@@ -1,5 +1,5 @@
 # T-0012 engineer run of tool/test/e2e_ios_test.sh
-# commit under test: 1ca0bca (scripts unchanged since)
+# code under test: commit 641e557 plus the suite_cleanup lock-file fix (committed with this file)
 # Flutter 3.47.8 • channel stable • https://github.com/flutter/flutter.git
 # Xcode 26.2 Build version 17C52 
 
@@ -12,46 +12,46 @@ $ /bin/bash tool/test/e2e_ios_test.sh
 T-0012 e2e runner test suite
   scripts run with: /bin/bash (3.2.57(1)-release)
   device: iPhone 17 Pro, runtime: com.apple.CoreSimulator.SimRuntime.iOS-26-2
-  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.NtI5Qh
+  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.ngUag6
 RUN  test_T-0012-AC1_pass_run_collects_evidence
-    creating fixture app in /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.NtI5Qh/fixture_base
-    fixture ready in 2 s
-    exit code 0; simulator mc-T-0012-engineer-26404
+    creating fixture app in /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.ngUag6/fixture_base
+    fixture ready in 1 s
+    exit code 0; simulator mc-T-0012-engineer-39524
     01_list.png: 1200 px tall
     02_detail.png: 1200 px tall
 PASS test_T-0012-AC1_pass_run_collects_evidence (49 s)
 RUN  test_T-0012-AC2_failing_target_reports_fail
-    exit code 1; simulator mc-T-0012-engineer-28393
-PASS test_T-0012-AC2_failing_target_reports_fail (47 s)
+    exit code 1; simulator mc-T-0012-engineer-42027
+PASS test_T-0012-AC2_failing_target_reports_fail (48 s)
 RUN  test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint
-    pass run: exit 0, simulator mc-T-0012-engineer-29909
-    fail run: exit 1, simulator mc-T-0012-engineer-31113
-    sending SIGINT to pid 32123 while flutter drive runs on mc-T-0012-verifier-32123
+    pass run: exit 0, simulator mc-T-0012-engineer-43327
+    fail run: exit 1, simulator mc-T-0012-engineer-44263
+    sending SIGINT to pid 45218 while flutter drive runs on mc-T-0012-verifier-45218
     interrupted run: exit 130
-PASS test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint (105 s)
+PASS test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint (104 s)
 RUN  test_T-0012-AC4_parallel_runs_isolated
-    engineer: exit 0, mc-T-0012-engineer-32859 (A2C272C9-D4CB-4445-B5F4-750DEBBEBE9A)
-    verifier: exit 0, mc-T-0012-verifier-32860 (902EC17D-64FA-4BAF-8418-F0544DD2D262)
-    simulators overlapped for 73 s
-PASS test_T-0012-AC4_parallel_runs_isolated (75 s)
+    engineer: exit 0, mc-T-0012-engineer-45816 (93E94AE7-8086-4D97-8AFD-7BD75B20BD6E)
+    verifier: exit 0, mc-T-0012-verifier-45817 (F6EA89F9-8D96-429B-B434-4D3FBE967669)
+    simulators overlapped for 75 s
+PASS test_T-0012-AC4_parallel_runs_isolated (76 s)
 RUN  test_T-0012-AC5_bad_runtime_or_device_fails_fast
-    bad --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9': exit 2 in 1 s: e2e_ios: error: unknown or unavailable --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9' (available iOS runtimes: com.apple.CoreSimulator.SimRuntime.iOS-18-2, com.apple.CoreSimulator.SimRuntime.iOS-26-0, com.apple.CoreSimulator.SimRuntime.iOS-26-2)
+    bad --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9': exit 2 in 0 s: e2e_ios: error: unknown or unavailable --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9' (available iOS runtimes: com.apple.CoreSimulator.SimRuntime.iOS-18-2, com.apple.CoreSimulator.SimRuntime.iOS-26-0, com.apple.CoreSimulator.SimRuntime.iOS-26-2)
     bad --device 'iPhone 99 Ultra': exit 2 in 0 s: e2e_ios: error: unknown --device 'iPhone 99 Ultra' (list them with: xcrun simctl list devicetypes)
-PASS test_T-0012-AC5_bad_runtime_or_device_fails_fast (1 s)
+PASS test_T-0012-AC5_bad_runtime_or_device_fails_fast (0 s)
 RUN  test_T-0012-AC6_cleanup_only_mc_simulators
-    private set: mc-T-0012-orphan-a-26298 (Booted), mc-T-0012-orphan-b-26298 (Shutdown), control zz-T-0012-control-26298
+    private set: mc-T-0012-orphan-a-39405 (Booted), mc-T-0012-orphan-b-39405 (Shutdown), control zz-T-0012-control-39405
     default set: 34 non-mc simulators untouched
-PASS test_T-0012-AC6_cleanup_only_mc_simulators (22 s)
+PASS test_T-0012-AC6_cleanup_only_mc_simulators (23 s)
 RUN  test_T-0012-AC7_small_screenshot_not_upscaled
     600 px: unchanged 300x600
     1200 px: unchanged 600x1200
     1800 px: downscaled from 600x1800
-    stub run: exit 0 on mc-T-0012-engineer-37700
-PASS test_T-0012-AC7_small_screenshot_not_upscaled (21 s)
+    stub run: exit 0 on mc-T-0012-engineer-49302
+PASS test_T-0012-AC7_small_screenshot_not_upscaled (20 s)
 
 Summary: 7 passed, 0 failed, 7 total in 320 s
 RESULT: PASS
-suite rc=0 wall=322 s
+suite rc=0 wall=321 s
 
 $ xcrun simctl list devices | grep -E "mc-|zz-T-0012"
 (no output)

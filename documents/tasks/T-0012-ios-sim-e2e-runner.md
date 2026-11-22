@@ -53,12 +53,12 @@ One reusable command that any Engineer or Verifier runs to execute a Flutter pro
 | AC | Layer | Test (in `tool/test/e2e_ios_test.sh`) | Status |
 |---|---|---|---|
 | T-0012-AC1 | L4/L5 | `test_T-0012-AC1_pass_run_collects_evidence` | ☑ PASS (Engineer, 49 s) |
-| T-0012-AC2 | L4 | `test_T-0012-AC2_failing_target_reports_fail` | ☑ PASS (Engineer, 47 s) |
-| T-0012-AC3 | script | `test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint` | ☑ PASS (Engineer, 105 s) |
-| T-0012-AC4 | script | `test_T-0012-AC4_parallel_runs_isolated` | ☑ PASS (Engineer, 75 s) |
-| T-0012-AC5 | script | `test_T-0012-AC5_bad_runtime_or_device_fails_fast` | ☑ PASS (Engineer, 1 s) |
-| T-0012-AC6 | script | `test_T-0012-AC6_cleanup_only_mc_simulators` | ☑ PASS (Engineer, 22 s) |
-| T-0012-AC7 | script | `test_T-0012-AC7_small_screenshot_not_upscaled` | ☑ PASS (Engineer, 21 s) |
+| T-0012-AC2 | L4 | `test_T-0012-AC2_failing_target_reports_fail` | ☑ PASS (Engineer, 48 s) |
+| T-0012-AC3 | script | `test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint` | ☑ PASS (Engineer, 104 s) |
+| T-0012-AC4 | script | `test_T-0012-AC4_parallel_runs_isolated` | ☑ PASS (Engineer, 76 s) |
+| T-0012-AC5 | script | `test_T-0012-AC5_bad_runtime_or_device_fails_fast` | ☑ PASS (Engineer, 0 s) |
+| T-0012-AC6 | script | `test_T-0012-AC6_cleanup_only_mc_simulators` | ☑ PASS (Engineer, 23 s) |
+| T-0012-AC7 | script | `test_T-0012-AC7_small_screenshot_not_upscaled` | ☑ PASS (Engineer, 20 s) |
 
 Engineer status only; the Verifier's verdict is still pending.
 
@@ -67,10 +67,11 @@ Engineer status only; the Verifier's verdict is still pending.
 - 2026-11-22 (Engineer): Wrote `tool/e2e_ios.sh`, `tool/sim_cleanup.sh`, `tool/test/e2e_ios_test.sh` and `tool/README.md`. Probes before writing the suite: (a) in a non-interactive bash a background job starts with SIGINT ignored and can't trap it, so the AC3 SIGINT case starts its run with `set -m`; (b) `xcrun simctl --set <dir>` gives an isolated device set that supports create, boot and delete. Both are recorded in [F-0005](../findings/F-0005-bash-background-jobs-ignore-sigint.md).
 - 2026-11-22 (Engineer): Suite run 1: 6 of 7 passed. **AC3 failed on a real bug:** after SIGINT the trap cleaned up correctly (simulator deleted, summary `INTERRUPTED`), but its messages went into the target log instead of the console. The cause was a redirect on the call to the function that waits for the child. Fixed by moving the redirect onto the background command inside `run_child`. AC3 now also asserts that the trap output reaches the console and stays out of the target log (the test was tightened, not loosened). Run 2: 7 of 7 passed in 302 s (Flutter 3.41.0).
 - 2026-11-22 (Engineer): Paused by the usage limit; resumed on the coordinator's instruction. WIP committed (`1ca0bca`). Meanwhile the fvm global SDK had changed from 3.41.0 to 3.47.8 (18:34; not this task). Run 3, on 3.47.8 with unchanged scripts: 7 of 7 passed in 320 s. Then an evidence run with the AC1 command form and the default evidence dir passed (the first build on the new SDK took 66 s, mostly artifact download). No `mc-` or `zz-T-0012` simulators were left.
+- 2026-11-22 (Engineer): The new SDK turns on Xcode's Swift Package Manager integration. Each fixture build then left an empty `*_build_ios_SourcePackages_workspace-state.json.lock` in `$TMPDIR`, named after the fixture path. `suite_cleanup` now deletes them, and I removed the 5 from earlier runs by hand. Run 4, on the final code: 7 of 7 passed in 320 s, with no temp dirs, lock files or simulators left.
 
 ## Outcome
 - **Changed:** branch `fleet/T-0012-ios-sim-e2e-runner`. New files: `tool/e2e_ios.sh`, `tool/sim_cleanup.sh`, `tool/test/e2e_ios_test.sh`, `tool/README.md`, [F-0005](../findings/F-0005-bash-background-jobs-ignore-sigint.md) and `documents/evidence/T-0012/` (engineer evidence). Everything runs on `/bin/bash` 3.2 with only Xcode, FVM and `/usr/bin/python3`.
-- **Engineer evidence:** [suite output](../evidence/T-0012/engineer-test-suite.txt): `bash -n` OK for all 3 scripts; `Summary: 7 passed, 0 failed, 7 total in 320 s`, `RESULT: PASS`; the simulator grep is empty. Sample run of `tool/e2e_ios.sh --task T-0012 --role engineer --project <fixture>` with the default evidence dir: [e2e-summary.md](../evidence/T-0012/e2e-summary.md), [log](../evidence/T-0012/e2e-app_test.log), [01_list.png](../evidence/T-0012/01_list.png) and [02_detail.png](../evidence/T-0012/02_detail.png), each 552×1200, downscaled from 1206×2622.
+- **Engineer evidence:** [suite output](../evidence/T-0012/engineer-test-suite.txt): this is run 4, on the final code with Flutter 3.47.8 and Xcode 26.2. `bash -n` OK for all 3 scripts; `Summary: 7 passed, 0 failed, 7 total in 320 s`, `RESULT: PASS`; the simulator grep is empty. Sample run of `tool/e2e_ios.sh --task T-0012 --role engineer --project <fixture>` with the default evidence dir: [e2e-summary.md](../evidence/T-0012/e2e-summary.md), [log](../evidence/T-0012/e2e-app_test.log), [01_list.png](../evidence/T-0012/01_list.png) and [02_detail.png](../evidence/T-0012/02_detail.png), each 552×1200, downscaled from 1206×2622.
 - **Verification:** pending (fresh Verifier).
 - **Review:** pending.
 - **Decisions (Engineer, within task scope):**

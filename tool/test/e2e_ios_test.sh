@@ -673,6 +673,9 @@ suite_cleanup() {
     say "Kept temp dir: $WORK"
   else
     rm -rf "$WORK"
+    # Xcode's Swift Package Manager integration leaves an empty lock file per
+    # fixture build in $TMPDIR, named after the fixture path ("/" -> "_").
+    rm -f "${TMPDIR:-/tmp}/$(printf '%s' "$WORK" | tr / _)"_*.lock
   fi
   exit "$rc"
 }
