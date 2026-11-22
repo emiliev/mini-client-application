@@ -39,7 +39,7 @@ _Proposed by the TL; awaiting PO confirmation ([Q-008](../open-questions.md#q-00
 Across all features: loading, empty and error states with retry (the mock can simulate latency and failures); light and dark theme; accessible text scaling.
 
 ## Goals (MVP)
-1. F1 to F5 run on an iOS simulator and an Android emulator against `mocked_backend`.
+1. F1 to F5 run on an iOS simulator against `mocked_backend`. Android is deferred by the PO ([Q-009](../open-questions.md#q-009)).
 2. The architecture follows the PO's stack (Q-006), with every significant choice recorded as an ADR.
 3. Quality gates (format, analyze, tests) are automated and green on `main` (T-0005).
 4. The data layer can swap the mock for a real backend with no changes in feature code.
@@ -53,7 +53,7 @@ Across all features: loading, empty and error states with retry (the mock can si
 ## Success criteria
 - Every MVP feature has a Done task with verification evidence.
 - `fvm flutter analyze` is clean and the unit and widget test suites pass in CI.
-- The app builds in release mode for both iOS and Android.
+- The app builds in release mode for iOS (Android deferred, Q-009).
 - `documents/` is current: STATUS, BOARD, ADRs and architecture overview match the code.
 
 ## Constraints (known)
@@ -61,6 +61,7 @@ Across all features: loading, empty and error states with retry (the mock can si
 - Repo on GitHub, private ([F-0002](../findings/F-0002-github-remote-access.md)); integration per [ADR-0004](../adr/0004-git-integration-workflow.md).
 - Fully documented in `documents/` ([ADR-0002](../adr/0002-documentation-as-code.md)), delivered by an agent fleet ([ADR-0003](../adr/0003-fleet-operating-model.md)).
 - No copyrighted Marvel artwork bundled by default ([R-005](../risks.md)).
+- **iOS first:** Android stays a target (Q-002), but building and verifying it is deferred until the PO re-enables it (Q-009, P-014).
 
 ## Stakeholders
 | Role | Who | Responsibility |

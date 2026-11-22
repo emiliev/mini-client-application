@@ -22,6 +22,7 @@ This repo is run as a **fleet**: a Tech Lead session orchestrates crew-member ag
 - Evidence (verification report and screenshots of at most 1200 px) goes in `documents/evidence/T-XXXX/`.
 
 ## Toolchain
+- **iOS first:** Android is deferred by the PO (Q-009). Don't build or verify Android unless a task says so.
 - Flutter/Dart via FVM. Always run `fvm flutter …` / `fvm dart …`. The bare `flutter` alias only exists in interactive zsh (see F-0001).
 
 ## Git

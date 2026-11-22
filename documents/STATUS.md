@@ -10,9 +10,10 @@ _Last updated: 2026-11-22 by Tech Lead_
 | **Code** | None yet. The repo holds only documentation. |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private). `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)). |
 | **Merge gate** | Nothing merges without a PASS from a fresh Verifier, a clean review, and the TL re-verifying the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | None. The T-0009 spike finished (PASS); next dispatches wait on Q-006 |
+| **Active crew** | Engineer (worktree) on [T-0012](tasks/T-0012-ios-sim-e2e-runner.md), the iOS simulator e2e runner. Then a fresh Verifier. |
 
 ## Now
+- [T-0012](tasks/T-0012-ios-sim-e2e-runner.md) iOS simulator e2e runner script: **In Progress** (first task through the full ADR-0006 gate)
 - [T-0002](tasks/T-0002-product-charter.md) Charter & MVP scope: **In Review** with the PO (Q-008)
 
 ## Next (in order, once unblocked)
@@ -26,9 +27,9 @@ _Last updated: 2026-11-22 by Tech Lead_
 |---|---|---|
 | T-0003, T-0004 | Q-006 (PO tech stack, arriving next) | — |
 | T-0002 acceptance | Q-008 (confirm F1 to F5) | build F1 to F5 as proposed |
-| T-0005, T-0010 | T-0003 | — |
+| T-0005 | T-0003 | — |
+| T-0010 | T-0003, T-0012 | — |
 | T-0007 | T-0003, T-0004 | — |
-| Local Android verification | Q-009 (Android toolchain) | Android verified in CI only |
 
 ## Recent decisions & findings
 - [F-0004](findings/F-0004-ios-verification-pipeline.md) The iOS verification pipeline is proven end to end (e2e 41 s cold / 13 s warm, screenshots, parallel simulators); [evidence](evidence/T-0009/verification-report.md)
@@ -40,10 +41,10 @@ _Last updated: 2026-11-22 by Tech Lead_
 ## Watch items
 - [Q-004](open-questions.md#q-004): bundle id `com.emiliev.miniclinet`. Confirm the spelling (`miniclinet` vs `miniclient`) before the scaffold.
 - [Q-007](open-questions.md#q-007) / [R-005](risks.md): a public store release of a Marvel-branded app needs licensing.
-- [Q-009](open-questions.md#q-009) / [R-009](risks.md): no Android SDK on this Mac.
+- **Android is deferred** by the PO ([Q-009](open-questions.md#q-009)): iOS is the only verified platform ([R-009](risks.md)).
 
 ## Key facts for anyone joining
 - Repo: the PO's checkout of `main` is at `/Users/emililiev/projects/flutter/mini-client`; fleet worktrees are under `/Users/emililiev/orca/workspaces/mini-client/`.
 - Remote: `origin` over HTTPS with keychain auth. No SSH key, `gh` not logged in, so no PRs from the CLI ([F-0002](findings/F-0002-github-remote-access.md)).
 - Toolchain: Flutter through FVM (global 3.41.0 / Dart 3.11.0). Always use `fvm flutter` ([F-0001](findings/F-0001-environment-survey.md)).
-- iOS verification: Xcode 26.2, CocoaPods 1.16.2, simulator runtimes iOS 18.2 / 26.0 / 26.2. No Android SDK.
+- iOS verification: Xcode 26.2, CocoaPods 1.16.2, simulator runtimes iOS 18.2 / 26.0 / 26.2. No Android SDK (Android deferred).

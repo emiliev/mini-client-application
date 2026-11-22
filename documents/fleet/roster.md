@@ -19,7 +19,7 @@ Crew are dispatched when there is unblocked work. Idle agents are not kept runni
 ## Active assignments
 | Crew member | Task | Branch | Dispatched | Status |
 |---|---|---|---|---|
-| — | — | — | — | None active. Next dispatches (T-0003, T-0004) wait on Q-006 |
+| Engineer (worktree) | T-0012 iOS simulator e2e runner | `fleet/T-0012-ios-sim-e2e-runner` | 2026-11-22 | In Progress |
 
 ## History
 | Date | Crew member | Task | Result |

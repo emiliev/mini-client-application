@@ -12,7 +12,7 @@ Only **direction-level** questions belong here. Technical questions are decided 
 | [Q-006](#q-006) | Architecture & tech stack | **Open**: PO is sharing it next | T-0003, T-0004 | — |
 | [Q-007](#q-007) | Public store release vs. Marvel IP licensing | **Open** | Phase 3 (release) | build store-ready, but public release gated on licensing; placeholder art |
 | [Q-008](#q-008) | Confirm the MVP feature set | **Open** | T-0002 acceptance | proposed set F1 to F5 in the [charter](project/charter.md#mvp-features-proposed) |
-| [Q-009](#q-009) | Android toolchain on this Mac | **Open** | Local Android verification (ADR-0006 §7) | Android verified in CI only (APK build + unit/widget tests) |
+| [Q-009](#q-009) | Android toolchain on this Mac | **Answered** 2026-11-22: Android deferred | — | — |
 
 ---
 
@@ -62,4 +62,4 @@ This Mac has no Android SDK (`flutter doctor`: "Unable to locate Android SDK"), 
 - **(c)** Android is verified only in GitHub Actions (APK build plus unit and widget tests; emulator e2e can be added to CI later, using Actions minutes).
 
 **Default:** (c) until you choose.
-**Answer:** _pending_
+**Answer, 2026-11-22:** "Ignore Android for now, let's focus on testing with iOS." None of (a) to (c): Android verification is **deferred** entirely, including in CI. iOS is the only verified platform until the PO re-enables Android ([P-014](pending-work.md)).

@@ -17,4 +17,4 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-011 | Placeholder imagery strategy for fixtures (generated or bundled; size budget) | Decision | ADR-0005, T-0007 | With T-0007 | — |
 | P-012 | Consider Maestro (black-box YAML flows) alongside `integration_test` for e2e; needs a global install (Maestro CLI + JDK) | Tooling | ADR-0006 | If `integration_test` proves limiting | — |
 | P-013 | Visual comparison against design mockups, if the PO provides designs | Quality → PO | ADR-0006 | When designs exist | — |
-| P-014 | Android emulator e2e (locally or in CI) | Quality | ADR-0006 §7 | After Q-009 | — |
+| P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

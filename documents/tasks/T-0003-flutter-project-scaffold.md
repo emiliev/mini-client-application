@@ -17,7 +17,7 @@ Create a clean, reproducible Flutter project skeleton that every worktree builds
 | Item | Value | Source |
 |---|---|---|
 | Project type | Flutter **application** | Q-001 |
-| Platforms | **iOS, Android** only (`--platforms=ios,android`) | Q-002 |
+| Platforms | Generate **iOS + Android** folders (`--platforms=ios,android`) to keep Q-002's target; **only iOS is built and verified** for now | Q-002, Q-009 |
 | Bundle id / applicationId | `com.emiliev.miniclinet` (spelling to confirm) | Q-004 |
 | Dart package name | `mini_client` | TL default |
 | Mock data module | separate package `mocked_backend` (built in T-0007; the scaffold only reserves the layout) | ADR-0005 |
@@ -35,7 +35,7 @@ Create a clean, reproducible Flutter project skeleton that every worktree builds
 - [ ] `fvm flutter --version` inside the project resolves to the pinned SDK.
 - [ ] `fvm flutter analyze` reports no issues.
 - [ ] `fvm flutter test` passes.
-- [ ] The app builds for Android (`fvm flutter build apk --debug`) and iOS (`fvm flutter build ios --debug --no-codesign`).
+- [ ] The app builds for the iOS simulator (`fvm flutter build ios --simulator --debug`) and for device without signing (`fvm flutter build ios --debug --no-codesign`). An Android build isn't required (Q-009).
 - [ ] Bundle id / applicationId is `com.emiliev.miniclinet` on both platforms (or the corrected value from Q-004).
 - [ ] ADR for SDK version & pinning is Accepted.
 - [ ] README explains setup from a fresh clone.

@@ -20,7 +20,7 @@ Before dispatch, the TL writes each task's acceptance criteria as numbered **Giv
 | **L1 Unit** | Domain logic, `mocked_backend`, repositories, state holders | `fvm flutter test` | Any logic change | Local + CI |
 | **L2 Widget** | Every screen state: loading, content, empty, error (mock with zero latency and injected failures) | `fvm flutter test` | Any UI change | Local + CI |
 | **L3 Golden** | Key screens, light and dark, at the reference size, with **real fonts loaded and the iOS platform set** (the default Ahem font renders text as boxes, F-0004) | `matchesGoldenFile` (library TBD by stack) | UI tasks | macOS only (font rendering differs on Linux) |
-| **L4 E2E** | One user journey per feature on a real simulator, with the app wired to `mocked_backend` (deterministic data, zero latency) | `integration_test`, plus `flutter drive` for in-test screenshots | Feature tasks; the **full MVP journey** at phase-2 exit (T-0011) | iOS simulator; Android once Q-009 is resolved |
+| **L4 E2E** | One user journey per feature on a real simulator, with the app wired to `mocked_backend` (deterministic data, zero latency) | `integration_test`, plus `flutter drive` for in-test screenshots | Feature tasks; the **full MVP journey** at phase-2 exit (T-0011) | iOS simulator (Android deferred, §7) |
 | **L5 Visual acceptance** | Screenshots at each checkpoint, inspected by an agent against the ACs and attached as evidence | `xcrun simctl io … screenshot`, in-test screenshots | UI tasks | iOS simulator |
 
 **Coverage gate:** at least 80 % line coverage for domain, data and `mocked_backend` code, measured from `lcov.info`. The UI layer is gated on per-state widget tests instead of a percentage.
@@ -49,8 +49,8 @@ Every agent that runs e2e **creates its own simulator** (`xcrun simctl create mc
 - **Primary:** iPhone 17 Pro, iOS 26.2
 - **Small screen and older OS** (layout checks at phase-2 exit): iPhone SE (3rd gen), iOS 18.2
 
-### 7. Android
-Until an Android SDK is available locally (Q-009), Android is verified **in CI only** (T-0005): an APK build plus L0 to L2 on a Linux runner. Android-emulator e2e is added once Q-009 is resolved.
+### 7. Android: deferred
+_Updated 2026-11-22: the PO decided to ignore Android for now and focus on iOS testing (Q-009)._ There is no Android verification of any kind, local or CI, until the PO re-enables it ([P-014](../pending-work.md)). Shared Dart code is platform-neutral and still covered by L0 to L3; only Android-specific behaviour goes unverified (R-009).
 
 ## Gate flow
 
@@ -69,4 +69,4 @@ flowchart LR
 ## Consequences
 - **Positive:** independent, reproducible evidence for every merge; ACs are traceable to tests; the PO can browse screenshots per task; regressions get caught at the merge result, not just on the branch.
 - **Negative:** each task takes longer (a Verifier pass plus simulator e2e) and costs more agent time. E2E suites can get flaky, which the anti-gaming rules and deterministic mock data mitigate (R-008).
-- **Follow-ups:** T-0005 (`tool/verify.sh` + CI), T-0010 (e2e and screenshot harness), T-0011 (full MVP journey e2e), Q-009 (Android toolchain).
+- **Follow-ups:** T-0005 (`tool/verify.sh` + CI), T-0010 (e2e and screenshot harness), T-0011 (full MVP journey e2e), Q-009 (Android deferred), T-0012 (simulator e2e runner).

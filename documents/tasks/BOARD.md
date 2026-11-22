@@ -13,14 +13,15 @@ _Owned by Tech Lead. Last updated 2026-11-22._ Status values and lifecycle: [fle
 | [T-0007](T-0007-mocked-backend-module.md) | `mocked_backend` module | **Backlog** | crew: Engineer | T-0003, T-0004 | — |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status & contract research | **Done** | crew: Researcher | — | — |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | **Done** ([PASS](../evidence/T-0009/verification-report.md)) | crew: Engineer (background) | — | — (scratchpad) |
-| [T-0010](T-0010-e2e-visual-harness.md) | E2E & visual verification harness (iOS) | **Blocked** | crew: Engineer | T-0003 | — |
+| [T-0010](T-0010-e2e-visual-harness.md) | E2E & visual verification harness (iOS) | **Blocked** | crew: Engineer | T-0003, T-0012 | — |
 | [T-0011](T-0011-mvp-journey-e2e.md) | Full MVP journey e2e + visual sign-off | **Backlog** | crew: Engineer + Verifier | F1 to F5, T-0010 | — |
+| [T-0012](T-0012-ios-sim-e2e-runner.md) | iOS simulator e2e runner script | **In Progress** | crew: Engineer (worktree) | — | `fleet/T-0012-ios-sim-e2e-runner` |
 
 ## Summary
 | Status | Count | Tasks |
 |---|---|---|
 | Done | 4 | T-0001, T-0006, T-0008, T-0009 |
-| In Progress | 0 | — |
+| In Progress | 1 | T-0012 |
 | In Verification | 0 | — |
 | In Review (PO) | 1 | T-0002 |
 | Ready | 0 | — |
@@ -36,6 +37,7 @@ flowchart LR
     T9 --> T10[T-0010 E2E harness]
     T3 --> T5
     T3 --> T10
+    T12[T-0012 Sim e2e runner] --> T10
     T3 --> T7[T-0007 mocked_backend]
     T4 --> T7
     T8[T-0008 API research ✓] --> T7

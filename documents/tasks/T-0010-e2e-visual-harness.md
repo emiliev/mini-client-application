@@ -8,7 +8,7 @@
 | Branch | `fleet/T-0010-e2e-harness` |
 | Created | 2026-11-22 |
 | Updated | 2026-11-22 |
-| Depends on | T-0003 (scaffold). Commands proven by T-0009 ([F-0004](../findings/F-0004-ios-verification-pipeline.md)) |
+| Depends on | T-0003 (scaffold), T-0012 (`tool/e2e_ios.sh` runner). Commands proven by T-0009 ([F-0004](../findings/F-0004-ios-verification-pipeline.md)) |
 | Related | ADR-0006 (L4, L5), T-0005 (`tool/verify.sh`), T-0011 |
 
 ## Goal
@@ -17,7 +17,7 @@ Give every Engineer and Verifier one command that runs the app's e2e journeys on
 ## Scope
 - **In:**
   - `integration_test` set up in the app, with an app entry point for tests that wires `mocked_backend` deterministically (zero latency, fixed seed).
-  - `tool/e2e_ios.sh <task-id> [--device "iPhone 17 Pro"] [--runtime iOS-26-2]`: `xcrun simctl create mc-<task>-<role>` (never clone), `simctl boot` + `simctl bootstatus -b`, runs `SCREENSHOT_DIR=… fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/<journey>_test.dart -d $UDID` (the driver uses `integrationDriver(onScreenshot:)`), downscales screenshots only when taller than 1200 px into `documents/evidence/<task>/`, and **always** deletes the simulator (`trap` on EXIT/INT/TERM). Expect about 45 s cold and about 15 s warm per journey (F-0004).
+  - Wire the app into `tool/e2e_ios.sh` from [T-0012](T-0012-ios-sim-e2e-runner.md). Don't reimplement the simulator lifecycle; add the app's `test_driver/integration_test.dart` (screenshot driver) and journey files.
   - A screenshot helper for tests, e.g. `checkpoint('name')`, that names files consistently.
   - A smoke e2e test (app launches, home renders) as the first journey.
   - README section: how to run e2e, how to read evidence.
@@ -40,6 +40,7 @@ Give every Engineer and Verifier one command that runs the app's e2e journeys on
 ## Log
 - 2026-11-22: Created from ADR-0006. Waiting on T-0003 and the T-0009 results.
 - 2026-11-22: T-0009 done. Script design is based on the proven F-0004 commands. Waiting only on T-0003.
+- 2026-11-22: The stack-independent runner script was split out into T-0012 (started now). T-0010 now wires the real app into it.
 
 ## Outcome
 _Pending._
