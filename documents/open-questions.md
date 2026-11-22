@@ -34,7 +34,7 @@ Only **direction-level** questions belong here. Technical questions are decided 
 
 ### Q-005
 **Hosting & integration.** Asked 2026-11-22.
-**Answer, 2026-11-22:** GitHub `origin` ([emiliev/mini-client-application](https://github.com/emiliev/mini-client-application), private). The PO didn't ask to approve merges, so the stated default applies: the **TL reviews, merges and pushes to `main`** ([ADR-0004](adr/0004-git-integration-workflow.md)). The PO can switch to PR approval at any time.
+**Answer, 2026-11-22:** GitHub `origin` ([emiliev/mini-client-application](https://github.com/emiliev/mini-client-application), private). **Merge policy confirmed by the PO, 2026-11-22:** "I trust you and your decisions; you can merge PRs." The **TL reviews, merges and pushes to `main`** without asking for approval ([ADR-0004](adr/0004-git-integration-workflow.md)). If `gh` gets authenticated, the same authority covers opening and merging GitHub PRs.
 
 ### Q-006
 **Architecture & tech stack.** Asked 2026-11-22.

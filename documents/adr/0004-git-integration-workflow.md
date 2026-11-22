@@ -2,11 +2,11 @@
 
 - **Status:** Accepted
 - **Date:** 2026-11-22
-- **Deciders:** Tech Lead (PO set hosting = GitHub; merge policy uses the stated default, Q-005)
+- **Deciders:** Tech Lead. The PO set hosting to GitHub, and on 2026-11-22 explicitly delegated merging to the TL (Q-005).
 - **Related:** ADR-0003, T-0006, F-0002, Q-005
 
 ## Context
-The repo now has a GitHub `origin` (private, HTTPS, no `gh` login, so no PRs from the CLI). The PO didn't ask to approve merges and wants the TL to act on its own. Crew work in separate worktrees of the same local repo. `main` is checked out in the PO's main checkout (`/Users/emililiev/projects/flutter/mini-client`), so git won't let another worktree check it out.
+The repo now has a GitHub `origin` (private, HTTPS, no `gh` login, so no PRs from the CLI). The PO explicitly delegated merging to the TL ("I trust you and your decisions; you can merge PRs", Q-005). Crew work in separate worktrees of the same local repo. `main` is checked out in the PO's main checkout (`/Users/emililiev/projects/flutter/mini-client`), so git won't let another worktree check it out.
 
 ## Options considered
 1. **PRs on GitHub, merged by the PO.** Rejected for now: it puts the PO in the loop for every task and needs `gh` auth for automation.
@@ -23,5 +23,5 @@ The repo now has a GitHub `origin` (private, HTTPS, no `gh` login, so no PRs fro
 
 ## Consequences
 - **Positive:** a fully autonomous flow; every task shows up as a single `--no-ff` merge commit on `main`; nothing outward-facing happens without the TL.
-- **Negative:** no GitHub-side review record. To get one, the PO runs `gh auth login` and a superseding ADR switches integration to PRs.
+- **Negative:** no GitHub-side review record. To get one, the PO runs `gh auth login` and a superseding ADR switches integration to PRs that the TL opens and merges itself (already authorised, Q-005).
 - **Follow-up:** once CI exists (T-0005), the TL waits for green CI on `main` after each push and fixes forward if it goes red.
