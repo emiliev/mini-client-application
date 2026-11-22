@@ -29,6 +29,8 @@ A complete, verified plan for building an enterprise Marvel app that follows Tid
 
 ## Log
 - 2026-11-22: Created from the PO request. Medium blocks direct fetches (403), but the publication's RSS feed has the full text of all six Miniclient articles. Extracted locally with the 5 diagrams. Both rules repos are cloned read-only (`ai_rules_dart` HEAD `be4e99f`, `ai_rules_flutter` HEAD `876e263`). Bazel 9.2.0 is installed; the machine is an M4 Pro with 14 cores and 48 GB (so the 16 GB budget must be simulated). Wave 1 dispatched.
+- 2026-11-22: Wave 1 done. Four research docs are in `documents/research/` (about 26k words in total). Two agents were cut off by a usage-limit pause, but both had finished writing. Key facts: "feature flow" is Tide's `feature_flow` navigation utility (state management is flutter_bloc); l10n is absent from the articles; rules_dart curates freezed and json_serializable but not injectable, retrofit or bdd_widget_test, and its builder shim isn't consumer-visible; outline cutoff needs Dart 3.13 (Flutter 3.47.x); upstream perf benches are pure Dart (rules_dart) or reach 500k LOC (rules_flutter); AOT and JIT peak RSS at scale is unmeasured upstream.
+- 2026-11-22: Planning brief (`documents/plan/00-planning-brief.md`, decisions D1 to D12) written. Wave 2 dispatched with 5 planners: P1 architecture and catalogue, P2 generation and scale, P3 Bazel integration, P4 profiling, optimisation and upstream, P5 testing and BDD. The TL writes the delivery roadmap at assembly.
 
 ## Outcome
 _Pending._
