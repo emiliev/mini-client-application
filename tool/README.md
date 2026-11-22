@@ -38,7 +38,7 @@ Machine-readable lines on stdout: `SIMULATOR_NAME=`, `SIMULATOR_UDID=`, `SIMULAT
 
 Exit codes: `0` all targets passed, `1` at least one target failed, `2` bad arguments or failed pre-flight (no simulator created), `3` simulator setup failed, `130` / `143` interrupted by SIGINT / SIGTERM.
 
-Timings on this Mac (iPhone 17 Pro, iOS 26.2): pre-flight about 1 s, boot about 16 s, first `flutter drive` of a project about 30 to 45 s (cold Xcode build), later runs about 15 s, teardown about 1 s.
+Timings on this Mac (iPhone 17 Pro, iOS 26.2): pre-flight about 1 s, boot about 16 s, first `flutter drive` of a project about 30 to 45 s (cold Xcode build), later runs about 15 s, teardown about 1 s. The first run after a Flutter SDK change also downloads the SDK's iOS artifacts and migrates the project, which took about 65 s on its own.
 
 Notes:
 - Parallel runs are safe as long as each uses its own project folder (own `build/`), which separate worktrees give you (F-0004 gotcha 8).
