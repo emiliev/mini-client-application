@@ -14,6 +14,13 @@ This repo is run as a **fleet**: a Tech Lead session orchestrates crew-member ag
 - Work discovered but not done → `documents/pending-work.md`. A question only the Product Owner can answer → `documents/open-questions.md`.
 - Crew members edit only **their own task file** plus **new** findings / ADR drafts. `STATUS.md`, `tasks/BOARD.md`, `journal/`, `fleet/roster.md` and all index files are owned by the Tech Lead (prevents merge conflicts between parallel crew).
 
+## Verification (ADR-0006, non-negotiable)
+- Every acceptance criterion `T-XXXX-ACn` needs a test whose name contains that ID, or a screenshot checkpoint if it's purely visual.
+- Engineers run `tool/verify.sh` (and the e2e script for feature tasks) before handing off. Nothing merges without a PASS report from a **fresh Verifier** who did not write the code.
+- Never delete, skip or weaken tests, or add `// ignore:`, without saying so in the handoff. Never retry a flaky test until it passes; root-cause it.
+- E2E agents create their own simulator (`mc-<task>-<role>`) and always delete it. Never touch the shared simulators.
+- Evidence (verification report and screenshots of at most 1200 px) goes in `documents/evidence/T-XXXX/`.
+
 ## Toolchain
 - Flutter/Dart via FVM. Always run `fvm flutter …` / `fvm dart …`. The bare `flutter` alias only exists in interactive zsh (see F-0001).
 

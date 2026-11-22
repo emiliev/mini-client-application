@@ -17,6 +17,7 @@ This directory is the **single source of truth** for the project: what we're bui
 | Decisions | [adr/](adr/README.md) | Architecture Decision Records and their index |
 | Tasks | [tasks/](tasks/BOARD.md) | `BOARD.md` plus one file per task |
 | Findings | [findings/](findings/README.md) | Investigations, spikes, gotchas, bugs found, lessons learned |
+| Evidence | [evidence/](evidence/README.md) | Per-task verification reports and screenshots ([ADR-0006](adr/0006-verification-strategy.md)) |
 | Pending work | [pending-work.md](pending-work.md) | Backlog not yet scoped into tasks, deferred items, tech debt |
 | Open questions | [open-questions.md](open-questions.md) | Questions for the Product Owner, with defaults |
 | Risks | [risks.md](risks.md) | Risk register |

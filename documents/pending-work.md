@@ -4,7 +4,7 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 
 | ID | Item | Type | Source | When relevant | Promoted to / Done |
 |---|---|---|---|---|---|
-| P-001 | Testing strategy ADR: unit / widget / golden / integration, coverage targets | Decision | T-0001 | With T-0004 (may come from the PO stack) | — |
+| P-001 | Testing strategy ADR: unit / widget / golden / integration, coverage targets | Decision | T-0001 | — | **Done** 2026-11-22 → [ADR-0006](adr/0006-verification-strategy.md) |
 | P-002 | Theming / design-system approach (light + dark per charter) | Decision | T-0001 | With T-0004 | — |
 | P-003 | Localization (i18n): needed? which languages? | Product → PO | T-0001 | After Q-008 | — |
 | P-004 | Observability: crash reporting, logging, analytics (third-party, so PO sign-off) | Decision | T-0001 | Phase 3 | — |
@@ -15,3 +15,6 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-009 | App display name and icon free of Marvel trademarks | Product → PO | Q-007, R-005 | Before the first distributable build | — |
 | P-010 | Tablet / large-screen layouts (mobile-first now) | Feature | Charter non-goals | After MVP | — |
 | P-011 | Placeholder imagery strategy for fixtures (generated or bundled; size budget) | Decision | ADR-0005, T-0007 | With T-0007 | — |
+| P-012 | Consider Maestro (black-box YAML flows) alongside `integration_test` for e2e; needs a global install (Maestro CLI + JDK) | Tooling | ADR-0006 | If `integration_test` proves limiting | — |
+| P-013 | Visual comparison against design mockups, if the PO provides designs | Quality → PO | ADR-0006 | When designs exist | — |
+| P-014 | Android emulator e2e (locally or in CI) | Quality | ADR-0006 §7 | After Q-009 | — |

@@ -12,6 +12,7 @@ Only **direction-level** questions belong here. Technical questions are decided 
 | [Q-006](#q-006) | Architecture & tech stack | **Open**: PO is sharing it next | T-0003, T-0004 | — |
 | [Q-007](#q-007) | Public store release vs. Marvel IP licensing | **Open** | Phase 3 (release) | build store-ready, but public release gated on licensing; placeholder art |
 | [Q-008](#q-008) | Confirm the MVP feature set | **Open** | T-0002 acceptance | proposed set F1 to F5 in the [charter](project/charter.md#mvp-features-proposed) |
+| [Q-009](#q-009) | Android toolchain on this Mac | **Open** | Local Android verification (ADR-0006 §7) | Android verified in CI only (APK build + unit/widget tests) |
 
 ---
 
@@ -51,4 +52,14 @@ Publishing a Marvel-branded app on the App Store or Google Play normally require
 **Confirm the MVP feature set.** Asked 2026-11-22.
 The PO said "a Marvel application" without listing features. The TL proposed F1 to F5 in the [charter](project/charter.md#mvp-features-proposed): browse characters, search characters, character details, browse comics and comic details, and favorites. Add, remove or reorder as you like.
 **Default:** build F1 to F5 in that order.
+**Answer:** _pending_
+
+### Q-009
+**Android toolchain.** Asked 2026-11-22.
+This Mac has no Android SDK (`flutter doctor`: "Unable to locate Android SDK"), so the fleet can't build or e2e-test Android locally. iOS is fully covered. Options:
+- **(a)** The TL installs the Android command-line tools, platform tools and one emulator image through Homebrew and `sdkmanager`: roughly 5 to 8 GB on your machine, plus a JDK if needed.
+- **(b)** You install Android Studio yourself, and the fleet uses its SDK and emulator.
+- **(c)** Android is verified only in GitHub Actions (APK build plus unit and widget tests; emulator e2e can be added to CI later, using Actions minutes).
+
+**Default:** (c) until you choose.
 **Answer:** _pending_

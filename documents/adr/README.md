@@ -14,6 +14,7 @@ An ADR captures **one** significant decision: the context, the options weighed, 
 | [0003](0003-fleet-operating-model.md) | Fleet operating model | Accepted | 2026-11-22 |
 | [0004](0004-git-integration-workflow.md) | Git integration workflow | Accepted | 2026-11-22 |
 | [0005](0005-mocked-backend-module.md) | Mocked backend as an in-repo module | Accepted (transport deferred) | 2026-11-22 |
+| [0006](0006-verification-strategy.md) | Verification strategy (no merge without independent evidence) | Accepted | 2026-11-22 |
 
 ## Expected upcoming ADRs
 | Topic | Comes from |
@@ -25,5 +26,4 @@ An ADR captures **one** significant decision: the context, the options weighed, 
 | Navigation / routing | T-0004 / Q-006 |
 | `mocked_backend` transport (in-process vs HTTP-level mock) | T-0004 (ADR-0005 deferred item) |
 | Local persistence (favorites) | T-0004 / F5 |
-| Testing strategy | P-001 |
 | CI platform & quality gates (GitHub Actions) | T-0005 |
