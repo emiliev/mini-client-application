@@ -12,7 +12,7 @@ The repository is empty: one "Initial commit", no tracked files, no remote. Flut
 | Item | Observation |
 |---|---|
 | Repo | Main checkout `/Users/emililiev/projects/flutter/mini-client` (branch `main`). Fleet worktrees under `/Users/emililiev/orca/workspaces/mini-client/`. Single commit `ae3ec79`, no files. |
-| Remote | `git remote -v` is empty, so there is no CI or PR flow yet. |
+| Remote | `git remote -v` is empty, so there is no CI or PR flow yet. _Update 2026-11-22: GitHub `origin` added; see [F-0002](F-0002-github-remote-access.md)._ |
 | FVM | `/opt/homebrew/bin/fvm`. Cache at `/Users/emililiev/fvm/versions`. |
 | SDKs | Global: Flutter **3.41.0** / Dart **3.11.0** (stable). Also in the cache: 3.47.4 and 3.38.5, which `fvm list` shows as "Need setup". |
 | `flutter` | In zsh: `flutter: aliased to fvm flutter`. In `bash -c 'type flutter'`: `not found`. |

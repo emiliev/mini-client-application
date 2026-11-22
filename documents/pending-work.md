@@ -10,5 +10,5 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-004 | Observability: crash reporting, logging, analytics (third-party, so PO sign-off) | Decision | T-0001 | Phase 3 | — |
 | P-005 | Release & distribution: signing, flavors / environments, store or web hosting | Feature | T-0001 | Phase 3 | — |
 | P-006 | Accessibility baseline (semantics, contrast, text scaling) | Quality | T-0001 | Phase 2 | — |
-| P-007 | Dependency update policy (Dependabot / Renovate) | Tooling | T-0001 | After Q-005 | — |
-| P-008 | Integrate the docs branch `continue-previous-work` into `main` | Integration | T-0001 | After Q-005 | — |
+| P-007 | Dependency update policy (Dependabot, since we're on GitHub) | Tooling | T-0001 | After T-0003 | — |
+| P-008 | Merge the docs branch `fleet/T-0001-documentation-scaffold` (pushed to `origin`) into `main` | Integration | T-0001, T-0006 | After the Q-005 merge policy | — |

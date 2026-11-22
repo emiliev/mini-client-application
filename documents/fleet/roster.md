@@ -24,3 +24,4 @@ Crew are dispatched when there is unblocked work. Idle agents are not kept runni
 | Date | Crew member | Task | Result |
 |---|---|---|---|
 | 2026-11-22 | Tech Lead (self) | T-0001 | Done: documentation scaffold |
+| 2026-11-22 | Tech Lead (self) | T-0006 | Done: GitHub remote linked |

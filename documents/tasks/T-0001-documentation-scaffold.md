@@ -4,7 +4,7 @@
 |---|---|
 | Status | Done |
 | Owner | Tech Lead |
-| Branch | `continue-previous-work` (Orca-created session branch) |
+| Branch | `continue-previous-work` (Orca-created session branch), pushed as `fleet/T-0001-documentation-scaffold` |
 | Created | 2026-11-22 |
 | Updated | 2026-11-22 |
 | Depends on | — |
@@ -27,6 +27,7 @@ Give the project a documentation system that lets anyone, human or agent, track 
 
 ## Log
 - 2026-11-22: Surveyed repo and toolchain (F-0001). Created the documentation structure, ADR-0001 to ADR-0003, tasks T-0001 to T-0005, Q-001 to Q-006, R-001 to R-004, P-001 to P-008, and CLAUDE.md.
+- 2026-11-22: Branch pushed to `origin` as `fleet/T-0001-documentation-scaffold` (T-0006).
 
 ## Outcome
 - **Changed:** added `CLAUDE.md` and `documents/**`. Committed on `continue-previous-work`.

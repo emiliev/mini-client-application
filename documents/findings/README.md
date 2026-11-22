@@ -7,4 +7,5 @@ A finding is knowledge we earned and don't want to earn twice: environment gotch
 ## Index
 | ID | Title | Type | Date | Impact |
 |---|---|---|---|---|
-| [F-0001](F-0001-environment-survey.md) | Development environment survey | Environment | 2026-11-22 | Agents must use `fvm flutter`; no git remote yet |
+| [F-0001](F-0001-environment-survey.md) | Development environment survey | Environment | 2026-11-22 | Agents must use `fvm flutter`; no git remote yet (superseded by F-0002) |
+| [F-0002](F-0002-github-remote-access.md) | GitHub remote access | Environment | 2026-11-22 | `origin` over HTTPS via keychain; no SSH, no `gh`, so no CLI PRs |

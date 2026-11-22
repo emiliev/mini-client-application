@@ -46,9 +46,11 @@ How the code is worked on. This part is real today.
 
 ```mermaid
 flowchart TB
-    subgraph repo["git repo (no remote yet: Q-005)"]
+    gh[("GitHub: emiliev/mini-client-application<br/>origin (private, HTTPS)")]
+    subgraph repo["local git repo"]
         main[("main<br/>/Users/emililiev/projects/flutter/mini-client")]
     end
+    main <-->|"push / fetch (TL only)"| gh
     tl["Tech Lead worktree<br/>/Users/emililiev/orca/workspaces/mini-client/&lt;name&gt;"]
     c1["Crew worktree<br/>branch fleet/T-XXXX-slug"]
     c2["Crew worktree<br/>branch fleet/T-YYYY-slug"]
