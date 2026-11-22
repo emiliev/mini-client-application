@@ -4,7 +4,7 @@
 |---|---|
 | Status | Done |
 | Owner | Tech Lead |
-| Branch | `continue-previous-work` (Orca-created session branch), pushed as `fleet/T-0001-documentation-scaffold` |
+| Branch | `continue-previous-work` (Orca session branch), fast-forwarded into `main` 2026-11-22 (P-008) |
 | Created | 2026-11-22 |
 | Updated | 2026-11-22 |
 | Depends on | — |

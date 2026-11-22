@@ -4,36 +4,39 @@ _Last updated: 2026-11-22 by Tech Lead_
 
 | | |
 |---|---|
-| **Phase** | 0 — Inception (documentation & direction) |
-| **Health** | Amber: waiting on product direction ([Q-001](open-questions.md#q-001), [Q-002](open-questions.md#q-002), [Q-003](open-questions.md#q-003)) |
+| **Product** | mini-client: a mobile-first **Marvel app** for **iOS & Android**, backed by an in-repo `mocked_backend` ([charter](project/charter.md)) |
+| **Phase** | 0 — Inception: charter drafted, waiting for PO confirmation |
+| **Health** | Amber: waiting on the PO tech stack ([Q-006](open-questions.md#q-006)) and MVP confirmation ([Q-008](open-questions.md#q-008)) |
 | **Code** | None yet. The repo holds only documentation. |
-| **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private) as `origin`. `main` is pushed; docs are on `fleet/T-0001-documentation-scaffold`, waiting to be merged ([P-008](pending-work.md)). |
-| **Active crew** | None. Crew will be dispatched once T-0003 is unblocked. |
+| **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private). `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)). |
+| **Active crew** | None. The Researcher finished T-0008. |
 
 ## Now
-- [T-0001](tasks/T-0001-documentation-scaffold.md) Documentation scaffold & fleet protocol: **Done**
-- [T-0006](tasks/T-0006-link-github-remote.md) Link GitHub remote: **Done**
+- [T-0002](tasks/T-0002-product-charter.md) Charter & MVP scope: **In Review** with the PO (Q-008)
 
 ## Next (in order, once unblocked)
-1. [T-0002](tasks/T-0002-product-charter.md) Product charter & MVP scope (Tech Lead)
-2. [T-0003](tasks/T-0003-flutter-project-scaffold.md) Flutter project scaffold (crew: Engineer)
-3. [T-0004](tasks/T-0004-architecture-decision.md) Architecture & state-management ADR (Tech Lead + Planner); can run in parallel with T-0003
-4. [T-0005](tasks/T-0005-ci-quality-gates.md) CI & quality gates (crew: Engineer); the hosting question is settled (GitHub)
+1. [T-0004](tasks/T-0004-architecture-decision.md) Architecture & tech-stack ADRs (TL + Planner), as soon as Q-006 arrives
+2. [T-0003](tasks/T-0003-flutter-project-scaffold.md) Flutter scaffold (crew: Engineer), in parallel with T-0004
+3. [T-0005](tasks/T-0005-ci-quality-gates.md) CI & quality gates, and [T-0007](tasks/T-0007-mocked-backend-module.md) `mocked_backend` (two Engineers in parallel)
+4. Feature tasks F1 to F5
 
 ## Blocked
 | Item | Blocked on | Default if no answer |
 |---|---|---|
-| T-0002 | Q-001 (what the product is), Q-003 (backend) | none, needs PO input |
-| T-0003 | Q-001 (app or package), Q-002 (platforms) | iOS + Android app |
-| T-0005 | T-0003 | — |
-| P-008 (merge docs into `main`) | Q-005 merge policy | — |
+| T-0003, T-0004 | Q-006 (PO tech stack, arriving next) | — |
+| T-0002 acceptance | Q-008 (confirm F1 to F5) | build F1 to F5 as proposed |
+| T-0005, T-0007 | T-0003 (and T-0004 for T-0007) | — |
 
-## Recent decisions
-- [ADR-0001](adr/0001-record-architecture-decisions.md) Record architecture decisions
-- [ADR-0002](adr/0002-documentation-as-code.md) Documentation as code in `documents/`
-- [ADR-0003](adr/0003-fleet-operating-model.md) Fleet operating model
+## Recent decisions & findings
+- [ADR-0004](adr/0004-git-integration-workflow.md) Git integration: the TL merges `--no-ff` and pushes `origin/main`
+- [ADR-0005](adr/0005-mocked-backend-module.md) Mocked backend as an in-repo module behind a data-source interface
+- [F-0003](findings/F-0003-marvel-api-unavailable.md) The official Marvel API is gone, so the mock contract is our own design
+
+## Watch items
+- [Q-004](open-questions.md#q-004): bundle id `com.emiliev.miniclinet`. Confirm the spelling (`miniclinet` vs `miniclient`) before the scaffold.
+- [Q-007](open-questions.md#q-007) / [R-005](risks.md): a public store release of a Marvel-branded app needs licensing.
 
 ## Key facts for anyone joining
-- Repo: main checkout at `/Users/emililiev/projects/flutter/mini-client`; fleet worktrees under `/Users/emililiev/orca/workspaces/mini-client/`.
-- Remote: `origin` over HTTPS with keychain auth. No SSH key, `gh` not logged in, so no PRs from the CLI. See [F-0002](findings/F-0002-github-remote-access.md).
-- Toolchain: Flutter through FVM (global 3.41.0 / Dart 3.11.0). Always use `fvm flutter`. See [F-0001](findings/F-0001-environment-survey.md).
+- Repo: the PO's checkout of `main` is at `/Users/emililiev/projects/flutter/mini-client`; fleet worktrees are under `/Users/emililiev/orca/workspaces/mini-client/`.
+- Remote: `origin` over HTTPS with keychain auth. No SSH key, `gh` not logged in, so no PRs from the CLI ([F-0002](findings/F-0002-github-remote-access.md)).
+- Toolchain: Flutter through FVM (global 3.41.0 / Dart 3.11.0). Always use `fvm flutter` ([F-0001](findings/F-0001-environment-survey.md)).

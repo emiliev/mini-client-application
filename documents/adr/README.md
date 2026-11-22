@@ -12,14 +12,18 @@ An ADR captures **one** significant decision: the context, the options weighed, 
 | [0001](0001-record-architecture-decisions.md) | Record architecture decisions | Accepted | 2026-11-22 |
 | [0002](0002-documentation-as-code.md) | Documentation as code in `documents/` | Accepted | 2026-11-22 |
 | [0003](0003-fleet-operating-model.md) | Fleet operating model | Accepted | 2026-11-22 |
+| [0004](0004-git-integration-workflow.md) | Git integration workflow | Accepted | 2026-11-22 |
+| [0005](0005-mocked-backend-module.md) | Mocked backend as an in-repo module | Accepted (transport deferred) | 2026-11-22 |
 
 ## Expected upcoming ADRs
 | Topic | Comes from |
 |---|---|
-| Flutter SDK version & pinning (`.fvmrc`) | T-0003 |
-| App architecture & layering | T-0004 |
-| State management | T-0004 |
-| Navigation / routing | T-0004 |
-| Networking & API client | after Q-003 |
+| Flutter SDK version & pinning (`.fvmrc`) | T-0003 / Q-006 |
+| Repo layout & workspace tooling (app + `mocked_backend` package) | T-0004 / Q-006 |
+| App architecture & layering | T-0004 / Q-006 |
+| State management | T-0004 / Q-006 |
+| Navigation / routing | T-0004 / Q-006 |
+| `mocked_backend` transport (in-process vs HTTP-level mock) | T-0004 (ADR-0005 deferred item) |
+| Local persistence (favorites) | T-0004 / F5 |
 | Testing strategy | P-001 |
-| CI platform & quality gates | T-0005 |
+| CI platform & quality gates (GitHub Actions) | T-0005 |

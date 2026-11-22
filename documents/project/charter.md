@@ -1,34 +1,66 @@
 # Project Charter — mini-client
 
-- **Status:** Draft, awaiting [Q-001](../open-questions.md#q-001) to [Q-003](../open-questions.md#q-003). Finalised by [T-0002](../tasks/T-0002-product-charter.md).
+- **Status:** Draft. Direction is confirmed (Q-001 to Q-005); the MVP feature set is proposed and awaits PO confirmation ([Q-008](../open-questions.md#q-008)). Finalised by [T-0002](../tasks/T-0002-product-charter.md).
 - **Product Owner:** Emil
 - **Tech Lead:** Claude (fleet lead session)
 - **Last updated:** 2026-11-22
 
 ## Vision
-_TBD (Q-001)._ One or two sentences: what mini-client is and why it should exist.
+A polished, mobile-first **Marvel universe app** for iOS and Android: browse and search characters and comics, dig into details, and keep favorites. It is built on a clean, swappable data layer and backed entirely by a mocked backend.
 
 ## Problem & target users
-_TBD (Q-001)._ Who uses it, and what problem it solves for them.
+- **Users:** Marvel fans on phones who want a fast, pleasant way to explore characters and comics.
+- **For the project itself:** a showcase of production-grade Flutter architecture, testing and delivery by an agent fleet, with every decision documented.
 
 ## Deliverable type
-_TBD (Q-001)._ A Flutter application, or a Dart/Flutter package (client SDK).
+A **Flutter application** (not a package). Mobile-first, for **iOS and Android** (Q-001, Q-002).
+
+## Identity
+| Item | Value | Source |
+|---|---|---|
+| Bundle id / applicationId | `com.emiliev.miniclinet` (spelling to confirm) | Q-004 |
+| Dart package name | `mini_client` | TL default |
+| Display name | _TBD_, kept free of Marvel trademarks pending Q-007 | Q-007 |
+
+## Data source
+No real backend. A **`mocked_backend` module** inside the repo provides all data ([ADR-0005](../adr/0005-mocked-backend-module.md)). The app reaches it only through a data-source abstraction, so a real backend could replace it later without touching features.
+
+## MVP features (proposed)
+_Proposed by the TL; awaiting PO confirmation ([Q-008](../open-questions.md#q-008))._
+
+| ID | Feature | Must-have behaviour |
+|---|---|---|
+| F1 | **Browse characters** | Paginated, infinitely scrolling list or grid with image and name |
+| F2 | **Search characters** | Search by name, debounced, with empty and no-results states |
+| F3 | **Character details** | Image, description, related comics (and series) |
+| F4 | **Browse comics & comic details** | Paginated comics list; detail page with cover, description, creators, characters |
+| F5 | **Favorites** | Favorite characters (and comics), saved locally, with a favorites tab |
+
+Across all features: loading, empty and error states with retry (the mock can simulate latency and failures); light and dark theme; accessible text scaling.
 
 ## Goals (MVP)
-_TBD._ Three to five measurable outcomes.
+1. F1 to F5 run on an iOS simulator and an Android emulator against `mocked_backend`.
+2. The architecture follows the PO's stack (Q-006), with every significant choice recorded as an ADR.
+3. Quality gates (format, analyze, tests) are automated and green on `main` (T-0005).
+4. The data layer can swap the mock for a real backend with no changes in feature code.
 
 ## Non-goals
-_TBD._ What we are explicitly not doing in the MVP.
+- A real backend, networking to Marvel servers, or building any server.
+- User accounts, authentication, payments, push notifications.
+- Web or desktop targets; tablet-optimised layouts are nice-to-have, not MVP.
+- A public store listing before IP clearance ([Q-007](../open-questions.md#q-007)).
 
 ## Success criteria
-_TBD._ How we will know the MVP is done and working.
+- Every MVP feature has a Done task with verification evidence.
+- `fvm flutter analyze` is clean and the unit and widget test suites pass in CI.
+- The app builds in release mode for both iOS and Android.
+- `documents/` is current: STATUS, BOARD, ADRs and architecture overview match the code.
 
 ## Constraints (known)
-- Flutter / Dart codebase, SDK managed with FVM ([F-0001](../findings/F-0001-environment-survey.md)).
-- Fully documented in `documents/` ([ADR-0002](../adr/0002-documentation-as-code.md)).
-- Delivered by an agent fleet under a Tech Lead ([ADR-0003](../adr/0003-fleet-operating-model.md)).
-- Target platforms: _TBD (Q-002)._
-- Backend / external services: _TBD (Q-003)._
+- Flutter / Dart, SDK managed with FVM ([F-0001](../findings/F-0001-environment-survey.md)).
+- Repo on GitHub, private ([F-0002](../findings/F-0002-github-remote-access.md)); integration per [ADR-0004](../adr/0004-git-integration-workflow.md).
+- Fully documented in `documents/` ([ADR-0002](../adr/0002-documentation-as-code.md)), delivered by an agent fleet ([ADR-0003](../adr/0003-fleet-operating-model.md)).
+- No copyrighted Marvel artwork bundled by default ([R-005](../risks.md)).
 
 ## Stakeholders
 | Role | Who | Responsibility |

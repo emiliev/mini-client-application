@@ -18,10 +18,12 @@ Crew are dispatched when there is unblocked work. Idle agents are not kept runni
 ## Active assignments
 | Crew member | Task | Branch | Dispatched | Status |
 |---|---|---|---|---|
-| — | — | — | — | No crew dispatched yet: all remaining tasks are blocked on direction (see [STATUS](../STATUS.md)) |
+| — | — | — | — | None active. T-0003 and T-0004 wait on the PO stack (Q-006); see [STATUS](../STATUS.md) |
 
 ## History
 | Date | Crew member | Task | Result |
 |---|---|---|---|
 | 2026-11-22 | Tech Lead (self) | T-0001 | Done: documentation scaffold |
 | 2026-11-22 | Tech Lead (self) | T-0006 | Done: GitHub remote linked |
+| 2026-11-22 | Researcher (web-fetch, background) | T-0008 | Done: Marvel developer portal retired (F-0003) |
+| 2026-11-22 | Tech Lead (self) | T-0002 | In Review: charter drafted, MVP proposed (Q-008) |

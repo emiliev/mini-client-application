@@ -1,9 +1,23 @@
 # Glossary
 
+## Product & domain
 | Term | Meaning |
 |---|---|
-| **mini-client** | The product we are building. Definition pending [Q-001](../open-questions.md#q-001). |
-| **Fleet** | The team of AI agents working on this project: one Tech Lead plus crew members. See [ADR-0003](../adr/0003-fleet-operating-model.md). |
+| **mini-client** | The product: a mobile-first Marvel app for iOS and Android ([charter](charter.md)). |
+| **mocked_backend** | The in-repo module that provides all of the app's data in place of a real backend ([ADR-0005](../adr/0005-mocked-backend-module.md)). |
+| **Fixture data** | The static dataset (characters, comics, …) shipped inside `mocked_backend`. |
+| **Data-source interface** | The abstraction the app uses to fetch data. `mocked_backend` implements it, and a real backend could later. |
+| **Character** | A Marvel character (hero, villain, …): name, description, image, related comics and series. |
+| **Comic** | A single comic issue: title, issue number, cover, description, creators, characters. |
+| **Series** | A sequence of comics published under one title. |
+| **Event** | A cross-title storyline that spans several series. |
+| **Creator** | A person credited on a comic (writer, artist, …). |
+| **Bundle id / applicationId** | The app's unique store identifier on iOS / Android (`com.emiliev.miniclinet`, Q-004). |
+
+## Process
+| Term | Meaning |
+|---|---|
+| **Fleet** | The team of AI agents working on this project: one Tech Lead plus crew members ([ADR-0003](../adr/0003-fleet-operating-model.md)). |
 | **Product Owner (PO)** | Emil, the human who owns direction, scope and priorities. |
 | **Tech Lead (TL)** | The main Claude session. It turns direction into tasks, makes technical decisions, dispatches and reviews crew, and integrates work. |
 | **Crew member** | A Claude agent dispatched by the TL to do one task, usually in its own git worktree. |

@@ -20,6 +20,7 @@ This repo is run as a **fleet**: a Tech Lead session orchestrates crew-member ag
 ## Git
 - Remote: `origin` → https://github.com/emiliev/mini-client-application (private, HTTPS with keychain auth; no SSH, no `gh` login). See F-0002.
 - Only the Tech Lead pushes. Push non-interactively with `GIT_TERMINAL_PROMPT=0 git push …`.
-- One branch per task: `fleet/T-XXXX-<slug>`. Never commit to `main` directly; the Tech Lead integrates.
+- One branch per task: `fleet/T-XXXX-<slug>`, created from `origin/main`. Crew commit there and never push.
+- Integration (ADR-0004): the TL reviews, runs `git merge --no-ff fleet/T-XXXX-<slug>` on its branch (which tracks `origin/main`), runs the gates, then `git push origin HEAD:main`. Never force-push `main`.
 - Never use bare `git stash` / `git stash pop` — the stash is shared across worktrees. Use a WIP commit instead.
 - Commit messages: `T-XXXX: <imperative summary>`.

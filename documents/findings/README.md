@@ -9,3 +9,4 @@ A finding is knowledge we earned and don't want to earn twice: environment gotch
 |---|---|---|---|---|
 | [F-0001](F-0001-environment-survey.md) | Development environment survey | Environment | 2026-11-22 | Agents must use `fvm flutter`; no git remote yet (superseded by F-0002) |
 | [F-0002](F-0002-github-remote-access.md) | GitHub remote access | Environment | 2026-11-22 | `origin` over HTTPS via keychain; no SSH, no `gh`, so no CLI PRs |
+| [F-0003](F-0003-marvel-api-unavailable.md) | The official Marvel API is effectively unavailable | Spike | 2026-11-22 | `mocked_backend` contract is our own design; no real-API swap target |
