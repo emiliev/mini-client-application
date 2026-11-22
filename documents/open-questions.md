@@ -9,7 +9,7 @@ Only **direction-level** questions belong here. Technical questions are decided 
 | [Q-003](#q-003) | Backend / API integration | **Answered** 2026-11-22 | — | — |
 | [Q-004](#q-004) | App identity (org / bundle id) | **Answered**, spelling to confirm | T-0003 (soft) | use `com.emiliev.miniclinet` exactly as given |
 | [Q-005](#q-005) | Repo hosting & integration policy | **Answered** 2026-11-22 | — | — |
-| [Q-006](#q-006) | Architecture & tech stack | **Open**: PO is sharing it next | T-0003, T-0004 | — |
+| [Q-006](#q-006) | Architecture & tech stack | **Answered** 2026-11-22: Tide Miniclient ("Lego") architecture, enterprise stack, Bazel | — | — |
 | [Q-007](#q-007) | Public store release vs. Marvel IP licensing | **Open** | Phase 3 (release) | build store-ready, but public release gated on licensing; placeholder art |
 | [Q-008](#q-008) | Confirm the MVP feature set | **Open** | T-0002 acceptance | proposed set F1 to F5 in the [charter](project/charter.md#mvp-features-proposed) |
 | [Q-009](#q-009) | Android toolchain on this Mac | **Answered** 2026-11-22: Android deferred | — | — |
@@ -40,7 +40,14 @@ Only **direction-level** questions belong here. Technical questions are decided 
 ### Q-006
 **Architecture & tech stack.** Asked 2026-11-22.
 **Status:** the PO will share the architecture and tech stack next. T-0003 (scaffold) and T-0004 (architecture ADRs) wait for it, because it may set the project generator, lints, monorepo layout, state management and more.
-**Answer:** _pending_
+**Answer, 2026-11-22 (PO, summarised faithfully):**
+- **Architecture:** Tide's "Lego" architecture from the *Project Miniclient* Medium series: introduction, utility layer, feature level, application layer, navigation, testing ([intro](https://medium.com/tide-engineering-team/project-miniclient-introduction-0a94aefa5638)). Go through all the articles and understand them in detail.
+- **Stack:** "freezed, feature flow, injectable, l10n, retrofit, etc.", i.e. the stack the articles use.
+- **Scale:** an enterprise Marvel app with **at least 100 modules, including BDD tests**.
+- **Build:** integrate with **Bazel** using [Mivr/ai_rules_dart](https://github.com/Mivr/ai_rules_dart) and [Mivr/ai_rules_flutter](https://github.com/Mivr/ai_rules_flutter).
+- **End goal:** stress-test the Bazel rules, profile them extensively, and identify, apply and **report upstream** every issue, so these become the most optimised Flutter and Dart rules. They must build the app; cache hits must be accurate; incremental changes must rebuild and assemble only what changed; RAM use must be optimal (Flutter AOT and JIT are memory-hungry), so that a **5 to 10M LOC** Flutter project runs comfortably on a **16 GB** laptop.
+- **This turn's deliverable:** a plan for building a **500k to 1M LOC (minimum)** app. Split the work across agents, including for planning, then assemble it. A separate set of agents then verifies that the plan follows the Tide articles.
+- Tracked in T-0013.
 
 ### Q-007
 **Public store release vs. Marvel IP.** Asked 2026-11-22.

@@ -1,0 +1,34 @@
+# T-0013: Enterprise-scale plan (Tide architecture × Bazel stress test)
+
+| Field | Value |
+|---|---|
+| Status | In Progress |
+| Owner | Tech Lead (orchestrating Researchers → Planners → Verifiers) |
+| Branch | TL branch → `main` (docs only) |
+| Created | 2026-11-22 |
+| Updated | 2026-11-22 |
+| Depends on | Q-006 (answered) |
+| Related | ADR-0005, ADR-0006, Q-006, `documents/research/`, `documents/plan/` |
+
+## Goal
+A complete, verified plan for building an enterprise Marvel app that follows Tide's Project Miniclient architecture and stack: 100+ modules, BDD tests, 500k to 1M LOC minimum, built with Bazel through `ai_rules_dart` / `ai_rules_flutter`. The plan serves the end goal of stress-testing, profiling and optimising those rules (accurate caching, minimal incremental rebuilds, RAM-optimal AOT and JIT, with 5 to 10M LOC feasible on 16 GB), and of reporting the issues found upstream.
+
+## Acceptance criteria
+- **T-0013-AC1:** Given the six Tide articles, then `documents/research/tide-miniclient/` captures the architecture, the stack and the codegen inventory, citing article sections.
+- **T-0013-AC2:** Given both rules repos, then `documents/research/bazel-rules/` documents their API, compilation model, codegen support, perf tooling and limitations, citing file paths.
+- **T-0013-AC3:** Given the research, then `documents/plan/` holds an assembled plan: a module catalogue of at least 100 modules, a LOC budget of at least 500k, the Bazel integration, the profiling and optimisation programme with an upstream-reporting workflow, the BDD testing approach, and a phased delivery roadmap that fleet waves can execute.
+- **T-0013-AC4:** Given the plan, when fresh Verifier agents audit it against the Tide articles, then every deviation is either fixed or recorded as an intentional, justified deviation.
+- **T-0013-AC5:** Given the plan, then ADRs record the major decisions, and BOARD and STATUS reflect the new task breakdown.
+
+## Plan
+1. **Wave 1, research (4 agents in parallel):** Tide core architecture; Tide app, navigation and testing; `ai_rules_dart`; `ai_rules_flutter`.
+2. **Wave 2, planning (parallel agents):** architecture and module catalogue; scale and codegen; Bazel integration; profiling and optimisation; testing and BDD; delivery roadmap.
+3. **Assembly (TL):** reconcile conflicts and write `documents/plan/README.md`, ADRs and tasks.
+4. **Wave 3, verification (fresh agents):** conformance to the Tide articles, plus Bazel feasibility against the rules repos.
+5. **Fix and finalise:** apply the verification findings.
+
+## Log
+- 2026-11-22: Created from the PO request. Medium blocks direct fetches (403), but the publication's RSS feed has the full text of all six Miniclient articles. Extracted locally with the 5 diagrams. Both rules repos are cloned read-only (`ai_rules_dart` HEAD `be4e99f`, `ai_rules_flutter` HEAD `876e263`). Bazel 9.2.0 is installed; the machine is an M4 Pro with 14 cores and 48 GB (so the 16 GB budget must be simulated). Wave 1 dispatched.
+
+## Outcome
+_Pending._
