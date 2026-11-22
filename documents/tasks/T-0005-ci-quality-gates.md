@@ -8,7 +8,7 @@
 | Branch | `fleet/T-0005-verify-and-ci` |
 | Created | 2026-11-22 |
 | Updated | 2026-11-22 |
-| Depends on | T-0003; commands from T-0009 (F-0004). Hosting is GitHub (T-0006), so CI is GitHub Actions. |
+| Depends on | T-0003. Commands proven by T-0009 ([F-0004](../findings/F-0004-ios-verification-pipeline.md)). Hosting is GitHub (T-0006), so CI is GitHub Actions. |
 | Related | ADR-0004, ADR-0006 (L0 to L3 and the coverage gate), T-0010, Q-009 |
 
 ## Goal
@@ -17,7 +17,7 @@ One command, identical for the Engineer, the Verifier, the TL's post-merge check
 ## Scope
 - **In (local):** `tool/verify.sh`, which runs:
   - L0: `fvm dart format --output=none --set-exit-if-changed .` and `fvm flutter analyze` (zero issues), across every package in the workspace
-  - L1 to L3: `fvm flutter test --coverage` for every package; golden tests run on macOS only
+  - L1 to L3: `rm -rf test/failures`, then `fvm flutter test --coverage` for every package. Golden tests run on macOS only, **load real fonts and set the iOS platform** in `test/flutter_test_config.dart`; the default Ahem font renders text as boxes (F-0004)
   - Coverage gate: at least 80 % line coverage for domain, data and `mocked_backend`, computed from `lcov.info` with no extra tools
   - A one-line summary per gate, and a non-zero exit on any failure
 - **In (CI):** a GitHub Actions workflow on push to `main` and on `fleet/**` branches that runs `tool/verify.sh` (goldens excluded on Linux) and `fvm flutter build apk --debug`. That is the Android coverage until Q-009 is resolved. Cache the SDK and pub packages; keep jobs lean, since the repo is private and uses Actions minutes. Record the CI platform in an ADR.
@@ -41,6 +41,7 @@ One command, identical for the Engineer, the Verifier, the TL's post-merge check
 - 2026-11-22: Created. Blocked on T-0003 and Q-005.
 - 2026-11-22: The hosting part of Q-005 is answered (GitHub, T-0006). Now blocked only on T-0003.
 - 2026-11-22: Rescoped by ADR-0006: `tool/verify.sh` is the single local gate (L0 to L3 plus coverage); e2e moved to T-0010; CI builds an Android APK as interim Android coverage (Q-009).
+- 2026-11-22: T-0009 done. Commands come from F-0004. Golden real-font setup added to scope.
 
 ## Outcome
 _Pending._

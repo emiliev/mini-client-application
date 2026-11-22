@@ -19,7 +19,7 @@ Crew are dispatched when there is unblocked work. Idle agents are not kept runni
 ## Active assignments
 | Crew member | Task | Branch | Dispatched | Status |
 |---|---|---|---|---|
-| Engineer (background) | T-0009 Verification pipeline spike | — (scratchpad only, outside the repo) | 2026-11-22 | In Progress |
+| — | — | — | — | None active. Next dispatches (T-0003, T-0004) wait on Q-006 |
 
 ## History
 | Date | Crew member | Task | Result |
@@ -28,4 +28,4 @@ Crew are dispatched when there is unblocked work. Idle agents are not kept runni
 | 2026-11-22 | Tech Lead (self) | T-0006 | Done: GitHub remote linked |
 | 2026-11-22 | Researcher (web-fetch, background) | T-0008 | Done: Marvel developer portal retired (F-0003) |
 | 2026-11-22 | Tech Lead (self) | T-0002 | In Review: charter drafted, MVP proposed (Q-008) |
-| 2026-11-22 | Engineer (background) | T-0009 | Dispatched: iOS verification pipeline spike |
+| 2026-11-22 | Engineer (background) | T-0009 | Done: pipeline proven in about 5 min; TL spot-check PASS (F-0004) |

@@ -2,8 +2,9 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done |
 | Owner | crew: Engineer (background) |
+| Verifier | Tech Lead (spot-check) |
 | Branch | — (throwaway app in the TL scratchpad, outside the repo) |
 | Created | 2026-11-22 |
 | Updated | 2026-11-22 |
@@ -26,6 +27,12 @@ No repo changes, no global installs, a dedicated simulator only, cleanup always,
 
 ## Log
 - 2026-11-22: Dispatched in the background, in parallel with the TL writing ADR-0006.
+- 2026-11-22: Engineer reported all 10 steps passing in about 5 minutes, with no fixes needed (one non-blocking error: `simctl clone` on a booted device).
+- 2026-11-22: TL spot-check verification: coverage re-computed, simulator cleanup and repo cleanliness confirmed, e2e test code read, screenshots viewed. PASS.
 
 ## Outcome
-_Pending: becomes F-0004._
+- **Changed:** nothing in the repo. Spike code is in the TL scratchpad (ephemeral).
+- **Verification:** [report](../evidence/T-0009/verification-report.md), verdict **PASS**, with 4 evidence screenshots.
+- **Findings:** [F-0004](../findings/F-0004-ios-verification-pipeline.md): commands, timings and 11 gotchas.
+- **Decisions:** ADR-0006 §5 and §6 refined (create rather than clone, `bootstatus`, downscale only when larger).
+- **Follow-ups:** T-0005 (real fonts for goldens, `rm -rf test/failures`), T-0010 (script from the proven commands).

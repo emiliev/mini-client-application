@@ -1,6 +1,6 @@
 # ADR-0006: Verification strategy (no merge without independent evidence)
 
-- **Status:** Accepted (policy). Exact commands are confirmed by the T-0009 spike ([task](../tasks/T-0009-verification-pipeline-spike.md); results go to finding F-0004). Test libraries can be adjusted to the PO stack (Q-006) without changing the policy.
+- **Status:** Accepted (policy). Feasibility and exact commands confirmed by the T-0009 spike ([F-0004](../findings/F-0004-ios-verification-pipeline.md)). Test libraries can be adjusted to the PO stack (Q-006) without changing the policy.
 - **Date:** 2026-11-22
 - **Deciders:** Product Owner (requirement: verify all agent work before merge, through tests, e2e at the end, and visual testing on iOS), Tech Lead (design)
 - **Related:** ADR-0003, ADR-0004, T-0005, T-0009, T-0010, T-0011, Q-009
@@ -19,7 +19,7 @@ Before dispatch, the TL writes each task's acceptance criteria as numbered **Giv
 | **L0 Static** | Format, analyze with zero issues, layer import rules | `dart format`, `fvm flutter analyze` | Every task | Local + CI |
 | **L1 Unit** | Domain logic, `mocked_backend`, repositories, state holders | `fvm flutter test` | Any logic change | Local + CI |
 | **L2 Widget** | Every screen state: loading, content, empty, error (mock with zero latency and injected failures) | `fvm flutter test` | Any UI change | Local + CI |
-| **L3 Golden** | Key screens, light and dark, at the reference size | `matchesGoldenFile` (library TBD by stack) | UI tasks | macOS only (font rendering differs on Linux) |
+| **L3 Golden** | Key screens, light and dark, at the reference size, with **real fonts loaded and the iOS platform set** (the default Ahem font renders text as boxes, F-0004) | `matchesGoldenFile` (library TBD by stack) | UI tasks | macOS only (font rendering differs on Linux) |
 | **L4 E2E** | One user journey per feature on a real simulator, with the app wired to `mocked_backend` (deterministic data, zero latency) | `integration_test`, plus `flutter drive` for in-test screenshots | Feature tasks; the **full MVP journey** at phase-2 exit (T-0011) | iOS simulator; Android once Q-009 is resolved |
 | **L5 Visual acceptance** | Screenshots at each checkpoint, inspected by an agent against the ACs and attached as evidence | `xcrun simctl io … screenshot`, in-test screenshots | UI tasks | iOS simulator |
 
@@ -42,10 +42,10 @@ Before dispatch, the TL writes each task's acceptance criteria as numbered **Giv
 - Test data is deterministic. An e2e test that fails intermittently is a bug to root-cause and record as a finding, never something to retry until it passes.
 
 ### 5. Evidence
-Each task's evidence lives in `documents/evidence/T-XXXX/`: the verification report (Markdown) plus PNG screenshots downscaled to at most 1200 px (`sips -Z 1200`). The task's Outcome links them. This is a deliberate exception to ADR-0002's "no binary images", which is about diagrams.
+Each task's evidence lives in `documents/evidence/T-XXXX/`: the verification report (Markdown) plus PNG screenshots no taller than 1200 px. Downscale with `sips -Z 1200` **only when the image is larger**, since `sips` also enlarges small images (F-0004). In-test screenshots (`binding.takeScreenshot`) cover every checkpoint after launch. `simctl io … screenshot` adds the real status bar but can't tap, so it only covers launch. The task's Outcome links them. This is a deliberate exception to ADR-0002's "no binary images", which is about diagrams.
 
 ### 6. Simulator hygiene
-Every agent that runs e2e **creates its own simulator** (`xcrun simctl create mc-<task>-<role> …`) and deletes it afterwards, even on failure. Agents never boot or modify the shared or default simulators. Reference devices:
+Every agent that runs e2e **creates its own simulator** (`xcrun simctl create mc-<task>-<role> …`; never `clone`, which fails on a booted device), waits with `xcrun simctl bootstatus <udid> -b`, and deletes it afterwards, even on failure (`trap`). Agents never boot or modify the shared or default simulators. Each agent builds in its own worktree, so `build/` folders never collide (F-0004). Reference devices:
 - **Primary:** iPhone 17 Pro, iOS 26.2
 - **Small screen and older OS** (layout checks at phase-2 exit): iPhone SE (3rd gen), iOS 18.2
 

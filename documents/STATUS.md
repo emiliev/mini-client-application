@@ -10,10 +10,9 @@ _Last updated: 2026-11-22 by Tech Lead_
 | **Code** | None yet. The repo holds only documentation. |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private). `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)). |
 | **Merge gate** | Nothing merges without a PASS from a fresh Verifier, a clean review, and the TL re-verifying the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | Engineer (background) on [T-0009](tasks/T-0009-verification-pipeline-spike.md), the iOS verification pipeline spike |
+| **Active crew** | None. The T-0009 spike finished (PASS); next dispatches wait on Q-006 |
 
 ## Now
-- [T-0009](tasks/T-0009-verification-pipeline-spike.md) Verification pipeline spike: **In Progress**
 - [T-0002](tasks/T-0002-product-charter.md) Charter & MVP scope: **In Review** with the PO (Q-008)
 
 ## Next (in order, once unblocked)
@@ -27,11 +26,12 @@ _Last updated: 2026-11-22 by Tech Lead_
 |---|---|---|
 | T-0003, T-0004 | Q-006 (PO tech stack, arriving next) | — |
 | T-0002 acceptance | Q-008 (confirm F1 to F5) | build F1 to F5 as proposed |
-| T-0005, T-0010 | T-0003, T-0009 | — |
+| T-0005, T-0010 | T-0003 | — |
 | T-0007 | T-0003, T-0004 | — |
 | Local Android verification | Q-009 (Android toolchain) | Android verified in CI only |
 
 ## Recent decisions & findings
+- [F-0004](findings/F-0004-ios-verification-pipeline.md) The iOS verification pipeline is proven end to end (e2e 41 s cold / 13 s warm, screenshots, parallel simulators); [evidence](evidence/T-0009/verification-report.md)
 - [ADR-0006](adr/0006-verification-strategy.md) Verification strategy: Given/When/Then ACs mapped to tests, layers L0 to L5, a fresh Verifier, evidence in `documents/evidence/`
 - [ADR-0004](adr/0004-git-integration-workflow.md) Git integration: the TL merges `--no-ff` and pushes `origin/main` (PO confirmed)
 - [ADR-0005](adr/0005-mocked-backend-module.md) Mocked backend as an in-repo module behind a data-source interface
