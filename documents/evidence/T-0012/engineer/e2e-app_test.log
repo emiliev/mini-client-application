@@ -1,0 +1,31 @@
+# e2e_ios.sh: T-0012 engineer on mc-T-0012-engineer-94337 (A9625BB0-1D2A-40EF-AF6E-D99EB90E75AA)
+# cwd: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.01cdIg/fixture_pass
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.C6pZHs/screenshots/1-app_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart -d A9625BB0-1D2A-40EF-AF6E-D99EB90E75AA
+
+Resolving dependencies...
+Downloading packages...
+  cupertino_icons 1.0.9 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+5 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            6.9s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57806/dfmv8x3Oh4w=/
+VMServiceFlutterDriver: Isolate found with number: 2436903547981747
+VMServiceFlutterDriver: Isolate 2436903547981747 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0012 fixture: list, tap item 3, detail
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: 00:01 +1: (tearDownAll)
+flutter: 00:01 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.C6pZHs/screenshots/1-app_test/01_list.png (215714 bytes)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.C6pZHs/screenshots/1-app_test/02_detail.png (166682 bytes)
+All tests passed.
+
+# exit code: 0

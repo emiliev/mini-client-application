@@ -1,5 +1,5 @@
 # T-0012 engineer run of tool/test/e2e_ios_test.sh
-# code under test: commit 641e557 plus the suite_cleanup lock-file fix (committed with this file)
+# code under test: the review-fix scripts and suite (committed together with this file in "T-0012: Address code review findings")
 # Flutter 3.47.8 • channel stable • https://github.com/flutter/flutter.git
 # Xcode 26.2 Build version 17C52 
 
@@ -8,50 +8,73 @@ bash -n OK: tool/e2e_ios.sh
 bash -n OK: tool/sim_cleanup.sh
 bash -n OK: tool/test/e2e_ios_test.sh
 
-$ /bin/bash tool/test/e2e_ios_test.sh
+$ E2E_TEST_KEEP=1 /bin/bash tool/test/e2e_ios_test.sh   (temp dir kept for the sample evidence run, then deleted)
 T-0012 e2e runner test suite
   scripts run with: /bin/bash (3.2.57(1)-release)
   device: iPhone 17 Pro, runtime: com.apple.CoreSimulator.SimRuntime.iOS-26-2
-  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.ngUag6
+  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.01cdIg
 RUN  test_T-0012-AC1_pass_run_collects_evidence
-    creating fixture app in /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.ngUag6/fixture_base
+    creating fixture app in /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.01cdIg/fixture_base
     fixture ready in 1 s
-    exit code 0; simulator mc-T-0012-engineer-39524
+    exit code 0; simulator mc-T-0012-engineer-82492
     01_list.png: 1200 px tall
     02_detail.png: 1200 px tall
-PASS test_T-0012-AC1_pass_run_collects_evidence (49 s)
+PASS test_T-0012-AC1_pass_run_collects_evidence (60 s)
+RUN  test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom
+    unit: cp and sips failures both return non-zero with no note
+    run with an unwritable screenshot: exit 4
+PASS test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom (22 s)
+RUN  test_T-0012-AC1_multiple_targets_get_unique_names
+    3 targets: logs e2e-a_test{,-2,-2-2}.log; screenshots x, a_test-x, a_test-3-x, a_test-2-x
+PASS test_T-0012-AC1_multiple_targets_get_unique_names (20 s)
 RUN  test_T-0012-AC2_failing_target_reports_fail
-    exit code 1; simulator mc-T-0012-engineer-42027
-PASS test_T-0012-AC2_failing_target_reports_fail (48 s)
+    exit code 1; simulator mc-T-0012-engineer-84836
+PASS test_T-0012-AC2_failing_target_reports_fail (47 s)
 RUN  test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint
-    pass run: exit 0, simulator mc-T-0012-engineer-43327
-    fail run: exit 1, simulator mc-T-0012-engineer-44263
-    sending SIGINT to pid 45218 while flutter drive runs on mc-T-0012-verifier-45218
+    pass run: exit 0, simulator mc-T-0012-engineer-86761
+    fail run: exit 1, simulator mc-T-0012-engineer-87707
+    sending SIGINT to pid 88613 while flutter drive runs on mc-T-0012-verifier-88613
     interrupted run: exit 130
-PASS test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint (104 s)
+PASS test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint (105 s)
+RUN  test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans
+    SIGINT to the process group, then again 1 s later during teardown (mc-T-0012-engineer-89203)
+    exit 130
+PASS test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans (30 s)
 RUN  test_T-0012-AC4_parallel_runs_isolated
-    engineer: exit 0, mc-T-0012-engineer-45816 (93E94AE7-8086-4D97-8AFD-7BD75B20BD6E)
-    verifier: exit 0, mc-T-0012-verifier-45817 (F6EA89F9-8D96-429B-B434-4D3FBE967669)
-    simulators overlapped for 75 s
-PASS test_T-0012-AC4_parallel_runs_isolated (76 s)
+    engineer: exit 0, mc-T-0012-engineer-89839 (C342C545-2250-4B0F-A860-CDC034F92A9D)
+    verifier: exit 0, mc-T-0012-verifier-89840 (361F2E13-C053-4B59-851F-1567B4018C02)
+    simulators overlapped for 77 s
+PASS test_T-0012-AC4_parallel_runs_isolated (78 s)
+RUN  test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset
+    engineer exit 0, verifier exit 0
+    per-role dirs written; stale.png and e2e-old.log removed; notes.md kept
+PASS test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset (31 s)
 RUN  test_T-0012-AC5_bad_runtime_or_device_fails_fast
     bad --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9': exit 2 in 0 s: e2e_ios: error: unknown or unavailable --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9' (available iOS runtimes: com.apple.CoreSimulator.SimRuntime.iOS-18-2, com.apple.CoreSimulator.SimRuntime.iOS-26-0, com.apple.CoreSimulator.SimRuntime.iOS-26-2)
     bad --device 'iPhone 99 Ultra': exit 2 in 0 s: e2e_ios: error: unknown --device 'iPhone 99 Ultra' (list them with: xcrun simctl list devicetypes)
-PASS test_T-0012-AC5_bad_runtime_or_device_fails_fast (0 s)
+PASS test_T-0012-AC5_bad_runtime_or_device_fails_fast (1 s)
+RUN  test_T-0012-AC5_fvm_checked_only_when_runner_uses_it
+    default runner needs fvm; --runner-cmd true does not (reached the runtime check)
+PASS test_T-0012-AC5_fvm_checked_only_when_runner_uses_it (0 s)
 RUN  test_T-0012-AC6_cleanup_only_mc_simulators
-    private set: mc-T-0012-orphan-a-39405 (Booted), mc-T-0012-orphan-b-39405 (Shutdown), control zz-T-0012-control-39405
+    private set: mc-T-0012-orphan-a-82373 (Booted), mc-T-0012-orphan-b-82373 (Shutdown), control zz-T-0012-control-82373
     default set: 34 non-mc simulators untouched
-PASS test_T-0012-AC6_cleanup_only_mc_simulators (23 s)
+PASS test_T-0012-AC6_cleanup_only_mc_simulators (22 s)
+RUN  test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
+    fakebin-fail: exit 3
+    fakebin-badjson: exit 3
+PASS test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails (1 s)
 RUN  test_T-0012-AC7_small_screenshot_not_upscaled
     600 px: unchanged 300x600
     1200 px: unchanged 600x1200
     1800 px: downscaled from 600x1800
-    stub run: exit 0 on mc-T-0012-engineer-49302
+    stub run: exit 0 on mc-T-0012-engineer-93584
 PASS test_T-0012-AC7_small_screenshot_not_upscaled (20 s)
 
-Summary: 7 passed, 0 failed, 7 total in 320 s
+Summary: 13 passed, 0 failed, 13 total in 437 s
 RESULT: PASS
-suite rc=0 wall=321 s
+Kept temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.01cdIg
+suite rc=0 wall=439 s
 
 $ xcrun simctl list devices | grep -E "mc-|zz-T-0012"
 (no output)
