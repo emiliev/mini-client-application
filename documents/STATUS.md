@@ -1,50 +1,36 @@
 # Project Status
 
-_Last updated: 2026-11-22 by Tech Lead_
+_Last updated: 2026-11-23 by Tech Lead_
 
 | | |
 |---|---|
-| **Product** | mini-client: a mobile-first **Marvel app** for **iOS & Android**, backed by an in-repo `mocked_backend` ([charter](project/charter.md)) |
-| **Phase** | 0 — Inception: charter drafted; verification strategy set |
-| **Health** | Amber: waiting on the PO tech stack ([Q-006](open-questions.md#q-006)) and MVP confirmation ([Q-008](open-questions.md#q-008)) |
-| **Code** | None yet. The repo holds only documentation. |
-| **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private). `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)). |
-| **Merge gate** | Nothing merges without a PASS from a fresh Verifier, a clean review, and the TL re-verifying the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | Engineer (worktree) on [T-0012](tasks/T-0012-ios-sim-e2e-runner.md), the iOS simulator e2e runner. Then a fresh Verifier. |
+| **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
+| **Phase** | Planning: the plan is assembled and in **verification** (wave 3). Execution starts at Phase A (de-risk spikes) |
+| **Health** | Amber: the plan is not yet verified; PO decisions Q-010 to Q-014 are open; agents keep hitting usage limits, so concurrency is capped at 3 |
+| **Code** | Docs plus T-0012 scripts, on a branch that hasn't merged yet |
+| **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
+| **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
+| **Active crew** | T-0012 Engineer (review fixes); plan Verifiers V1 to V3 |
 
 ## Now
-- [T-0012](tasks/T-0012-ios-sim-e2e-runner.md) iOS simulator e2e runner script: **In Progress** (first task through the full ADR-0006 gate)
-- [T-0002](tasks/T-0002-product-charter.md) Charter & MVP scope: **In Review** with the PO (Q-008)
+- [T-0013](tasks/T-0013-enterprise-plan.md) Enterprise plan: **In Verification**
+- [T-0012](tasks/T-0012-ios-sim-e2e-runner.md) Simulator e2e runner: **In Progress**, fixing 4 important review findings
 
-## Next (in order, once unblocked)
-1. [T-0004](tasks/T-0004-architecture-decision.md) Architecture & tech-stack ADRs (TL + Planner), as soon as Q-006 arrives
-2. [T-0003](tasks/T-0003-flutter-project-scaffold.md) Flutter scaffold (crew: Engineer), in parallel with T-0004
-3. In parallel after T-0003: [T-0005](tasks/T-0005-ci-quality-gates.md) `tool/verify.sh` + CI, [T-0010](tasks/T-0010-e2e-visual-harness.md) e2e + screenshot harness, and [T-0007](tasks/T-0007-mocked-backend-module.md) `mocked_backend`
-4. Feature tasks F1 to F5, each with a per-feature e2e journey; then [T-0011](tasks/T-0011-mvp-journey-e2e.md), the full MVP journey and visual sign-off
+## Next
+Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
 
-## Blocked
-| Item | Blocked on | Default if no answer |
-|---|---|---|
-| T-0003, T-0004 | Q-006 (PO tech stack, arriving next) | — |
-| T-0002 acceptance | Q-008 (confirm F1 to F5) | build F1 to F5 as proposed |
-| T-0005 | T-0003 | — |
-| T-0010 | T-0003, T-0012 | — |
-| T-0007 | T-0003, T-0004 | — |
+## Decisions needed from the PO
+[Q-010](open-questions.md#q-010) LOC definition · [Q-011](open-questions.md#q-011) release AOT goal split · [Q-012](open-questions.md#q-012) budget16 hardware / VM · [Q-013](open-questions.md#q-013) GitHub access for upstream · [Q-014](open-questions.md#q-014) Apple Developer team · [Q-004](open-questions.md#q-004) bundle id spelling · [Q-007](open-questions.md#q-007) store release vs Marvel IP
 
-## Recent decisions & findings
-- [F-0004](findings/F-0004-ios-verification-pipeline.md) The iOS verification pipeline is proven end to end (e2e 41 s cold / 13 s warm, screenshots, parallel simulators); [evidence](evidence/T-0009/verification-report.md)
-- [ADR-0006](adr/0006-verification-strategy.md) Verification strategy: Given/When/Then ACs mapped to tests, layers L0 to L5, a fresh Verifier, evidence in `documents/evidence/`
-- [ADR-0004](adr/0004-git-integration-workflow.md) Git integration: the TL merges `--no-ff` and pushes `origin/main` (PO confirmed)
-- [ADR-0005](adr/0005-mocked-backend-module.md) Mocked backend as an in-repo module behind a data-source interface
-- [F-0003](findings/F-0003-marvel-api-unavailable.md) The official Marvel API is gone, so the mock contract is our own design
-
-## Watch items
-- [Q-004](open-questions.md#q-004): bundle id `com.emiliev.miniclinet`. Confirm the spelling (`miniclinet` vs `miniclient`) before the scaffold.
-- [Q-007](open-questions.md#q-007) / [R-005](risks.md): a public store release of a Marvel-branded app needs licensing.
-- **Android is deferred** by the PO ([Q-009](open-questions.md#q-009)): iOS is the only verified platform ([R-009](risks.md)).
+## Recent decisions
+- [ADR-0007](adr/0007-tide-miniclient-architecture.md) Tide Miniclient architecture and stack (with recorded deviations)
+- [ADR-0008](adr/0008-bazel-with-ai-rules.md) Bazel with pinned ai_rules (patch queue, codegen shims)
+- [ADR-0009](adr/0009-exemplar-first-generation-and-loc.md) Exemplar-first generation and the LOC metric
+- [ADR-0010](adr/0010-testing-tiers-and-coverage.md) Tide testing tiers, BDD AC tags, 90 % coverage
+- [Plan conflict resolutions R1 to R27](plan/README.md#4-conflict-resolutions-tl-decisions)
 
 ## Key facts for anyone joining
-- Repo: the PO's checkout of `main` is at `/Users/emililiev/projects/flutter/mini-client`; fleet worktrees are under `/Users/emililiev/orca/workspaces/mini-client/`.
-- Remote: `origin` over HTTPS with keychain auth. No SSH key, `gh` not logged in, so no PRs from the CLI ([F-0002](findings/F-0002-github-remote-access.md)).
-- Toolchain: Flutter through FVM (global 3.41.0 / Dart 3.11.0). Always use `fvm flutter` ([F-0001](findings/F-0001-environment-survey.md)).
-- iOS verification: Xcode 26.2, CocoaPods 1.16.2, simulator runtimes iOS 18.2 / 26.0 / 26.2. No Android SDK (Android deferred).
+- Read [plan/README.md](plan/README.md) first, then the section for your task.
+- Toolchain target: Flutter **3.47.7** (`.fvmrc`; FVM's global is 3.47.8 and stays untouched), Bazel **9.3.0** via `tool/bazelw`, rules pinned (ADR-0008). iOS only.
+- Machine: M4 Pro, 14 cores, 48 GB. "budget16" is simulated (plan 04).
+- Crew models: Opus for planning, rules work and verification; Sonnet for engineering; Haiku for bulk batches. At most 3 agents at once; no crew during perf windows.

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Blocked |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | crew: Engineer (worktree) |
 | Verifier | crew: Verifier |
 | Branch | `fleet/T-0005-verify-and-ci` |
@@ -43,6 +43,9 @@ One command, identical for the Engineer, the Verifier, the TL's post-merge check
 - 2026-11-22: Rescoped by ADR-0006: `tool/verify.sh` is the single local gate (L0 to L3 plus coverage); e2e moved to T-0010; CI builds an Android APK as interim Android coverage (Q-009).
 - 2026-11-22: T-0009 done. Commands come from F-0004. Golden real-font setup added to scope.
 - 2026-11-22: The PO deferred Android (Q-009), so the CI Android APK build was dropped from scope.
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending._

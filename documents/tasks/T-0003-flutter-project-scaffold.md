@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Blocked (on Q-006 only) |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | crew: Engineer (worktree) |
 | Branch | `fleet/T-0003-flutter-scaffold` |
 | Created | 2026-11-22 |
@@ -48,6 +48,9 @@ Create a clean, reproducible Flutter project skeleton that every worktree builds
 ## Log
 - 2026-11-22: Created. Blocked on Q-001 and Q-002.
 - 2026-11-22: Q-001, Q-002 and Q-004 answered. Now waiting only on the PO stack (Q-006), which arrives next.
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending._

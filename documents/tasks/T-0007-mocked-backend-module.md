@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Backlog |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | crew: Engineer (worktree) |
 | Branch | `fleet/T-0007-mocked-backend` |
 | Created | 2026-11-22 |
@@ -32,6 +32,9 @@ Build the in-repo module that provides all of the app's data, behaving like a re
 
 ## Log
 - 2026-11-22: Created from the Q-003 answer and ADR-0005. Contract approach set by F-0003.
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending._

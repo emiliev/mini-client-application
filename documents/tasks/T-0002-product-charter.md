@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Review (with PO: Q-008) |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | Tech Lead |
 | Branch | TL branch → `main` (docs-only, ADR-0004) |
 | Created | 2026-11-22 |
@@ -31,6 +31,9 @@ Turn the Product Owner's direction into an accepted charter (vision, users, MVP 
 ## Log
 - 2026-11-22: Created. Blocked on Q-001 and Q-003.
 - 2026-11-22: PO answered Q-001 to Q-005 (Marvel app, iOS + Android, mocked backend, `com.emiliev.miniclinet`, GitHub). Drafted the charter with proposed MVP F1 to F5, roadmap phases 1 to 3 and glossary domain terms. Raised Q-007 (store release vs. Marvel IP) and Q-008 (confirm MVP). Status → In Review.
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending PO confirmation (Q-008)._

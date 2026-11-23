@@ -11,8 +11,13 @@ Only **direction-level** questions belong here. Technical questions are decided 
 | [Q-005](#q-005) | Repo hosting & integration policy | **Answered** 2026-11-22 | — | — |
 | [Q-006](#q-006) | Architecture & tech stack | **Answered** 2026-11-22: Tide Miniclient ("Lego") architecture, enterprise stack, Bazel | — | — |
 | [Q-007](#q-007) | Public store release vs. Marvel IP licensing | **Open** | Phase 3 (release) | build store-ready, but public release gated on licensing; placeholder art |
-| [Q-008](#q-008) | Confirm the MVP feature set | **Open** | T-0002 acceptance | proposed set F1 to F5 in the [charter](project/charter.md#mvp-features-proposed) |
+| [Q-008](#q-008) | Confirm the MVP feature set | **Superseded** 2026-11-23 by the 169-module catalogue (plan 01) | — | — |
 | [Q-009](#q-009) | Android toolchain on this Mac | **Answered** 2026-11-22: Android deferred | — | — |
+| [Q-010](#q-010) | LOC definition: does committed scaffolded source count? | **Open** | S2/S3 gates (plan R1) | Yes: committed first-party `.dart`, build-time generated code excluded, hand share reported |
+| [Q-011](#q-011) | Goal split for release AOT at 5 to 10M LOC | **Open** | Phase G sign-off (plan R27) | Dev loop must pass budget16 at every rung; release AOT must pass up to S3 and is reported at S4 |
+| [Q-012](#q-012) | budget16 fidelity: VM tool (L2) and a real 16 GB Mac (L3) | **Open** | Phase G sign-off | L1 (wired-memory ballast on this Mac) only; final numbers flagged as simulated |
+| [Q-013](#q-013) | GitHub access for upstream issues and PRs | **Open** | Filing upstream (D12, R11) | Issues and PRs drafted in `documents/upstream/`, patches kept in the in-repo queue |
+| [Q-014](#q-014) | Apple Developer team for device builds | **Open** | Device AOT builds on hardware | Device builds deferred; AOT measured via build-only targets |
 
 ---
 
@@ -70,3 +75,34 @@ This Mac has no Android SDK (`flutter doctor`: "Unable to locate Android SDK"), 
 
 **Default:** (c) until you choose.
 **Answer, 2026-11-22:** "Ignore Android for now, let's focus on testing with iOS." None of (a) to (c): Android verification is **deferred** entirely, including in CI. iOS is the only verified platform until the PO re-enables Android ([P-014](pending-work.md)).
+
+### Q-010
+**LOC definition.** Asked 2026-11-23. Hand-typing 500k to 1M lines would take hundreds of agent tasks. The plan builds verified exemplars by hand, then a generator (`tool/mcgen`) produces the rest as committed, reviewed source that the compiler, the analyzer and Bazel treat exactly like typed code. Build-time generated code (freezed, json, injectable, retrofit, l10n, BDD) is **not** counted. Reports always show the hand-written and scaffolded split. Is that acceptable for the 500k to 1M target?
+**Default:** yes, as above (plan R1, ADR-0009).
+**Answer:** _pending_
+
+### Q-011
+**Release AOT at 5 to 10M LOC.** Asked 2026-11-23. A release AOT build runs one whole-program compiler process (TFA, then `gen_snapshot`) whose memory grows with program size; no Bazel scheduling can make one process smaller. It may not fit 16 GB at 5 to 10M.
+**Proposed split:** the dev loop (simulator debug, tests, analysis, incremental) must pass budget16 at every rung. Release AOT must pass up to S3 (about 1M), and is measured and reported at S4. If one process exceeds 8 GiB, we escalate to the Dart SDK.
+**Default:** this split.
+**Answer:** _pending_
+
+### Q-012
+**budget16 fidelity.** Asked 2026-11-23. Simulation levels:
+- L1: wired-memory ballast on this 48 GB Mac
+- L2: a 16 GiB / 8 vCPU macOS VM (needs a VM tool installed)
+- L3: a real 16 GB Mac, or a cloud Mac
+
+May we install a VM tool, and is a 16 GB machine available for final sign-off?
+**Default:** L1 only; final numbers labelled "simulated".
+**Answer:** _pending_
+
+### Q-013
+**GitHub access for upstream work.** Asked 2026-11-23. Filing issues and PRs on `Mivr/ai_rules_dart` / `ai_rules_flutter` (and on injectable / lean_builder) needs `gh auth login` on this Mac, plus your OK to fork those repos under your account and to file in your name. Until then, everything is drafted in `documents/upstream/` and patches stay in our in-repo queue.
+**Default:** draft only.
+**Answer:** _pending_
+
+### Q-014
+**Apple Developer team.** Asked 2026-11-23. Running AOT builds on a physical iPhone needs a team and a provisioning profile.
+**Default:** device builds deferred; AOT is built and measured without installing.
+**Answer:** _pending_

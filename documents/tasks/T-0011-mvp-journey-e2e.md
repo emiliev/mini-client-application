@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Backlog |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | crew: Engineer; then crew: Verifier for visual sign-off |
 | Branch | `fleet/T-0011-mvp-journey-e2e` |
 | Created | 2026-11-22 |
@@ -22,6 +22,9 @@ _To be written as Given / When / Then once Q-008 confirms the feature set._
 
 ## Log
 - 2026-11-22: Created from the PO request: "end up with an e2e test at the end, or build the app for iOS and visually test it."
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending._

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification |
 | Owner | Tech Lead (orchestrating Researchers → Planners → Verifiers) |
 | Branch | TL branch → `main` (docs only) |
 | Created | 2026-11-22 |
@@ -32,5 +32,8 @@ A complete, verified plan for building an enterprise Marvel app that follows Tid
 - 2026-11-22: Wave 1 done. Four research docs are in `documents/research/` (about 26k words in total). Two agents were cut off by a usage-limit pause, but both had finished writing. Key facts: "feature flow" is Tide's `feature_flow` navigation utility (state management is flutter_bloc); l10n is absent from the articles; rules_dart curates freezed and json_serializable but not injectable, retrofit or bdd_widget_test, and its builder shim isn't consumer-visible; outline cutoff needs Dart 3.13 (Flutter 3.47.x); upstream perf benches are pure Dart (rules_dart) or reach 500k LOC (rules_flutter); AOT and JIT peak RSS at scale is unmeasured upstream.
 - 2026-11-22: Planning brief (`documents/plan/00-planning-brief.md`, decisions D1 to D12) written. Wave 2 dispatched with 5 planners: P1 architecture and catalogue, P2 generation and scale, P3 Bazel integration, P4 profiling, optimisation and upstream, P5 testing and BDD. The TL writes the delivery roadmap at assembly.
 
+- 2026-11-22/23: Wave 2 ran with interruptions (usage-limit pauses three times; agents resumed one at a time). All five sections were written: 01 (169 modules, ~634k LOC), 02 (mcgen, S0 to S4, edit corpus), 03 (pins, patch queue, codegen shims), 04 (KPIs, budget16, oracles, 23 experiments, upstream pipeline), 05 (Tide tiers, BDD AC tags, Bazel test targets).
+- 2026-11-23: TL assembled `documents/plan/README.md`: resolutions R1 to R27, roadmap Phases A to H, superseded tasks. Wrote ADR-0007 to ADR-0010 and raised Q-010 to Q-014. Wave 3 (V1 to V3) dispatched.
+
 ## Outcome
-_Pending._
+_Pending verification (AC4)._

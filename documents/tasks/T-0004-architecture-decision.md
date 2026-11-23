@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Blocked (on Q-006) |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | Tech Lead, with crew: Planner (and Researcher if needed) |
 | Branch | `fleet/T-0004-architecture` |
 | Created | 2026-11-22 |
@@ -32,6 +32,9 @@ Turn the PO's tech stack into recorded decisions and a documented structure, so 
 ## Log
 - 2026-11-22: Created. Blocked on T-0002.
 - 2026-11-22: Charter drafted. The PO will share the stack next (Q-006), which is now the blocker.
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending._

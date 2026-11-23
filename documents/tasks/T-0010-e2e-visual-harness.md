@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Blocked |
+| Status | Superseded 2026-11-23: see [BOARD](BOARD.md#superseded-by-the-enterprise-plan-2026-11-23) |
 | Owner | crew: Engineer (worktree) |
 | Verifier | crew: Verifier |
 | Branch | `fleet/T-0010-e2e-harness` |
@@ -41,6 +41,9 @@ Give every Engineer and Verifier one command that runs the app's e2e journeys on
 - 2026-11-22: Created from ADR-0006. Waiting on T-0003 and the T-0009 results.
 - 2026-11-22: T-0009 done. Script design is based on the proven F-0004 commands. Waiting only on T-0003.
 - 2026-11-22: The stack-independent runner script was split out into T-0012 (started now). T-0010 now wires the real app into it.
+
+## Superseded
+2026-11-23: replaced by the enterprise plan. See [plan/README.md §6](../plan/README.md#6-superseded-and-rescoped-tasks).
 
 ## Outcome
 _Pending._

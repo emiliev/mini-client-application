@@ -1,5 +1,7 @@
 # Project Charter — mini-client
 
+> **2026-11-23: superseded in scope by the [enterprise plan](../plan/README.md).** The product is now a 169-module enterprise Marvel app in Tide's architecture, used to stress-test the Bazel rules (Q-006). The proposed MVP F1 to F5 are part of the catalogue. Sections below are kept for history.
+
 - **Status:** Draft. Direction is confirmed (Q-001 to Q-005); the MVP feature set is proposed and awaits PO confirmation ([Q-008](../open-questions.md#q-008)). Finalised by [T-0002](../tasks/T-0002-product-charter.md).
 - **Product Owner:** Emil
 - **Tech Lead:** Claude (fleet lead session)
