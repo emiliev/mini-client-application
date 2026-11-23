@@ -1,5 +1,5 @@
-import 'mock_http.dart';
-import 'seeded_random.dart';
+import 'package:mc_mocked_backend/src/mock_http.dart';
+import 'package:mc_mocked_backend/src/seeded_random.dart';
 
 /// What an injected failure does (P5's failure vocabulary).
 sealed class FailureKind {
@@ -118,17 +118,25 @@ final class FailureRule {
   final bool Function(Map<String, String> query)? queryMatches;
 
   bool matches(MockRequest request) {
-    if (method != '*' && method != request.method) return false;
-    if (!_pathMatches(path, request.path)) return false;
+    if (method != '*' && method != request.method) {
+      return false;
+    }
+    if (!_pathMatches(path, request.path)) {
+      return false;
+    }
     return queryMatches?.call(request.query) ?? true;
   }
 
   static bool _pathMatches(String pattern, String path) {
     final p = pattern.split('/').where((s) => s.isNotEmpty).toList();
     final q = path.split('/').where((s) => s.isNotEmpty).toList();
-    if (p.length != q.length) return false;
+    if (p.length != q.length) {
+      return false;
+    }
     for (var i = 0; i < p.length; i++) {
-      if (!p[i].startsWith(':') && p[i] != q[i]) return false;
+      if (!p[i].startsWith(':') && p[i] != q[i]) {
+        return false;
+      }
     }
     return true;
   }

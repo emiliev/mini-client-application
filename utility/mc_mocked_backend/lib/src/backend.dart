@@ -5,12 +5,12 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
-import 'failure_rule.dart';
-import 'latency.dart';
-import 'mock_http.dart';
-import 'router.dart';
-import 'seeded_random.dart';
-import 'traffic.dart';
+import 'package:mc_mocked_backend/src/failure_rule.dart';
+import 'package:mc_mocked_backend/src/latency.dart';
+import 'package:mc_mocked_backend/src/mock_http.dart';
+import 'package:mc_mocked_backend/src/router.dart';
+import 'package:mc_mocked_backend/src/seeded_random.dart';
+import 'package:mc_mocked_backend/src/traffic.dart';
 
 /// A named bundle of failures and handler overrides, selected by config, a BDD
 /// step or the developer menu (plan 01 §5 "Scenarios").
@@ -190,11 +190,15 @@ final class MockBackend {
     final rules = [..._injected, ..._configured];
     for (var i = 0; i < rules.length; i++) {
       final active = rules[i];
-      if (!active.rule.matches(request)) continue;
+      if (!active.rule.matches(request)) {
+        continue;
+      }
       final call = active.calls + 1;
       final rng = _root.fork('failure').fork('$i:$call');
       active.calls = call;
-      if (active.rule.trigger.fires(call, rng)) return active.rule.kind;
+      if (active.rule.trigger.fires(call, rng)) {
+        return active.rule.kind;
+      }
     }
     return null;
   }
@@ -219,7 +223,9 @@ final class MockBackend {
     var delay = latencyForRequest(index);
 
     final failure = badRequest == null ? _pickFailure(request) : null;
-    if (failure is SlowFailure) delay += failure.delay;
+    if (failure is SlowFailure) {
+      delay += failure.delay;
+    }
 
     TrafficEntry entry(int? status, Duration duration, [String? error]) =>
         TrafficEntry(
@@ -357,7 +363,9 @@ final class MockBackend {
   Future<bool> _sleep(Duration d, Future<void>? cancel) {
     final done = Completer<bool>();
     final timer = Timer(d, () {
-      if (!done.isCompleted) done.complete(true);
+      if (!done.isCompleted) {
+        done.complete(true);
+      }
     });
     cancel?.then((_) {
       if (!done.isCompleted) {

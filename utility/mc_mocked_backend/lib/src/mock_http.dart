@@ -1,4 +1,4 @@
-import 'canonical_json.dart';
+import 'package:mc_mocked_backend/src/canonical_json.dart';
 
 /// A request as handlers see it: no Dio types.
 final class MockRequest {

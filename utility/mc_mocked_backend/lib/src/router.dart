@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'mock_http.dart';
+import 'package:mc_mocked_backend/src/mock_http.dart';
 
 /// What a handler may use besides the request.
 final class MockContext {
@@ -53,13 +53,17 @@ final class MockRoute {
     for (var i = 0; i < _segments.length; i++) {
       final a = _segments[i];
       final b = other._segments[i];
-      if (!a.startsWith(':') && !b.startsWith(':') && a != b) return false;
+      if (!a.startsWith(':') && !b.startsWith(':') && a != b) {
+        return false;
+      }
     }
     return true;
   }
 
   Map<String, String>? _match(String method, List<String> path) {
-    if (method != this.method || path.length != _segments.length) return null;
+    if (method != this.method || path.length != _segments.length) {
+      return null;
+    }
     final params = <String, String>{};
     for (var i = 0; i < path.length; i++) {
       final segment = _segments[i];
@@ -121,7 +125,9 @@ final class MockRouter {
     RouteMatch? best;
     for (final route in _routes) {
       final params = route._match(method.toUpperCase(), segments);
-      if (params == null) continue;
+      if (params == null) {
+        continue;
+      }
       if (best == null || route._literals > best.route._literals) {
         best = RouteMatch(route, params);
       }

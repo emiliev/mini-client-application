@@ -16,7 +16,9 @@ Directory _dir(String relative) {
     if (srcDir != null) '$srcDir/$workspace/$relative',
     relative,
   ]) {
-    if (Directory(candidate).existsSync()) return Directory(candidate);
+    if (Directory(candidate).existsSync()) {
+      return Directory(candidate);
+    }
   }
   throw StateError('$relative not found from ${Directory.current}');
 }
@@ -134,7 +136,9 @@ void main() {
       for (final image in images) {
         final bundled = resolver.resolve(image);
         for (final path in bundled.allDensityPaths) {
-          if (!seen.add(path)) continue;
+          if (!seen.add(path)) {
+            continue;
+          }
           expect(
             File('${media.path}/$path').existsSync(),
             isTrue,

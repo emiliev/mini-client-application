@@ -1,6 +1,5 @@
+import 'package:mc_fixtures_characters/src/data/universe.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
-
-import '../data/universe.dart';
 
 const int defaultLimit = 20;
 const int maxLimit = 100;
@@ -13,7 +12,9 @@ const int maxLimit = 100;
 /// is total and stable.
 MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
   final (:query, :error) = _parse(request);
-  if (query == null) return error!;
+  if (query == null) {
+    return error!;
+  }
 
   var matches = universe.byName;
   if (query.prefix.isNotEmpty) {
@@ -103,7 +104,9 @@ MockHandler characterDetail(CharacterUniverse universe) => (request, context) {
 /// answers a well-formed page with no results.
 MockResponse emptyPage(MockRequest request, MockContext context) {
   final (:query, :error) = _parse(request);
-  if (query == null) return error!;
+  if (query == null) {
+    return error!;
+  }
   return MockResponse.ok(
     pageEnvelope(
       offset: query.offset,
@@ -147,9 +150,13 @@ int? _intParam(
   int? max,
 }) {
   final raw = request.query[name];
-  if (raw == null) return fallback;
+  if (raw == null) {
+    return fallback;
+  }
   final value = parseDigits(raw);
-  if (value == null || value < min || (max != null && value > max)) return null;
+  if (value == null || value < min || (max != null && value > max)) {
+    return null;
+  }
   return value;
 }
 

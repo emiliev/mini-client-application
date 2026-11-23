@@ -1,7 +1,6 @@
+import 'package:mc_fixtures_characters/src/data/universe.dart';
+import 'package:mc_fixtures_characters/src/handlers/characters_handlers.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
-
-import 'data/universe.dart';
-import 'handlers/characters_handlers.dart';
 
 /// The characters domain: `GET /v1/characters` and `GET /v1/characters/:id`.
 /// Documented in `CONTRACT.md`; the same routes are listed in

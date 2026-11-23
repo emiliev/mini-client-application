@@ -9,6 +9,8 @@ Object? _sorted(Object? value) {
     final keys = value.keys.map((k) => k.toString()).toList()..sort();
     return {for (final k in keys) k: _sorted(value[k])};
   }
-  if (value is Iterable) return [for (final v in value) _sorted(v)];
+  if (value is Iterable) {
+    return [for (final v in value) _sorted(v)];
+  }
   return value;
 }

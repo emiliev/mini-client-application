@@ -18,7 +18,9 @@ final class SplitMix64 {
 
   /// A uniform integer in `[0, max)`.
   int nextInt(int max) {
-    if (max <= 0) throw ArgumentError.value(max, 'max', 'must be positive');
+    if (max <= 0) {
+      throw ArgumentError.value(max, 'max', 'must be positive');
+    }
     return (nextInt64() >>> 1) % max;
   }
 

@@ -1,4 +1,4 @@
-import 'api_image.dart';
+import 'package:mc_fixtures_media/src/api_image.dart';
 
 /// How many placeholder images each set bundles. Image ids run `000` to
 /// `count - 1`. Keep in step with `tool/generate_placeholders.dart`.

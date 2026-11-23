@@ -1,4 +1,4 @@
-import 'seeded_random.dart';
+import 'package:mc_mocked_backend/src/seeded_random.dart';
 
 /// How long a response takes (plan 01 §5 "Latency").
 ///
@@ -26,7 +26,9 @@ final class LatencyProfile {
 
   /// The delay for a request that draws from [rng].
   Duration delayFor(SplitMix64 rng) {
-    if (jitter == Duration.zero) return base;
+    if (jitter == Duration.zero) {
+      return base;
+    }
     return base + Duration(microseconds: rng.nextInt(jitter.inMicroseconds));
   }
 }

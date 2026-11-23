@@ -148,7 +148,9 @@ void main() {
           b['modified']! as String,
         );
         expect(byDate <= 0, isTrue);
-        if (byDate == 0) expect(a['id']! as int, lessThan(b['id']! as int));
+        if (byDate == 0) {
+          expect(a['id']! as int, lessThan(b['id']! as int));
+        }
       }
     });
   });

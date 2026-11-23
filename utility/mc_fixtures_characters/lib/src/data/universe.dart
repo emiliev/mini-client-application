@@ -1,7 +1,6 @@
+import 'package:mc_fixtures_characters/src/data/vocabulary.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
-
-import 'vocabulary.dart';
 
 /// How many characters the universe holds.
 const int characterCount = 1500;
