@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0017](T-0017-workspace-and-foundation.md) | Workspace, arch guard, `mc_prelude`, `mc_di` (P1-01, P1-02) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0017-foundation` |
 | [T-0014](T-0014-toolchain-bring-up.md) | Toolchain bring-up under Bazel (P3-01) | **In Progress** | Engineer (Opus) | — | `fleet/T-0014-toolchain` |
 
 ## Done
