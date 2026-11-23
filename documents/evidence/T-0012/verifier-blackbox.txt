@@ -1,0 +1,93 @@
+# T-0012 Verifier: black-box checks and pre-fix regression run
+
+## (b) bogus --device (timed with /usr/bin/time -p; 38 simctl device lines before and after)
+$ tool/e2e_ios.sh --task T-0012 --role verifier --project <vfix> --device "iPhone Bogus 3000"   -> exit 2
+e2e_ios: error: unknown --device 'iPhone Bogus 3000' (list them with: xcrun simctl list devicetypes)
+real 0.14
+user 0.08
+sys 0.04
+
+## (b2) device not supported by the runtime
+$ tool/e2e_ios.sh --task T-0012 --role verifier --project <vfix> --runtime com.apple.CoreSimulator.SimRuntime.iOS-18-2   -> exit 2
+e2e_ios: error: --device 'iPhone 17 Pro' is not supported by --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-18-2'
+real 0.15
+user 0.08
+sys 0.05
+
+## (c) two SIGINTs to the process group during flutter drive (evidence dir in the Verifier scratchpad)
+script pid=26295 pgid=26295
+sim mc-T-0012-verifier-26295 3F3FBB60-2102-4599-ADC8-4997EEF24415; exists before signal: 1
+runner procs with -d udid before: 2
+script alive 1 s after first SIGINT: yes
+second SIGINT sent to group
+exit rc=130 after 4 s
+sim still listed: 0
+runner procs with -d udid after: 0
+--- script output (non-indented lines) ---
+==> Task T-0012, role verifier, project /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/vfix
+==> Evidence dir: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/bb-c-evidence
+==> Creating simulator mc-T-0012-verifier-26295 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0012-verifier-26295
+SIMULATOR_UDID=3F3FBB60-2102-4599-ADC8-4997EEF24415
+SIMULATOR_CREATED_AT=1795428581
+==> Booting 3F3FBB60-2102-4599-ADC8-4997EEF24415
+==> Booted in 16 s
+==> Running target 1/1: integration_test/counter_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/counter_test.dart -d 3F3FBB60-2102-4599-ADC8-4997EEF24415
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/bb-c-evidence/e2e-counter_test.log
+e2e_ios: received SIGINT, cleaning up
+==> Stopping runner (pid 26674) and its child processes
+==> Deleted simulator mc-T-0012-verifier-26295 (3F3FBB60-2102-4599-ADC8-4997EEF24415)
+SIMULATOR_DELETED_AT=1795428606
+==> Summary: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/bb-c-evidence/e2e-summary.md
+--- summary target rows ---
+# E2E summary: T-0012 (verifier)
+| Result | **INTERRUPTED (SIGINT)** |
+| Target | Result | Duration | Log |
+| `integration_test/counter_test.dart` | INTERRUPTED | 9 s | [e2e-counter_test.log](e2e-counter_test.log) |
+--- log tail ---
+  Command: /usr/bin/arch -arm64e xcrun xcodebuild -clonedSourcePackagesDirPath /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/vfix/build/ios/SourcePackages -skipPackagePluginValidation -skipPackageSignatureValidation -list
+
+# interrupted by SIGINT
+
+## (d) tool/sim_cleanup.sh --dry-run on the default device set
+1) No mc- simulator present: 'No simulators named mc-* in the default device set.' exit 0, real 0.08 s; 34 device lines before and after.
+2) With a Verifier-created mc-T-0012-verifier-dryrun (Shutdown) present:
+   would delete: mc-T-0012-verifier-dryrun (36602690-3B08-4F51-A7D6-3A64E987D29F) [Shutdown]
+   Dry run: 1 simulator(s) named mc-* in the default device set; nothing deleted.
+   exit 0; the simulator was still listed afterwards; then the Verifier deleted it.
+
+## New regression tests against the pre-fix scripts (a7aefb8 tool/e2e_ios.sh + tool/sim_cleanup.sh, suite from 805b6ab)
+T-0012 e2e runner test suite
+  scripts run with: /bin/bash (3.2.57(1)-release)
+  device: iPhone 17 Pro, runtime: com.apple.CoreSimulator.SimRuntime.iOS-26-2
+  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.0WWTkS
+RUN  test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom
+    unit: cp and sips failures both return non-zero with no note
+    run with an unwritable screenshot: exit 0
+    ASSERTION FAILED: exit code when a screenshot can't be written (documented: 4): expected '4', got '0'
+FAIL test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom (20 s)
+    --- last lines of ac1-review-run.out ---
+RUN  test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans
+    SIGINT to the process group, then again 1 s later during teardown (mc-T-0012-engineer-27373)
+    exit 130
+    ASSERTION FAILED: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.0WWTkS/out/ac3-review.out: expected to contain 'Deleted simulator mc-T-0012-engineer-27373'
+FAIL test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans (18 s)
+    --- last lines of ac3-review.out ---
+RUN  test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset
+    engineer exit 0, verifier exit 0
+    ASSERTION FAILED: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.0WWTkS/out/ac4-review-engineer.out: expected to contain 'Evidence dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.0WWTkS/fake_repo/documents/evidence/T-0012/engineer'
+FAIL test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset (33 s)
+    --- last lines of ac4-review-engineer.out ---
+    --- last lines of ac4-review-verifier.out ---
+RUN  test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
+    fakebin-fail: exit 0
+    ASSERTION FAILED: cleanup exit code when listing fails (fakebin-fail): expected '3', got '0'
+FAIL test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails (0 s)
+    --- last lines of ac6-review-fakebin-fail.out ---
+
+Summary: 0 passed, 4 failed, 4 total in 71 s
+Failed: test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
+RESULT: FAIL
+suite cleanup: deleted leftover simulator mc-T-0012-engineer-27373 (A0C8A7E9-B6D8-4138-BE99-0FE698BC5CE2)
+(The pre-fix teardown also left 4 orphan processes tagged T0012-orphan-26984 and its e2e_ios.* temp dir; the Verifier killed and removed them.)

@@ -1,0 +1,29 @@
+# e2e_ios.sh: T-0012 verifier on mc-T-0012-verifier-9507 (E7A5407B-8A4D-4586-B879-974DD8728F91)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/vfix
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.p8tGZ9/screenshots/1-counter_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/counter_test.dart -d E7A5407B-8A4D-4586-B879-974DD8728F91
+
+Resolving dependencies...
+Downloading packages...
+  cupertino_icons 1.0.9 (2.0.0 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  meta 1.18.3 (1.19.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  vector_math 2.4.0 (2.4.4 available)
+Got dependencies!
+5 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           14.7s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62914/OYTD09Ctj8U=/
+VMServiceFlutterDriver: Isolate found with number: 2385716496492275
+VMServiceFlutterDriver: Isolate 2385716496492275 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: verifier: count to 3 then open settings
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: 00:02 +1: (tearDownAll)
+flutter: 00:02 +2: All tests passed!
+All tests passed.
+
+# exit code: 0
