@@ -42,6 +42,12 @@ final class _EchoDomain implements MockDomain {
         '/v1/boom',
         (request, context) => throw StateError('handler exploded'),
       )
+      ..get('/v1/random', (request, context) {
+        final rng = SplitMix64(context.seed).fork('random');
+        return MockResponse.ok({
+          'ids': [for (var i = 0; i < 5; i++) rng.nextInt(1000000)],
+        });
+      })
       ..get(
         '/v1/headers',
         (request, context) => MockResponse.ok(request.headers),
@@ -81,6 +87,34 @@ Future<List<int>> _bytes(Dio dio, String path) async {
 }
 
 void main() {
+  group('T-0018-AC1 seeded randomness', () {
+    Future<(List<int>, List<Duration>)> run(int seed) async {
+      final backend = MockBackend(
+        seed: seed,
+        latency: const LatencyProfile.realistic(),
+        domains: [_EchoDomain()],
+      );
+      final dio = backend.createDio();
+      final bytes = <int>[];
+      for (var i = 0; i < 3; i++) {
+        bytes.addAll(await _bytes(dio, '/v1/random'));
+      }
+      return (bytes, [for (final t in backend.recentTraffic) t.duration]);
+    }
+
+    test('T-0018-AC1: RNG-driven bodies and latency repeat for a seed and differ across seeds', () async {
+      final a = await run(42);
+      final b = await run(42);
+      expect(a.$1, b.$1);
+      expect(a.$2, b.$2);
+      final other = await run(43);
+      expect(other.$1, isNot(a.$1));
+      expect(other.$2, isNot(a.$2));
+      // The three calls within one backend are not all the same draw either.
+      expect(a.$2.toSet().length, greaterThan(1));
+    });
+  });
+
   group('T-0018-AC1 determinism', () {
     test(
       'T-0018-AC1: seed 42 gives byte-identical responses on two backends',

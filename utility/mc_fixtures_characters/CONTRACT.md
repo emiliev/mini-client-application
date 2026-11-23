@@ -65,7 +65,7 @@ An unknown or non-numeric id gives `404` with `{"error": {"code": "character_not
 |---|---|
 | Characters | 1,500, all names unique |
 | First name in order | `Amber Alchemist` |
-| `nameStartsWith=spi` | matches the aliases Spindle, Spirit, Spiral and Spire (150 characters); `Sparrow *` does not match |
+| `nameStartsWith=spi` | matches the aliases Spindle, Spirit, Spiral and Spire (152 characters); `Sparrow *` does not match |
 | Page 2 at 30 per page | `offset=30&limit=30` |
 | Names | do not depend on the seed; every other field does |
 

@@ -80,6 +80,25 @@ void main() {
       },
     );
 
+    test(
+      'T-0018-AC7: the documented nameStartsWith=spi count equals the real one',
+      () async {
+        final doc = File('${characters.path}/CONTRACT.md').readAsStringSync();
+        final documented = int.parse(
+          RegExp(r'nameStartsWith=spi`.*?\((\d+) characters\)')
+              .firstMatch(doc)!
+              .group(1)!,
+        );
+        final page = await snapshotBackend()
+            .createDio()
+            .get<Map<String, Object?>>(
+              '/v1/characters',
+              queryParameters: {'nameStartsWith': 'spi', 'limit': 1},
+            );
+        expect(page.data!['total'], documented);
+      },
+    );
+
     test('T-0018-AC7: CONTRACT.md documents every route and scenario', () {
       final doc = File('${characters.path}/CONTRACT.md').readAsStringSync();
       for (final route in CharactersMockDomain.routeManifest) {
