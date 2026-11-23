@@ -106,7 +106,7 @@ void main() {
         .where((r) => !fixtureNames.contains(r));
 
     expect(missing, isEmpty);
-    expect(_enabledRules(), hasLength(20));
+    expect(_enabledRules(), hasLength(21));
   });
 
   test('T-0017-AC3 each rule reports on its fixture', () async {

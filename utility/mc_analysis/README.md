@@ -36,6 +36,7 @@ article (tide-core research §4.1). Source `Plan 01` is plan 01 §2 row 5 / D-06
 | `unnecessary_nullable_for_final_variable_declarations` | Tide |
 | `unnecessary_overrides` | Tide |
 | `unnecessary_parenthesis` | Tide |
+| `unawaited_futures` | T-0014 workspace baseline (not in Tide's list) |
 | `strict-inference` (language flag) | Plan 01 D-06 |
 
 Also carried over from Tide: `strict-casts`, `strict-raw-types`, the error
@@ -46,13 +47,14 @@ exclude `**/lib/src/l10n/*_l10n*.dart`.
 
 ## Deviations from Tide's 22 rules
 
-Two Tide rules are left out because they cannot do their job on the pinned
-Dart 3.13.5 (F-0013):
-
-- `unnecessary_await_in_return`: deprecated; the analyzer warns that it
-  "shouldn't be enabled" on every project that includes this file.
-- `package_prefixed_library_names`: enabled, it reports nothing on a
-  mismatched `library` name, so AC3 cannot be met.
+- `unnecessary_await_in_return` is left out: it is deprecated on Dart 3.13.5, and
+  the analyzer warns on every project that enables it ("shouldn't be enabled").
+  It still reports (F-0013).
+- `package_prefixed_library_names` is left out: enabled, it reports nothing on a
+  mismatched `library` name, so AC3 cannot be met (F-0013).
+- The T-0014 workspace baseline also had `prefer_const_constructors` and
+  `prefer_final_locals`. They are not in Tide's list or plan 01 D-06, so they are
+  not carried over; `unawaited_futures` is, because it catches dropped futures.
 
 ## Other deviations
 

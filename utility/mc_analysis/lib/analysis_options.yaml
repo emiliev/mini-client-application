@@ -40,3 +40,4 @@ linter:
     - unnecessary_nullable_for_final_variable_declarations
     - unnecessary_overrides
     - unnecessary_parenthesis
+    - unawaited_futures # kept from the T-0014 workspace baseline, not Tide
