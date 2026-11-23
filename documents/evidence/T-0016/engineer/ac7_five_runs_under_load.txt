@@ -1,0 +1,10 @@
+run 1 load 8.65 6.50 5.95
+OK
+run 2 load 7.17 6.34 5.91
+OK
+run 3 load 6.65 6.29 5.91
+OK
+run 4 load 6.65 6.32 5.93
+OK
+run 5 load 6.11 6.23 5.91
+OK

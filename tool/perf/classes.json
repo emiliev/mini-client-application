@@ -1,0 +1,8 @@
+{"version": 1, "classes": [
+ ["bazel-server", ["A-server.jar"]],
+ ["gen_snapshot", ["gen_snapshot"]],
+ ["kernel_worker", ["DartKernel", "kernel_worker"]],
+ ["flutter_tester", ["flutter_tester"]],
+ ["native", ["swift-frontend", "clang", "/ld"]],
+ ["wrapper", ["sandbox-exec", "process-wrapper"]]
+]}

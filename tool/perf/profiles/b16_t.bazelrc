@@ -1,0 +1,8 @@
+# Profile B16 arm T (plan 04 §7.2). Initial values; X-08, X-11 and X-15 refine them.
+startup --host_jvm_args=-Xmx3g
+build --local_resources=memory=9000
+build --local_resources=cpu=14
+build --local_test_jobs=4
+build --experimental_shrink_worker_pool
+build --experimental_total_worker_memory_limit_mb=3072
+build --loading_phase_threads=auto
