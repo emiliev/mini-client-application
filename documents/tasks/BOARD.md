@@ -5,10 +5,9 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0021](T-0021-app-shell.md) | App shell: `app_core` + `app/mini_client` on the simulator (P1-16) | **Ready** | Engineer (Opus) | T-0020 | — |
-| [T-0022](T-0022-feature-flow-and-bloc-kit.md) | `mc_bloc_kit` + `mc_feature_flow` (P1-04) | **Ready** | Engineer (Sonnet) | T-0020 | — |
-| [T-0023](T-0023-api-client-and-errors.md) | `mc_api_errors` + `mc_api_client` (P1-05 subset) | **Ready** | Engineer (Sonnet) | T-0020 | — |
-| [T-0020](T-0020-config-monitoring-eventbus-storage.md) | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage` (P1-03) | **In Progress** | Engineer (Sonnet) | T-0017 | `fleet/T-0020-core-utils` |
+| [T-0021](T-0021-app-shell.md) | App shell: `app_core` + `app/mini_client` on the simulator (P1-16) | **In Progress** | Engineer (Opus) | T-0020 | — |
+| [T-0022](T-0022-feature-flow-and-bloc-kit.md) | `mc_bloc_kit` + `mc_feature_flow` (P1-04) | **In Progress** | Engineer (Sonnet) | T-0020 | — |
+| [T-0023](T-0023-api-client-and-errors.md) | `mc_api_errors` + `mc_api_client` (P1-05 subset) | **In Progress** | Engineer (Sonnet) | T-0020 | — |
 
 ## Done
 | ID | Title | Result |
@@ -17,6 +16,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0020](T-0020-config-monitoring-eventbus-storage.md) | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage` (P1-03) | merged; Verifier [PASS](../evidence/T-0020/verification-report.md); F-0016 |
 | [T-0018](T-0018-mocked-backend-and-character-fixtures.md) | `mc_mocked_backend` + character and media fixtures (P1-06, P1-07) | merged; Verifier [PASS](../evidence/T-0018/verification-report.md); F-0015 |
 | [T-0019](T-0019-design-system-foundation.md) | Design-system foundation `mc_ds_*` (P1-11) | merged; Verifier [PASS](../evidence/T-0019/verification-report.md); F-0014 |
 | [T-0017](T-0017-workspace-and-foundation.md) | Workspace, `mc_arch_check`, `mc_analysis`, `mc_prelude`, `mc_di` (P1-01, P1-02) | merged; Verifier [PASS](../evidence/T-0017/verification-report.md); F-0013 |

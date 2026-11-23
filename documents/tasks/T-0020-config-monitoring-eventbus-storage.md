@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Review |
+| Status | Done (merged 2026-11-23; Verifier PASS `17565c6`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0020-core-utils` (from `origin/main` `1429119`+) |
@@ -51,3 +51,8 @@ Root changes: `pubspec.yaml` workspace list (+4 entries); `pubspec.lock` unchang
 - `mc_storage`: temp file + atomic rename, writes and deletes serialised per key, `read` catches `PathNotFoundException` (no `existsSync`), `delete` is async, key file names are hex. Tests under AC4: overlapping writes, read racing delete, delete, case-distinct keys, write failure.
 - Nits: `no_flutter_test` also matches `export`; `bundled_config_test` skips outside Bazel; storage tests assert write results.
 - Re-run uncached: `//utility/...` 11/11, e2e bundled test, lint and arch_check OK.
+
+## Merge (TL)
+- 2026-11-23: First Verifier pass PASS (`23a06fd`), with one medium issue (cascade publish). `/code-review` found 5 important issues (cascade publish, publish after dispose, monitoring sink isolation, atomic storage writes, read/delete race), fixed in `4dd6941`. Rebased onto main as `320730c`. Re-verify PASS `17565c6`. The TL merged `--no-ff`; on the merge result `test --nocache_test_results //...` passed 27/27, lint was clean and `mc_arch_check` reported OK.
+- Note: on resume, the Engineer once ran in the TL worktree (protocol fixed, no damage).
+- Follow-ups: P-037 (multi-store same-directory write races; long keys > ~123 bytes), P-038 (`setKey`, in-memory store, `mc_media`).

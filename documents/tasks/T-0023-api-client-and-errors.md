@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0020 merges) |
+| Status | In Progress |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0023-api-client` |

@@ -18,3 +18,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0017](T-0017/verification-report.md) | PASS (re-verified after first FAIL) | Arch guard violation fixtures, Result/DI semantics |
 | [T-0019](T-0019/verification-report.md) | PASS (re-verified after first FAIL) | Design system: real-font goldens across 4 themes and 2 text scales, semantics |
 | [T-0018](T-0018/verification-report.md) | PASS (re-verified after review fixes) | Mocked backend: black-box checks, mutation checks |
+| [T-0020](T-0020/verification-report.md) | PASS (re-verified after review fixes) | Config env flag, monitoring sinks, event bus, atomic storage |
