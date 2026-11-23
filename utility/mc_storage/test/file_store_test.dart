@@ -91,4 +91,15 @@ void main() {
       expect(failure, isA<StorageFailure>());
     },
   );
+
+  test('T-0020-AC4 a directory at the key path is a typed failure', () async {
+    final store = FileStore(dir);
+    await store.write('k', 1);
+    final file = dir.listSync().whereType<File>().single;
+    file.deleteSync();
+    Directory(file.path).createSync();
+    final failure = _failureOf(await store.read('k'));
+    expect(failure, isA<StorageFailure>());
+    expect(failure!.key, 'k');
+  });
 }
