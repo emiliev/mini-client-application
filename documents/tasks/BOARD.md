@@ -5,6 +5,9 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0021](T-0021-app-shell.md) | App shell: `app_core` + `app/mini_client` on the simulator (P1-16) | **Ready** | Engineer (Opus) | T-0020 | — |
+| [T-0022](T-0022-feature-flow-and-bloc-kit.md) | `mc_bloc_kit` + `mc_feature_flow` (P1-04) | **Ready** | Engineer (Sonnet) | T-0020 | — |
+| [T-0023](T-0023-api-client-and-errors.md) | `mc_api_errors` + `mc_api_client` (P1-05 subset) | **Ready** | Engineer (Sonnet) | T-0020 | — |
 | [T-0020](T-0020-config-monitoring-eventbus-storage.md) | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage` (P1-03) | **In Progress** | Engineer (Sonnet) | T-0017 | `fleet/T-0020-core-utils` |
 
 ## Done
