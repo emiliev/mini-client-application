@@ -9,6 +9,7 @@ dart_library(
     visibility = ["//visibility:public"],
     deps = [
         "//utility/mc_api_errors",
+        "//utility/mc_config",
         "//utility/mc_di",
         "//utility/mc_mocked_backend",
         "//utility/mc_monitoring",
@@ -27,6 +28,7 @@ dart_test(
     deps = [
         ":mc_api_client",
         "//utility/mc_api_errors",
+        "//utility/mc_config",
         "//utility/mc_di",
         "//utility/mc_fixtures_characters",
         "//utility/mc_mocked_backend",

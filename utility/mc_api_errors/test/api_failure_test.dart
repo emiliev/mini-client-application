@@ -50,6 +50,10 @@ void main() {
     expect(ApiFailure.from(_bad(401)), isA<ApiUnauthorized>());
     expect(ApiFailure.from(_bad(404)), isA<ApiNotFound>());
     expect(
+      ApiFailure.from(_bad(422)),
+      isA<ApiClientError>().having((f) => f.status, 'status', 422),
+    );
+    expect(
       ApiFailure.from(_bad(503)),
       isA<ApiServer>().having((f) => f.status, 'status', 503),
     );

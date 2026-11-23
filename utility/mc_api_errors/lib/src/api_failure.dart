@@ -26,6 +26,8 @@ sealed class ApiFailure implements Exception {
   const factory ApiFailure.offline([String message]) = ApiOffline;
   const factory ApiFailure.unauthorized([String message]) = ApiUnauthorized;
   const factory ApiFailure.notFound([String message]) = ApiNotFound;
+  const factory ApiFailure.clientError(int status, [String message]) =
+      ApiClientError;
   const factory ApiFailure.server(int status, [String message]) = ApiServer;
   const factory ApiFailure.malformed([String message]) = ApiMalformed;
   const factory ApiFailure.unexpected([String message]) = ApiUnexpected;
@@ -53,6 +55,9 @@ sealed class ApiFailure implements Exception {
         if (status >= 500) {
           return ApiServer(status, detail);
         }
+        if (status >= 400) {
+          return ApiClientError(status, detail);
+        }
         return ApiUnexpected('HTTP $status: $detail');
       case DioExceptionType.cancel:
         return ApiUnexpected('Request cancelled: $detail');
@@ -66,7 +71,9 @@ sealed class ApiFailure implements Exception {
         if (inner is ApiFailure) {
           return inner;
         }
-        return ApiUnexpected(inner == null ? detail : '$inner');
+        return ApiUnexpected(
+          inner == null ? detail : '${inner.runtimeType}: $inner',
+        );
     }
   }
 
@@ -88,6 +95,13 @@ final class ApiUnauthorized extends ApiFailure {
 
 final class ApiNotFound extends ApiFailure {
   const ApiNotFound([super.message = 'Not found']);
+}
+
+/// Any 4xx other than 401 and 404 (400, 403, 409, 422, 429, ...).
+final class ApiClientError extends ApiFailure {
+  const ApiClientError(this.status, [super.message = 'Request rejected']);
+
+  final int status;
 }
 
 final class ApiServer extends ApiFailure {

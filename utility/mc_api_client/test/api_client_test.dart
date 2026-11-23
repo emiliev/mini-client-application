@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
+import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -16,7 +17,7 @@ MockBackend _backend({List<FailureRule> failures = const []}) => MockBackend(
 Dio _dio(MockBackend backend, {Monitoring? monitoring}) => createApiDio(
   adapter: backend.adapter,
   retryDelay: Duration.zero,
-  monitoring: monitoring,
+  monitoring: monitoring == null ? null : () => monitoring,
 );
 
 ApiFailure _failureOf(Result<Object?, ApiFailure> r) =>
@@ -57,6 +58,12 @@ void main() {
       expect(
         await run(const FailureKind.http(500)),
         isA<ApiServer>().having((f) => f.status, 'status', 500),
+      );
+    });
+    test('T-0023-AC1: other 4xx is a client error with its status', () async {
+      expect(
+        await run(const FailureKind.http(403)),
+        isA<ApiClientError>().having((f) => f.status, 'status', 403),
       );
     });
     test('T-0023-AC1: malformed body', () async {
@@ -120,6 +127,97 @@ void main() {
       expect(backend.recentTraffic, hasLength(1));
     });
 
+    group('T-0023-AC2 request bodies and cancellation', () {
+      MockBackend always503() => _backend(
+        failures: [
+          const FailureRule('PUT', '/v1/characters', FailureKind.http(503)),
+        ],
+      );
+
+      test(
+        'T-0023-AC2: a PUT with FormData is retried with a fresh copy',
+        () async {
+          final backend = always503();
+          final dio = _dio(backend);
+          final form = FormData.fromMap({
+            'name': 'x',
+            'file': MultipartFile.fromString('abc', filename: 'a.txt'),
+          });
+          final result = await apiCall<Object?>(
+            () => dio.put<Object?>('/v1/characters', data: form),
+          );
+          // The caller sees the real failure, not a "finalized" StateError.
+          expect(
+            _failureOf(result),
+            isA<ApiServer>().having((f) => f.status, 'status', 503),
+          );
+          expect(backend.recentTraffic, hasLength(3));
+        },
+      );
+
+      test('T-0023-AC2: a PUT with a stream body is not retried', () async {
+        final backend = always503();
+        final dio = _dio(backend);
+        final result = await apiCall<Object?>(
+          () => dio.put<Object?>(
+            '/v1/characters',
+            data: Stream.fromIterable([
+              [1, 2, 3],
+            ]),
+            options: Options(headers: {Headers.contentLengthHeader: 3}),
+          ),
+        );
+        expect(
+          _failureOf(result),
+          isA<ApiServer>().having((f) => f.status, 'status', 503),
+        );
+        expect(backend.recentTraffic, hasLength(1));
+      });
+
+      test('T-0023-AC2: a receive timeout is not retried', () async {
+        final backend = _backend(
+          failures: [
+            const FailureRule(
+              'GET',
+              '/v1/characters',
+              FailureKind.slow(Duration(seconds: 5)),
+            ),
+          ],
+        );
+        final dio = _dio(backend);
+        final result = await apiCall<Object?>(
+          () => dio.get<Object?>(
+            '/v1/characters',
+            options: Options(receiveTimeout: const Duration(milliseconds: 20)),
+          ),
+        );
+        expect(_failureOf(result), isA<ApiTimeout>());
+        expect(backend.recentTraffic, hasLength(1));
+      });
+
+      test(
+        'T-0023-AC2: cancelling during the backoff stops the retries',
+        () async {
+          final backend = always503();
+          final dio = createApiDio(
+            adapter: backend.adapter,
+            retryDelay: const Duration(seconds: 30),
+          );
+          final token = CancelToken();
+          final call = apiCall<Object?>(
+            () => dio.put<Object?>('/v1/characters', cancelToken: token),
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 50));
+          token.cancel('stop');
+          final failure = _failureOf(
+            await call.timeout(const Duration(seconds: 5)),
+          );
+          expect(failure.message, contains('cancel'));
+          expect(backend.recentTraffic, hasLength(1));
+        },
+      );
+    });
+
     test('T-0023-AC2: each attempt is logged to monitoring once', () async {
       final sink = InMemorySink();
       final backend = _backend(
@@ -134,17 +232,43 @@ void main() {
   });
 
   group('T-0023-AC4 DI', () {
+    const config =
+        '{"env":"dev","backend":{"seed":1,"latencyMs":0,"scenario":"happy"},'
+        '"apiBaseUrl":"https://api.test","build":"1"}';
     setUp(resetDIContainer);
+
+    test('T-0023-AC4: an explicit baseUrl overrides the config', () async {
+      await initializeDIContainer([
+        ApiClientDIInitializer(
+          backend: _backend(),
+          baseUrl: 'https://override.test',
+          retryDelay: Duration.zero,
+        ),
+      ]);
+      expect(diContainer<Dio>().options.baseUrl, 'https://override.test');
+    });
+
+    test('T-0023-AC4: a missing Monitoring fails the request loudly', () async {
+      await initializeDIContainer([
+        ApiClientDIInitializer(backend: _backend(), baseUrl: 'https://x.test'),
+      ]);
+      await expectLater(
+        diContainer<Dio>().get<Object?>('/v1/characters'),
+        throwsA(anything),
+      );
+    });
 
     test(
       'T-0023-AC4: one shared Dio on the mocked backend returns page 1',
       () async {
         final backend = _backend();
         await initializeDIContainer([
+          ConfigDIInitializer(() async => config),
           MonitoringDIInitializer(sinks: [InMemorySink()]),
           ApiClientDIInitializer(backend: backend),
         ]);
         final dio = diContainer<Dio>();
+        expect(dio.options.baseUrl, 'https://api.test');
         expect(identical(dio, diContainer<Dio>()), isTrue);
         expect(dio.httpClientAdapter, same(backend.adapter));
 

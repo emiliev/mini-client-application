@@ -25,12 +25,14 @@ class AppConfig {
   const AppConfig({
     required this.env,
     required this.backend,
+    required this.apiBaseUrl,
     required this.build,
   });
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
     env: json['env'] as String,
     backend: BackendConfig.fromJson(json['backend'] as Map<String, dynamic>),
+    apiBaseUrl: json['apiBaseUrl'] as String,
     build: json['build'] as String,
   );
 
@@ -40,5 +42,8 @@ class AppConfig {
 
   final String env;
   final BackendConfig backend;
+
+  /// Base URL of the API. The mocked backend never contacts it.
+  final String apiBaseUrl;
   final String build;
 }

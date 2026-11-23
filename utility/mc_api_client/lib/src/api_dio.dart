@@ -8,7 +8,7 @@ import 'package:mc_monitoring/mc_monitoring.dart';
 const String defaultApiBaseUrl = 'https://mock.mini-client.invalid';
 
 /// Builds the shared [Dio]: base URL, timeouts, one log line per attempt
-/// (when [monitoring] is given) and retry for idempotent requests.
+/// (when [monitoring] is given; it is resolved on each request) and retry for idempotent requests.
 ///
 /// Interceptor order matters: logging sits before retry so each attempt is
 /// logged once, the first by the outer call and the rest by the retries.
@@ -19,7 +19,7 @@ Dio createApiDio({
   Duration receiveTimeout = const Duration(seconds: 30),
   int retries = 2,
   Duration retryDelay = const Duration(milliseconds: 200),
-  Monitoring? monitoring,
+  Monitoring Function()? monitoring,
 }) {
   final dio = Dio(
     BaseOptions(

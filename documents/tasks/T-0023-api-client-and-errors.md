@@ -40,7 +40,13 @@ Implemented by the Engineer; gates pass (`test //...` 31/31, lint, `mc_arch_chec
 | AC4 | `api_client_test` "T-0023-AC4: ..." |
 | AC5 | the gates above plus `no_flutter_test` in both packages ("T-0023-AC5") |
 
+Review fixes (2nd commit):
+- Retry: FormData cloned per attempt, stream bodies and receive timeouts not retried, backoff raced against `CancelToken` (AC2 tests "request bodies and cancellation").
+- `ApiClientError(status)` for other 4xx (AC1 tests in both packages).
+- `AppConfig.apiBaseUrl` added (`mc_config`, `tool/bazel/config/*.json`, `app_config_test`); `ApiClientDIInitializer` reads it, with an `baseUrl` override (AC4 tests). Monitoring is resolved per request; a missing one fails the request (AC4 test).
+- `dio: ^5.11.0`; `ApiUnexpected` message format `Type: message`; `mc_mocked_backend` made pure Dart with `dart_test`.
+
 Decisions and gaps:
-- `AppConfig` has no base-URL field, so `ApiClientDIInitializer` takes `baseUrl` (default the mock's `.invalid` host) and does not depend on `mc_config`. The app passes in a `MockBackend` built from `AppConfig`.
-- Other 4xx statuses map to `ApiUnexpected('HTTP <n>: ...')`; `ApiServer` carries the status.
-- No tests were deleted, skipped or weakened; no `ignore:` added.
+- `MockBackend` is passed in by the app, built from `AppConfig`.
+- `mc_fixtures_characters` still uses `flutter_test` and `dio: ^5.9.0` (follow-up).
+- No tests were deleted, skipped or weakened (mocked_backend tests only changed their test import); no `ignore:` added.

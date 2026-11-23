@@ -8,9 +8,10 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
-  dio: ^5.9.0
+  dio: ^5.11.0
   get_it: ^8.0.0
   mc_api_errors: any
+  mc_config: any
   mc_di: any
   mc_mocked_backend: any
   mc_monitoring: any

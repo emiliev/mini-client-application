@@ -1,7 +1,5 @@
-# T-0018 (P1-06): the data-free mocked-backend engine. Pure Dart; tests use
-# flutter_test because `package:test` is not in the root lock (F-0015).
-load("@rules_dart//dart:defs.bzl", "dart_library")
-load("@rules_flutter//flutter:defs.bzl", "flutter_test")
+# T-0018 (P1-06): the data-free mocked-backend engine. Pure Dart (F-0015, F-0017).
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -15,7 +13,7 @@ dart_library(
     deps = ["@pub_deps//:dio"],
 )
 
-flutter_test(
+dart_test(
     name = "mocked_backend_test",
     package_name = "mc_mocked_backend",
     language_version = _LANG,
@@ -25,6 +23,6 @@ flutter_test(
         ":mc_mocked_backend",
         "@pub_deps//:dio",
         "@pub_deps//:fake_async",
-        "@pub_deps//:flutter_test",
+        "@pub_deps//:test",
     ],
 )
