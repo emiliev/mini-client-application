@@ -1,0 +1,49 @@
+# T-0023 (P1-05): the shared Dio, wired to the mocked backend. Pure Dart (R15).
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_api_client",
+    package_name = "mc_api_client",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//utility/mc_api_errors",
+        "//utility/mc_di",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_prelude",
+        "@pub_deps//:dio",
+        "@pub_deps//:get_it",
+    ],
+)
+
+dart_test(
+    name = "api_client_test",
+    size = "small",
+    package_name = "mc_api_client",
+    language_version = "3.13",
+    main = "test/api_client_test.dart",
+    deps = [
+        ":mc_api_client",
+        "//utility/mc_api_errors",
+        "//utility/mc_di",
+        "//utility/mc_fixtures_characters",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_prelude",
+        "@pub_deps//:dio",
+        "@pub_deps//:test",
+    ],
+)
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_api_client",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

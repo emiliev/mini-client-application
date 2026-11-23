@@ -1,0 +1,35 @@
+# T-0023 (P1-05): the typed failure model. Pure Dart (R15).
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_api_errors",
+    package_name = "mc_api_errors",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = ["@pub_deps//:dio"],
+)
+
+dart_test(
+    name = "api_failure_test",
+    size = "small",
+    package_name = "mc_api_errors",
+    language_version = "3.13",
+    main = "test/api_failure_test.dart",
+    deps = [
+        ":mc_api_errors",
+        "@pub_deps//:dio",
+        "@pub_deps//:test",
+    ],
+)
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_api_errors",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

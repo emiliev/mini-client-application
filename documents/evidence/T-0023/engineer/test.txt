@@ -1,0 +1,42 @@
+INFO: Invocation ID: c457edae-746c-4488-a665-d0d218d1e5e9
+Computing main repo mapping: 
+
+INFO: Analyzed 66 targets (57 packages loaded, 4335 targets configured, 550 aspect applications).
+INFO: Found 35 targets and 31 test targets...
+INFO: Elapsed time: 4.106s, Critical Path: 2.93s
+INFO: 5828 processes: 425 disk cache hit, 5367 internal, 32 darwin-sandbox, 4 worker.
+INFO: Build completed successfully, 5828 total actions
+//spike/hello:widget_test                                                PASSED in 0.8s
+//tool/mc_arch_check:arch_check_test                                     PASSED in 0.9s
+//utility/mc_analysis:lints_test                                         PASSED in 2.9s
+//utility/mc_api_client:api_client_test                                  PASSED in 0.9s
+//utility/mc_api_client:no_flutter_test                                  PASSED in 0.3s
+//utility/mc_api_errors:api_failure_test                                 PASSED in 0.3s
+//utility/mc_api_errors:no_flutter_test                                  PASSED in 0.4s
+//utility/mc_config:app_config_test                                      PASSED in 0.3s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.3s
+//utility/mc_di:di_container_test                                        PASSED in 0.5s
+//utility/mc_ds_buttons:buttons_test                                     PASSED in 0.8s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.0s
+//utility/mc_ds_feedback:feedback_test                                   PASSED in 0.7s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.3s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.5s
+//utility/mc_ds_layout:layout_test                                       PASSED in 0.6s
+//utility/mc_ds_testing:fonts_test                                       PASSED in 0.7s
+//utility/mc_ds_theme:golden_test                                        PASSED in 1.2s
+//utility/mc_ds_theme:theme_test                                         PASSED in 0.5s
+//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.3s
+//utility/mc_event_bus:event_bus_test                                    PASSED in 0.4s
+//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.3s
+//utility/mc_fixtures_characters:characters_test                         PASSED in 0.9s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.9s
+//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.6s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 2.3s
+//utility/mc_monitoring:monitoring_test                                  PASSED in 0.4s
+//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.3s
+//utility/mc_prelude:result_test                                         PASSED in 0.5s
+//utility/mc_storage:file_store_test                                     PASSED in 0.6s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.3s
+
+Executed 31 out of 31 tests: 31 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

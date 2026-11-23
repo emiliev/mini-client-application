@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Review |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0023-api-client` |
@@ -30,4 +30,17 @@ Tide's `api_client` utility: the shared Dio instance that every feature's retrof
 - 2026-11-23: Created.
 
 ## Outcome
-_Pending._
+Implemented by the Engineer; gates pass (`test //...` 31/31, lint, `mc_arch_check`). Evidence: `documents/evidence/T-0023/engineer/`. Finding: F-0017.
+
+| AC | Test |
+|---|---|
+| AC1 | `mc_api_client:api_client_test` "T-0023-AC1: ..." (six, through `mc_mocked_backend` failure rules); `mc_api_errors:api_failure_test` (direct mapping) |
+| AC2 | `api_client_test` "T-0023-AC2: ..." (503 GET = 3 attempts; recovery on 3rd; POST once; 404 not retried; one log per attempt) |
+| AC3 | `api_failure_test` "T-0023-AC3: ..." |
+| AC4 | `api_client_test` "T-0023-AC4: ..." |
+| AC5 | the gates above plus `no_flutter_test` in both packages ("T-0023-AC5") |
+
+Decisions and gaps:
+- `AppConfig` has no base-URL field, so `ApiClientDIInitializer` takes `baseUrl` (default the mock's `.invalid` host) and does not depend on `mc_config`. The app passes in a `MockBackend` built from `AppConfig`.
+- Other 4xx statuses map to `ApiUnexpected('HTTP <n>: ...')`; `ApiServer` carries the status.
+- No tests were deleted, skipped or weakened; no `ignore:` added.

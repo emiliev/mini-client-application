@@ -1,0 +1,22 @@
+name: mc_api_client
+description: The shared Dio (timeouts, logging, retry), its DI initializer and a Result call helper (T-0023).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  dio: ^5.9.0
+  get_it: ^8.0.0
+  mc_api_errors: any
+  mc_di: any
+  mc_mocked_backend: any
+  mc_monitoring: any
+  mc_prelude: any
+
+dev_dependencies:
+  mc_analysis: any
+  mc_fixtures_characters: any
+  test: ^1.25.0
