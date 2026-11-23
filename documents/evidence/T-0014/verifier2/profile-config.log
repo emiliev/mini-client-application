@@ -1,0 +1,18 @@
+ERROR: Error while creating profile file: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a43430bcd5c70bf88/%workspace%/bazel-mc-profile.json.gz (No such file or directory)
+INFO: Invocation ID: a98880b9-e712-404f-88b2-f0e86a329079
+ERROR: Error while creating memory profile file: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a43430bcd5c70bf88/%workspace%/bazel-mc-mem.txt (No such file or directory)
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //spike/greeting:greeting (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/greeting:greeting (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/greeting:greeting (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+Aspect @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze of //spike/greeting:greeting up-to-date:
+  bazel-bin/spike/greeting/greeting.dart_analyzer_summary.sum
+INFO: Elapsed time: 0.183s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+build exit=0
+-rw-r--r--@ 1 emililiev  staff  66 Nov 23 23:01 bazel-mc-exec.log.zst

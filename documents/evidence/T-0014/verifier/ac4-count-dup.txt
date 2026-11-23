@@ -1,0 +1,38 @@
+## Actions per mnemonic and configuration
+DartAnalyze	darwin_arm64-fastbuild	1
+DartAnalyzerSummary	darwin_arm64-fastbuild	30
+DartAnalyzerSummary	ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e	4
+DartCodegen	darwin_arm64-fastbuild	3
+DartCodegen	ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e	3
+DartFormat	darwin_arm64-fastbuild	1
+DartKernel	darwin_arm64-fastbuild	32
+DartKernel	darwin_arm64-opt-exec	48
+DartKernel	darwin_arm64-opt-exec-ST-af20dd4d9e84	6
+DartKernel	ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e	15
+DartKernelLink	darwin_arm64-fastbuild	2
+DartKernelLink	darwin_arm64-opt-exec	3
+DartKernelLink	ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e	1
+
+## Exact duplicates across configurations (mnemonic, target, output minus config)
+DartKernel	distinct=100	duplicated=1
+    //spike/greeting:greeting  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+DartCodegen	distinct=3	duplicated=3
+    //spike/hello:counter_state_freezed  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+    //spike/hello:routes_g  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+    //spike/hello:routes_go_router_part  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+DartAnalyzerSummary	distinct=30	duplicated=4
+    @@ai_rules_flutter++flutter+pub_deps__collection//:collection  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+    @@ai_rules_flutter++flutter+pub_deps__freezed_annotation//:freezed_annotation  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+    @@ai_rules_flutter++flutter+pub_deps__json_annotation//:json_annotation  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+    @@ai_rules_flutter++flutter+pub_deps__meta//:meta  ['darwin_arm64-fastbuild', 'ios_sim_arm64-dbg-ios-sim_arm64-min15.0-ST-8f99be897b7e']
+DartKernelLink	distinct=6	duplicated=0
+DartAnalyze	distinct=1	duplicated=0
+DartFormat	distinct=1	duplicated=0
+
+## Non-exec targets built in 2+ configurations (any output name)
+DartKernel	targets=32	in_2plus_configs=12
+DartCodegen	targets=3	in_2plus_configs=3
+DartAnalyzerSummary	targets=30	in_2plus_configs=4
+DartKernelLink	targets=3	in_2plus_configs=0
+DartAnalyze	targets=1	in_2plus_configs=0
+DartFormat	targets=1	in_2plus_configs=0

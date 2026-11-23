@@ -1,0 +1,12 @@
+tool/bazelw: budget16 (sample worker RSS with: ps -axo rss,comm | grep -i -E 'java|dart|worker')
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: 62fda4e6-49f6-4e3c-8ae9-11dee5a22911
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: target //spike/greeting:greeting (6 packages loaded, 6 targets configured)
+INFO: Analyzed target //spike/greeting:greeting (134 packages loaded, 5780 targets configured, 94 aspect applications).
+INFO: Found 1 target...
+INFO: Elapsed time: 2.012s, Critical Path: 0.00s
+INFO: 0 processes.
+INFO: Build completed successfully, 0 total actions

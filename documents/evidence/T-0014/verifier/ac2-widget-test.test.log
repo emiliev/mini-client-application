@@ -1,0 +1,8 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //spike/hello:widget_test
+-----------------------------------------------------------------------------
+  PASS  T-0014-AC2 hello app renders and counts under Bazel
+  PASS  T-0014-AC6 state.when / maybeWhen / map on a private-case union
+  PASS  T-0014-AC7 generated $appRoutes navigates to the typed DetailRoute
+
+3 passed

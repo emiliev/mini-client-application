@@ -1,0 +1,13 @@
+  compiling builders/aot
+  12s compiling builders/aot
+W These options have been removed and were ignored: --delete-conflicting-outputs
+  0s go_router_builder on 4 inputs; lib/main.dart
+  3s go_router_builder on 4 inputs: 1 no-op; spent 2s analyzing; lib/src/counter_state.dart
+  3s go_router_builder on 4 inputs: 1 output, 3 no-op; spent 2s analyzing
+  0s source_gen:combining_builder on 4 inputs; lib/main.dart
+  0s source_gen:combining_builder on 4 inputs: 1 output, 3 no-op
+  0s freezed on 8 inputs; lib/main.dart
+  0s freezed on 8 inputs: 3 skipped, 1 output, 4 no-op
+  Built with build_runner/aot in 14s; wrote 3 outputs.
+EQUAL   spike/hello/lib/src/counter_state.freezed.dart
+EQUAL   spike/hello/lib/src/routes.g.dart

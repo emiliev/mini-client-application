@@ -1,0 +1,27 @@
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 7 targets (0 packages loaded, 0 targets configured)
+Analyzing: 7 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 7 targets (0 packages loaded, 0 targets configured).
+[3,801 / 3,972] [Prepa] Compiling Dart kernel @@ai_rules_flutter+//flutter/private/tools:generate_asset_manifest [for tool]
+[3,817 / 3,972] Compiling Dart kernel @@ai_rules_dart+//dart/private/tools:format_runner [for tool]; 1s darwin-sandbox ... (7 actions, 6 running)
+[3,858 / 3,972] Compiling Dart kernel @@ai_rules_dart+//dart/private/tools:format_runner [for tool]; 2s darwin-sandbox ... (14 actions, 13 running)
+[3,886 / 3,972] Compiling Dart kernel @@ai_rules_dart+//dart/private/tools:analyzer_summary [for tool]; 3s darwin-sandbox ... (5 actions running)
+[3,892 / 3,972] Compiling Dart kernel @@ai_rules_dart+//dart/private/tools:analyzer_summary [for tool]; 4s darwin-sandbox ... (3 actions running)
+[3,893 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 3s worker ... (3 actions, 2 running)
+[3,893 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 4s worker ... (3 actions running)
+[3,894 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 7s worker ... (5 actions, 2 running)
+[3,898 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 8s worker ... (3 actions, 2 running)
+[3,905 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 9s worker ... (4 actions, 3 running)
+[3,912 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 10s worker ... (4 actions, 2 running)
+[3,945 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 11s worker ... (3 actions running)
+[3,946 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 13s worker ... (6 actions, 2 running)
+[3,952 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 14s worker ... (2 actions running)
+[3,953 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 16s worker ... (2 actions, 1 running)
+[3,967 / 3,972] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter_test/flutter_test.flutter.kmod; 0s worker
+INFO: Found 7 targets...
+INFO: Elapsed time: 22.764s, Critical Path: 22.31s
+INFO: 3972 processes: 3822 internal, 30 darwin-sandbox, 120 worker.
+INFO: Build completed successfully, 3972 total actions

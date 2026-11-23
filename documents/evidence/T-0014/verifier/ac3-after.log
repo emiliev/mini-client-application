@@ -1,0 +1,16 @@
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:widget_test (0 packages loaded, 0 targets configured).
+[8 / 20] DartCodegen @@//spike/hello:routes_go_router_part; 1s worker
+[20 / 21] Testing //spike/hello:widget_test; 0s darwin-sandbox
+INFO: Found 1 test target...
+INFO: Elapsed time: 3.525s, Critical Path: 3.29s
+INFO: 12 processes: 5 action cache hit, 5 internal, 2 darwin-sandbox, 5 worker.
+INFO: Build completed successfully, 12 total actions
+//spike/hello:widget_test                                                PASSED in 0.6s
+
+Executed 1 out of 1 test: 1 test passes.

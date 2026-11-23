@@ -1,0 +1,43 @@
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: target //spike/hello:hello_ios (6 packages loaded, 6 targets configured)
+Analyzing: target //spike/hello:hello_ios (6 packages loaded, 6 targets configured)
+
+Analyzing: target //spike/hello:hello_ios (285 packages loaded, 16084 targets configured, 264 aspect applications)
+
+INFO: Analyzed target //spike/hello:hello_ios (286 packages loaded, 16087 targets configured, 266 aspect applications).
+[3,153 / 3,450] Executing apple_genrule @@apple_support+//crosstool:generate_layering_check_modulemap [for tool]; 0s darwin-sandbox ... (12 actions, 11 running)
+[3,159 / 3,450] Executing apple_genrule @@apple_support+//crosstool:generate_layering_check_modulemap [for tool]; 2s darwin-sandbox ... (14 actions running)
+[3,176 / 3,450] Executing apple_genrule @@apple_support+//crosstool:generate_layering_check_modulemap [for tool]; 3s darwin-sandbox ... (11 actions running)
+[3,217 / 3,450] Executing apple_genrule @@apple_support+//crosstool:generate_layering_check_modulemap [for tool]; 4s darwin-sandbox ... (11 actions running)
+[3,236 / 3,450] Executing apple_genrule @@apple_support+//crosstool:generate_layering_check_modulemap [for tool]; 5s darwin-sandbox ... (6 actions running)
+[3,237 / 3,450] Executing apple_genrule @@apple_support+//crosstool:generate_layering_check_modulemap; 7s darwin-sandbox ... (11 actions, 5 running)
+[3,239 / 3,450] Compiling Dart kernel @@ai_rules_dart+//dart/private/tools:analyzer_summary [for tool]; 6s darwin-sandbox ... (14 actions running)
+[3,255 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 4s worker ... (14 actions running)
+[3,270 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 5s worker ... (14 actions running)
+[3,277 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 6s worker ... (14 actions running)
+[3,287 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 7s worker ... (14 actions running)
+[3,296 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 8s worker ... (14 actions running)
+[3,309 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 9s worker ... (14 actions running)
+[3,327 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 10s worker ... (14 actions running)
+[3,339 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 11s worker ... (14 actions running)
+[3,353 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 12s worker ... (14 actions running)
+[3,373 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 13s worker ... (14 actions running)
+[3,382 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 14s worker ... (14 actions running)
+[3,396 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 15s worker ... (14 actions running)
+[3,414 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 16s worker ... (10 actions running)
+[3,428 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 17s worker ... (4 actions running)
+[3,430 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 18s worker ... (4 actions running)
+[3,431 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 20s worker ... (4 actions, 3 running)
+[3,436 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 21s worker ... (3 actions running)
+[3,437 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 22s worker ... (3 actions, 2 running)
+[3,441 / 3,450] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter_registrant.kmod; 24s worker ... (2 actions, 1 running)
+[3,447 / 3,450] Bundling hello_ios; 0s darwin-sandbox
+INFO: Found 1 target...
+Target //spike/hello:hello_ios up-to-date:
+  bazel-bin/spike/hello/hello_ios.ipa
+INFO: Elapsed time: 32.340s, Critical Path: 30.34s
+INFO: 3450 processes: 3166 internal, 212 darwin-sandbox, 5 local, 67 worker.
+INFO: Build completed successfully, 3450 total actions
+tool/bazelw $OB build --config=sim --config=cold  //spike/hello:hello_ios  0.03s user 0.03s system 0% cpu 32.629 total

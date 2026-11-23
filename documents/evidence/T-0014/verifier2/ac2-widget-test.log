@@ -1,0 +1,17 @@
+INFO: Invocation ID: 374d25db-5235-450a-8d60-863db120596a
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:widget_test (0 packages loaded, 5139 targets configured, 366 aspect applications).
+[3,909 / 3,910] 1 / 1 tests; Testing //spike/hello:widget_test; 0s darwin-sandbox
+INFO: Found 1 test target...
+INFO: Elapsed time: 1.570s, Critical Path: 1.16s
+INFO: 606 processes: 3304 action cache hit, 48 disk cache hit, 557 internal, 1 darwin-sandbox.
+INFO: Build completed successfully, 606 total actions
+//spike/hello:widget_test                                                PASSED in 0.9s
+
+Executed 1 out of 1 test: 1 test passes.

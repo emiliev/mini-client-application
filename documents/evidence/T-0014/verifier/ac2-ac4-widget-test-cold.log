@@ -1,0 +1,24 @@
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:widget_test (29 packages loaded, 2263 targets configured, 214 aspect applications).
+[3,835 / 3,909] Summarizing the Dart SDK for analysis; 0s darwin-sandbox ... (7 actions, 5 running)
+[3,879 / 3,909] Compiling Dart kernel @@ai_rules_dart+//dart/private/tools:format_runner [for tool]; 1s darwin-sandbox ... (6 actions, 5 running)
+[3,886 / 3,909] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 2s worker ... (3 actions running)
+[3,891 / 3,909] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 3s worker ... (2 actions running)
+[3,899 / 3,909] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 4s worker
+[3,900 / 3,909] [Scann] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter_web_plugins/flutter_web_plugins.flutter.kmod ... (2 actions, 0 running)
+[3,904 / 3,909] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter_test/flutter_test.flutter.kmod; 0s worker
+[3,909 / 3,910] Testing //spike/hello:widget_test; 0s darwin-sandbox
+INFO: Found 1 test target...
+INFO: Elapsed time: 299.350s, Critical Path: 16.78s
+INFO: 3815 processes: 95 action cache hit, 3729 internal, 17 darwin-sandbox, 69 worker.
+INFO: Build completed successfully, 3815 total actions
+//spike/hello:widget_test                                                PASSED in 1.0s
+
+Executed 1 out of 1 test: 1 test passes.
+tool/bazelw $OB test --config=cold --execution_log_json_file=$S/exec_host.jso  0.02s user 0.02s system 0% cpu 4:59.46 total
