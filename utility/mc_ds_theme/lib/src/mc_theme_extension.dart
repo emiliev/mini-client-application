@@ -17,11 +17,13 @@ class McThemeExtension extends ThemeExtension<McThemeExtension> {
         palette: palette ?? this.palette,
       );
 
-  /// Palettes are discrete, so interpolation switches at the midpoint.
   @override
   McThemeExtension lerp(McThemeExtension? other, double t) {
     if (other == null) return this;
-    return t < 0.5 ? this : other;
+    return McThemeExtension(
+      variant: t < 0.5 ? variant : other.variant,
+      palette: McPalette.lerp(palette, other.palette, t),
+    );
   }
 }
 

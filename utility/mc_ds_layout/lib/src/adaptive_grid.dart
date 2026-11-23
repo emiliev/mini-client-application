@@ -26,8 +26,12 @@ class McAdaptiveGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = columnsFor(constraints.maxWidth);
-        return GridView.count(
+        // Unbounded (e.g. inside a horizontal scroll view): use the screen.
+        final width = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final columns = columnsFor(width);
+        final grid = GridView.count(
           crossAxisCount: columns,
           mainAxisSpacing: spacing,
           crossAxisSpacing: spacing,
@@ -37,6 +41,9 @@ class McAdaptiveGrid extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           children: children,
         );
+        return constraints.hasBoundedWidth
+            ? grid
+            : SizedBox(width: width, child: grid);
       },
     );
   }

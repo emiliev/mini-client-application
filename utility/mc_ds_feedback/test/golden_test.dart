@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mc_ds_feedback/mc_ds_feedback.dart';
-import 'package:mc_ds_theme/mc_ds_golden.dart';
+import 'package:mc_ds_testing/mc_ds_testing.dart';
 
 void main() {
   mcGoldenMatrix(

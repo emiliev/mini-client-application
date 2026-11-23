@@ -76,6 +76,13 @@ class McButton extends StatelessWidget {
         child: text,
       ),
     };
-    return expand ? SizedBox(width: double.infinity, child: button) : button;
+    if (!expand) return button;
+    // Fill the width only when it is bounded; in a Row or horizontal scroll
+    // view an infinite width would throw, so fall back to the natural size.
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.hasBoundedWidth
+          ? SizedBox(width: double.infinity, child: button)
+          : button,
+    );
   }
 }

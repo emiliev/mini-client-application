@@ -1,0 +1,14 @@
+name: mc_ds_testing
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  mc_ds_theme: any
+  mc_ds_tokens: any

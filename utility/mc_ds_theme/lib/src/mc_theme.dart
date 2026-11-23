@@ -8,13 +8,19 @@ abstract final class McTheme {
   static ThemeData get light => of(McThemeVariant.light);
   static ThemeData get dark => of(McThemeVariant.dark);
   static ThemeData get highContrast => of(McThemeVariant.highContrast);
+  static ThemeData get highContrastDarkTheme =>
+      of(McThemeVariant.highContrastDark);
 
   /// Picks the variant from platform settings (`MediaQuery.highContrast`).
   static McThemeVariant variantFor({
     required Brightness brightness,
     bool highContrast = false,
   }) {
-    if (highContrast) return McThemeVariant.highContrast;
+    if (highContrast) {
+      return brightness == Brightness.dark
+          ? McThemeVariant.highContrastDark
+          : McThemeVariant.highContrast;
+    }
     return brightness == Brightness.dark
         ? McThemeVariant.dark
         : McThemeVariant.light;
@@ -41,6 +47,7 @@ abstract final class McTheme {
       useMaterial3: true,
       colorScheme: scheme,
       fontFamily: mcFontFamily,
+      package: mcFontPackage,
       textTheme: text,
       scaffoldBackgroundColor: p.background,
       canvasColor: p.background,

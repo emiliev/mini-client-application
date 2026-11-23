@@ -1,6 +1,7 @@
 load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
 
-package(default_visibility = ["//utility:__subpackages__"])
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
 
 flutter_library(
     name = "mc_ds_tokens",

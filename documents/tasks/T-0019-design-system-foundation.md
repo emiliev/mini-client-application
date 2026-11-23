@@ -35,11 +35,13 @@ Implemented 5 packages under `utility/` (tokens, theme, layout, buttons, feedbac
 
 | AC | Tests | Result |
 |---|---|---|
-| AC1 | `tokens_test`, `theme_test`, `buttons_test`, `feedback_test` (names contain `T-0019-AC1`); `golden_test` in theme, layout, buttons, feedback: 42 goldens = 7 components (theme_sheet, adaptive_grid_375, adaptive_grid_1024, buttons, loading, error_view, empty_view) x light/dark/highContrast x text scale 1.0/2.0 | pass; real Inter text and MaterialIcons visible |
+| AC1 | `tokens_test`, `theme_test`, `buttons_test`, `feedback_test` (names contain `T-0019-AC1`); `golden_test` in theme, layout, buttons, feedback: 56 goldens = 7 components (theme_sheet, adaptive_grid_375, adaptive_grid_1024, buttons, loading, error_view, empty_view) x light/dark/highContrast/highContrastDark x text scale 1.0/2.0 | pass; real Inter text and MaterialIcons visible |
 | AC2 | `feedback_test`: Retry fires once; semantics label `Error: ...` exists | pass |
 | AC3 | `layout_test`: 2 columns at 375, 4 at 1024 (plus breakpoint edges); goldens at both widths | pass |
 | AC4 | `bazel test` on the 5 package globs: 9/9 pass; `build --config=lint //utility/...` clean; `dart format` clean; goldens byte-identical over 2 regenerations | pass |
 
-Font: Inter (SIL OFL 1.1), licence in `utility/mc_ds_theme/assets/fonts/OFL.txt`, recorded in the package README. Finding: F-0013. Evidence: `documents/evidence/T-0019/engineer/`.
+Font: Inter (SIL OFL 1.1), licence in `utility/mc_ds_theme/assets/fonts/OFL.txt`, recorded in the package README. Finding: F-0014. Evidence: `documents/evidence/T-0019/engineer/`.
 
-Notes: loading/error strings are parameters with English defaults (no `mc_l10n_core` yet). The golden harness lives in `mc_ds_theme/lib/mc_ds_golden.dart` until `mc_test_utils` exists. No tests deleted or weakened.
+Notes: loading/error strings are parameters with English defaults (no `mc_l10n_core` yet). The golden harness lives in the testonly package `utility/mc_ds_testing` (6th workspace entry) until `mc_test_utils` exists. Package visibility is public until the P3-06 package_group exists.
+
+Review round 1 (code-review) fixes: font family now `packages/mc_ds_theme/Inter` (test `fonts_test`), public visibility, dark high-contrast palette/theme/goldens, harness split out of `mc_ds_theme`, plus the nits (icon-button semantics, unbounded widths, palette lerp, icons discovery, test rename, F-0013 -> F-0014). Evidence: `documents/evidence/T-0019/engineer/round2-*.txt`. No tests deleted or weakened.

@@ -14,3 +14,4 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mc_ds_theme: any
+  mc_ds_testing: any

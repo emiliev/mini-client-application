@@ -1,6 +1,7 @@
 load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
 
-package(default_visibility = ["//utility:__subpackages__"])
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
 
 # Inter (SIL OFL 1.1) plus the SDK's MaterialIcons font (the tester disables
 # asset fonts, so icons render as boxes unless loaded explicitly). Golden tests of every mc_ds_* package list this in
@@ -18,7 +19,6 @@ flutter_library(
     deps = [
         "//utility/mc_ds_tokens",
         "@pub_deps//:flutter",
-        "@pub_deps//:flutter_test",
     ],
 )
 
@@ -46,6 +46,7 @@ flutter_test(
     tags = ["golden"],
     target_compatible_with = ["@platforms//os:macos"],
     deps = [
+        "//utility/mc_ds_testing",
         ":mc_ds_theme",
         "//utility/mc_ds_tokens",
         "@pub_deps//:flutter",

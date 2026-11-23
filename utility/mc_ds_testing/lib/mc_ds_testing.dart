@@ -1,5 +1,6 @@
 /// Golden-test harness: real fonts, iOS platform, theme x text-scale matrix.
 ///
+/// Test-only (`testonly = True`): production packages must not depend on it.
 /// Interim home. Plan 01 moves this into `mc_test_utils` once that package
 /// exists; the API is kept small so the move is mechanical.
 library;
@@ -12,10 +13,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 
-import 'mc_ds_theme.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
 
 /// Bazel `data` label every golden-testing package must list.
 const String mcFontsDataLabel = '//utility/mc_ds_theme:fonts';
+
+/// The family name the harness registers Inter under. It is the name the
+/// app resolves for `McTypeScale` styles (`packages/mc_ds_theme/Inter`).
+const String mcRegisteredFontFamily = mcResolvedFontFamily;
 
 const _fontFiles = [
   'Inter-Regular.ttf',
@@ -39,12 +44,23 @@ List<String> _candidateDirs() => [
   'assets/fonts',
 ];
 
-List<String> _materialIconsCandidates() => [
-  if (Platform.environment['TEST_SRCDIR'] case final src?)
-    '$src/ai_rules_flutter++flutter+flutter_material_fonts/material-fonts/MaterialIcons-Regular.otf',
-  if (Platform.environment['FLUTTER_ROOT'] case final root?)
-    '$root/bin/cache/artifacts/material_fonts/MaterialIcons-Regular.otf',
-];
+/// Where the SDK's MaterialIcons font may be: an explicit override, the
+/// Bazel runfiles (any top-level repo dir ending in `flutter_material_fonts`,
+/// so the canonical repo name is not hard-coded), or the Flutter SDK.
+List<String> _materialIconsCandidates() {
+  const file = 'MaterialIcons-Regular.otf';
+  final env = Platform.environment;
+  final src = env['TEST_SRCDIR'];
+  return [
+    if (env['MC_MATERIAL_ICONS'] case final override?) override,
+    if (src != null && Directory(src).existsSync())
+      for (final e in Directory(src).listSync())
+        if (e.path.endsWith('flutter_material_fonts'))
+          '${e.path}/material-fonts/$file',
+    if (env['FLUTTER_ROOT'] case final root?)
+      '$root/bin/cache/artifacts/material_fonts/$file',
+  ];
+}
 
 /// Registers the bundled Inter family with the engine. Needed because the
 /// tester runs with asset fonts disabled and would otherwise draw Ahem boxes
@@ -58,7 +74,7 @@ Future<void> mcLoadFonts() async {
       'Add $mcFontsDataLabel to the test target `data`.',
     ),
   );
-  final loader = FontLoader(mcFontFamily);
+  final loader = FontLoader(mcRegisteredFontFamily);
   for (final f in _fontFiles) {
     final bytes = File('$dir/$f').readAsBytesSync();
     loader.addFont(Future.value(ByteData.sublistView(bytes)));
@@ -95,7 +111,9 @@ Widget mcGoldenApp({
     builder: (context, app) => MediaQuery(
       data: MediaQuery.of(context).copyWith(
         textScaler: TextScaler.linear(textScale),
-        highContrast: variant == McThemeVariant.highContrast,
+        highContrast:
+            variant == McThemeVariant.highContrast ||
+            variant == McThemeVariant.highContrastDark,
       ),
       child: app!,
     ),

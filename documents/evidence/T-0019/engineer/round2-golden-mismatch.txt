@@ -1,0 +1,10 @@
+FAIL: //utility/mc_ds_buttons:golden_test (Exit 1) (see /Users/emililiev/Library/Caches/bazel/_bazel_emililiev/194f03e59b1aff2e3c36a3886f6a6de2/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_ds_buttons/golden_test/test.log)
+Golden "goldens/buttons.light.x1.png": Pixel test failed, 9.19%, 60680px diff detected.
+  FAIL  T-0019-AC1 buttons golden light x1
+Golden "goldens/buttons.light.x2.png": Pixel test failed, 7.52%, 72188px diff detected.
+  FAIL  T-0019-AC1 buttons golden light x2
+INFO: Build completed, 1 test FAILED, 20 total actions
+//utility/mc_ds_buttons:golden_test                                      FAILED in 1.0s
+Executed 1 out of 1 test: 1 fails locally.
+--- after revert ---
+//utility/mc_ds_buttons:golden_test                                      PASSED in 0.7s

@@ -73,4 +73,40 @@ void main() {
     expect(find.bySemanticsLabel('Close'), findsOneWidget);
     handle.dispose();
   });
+
+  testWidgets('T-0019-AC1 buttons: expand works in a Row without throwing', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _app(
+        Row(
+          children: [McButton(label: 'Go', expand: true, onPressed: () {})],
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.text('Go'), findsOneWidget);
+  });
+
+  testWidgets('T-0019-AC1 buttons: icon button announces its label once', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        McIconButton(
+          icon: Icons.close,
+          semanticLabel: 'Close',
+          onPressed: () {},
+        ),
+      ),
+    );
+    expect(find.bySemanticsLabel('Close'), findsOneWidget);
+    // A duplicated announcement would read "Close\nClose".
+    expect(
+      find.bySemanticsLabel(RegExp('Close.*Close', dotAll: true)),
+      findsNothing,
+    );
+    handle.dispose();
+  });
 }

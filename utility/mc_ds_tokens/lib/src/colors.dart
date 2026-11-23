@@ -3,7 +3,7 @@ import 'dart:ui' show Brightness, Color;
 import 'package:flutter/foundation.dart' show immutable;
 
 /// The three palettes the design system ships.
-enum McThemeVariant { light, dark, highContrast }
+enum McThemeVariant { light, dark, highContrast, highContrastDark }
 
 /// A complete, immutable colour palette. Widgets read it through the theme
 /// extension in `mc_ds_theme`; they never hard-code colours.
@@ -83,9 +83,45 @@ class McPalette {
     success: Color(0xFF004D1A),
   );
 
+  /// Maximum contrast on black: at least 7:1 for every text pair.
+  static const McPalette highContrastDark = McPalette(
+    brightness: Brightness.dark,
+    primary: Color(0xFFFFB3B6),
+    onPrimary: Color(0xFF000000),
+    background: Color(0xFF000000),
+    surface: Color(0xFF000000),
+    surfaceVariant: Color(0xFF1F1F1F),
+    onSurface: Color(0xFFFFFFFF),
+    onSurfaceMuted: Color(0xFFE6E6E6),
+    outline: Color(0xFFFFFFFF),
+    error: Color(0xFFFFB4BE),
+    onError: Color(0xFF000000),
+    success: Color(0xFF9CFFB8),
+  );
+
   static McPalette of(McThemeVariant variant) => switch (variant) {
     McThemeVariant.light => light,
     McThemeVariant.dark => dark,
     McThemeVariant.highContrast => highContrast,
+    McThemeVariant.highContrastDark => highContrastDark,
   };
+
+  /// Interpolates every colour; brightness switches at the midpoint.
+  static McPalette lerp(McPalette a, McPalette b, double t) {
+    Color c(Color x, Color y) => Color.lerp(x, y, t)!;
+    return McPalette(
+      brightness: t < 0.5 ? a.brightness : b.brightness,
+      primary: c(a.primary, b.primary),
+      onPrimary: c(a.onPrimary, b.onPrimary),
+      background: c(a.background, b.background),
+      surface: c(a.surface, b.surface),
+      surfaceVariant: c(a.surfaceVariant, b.surfaceVariant),
+      onSurface: c(a.onSurface, b.onSurface),
+      onSurfaceMuted: c(a.onSurfaceMuted, b.onSurfaceMuted),
+      outline: c(a.outline, b.outline),
+      error: c(a.error, b.error),
+      onError: c(a.onError, b.onError),
+      success: c(a.success, b.success),
+    );
+  }
 }

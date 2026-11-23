@@ -44,7 +44,9 @@ void main() {
     expect(McAdaptiveGrid.columnsFor(1024), 4);
   });
 
-  testWidgets('T-0019-AC3 a11y helpers read reduced motion', (tester) async {
+  testWidgets('T-0019-AC1 a11y: McA11y.duration is zero under reduced motion', (
+    tester,
+  ) async {
     late Duration d;
     await tester.pumpWidget(
       MediaQuery(
@@ -58,5 +60,29 @@ void main() {
       ),
     );
     expect(d, Duration.zero);
+  });
+
+  testWidgets('T-0019-AC3 grid in unbounded width falls back to the screen', (
+    tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1024, 800);
+    addTearDown(tester.view.reset);
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              McAdaptiveGrid(children: [Text('a')]),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    final grid = tester.widget<GridView>(find.byType(GridView));
+    final d = grid.gridDelegate as SliverGridDelegateWithFixedCrossAxisCount;
+    expect(d.crossAxisCount, 4); // 1024-wide screen
   });
 }

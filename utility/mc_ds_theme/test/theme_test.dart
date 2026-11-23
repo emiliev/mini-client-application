@@ -9,16 +9,17 @@ void main() {
       final t = McTheme.of(v);
       expect(t.extension<McThemeExtension>()!.palette, McPalette.of(v));
       expect(t.colorScheme.primary, McPalette.of(v).primary);
-      expect(t.textTheme.bodyMedium!.fontFamily, mcFontFamily);
+      expect(t.textTheme.bodyMedium!.fontFamily, mcResolvedFontFamily);
     }
     expect(McTheme.dark.brightness, Brightness.dark);
     expect(McTheme.highContrast.brightness, Brightness.light);
+    expect(McTheme.highContrastDarkTheme.brightness, Brightness.dark);
   });
 
   test('T-0019-AC1 theme: variantFor honours high contrast first', () {
     expect(
       McTheme.variantFor(brightness: Brightness.dark, highContrast: true),
-      McThemeVariant.highContrast,
+      McThemeVariant.highContrastDark,
     );
     expect(
       McTheme.variantFor(brightness: Brightness.dark),
@@ -28,6 +29,25 @@ void main() {
       McTheme.variantFor(brightness: Brightness.light),
       McThemeVariant.light,
     );
+  });
+
+  test('T-0019-AC1 theme: high contrast respects brightness', () {
+    expect(
+      McTheme.variantFor(brightness: Brightness.light, highContrast: true),
+      McThemeVariant.highContrast,
+    );
+    expect(
+      McTheme.variantFor(brightness: Brightness.dark, highContrast: true),
+      McThemeVariant.highContrastDark,
+    );
+  });
+
+  test('T-0019-AC1 theme: extension lerp interpolates the palette', () {
+    final a = McTheme.light.extension<McThemeExtension>()!;
+    final b = McTheme.dark.extension<McThemeExtension>()!;
+    final mid = a.lerp(b, 0.5);
+    expect(mid.palette.surface, isNot(a.palette.surface));
+    expect(mid.palette.surface, isNot(b.palette.surface));
   });
 
   test('T-0019-AC1 theme: mode controller notifies on change only', () {

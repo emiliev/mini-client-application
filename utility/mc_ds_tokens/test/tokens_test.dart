@@ -1,3 +1,4 @@
+import 'dart:ui' show Brightness;
 import 'dart:math' as math;
 
 import 'package:flutter/painting.dart';
@@ -22,7 +23,11 @@ void main() {
     () {
       for (final v in McThemeVariant.values) {
         final p = McPalette.of(v);
-        final min = v == McThemeVariant.highContrast ? 7.0 : 4.5;
+        final min =
+            (v == McThemeVariant.highContrast ||
+                v == McThemeVariant.highContrastDark)
+            ? 7.0
+            : 4.5;
         expect(_contrast(p.onSurface, p.surface), greaterThanOrEqualTo(min));
         expect(_contrast(p.onSurface, p.background), greaterThanOrEqualTo(min));
         expect(_contrast(p.onPrimary, p.primary), greaterThanOrEqualTo(min));
@@ -47,8 +52,41 @@ void main() {
       McTypeScale.title,
       McTypeScale.caption,
     ]) {
-      expect(s.fontFamily, mcFontFamily);
+      expect(s.fontFamily, mcResolvedFontFamily);
     }
     expect(mcMinTapTarget, 44);
+  });
+
+  test('T-0019-AC1 tokens: every type style resolves to the package font', () {
+    expect(mcResolvedFontFamily, 'packages/mc_ds_theme/Inter');
+    for (final s in [
+      McTypeScale.display,
+      McTypeScale.title,
+      McTypeScale.headline,
+      McTypeScale.body,
+      McTypeScale.label,
+      McTypeScale.caption,
+    ]) {
+      expect(s.fontFamily, mcResolvedFontFamily);
+    }
+  });
+
+  test('T-0019-AC1 tokens: palette lerp interpolates colours', () {
+    final mid = McPalette.lerp(McPalette.light, McPalette.dark, 0.5);
+    expect(mid.surface, isNot(McPalette.light.surface));
+    expect(mid.surface, isNot(McPalette.dark.surface));
+    expect(
+      McPalette.lerp(McPalette.light, McPalette.dark, 0).surface,
+      McPalette.light.surface,
+    );
+    expect(
+      McPalette.lerp(McPalette.light, McPalette.dark, 1).brightness,
+      Brightness.dark,
+    );
+  });
+
+  test('T-0019-AC1 tokens: dark high contrast is dark and distinct', () {
+    expect(McPalette.highContrastDark.brightness, Brightness.dark);
+    expect(McPalette.highContrastDark, isNot(McPalette.highContrast));
   });
 }

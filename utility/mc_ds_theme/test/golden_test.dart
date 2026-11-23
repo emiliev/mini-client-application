@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mc_ds_theme/mc_ds_golden.dart';
+import 'package:mc_ds_testing/mc_ds_testing.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 
