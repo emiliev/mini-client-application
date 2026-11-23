@@ -33,4 +33,7 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-028 | A hung DI init blocks the BootBloc retry: add a timeout and cancellation to boot init | Feature | T-0017 Verifier | App-shell task | — |
 | P-029 | Run `mc_arch_check` in the verify gate (`tool/verify.sh` / `bazel test`) | Tooling | T-0017 | With P5-09 | — |
 | P-030 | The analyze aspect missed one `unnecessary_parenthesis` that `dart analyze` caught (possible rules_dart gap) | Upstream? | T-0017, F-0013 | Phase F | — |
+| P-031 | Declare Inter in the Bazel app bundle (`flutter_application` fonts) so the app renders the DS font | Feature | T-0019 Verifier | App-shell task | — |
+| P-032 | Restrict DS visibility from `//visibility:public` to the P3-06 layer package_group | Tooling | T-0019 | With P3-06 | — |
+| P-033 | Move the `mc_ds_testing` golden harness into `mc_test_utils` | Tooling | T-0019 | With P5-01 | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

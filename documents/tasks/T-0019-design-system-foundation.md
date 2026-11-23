@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready for verification |
+| Status | Done (merged 2026-11-23; Verifier PASS `a18032a`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0019-design-system` (from `origin/main` `53c612d`+) |
@@ -45,3 +45,7 @@ Font: Inter (SIL OFL 1.1), licence in `utility/mc_ds_theme/assets/fonts/OFL.txt`
 Notes: loading/error strings are parameters with English defaults (no `mc_l10n_core` yet). The golden harness lives in the testonly package `utility/mc_ds_testing` (6th workspace entry) until `mc_test_utils` exists. Package visibility is public until the P3-06 package_group exists.
 
 Review round 1 (code-review) fixes: font family now `packages/mc_ds_theme/Inter` (test `fonts_test`), public visibility, dark high-contrast palette/theme/goldens, harness split out of `mc_ds_theme`, plus the nits (icon-button semantics, unbounded widths, palette lerp, icons discovery, test rename, F-0013 -> F-0014). Evidence: `documents/evidence/T-0019/engineer/round2-*.txt`. No tests deleted or weakened.
+
+## Merge (TL)
+- 2026-11-23: `/code-review` found 4 important issues (Inter font name, visibility, dark high-contrast, `flutter_test` in the production package), fixed in `e11da43`. The first Verifier pass FAILED (AC2: `McIconButton` label and tap action on separate nodes), fixed in `19705dc`. Re-verify PASS `a18032a`. The rebase onto main brought in the T-0017 lints, so mechanical lint fixes landed in `1f71377`; the TL reviewed that diff (imports and braces only, no goldens changed). The TL merged `--no-ff`; on the merge result `test --nocache_test_results //...` passed 15/15, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-031 (Inter in the Bazel app bundle), P-032 (restrict `//visibility:public` to the P3-06 package_group), P-033 (move `mc_ds_testing` into `mc_test_utils`).

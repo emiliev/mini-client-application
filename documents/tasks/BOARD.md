@@ -7,7 +7,6 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 |---|---|---|---|---|---|
 | [T-0020](T-0020-config-monitoring-eventbus-storage.md) | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage` (P1-03) | **In Progress** | Engineer (Sonnet) | T-0017 | `fleet/T-0020-core-utils` |
 | [T-0018](T-0018-mocked-backend-and-character-fixtures.md) | `mc_mocked_backend` + character and media fixtures (P1-06, P1-07) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0018-mocked-backend` |
-| [T-0019](T-0019-design-system-foundation.md) | Design-system foundation (P1-11) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0019-design-system` |
 
 ## Done
 | ID | Title | Result |
@@ -16,6 +15,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0019](T-0019-design-system-foundation.md) | Design-system foundation `mc_ds_*` (P1-11) | merged; Verifier [PASS](../evidence/T-0019/verification-report.md); F-0014 |
 | [T-0017](T-0017-workspace-and-foundation.md) | Workspace, `mc_arch_check`, `mc_analysis`, `mc_prelude`, `mc_di` (P1-01, P1-02) | merged; Verifier [PASS](../evidence/T-0017/verification-report.md); F-0013 |
 | [T-0014](T-0014-toolchain-bring-up.md) | Toolchain bring-up: Bazel 9.3.0, Flutter 3.47.7, first Flutter iOS app (P3-01) | merged; Verifier [PASS](../evidence/T-0014/verification-report.md); F-0006, F-0007, F-0009 to F-0012 |
 | [T-0016](T-0016-perf-harness.md) | Perf harness, ingestion, macOS sampler (P4-01 to P4-03) | merged; Verifier [PASS](../evidence/T-0016/verification-report.md); F-0008 |

@@ -16,3 +16,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0016](T-0016/verification-report.md) | PASS (re-verified after first FAIL) | Perf harness: fresh-clone suite, AC7 5/5 under load |
 | [T-0014](T-0014/verification-report.md) | PASS (re-verified after fixes) | Toolchain: sim app screenshots, outline cutoff, cfgdup counts, codegen byte-identity |
 | [T-0017](T-0017/verification-report.md) | PASS (re-verified after first FAIL) | Arch guard violation fixtures, Result/DI semantics |
+| [T-0019](T-0019/verification-report.md) | PASS (re-verified after first FAIL) | Design system: real-font goldens across 4 themes and 2 text scales, semantics |
