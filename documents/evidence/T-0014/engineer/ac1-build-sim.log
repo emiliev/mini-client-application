@@ -1,4 +1,4 @@
-INFO: Invocation ID: acca22b1-61e7-45a8-a682-2a100e2bec80
+INFO: Invocation ID: d8a30990-2956-46ed-99dd-95d305855102
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -6,18 +6,10 @@ WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, dis
 Analyzing: target //spike/hello:hello_ios (0 packages loaded, 0 targets configured)
 Analyzing: target //spike/hello:hello_ios (0 packages loaded, 0 targets configured)
 
-INFO: Analyzed target //spike/hello:hello_ios (118 packages loaded, 10496 targets configured, 123 aspect applications).
-[2,925 / 3,443] DartCodegen @@//spike/hello:counter_state_freezed; 0s disk-cache, worker ... (10 actions, 1 running)
-[3,432 / 3,446] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 1s disk-cache, worker ... (3 actions running)
-[3,433 / 3,446] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 3s disk-cache, worker ... (3 actions, 2 running)
-[3,436 / 3,446] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 4s disk-cache, worker ... (2 actions running)
-[3,436 / 3,446] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter.kmod; 14s disk-cache, worker ... (2 actions running)
-[3,437 / 3,446] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.app_debug.flutter_registrant.kmod; 20s disk-cache, worker ... (2 actions, 1 running)
-[3,443 / 3,446] Bundling hello_ios; 0s disk-cache, darwin-sandbox
+INFO: Analyzed target //spike/hello:hello_ios (0 packages loaded, 7565 targets configured, 123 aspect applications).
 INFO: Found 1 target...
 Target //spike/hello:hello_ios up-to-date:
   bazel-bin/spike/hello/hello_ios.ipa
-INFO: Elapsed time: 23.680s, Critical Path: 22.65s
-INFO: 1251 processes: 2195 action cache hit, 1235 internal, 7 darwin-sandbox, 9 worker.
-INFO: Build completed successfully, 1251 total actions
-tool/bazelw build --config=sim //spike/hello:hello_ios  0.02s user 0.02s system 0% cpu 23.709 total
+INFO: Elapsed time: 0.387s, Critical Path: 0.03s
+INFO: 1 process: 3449 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action

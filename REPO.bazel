@@ -1,9 +1,12 @@
 # Keep `fvm flutter` and build_runner debris out of `//...` (plan 03 §1.2).
+# `build/` is anchored to package roots that may hold Flutter projects, so a
+# real Bazel package named `build` elsewhere is not hidden.
 ignore_directories([
     "**/.dart_tool",
     "**/ios/Pods",
     "**/ios/.symlinks",
     "**/ios/Flutter/ephemeral",
-    "**/build",
+    "app/**/build",
+    "spike/*/build",
     ".fvm",
 ])

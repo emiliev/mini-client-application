@@ -2,6 +2,14 @@
 
 **Reference outputs:** `tool/build_runner_overlay/spike_reference.sh spike/hello`. It copies `spike/hello/lib` into the git-ignored `.dart_tool/mc_overlay/hello/`, runs build_runner 2.16.2 with freezed 4.0.2 and go_router_builder 4.5.0 (analyzer 14.5.0 and source_helper 1.3.13, matching rules_dart's ext lock @ e7163aa), and `cmp`s each output with `bazel-bin/spike/hello/`. Nothing is copied back or committed (R10 / D7).
 
+After the code review, the script also:
+- builds the package's `dart_codegen` targets itself, with `--remote_download_all`;
+- adds first-party workspace deps (`greeting`) as path dependencies;
+- fails if any hosted version drifts from the committed overlay lock;
+- fails if `dart analyze` reports an unresolved import. A negative run without the `greeting` path dep reported `uri_does_not_exist`.
+
+Reproduce everything with `tool/checks/T-0014-AC7_codegen_matches_build_runner.sh`; its latest report is [`T-0014-AC7.md`](T-0014-AC7.md).
+
 ```
 EQUAL   spike/hello/lib/src/counter_state.freezed.dart
 EQUAL   spike/hello/lib/src/routes.g.dart
