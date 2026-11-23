@@ -1,0 +1,28 @@
+# build_runner overlay (plan 03 §7.3, R28). NOT a member of the root pub
+# workspace: no `resolution: workspace`, and Bazel never reads it. It is the
+# only place where build_runner and stock generators may appear (R10).
+#
+# T-0014 uses it only to produce reference outputs for the freezed and
+# go_router shims (AC6, AC7). The generated files are never committed.
+# P4-14 and the R28 fallback extend it with retrofit, injectable and BDD.
+name: mc_build_runner_overlay
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  freezed_annotation: 3.1.0
+  go_router: 17.5.0
+
+dev_dependencies:
+  # Generator-side versions match rules_dart's dart/ext/pubspec.lock @ e7163aa.
+  analyzer: 14.5.0
+  build_runner: 2.16.2
+  freezed: 4.0.2
+  go_router_builder: 4.5.0
+  # source_helper 1.4.0 adds a `qualifiedName` extension that clashes with
+  # go_router_builder 4.5.0's own, so the builder fails to compile (F-0008).
+  source_helper: 1.3.13

@@ -1,0 +1,9 @@
+# Keep `fvm flutter` and build_runner debris out of `//...` (plan 03 §1.2).
+ignore_directories([
+    "**/.dart_tool",
+    "**/ios/Pods",
+    "**/ios/.symlinks",
+    "**/ios/Flutter/ephemeral",
+    "**/build",
+    ".fvm",
+])

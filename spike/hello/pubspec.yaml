@@ -1,0 +1,17 @@
+# T-0014 spike S1: hello-world iOS app, a freezed union and one typed route.
+name: hello
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  freezed_annotation: 3.1.0
+  go_router: 17.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

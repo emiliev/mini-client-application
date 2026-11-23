@@ -1,0 +1,11 @@
+# Pub workspace root (plan 03 §2, R10). One lock, third-party packages only.
+# No code generator and no build_runner may appear here; the reference
+# outputs come from the build_runner overlay (plan 03 §7.3).
+name: mini_client_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+workspace:
+  - spike/hello

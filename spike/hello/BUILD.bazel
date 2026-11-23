@@ -1,0 +1,123 @@
+# T-0014 spike S1: the pinned toolchain end to end (plan 03 §8, P3-01).
+#
+# Codegen is wired file by file through `dart_codegen`, never through the
+# curated `*_library` wrappers, which would each create their own library and
+# split the package (KD5).
+load("@rules_dart//dart:defs.bzl", "dart_codegen")
+load("@rules_flutter//flutter:defs.bzl", "flutter_application", "flutter_library", "flutter_test")
+load("@rules_flutter//flutter:ios.bzl", "IOS_MINIMUM_OS_VERSION", "flutter_ios_app")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "hello"
+
+_HAND_WRITTEN = glob(
+    ["lib/**/*.dart"],
+    exclude = [
+        "lib/**/*.g.dart",
+        "lib/**/*.freezed.dart",
+    ],
+)
+
+_RUNTIME_DEPS = [
+    "@pub_deps//:flutter",
+    "@pub_deps//:freezed_annotation",
+    "@pub_deps//:go_router",
+]
+
+# --- freezed (curated stock shim, R16 / T-0014-AC6) -------------------------
+# counter_state.dart is Flutter-free (CPR), so this action runs on summaries.
+dart_codegen(
+    name = "counter_state_freezed",
+    package_name = _PKG,
+    src = "lib/src/counter_state.dart",
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    output_suffixes = [".freezed.dart"],
+    deps = ["@pub_deps//:freezed_annotation"],
+)
+
+# Same-package siblings the route file imports, staged for codegen only.
+# Never a dep of another library or test (V3-18).
+flutter_library(
+    name = "_stage",
+    package_name = _PKG,
+    srcs = [
+        "lib/src/counter_state.dart",
+        "lib/src/greeting.dart",
+        "lib/src/pages.dart",
+        ":counter_state_freezed",
+    ],
+    deps = [
+        "@pub_deps//:flutter",
+        "@pub_deps//:freezed_annotation",
+    ],
+)
+
+# --- go_router_builder over real go_router 17.5.0 (V3-01 / T-0014-AC7) -------
+# The closure holds Flutter (sky_engine), so summaries are off for this action.
+dart_codegen(
+    name = "routes_go_router_part",
+    package_name = _PKG,
+    src = "lib/src/routes.dart",
+    generator_bin = "@rules_dart//dart/ext/go_router:shim",
+    output_suffixes = [".go_router.g.part"],
+    deps = [
+        ":_stage",
+        "@pub_deps//:flutter",
+        "@pub_deps//:go_router",
+    ],
+)
+
+dart_codegen(
+    name = "routes_g",
+    package_name = _PKG,
+    src = "lib/src/routes.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    output_suffixes = [".g.dart"],
+    parts = [":routes_go_router_part"],
+)
+
+_GENERATED = [
+    ":counter_state_freezed",
+    ":routes_g",
+]
+
+# --- The package library (tests and analysis) -------------------------------
+flutter_library(
+    name = "hello_lib",
+    package_name = _PKG,
+    srcs = _HAND_WRITTEN + _GENERATED,
+    deps = _RUNTIME_DEPS,
+)
+
+flutter_test(
+    name = "widget_test",
+    package_name = _PKG,
+    size = "small",
+    main = "test/widget_test.dart",
+    deps = [
+        ":hello_lib",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# --- The app ----------------------------------------------------------------
+# The app rule carries no DartInfo, so its sources are listed again (as
+# upstream's e2e/codegen does) instead of depending on :hello_lib.
+flutter_application(
+    name = "hello_app",
+    package_name = _PKG,
+    srcs = [s for s in _HAND_WRITTEN if s != "lib/main.dart"] + _GENERATED,
+    main = "lib/main.dart",
+    min_os_version = IOS_MINIMUM_OS_VERSION,
+    tags = ["manual"],
+    deps = _RUNTIME_DEPS + ["@rules_flutter//flutter:material_icons"],
+)
+
+# Simulator: tool/bazelw build --config=sim //spike/hello:hello_ios
+flutter_ios_app(
+    name = "hello_ios",
+    application = ":hello_app",
+    bundle_id = "com.emiliev.miniclient.spike.hello",
+)

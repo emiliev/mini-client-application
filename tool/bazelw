@@ -1,0 +1,52 @@
+#!/bin/bash
+# tool/bazelw: the only way agents and scripts run Bazel in this repo (plan 03 §1.3, R18).
+#
+# Runs the installed-but-unlinked Homebrew bazelisk, which reads `.bazelversion`
+# (9.3.0) and downloads that exact Bazel once. The machine is not changed: the
+# Homebrew `bazel` formula (9.2.0) stays linked on PATH and is never used here.
+#
+#   tool/bazelw build --config=sim //spike/hello:hello_ios
+#   tool/bazelw --budget16 build //...     # adds the budget16 startup flags (P4 owns the values)
+#
+# Override the bazelisk path with MC_BAZELISK=/path/to/bazelisk.
+set -euo pipefail
+
+BAZELISK="${MC_BAZELISK:-/opt/homebrew/opt/bazelisk/bin/bazelisk}"
+if [[ ! -x "$BAZELISK" ]]; then
+  echo "tool/bazelw: bazelisk not found at $BAZELISK." >&2
+  echo "  Install it with 'brew install bazelisk' (it stays unlinked next to the bazel formula)," >&2
+  echo "  or point MC_BAZELISK at a bazelisk binary." >&2
+  exit 2
+fi
+
+# Run from the workspace root so `.bazelversion` is found from any cwd.
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+
+# Startup options cannot come from a --config, so --budget16 injects them here
+# (plan 03 §1.4 note 1). The heap value is a proposal; P4-01 calibrates it.
+startup=()
+args=()
+for a in "$@"; do
+  case "$a" in
+    --budget16)
+      startup+=(--host_jvm_args=-Xmx3g)
+      budget16=1
+      ;;
+    *) args+=("$a") ;;
+  esac
+done
+
+if [[ ${#args[@]} -eq 0 ]]; then
+  exec "$BAZELISK" ${startup[@]+"${startup[@]}"}
+fi
+
+# --budget16 also selects the budget16 build config: insert it after the command.
+if [[ "${budget16:-0}" == 1 ]]; then
+  cmd="${args[0]}"
+  rest=("${args[@]:1}")
+  echo "tool/bazelw: budget16 (sample worker RSS with: ps -axo rss,comm | grep -i -E 'java|dart|worker')" >&2
+  exec "$BAZELISK" "${startup[@]}" "$cmd" --config=budget16 ${rest[@]+"${rest[@]}"}
+fi
+
+exec "$BAZELISK" ${startup[@]+"${startup[@]}"} "${args[@]}"

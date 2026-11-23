@@ -1,0 +1,17 @@
+load("@rules_dart//dart:defs.bzl", "dart_analysis_config", "dart_analysis_options")
+
+exports_files(["pubspec.lock"])
+
+# The workspace lint ruleset. Until `mc_analysis` exists (P1) it is a plain
+# file with no `include:`, so it stages no package.
+dart_analysis_options(
+    name = "options",
+    src = "analysis_options.yaml",
+)
+
+# Every analysis_options.yaml in the workspace, for the dart_analyze aspect
+# that `.bazelrc` turns on under `bazel test` and `--config=lint`.
+dart_analysis_config(
+    name = "analysis_config",
+    options = [":options"],
+)

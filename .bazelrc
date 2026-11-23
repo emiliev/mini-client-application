@@ -1,0 +1,47 @@
+# mini-client Bazel configuration (plan 03 §1.4, T-0014). Always run Bazel through tool/bazelw.
+
+# Required by rules_flutter [rules_flutter §15.2]
+common --java_runtime_version=remotejdk_25
+common --tool_java_language_version=25
+common --tool_java_runtime_version=remotejdk_25
+# rules_dart consumer preset (copied from dart/consumer.bazelrc @ e7163aa)
+common --reuse_sandbox_directories
+common --nobuild_runfile_links
+common --experimental_shrink_worker_pool
+# Hygiene / caching
+common --lockfile_mode=update
+build  --incompatible_strict_action_env
+common --disk_cache=~/.cache/mc-bazel/disk          # shared across fleet worktrees (P5 C9 accepted)
+common --repository_cache=~/.cache/mc-bazel/repo
+# Analysis + format under test [rules_dart §13]
+test --aspects=@rules_dart//dart:analyze.bzl%dart_analyze
+test --output_groups=+dart_analyze,+dart_format
+common --@rules_dart//dart:analysis_config=//:analysis_config
+test --flaky_test_attempts=1 --test_output=errors   # ADR-0006 §4; P5 owns the test:* configs
+test --local_test_jobs=8
+
+build:sim     -c dbg --ios_multi_cpus=sim_arm64
+build:device  -c opt --ios_multi_cpus=arm64
+build:device-profile --config=device --@rules_flutter//flutter:profile
+build:lint    --aspects=@rules_dart//dart:analyze.bzl%dart_analyze --output_groups=+dart_analyze,+dart_format
+build:ci      --lockfile_mode=error --worker_sandboxing --keep_going --color=no --curses=no
+build:cold    --disk_cache=                         # empty value disables it; nightly: --config=ci --config=cold
+test:app      --build_tests_only --test_tag_filters=app   # sim build tests, own invocation (R14, H-TEST-2)
+# budget16: the single definition is 04 §7.2 (arm T, P4 owns the values); this block must match it byte for byte
+build:budget16 --local_resources=memory=9000 --local_resources=cpu=14 --jobs=14
+build:budget16 --worker_max_instances=DartKernel=2              # singleplex Flutter .flutter.kmod workers
+build:budget16 --worker_max_multiplex_instances=DartKernel=4    # rules_dart multiplex kernel workers
+build:budget16 --worker_max_instances=DartCodegen=1 --worker_max_instances=DartSqlCodegen=1
+build:budget16 --worker_max_instances=DartAggregateCodegen=1 --worker_max_instances=DartAnalyzerSummary=2
+build:budget16 --worker_max_instances=DartAnalyze=2 --worker_max_instances=DartKernelLink=1
+build:budget16 --worker_max_instances=FlutterKernelCompile=1
+build:budget16 --experimental_total_worker_memory_limit_mb=3072  # † P4-01 confirms the spelling
+test:budget16  --local_test_jobs=4
+build:budget16_8c --config=budget16 --local_resources=cpu=8 --jobs=8
+test:budget16_8c  --local_test_jobs=3
+build:profile --generate_json_trace_profile --profile=/tmp/mc-bazel-profile.json.gz
+build:profile --execution_log_compact_file=/tmp/mc-exec.log.zst --memory_profile=/tmp/mc-mem.txt
+build:profile --noexecution_log_sort --heap_dump_on_oom
+build:remote-cache --remote_cache=grpc://127.0.0.1:9092 --remote_upload_local_results
+build:remote-cache --remote_local_fallback
+try-import %workspace%/.bazelrc.user
