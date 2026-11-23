@@ -11,7 +11,7 @@ class HelloApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => MaterialApp.router(
-        title: 'mini-client hello',
-        routerConfig: _router,
-      );
+    title: 'mini-client hello',
+    routerConfig: _router,
+  );
 }

@@ -1,0 +1,15 @@
+INFO: Invocation ID: ded4b4ff-7a41-41df-9fcb-18cbf6abaf0a
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:widget_test (0 packages loaded, 0 targets configured).
+INFO: Found 1 test target...
+INFO: Elapsed time: 0.211s, Critical Path: 0.01s
+INFO: 12 processes: 5 action cache hit, 7 disk cache hit, 5 internal.
+INFO: Build completed successfully, 12 total actions
+//spike/hello:widget_test                                       (cached) PASSED in 0.6s
+
+Executed 0 out of 1 test: 1 test passes.

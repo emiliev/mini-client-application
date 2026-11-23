@@ -11,6 +11,11 @@ package(default_visibility = ["//visibility:private"])
 
 _PKG = "hello"
 
+# Matches the pubspec SDK floor (^3.13.0). Without it the codegen shims run with
+# `--root-language-version 3.0`, so dart_style formats generated code in the
+# pre-3.7 "short" style and it no longer equals build_runner's output (F-0008).
+_LANG = "3.13"
+
 _HAND_WRITTEN = glob(
     ["lib/**/*.dart"],
     exclude = [
@@ -20,6 +25,7 @@ _HAND_WRITTEN = glob(
 )
 
 _RUNTIME_DEPS = [
+    "//spike/greeting",
     "@pub_deps//:flutter",
     "@pub_deps//:freezed_annotation",
     "@pub_deps//:go_router",
@@ -30,6 +36,7 @@ _RUNTIME_DEPS = [
 dart_codegen(
     name = "counter_state_freezed",
     package_name = _PKG,
+    language_version = _LANG,
     src = "lib/src/counter_state.dart",
     generator_bin = "@rules_dart//dart/ext/freezed:shim",
     output_suffixes = [".freezed.dart"],
@@ -41,13 +48,14 @@ dart_codegen(
 flutter_library(
     name = "_stage",
     package_name = _PKG,
+    language_version = _LANG,
     srcs = [
         "lib/src/counter_state.dart",
-        "lib/src/greeting.dart",
         "lib/src/pages.dart",
         ":counter_state_freezed",
     ],
     deps = [
+        "//spike/greeting",
         "@pub_deps//:flutter",
         "@pub_deps//:freezed_annotation",
     ],
@@ -58,11 +66,19 @@ flutter_library(
 dart_codegen(
     name = "routes_go_router_part",
     package_name = _PKG,
+    language_version = _LANG,
     src = "lib/src/routes.dart",
     generator_bin = "@rules_dart//dart/ext/go_router:shim",
     output_suffixes = [".go_router.g.part"],
     deps = [
         ":_stage",
+        "//spike/greeting",
+        # Workaround (F-0007): flutter_library puts sky_engine only in its
+        # analysis provider, so rules_dart doesn't see the embedder, passes
+        # analyzer summaries, and the shim crashes on the dart:ui-less
+        # package:flutter summary. Naming sky_engine here turns summaries off
+        # for this action, as plan 03 KD6 assumed would happen anyway.
+        "@flutter_sky_engine//:sky_engine",
         "@pub_deps//:flutter",
         "@pub_deps//:go_router",
     ],
@@ -71,6 +87,7 @@ dart_codegen(
 dart_codegen(
     name = "routes_g",
     package_name = _PKG,
+    language_version = _LANG,
     src = "lib/src/routes.dart",
     generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
     output_suffixes = [".g.dart"],
@@ -86,6 +103,7 @@ _GENERATED = [
 flutter_library(
     name = "hello_lib",
     package_name = _PKG,
+    language_version = _LANG,
     srcs = _HAND_WRITTEN + _GENERATED,
     deps = _RUNTIME_DEPS,
 )
@@ -93,6 +111,7 @@ flutter_library(
 flutter_test(
     name = "widget_test",
     package_name = _PKG,
+    language_version = _LANG,
     size = "small",
     main = "test/widget_test.dart",
     deps = [
@@ -108,6 +127,7 @@ flutter_test(
 flutter_application(
     name = "hello_app",
     package_name = _PKG,
+    language_version = _LANG,
     srcs = [s for s in _HAND_WRITTEN if s != "lib/main.dart"] + _GENERATED,
     main = "lib/main.dart",
     min_os_version = IOS_MINIMUM_OS_VERSION,

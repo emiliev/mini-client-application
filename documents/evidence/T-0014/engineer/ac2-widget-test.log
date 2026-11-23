@@ -1,0 +1,22 @@
+INFO: Invocation ID: 4d399528-0a67-4cd9-8c6b-2d21277f43fe
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:widget_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:widget_test (0 packages loaded, 0 targets configured).
+[3,880 / 3,903] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 1s disk-cache, worker ... (3 actions running)
+[3,883 / 3,903] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 2s disk-cache, worker ... (4 actions running)
+[3,893 / 3,903] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__flutter/flutter.flutter.kmod; 3s disk-cache, worker
+[3,894 / 3,903] [Scann] Compiling Dart kernel module ../ai_rules_flutter++flutter+pub_deps__leak_tracker_flutter_testing/leak_tracker_flutter_testing.flutter.kmod ... (2 actions, 0 running)
+[3,899 / 3,903] [Scann] Compiling Dart kernel module spike/hello/widget_test.flutter_entry.kmod
+[3,903 / 3,904] Testing //spike/hello:widget_test; 1s disk-cache, darwin-sandbox
+INFO: Found 1 test target...
+INFO: Elapsed time: 17.373s, Critical Path: 17.01s
+INFO: 36 processes: 4 action cache hit, 12 internal, 5 darwin-sandbox, 19 worker.
+INFO: Build completed successfully, 36 total actions
+//spike/hello:widget_test                                                PASSED in 1.7s
+
+Executed 1 out of 1 test: 1 test passes.
+tool/bazelw test //spike/hello:widget_test  0.02s user 0.02s system 0% cpu 17.417 total

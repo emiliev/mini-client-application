@@ -8,4 +8,5 @@ environment:
   sdk: ^3.13.0
 
 workspace:
+  - spike/greeting
   - spike/hello

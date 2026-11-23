@@ -1,0 +1,9 @@
+# T-0014 spike S1: a pure-Dart leaf package, so AC3 has a first-party
+# `.koutline` of its own. A library in the same package as its consumer is
+# compiled into the consumer's module and has no separate outline (F-0009).
+name: greeting
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0

@@ -12,6 +12,11 @@ coverage/
 **/ios/Pods/
 **/ios/.symlinks/
 **/ios/Flutter/ephemeral/
+# Written by `fvm flutter pub get` into members that have an ios/ dir; Bazel
+# generates its own registrant and never reads these.
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Runner/GeneratedPluginRegistrant.*
 *.iml
 .idea/
 

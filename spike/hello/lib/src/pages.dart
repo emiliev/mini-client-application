@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'counter_state.dart';
-import 'greeting.dart';
+import 'package:greeting/greeting.dart';
 
 /// The home page: a counter driven by the freezed [CounterState] union,
 /// rendered with `state.when` (T-0014-AC6).
@@ -59,7 +59,9 @@ class DetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(title: const Text('Detail')),
-        body: Center(child: Text('Detail for $count', key: const Key('detail_label'))),
-      );
+    appBar: AppBar(title: const Text('Detail')),
+    body: Center(
+      child: Text('Detail for $count', key: const Key('detail_label')),
+    ),
+  );
 }
