@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Review |
+| Status | Done (merged 2026-11-23; Verifier PASS `0174a43`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Sonnet, fresh; low-risk tooling) |
 | Branch | `fleet/T-0015-tool-loc` |
@@ -68,3 +68,6 @@ Implemented `tool/loc/` (package `loc`; `bin/loc.dart`, `lib/count.dart` = D8 sc
 - Not done: `--gate <rung>` / `gates.yaml` (gates field is emitted with pass/failures from strict only), `loc diff a b`, per-core isolates, the `cloc` cross-check finding. See follow-ups.
 
 **Follow-ups:** gate + diff subcommands; isolates for the 1M/30 s target; cloc cross-check finding; CLI-level (process) test of exit code.
+
+## Merge (TL)
+- 2026-11-23: Verifier PASS `640823c`. `/code-review` found 8 important issues, all fixed; the branch was rewritten so the `.dart_tool` blobs never reach `main`. Re-verify PASS `0174a43`. The TL merged `--no-ff` and re-ran analyze (clean) and the tests (25/25) on the merge result.
