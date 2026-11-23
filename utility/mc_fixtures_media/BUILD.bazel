@@ -1,0 +1,33 @@
+# T-0018 (P1-07): bundled original placeholder art plus ApiImage resolution.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+# The same files as test data, so a test can check that each asset exists.
+filegroup(
+    name = "asset_files",
+    srcs = glob(["assets/**/*.png"]),
+)
+
+flutter_library(
+    name = "mc_fixtures_media",
+    package_name = "mc_fixtures_media",
+    srcs = glob(["lib/**/*.dart"]),
+    assets = [":asset_files"],
+    language_version = _LANG,
+)
+
+flutter_test(
+    name = "bundled_image_resolver_test",
+    package_name = "mc_fixtures_media",
+    language_version = _LANG,
+    size = "small",
+    data = [":asset_files"],
+    main = "test/bundled_image_resolver_test.dart",
+    deps = [
+        ":mc_fixtures_media",
+        "@pub_deps//:flutter_test",
+    ],
+)

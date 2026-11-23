@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_parameter",
+      "message": "Query parameter \"limit\" must be an integer from 1 to 100",
+      "parameter": "limit"
+    }
+  },
+  "request": "GET /v1/characters?limit=0",
+  "status": 400
+}

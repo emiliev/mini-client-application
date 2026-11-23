@@ -11402,7 +11402,7 @@
           "REPO_MAPPING:rules_cc+,platforms platforms",
           "REPO_MAPPING:rules_cc+,rules_cc rules_cc+",
           "REPO_MAPPING:rules_cc++compatibility_proxy+cc_compatibility_proxy,rules_cc rules_cc+",
-          "FILE:@@//pubspec.lock 393b4a4c556d9c457563629c65d1b54d4a5faedab75e654d4311f6d2152bd811",
+          "FILE:@@//pubspec.lock b5439b54225260ddc7bc385b6d296389434b172a7df3aba206ad576be3b2b7e5",
           "REPO_MAPPING:ai_rules_dart+,dart_macos-arm64 ai_rules_dart++dart+dart_macos-arm64"
         ],
         "generatedRepoSpecs": {
@@ -12523,6 +12523,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -12575,7 +12577,10 @@
                 "webkit_inspection_protocol",
                 "yaml"
               ],
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "swift_package_sha256": {},
               "swift_package_product_deps": {},
               "ios_pod_deps": {},
@@ -12605,6 +12610,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -12661,7 +12668,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -12709,6 +12719,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -12776,7 +12788,10 @@
                 "yaml"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -12824,6 +12839,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -12878,7 +12895,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -12926,6 +12946,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -12983,7 +13005,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13031,6 +13056,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13088,7 +13115,10 @@
                 "string_scanner"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13136,6 +13166,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13190,7 +13222,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13238,6 +13273,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13295,7 +13332,10 @@
                 "yaml"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13343,6 +13383,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13401,7 +13443,10 @@
                 "path"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13449,6 +13494,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13503,7 +13550,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13551,6 +13601,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13605,7 +13657,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13653,6 +13708,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13709,7 +13766,10 @@
                 "typed_data"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13757,6 +13817,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13824,7 +13886,10 @@
                 "yaml"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13872,6 +13937,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -13926,7 +13993,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -13947,6 +14017,30 @@
               "version": "3.0.8",
               "hub_name": "pub_deps",
               "sha256": "e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4",
+              "base_url": "https://pub.dev",
+              "android_maven_deps": {},
+              "android_maven_ignore": []
+            }
+          },
+          "pub_deps-android-dio": {
+            "repoRuleId": "@@ai_rules_flutter+//flutter/private:flutter_pub_android_package.bzl%flutter_pub_android_package",
+            "attributes": {
+              "package_name": "dio",
+              "version": "5.11.1",
+              "hub_name": "pub_deps",
+              "sha256": "852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1",
+              "base_url": "https://pub.dev",
+              "android_maven_deps": {},
+              "android_maven_ignore": []
+            }
+          },
+          "pub_deps-android-dio_web_adapter": {
+            "repoRuleId": "@@ai_rules_flutter+//flutter/private:flutter_pub_android_package.bzl%flutter_pub_android_package",
+            "attributes": {
+              "package_name": "dio_web_adapter",
+              "version": "2.2.2",
+              "hub_name": "pub_deps",
+              "sha256": "3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc",
               "base_url": "https://pub.dev",
               "android_maven_deps": {},
               "android_maven_ignore": []
@@ -13974,6 +14068,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14031,7 +14127,10 @@
                 "collection"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14079,6 +14178,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14133,7 +14234,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14181,6 +14285,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14238,7 +14344,10 @@
                 "path"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14286,6 +14395,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14344,7 +14455,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14392,6 +14506,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14450,7 +14566,10 @@
                 "path"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14498,6 +14617,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14556,7 +14677,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14604,6 +14728,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14664,7 +14790,10 @@
                 "string_scanner"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14712,6 +14841,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14772,7 +14903,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14820,6 +14954,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14876,7 +15012,10 @@
                 "async"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -14924,6 +15063,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -14983,7 +15124,10 @@
                 "typed_data"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15031,6 +15175,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15089,7 +15235,10 @@
                 "string_scanner"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15137,6 +15286,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15193,7 +15344,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15241,6 +15395,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15301,7 +15457,10 @@
                 "vm_service"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15349,6 +15508,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15409,7 +15570,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15457,6 +15621,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15515,7 +15681,10 @@
                 "meta"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15563,6 +15732,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15617,7 +15788,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15665,6 +15839,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15725,7 +15901,10 @@
                 "test_api"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15773,6 +15952,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15829,7 +16010,10 @@
                 "collection"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15877,6 +16061,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -15931,7 +16117,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -15979,6 +16168,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16033,7 +16224,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16081,6 +16275,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16135,7 +16331,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16183,6 +16382,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16239,7 +16440,10 @@
                 "path"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16287,6 +16491,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16341,7 +16547,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16389,6 +16598,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16446,7 +16657,10 @@
                 "stack_trace"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16494,6 +16708,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16550,7 +16766,10 @@
                 "collection"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16598,6 +16817,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16659,7 +16880,10 @@
                 "stream_channel"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16707,6 +16931,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16765,7 +16991,10 @@
                 "shelf_static"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16813,6 +17042,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16873,7 +17104,10 @@
                 "shelf"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -16921,6 +17155,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -16979,7 +17215,10 @@
                 "web_socket_channel"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17027,6 +17266,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17085,7 +17326,10 @@
                 "stack_trace"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17133,6 +17377,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17189,7 +17435,10 @@
                 "source_span"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17237,6 +17486,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17295,7 +17546,10 @@
                 "term_glyph"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17343,6 +17597,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17399,7 +17655,10 @@
                 "path"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17447,6 +17706,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17503,7 +17764,10 @@
                 "async"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17551,6 +17815,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17607,7 +17873,10 @@
                 "source_span"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17655,6 +17924,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17709,7 +17980,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17757,6 +18031,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17837,7 +18113,10 @@
                 "yaml"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17885,6 +18164,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -17949,7 +18230,10 @@
                 "term_glyph"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -17997,6 +18281,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18073,7 +18359,10 @@
                 "yaml"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18121,6 +18410,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18177,7 +18468,10 @@
                 "collection"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18225,6 +18519,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18279,7 +18575,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18327,6 +18626,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18381,7 +18682,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18429,6 +18733,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18486,7 +18792,10 @@
                 "path"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18534,6 +18843,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18588,7 +18899,10 @@
               ],
               "planned_deps": [],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18636,6 +18950,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18692,7 +19008,10 @@
                 "web"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18740,6 +19059,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18800,7 +19121,10 @@
                 "web_socket"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18848,6 +19172,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -18904,7 +19230,10 @@
                 "logging"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -18952,6 +19281,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -19010,7 +19341,10 @@
                 "string_scanner"
               ],
               "plan_covers_package": true,
-              "scc_targets": {},
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
               "cycle_breaks": [],
               "plugin_defines": [],
               "overlay_roots": [
@@ -19036,14 +19370,12 @@
               "android_maven_ignore": []
             }
           },
-          "pub_deps__flutter": {
-            "repoRuleId": "@@ai_rules_flutter+//flutter/private:flutter_sdk_package.bzl%flutter_sdk_package",
+          "pub_deps__scc__dio__dio_web_adapter": {
+            "repoRuleId": "@@ai_rules_flutter+//flutter/private:flutter_pub_scc_spoke.bzl%flutter_pub_scc_package",
             "attributes": {
-              "package_name": "flutter",
-              "flutter_version": "3.47.7",
-              "local_path": "",
-              "sdk_source": "@@ai_rules_flutter++flutter+flutter_sdk_source//:BUILD.bazel",
+              "repo_name": "pub_deps__scc__dio__dio_web_adapter",
               "hub_name": "pub_deps",
+              "members_json": "[{\"code_assets\":[],\"name\":\"dio\",\"planned_deps\":[\"async\",\"collection\",\"dio_web_adapter\",\"http_parser\",\"meta\",\"mime\",\"path\"],\"sha256\":\"852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1\",\"source\":\"hosted\",\"url\":\"https://pub.dev\",\"version\":\"5.11.1\"},{\"code_assets\":[],\"name\":\"dio_web_adapter\",\"planned_deps\":[\"dio\",\"http_parser\",\"meta\",\"web\"],\"sha256\":\"3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc\",\"source\":\"hosted\",\"url\":\"https://pub.dev\",\"version\":\"2.2.2\"}]",
               "lock_packages": [
                 "_fe_analyzer_shared",
                 "analyzer",
@@ -19058,6 +19390,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -19110,7 +19444,101 @@
                 "webkit_inspection_protocol",
                 "yaml"
               ],
-              "scc_targets": {}
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              },
+              "cycle_breaks": {},
+              "ios_plugin_defines": {},
+              "ios_plugin_deps": {},
+              "overlay_roots": [
+                "@@ai_rules_flutter+//ext:BUILD.bazel"
+              ],
+              "ignore_hooks": [],
+              "ios_native_deps": "@@ai_rules_flutter++flutter+pub_deps//:ios_native_deps.json",
+              "pubspec_lock": "@@//:pubspec.lock"
+            }
+          },
+          "pub_deps__flutter": {
+            "repoRuleId": "@@ai_rules_flutter+//flutter/private:flutter_sdk_package.bzl%flutter_sdk_package",
+            "attributes": {
+              "package_name": "flutter",
+              "flutter_version": "3.47.7",
+              "local_path": "",
+              "sdk_source": "@@ai_rules_flutter++flutter+flutter_sdk_source//:BUILD.bazel",
+              "hub_name": "pub_deps",
+              "lock_packages": [
+                "_fe_analyzer_shared",
+                "analyzer",
+                "args",
+                "async",
+                "boolean_selector",
+                "characters",
+                "cli_config",
+                "cli_util",
+                "clock",
+                "collection",
+                "convert",
+                "coverage",
+                "crypto",
+                "dio",
+                "dio_web_adapter",
+                "fake_async",
+                "ffi",
+                "file",
+                "flutter",
+                "flutter_test",
+                "flutter_web_plugins",
+                "freezed_annotation",
+                "frontend_server_client",
+                "get_it",
+                "glob",
+                "go_router",
+                "http_multi_server",
+                "http_parser",
+                "io",
+                "json_annotation",
+                "leak_tracker",
+                "leak_tracker_flutter_testing",
+                "leak_tracker_testing",
+                "logging",
+                "matcher",
+                "material_color_utilities",
+                "meta",
+                "mime",
+                "node_preamble",
+                "package_config",
+                "path",
+                "pool",
+                "pub_semver",
+                "shelf",
+                "shelf_packages_handler",
+                "shelf_static",
+                "shelf_web_socket",
+                "source_map_stack_trace",
+                "source_maps",
+                "source_span",
+                "stack_trace",
+                "stream_channel",
+                "string_scanner",
+                "term_glyph",
+                "test",
+                "test_api",
+                "test_core",
+                "typed_data",
+                "vector_math",
+                "vm_service",
+                "watcher",
+                "web",
+                "web_socket",
+                "web_socket_channel",
+                "webkit_inspection_protocol",
+                "yaml"
+              ],
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              }
             }
           },
           "pub_deps__flutter_test": {
@@ -19135,6 +19563,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -19187,7 +19617,10 @@
                 "webkit_inspection_protocol",
                 "yaml"
               ],
-              "scc_targets": {}
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              }
             }
           },
           "pub_deps__flutter_web_plugins": {
@@ -19212,6 +19645,8 @@
                 "convert",
                 "coverage",
                 "crypto",
+                "dio",
+                "dio_web_adapter",
                 "fake_async",
                 "ffi",
                 "file",
@@ -19264,7 +19699,10 @@
                 "webkit_inspection_protocol",
                 "yaml"
               ],
-              "scc_targets": {}
+              "scc_targets": {
+                "dio": "@pub_deps__scc__dio__dio_web_adapter//:dio",
+                "dio_web_adapter": "@pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
+              }
             }
           }
         },
@@ -20069,6 +20507,21 @@
         "yaml"
       ],
       "pub.scc.v2.af2853485ad99a880004d13d/hosted/crypto/3.0.8/e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4": [],
+      "pub.scc.v2.af2853485ad99a880004d13d/hosted/dio/5.11.1/852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1": [
+        "async",
+        "collection",
+        "dio_web_adapter",
+        "http_parser",
+        "meta",
+        "mime",
+        "path"
+      ],
+      "pub.scc.v2.af2853485ad99a880004d13d/hosted/dio_web_adapter/2.2.2/3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc": [
+        "dio",
+        "http_parser",
+        "meta",
+        "web"
+      ],
       "pub.scc.v2.af2853485ad99a880004d13d/hosted/fake_async/1.3.3/5368f224a74523e8d2e7399ea1638b37aecfca824a3cc4dfdf77bf1fa905ac44": [
         "clock",
         "collection"

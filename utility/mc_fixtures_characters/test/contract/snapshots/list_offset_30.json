@@ -1,0 +1,32 @@
+{
+  "body": {
+    "count": 2,
+    "limit": 2,
+    "offset": 30,
+    "results": [
+      {
+        "description": "Amber Tinker was a clockmaker's daughter before a quiet accident turned spark leap into a daily habit. Known to be unusually patient.",
+        "id": 101246,
+        "modified": "2020-10-30T00:00:00.000Z",
+        "name": "Amber Tinker",
+        "thumbnail": {
+          "path": "mock-asset://characters/016",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "description": "Amber Usher was an archivist of lost maps before a quiet accident turned light weaving into a daily habit. Known to be always a little late.",
+        "id": 101286,
+        "modified": "2023-11-05T00:00:00.000Z",
+        "name": "Amber Usher",
+        "thumbnail": {
+          "path": "mock-asset://characters/009",
+          "variant": "portrait_medium"
+        }
+      }
+    ],
+    "total": 1500
+  },
+  "request": "GET /v1/characters?offset=30&limit=2",
+  "status": 200
+}

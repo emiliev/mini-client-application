@@ -19,4 +19,7 @@ workspace:
   - utility/mc_ds_testing
   - utility/mc_ds_theme
   - utility/mc_ds_tokens
+  - utility/mc_fixtures_characters
+  - utility/mc_fixtures_media
+  - utility/mc_mocked_backend
   - utility/mc_prelude
