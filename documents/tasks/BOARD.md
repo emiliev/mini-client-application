@@ -6,7 +6,6 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
 | [T-0017](T-0017-workspace-and-foundation.md) | Workspace, arch guard, `mc_prelude`, `mc_di` (P1-01, P1-02) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0017-foundation` |
-| [T-0014](T-0014-toolchain-bring-up.md) | Toolchain bring-up under Bazel (P3-01) | **In Progress** | Engineer (Opus) | — | `fleet/T-0014-toolchain` |
 
 ## Done
 | ID | Title | Result |
@@ -15,6 +14,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0014](T-0014-toolchain-bring-up.md) | Toolchain bring-up: Bazel 9.3.0, Flutter 3.47.7, first Flutter iOS app (P3-01) | merged; Verifier [PASS](../evidence/T-0014/verification-report.md); F-0006, F-0007, F-0009 to F-0012 |
 | [T-0016](T-0016-perf-harness.md) | Perf harness, ingestion, macOS sampler (P4-01 to P4-03) | merged; Verifier [PASS](../evidence/T-0016/verification-report.md); F-0008 |
 | [T-0015](T-0015-tool-loc.md) | `tool/loc` LOC counter (P2-02) | merged; Verifier [PASS](../evidence/T-0015/verification-report.md) |
 | [T-0013](T-0013-enterprise-plan.md) | Enterprise plan (Tide × Bazel stress test) | verified; 49 audit findings resolved |

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-23; Verifier PASS `c2dbcee`) |
 | Owner | crew: Engineer (Opus, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0014-toolchain` |
@@ -82,3 +82,7 @@ Every AC has an ID-named, repeatable check (ADR-0006). Each `tool/checks/T-0014-
 - P4: kernel variant duplication between tests and the debug app (F-0010).
 - P4: measure the analysis memory of the always-attached analyze aspect at S2 (F-0009).
 - T-0005 `tool/verify.sh` must run `build --config=lint //...`: `test` checks only the test target's own files (F-0009 gotcha 7).
+
+## Merge (TL)
+- 2026-11-23: Verifier PASS `e7563e8` (plus a lint finding). `/code-review` found 4 important issues plus nits, all fixed in `d29ee32` along with ID-named checks under `tool/checks/`. Re-verify PASS `c2dbcee`. The TL merged `--no-ff` and re-ran `T-0014-AC5` and `T-0014-AC8` on the merge result: both PASS.
+- Follow-ups: P-023 to P-027. The F-0007 upstream bug goes into the P3-13 upstream drafts.

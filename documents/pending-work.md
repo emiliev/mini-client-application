@@ -25,4 +25,9 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-020 | Plan 04 §6.3 / KD-7 correction: `bazel analyze-profile` and `--verbose_explanations` are absent in Bazel 9.2.0 (T-0016). Re-check on 9.3.0 and update the flag inventory and the AC5 reference | Docs/Tooling | T-0016 | With T-0014 (Bazel 9.3.0) | — |
 | P-021 | Compact execution-log ingestion: build Bazel's converter from the pinned 9.3.0 source (KD-7); JSON ingestion works today | Tooling | T-0016 | Before S1 perf runs | — |
 | P-022 | `tool/perf` sampler: use a monotonic clock for intervals (a host sleep of 699 s made one AC7 run fail) | Tooling | T-0016 Verifier | Before nightly perf runs | — |
+| P-023 | `--config=profile`: `%workspace%` isn't expanded in the trace and memory-profile paths (only the exec log is written, exit 0) | Tooling | T-0014 Verifier | Before P4 perf runs | — |
+| P-024 | `spike_reference.sh` ignores a failed Bazel build (could compare stale outputs) | Tooling | T-0014 Verifier | Before P3-03 shims | — |
+| P-025 | Reconcile the budget16 `--jobs` value between plan 03 and plan 04 | Docs | T-0014 | With P4-04 | — |
+| P-026 | A debug simulator build also downloads the release iOS engine (fetch-cost upstream candidate) | Perf/Upstream | T-0014 | Phase F | — |
+| P-027 | mcgen buildgen must emit `language_version` and the `sky_engine` codegen dep (F-0007, F-0011) | Tooling | T-0014 | With P2-08 | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |
