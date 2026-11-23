@@ -1,7 +1,7 @@
 {
   "by_archetype": {},
   "by_tier": {},
-  "commit": "a17815f397d5ddea65c2b534a21e671e19794406",
+  "commit": "d204a754053b4752021ca822b4c6426f2a4e1e5a",
   "excluded_committed_generated": [],
   "gates": {
     "failures": [],
@@ -120,7 +120,8 @@
   },
   "mixins": {
     "authored": 0,
-    "generated": 0
+    "generated": 0,
+    "with_applications": 0
   },
   "modules": [],
   "non_dart": {
@@ -156,6 +157,7 @@
       "hand": 0,
       "scaffold": 0
     },
-    "tooling": 876
-  }
+    "tooling": 1103
+  },
+  "warnings": []
 }

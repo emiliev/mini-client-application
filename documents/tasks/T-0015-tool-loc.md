@@ -29,6 +29,18 @@ A Dart CLI implementing the D8 / R1 counting rule exactly. It's the gate for eve
 ## Log
 - 2026-11-23: Created and dispatched (wave A1).
 - 2026-11-23: Engineer built `tool/loc`, fixtures and 17 tests; analyze clean; evidence recorded.
+- 2026-11-23: Fixed 8 `/code-review` findings (below). Amended the first commit so `tool/loc/.dart_tool/` never enters branch history; root `.gitignore` added. 25 tests pass.
+
+## Review-fix map (test names start with the AC ID)
+1. `.dart_tool` purged from history (amend), root `.gitignore` (`.dart_tool/ build/ bazel-* .fvm/flutter_sdk coverage/ *.iml .idea/`).
+2. Files from `git ls-files` (tracked only), `--include-untracked`, walk plus warning outside git: `T-0015-AC5 strict uses git ls-files...`, `T-0015-AC5 outside git it walks the tree and warns`.
+3. Unowned tier files go to synthetic `(unowned:<tier>)`, warn, fail strict; unparseable pubspec likewise: `T-0015-AC3 files outside any module...`, `T-0015-AC3 unparseable pubspec.yaml...`.
+4. l10n needs `l10n.yaml` and its output dir: `T-0015-AC2 l10n rule needs l10n.yaml and the configured output dir`.
+5. Malformed `.arb` / manifest warn, fail strict, no crash: `T-0015-AC5 malformed .arb and manifest warn...`.
+6. `--generated-root` only generator kinds under tier paths: `T-0015-AC2 generated root ignores external/...`.
+7. Combined `.g.dart` split by section header: `T-0015-AC2 combined .g.dart is split by generator section`.
+8. Fixtures resolved via `Isolate.resolvePackageUri`. Pass: `fvm dart test` in `tool/loc` (25) and `fvm dart tool/loc/test/loc_test.dart` from the repo root (25). `fvm dart test tool/loc` from the root cannot run: dart needs a pubspec in cwd, and the repo root has none yet.
+Nits: `MixinDeclaration` nodes plus `with_applications`; README with the manifest format.
 
 ## AC to test map
 All in `tool/loc/test/loc_test.dart`.
