@@ -1,0 +1,51 @@
+# T-0018 (P1-07): the characters domain of the mocked backend. Data plus small
+# pure-Dart handlers (R3).
+load("@rules_dart//dart:defs.bzl", "dart_library")
+load("@rules_flutter//flutter:defs.bzl", "flutter_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+dart_library(
+    name = "mc_fixtures_characters",
+    package_name = "mc_fixtures_characters",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    deps = [
+        "//utility/mc_fixtures_media",
+        "//utility/mc_mocked_backend",
+    ],
+)
+
+_TEST_DEPS = [
+    ":mc_fixtures_characters",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:dio",
+    "@pub_deps//:flutter_test",
+]
+
+flutter_test(
+    name = "characters_test",
+    package_name = "mc_fixtures_characters",
+    language_version = _LANG,
+    size = "small",
+    main = "test/characters_test.dart",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "provider_contract_test",
+    package_name = "mc_fixtures_characters",
+    language_version = _LANG,
+    size = "small",
+    srcs = ["test/contract/snapshot_cases.dart"],
+    data = glob(["test/contract/snapshots/*.json"]) + [
+        "CONTRACT.md",
+        "fixtures/routes.json",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/contract/provider_contract_test.dart",
+    deps = _TEST_DEPS,
+)

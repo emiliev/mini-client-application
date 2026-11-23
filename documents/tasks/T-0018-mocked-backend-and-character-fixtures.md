@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Ready for verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0018-mocked-backend` (from `origin/main` `53c612d`+) |
@@ -34,6 +34,33 @@ The data source for the whole Marvel app: a deterministic, data-free Dio `HttpCl
 
 ## Log
 - 2026-11-23: Created and dispatched (app work, in parallel with T-0017).
+- 2026-11-23: Engineer implemented all three packages. `tool/bazelw test` over the three package trees: 4 targets PASS (40 test cases); `build --config=lint //utility/...` clean; `dart format --set-exit-if-changed utility` clean. Finding F-0013 written.
 
 ## Outcome
-_Pending._
+Implemented:
+- `utility/mc_mocked_backend`: `MockBackend` (seeded SplitMix64 with named forks, fixed clock, canonical sorted-key JSON), `MockBackendAdapter implements HttpClientAdapter`, `MockRouter` (`:param`, literal beats parameter), `LatencyProfile` (`none` / `realistic` / `slow`), `FailureRule` (`timeout`, `offline`, `http`, `notFound`, `unauthorized`, `malformed`, `slow`; triggers `always`, `once`, `times`, `afterCalls`, `probability`), scenarios, in-memory store, `reset()`, traffic stream plus a 500-entry ring buffer. No data.
+- `utility/mc_fixtures_media`: 24 generated original placeholder portraits at 1x/2x/3x (288 KB total, `tool/generate_placeholders.dart`), `ApiImage` + `ImageVariant`, `BundledImageResolver` (`mock-asset://<set>/<id>`).
+- `utility/mc_fixtures_characters`: 1,500 invented characters, `CharactersMockDomain` (`GET /v1/characters`, `GET /v1/characters/:id`), `characters.empty` and `characters.server_error` scenarios, `CONTRACT.md`, `fixtures/routes.json`, 7 provider snapshots (`tool/update_snapshots.dart`).
+
+Deviations and choices to review:
+- The plan lists `mc_prelude`, `mc_di`, `mc_config`, `mc_api_client` as deps of the engine; none exist yet (P1-05), so the engine depends on `dio` only. `NetworkDiagnostics` (an `mc_api_client` interface) is not defined here; `MockBackend` exposes the same surface (`setLatency`, `failNext`, `useScenario`, `traffic`) for P1-05 to adapt.
+- `ApiImage` / `ImageVariant` live in `mc_fixtures_media` until `mc_media` exists (the plan has media depending on it). The JSON shape is the contract.
+- `mc_fixtures_characters` depends on `mc_fixtures_media` (plan: engine only) so thumbnail paths are validated against the same placeholder catalogue.
+- Failure rules run before route lookup, so a rule works on a path with no registered route.
+- `TrafficEntry.duration` is the simulated time (latency plus injected delay), not wall time, so it is deterministic.
+- Per-route latency overrides and `empty` as a generic failure kind are not built (the characters `empty` scenario is a handler override). Pending-work candidates.
+- Contract schema validation (`contract/schemas/*.json`, plan 05) is not built; the snapshots plus a structural test stand in.
+- Tests use `flutter_test` (F-0013 item 1) and add `fake_async` as a dev dependency; no new third-party package beyond `dio ^5.9.0` (and its transitive deps in `pubspec.lock`).
+- `MODULE.bazel.lock` changed when Bazel resolved the new pub deps; it is not committed (TL re-resolves, per the task).
+
+## AC to test map
+| AC | Test (file, name contains the ID) | Result |
+|---|---|---|
+| T-0018-AC1 | `utility/mc_mocked_backend/test/mocked_backend_test.dart` `T-0018-AC1: seed 42 gives byte-identical responses on two backends` (+ 2 more) | PASS |
+| T-0018-AC2 | same file, `T-0018-AC2: latency none ...`, `T-0018-AC2: realistic latency waits exactly the seeded delay` | PASS |
+| T-0018-AC3 | same file, `T-0018-AC3: timeout once throws connectionTimeout, then succeeds` (+ 3 more) | PASS |
+| T-0018-AC4 | same file, `T-0018-AC4: an unregistered route is 404 and names the path` (+ 2 more) | PASS |
+| T-0018-AC5 | same file, `T-0018-AC5: the stream emits method, path, status and duration` (+ ring buffer) | PASS |
+| T-0018-AC6 | `utility/mc_fixtures_characters/test/characters_test.dart` `T-0018-AC6: offset 30 limit 30 is page 2 of 1,500`, `...nameStartsWith=spi...` (+ 9 more) | PASS |
+| T-0018-AC7 | `utility/mc_fixtures_characters/test/contract/provider_contract_test.dart` (7 snapshot tests, manifest, CONTRACT.md, `every ApiImage in all 1,500 responses resolves to an existing asset`); `utility/mc_fixtures_media/test/bundled_image_resolver_test.dart` | PASS |
+| T-0018-AC8 | `tool/bazelw test //utility/mc_mocked_backend/... //utility/mc_fixtures_characters/... //utility/mc_fixtures_media/...` and `tool/bazelw build --config=lint //utility/...`; log in `documents/evidence/T-0018/engineer/ac8-test-and-lint.log` | PASS |

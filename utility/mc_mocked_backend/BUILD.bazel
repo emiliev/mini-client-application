@@ -1,0 +1,30 @@
+# T-0018 (P1-06): the data-free mocked-backend engine. Pure Dart; tests use
+# flutter_test because `package:test` is not in the root lock (F-0013).
+load("@rules_dart//dart:defs.bzl", "dart_library")
+load("@rules_flutter//flutter:defs.bzl", "flutter_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+dart_library(
+    name = "mc_mocked_backend",
+    package_name = "mc_mocked_backend",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    deps = ["@pub_deps//:dio"],
+)
+
+flutter_test(
+    name = "mocked_backend_test",
+    package_name = "mc_mocked_backend",
+    language_version = _LANG,
+    size = "small",
+    main = "test/mocked_backend_test.dart",
+    deps = [
+        ":mc_mocked_backend",
+        "@pub_deps//:dio",
+        "@pub_deps//:fake_async",
+        "@pub_deps//:flutter_test",
+    ],
+)

@@ -1,0 +1,18 @@
+# T-0018 (P1-07): the characters domain of the mocked backend (R3: data plus small pure-Dart handlers).
+name: mc_fixtures_characters
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  dio: ^5.9.0
+  mc_fixtures_media: any
+  mc_mocked_backend: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

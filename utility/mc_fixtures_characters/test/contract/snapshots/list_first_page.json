@@ -1,0 +1,42 @@
+{
+  "body": {
+    "count": 3,
+    "limit": 3,
+    "offset": 0,
+    "results": [
+      {
+        "description": "Amber Alchemist was a mountain radio operator before a quiet accident turned spark leap into a daily habit. Known to be never seen without a scarf.",
+        "id": 100486,
+        "modified": "2020-11-10T00:00:00.000Z",
+        "name": "Amber Alchemist",
+        "thumbnail": {
+          "path": "mock-asset://characters/020",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "description": "Amber Artisan was a lighthouse keeper's apprentice before a quiet accident turned light weaving into a daily habit. Known to be stubborn but fair.",
+        "id": 101406,
+        "modified": "2025-07-09T00:00:00.000Z",
+        "name": "Amber Artisan",
+        "thumbnail": {
+          "path": "mock-asset://characters/002",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "description": "Amber Bard was a mountain radio operator before a quiet accident turned magnetic pull into a daily habit. Known to be fiercely loyal.",
+        "id": 101446,
+        "modified": "2022-02-02T00:00:00.000Z",
+        "name": "Amber Bard",
+        "thumbnail": {
+          "path": "mock-asset://characters/009",
+          "variant": "portrait_medium"
+        }
+      }
+    ],
+    "total": 1500
+  },
+  "request": "GET /v1/characters?limit=3",
+  "status": 200
+}

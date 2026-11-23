@@ -1,0 +1,27 @@
+{
+  "body": {
+    "appearances": {
+      "comics": 214,
+      "events": 5,
+      "series": 26
+    },
+    "description": "Spindle Warden was an archivist of lost maps before a quiet accident turned echo vision into a daily habit. Known to be obsessed with tidy handwriting.",
+    "firstAppearanceYear": 2011,
+    "id": 100000,
+    "modified": "2023-02-21T00:00:00.000Z",
+    "name": "Spindle Warden",
+    "origin": "an archivist of lost maps",
+    "powers": [
+      "Dream walking",
+      "Echo vision",
+      "Iron skin"
+    ],
+    "team": "The Quiet Ones",
+    "thumbnail": {
+      "path": "mock-asset://characters/015",
+      "variant": "portrait_medium"
+    }
+  },
+  "request": "GET /v1/characters/100000",
+  "status": 200
+}

@@ -1,0 +1,42 @@
+{
+  "body": {
+    "count": 3,
+    "limit": 3,
+    "offset": 0,
+    "results": [
+      {
+        "description": "Spindle Alchemist was a clockmaker's daughter before a quiet accident turned time stutter into a daily habit. Known to be allergic to ceremony.",
+        "id": 100480,
+        "modified": "2023-07-13T00:00:00.000Z",
+        "name": "Spindle Alchemist",
+        "thumbnail": {
+          "path": "mock-asset://characters/014",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "description": "Spindle Artisan was a lighthouse keeper's apprentice before a quiet accident turned phase walking into a daily habit. Known to be always a little late.",
+        "id": 101400,
+        "modified": "2025-12-26T00:00:00.000Z",
+        "name": "Spindle Artisan",
+        "thumbnail": {
+          "path": "mock-asset://characters/006",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "description": "Spindle Bard was a street-market chemist before a quiet accident turned stone sense into a daily habit. Known to be unusually patient.",
+        "id": 101440,
+        "modified": "2025-08-21T00:00:00.000Z",
+        "name": "Spindle Bard",
+        "thumbnail": {
+          "path": "mock-asset://characters/020",
+          "variant": "portrait_medium"
+        }
+      }
+    ],
+    "total": 152
+  },
+  "request": "GET /v1/characters?nameStartsWith=spi&limit=3",
+  "status": 200
+}

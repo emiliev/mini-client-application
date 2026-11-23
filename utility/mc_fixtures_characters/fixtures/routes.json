@@ -1,0 +1,11 @@
+{
+  "domain": "characters",
+  "routes": [
+    "GET /v1/characters",
+    "GET /v1/characters/:id"
+  ],
+  "scenarios": [
+    "characters.empty",
+    "characters.server_error"
+  ]
+}

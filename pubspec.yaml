@@ -13,4 +13,7 @@ workspace:
   - tool/mc_arch_check
   - utility/mc_analysis
   - utility/mc_di
+  - utility/mc_fixtures_characters
+  - utility/mc_fixtures_media
+  - utility/mc_mocked_backend
   - utility/mc_prelude

@@ -1,0 +1,32 @@
+{
+  "body": {
+    "count": 2,
+    "limit": 2,
+    "offset": 0,
+    "results": [
+      {
+        "description": "Zephyr Weaver was a clockmaker's daughter before a quiet accident turned phase walking into a daily habit. Known to be unusually patient.",
+        "id": 100229,
+        "modified": "2025-09-20T00:00:00.000Z",
+        "name": "Zephyr Weaver",
+        "thumbnail": {
+          "path": "mock-asset://characters/005",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "description": "Zephyr Watcher was a retired weather forecaster before a quiet accident turned magnetic pull into a daily habit. Known to be quick to laugh.",
+        "id": 101389,
+        "modified": "2025-03-06T00:00:00.000Z",
+        "name": "Zephyr Watcher",
+        "thumbnail": {
+          "path": "mock-asset://characters/023",
+          "variant": "portrait_medium"
+        }
+      }
+    ],
+    "total": 1500
+  },
+  "request": "GET /v1/characters?orderBy=-name&limit=2",
+  "status": 200
+}
