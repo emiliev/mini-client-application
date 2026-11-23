@@ -4,6 +4,8 @@ import 'api_image.dart';
 /// `count - 1`. Keep in step with `tool/generate_placeholders.dart`.
 const Map<String, int> placeholderSets = {'characters': 24};
 
+final RegExp _digits = RegExp(r'^\d+$');
+
 const String mockAssetScheme = 'mock-asset';
 
 /// A bundled asset an [ApiImage] resolved to.
@@ -69,7 +71,9 @@ final class BundledImageResolver {
       throw UnresolvedImageException(image.path, 'unknown set "$set"');
     }
     final segments = uri.pathSegments;
-    final index = segments.length == 1 ? int.tryParse(segments.single) : null;
+    final index = segments.length == 1 && _digits.hasMatch(segments.single)
+        ? int.tryParse(segments.single)
+        : null;
     if (index == null || index < 0 || index >= count) {
       throw UnresolvedImageException(
         image.path,

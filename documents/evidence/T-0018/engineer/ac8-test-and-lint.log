@@ -1,46 +1,7 @@
-INFO: Invocation ID: fc57afe1-3250-4190-ab60-947c74d8714e
+INFO: Invocation ID: b766e5d7-858d-4296-9bca-32ad22c55948
 
 INFO: Analyzed 8 targets (0 packages loaded, 0 targets configured).
-INFO: Found 4 targets and 4 test targets...
-INFO: Elapsed time: 0.189s, Critical Path: 0.01s
-INFO: 16 processes: 10 action cache hit, 9 disk cache hit, 7 internal.
-INFO: Build completed successfully, 16 total actions
-PASSED: //utility/mc_fixtures_characters:characters_test (see /Users/emililiev/Library/Caches/bazel/_bazel_emililiev/4f212aaffd7ac8db1ecd74e8dde4afa7/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_fixtures_characters/characters_test/test.log)
-INFO: From Testing //utility/mc_fixtures_characters:characters_test
-==================== Test output for //utility/mc_fixtures_characters:characters_test:
-  PASS  T-0018-AC6 pagination T-0018-AC6: offset 30 limit 30 is page 2 of 1,500
-  PASS  T-0018-AC6 pagination T-0018-AC6: the order is stable, sorted and covers every character
-  PASS  T-0018-AC6 pagination T-0018-AC6: the last page is short and past the end is empty
-  PASS  T-0018-AC6 pagination T-0018-AC6: invalid paging parameters are 400
-  PASS  T-0018-AC6 search T-0018-AC6: nameStartsWith=spi matches names starting with spi, ignoring case
-  PASS  T-0018-AC6 search T-0018-AC6: other prefixes do not leak in (Sparrow is not spi)
-  PASS  T-0018-AC6 search T-0018-AC6: orderBy -name reverses and ties break on id
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: detail by id, 404 for an unknown id
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: names are unique and the cast is 1,500
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: the seed changes details but not the catalogue of names
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: scenarios empty and server_error
-
-11 passed
-================================================================================
-PASSED: //utility/mc_fixtures_characters:provider_contract_test (see /Users/emililiev/Library/Caches/bazel/_bazel_emililiev/4f212aaffd7ac8db1ecd74e8dde4afa7/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_fixtures_characters/provider_contract_test/test.log)
-INFO: From Testing //utility/mc_fixtures_characters:provider_contract_test
-==================== Test output for //utility/mc_fixtures_characters:provider_contract_test:
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_first_page matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_offset_30 matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_search_spi matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_order_desc matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: detail matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: detail_not_found matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_invalid_limit matches its snapshot
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: no snapshot file lacks a case
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: the route manifest, the domain and the scenarios agree
-  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: CONTRACT.md documents every route and scenario
-  PASS  T-0018-AC7 images in responses T-0018-AC7: every ApiImage in all 1,500 responses resolves to an existing asset
-
-11 passed
-================================================================================
-PASSED: //utility/mc_fixtures_media:bundled_image_resolver_test (see /Users/emililiev/Library/Caches/bazel/_bazel_emililiev/4f212aaffd7ac8db1ecd74e8dde4afa7/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_fixtures_media/bundled_image_resolver_test/test.log)
-INFO: From Testing //utility/mc_fixtures_media:bundled_image_resolver_test
+INFO: From Testing //utility/mc_fixtures_media:bundled_image_resolver_test:
 ==================== Test output for //utility/mc_fixtures_media:bundled_image_resolver_test:
   PASS  T-0018-AC7 image resolution T-0018-AC7: every placeholder id resolves to files that exist
   PASS  T-0018-AC7 image resolution T-0018-AC7: path and variant resolve to a package asset key
@@ -49,8 +10,7 @@ INFO: From Testing //utility/mc_fixtures_media:bundled_image_resolver_test
 
 4 passed
 ================================================================================
-PASSED: //utility/mc_mocked_backend:mocked_backend_test (see /Users/emililiev/Library/Caches/bazel/_bazel_emililiev/4f212aaffd7ac8db1ecd74e8dde4afa7/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_mocked_backend/mocked_backend_test/test.log)
-INFO: From Testing //utility/mc_mocked_backend:mocked_backend_test
+INFO: From Testing //utility/mc_mocked_backend:mocked_backend_test:
 ==================== Test output for //utility/mc_mocked_backend:mocked_backend_test:
   PASS  T-0018-AC1 determinism T-0018-AC1: seed 42 gives byte-identical responses on two backends
   PASS  T-0018-AC1 determinism T-0018-AC1: JSON keys come out sorted and the clock is fixed
@@ -66,17 +26,61 @@ INFO: From Testing //utility/mc_mocked_backend:mocked_backend_test
   PASS  T-0018-AC4 unknown routes T-0018-AC4: a throwing handler is a 500, and POST bodies arrive
   PASS  T-0018-AC5 traffic diagnostics T-0018-AC5: the stream emits method, path, status and duration
   PASS  T-0018-AC5 traffic diagnostics T-0018-AC5: the ring buffer keeps the last N requests
+  PASS  review regressions T-0018-AC3: a rule is consumed only by the request it fails
+  PASS  review regressions T-0018-AC2: a delay beyond receiveTimeout or connectTimeout times out
+  PASS  review regressions T-0018-AC4: bad UTF-8 bodies and bad percent-encoding answer 400 and are logged
+  PASS  review regressions T-0018-AC5: cancelling during the delay records it and skips the handler
+  PASS  review regressions T-0018-AC4: ambiguous routes are rejected, literal precedence is kept
+  PASS  review regressions T-0018-AC4: list-valued headers are joined with a comma and a space
 
-14 passed
+20 passed
 ================================================================================
-//utility/mc_fixtures_characters:characters_test                (cached) PASSED in 0.3s
-//utility/mc_fixtures_characters:provider_contract_test         (cached) PASSED in 0.4s
-//utility/mc_fixtures_media:bundled_image_resolver_test         (cached) PASSED in 0.2s
-//utility/mc_mocked_backend:mocked_backend_test                 (cached) PASSED in 0.3s
+INFO: From Testing //utility/mc_fixtures_characters:provider_contract_test:
+==================== Test output for //utility/mc_fixtures_characters:provider_contract_test:
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_first_page matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_offset_30 matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_search_spi matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_order_desc matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: detail matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: detail_not_found matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: list_invalid_limit matches its snapshot
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: no snapshot file lacks a case
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: the route manifest, the domain and the scenarios agree
+  PASS  T-0018-AC7 provider contract snapshots T-0018-AC7: CONTRACT.md documents every route and scenario
+  PASS  T-0018-AC7 images in responses T-0018-AC7: every ApiImage in all 1,500 responses resolves to an existing asset
 
-Executed 0 out of 4 tests: 4 tests pass.
-There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+11 passed
+================================================================================
+INFO: From Testing //utility/mc_fixtures_characters:characters_test:
+==================== Test output for //utility/mc_fixtures_characters:characters_test:
+  PASS  T-0018-AC6 pagination T-0018-AC6: offset 30 limit 30 is page 2 of 1,500
+  PASS  T-0018-AC6 pagination T-0018-AC6: the order is stable, sorted and covers every character
+  PASS  T-0018-AC6 pagination T-0018-AC6: the last page is short and past the end is empty
+  PASS  T-0018-AC6 pagination T-0018-AC6: invalid paging parameters are 400
+  PASS  T-0018-AC6 search T-0018-AC6: nameStartsWith=spi matches names starting with spi, ignoring case
+  PASS  T-0018-AC6 search T-0018-AC6: other prefixes do not leak in (Sparrow is not spi)
+  PASS  T-0018-AC6 search T-0018-AC6: orderBy -name reverses and ties break on id
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: detail by id, 404 for an unknown id
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: names are unique and the cast is 1,500
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: the seed changes details but not the catalogue of names
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: ids and paging values are strict decimal digits
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: the empty scenario validates like the normal handler
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: scenarios empty and server_error
+
+13 passed
+================================================================================
+INFO: Found 4 targets and 4 test targets...
+INFO: Elapsed time: 0.640s, Critical Path: 0.47s
+INFO: 5 processes: 1 internal, 4 darwin-sandbox.
+INFO: Build completed successfully, 5 total actions
+//utility/mc_fixtures_characters:characters_test                         PASSED in 0.5s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.4s
+//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.3s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 0.4s
+
+Executed 4 out of 4 tests: 4 tests pass.
 INFO: Found 8 targets...
-INFO: Elapsed time: 0.179s, Critical Path: 0.00s
-INFO: 1 process: 1 internal.
+INFO: Elapsed time: 0.335s, Critical Path: 0.01s
+INFO: 1 process: 109 action cache hit, 1 internal.
 INFO: Build completed successfully, 1 total action
+Formatted 24 files (0 changed) in 0.02 seconds.

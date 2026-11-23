@@ -45,6 +45,19 @@ final class MockRoute {
 
   int get _literals => _segments.where((s) => !s.startsWith(':')).length;
 
+  /// Whether some path could match both this route and [other].
+  bool _overlaps(MockRoute other) {
+    if (method != other.method || _segments.length != other._segments.length) {
+      return false;
+    }
+    for (var i = 0; i < _segments.length; i++) {
+      final a = _segments[i];
+      final b = other._segments[i];
+      if (!a.startsWith(':') && !b.startsWith(':') && a != b) return false;
+    }
+    return true;
+  }
+
   Map<String, String>? _match(String method, List<String> path) {
     if (method != this.method || path.length != _segments.length) return null;
     final params = <String, String>{};
@@ -86,11 +99,23 @@ final class MockRouter {
     if (_routes.any((r) => r.key == route.key)) {
       throw StateError('Route already registered: ${route.key}');
     }
+    // Precedence is "most literal segments wins". Two routes that can match
+    // one path with the same literal count would depend on registration
+    // order, so refuse them.
+    for (final other in _routes) {
+      if (other._overlaps(route) && other._literals == route._literals) {
+        throw StateError(
+          'Ambiguous routes: ${other.key} and ${route.key} can match the '
+          'same path with equal precedence',
+        );
+      }
+    }
     _routes.add(route);
   }
 
   /// The match with the most literal segments, so `/v1/characters/search`
-  /// beats `/v1/characters/:id`. Null if nothing matches.
+  /// beats `/v1/characters/:id`; [add] rejects ties. Null if nothing matches.
+  /// Throws [FormatException] for bad percent-encoding in a parameter.
   RouteMatch? resolve(String method, String path) {
     final segments = _split(path);
     RouteMatch? best;

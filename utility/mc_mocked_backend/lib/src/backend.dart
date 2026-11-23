@@ -181,80 +181,150 @@ final class MockBackend {
   Duration latencyForRequest(int index) =>
       _latency.delayFor(_root.fork('latency').fork('$index'));
 
-  // --- Pipeline: failure rules -> route -> latency -> handler ---------------
+  // --- Pipeline: failure rules -> latency -> route -> handler ---------------
+
+  /// The first rule (injected ones first) that matches [request] and fires.
+  /// Only rules that match are counted, and rules after the winner are not
+  /// touched, so a `once` rule is consumed only by the request it fails.
+  FailureKind? _pickFailure(MockRequest request) {
+    final rules = [..._injected, ..._configured];
+    for (var i = 0; i < rules.length; i++) {
+      final active = rules[i];
+      if (!active.rule.matches(request)) continue;
+      final call = active.calls + 1;
+      final rng = _root.fork('failure').fork('$i:$call');
+      active.calls = call;
+      if (active.rule.trigger.fires(call, rng)) return active.rule.kind;
+    }
+    return null;
+  }
 
   Future<ResponseBody> handle(
     RequestOptions options,
-    Stream<Uint8List>? requestStream,
-  ) async {
+    Stream<Uint8List>? requestStream, [
+    Future<void>? cancelFuture,
+  ]) async {
     final index = _requests++;
-    final request = await _toRequest(options, requestStream);
+    String? badRequest;
+    MockRequest request;
+    try {
+      request = await _toRequest(options, requestStream);
+    } on FormatException catch (e) {
+      badRequest = 'Malformed request URL: ${e.message}';
+      request = MockRequest(
+        method: options.method.toUpperCase(),
+        path: options.uri.path,
+      );
+    }
     var delay = latencyForRequest(index);
 
-    FailureKind? failure;
-    var ruleIndex = 0;
-    for (final active in [..._configured, ..._injected]) {
-      final i = ruleIndex++;
-      if (!active.rule.matches(request)) continue;
-      active.calls++;
-      final rng = _root.fork('failure').fork('$i:${active.calls}');
-      if (failure == null && active.rule.trigger.fires(active.calls, rng)) {
-        failure = active.rule.kind;
-      }
-    }
+    final failure = badRequest == null ? _pickFailure(request) : null;
     if (failure is SlowFailure) delay += failure.delay;
 
-    if (delay > Duration.zero) await Future<void>.delayed(delay);
+    TrafficEntry entry(int? status, Duration duration, [String? error]) =>
+        TrafficEntry(
+          method: request.method,
+          path: request.path,
+          status: status,
+          duration: duration,
+          error: error,
+        );
 
-    TrafficEntry entry(int? status, [String? error]) => TrafficEntry(
-      method: request.method,
-      path: request.path,
-      status: status,
-      duration: delay,
-      error: error,
-    );
+    // A delay beyond the request's own timeouts is that timeout, after
+    // waiting for it, as on a real network.
+    final connect = options.connectTimeout;
+    final receive = options.receiveTimeout;
+    DioException? timedOut;
+    var wait = delay;
+    if (connect != null && connect > Duration.zero && delay > connect) {
+      wait = connect;
+      timedOut = DioException.connectionTimeout(
+        timeout: connect,
+        requestOptions: options,
+      );
+    }
+    if (receive != null &&
+        receive > Duration.zero &&
+        delay > receive &&
+        (timedOut == null || receive < wait)) {
+      wait = receive;
+      timedOut = DioException.receiveTimeout(
+        timeout: receive,
+        requestOptions: options,
+      );
+    }
+
+    if (wait > Duration.zero && !await _sleep(wait, cancelFuture)) {
+      _record(entry(null, Duration.zero, 'cancel'));
+      throw DioException.requestCancelled(
+        requestOptions: options,
+        reason: 'Cancelled while waiting for the mock backend',
+      );
+    }
+    if (timedOut != null) {
+      _record(entry(null, wait, timedOut.type.name));
+      throw timedOut;
+    }
+
+    ResponseBody respond(MockResponse response) {
+      _record(entry(response.status, delay));
+      return _body(response.encode(), response.status);
+    }
 
     switch (failure) {
       case TimeoutFailure():
         final e = DioException.connectionTimeout(
-          timeout: timeout,
+          timeout: connect ?? timeout,
           requestOptions: options,
         );
-        _record(entry(null, e.type.name));
+        _record(entry(null, delay, e.type.name));
         throw e;
       case OfflineFailure():
         final e = DioException.connectionError(
           requestOptions: options,
           reason: 'Mock backend is offline',
         );
-        _record(entry(null, e.type.name));
+        _record(entry(null, delay, e.type.name));
         throw e;
       case HttpFailure(:final status):
-        return _respond(
+        return respond(
           MockResponse.error(
             status,
             'injected_failure',
             'Injected HTTP $status for ${request.routeKey}',
           ),
-          entry,
         );
       case MalformedFailure():
-        _record(entry(200));
+        _record(entry(200, delay));
         return _body('{"results": [', 200);
       case SlowFailure() || null:
         break;
     }
 
-    final match = router.resolve(request.method, request.path);
+    if (badRequest != null) {
+      return respond(MockResponse.error(400, 'bad_request', badRequest));
+    }
+    final RouteMatch? match;
+    try {
+      match = router.resolve(request.method, request.path);
+    } on FormatException catch (e) {
+      return respond(
+        MockResponse.error(
+          400,
+          'bad_request',
+          'Malformed path ${request.path}: ${e.message}',
+          extra: {'path': request.path},
+        ),
+      );
+    }
     if (match == null) {
-      return _respond(
+      return respond(
         MockResponse.error(
           404,
           'not_found',
           'No mock route for ${request.method} ${request.path}',
           extra: {'path': request.path},
         ),
-        entry,
       );
     }
 
@@ -272,24 +342,30 @@ final class MockBackend {
         ),
       );
     } on Object catch (e) {
-      return _respond(
+      return respond(
         MockResponse.error(
           500,
           'handler_error',
           'Handler for ${match.route.key} threw: $e',
         ),
-        entry,
       );
     }
-    return _respond(response, entry);
+    return respond(response);
   }
 
-  ResponseBody _respond(
-    MockResponse response,
-    TrafficEntry Function(int? status, [String? error]) entry,
-  ) {
-    _record(entry(response.status));
-    return _body(response.encode(), response.status);
+  /// Waits [d]; false if [cancel] completes first (the timer is dropped).
+  Future<bool> _sleep(Duration d, Future<void>? cancel) {
+    final done = Completer<bool>();
+    final timer = Timer(d, () {
+      if (!done.isCompleted) done.complete(true);
+    });
+    cancel?.then((_) {
+      if (!done.isCompleted) {
+        timer.cancel();
+        done.complete(false);
+      }
+    }, onError: (_) {});
+    return done.future;
   }
 
   ResponseBody _body(String json, int status) => ResponseBody.fromString(
@@ -308,17 +384,18 @@ final class MockBackend {
     _trafficController.add(entry);
   }
 
+  /// Throws [FormatException] for a URL that cannot be decoded.
   Future<MockRequest> _toRequest(
     RequestOptions options,
     Stream<Uint8List>? requestStream,
   ) async {
     Object? body;
     if (requestStream != null) {
-      final bytes = <int>[];
+      final bytes = BytesBuilder(copy: false);
       await for (final chunk in requestStream) {
-        bytes.addAll(chunk);
+        bytes.add(chunk);
       }
-      final text = utf8.decode(bytes);
+      final text = utf8.decode(bytes.takeBytes(), allowMalformed: true);
       if (text.isNotEmpty) {
         try {
           body = jsonDecode(text);
@@ -338,7 +415,9 @@ final class MockBackend {
       },
       headers: {
         for (final e in options.headers.entries)
-          e.key.toLowerCase(): e.value.toString(),
+          e.key.toLowerCase(): e.value is Iterable
+              ? (e.value as Iterable).join(', ')
+              : e.value.toString(),
       },
       body: body,
     );
@@ -357,7 +436,7 @@ final class MockBackendAdapter implements HttpClientAdapter {
     RequestOptions options,
     Stream<Uint8List>? requestStream,
     Future<void>? cancelFuture,
-  ) => _backend.handle(options, requestStream);
+  ) => _backend.handle(options, requestStream, cancelFuture);
 
   @override
   void close({bool force = false}) {}

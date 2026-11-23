@@ -1,9 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+
+int handlerCalls = 0;
 
 /// A tiny domain: the engine ships no data of its own (R3).
 final class _EchoDomain implements MockDomain {
@@ -37,7 +41,15 @@ final class _EchoDomain implements MockDomain {
       ..get(
         '/v1/boom',
         (request, context) => throw StateError('handler exploded'),
-      );
+      )
+      ..get(
+        '/v1/headers',
+        (request, context) => MockResponse.ok(request.headers),
+      )
+      ..get('/v1/count', (request, context) {
+        handlerCalls++;
+        return const MockResponse.ok({'ok': true});
+      });
   }
 
   @override
@@ -389,5 +401,186 @@ void main() {
         '/v1/items/4',
       ]);
     });
+  });
+
+  group('review regressions', () {
+    test(
+      'T-0018-AC3: a rule is consumed only by the request it fails',
+      () async {
+        final backend = _backend(
+          failures: const [
+            FailureRule(
+              'GET',
+              '/v1/x',
+              FailureKind.http(503),
+              FailureTrigger.times(2),
+            ),
+          ],
+        );
+        final dio = backend.createDio();
+        Future<int?> status(String path) async => (await dio.get<Object?>(
+          path,
+          options: Options(validateStatus: (_) => true),
+        )).statusCode;
+
+        // Injected rules are checked first and shadow the configured one, so
+        // the configured times(2) is not used up by the request they fail.
+        backend.failNext('GET', '/v1/x', const FailureKind.http(500));
+        expect(await status('/v1/x'), 500);
+        expect(await status('/v1/x'), 503);
+        expect(await status('/v1/x'), 503);
+        expect(await status('/v1/x'), 200);
+
+        // A once rule on another path is untouched by unrelated traffic.
+        backend.failNext('GET', '/v1/items/:id', const FailureKind.http(500));
+        expect(await status('/v1/x'), 200);
+        expect(await status('/v1/items/1'), 500);
+        expect(await status('/v1/items/1'), 200);
+      },
+    );
+
+    test(
+      'T-0018-AC2: a delay beyond receiveTimeout or connectTimeout times out',
+      () {
+        fakeAsync((async) {
+          final backend = _backend(latency: const LatencyProfile.slow());
+          final dio = backend.createDio();
+          Object? receive;
+          Object? connect;
+          dio
+              .get<Object?>(
+                '/v1/x',
+                options: Options(
+                  receiveTimeout: const Duration(milliseconds: 300),
+                ),
+              )
+              .then<void>((_) {}, onError: (Object e) => receive = e);
+          async.elapse(const Duration(milliseconds: 299));
+          expect(receive, isNull);
+          async.elapse(const Duration(milliseconds: 1));
+          expect(
+            receive,
+            isA<DioException>()
+                .having((e) => e.type, 'type', DioExceptionType.receiveTimeout)
+                .having(
+                  (e) => e.message,
+                  'message',
+                  contains('0:00:00.300000'),
+                ),
+          );
+          expect(backend.recentTraffic.single.error, 'receiveTimeout');
+          expect(
+            backend.recentTraffic.single.duration,
+            const Duration(milliseconds: 300),
+          );
+
+          dio
+              .get<Object?>(
+                '/v1/x',
+                options: Options(
+                  connectTimeout: const Duration(milliseconds: 200),
+                  receiveTimeout: const Duration(seconds: 5),
+                ),
+              )
+              .then<void>((_) {}, onError: (Object e) => connect = e);
+          async.elapse(const Duration(milliseconds: 200));
+          expect(
+            connect,
+            isA<DioException>().having(
+              (e) => e.type,
+              'type',
+              DioExceptionType.connectionTimeout,
+            ),
+          );
+          async.flushTimers();
+        });
+      },
+    );
+
+    test('T-0018-AC4: bad UTF-8 bodies and bad percent-encoding answer 400 and are logged', () async {
+      final backend = _backend();
+      final dio = backend.createDio();
+      final echo = await dio.post<Map<String, Object?>>(
+        '/v1/echo',
+        data: Uint8List.fromList([0x61, 0xff, 0xfe, 0x62]),
+        options: Options(contentType: 'application/octet-stream'),
+      );
+      expect(echo.statusCode, 200);
+      expect(echo.data!['got']! as String, contains('a'));
+
+      for (final path in ['/v1/items/%FF', '/v1/x?q=%FF']) {
+        final response = await backend.adapter.fetch(
+          RequestOptions(path: path, baseUrl: 'https://h.invalid'),
+          null,
+          null,
+        );
+        expect(response.statusCode, 400, reason: path);
+      }
+      final logged = backend.recentTraffic.map((e) => e.status).toList();
+      expect(logged, [200, 400, 400]);
+    });
+
+    test('T-0018-AC5: cancelling during the delay records it and skips the handler', () {
+      fakeAsync((async) {
+        handlerCalls = 0;
+        final backend = _backend(latency: const LatencyProfile.slow());
+        final cancel = Completer<void>();
+        Object? error;
+        backend.adapter
+            .fetch(
+              RequestOptions(path: '/v1/count', baseUrl: 'https://h.invalid'),
+              null,
+              cancel.future,
+            )
+            .then<void>((_) {}, onError: (Object e) => error = e);
+        async.elapse(const Duration(milliseconds: 100));
+        cancel.complete();
+        async.flushMicrotasks();
+        expect(
+          error,
+          isA<DioException>().having(
+            (e) => e.type,
+            'type',
+            DioExceptionType.cancel,
+          ),
+        );
+        expect(backend.recentTraffic.single.error, 'cancel');
+        async.elapse(const Duration(seconds: 5));
+        expect(handlerCalls, 0);
+        expect(async.pendingTimers, isEmpty);
+      });
+    });
+
+    test(
+      'T-0018-AC4: ambiguous routes are rejected, literal precedence is kept',
+      () {
+        MockResponse h(MockRequest r, MockContext c) => const MockResponse(200);
+        final router = MockRouter()
+          ..get('/a/:x/c', h)
+          ..get('/a/b/c', h);
+        expect(() => router.get('/a/b/:y', h), throwsStateError);
+        expect(() => router.get('/a/:z/c', h), throwsStateError);
+        expect(router.resolve('GET', '/a/b/c')!.route.pattern, '/a/b/c');
+        router.get('/a/:x/:y', h); // fewer literals, never ties with the others
+        expect(router.resolve('GET', '/a/q/c')!.route.pattern, '/a/:x/c');
+      },
+    );
+
+    test(
+      'T-0018-AC4: list-valued headers are joined with a comma and a space',
+      () async {
+        final response = await _backend().createDio().get<Map<String, Object?>>(
+          '/v1/headers',
+          options: Options(
+            headers: {
+              'X-Multi': ['a', 'b'],
+              'X-One': 'c',
+            },
+          ),
+        );
+        expect(response.data!['x-multi'], 'a, b');
+        expect(response.data!['x-one'], 'c');
+      },
+    );
   });
 }

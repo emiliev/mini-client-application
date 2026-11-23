@@ -12,6 +12,35 @@ const int maxLimit = 100;
 /// `modified`, `-modified`; default `name`). Ties break on `id`, so the order
 /// is total and stable.
 MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
+  final (:query, :error) = _parse(request);
+  if (query == null) return error!;
+
+  var matches = universe.byName;
+  if (query.prefix.isNotEmpty) {
+    matches = [
+      for (final c in matches)
+        if (c.name.toLowerCase().startsWith(query.prefix)) c,
+    ];
+  }
+  if (query.orderBy != 'name') {
+    matches = [...matches]..sort(_orders[query.orderBy]);
+  }
+
+  final page = matches.skip(query.offset).take(query.limit).toList();
+  return MockResponse.ok(
+    pageEnvelope(
+      offset: query.offset,
+      limit: query.limit,
+      total: matches.length,
+      results: [for (final c in page) c.toSummaryJson()],
+    ),
+  );
+};
+
+typedef _Query = ({int offset, int limit, String orderBy, String prefix});
+
+/// Validates the list query once, for the normal and the `empty` handler.
+({_Query? query, MockResponse? error}) _parse(MockRequest request) {
   final offset = _intParam(request, 'offset', 0, min: 0);
   final limit = _intParam(
     request,
@@ -20,44 +49,45 @@ MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
     min: 1,
     max: maxLimit,
   );
-  if (offset == null) return _invalid('offset', 'must be an integer >= 0');
+  if (offset == null) {
+    return (query: null, error: _invalid('offset', 'must be an integer >= 0'));
+  }
   if (limit == null) {
-    return _invalid('limit', 'must be an integer from 1 to $maxLimit');
+    return (
+      query: null,
+      error: _invalid('limit', 'must be an integer from 1 to $maxLimit'),
+    );
   }
-
   final orderBy = request.query['orderBy'] ?? 'name';
-  final compare = _orders[orderBy];
-  if (compare == null) {
-    return _invalid('orderBy', 'must be one of ${_orders.keys.join(', ')}');
+  if (!_orders.containsKey(orderBy)) {
+    return (
+      query: null,
+      error: _invalid('orderBy', 'must be one of ${_orders.keys.join(', ')}'),
+    );
   }
-
-  final prefix = request.query['nameStartsWith']?.trim().toLowerCase();
-  var matches = universe.byName;
-  if (prefix != null && prefix.isNotEmpty) {
-    matches = [
-      for (final c in matches)
-        if (c.name.toLowerCase().startsWith(prefix)) c,
-    ];
-  }
-  if (orderBy != 'name') matches = [...matches]..sort(compare);
-
-  final page = matches.skip(offset).take(limit).toList();
-  return MockResponse.ok(
-    pageEnvelope(
+  return (
+    query: (
       offset: offset,
       limit: limit,
-      total: matches.length,
-      results: [for (final c in page) c.toSummaryJson()],
+      orderBy: orderBy,
+      prefix: (request.query['nameStartsWith'] ?? '').trim().toLowerCase(),
     ),
+    error: null,
   );
-};
+}
+
+final RegExp _digits = RegExp(r'^\d+$');
+
+/// A non-negative decimal integer, or null. Unlike `int.tryParse` this
+/// rejects `0x10`, `+5` and padded whitespace.
+int? parseDigits(String raw) =>
+    _digits.hasMatch(raw) ? int.tryParse(raw) : null;
 
 /// `GET /v1/characters/:id`.
 MockHandler characterDetail(CharacterUniverse universe) => (request, context) {
   final raw = context.params['id']!;
-  final character = int.tryParse(raw) == null
-      ? null
-      : universe.find(int.parse(raw));
+  final id = parseDigits(raw);
+  final character = id == null ? null : universe.find(id);
   if (character == null) {
     return MockResponse.error(
       404,
@@ -69,16 +99,20 @@ MockHandler characterDetail(CharacterUniverse universe) => (request, context) {
   return MockResponse.ok(character.toDetailJson());
 };
 
-/// The `empty` scenario's list: a well-formed page with no results.
-MockResponse emptyPage(MockRequest request, MockContext context) =>
-    MockResponse.ok(
-      pageEnvelope(
-        offset: int.tryParse(request.query['offset'] ?? '') ?? 0,
-        limit: int.tryParse(request.query['limit'] ?? '') ?? defaultLimit,
-        total: 0,
-        results: const [],
-      ),
-    );
+/// The `empty` scenario's list: validates like the real handler, then
+/// answers a well-formed page with no results.
+MockResponse emptyPage(MockRequest request, MockContext context) {
+  final (:query, :error) = _parse(request);
+  if (query == null) return error!;
+  return MockResponse.ok(
+    pageEnvelope(
+      offset: query.offset,
+      limit: query.limit,
+      total: 0,
+      results: const [],
+    ),
+  );
+}
 
 /// The paginated envelope every list endpoint shares.
 Map<String, Object?> pageEnvelope({
@@ -114,7 +148,7 @@ int? _intParam(
 }) {
   final raw = request.query[name];
   if (raw == null) return fallback;
-  final value = int.tryParse(raw);
+  final value = parseDigits(raw);
   if (value == null || value < min || (max != null && value > max)) return null;
   return value;
 }

@@ -34,7 +34,8 @@ The data source for the whole Marvel app: a deterministic, data-free Dio `HttpCl
 
 ## Log
 - 2026-11-23: Created and dispatched (app work, in parallel with T-0017).
-- 2026-11-23: Engineer implemented all three packages. `tool/bazelw test` over the three package trees: 4 targets PASS (40 test cases); `build --config=lint //utility/...` clean; `dart format --set-exit-if-changed utility` clean. Finding F-0013 written.
+- 2026-11-23: Engineer implemented all three packages. `tool/bazelw test` over the three package trees: 4 targets PASS (40 test cases); `build --config=lint //utility/...` clean; `dart format --set-exit-if-changed utility` clean. Finding F-0015 written.
+- 2026-11-23: Code-review fixes (8 findings) with regression tests; F-0013 renumbered to F-0015. `--nocache_test_results` run: 4 targets PASS (48 PASS lines incl. regressions); lint and format clean.
 
 ## Outcome
 Implemented:
@@ -50,7 +51,8 @@ Deviations and choices to review:
 - `TrafficEntry.duration` is the simulated time (latency plus injected delay), not wall time, so it is deterministic.
 - Per-route latency overrides and `empty` as a generic failure kind are not built (the characters `empty` scenario is a handler override). Pending-work candidates.
 - Contract schema validation (`contract/schemas/*.json`, plan 05) is not built; the snapshots plus a structural test stand in.
-- Tests use `flutter_test` (F-0013 item 1) and add `fake_async` as a dev dependency; no new third-party package beyond `dio ^5.9.0` (and its transitive deps in `pubspec.lock`).
+- Tests use `flutter_test` (F-0015 item 1) and add `fake_async` as a dev dependency; no new third-party package beyond `dio ^5.9.0` (and its transitive deps in `pubspec.lock`).
+- Root-file changes: `pubspec.yaml` (3 workspace entries) and `pubspec.lock` (`dio 5.9.x` plus transitive `mime`, `typed_data`, `web` and others resolved by `fvm flutter pub get`). Not committed: `MODULE.bazel.lock` churn.
 - `MODULE.bazel.lock` changed when Bazel resolved the new pub deps; it is not committed (TL re-resolves, per the task).
 
 ## AC to test map
@@ -64,3 +66,15 @@ Deviations and choices to review:
 | T-0018-AC6 | `utility/mc_fixtures_characters/test/characters_test.dart` `T-0018-AC6: offset 30 limit 30 is page 2 of 1,500`, `...nameStartsWith=spi...` (+ 9 more) | PASS |
 | T-0018-AC7 | `utility/mc_fixtures_characters/test/contract/provider_contract_test.dart` (7 snapshot tests, manifest, CONTRACT.md, `every ApiImage in all 1,500 responses resolves to an existing asset`); `utility/mc_fixtures_media/test/bundled_image_resolver_test.dart` | PASS |
 | T-0018-AC8 | `tool/bazelw test //utility/mc_mocked_backend/... //utility/mc_fixtures_characters/... //utility/mc_fixtures_media/...` and `tool/bazelw build --config=lint //utility/...`; log in `documents/evidence/T-0018/engineer/ac8-test-and-lint.log` | PASS |
+
+## Review fixes (all with regression tests)
+| # | Finding | Fix | Test |
+|---|---|---|---|
+| 1 | Rule counting | Injected rules are checked first; only matching rules up to and including the winner are counted | `T-0018-AC3: a rule is consumed only by the request it fails` |
+| 2 | Timeouts | A delay beyond `connectTimeout` / `receiveTimeout` waits that timeout, then throws `connectionTimeout` / `receiveTimeout` with the option's value; the injected `timeout` kind uses `connectTimeout` too | `T-0018-AC2: a delay beyond receiveTimeout or connectTimeout times out` |
+| 3 | Malformed input | Bodies decode with `allowMalformed`; a bad URL (`%FF` in path or query) is a 400 `bad_request`, logged in traffic | `T-0018-AC4: bad UTF-8 bodies and bad percent-encoding answer 400 and are logged` |
+| 4 | Strict numbers | `^\d+$` for ids, offset, limit and image ids | `T-0018-AC6: ids and paging values are strict decimal digits`, resolver test (AC7) |
+| 5 | Cancellation | The delay races `cancelFuture`; cancel records `cancel` and skips the handler (traffic duration is zero) | `T-0018-AC5: cancelling during the delay records it and skips the handler` |
+| 6 | `characters.empty` | Shares the list query validation | `T-0018-AC6: the empty scenario validates like the normal handler` |
+| 7 | Router ties | `add` throws when two same-method routes can match one path with equal literal counts; more literals wins | `T-0018-AC4: ambiguous routes are rejected, literal precedence is kept` |
+| 8 | Headers | List values join with `", "` | `T-0018-AC4: list-valued headers are joined with a comma and a space` |

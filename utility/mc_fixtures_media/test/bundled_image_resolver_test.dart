@@ -64,6 +64,9 @@ void main() {
         'mock-asset://characters/24',
         'mock-asset://characters/-1',
         'mock-asset://characters/abc',
+        'mock-asset://characters/0x5',
+        'mock-asset://characters/+5',
+        'mock-asset://characters/%205',
         'https://example.invalid/a.png',
       ]) {
         expect(

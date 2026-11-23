@@ -189,6 +189,58 @@ void main() {
       },
     );
 
+    test(
+      'T-0018-AC6: ids and paging values are strict decimal digits',
+      () async {
+        for (final query in [
+          'offset=0x10',
+          'offset=%2B5',
+          'limit=%2030',
+          'limit=1e1',
+          'limit=%0930',
+        ]) {
+          final body = await _get(dio, '/v1/characters?$query');
+          expect(body['error'], isNotNull, reason: query);
+        }
+        for (final id in ['0x186A0', '%2B100000', '%20100000', '100000.0']) {
+          final body = await _get(dio, '/v1/characters/$id');
+          expect(
+            (body['error']! as Map)['code'],
+            'character_not_found',
+            reason: id,
+          );
+        }
+        expect((await _get(dio, '/v1/characters/100000'))['id'], 100000);
+      },
+    );
+
+    test(
+      'T-0018-AC6: the empty scenario validates like the normal handler',
+      () async {
+        final backend = _backend()..useScenario('characters.empty');
+        final dio = backend.createDio();
+        for (final query in [
+          'limit=0',
+          'limit=101',
+          'offset=-1',
+          'offset=0x1',
+          'orderBy=age',
+        ]) {
+          final body = await _get(dio, '/v1/characters?$query');
+          expect(
+            (body['error']! as Map)['code'],
+            'invalid_parameter',
+            reason: query,
+          );
+        }
+        final ok = await _get(dio, '/v1/characters?offset=5&limit=7');
+        expect(
+          [ok['total'], ok['offset'], ok['limit'], ok['count']],
+          [0, 5, 7, 0],
+        );
+      },
+    );
+
     test('T-0018-AC6: scenarios empty and server_error', () async {
       final backend = _backend();
       final dio = backend.createDio();
