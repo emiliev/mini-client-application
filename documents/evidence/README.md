@@ -11,3 +11,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | Task | Verdict | Report |
 |---|---|---|
 | [T-0009](T-0009/verification-report.md) | PASS (TL spot-check) | Verification pipeline spike: 4 screenshots |
+| [T-0012](T-0012/verification-report.md) | PASS (fresh Verifier) | Simulator e2e runner: engineer and verifier evidence, 13-test suite |

@@ -5,7 +5,6 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0012](T-0012-ios-sim-e2e-runner.md) | iOS simulator e2e runner script | **In Progress**: code-review fixes, then a fresh Verifier | crew: Engineer | — | `fleet/T-0012-ios-sim-e2e-runner` |
 | [T-0013](T-0013-enterprise-plan.md) | Enterprise plan (Tide × Bazel stress test) | **In Verification**: wave-3 audits | TL + crew | Q-006 | TL branch → `main` |
 
 ## Done
@@ -15,6 +14,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0012](T-0012-ios-sim-e2e-runner.md) | iOS simulator e2e runner (`tool/e2e_ios.sh`) | merged; Verifier [PASS](../evidence/T-0012/verification-report.md); F-0005 |
 
 ## Superseded by the enterprise plan (2026-11-23)
 | ID | Title | Replaced by |

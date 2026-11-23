@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-23; Verifier PASS `b686b51`) |
 | Owner | crew: Engineer (worktree) |
 | Verifier | crew: Verifier (fresh agent, assigned at handoff) |
 | Branch | `fleet/T-0012-ios-sim-e2e-runner` |
@@ -106,3 +106,7 @@ Engineer status only, from suite run 5 on the review-fix code. The Verifier's ve
   - `sim_cleanup.sh` deletes live runs' simulators too. It could skip `mc-…-<pid>` simulators whose pid is still a running `e2e_ios.sh`.
   - The fixture uses the fvm global SDK, which changed mid-session (F-0004 gotcha 10). T-0003's `.fvmrc` pin will fix the real app, but not the temp fixture.
   - T-0010 wires the real app into the runner.
+
+## Merge (TL)
+- 2026-11-23: `/code-review` (medium) found 4 important issues and 6 nits, all fixed in `805b6ab`. A fresh Verifier gave **PASS** ([report](../evidence/T-0012/verification-report.md)); each new regression test fails on the old `a7aefb8`. The TL merged `--no-ff`, then re-checked the merge result: `bash -n` OK, `e2e_ios_test.sh AC5 AC7` 3/3 PASS in 21 s, no simulators left.
+- Follow-ups → P-015 to P-017.

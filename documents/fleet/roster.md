@@ -29,3 +29,6 @@ Crew are dispatched when there is unblocked work. Idle agents are not kept runni
 | 2026-11-22 | Researcher (web-fetch, background) | T-0008 | Done: Marvel developer portal retired (F-0003) |
 | 2026-11-22 | Tech Lead (self) | T-0002 | In Review: charter drafted, MVP proposed (Q-008) |
 | 2026-11-22 | Engineer (background) | T-0009 | Done: pipeline proven in about 5 min; TL spot-check PASS (F-0004) |
+| 2026-11-23 | Engineer (Opus, worktree) | T-0012 | Done: 7 ACs + 10 review fixes, suite 13/13 |
+| 2026-11-23 | Verifier (Opus, fresh) | T-0012 | PASS (`b686b51`) |
+| 2026-11-23 | Researchers ×4, Planners ×5, Plan Verifiers V1 to V3 (Opus) | T-0013 | Research, plan sections and audits done; fix pass running |
