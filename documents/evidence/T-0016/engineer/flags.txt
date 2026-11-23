@@ -1,0 +1,19 @@
+FAIL: 1 flag(s) missing: build:verbose_explanations
+available  build:build_event_json_file
+available  build:execution_log_compact_file
+available  build:experimental_collect_worker_data_in_profiler
+available  build:experimental_profile_include_target_label
+available  build:experimental_shrink_worker_pool
+available  build:experimental_total_worker_memory_limit_mb
+available  build:explain
+available  build:loading_phase_threads
+available  build:local_resources
+available  build:local_test_jobs
+available  build:memory_profile
+available  build:memory_profile_stable_heap_parameters
+available  build:noslim_profile
+available  build:profile
+available  build:starlark_cpu_profile
+available  build:worker_extra_flag
+available  startup:host_jvm_args
+MISSING    build:verbose_explanations

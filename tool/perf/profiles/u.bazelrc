@@ -1,0 +1,13 @@
+# Profile U: default resources plus the plan 04 §6.3 instruments. Flags marked with a dagger in the
+# plan are confirmed by `bench.py flags` against the pinned Bazel before anything relies on them.
+build --profile=perf-out/trace.json.gz
+build --noslim_profile
+build --experimental_profile_include_target_label
+build --experimental_collect_worker_data_in_profiler
+build --memory_profile=perf-out/mem.txt
+build --memory_profile_stable_heap_parameters=1,1
+build --execution_log_compact_file=perf-out/exec.zst
+build --explain=perf-out/explain.log
+build --build_event_json_file=perf-out/bep.json
+build --starlark_cpu_profile=perf-out/starlark.pprof.gz
+build --worker_extra_flag=DartKernel=--phase-timing-log=perf-out/kernel_phase.log

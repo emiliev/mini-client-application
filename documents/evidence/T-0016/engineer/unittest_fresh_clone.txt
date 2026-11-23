@@ -1,0 +1,46 @@
+test_T_0016_AC1_failed_bazel_help_raises_instead_of_reporting_all_missing (test_ac1_flags.FlagsTest) ... ok
+test_T_0016_AC1_help_output_base_is_per_process (test_ac1_flags.FlagsTest) ... ok
+test_T_0016_AC1_inventory_covers_profiles_and_plan (test_ac1_flags.FlagsTest) ... ok
+test_T_0016_AC1_missing_flag_is_reported_by_name_with_stub_help (test_ac1_flags.FlagsTest) ... ok
+test_T_0016_AC1_parse_help_handles_no_prefix (test_ac1_flags.FlagsTest) ... ok
+test_T_0016_AC1_real_bazel_every_flag_classified_and_bogus_fails_by_name (test_ac1_flags.FlagsTest) ... ok
+test_T_0016_AC2_booted_simulator_refuses (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_clean_run_not_contaminated (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_failed_start_releases_lock (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_foreign_bazel_server_refuses (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_foreign_server_mid_run_still_contaminates_with_output_base (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_high_load_refuses (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_mid_run_intruder_marks_contaminated (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_own_output_base_server_is_not_an_intruder (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_own_server_is_not_an_intruder (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_parses_real_ps_output_fixture (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_run_strips_only_the_leading_separator (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC2_second_holder_is_refused (test_ac2_lock.LockTest) ... ok
+test_T_0016_AC3_capture_records_drift (test_ac3_env.EnvTest) ... ok
+test_T_0016_AC3_drift_above_5_percent_flags_machine_drift (test_ac3_env.EnvTest) ... ok
+test_T_0016_AC3_env_json_has_all_fields (test_ac3_env.EnvTest) ... ok
+test_T_0016_AC3_power_and_thermal_parsing (test_ac3_env.EnvTest) ... ok
+test_T_0016_AC4_two_real_logs_one_input_edited (test_ac4_execlog.RealBazelTest) ... ok
+test_T_0016_AC4_diff_pairs_and_reports_changed_inputs (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC4_key_collisions_are_kept_and_reported (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC4_key_includes_target_label (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC4_peak_rss_bounded_on_synthetic_large_log (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC4_reader_handles_newline_delimited (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC4_reader_handles_pretty_printed_concatenated_objects_across_chunks (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC4_workspace_copy_skips_bazel_symlinks_and_none_are_tracked (test_ac4_execlog.StreamTest) ... ok
+test_T_0016_AC5_analyze_profile_output_parser (test_ac5_profile.ProfileTest) ... ok
+test_T_0016_AC5_bep_units_ms_fields_not_scaled_durations_converted (test_ac5_profile.ProfileTest) ... ok
+test_T_0016_AC5_matches_bazel_analyze_profile_within_1_percent (test_ac5_profile.ProfileTest) ... skipped 'DEFERRED: Bazel 9.2.0 has no `analyze-profile` command (removed); AC5 reference comparison cannot run. See T-0016 Outcome.'
+test_T_0016_AC5_phase_totals_exact_on_fixture (test_ac5_profile.ProfileTest) ... ok
+test_T_0016_AC5_real_trace_phases_cover_profile_and_match_bep_wall (test_ac5_profile.ProfileTest) ... ok
+test_T_0016_AC5_within_one_percent_comparator (test_ac5_profile.ProfileTest) ... ok
+test_T_0016_AC6_exited_pids_are_evicted_and_reused_pid_is_reclassified (test_ac6_ac7_sampler.CacheTest) ... ok
+test_T_0016_AC6_rusage_is_thread_safe (test_ac6_ac7_sampler.CacheTest) ... ok
+test_T_0016_AC6_three_children_512MiB_tree_peak (test_ac6_ac7_sampler.MemorySamplerTest) ... ok
+test_T_0016_AC7_200_pids_at_250ms_overhead_under_2_percent (test_ac6_ac7_sampler.OverheadTest) ... ok
+test_T_0016_AC7_overhead_counts_sampler_threads_only (test_ac6_ac7_sampler.OverheadTest) ... ok
+
+----------------------------------------------------------------------
+Ran 41 tests in 39.427s
+
+OK (skipped=1)

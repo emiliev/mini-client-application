@@ -1,0 +1,3 @@
+genrule(name = "out_a", srcs = ["a.txt"], outs = ["out_a.txt"], cmd = "cat $< > $@")
+genrule(name = "out_b", srcs = ["b.txt"], outs = ["out_b.txt"], cmd = "cat $< > $@")
+genrule(name = "out_ab", srcs = [":out_a", ":out_b"], outs = ["out_ab.txt"], cmd = "cat $(SRCS) > $@")
