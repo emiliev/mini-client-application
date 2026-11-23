@@ -1,0 +1,6 @@
+include: package:mc_analysis/analysis_options.yaml
+
+# Fixtures are deliberately broken.
+analyzer:
+  exclude:
+    - "test/fixtures/**"

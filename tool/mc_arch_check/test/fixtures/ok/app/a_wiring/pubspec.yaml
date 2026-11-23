@@ -1,0 +1,6 @@
+name: a_wiring
+dependencies:
+  f_a:
+    path: ../../utility/f_a
+  u_top:
+    path: ../../utility/u_top

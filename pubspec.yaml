@@ -10,3 +10,7 @@ environment:
 workspace:
   - spike/greeting
   - spike/hello
+  - tool/mc_arch_check
+  - utility/mc_analysis
+  - utility/mc_di
+  - utility/mc_prelude

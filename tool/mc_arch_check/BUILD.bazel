@@ -1,0 +1,36 @@
+load("@rules_dart//dart:defs.bzl", "dart_binary", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_arch_check",
+    package_name = "mc_arch_check",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = [
+        "@pub_deps//:analyzer",
+        "@pub_deps//:path",
+        "@pub_deps//:yaml",
+    ],
+)
+
+# tool/bazelw run //tool/mc_arch_check:bin   (checks the workspace)
+dart_binary(
+    name = "bin",
+    package_name = "mc_arch_check",
+    language_version = "3.13",
+    main = "bin/mc_arch_check.dart",
+    deps = [":mc_arch_check"],
+)
+
+dart_test(
+    name = "arch_check_test",
+    size = "small",
+    package_name = "mc_arch_check",
+    language_version = "3.13",
+    main = "test/arch_check_test.dart",
+    data = glob(["test/fixtures/**"]),
+    deps = [
+        ":mc_arch_check",
+        "@pub_deps//:test",
+    ],
+)

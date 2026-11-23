@@ -1,0 +1,3 @@
+class CharsDetailsPage {}
+
+class Helper {}

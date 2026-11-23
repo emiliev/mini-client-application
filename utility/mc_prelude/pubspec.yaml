@@ -1,0 +1,12 @@
+name: mc_prelude
+description: Foundation types. Result<S, F>, the errors-as-values type.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

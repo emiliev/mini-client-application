@@ -1,0 +1,67 @@
+# mc_arch_check @ 873500c over the Verifier's fixtures (make_fixtures.py)
+== ff
+[layer] feature/comics/comics_list/lib/src/flow/comics_list_flow.dart: comics_list imports package:characters_details, feature → feature: no feature knows another feature
+mc_arch_check: 1 violation(s) in ff
+exit 1
+== ffpub
+[layer] feature/a/a_one/pubspec.yaml: a_one depends on b_two, feature → feature: no feature knows another feature
+mc_arch_check: 1 violation(s) in ffpub
+exit 1
+== uf
+[layer] utility/mc_y/test/y_test.dart: mc_y imports package:shop_cart, utility → feature: a utility depends on utilities only
+mc_arch_check: 1 violation(s) in uf
+exit 1
+== src
+[barrel-only] utility/mc_a/lib/src/a.dart: imports package:mc_b/src/internal/secret.dart; import the barrel package:mc_b/mc_b.dart (barrel-only, no package:x/src/)
+mc_arch_check: 1 violation(s) in src
+exit 1
+== srcexp
+[barrel-only] utility/mc_c/lib/mc_c.dart: imports package:mc_b/src/internal/secret.dart; import the barrel package:mc_b/mc_b.dart (barrel-only, no package:x/src/)
+mc_arch_check: 1 violation(s) in srcexp
+exit 1
+== barrel
+[R4] feature/comics/comics_detail/lib/comics_detail.dart: barrel exports ComicsDetailBloc (from package:comics_detail/src/presentation/bloc/comics_detail_bloc.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/comics/comics_detail/lib/comics_detail.dart: barrel exports ComicsDetailDIInitializer (from package:comics_detail/src/di/di_initializer.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/comics/comics_detail/lib/comics_detail.dart: barrel exports all of package:comics_detail/src/presentation/page/comics_detail_page.dart without show; a feature barrel lists the flows, navigators and arg/result types it exports with show
+mc_arch_check: 3 violation(s) in barrel
+exit 1
+== barrel2
+[R4] feature/comics/comics_x/lib/comics_x.dart: barrel exports ComicsXBloc (from src/presentation/bloc/comics_x_bloc.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/comics/comics_x/lib/comics_x.dart: barrel exports all of package:comics_x/src/presentation/page/comics_x_page.dart without show; a feature barrel lists the flows, navigators and arg/result types it exports with show
+mc_arch_check: 2 violation(s) in barrel2
+exit 1
+== barrel3
+[R4] feature/comics/comics_y/lib/comics_y.dart: barrel exports ComicsYBloc (from src/presentation/bloc/comics_y_bloc.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/comics/comics_y/lib/comics_y.dart: barrel exports ComicsYDIInitializer (from src/di/di_initializer.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/comics/comics_y/lib/comics_y.dart: barrel exports all of src/presentation/page/comics_y_page.dart without show; a feature barrel lists the flows, navigators and arg/result types it exports with show
+mc_arch_check: 3 violation(s) in barrel3
+exit 1
+== wild
+[R4] feature/comics/comics_w/lib/comics_w.dart: barrel exports all of package:comics_w/src/flow/comics_w_flow.dart without show; a feature barrel lists the flows, navigators and arg/result types it exports with show
+[R4] feature/comics/comics_w/lib/comics_w.dart: barrel exports all of src/presentation/comics_w_stuff.dart without show, including ComicsWBloc, ComicsWPage; a feature barrel lists the flows, navigators and arg/result types it exports with show
+mc_arch_check: 2 violation(s) in wild
+exit 1
+== cond
+[barrel-only] feature/a/a_cond/lib/src/use.dart: imports package:mc_u/src/web.dart; import the barrel package:mc_u/mc_u.dart (barrel-only, no package:x/src/)
+[layer] feature/a/a_cond/lib/src/use.dart: a_cond imports package:b_cond, feature → feature: no feature knows another feature
+mc_arch_check: 2 violation(s) in cond
+exit 1
+== rtget
+[R15] app/wiring/w_wiring/lib/src/routes/route_targets.dart: RouteTargets.maybe returns Widget?; a route builds a *Flow, never a page or another widget
+[R15] app/wiring/w_wiring/lib/src/routes/route_targets.dart: RouteTargets.page returns CharsPage; a route builds a *Flow, never a page or another widget
+mc_arch_check: 2 violation(s) in rtget
+exit 1
+== okrel
+mc_arch_check: OK (okrel)
+exit 0
+== r15
+[R15] app/wiring/universe_wiring/lib/src/routes/characters_routes.dart: route library imports feature barrel package:characters_list; use RouteTargets (route_targets.dart) instead
+mc_arch_check: 1 violation(s) in r15
+exit 1
+== src2
+[barrel-only] feature/d/d_one/lib/src/use.dart: relative import ../../../../../utility/mc_b/lib/src/secret.dart leaves package d_one (barrel-only: reach other packages through package:<name>/<name>.dart)
+mc_arch_check: 1 violation(s) in src2
+exit 1
+== real repo
+mc_arch_check: OK (<worktree>)
+exit 0

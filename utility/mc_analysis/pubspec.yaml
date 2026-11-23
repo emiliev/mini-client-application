@@ -1,0 +1,12 @@
+name: mc_analysis
+description: Shared lint rules for every mini-client package (Tide's tide_analysis plus plan 01 D-06).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dev_dependencies:
+  test: ^1.25.0
+  yaml: ^3.1.0

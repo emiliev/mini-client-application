@@ -1,0 +1,26 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+# The shared ruleset is a pub package whose yaml other `analysis_options.yaml`
+# files `include:` by `package:` URI. It carries no Dart code.
+dart_library(
+    name = "mc_analysis",
+    package_name = "mc_analysis",
+    language_version = "3.13",
+    resources = ["lib/analysis_options.yaml"],
+    visibility = ["//visibility:public"],
+)
+
+# The test shells out to `dart analyze` (the running SDK) over throwaway
+# packages built from the fixtures.
+dart_test(
+    name = "lints_test",
+    size = "medium",
+    package_name = "mc_analysis",
+    language_version = "3.13",
+    main = "test/lints_test.dart",
+    data = glob(["test/fixtures/**"]) + ["lib/analysis_options.yaml"],
+    deps = [
+        "@pub_deps//:test",
+        "@pub_deps//:yaml",
+    ],
+)

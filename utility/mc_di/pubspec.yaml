@@ -1,0 +1,15 @@
+name: mc_di
+description: get_it facade. Initializers, the root container and child containers.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  get_it: ^8.0.0
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

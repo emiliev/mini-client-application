@@ -2,11 +2,12 @@ load("@rules_dart//dart:defs.bzl", "dart_analysis_config", "dart_analysis_option
 
 exports_files(["pubspec.lock"])
 
-# The workspace lint ruleset. Until `mc_analysis` exists (P1) it is a plain
-# file with no `include:`, so it stages no package.
+# The workspace lint ruleset: `analysis_options.yaml` includes
+# `package:mc_analysis/analysis_options.yaml` (T-0017).
 dart_analysis_options(
     name = "options",
     src = "analysis_options.yaml",
+    deps = ["//utility/mc_analysis"],
 )
 
 # Every analysis_options.yaml in the workspace, for the dart_analyze aspect
