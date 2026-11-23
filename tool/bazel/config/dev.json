@@ -1,0 +1,5 @@
+{
+  "env": "dev",
+  "backend": { "seed": 42, "latencyMs": 250, "scenario": "happy" },
+  "build": "1"
+}

@@ -1,0 +1,36 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_monitoring",
+    package_name = "mc_monitoring",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//utility/mc_di",
+        "@pub_deps//:get_it",
+    ],
+)
+
+dart_test(
+    name = "monitoring_test",
+    size = "small",
+    package_name = "mc_monitoring",
+    language_version = "3.13",
+    main = "test/monitoring_test.dart",
+    deps = [
+        ":mc_monitoring",
+        "@pub_deps//:test",
+    ],
+)
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_monitoring",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

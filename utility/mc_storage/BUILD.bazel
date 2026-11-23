@@ -1,0 +1,38 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_storage",
+    package_name = "mc_storage",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//utility/mc_di",
+        "//utility/mc_prelude",
+        "@pub_deps//:get_it",
+    ],
+)
+
+dart_test(
+    name = "file_store_test",
+    size = "small",
+    package_name = "mc_storage",
+    language_version = "3.13",
+    main = "test/file_store_test.dart",
+    deps = [
+        ":mc_storage",
+        "//utility/mc_prelude",
+        "@pub_deps//:test",
+    ],
+)
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_storage",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

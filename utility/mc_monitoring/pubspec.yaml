@@ -1,0 +1,16 @@
+name: mc_monitoring
+description: Pure Dart monitoring. log, trackEvent, recordError with console and in-memory sinks.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  get_it: ^8.0.0
+  mc_di: any
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

@@ -1,0 +1,3 @@
+INFO: Elapsed time: 1.315s, Critical Path: 0.13s
+INFO: 5621 processes: 2140 action cache hit, 211 disk cache hit, 5410 internal.
+INFO: Build completed successfully, 5621 total actions

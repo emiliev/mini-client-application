@@ -1,0 +1,16 @@
+name: mc_config
+description: AppConfig read once at boot from the bundled app_config.json (R13).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  get_it: ^8.0.0
+  mc_di: any
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

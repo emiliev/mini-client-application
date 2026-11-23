@@ -1,0 +1,4 @@
+INFO: Build completed successfully, 4 total actions
+//utility/mc_config:bundled_config_test                                  PASSED in 0.2s
+
+Executed 1 out of 1 test: 1 test passes.

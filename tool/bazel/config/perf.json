@@ -1,0 +1,5 @@
+{
+  "env": "perf",
+  "backend": { "seed": 42, "latencyMs": 0, "scenario": "happy" },
+  "build": "1"
+}
