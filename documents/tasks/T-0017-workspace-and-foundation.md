@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Ready for Verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0017-foundation`, **based on `eba44d8` (T-0014 head)**; rebased onto `main` after T-0014 merges |
@@ -38,6 +38,27 @@ Tests are named with their AC IDs (ADR-0006). The utilities get solitary unit te
 
 ## Log
 - 2026-11-23: Created and dispatched in parallel with T-0014's fix round (PO asked for app code to start sooner).
+- 2026-11-23: Engineer: rebased onto `origin/main` (e18ade6). Built `mc_analysis`, `mc_prelude`, `mc_di`, `mc_arch_check`; all hand-written `BUILD.bazel`; `tool/bazelw test //...` passes with the analyze aspect.
 
 ## Outcome
-_Pending._
+Done. Commits on `fleet/T-0017-foundation`. Evidence in `documents/evidence/T-0017/engineer/`.
+
+### AC to test map
+| AC | Test (all pass) |
+|---|---|
+| AC1 | `tool/mc_arch_check/test/arch_check_test.dart`: `T-0017-AC1 ...` (3 tests; fixtures `feature_to_feature`, `utility_to_feature`, `ok`) |
+| AC2 | same file: `T-0017-AC2 ...` (2 tests; fixture `src_import`) |
+| AC3 | `utility/mc_analysis/test/lints_test.dart`: `T-0017-AC3 ...` (5 tests; one fixture per rule; list and sources in `utility/mc_analysis/README.md`) |
+| AC4 | arch_check_test: `T-0017-AC4 ...` (3 tests: R4 symbols, R15 route import, `RouteTargets` non-Flow return) |
+| AC5 | `utility/mc_prelude/test/result_test.dart`: `T-0017-AC5 ...` (18 tests, every member incl. `guard`, `fromAsync` over `StateError`, `guard` over `TypeError`) |
+| AC6 | `utility/mc_di/test/di_container_test.dart`: `T-0017-AC6 ...` (4 tests: order, param/name, throw then retry, dispose on failure) |
+| AC7 | same file: `T-0017-AC7 ...` (8 tests: RootImport, named, missing import names T, child dispose, reset isolation, no second init) |
+| AC8 | `tool/bazelw test //...` (analyze aspect on): 5/5 pass; `tool/bazelw run //tool/mc_arch_check:bin` prints OK on the repo (logs in evidence) |
+
+### Notes and deviations
+- `mc_analysis` has 20 Tide rules, not 22, plus `strict-inference`: `unnecessary_await_in_return` (deprecated) and `package_prefixed_library_names` (no-op) dropped, see F-0013.
+- Root files touched: `pubspec.yaml` (members), `pubspec.lock` (additions only), `BUILD.bazel` (`//:options` deps = `//utility/mc_analysis`), `analysis_options.yaml` (now includes `mc_analysis`). `spike/hello` got `package:` imports (three lines) to satisfy `always_use_package_imports`.
+- `initializeDIContainer` is transactional via a staging `GetIt`; a second call after success throws (no production reset).
+- `Result.guard` is async and takes `F Function(Object error)`; `fromAction` also keeps `Error` messages.
+- `mc_arch_check` is not itself a Bazel test over the real repo (needs the whole tree as data); it is run with `bazel run //tool/mc_arch_check:bin`. A `verify.sh` hook is a follow-up.
+- No `Optional` (out of scope).

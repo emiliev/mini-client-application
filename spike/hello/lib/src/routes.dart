@@ -3,7 +3,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-import 'pages.dart';
+import 'package:hello/src/pages.dart';
 
 part 'routes.g.dart';
 

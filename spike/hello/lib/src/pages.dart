@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:greeting/greeting.dart';
 
-import 'counter_state.dart';
+import 'package:hello/src/counter_state.dart';
 
 /// The home page: a counter driven by the freezed [CounterState] union,
 /// rendered with `state.when` (T-0014-AC6).

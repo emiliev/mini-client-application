@@ -1,0 +1,21 @@
+== feature_to_feature
+[layer] feature/f_a/lib/src/use.dart: f_a imports package:f_b, feature → feature: no feature knows another feature
+[layer] feature/f_a/pubspec.yaml: f_a depends on f_b, feature → feature: no feature knows another feature
+mc_arch_check: 2 violation(s) in test/fixtures/feature_to_feature
+exit 1
+== src_import
+[barrel-only] feature/f_a/lib/src/use.dart: imports package:u_base/src/u_base.dart; import the barrel package:u_base/u_base.dart (barrel-only, no package:x/src/)
+mc_arch_check: 1 violation(s) in test/fixtures/src_import
+exit 1
+== barrel_exports
+[R4] feature/chars/lib/chars.dart: barrel exports CharsBloc (from src/chars_bloc.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/chars/lib/chars.dart: barrel exports CharsPage (from src/chars_page.dart); a feature barrel exports only flows, navigators and arg/result types
+[R4] feature/chars/lib/chars.dart: barrel exports all of src/di/di_initializer.dart (a page, bloc or DI initializer); a feature barrel exports only flows, navigators and arg/result types
+mc_arch_check: 3 violation(s) in test/fixtures/barrel_exports
+exit 1
+== route_imports_feature
+[R15] app/a_wiring/lib/src/route_targets.dart: RouteTargets.other returns CharsPage; a route builds a *Flow, never a page or another widget
+[R15] app/a_wiring/lib/src/route_targets.dart: RouteTargets.page returns Widget; a route builds a *Flow, never a page or another widget
+[R15] app/a_wiring/lib/src/routes.dart: route library imports feature barrel package:f_a; use RouteTargets (route_targets.dart) instead
+mc_arch_check: 3 violation(s) in test/fixtures/route_imports_feature
+exit 1

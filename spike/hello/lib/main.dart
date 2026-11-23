@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'src/routes.dart';
+import 'package:hello/src/routes.dart';
 
 void main() => runApp(HelloApp());
 
