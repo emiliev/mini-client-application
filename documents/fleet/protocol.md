@@ -114,6 +114,11 @@ Questions for PO: <only direction-level, or "none">
 | Anything that costs money, involves a third-party account, or installs large software on the PO's machine | Tooling, lints, CI configuration |
 | Publishing and store releases | Task breakdown and sequencing; merging and pushing to `origin` (delegated, Q-005) |
 
+## Resuming crew agents (TL)
+- A crew agent must **never run in the Tech Lead's worktree** (`/Users/emililiev/orca/workspaces/mini-client/tang`). When resuming an agent whose worktree was never created, tell it to create its own worktree first (`git worktree add <repo>/.claude/worktrees/<name> -b fleet/T-XXXX-… origin/main`) and `cd` there, **not** to `git switch` in its current directory.
+- After every resume, the TL checks `git -C <TL worktree> branch --show-current` is still `continue-previous-work`.
+- _Lesson 2026-11-23:_ the T-0020 Engineer, resumed after a usage-limit stop before its worktree existed, ran `git switch -c` in the TL worktree. Nothing was lost (the tree was clean); the TL switched back.
+
 ## Session hygiene (Tech Lead)
 - **Session start:** read STATUS, the latest journal entry, BOARD and open questions.
 - **Session end:** write or update `journal/YYYY-MM-DD.md`, refresh STATUS, and commit.
