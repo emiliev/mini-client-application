@@ -1,0 +1,17 @@
+name: mc_storage
+description: Key-value file store on dart:io under a given directory.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  get_it: ^8.0.0
+  mc_di: any
+  mc_prelude: any
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

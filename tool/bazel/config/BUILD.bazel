@@ -1,0 +1,42 @@
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
+
+package(default_visibility = ["//visibility:public"])
+
+# R13: the environment is a build setting, never a dart-define.
+#   tool/bazelw build --//tool/bazel/config:env=e2e <target>
+string_flag(
+    name = "env",
+    build_setting_default = "dev",
+    values = [
+        "dev",
+        "e2e",
+        "perf",
+    ],
+)
+
+[config_setting(
+    name = e,
+    flag_values = {":env": e},
+) for e in [
+    "dev",
+    "e2e",
+    "perf",
+]]
+
+exports_files([
+    "dev.json",
+    "e2e.json",
+    "perf.json",
+])
+
+# The selected file, bundled by consumers as the asset `app_config.json`.
+genrule(
+    name = "app_config",
+    srcs = select({
+        ":dev": ["dev.json"],
+        ":e2e": ["e2e.json"],
+        ":perf": ["perf.json"],
+    }),
+    outs = ["app_config.json"],
+    cmd = "cp $< $@",
+)

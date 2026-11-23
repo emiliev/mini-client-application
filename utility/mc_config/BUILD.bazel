@@ -1,0 +1,54 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_config",
+    package_name = "mc_config",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//utility/mc_di",
+        "@pub_deps//:get_it",
+    ],
+)
+
+dart_test(
+    name = "app_config_test",
+    size = "small",
+    package_name = "mc_config",
+    language_version = "3.13",
+    main = "test/app_config_test.dart",
+    deps = [
+        ":mc_config",
+        "//utility/mc_di",
+        "@pub_deps//:test",
+    ],
+)
+
+# AC1: reads the config the build setting selected (default env=dev).
+dart_test(
+    name = "bundled_config_test",
+    size = "small",
+    data = ["//tool/bazel/config:app_config"],
+    env = select({
+        "//tool/bazel/config:dev": {
+            "MC_CONFIG_JSON": "$(rootpath //tool/bazel/config:app_config)",
+            "MC_EXPECT_ENV": "dev",
+        },
+        "//tool/bazel/config:e2e": {
+            "MC_CONFIG_JSON": "$(rootpath //tool/bazel/config:app_config)",
+            "MC_EXPECT_ENV": "e2e",
+        },
+        "//tool/bazel/config:perf": {
+            "MC_CONFIG_JSON": "$(rootpath //tool/bazel/config:app_config)",
+            "MC_EXPECT_ENV": "perf",
+        },
+    }),
+    language_version = "3.13",
+    main = "test/bundled_config_test.dart",
+    package_name = "mc_config",
+    deps = [
+        ":mc_config",
+        "@pub_deps//:test",
+    ],
+)

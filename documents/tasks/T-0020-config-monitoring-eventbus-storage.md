@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Review |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0020-core-utils` (from `origin/main` `1429119`+) |
@@ -33,4 +33,14 @@ The cross-cutting utilities the app shell and every feature need: typed per-envi
 - 2026-11-23: Created and dispatched.
 
 ## Outcome
-_Pending._
+Implemented `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage`, plus `tool/bazel/config/` (`string_flag env`, `dev|e2e|perf.json`, `app_config` genrule). Evidence: `documents/evidence/T-0020/engineer/`. Finding: F-0016.
+
+| AC | Test | Result |
+|---|---|---|
+| AC1 | `mc_config:app_config_test`, `mc_config:bundled_config_test` (run with `env=e2e` and default dev); aquery: 0 `--dart-define` | PASS |
+| AC2 | `mc_monitoring:monitoring_test` | PASS |
+| AC3 | `mc_event_bus:event_bus_test` | PASS |
+| AC4 | `mc_storage:file_store_test` | PASS |
+| AC5 | `*:no_flutter_test` x3; `//utility/...` 11/11 uncached; `build --config=lint //...` OK; `mc_arch_check` OK | PASS |
+
+Root changes: `pubspec.yaml` workspace list (+4 entries); `pubspec.lock` unchanged. Design: `ConfigDIInitializer(ConfigSource)`, `StorageDIInitializer(Directory)` and `MonitoringDIInitializer({sinks})` take app-supplied inputs; `EventBusDIInitializer` is const. Follow-up: `app_core` supplies the asset loader and Flutter error hooks; the app BUILD should bundle `//tool/bazel/config:app_config` as an asset; `mc_media` still open.
