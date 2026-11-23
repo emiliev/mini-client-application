@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Review |
+| Status | Done (merged 2026-11-24; Verifier PASS `06fbd98`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0023-api-client` |
@@ -54,3 +54,7 @@ Decisions and gaps:
 - The app builds the `MockBackend` from `AppConfig` and passes its adapter.
 - `mc_fixtures_characters` still uses `flutter_test` and `dio: ^5.9.0` (follow-up).
 - No tests were deleted, skipped or weakened (mocked_backend tests only changed their test import); no `ignore:` added.
+
+## Merge (TL)
+- 2026-11-24: `/code-review` found 1 important issue (retry body reuse) plus nits; TL decisions (`apiBaseUrl` in `AppConfig`, `ApiClientError` for 4xx) landed in `018e613`. The first Verifier pass FAILED (AC5: `@pub_deps//:dio` pulled Flutter in through the rules_flutter cycle merge). Fixed in `e7f93dc` with a TL-approved `cycle_breaks` in `MODULE.bazel` (F-0019, upstream P-039), the adapter injected (no `mc_mocked_backend` runtime dependency), and the `T-0023-AC5` check. Re-verify PASS `06fbd98`. The TL merged `--no-ff`; on the merge result tests passed 31/31, lint was clean, `mc_arch_check` reported OK and `T-0023-AC5` passed.
+- Follow-ups: P-040 (shorten Dio failure messages; the retry marker sticks on the final error; the check script needs an output-base wrapper).

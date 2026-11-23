@@ -42,4 +42,5 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-037 | `mc_storage`: two stores on one directory race on one key; keys > ~123 bytes fail (file name too long) | Bug (low) | T-0020 Verifier | Before features persist data | — |
 | P-038 | `mc_storage` `setKey` + in-memory store; `mc_media` package | Feature | T-0020 | With P1-03 follow-up | — |
 | P-039 | **Upstream:** rules_flutter merges `dio` + `dio_web_adapter` (a pub cycle) into a Flutter target, which pulls `sky_engine` into pure-Dart closures and disables codegen summaries. Workaround: `cycle_breaks` (T-0023, F-0019) | Upstream | T-0023 Verifier | With P3-13 drafts | — |
+| P-040 | `mc_api_client`: shorten Dio failure messages; clear the retry marker on the final error; wrap the `T-0023-AC5` check with an output base | Tooling | T-0023 Verifier | With P1-05 follow-up | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

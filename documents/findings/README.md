@@ -23,3 +23,5 @@ A finding is knowledge we earned and don't want to earn twice: environment gotch
 | [F-0014](F-0014-goldens-under-bazel-flutter-test.md) | Goldens under Bazel `flutter_test`: read path, update command, fonts and icons | Lesson | 2026-11-23 | Real fonts via the golden harness; MaterialIcons resolved via runfiles or an env var |
 | [F-0015](F-0015-mocked-backend-bazel-test-gotchas.md) | Mocked backend Bazel test and data-file gotchas | Lesson | 2026-11-23 | Fixture assets and test data under Bazel runfiles |
 | [F-0016](F-0016-config-select-and-runfiles-in-tests.md) | Selecting a Bazel build setting inside `dart_test` | Lesson | 2026-11-23 | Per-env config without dart-defines (R13) |
+| [F-0017](F-0017-api-client-retry-and-dart-test-deps.md) | Dio interceptor order, error shapes, `dart_test` against the mocked backend | Lesson | 2026-11-24 | API client design notes |
+| [F-0019](F-0019-dio-cycle-merge-pulls-flutter-into-pure-dart.md) | The dio/dio_web_adapter cycle merge pulls Flutter into pure-Dart closures | Bug root cause | 2026-11-24 | **Upstream.** Workaround: `cycle_breaks`; keeps codegen summaries on |
