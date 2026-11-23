@@ -30,4 +30,7 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-025 | Reconcile the budget16 `--jobs` value between plan 03 and plan 04 | Docs | T-0014 | With P4-04 | — |
 | P-026 | A debug simulator build also downloads the release iOS engine (fetch-cost upstream candidate) | Perf/Upstream | T-0014 | Phase F | — |
 | P-027 | mcgen buildgen must emit `language_version` and the `sky_engine` codegen dep (F-0007, F-0011) | Tooling | T-0014 | With P2-08 | — |
+| P-028 | A hung DI init blocks the BootBloc retry: add a timeout and cancellation to boot init | Feature | T-0017 Verifier | App-shell task | — |
+| P-029 | Run `mc_arch_check` in the verify gate (`tool/verify.sh` / `bazel test`) | Tooling | T-0017 | With P5-09 | — |
+| P-030 | The analyze aspect missed one `unnecessary_parenthesis` that `dart analyze` caught (possible rules_dart gap) | Upstream? | T-0017, F-0013 | Phase F | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

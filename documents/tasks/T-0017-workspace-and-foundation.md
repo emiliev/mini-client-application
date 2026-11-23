@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready for Verification |
+| Status | Done (merged 2026-11-23; Verifier PASS `a0f0a89`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0017-foundation`, **based on `eba44d8` (T-0014 head)**; rebased onto `main` after T-0014 merges |
@@ -79,3 +79,7 @@ Nits: `lints_test` asserts a sentinel diagnostic so an analyzer that did not run
 Results: `tool/bazelw test --config=lint //...` 5/5 pass; `build --config=lint //...` clean; `mc_arch_check` OK on the repo.
 
 Follow-up (app-shell task): a hung DI initializer blocks `initializeDIContainer`, so the BootBloc retry cannot start; needs a timeout or cancellation story.
+
+## Merge (TL)
+- 2026-11-23: The first Verifier pass FAILED (AC4: relative exports bypassed R4). `/code-review` found 7 important issues, fixed in `1c56e4b` by moving `mc_arch_check` onto `package:analyzer` AST parsing. Minor fixes in `873500c`. Re-verify PASS `a0f0a89`. The TL merged `--no-ff`; on the merge result, `pub get` produced no lock change, `bazel test //...` passed 5/5, `build --config=lint //...` was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-028 (a hung DI init blocks the BootBloc retry, for the app-shell task), P-029 (`mc_arch_check` into the verify gate), P-030 (the analyze aspect missed one `unnecessary_parenthesis`, F-0013).

@@ -19,3 +19,4 @@ A finding is knowledge we earned and don't want to earn twice: environment gotch
 | [F-0010](F-0010-h-cfgdup-measured.md) | H-CFGDUP measured: codegen runs once per configuration | Benchmark | 2026-11-23 | 3/3 codegen duplicated; 12/32 kernels built in two variants |
 | [F-0011](F-0011-codegen-language-version-and-overlay-pins.md) | Codegen equals build_runner's only with `language_version` set | Lesson | 2026-11-23 | buildgen must emit `language_version`; the overlay pins analyzer and source_helper |
 | [F-0012](F-0012-test-analyze-format-top-level-only.md) | `bazel test` analyzes and format-checks only the test target | Lesson | 2026-11-23 | Use `build --config=lint //...` for full coverage |
+| [F-0013](F-0013-lint-and-runfiles-facts.md) | Lint and runfiles facts: Tide rules on Dart 3.13.5, aspect vs `dart analyze` gap | Lesson | 2026-11-23 | `mc_analysis` carries 21 rules; one aspect miss under investigation (P-030) |

@@ -15,3 +15,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0015](T-0015/verification-report.md) | PASS (fresh Verifier, re-verified after fixes) | `tool/loc`: hand-counted fixtures, CLI strict check |
 | [T-0016](T-0016/verification-report.md) | PASS (re-verified after first FAIL) | Perf harness: fresh-clone suite, AC7 5/5 under load |
 | [T-0014](T-0014/verification-report.md) | PASS (re-verified after fixes) | Toolchain: sim app screenshots, outline cutoff, cfgdup counts, codegen byte-identity |
+| [T-0017](T-0017/verification-report.md) | PASS (re-verified after first FAIL) | Arch guard violation fixtures, Result/DI semantics |
