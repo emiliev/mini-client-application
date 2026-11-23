@@ -743,10 +743,15 @@ SH
   wait_for_line "$ev/e2e-stub_test.log" "runner-started" 120 || fail "runner never started (see $out)"
   name=$(out_value "$out" SIMULATOR_NAME)
   pgrep -f -- "$token" >/dev/null || fail "orphan process was not started"
-  note "SIGINT, then a second SIGINT 1 s later during teardown ($name)"
-  kill -INT "$BG_PID"
+  # Like Ctrl-C in a terminal: signal the script's whole process group (it got
+  # its own via set -m), so its foreground children get SIGINT too. Signalling
+  # only the pid would not reproduce the bug: bash survives a SIGINT whose
+  # foreground child exits normally ("wait and cooperative exit").
+  note "SIGINT to the process group, then again 1 s later during teardown ($name)"
+  kill -INT -- "-$BG_PID"
   sleep 1
-  kill -INT "$BG_PID" 2>/dev/null || fail "script already exited 1 s after SIGINT; teardown is not being exercised"
+  kill -0 "$BG_PID" 2>/dev/null || fail "script already exited 1 s after SIGINT; teardown is not being exercised"
+  kill -INT -- "-$BG_PID" 2>/dev/null || true
   rc=0
   wait_pid "$BG_PID" 60 || rc=$?
   note "exit $rc"
