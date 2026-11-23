@@ -92,7 +92,8 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('Retry'), findsOneWidget);
-    expect(find.textContaining('init failed'), findsOneWidget);
+    expect(find.textContaining('init failed'), findsNothing);
+    expect(find.textContaining('Please try again'), findsOneWidget);
     expect(sink.entries.whereType<ErrorEntry>(), hasLength(1));
 
     await tester.tap(find.text('Retry'));
@@ -189,6 +190,45 @@ void main() {
     expect(find.text('probe'), findsOneWidget);
     expect(controller.state.selected, isNull);
   });
+
+  testWidgets(
+    'T-0022-AC5 an in-place update then an edge swipe keeps state and pages '
+    'in step',
+    (tester) async {
+      late FeatureFlowController<_Selection> controller;
+      await tester.pumpWidget(
+        _app(
+          FeatureFlow<_Selection>(
+            state: const _Selection(),
+            onGeneratePages: (s) => [
+              McFlowPage(
+                name: 'list',
+                child: _Probe(onController: (c) => controller = c),
+              ),
+              if (s.selected != null)
+                McFlowPage(name: 'detail', child: Text('detail ${s.selected}')),
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      controller.update((_) => const _Selection('x'));
+      await tester.pumpAndSettle();
+      // Same pages, new selection: no push, but the page shows the new data.
+      controller.update((_) => const _Selection('y'));
+      await tester.pumpAndSettle();
+      expect(find.text('detail y'), findsOneWidget);
+
+      final gesture = await tester.startGesture(const Offset(2, 300));
+      await gesture.moveBy(const Offset(400, 0));
+      await gesture.up();
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('detail'), findsNothing);
+      expect(find.text('probe'), findsOneWidget);
+      expect(controller.state.selected, isNull);
+    },
+  );
 
   testWidgets('T-0022-AC6 an unregistered root import fails naming its type', (
     tester,

@@ -1,4 +1,4 @@
-# F-0017: flow_builder 0.1.0 works on Flutter 3.47.7 under Bazel (T-0022 spike, plan 01 C11)
+# F-0018: flow_builder 0.1.0 works on Flutter 3.47.7 under Bazel (T-0022 spike, plan 01 C11)
 
 Spike run 2026-11-23, Flutter 3.47.7 / Dart 3.13.5, Bazel 9.3.0.
 
@@ -9,3 +9,6 @@ Spike run 2026-11-23, Flutter 3.47.7 / Dart 3.13.5, Bazel 9.3.0.
 5. **`mc_di` gained `debugResolveAll`.** get_it has no public API to enumerate registrations, so child containers build their registrations through `RecordingGetIt` (a forwarding `GetIt`), and `ChildDIContainer.debugResolveAll()` resolves each recorded one. Factories with parameters are skipped. The `skipDoubleRegistration` and `allowRegisterMultipleImplementationsOfoneType` switches are `@visibleForTesting` in get_it, so the wrapper stores them as plain fields instead of forwarding (forwarding fails the lint). A get_it upgrade that adds abstract members breaks the wrapper at compile time.
 6. **A missing root import must not become a Retry view.** `FeatureFlow` first probes `createChildContainer(rootImports: ...)` alone. If that throws it is a wiring bug and is rethrown from `build` (naming `T`); only initializer errors get the error view, Retry and `recordError`.
 7. **`MODULE.bazel.lock` grows by ~360 lines** when the new pub packages are added (Bazel rewrites it on the first build).
+8. **flow_builder keeps a history entry per `update` and a back gesture restores the previous entry.** Forwarding an in-place update (same pages, new data) leaves a history entry that the swipe then "restores" to, so state and pages disagree. `FeatureFlow` therefore forwards only updates that change the page-name list; page content follows in-place updates through a `StreamBuilder` on the controller. Page names must be unique within a state (asserted).
+9. **`RecordingGetIt` tracks scopes.** `unregister`, `reset`, `resetScope`, `popScope`, `popScopesTill` and `dropScope` remove the matching recorded entries; `pushNewScope(Async)` hands its `init` the recorder. `signalsReady`, `registerSingletonAsync` and `WithDependencies` registrations are resolved through `isReady`, and `debugResolveAll({timeout})` (default 5 s) fails naming the type if they never become ready. get_it rejects an unregistered `dependsOn` at registration time.
+10. The file-level `// ignore_for_file: invalid_use_of_visible_for_testing_member` in `recording_get_it.dart` exists only to forward get_it's two `@visibleForTesting` switches.

@@ -1,0 +1,169 @@
+INFO: Invocation ID: a041f360-209b-4bca-9a2d-f6d41209cb11
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 9 targets (0 packages loaded, 0 targets configured)
+Analyzing: 9 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 9 targets (0 packages loaded, 26 targets configured, 37 aspect applications).
+INFO: From Testing //utility/mc_bloc_kit:purity_test:
+==================== Test output for //utility/mc_bloc_kit:purity_test:
+00:00 +0: loading utility/mc_bloc_kit/test/purity_test.dart
+00:00 +0: T-0022-AC7 lib imports no Flutter and declares no mixins
+00:00 +1: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_bloc_kit:feature_flow_controller_test:
+==================== Test output for //utility/mc_bloc_kit:feature_flow_controller_test:
+00:00 +0: loading utility/mc_bloc_kit/test/feature_flow_controller_test.dart
+00:00 +0: T-0022-AC3 complete emits the result exactly once
+00:00 +1: T-0022-AC3 update notifies states; restore does not
+00:00 +2: T-0022-AC3 update after completion is ignored
+00:00 +3: T-0022-AC3 a late update, restore or complete after dispose is a no-op
+00:00 +4: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_bloc_kit:mc_bloc_test:
+==================== Test output for //utility/mc_bloc_kit:mc_bloc_test:
+00:00 +0: loading utility/mc_bloc_kit/test/mc_bloc_test.dart
+00:00 +0: T-0022-AC7 a transition is logged once through monitoring
+00:00 +1: T-0022-AC7 a McFailureState transition records its error
+00:00 +2: T-0022-AC7 an error added to the bloc is recorded
+00:00 +3: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_di:di_container_test:
+==================== Test output for //utility/mc_di:di_container_test:
+00:00 +0: loading utility/mc_di/test/di_container_test.dart
+00:00 +0: T-0017-AC6 initializeDIContainer T-0017-AC6 runs initializers in order and resolves both
+00:00 +1: T-0017-AC6 initializeDIContainer T-0017-AC6 passes the factory parameter and the name
+00:00 +2: T-0017-AC6 initializeDIContainer T-0017-AC6 a throwing second initializer publishes nothing, and a retry registers each type exactly once
+00:00 +3: T-0017-AC6 initializeDIContainer T-0017-AC6 a failed init disposes what it had created
+00:00 +4: T-0017-AC6 initializeDIContainer T-0017-AC7 production init never resets: a second init throws
+00:00 +5: T-0017-AC7 child containers T-0017-AC7 RootImport<Foo> resolves to the root singleton, child-only types are invisible at the root
+00:00 +6: T-0017-AC7 child containers T-0017-AC7 a named RootImport forwards the named registration
+00:00 +7: T-0017-AC7 child containers T-0017-AC7 a RootImport without a root registration fails naming T
+00:00 +8: T-0017-AC7 child containers T-0017-AC7 disposing a child leaves the root alone
+00:00 +9: T-0017-AC7 lifecycle T-0017-AC7 a RootImport forwards factory parameters
+00:00 +10: T-0017-AC7 lifecycle T-0017-AC7 reset during an in-flight init throws and the init still publishes
+00:00 +11: T-0017-AC7 lifecycle T-0017-AC7 a child follows the root across a reset
+00:00 +12: T-0017-AC7 resetDIContainer T-0017-AC7 first test registers a singleton
+00:00 +13: T-0017-AC7 resetDIContainer T-0017-AC7 reset in setUp isolates the second test
+00:00 +14: T-0017-AC7 resetDIContainer T-0017-AC7 reset disposes the singletons
+00:00 +15: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_di:recording_test:
+==================== Test output for //utility/mc_di:recording_test:
+00:00 +0: loading utility/mc_di/test/recording_test.dart
+00:00 +0: T-0022-AC6 debugResolveAll passes when every dependency exists
+00:00 +1: T-0022-AC6 debugResolveAll names the type and its missing dependency
+Error while creating _B
+Stack trace:
+ #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
+#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
+#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
+#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
+#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-root:///utility/mc_di/test/recording_test.dart:40:67)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
+#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:139:22)
+#12     main.<anonymous closure> (org-dartlang-root:///utility/mc_di/test/recording_test.dart:45:15)
+<asynchronous suspension>
+#13     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#15     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:00 +2: T-0022-AC6 an unregistered type is no longer resolved
+00:00 +3: T-0022-AC6 reset forgets earlier registrations
+00:00 +4: T-0022-AC6 pushNewScope registrations are recorded
+Error while creating _B
+Stack trace:
+ #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
+#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
+#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
+#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
+#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-root:///utility/mc_di/test/recording_test.dart:92:69)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
+#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:139:22)
+#12     main.<anonymous closure> (org-dartlang-root:///utility/mc_di/test/recording_test.dart:95:29)
+<asynchronous suspension>
+#13     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#15     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+00:00 +5: T-0022-AC6 popScope forgets the scope registrations
+00:00 +6: T-0022-AC6 dropScope forgets that scope only
+00:00 +7: T-0022-AC6 a singleton that never signals ready names its type
+00:00 +8: T-0022-AC6 a never-ready dependency names its type, not a hang
+00:00 +9: T-0022-AC6 an async singleton is awaited, not failed
+00:00 +10: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_feature_flow:feature_flow_test:
+==================== Test output for //utility/mc_feature_flow:feature_flow_test:
+  PASS  T-0022-AC1 no flowInitializer renders the first page
+  PASS  T-0022-AC2 a throwing initializer shows Retry and records
+  PASS  T-0022-AC3 complete(r) calls onComplete once with r
+  PASS  T-0022-AC4 two flows in an IndexedStack own their controllers
+  PASS  T-0022-AC5 iOS edge swipe pops a named page and reverts state
+  PASS  T-0022-AC5 an in-place update then an edge swipe keeps state and pages in step
+  PASS  T-0022-AC6 an unregistered root import fails naming its type
+Error while creating _Other
+Stack trace:
+ #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
+#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
+#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
+#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
+#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:266:61)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
+#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:139:22)
+<asynchronous suspension>
+#12     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#13     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#14     OutstandingWork.complete (package:test_api/hooks.dart:77:3)
+<asynchronous suspension>
+#15     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#16     main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:283:5)
+<asynchronous suspension>
+#17     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#18     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#19     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+  PASS  T-0022-AC6 debugResolveAll names both types
+
+8 passed
+================================================================================
+INFO: Found 3 targets and 6 test targets...
+INFO: Elapsed time: 1.201s, Critical Path: 0.73s
+INFO: 7 processes: 149 action cache hit, 1 internal, 6 darwin-sandbox.
+INFO: Build completed successfully, 7 total actions
+//utility/mc_bloc_kit:feature_flow_controller_test                       PASSED in 0.2s
+//utility/mc_bloc_kit:mc_bloc_test                                       PASSED in 0.2s
+//utility/mc_bloc_kit:purity_test                                        PASSED in 0.2s
+//utility/mc_di:di_container_test                                        PASSED in 0.2s
+//utility/mc_di:recording_test                                           PASSED in 0.3s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 0.7s
+
+Executed 6 out of 6 tests: 6 tests pass.

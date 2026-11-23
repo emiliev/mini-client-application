@@ -1,12 +1,16 @@
+// ignore_for_file: invalid_use_of_visible_for_testing_member
 import 'dart:async';
 
 import 'package:get_it/get_it.dart';
 
 /// One recorded `register*` call: the registered type and how to resolve it.
 class RecordedRegistration {
-  const RecordedRegistration(this.type, this.instanceName, this.resolve);
+  RecordedRegistration(this.type, this.instanceName, this.resolve, this.level);
 
   final Type type;
+
+  /// Scope depth at registration time: 0 is the base scope.
+  int level;
   final String? instanceName;
 
   /// Resolves the registration once; `null` for factories that need
@@ -27,10 +31,21 @@ class RecordingGetIt implements GetIt {
   final GetIt _inner;
   final List<RecordedRegistration> recorded = [];
 
+  /// Names of the scopes pushed on top of the base scope, innermost last.
+  final List<String?> _scopeNames = [];
+
   void _record<T extends Object>(
     String? name,
     Future<void> Function()? resolve,
-  ) => recorded.add(RecordedRegistration(T, name, resolve));
+  ) => recorded.add(RecordedRegistration(T, name, resolve, _scopeNames.length));
+
+  /// Waits for the registration to be ready (async creation, `signalsReady`,
+  /// `dependsOn`), then resolves it. Never completes if nothing signals, so
+  /// `debugResolveAll` applies a timeout.
+  Future<void> Function() _ready<T extends Object>(String? name) => () async {
+    await _inner.isReady<T>(instanceName: name);
+    _inner.get<T>(instanceName: name);
+  };
 
   Future<void> Function() _sync<T extends Object>(String? name) =>
       () async => _inner.get<T>(instanceName: name);
@@ -138,7 +153,10 @@ class RecordingGetIt implements GetIt {
       signalsReady: signalsReady,
       dispose: dispose,
     );
-    _record<T>(instanceName, _sync<T>(instanceName));
+    _record<T>(
+      instanceName,
+      signalsReady ?? false ? _ready<T>(instanceName) : _sync<T>(instanceName),
+    );
     return result;
   }
 
@@ -172,7 +190,7 @@ class RecordingGetIt implements GetIt {
       signalsReady: signalsReady,
       dispose: dispose,
     );
-    _record<T>(instanceName, _async<T>(instanceName));
+    _record<T>(instanceName, _ready<T>(instanceName));
   }
 
   @override
@@ -192,7 +210,7 @@ class RecordingGetIt implements GetIt {
       dispose: dispose,
       onCreated: onCreated,
     );
-    _record<T>(instanceName, _async<T>(instanceName));
+    _record<T>(instanceName, _ready<T>(instanceName));
   }
 
   @override
@@ -244,13 +262,20 @@ class RecordingGetIt implements GetIt {
   @override
   set allowReassignment(bool value) => _inner.allowReassignment = value;
 
-  // Test-only switches in get_it; not forwarded, since initializers never
-  // set them.
+  // These two are `@visibleForTesting` in get_it; the file-level ignore at the
+  // top exists only so they can be forwarded.
   @override
-  bool skipDoubleRegistration = false;
+  bool get skipDoubleRegistration => _inner.skipDoubleRegistration;
+  @override
+  set skipDoubleRegistration(bool value) =>
+      _inner.skipDoubleRegistration = value;
 
   @override
-  bool allowRegisterMultipleImplementationsOfoneType = false;
+  bool get allowRegisterMultipleImplementationsOfoneType =>
+      _inner.allowRegisterMultipleImplementationsOfoneType;
+  @override
+  set allowRegisterMultipleImplementationsOfoneType(bool value) =>
+      _inner.allowRegisterMultipleImplementationsOfoneType = value;
 
   @override
   void enableRegisteringMultipleInstancesOfOneType() =>
@@ -388,11 +413,18 @@ class RecordingGetIt implements GetIt {
   );
 
   @override
-  Future<void> reset({bool dispose = true}) => _inner.reset(dispose: dispose);
+  Future<void> reset({bool dispose = true}) {
+    recorded.clear();
+    _scopeNames.clear();
+    return _inner.reset(dispose: dispose);
+  }
 
   @override
-  Future<void> resetScope({bool dispose = true}) =>
-      _inner.resetScope(dispose: dispose);
+  Future<void> resetScope({bool dispose = true}) {
+    final level = _scopeNames.length;
+    recorded.removeWhere((r) => r.level == level);
+    return _inner.resetScope(dispose: dispose);
+  }
 
   @override
   void pushNewScope({
@@ -400,33 +432,67 @@ class RecordingGetIt implements GetIt {
     String? scopeName,
     ScopeDisposeFunc? dispose,
     bool isFinal = false,
-  }) => _inner.pushNewScope(
-    init: init,
-    scopeName: scopeName,
-    dispose: dispose,
-    isFinal: isFinal,
-  );
+  }) {
+    _scopeNames.add(scopeName);
+    _inner.pushNewScope(
+      init: init == null ? null : (_) => init(this),
+      scopeName: scopeName,
+      dispose: dispose,
+      isFinal: isFinal,
+    );
+  }
 
   @override
   Future<void> pushNewScopeAsync({
     Future<void> Function(GetIt getIt)? init,
     String? scopeName,
     ScopeDisposeFunc? dispose,
-  }) => _inner.pushNewScopeAsync(
-    init: init,
-    scopeName: scopeName,
-    dispose: dispose,
-  );
+  }) {
+    _scopeNames.add(scopeName);
+    return _inner.pushNewScopeAsync(
+      init: init == null ? null : (_) => init(this),
+      scopeName: scopeName,
+      dispose: dispose,
+    );
+  }
 
   @override
-  Future<void> popScope() => _inner.popScope();
+  Future<void> popScope() {
+    final level = _scopeNames.length;
+    if (level > 0) {
+      recorded.removeWhere((r) => r.level == level);
+      _scopeNames.removeLast();
+    }
+    return _inner.popScope();
+  }
 
   @override
-  Future<bool> popScopesTill(String name, {bool inclusive = true}) =>
-      _inner.popScopesTill(name, inclusive: inclusive);
+  Future<bool> popScopesTill(String name, {bool inclusive = true}) {
+    final index = _scopeNames.lastIndexOf(name);
+    if (index >= 0) {
+      // Scope `index` lives at level `index + 1`.
+      final keep = inclusive ? index : index + 1;
+      recorded.removeWhere((r) => r.level > keep);
+      _scopeNames.length = keep;
+    }
+    return _inner.popScopesTill(name, inclusive: inclusive);
+  }
 
   @override
-  Future<void> dropScope(String scopeName) => _inner.dropScope(scopeName);
+  Future<void> dropScope(String scopeName) {
+    final index = _scopeNames.lastIndexOf(scopeName);
+    if (index >= 0) {
+      final level = index + 1;
+      recorded.removeWhere((r) => r.level == level);
+      for (final r in recorded) {
+        if (r.level > level) {
+          r.level--;
+        }
+      }
+      _scopeNames.removeAt(index);
+    }
+    return _inner.dropScope(scopeName);
+  }
 
   @override
   bool hasScope(String scopeName) => _inner.hasScope(scopeName);
@@ -467,12 +533,21 @@ class RecordingGetIt implements GetIt {
     String? instanceName,
     FutureOr<dynamic> Function(T)? disposingFunction,
     bool ignoreReferenceCount = false,
-  }) => _inner.unregister<T>(
-    instance: instance,
-    instanceName: instanceName,
-    disposingFunction: disposingFunction,
-    ignoreReferenceCount: ignoreReferenceCount,
-  );
+  }) {
+    final level = _scopeNames.length;
+    final index = recorded.lastIndexWhere(
+      (r) => r.type == T && r.instanceName == instanceName && r.level == level,
+    );
+    if (index >= 0) {
+      recorded.removeAt(index);
+    }
+    return _inner.unregister<T>(
+      instance: instance,
+      instanceName: instanceName,
+      disposingFunction: disposingFunction,
+      ignoreReferenceCount: ignoreReferenceCount,
+    );
+  }
 
   @override
   Future<void> allReady({

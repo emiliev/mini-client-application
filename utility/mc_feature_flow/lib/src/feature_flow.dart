@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flow_builder/flow_builder.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_di/mc_di.dart';
@@ -16,6 +17,10 @@ class McFlowPage {
   final Widget child;
   final Object? arguments;
 }
+
+/// What the user sees when a flow fails to open; the error itself goes to
+/// monitoring only.
+const String _loadFailedMessage = 'This could not be loaded. Please try again.';
 
 typedef OnGenerateFlowPages<T> = List<McFlowPage> Function(T state);
 
@@ -69,11 +74,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
     _flowController = FlowController<T>(widget.state);
     // Controller -> pages.
     _subscriptions
-      ..add(
-        _controller.states.listen(
-          (next) => _flowController.update((_) => next),
-        ),
-      )
+      ..add(_controller.states.listen(_onControllerState))
       ..add(
         _controller.completions.listen(
           (result) => widget.onComplete?.call(result),
@@ -83,6 +84,20 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
     _flowController.addListener(_onFlowChanged);
     _container = _open();
   }
+
+  /// flow_builder records a history entry per update and a back gesture
+  /// restores the previous entry, so only an update that changes the page
+  /// stack may reach it. In-place updates stay in the controller and reach
+  /// the pages through [_LivePage].
+  void _onControllerState(T next) {
+    if (!listEquals(_names(_flowController.state), _names(next))) {
+      _flowController.update((_) => next);
+    }
+  }
+
+  List<String> _names(T state) => [
+    for (final page in widget.onGeneratePages(state)) page.name,
+  ];
 
   void _onFlowChanged() => _controller.restore(_flowController.state);
 
@@ -146,15 +161,28 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
     super.dispose();
   }
 
-  List<Page<dynamic>> _pages(T state, List<Page<dynamic>> _) => [
-    for (final page in widget.onGeneratePages(state))
-      MaterialPage<dynamic>(
-        key: ValueKey<String>(page.name),
-        name: page.name,
-        arguments: page.arguments,
-        child: page.child,
-      ),
-  ];
+  List<Page<dynamic>> _pages(T state, List<Page<dynamic>> _) {
+    final pages = widget.onGeneratePages(state);
+    assert(
+      {for (final page in pages) page.name}.length == pages.length,
+      'FeatureFlow page names must be unique within one state, got '
+      '${[for (final page in pages) page.name]}.',
+    );
+    return [
+      for (final page in pages)
+        MaterialPage<dynamic>(
+          key: ValueKey<String>(page.name),
+          name: page.name,
+          arguments: page.arguments,
+          child: _LivePage<T>(
+            controller: _controller,
+            name: page.name,
+            generate: (s) => widget.onGeneratePages(s),
+            initial: page.child,
+          ),
+        ),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +199,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
                 _configStack ?? StackTrace.current,
               );
             }
-            return McErrorView(message: '${snapshot.error}', onRetry: _retry);
+            return McErrorView(message: _loadFailedMessage, onRetry: _retry);
           }
           final container = snapshot.data;
           if (container == null) {
@@ -188,4 +216,35 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
       ),
     );
   }
+}
+
+/// Rebuilds one page's content from the controller's current state, so an
+/// in-place state change shows without touching the page stack.
+class _LivePage<T> extends StatelessWidget {
+  const _LivePage({
+    required this.controller,
+    required this.name,
+    required this.generate,
+    required this.initial,
+  });
+
+  final FeatureFlowController<T> controller;
+  final String name;
+  final OnGenerateFlowPages<T> generate;
+  final Widget initial;
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<T>(
+    stream: controller.states,
+    initialData: controller.state,
+    builder: (context, snapshot) {
+      for (final page in generate(snapshot.data as T)) {
+        if (page.name == name) {
+          return page.child;
+        }
+      }
+      // The page left the stack in this update; it is about to be removed.
+      return initial;
+    },
+  );
 }

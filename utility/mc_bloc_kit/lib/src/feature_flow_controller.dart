@@ -11,6 +11,7 @@ class FeatureFlowController<T> {
 
   T _state;
   bool _completed = false;
+  bool _disposed = false;
   Object? _result;
   final StreamController<T> _states = StreamController<T>.broadcast(sync: true);
   final StreamController<Object?> _completions =
@@ -34,7 +35,7 @@ class FeatureFlowController<T> {
   /// Replaces the state with `change(state)` and notifies [states].
   /// Ignored once the flow is completed.
   void update(T Function(T state) change) {
-    if (_completed) {
+    if (_completed || _disposed) {
       return;
     }
     _state = change(_state);
@@ -45,13 +46,16 @@ class FeatureFlowController<T> {
   /// gesture popped a page). Does not notify [states], so the host does not
   /// hear its own change.
   void restore(T state) {
+    if (_disposed) {
+      return;
+    }
     _state = state;
   }
 
   /// Finishes the flow. The first call emits [result] on [completions]; later
   /// calls are ignored, so `onComplete` fires exactly once.
   void complete([Object? result]) {
-    if (_completed) {
+    if (_completed || _disposed) {
       return;
     }
     _completed = true;
@@ -59,7 +63,10 @@ class FeatureFlowController<T> {
     _completions.add(result);
   }
 
+  /// After disposal [update], [restore] and [complete] do nothing, so a bloc
+  /// that finishes late (after its flow left the screen) is harmless.
   Future<void> dispose() async {
+    _disposed = true;
     await _states.close();
     await _completions.close();
   }
