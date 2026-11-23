@@ -18,13 +18,19 @@ class DataChanged extends BusEvent {
   int get hashCode => Object.hash(DataChanged, topic);
 }
 
-/// Typed in-process publish and subscribe. Delivery is synchronous, so each
+/// Typed in-process publish and subscribe. Delivery is asynchronous (a
+/// microtask later), so a listener may publish from inside its callback. Each
 /// subscriber sees each event exactly once, in publish order.
 class EventBus {
   final StreamController<BusEvent> _controller =
-      StreamController<BusEvent>.broadcast(sync: true);
+      StreamController<BusEvent>.broadcast();
 
-  void publish(BusEvent event) => _controller.add(event);
+  /// A no-op once the bus is disposed.
+  void publish(BusEvent event) {
+    if (!_controller.isClosed) {
+      _controller.add(event);
+    }
+  }
 
   /// Events of type [T]. Cancel the subscription to stop receiving.
   Stream<T> on<T extends BusEvent>() =>

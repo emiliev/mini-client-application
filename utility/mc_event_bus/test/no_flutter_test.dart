@@ -14,7 +14,9 @@ void main() {
         .where((e) => e.path.endsWith('.dart'))
         .toList();
     expect(dartFiles, isNotEmpty);
-    final flutterImport = RegExp('import\\s+[\'"](package:flutter|dart:ui)');
+    final flutterImport = RegExp(
+      '(import|export)\\s+[\'"](package:flutter|dart:ui)',
+    );
     final offenders = [
       for (final f in dartFiles)
         if (flutterImport.hasMatch(File(f.path).readAsStringSync())) f.path,

@@ -1,5 +1,3 @@
-INFO: Elapsed time: 0.583s, Critical Path: 0.27s
-INFO: 4 processes: 1655 action cache hit, 2 internal, 2 darwin-sandbox.
 INFO: Build completed successfully, 4 total actions
 //utility/mc_config:bundled_config_test                                  PASSED in 0.2s
 

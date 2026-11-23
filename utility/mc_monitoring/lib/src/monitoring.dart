@@ -21,9 +21,15 @@ class Monitoring {
     bool fatal = false,
   }) async => _emit(ErrorEntry(error, stackTrace, fatal: fatal));
 
+  /// Monitoring never throws: a failing sink is skipped so later sinks still
+  /// get the entry, and its error is not reported back through monitoring.
   void _emit(MonitoringEntry entry) {
     for (final sink in _sinks) {
-      sink.record(entry);
+      try {
+        sink.record(entry);
+      } on Object {
+        // Deliberately swallowed.
+      }
     }
   }
 }

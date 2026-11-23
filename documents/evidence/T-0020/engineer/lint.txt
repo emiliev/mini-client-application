@@ -1,4 +1,3 @@
-INFO: Found 35 targets...
-INFO: Elapsed time: 0.654s, Critical Path: 0.09s
-INFO: 2 processes: 5880 action cache hit, 1 internal, 1 darwin-sandbox.
-INFO: Build completed successfully, 2 total actions
+INFO: Elapsed time: 1.315s, Critical Path: 0.13s
+INFO: 5621 processes: 2140 action cache hit, 211 disk cache hit, 5410 internal.
+INFO: Build completed successfully, 5621 total actions

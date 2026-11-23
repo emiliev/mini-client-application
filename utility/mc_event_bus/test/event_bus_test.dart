@@ -35,4 +35,28 @@ void main() {
     expect(received, isEmpty);
     await bus.dispose();
   });
+
+  test('T-0020-AC3 a listener may publish from inside its callback', () async {
+    final bus = EventBus();
+    final seen = <String>[];
+    final sub = bus.on<DataChanged>().listen((e) {
+      seen.add(e.topic);
+      if (e.topic == 'a') {
+        bus.publish(const DataChanged('b'));
+      }
+    });
+
+    bus.publish(const DataChanged('a'));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(seen, ['a', 'b']);
+    await sub.cancel();
+    await bus.dispose();
+  });
+
+  test('T-0020-AC3 publish after dispose is a no-op', () async {
+    final bus = EventBus();
+    await bus.dispose();
+    expect(() => bus.publish(const DataChanged('favourites')), returnsNormally);
+  });
 }

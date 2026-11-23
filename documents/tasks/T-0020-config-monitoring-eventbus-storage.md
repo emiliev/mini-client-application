@@ -44,3 +44,10 @@ Implemented `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage`, plus `to
 | AC5 | `*:no_flutter_test` x3; `//utility/...` 11/11 uncached; `build --config=lint //...` OK; `mc_arch_check` OK | PASS |
 
 Root changes: `pubspec.yaml` workspace list (+4 entries); `pubspec.lock` unchanged. Design: `ConfigDIInitializer(ConfigSource)`, `StorageDIInitializer(Directory)` and `MonitoringDIInitializer({sinks})` take app-supplied inputs; `EventBusDIInitializer` is const. Follow-up: `app_core` supplies the asset loader and Flutter error hooks; the app BUILD should bundle `//tool/bazel/config:app_config` as an asset; `mc_media` still open.
+
+### Review fixes (2026-11-23)
+- `mc_event_bus`: async delivery (cascade publish from a listener works); `publish` after `dispose` is a no-op. Tests under AC3.
+- `mc_monitoring`: each sink is try/caught, so monitoring never throws and later sinks still receive entries. Test under AC2.
+- `mc_storage`: temp file + atomic rename, writes and deletes serialised per key, `read` catches `PathNotFoundException` (no `existsSync`), `delete` is async, key file names are hex. Tests under AC4: overlapping writes, read racing delete, delete, case-distinct keys, write failure.
+- Nits: `no_flutter_test` also matches `export`; `bundled_config_test` skips outside Bazel; storage tests assert write results.
+- Re-run uncached: `//utility/...` 11/11, e2e bundled test, lint and arch_check OK.

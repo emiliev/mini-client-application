@@ -1,3 +1,1 @@
-INFO: Build completed successfully, 1 total action
-INFO: Running command line: bazel-bin/tool/mc_arch_check/bin
-mc_arch_check: OK (/Users/emililiev/orca/workspaces/mini-client/tang)
+mc_arch_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/t0020-engineer)

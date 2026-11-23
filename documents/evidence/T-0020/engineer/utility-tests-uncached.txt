@@ -1,16 +1,14 @@
-INFO: Found 7 targets and 11 test targets...
-INFO: Elapsed time: 3.714s, Critical Path: 3.24s
-INFO: 14 processes: 2140 action cache hit, 1 disk cache hit, 2 internal, 11 darwin-sandbox.
-INFO: Build completed successfully, 14 total actions
-//utility/mc_analysis:lints_test                                         PASSED in 3.2s
+INFO: 12 processes: 1 internal, 11 darwin-sandbox.
+INFO: Build completed successfully, 12 total actions
+//utility/mc_analysis:lints_test                                         PASSED in 3.1s
 //utility/mc_config:app_config_test                                      PASSED in 0.2s
-//utility/mc_config:bundled_config_test                                  PASSED in 0.3s
-//utility/mc_di:di_container_test                                        PASSED in 0.4s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.2s
+//utility/mc_di:di_container_test                                        PASSED in 0.3s
 //utility/mc_event_bus:event_bus_test                                    PASSED in 0.3s
 //utility/mc_event_bus:no_flutter_test                                   PASSED in 0.2s
 //utility/mc_monitoring:monitoring_test                                  PASSED in 0.3s
-//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.3s
-//utility/mc_prelude:result_test                                         PASSED in 0.4s
+//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_prelude:result_test                                         PASSED in 0.2s
 //utility/mc_storage:file_store_test                                     PASSED in 0.3s
 //utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
 

@@ -33,4 +33,23 @@ void main() {
     await monitoring.trackEvent('b');
     expect(lines, ['[info] a', '[event] b {}']);
   });
+
+  test(
+    'T-0020-AC2 a throwing sink neither blocks later sinks nor throws',
+    () async {
+      final sink = InMemorySink();
+      final monitoring = Monitoring([_ThrowingSink(), sink]);
+
+      await monitoring.log('a');
+      await monitoring.trackEvent('b');
+      await monitoring.recordError('c', null);
+
+      expect(sink.entries, hasLength(3));
+    },
+  );
+}
+
+class _ThrowingSink implements MonitoringSink {
+  @override
+  void record(MonitoringEntry entry) => throw StateError('sink down');
 }
