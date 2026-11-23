@@ -1,0 +1,3 @@
+import 'package:feature_a/a.dart';
+void main() {}
+// c

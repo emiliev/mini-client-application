@@ -1,0 +1,2 @@
+part of 'item.dart';
+const j = 1;

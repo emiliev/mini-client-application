@@ -1,0 +1,9 @@
+// Scaffolded
+class ABloc {
+  int run() {
+    // mcgen:keep body
+    var x = 1;
+    return x;
+    // mcgen:end body
+  }
+}

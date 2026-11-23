@@ -1,0 +1,8 @@
+{
+  "archetype": "list_detail",
+  "files": {
+    "lib/src/domain/model/item.dart": {"hash": "eea9b66b07e7fcfa80ada96fccd23e0465a9a8e1bb1fd12edadd047f586a1ed2", "ownership": "managed"},
+    "lib/src/presentation/bloc/a_bloc.dart": {"hash": "10afe3f31dc8989bdc515d408a29b955223665a3007349348b90a536c94ce6e9", "ownership": "managed"},
+    "lib/src/domain/usecase/drift.dart": {"hash": "0000000000000000000000000000000000000000000000000000000000000000", "ownership": "owned"}
+  }
+}

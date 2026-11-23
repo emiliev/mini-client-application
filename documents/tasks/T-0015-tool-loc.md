@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Review |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Sonnet, fresh; low-risk tooling) |
 | Branch | `fleet/T-0015-tool-loc` |
@@ -28,6 +28,43 @@ A Dart CLI implementing the D8 / R1 counting rule exactly. It's the gate for eve
 
 ## Log
 - 2026-11-23: Created and dispatched (wave A1).
+- 2026-11-23: Engineer built `tool/loc`, fixtures and 17 tests; analyze clean; evidence recorded.
+- 2026-11-23: Fixed 8 `/code-review` findings (below). Amended the first commit so `tool/loc/.dart_tool/` never enters branch history; root `.gitignore` added. 25 tests pass.
+
+## Review-fix map (test names start with the AC ID)
+1. `.dart_tool` purged from history (amend), root `.gitignore` (`.dart_tool/ build/ bazel-* .fvm/flutter_sdk coverage/ *.iml .idea/`).
+2. Files from `git ls-files` (tracked only), `--include-untracked`, walk plus warning outside git: `T-0015-AC5 strict uses git ls-files...`, `T-0015-AC5 outside git it walks the tree and warns`.
+3. Unowned tier files go to synthetic `(unowned:<tier>)`, warn, fail strict; unparseable pubspec likewise: `T-0015-AC3 files outside any module...`, `T-0015-AC3 unparseable pubspec.yaml...`.
+4. l10n needs `l10n.yaml` and its output dir: `T-0015-AC2 l10n rule needs l10n.yaml and the configured output dir`.
+5. Malformed `.arb` / manifest warn, fail strict, no crash: `T-0015-AC5 malformed .arb and manifest warn...`.
+6. `--generated-root` only generator kinds under tier paths: `T-0015-AC2 generated root ignores external/...`.
+7. Combined `.g.dart` split by section header: `T-0015-AC2 combined .g.dart is split by generator section`.
+8. Fixtures resolved via `Isolate.resolvePackageUri`. Pass: `fvm dart test` in `tool/loc` (25) and `fvm dart tool/loc/test/loc_test.dart` from the repo root (25). `fvm dart test tool/loc` from the root cannot run: dart needs a pubspec in cwd, and the repo root has none yet.
+Nits: `MixinDeclaration` nodes plus `with_applications`; README with the manifest format.
+
+## AC to test map
+All in `tool/loc/test/loc_test.dart`.
+| AC | Tests |
+|---|---|
+| T-0015-AC1 | `T-0015-AC1 line comments...`, `nested block comments...`, `multi-line strings...`, `doc comments and blank lines`, `imports and mixins are tallied` |
+| T-0015-AC2 | `T-0015-AC2 generated suffixes, l10n and BDD are excluded`, `generated bucket only with --generated-root` |
+| T-0015-AC3 | `T-0015-AC3 tiers, test, testonly and tooling buckets`, `manifest hashes and keep regions split hand/scaffold`, `without a manifest everything is hand` |
+| T-0015-AC4 | `T-0015-AC4 valid mc-loc/1 JSON...`, `fan-in/out histograms...`, `two runs are byte-identical...` |
+| T-0015-AC5 | `T-0015-AC5 committed generated files fail naming each file`, `non-strict never fails`, `files in fallback.yaml pass and count as generated`, `a fallback listing only some files still fails the rest` |
+| T-0015-AC6 | `fvm dart analyze tool/loc` (No issues found) and `fvm dart test` (17 passed) |
 
 ## Outcome
-_Pending._
+Implemented `tool/loc/` (package `loc`; `bin/loc.dart`, `lib/count.dart` = D8 scanner, `lib/loc.dart` = walk, classify, aggregate, JSON and Markdown). Run: `fvm dart run tool/loc/bin/loc.dart <root> [--json f] [--md f] [--strict] [--generated-root d] [--stamp s] [--commit sha]`. Exit 1 under `--strict` when a committed generated file is not in `fallback.yaml`.
+
+**Tests:** 17 pass (`cd tool/loc && fvm dart test`); `fvm dart analyze tool/loc` clean. Fixtures are stored with a `.fixture` suffix (stripped on copy to a temp dir) so they are neither analysed nor counted as tooling.
+
+**Evidence:** `documents/evidence/T-0015/engineer/repo-loc.{json,md}`: two runs byte-identical. This repo has no app/feature/utility modules yet: source 0, tooling 876 lines.
+
+**Assumptions the plan left open (flag for review):**
+- Manifest format (not specified elsewhere): `<module>/.mcgen/manifest.json` = `{"archetype": "...", "files": {"<path in module>": {"hash": "<sha256>", "ownership": "managed|owned|ejected"}}}`. Hash is sha256 of the file with keep-region bodies (lines between `// mcgen:keep id` and `// mcgen:end id`) removed. Listed, non-ejected, hash match = scaffold (keep lines hand); anything else = hand. Archetype falls back to `mcgen.yaml`, then `unknown`.
+- Module = a `pubspec.yaml` under `app|feature|utility`; testonly = `testonly: true` in the pubspec or name `mc_test_utils`.
+- `fallback.yaml`: any `.dart` path string anywhere in the YAML counts as listed.
+- `.g.dart` is `retrofit` if it mentions `RestClient`/`retrofit`, else `json`.
+- Not done: `--gate <rung>` / `gates.yaml` (gates field is emitted with pass/failures from strict only), `loc diff a b`, per-core isolates, the `cloc` cross-check finding. See follow-ups.
+
+**Follow-ups:** gate + diff subcommands; isolates for the 1M/30 s target; cloc cross-check finding; CLI-level (process) test of exit code.

@@ -1,0 +1,7 @@
+.dart_tool/
+build/
+bazel-*
+.fvm/flutter_sdk
+coverage/
+*.iml
+.idea/

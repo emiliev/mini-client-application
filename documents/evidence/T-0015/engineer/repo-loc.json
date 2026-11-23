@@ -1,0 +1,163 @@
+{
+  "by_archetype": {},
+  "by_tier": {},
+  "commit": "d204a754053b4752021ca822b4c6426f2a4e1e5a",
+  "excluded_committed_generated": [],
+  "gates": {
+    "failures": [],
+    "pass": true,
+    "rung": null
+  },
+  "histograms": {
+    "file_loc": [
+      {
+        "bucket": "0-49",
+        "count": 0
+      },
+      {
+        "bucket": "50-99",
+        "count": 0
+      },
+      {
+        "bucket": "100-199",
+        "count": 0
+      },
+      {
+        "bucket": "200-399",
+        "count": 0
+      },
+      {
+        "bucket": "400-799",
+        "count": 0
+      },
+      {
+        "bucket": "800+",
+        "count": 0
+      }
+    ],
+    "imports_per_file": [
+      {
+        "bucket": "0",
+        "count": 0
+      },
+      {
+        "bucket": "1-5",
+        "count": 0
+      },
+      {
+        "bucket": "6-10",
+        "count": 0
+      },
+      {
+        "bucket": "11-20",
+        "count": 0
+      },
+      {
+        "bucket": "21+",
+        "count": 0
+      }
+    ],
+    "pkg_fan_in": [
+      {
+        "bucket": "0",
+        "count": 0
+      },
+      {
+        "bucket": "1",
+        "count": 0
+      },
+      {
+        "bucket": "2",
+        "count": 0
+      },
+      {
+        "bucket": "3-5",
+        "count": 0
+      },
+      {
+        "bucket": "6-10",
+        "count": 0
+      },
+      {
+        "bucket": "11-20",
+        "count": 0
+      },
+      {
+        "bucket": "21+",
+        "count": 0
+      }
+    ],
+    "pkg_fan_out": [
+      {
+        "bucket": "0",
+        "count": 0
+      },
+      {
+        "bucket": "1",
+        "count": 0
+      },
+      {
+        "bucket": "2",
+        "count": 0
+      },
+      {
+        "bucket": "3-5",
+        "count": 0
+      },
+      {
+        "bucket": "6-10",
+        "count": 0
+      },
+      {
+        "bucket": "11-20",
+        "count": 0
+      },
+      {
+        "bucket": "21+",
+        "count": 0
+      }
+    ]
+  },
+  "mixins": {
+    "authored": 0,
+    "generated": 0,
+    "with_applications": 0
+  },
+  "modules": [],
+  "non_dart": {
+    "arb_keys": 0,
+    "asset_files": 0,
+    "feature_scenarios": 0,
+    "fixture_files": 0
+  },
+  "rule": "D8",
+  "schema": "mc-loc/1",
+  "totals": {
+    "files": {
+      "lib": 0,
+      "other": 4,
+      "test": 0
+    },
+    "generated": {
+      "bdd": 0,
+      "freezed": 0,
+      "go_router": 0,
+      "injectable": 0,
+      "json": 0,
+      "l10n": 0,
+      "other": 0,
+      "retrofit": 0
+    },
+    "packages": 0,
+    "source": {
+      "hand": 0,
+      "scaffold": 0
+    },
+    "test": {
+      "hand": 0,
+      "scaffold": 0
+    },
+    "tooling": 1103
+  },
+  "warnings": []
+}

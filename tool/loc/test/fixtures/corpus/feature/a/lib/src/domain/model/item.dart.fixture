@@ -1,0 +1,5 @@
+// Scaffolded by mcgen
+class Item {
+  final int id;
+  const Item(this.id);
+}
