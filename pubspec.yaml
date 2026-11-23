@@ -13,4 +13,10 @@ workspace:
   - tool/mc_arch_check
   - utility/mc_analysis
   - utility/mc_di
+  - utility/mc_ds_buttons
+  - utility/mc_ds_feedback
+  - utility/mc_ds_layout
+  - utility/mc_ds_testing
+  - utility/mc_ds_theme
+  - utility/mc_ds_tokens
   - utility/mc_prelude

@@ -1,0 +1,49 @@
+import 'package:flutter/widgets.dart';
+import 'package:mc_ds_layout/src/breakpoints.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+
+/// A non-scrolling grid whose column count follows the available width:
+/// 2 (compact), 3 (medium) or 4 (expanded). Put it inside a scroll view.
+class McAdaptiveGrid extends StatelessWidget {
+  const McAdaptiveGrid({
+    required this.children,
+    this.spacing = McSpacing.md,
+    this.childAspectRatio = 1,
+    this.padding = EdgeInsets.zero,
+    super.key,
+  });
+
+  final List<Widget> children;
+  final double spacing;
+  final double childAspectRatio;
+  final EdgeInsets padding;
+
+  /// The column count for [width].
+  static int columnsFor(double width) => McWidthClass.of(width).columns;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Unbounded (e.g. inside a horizontal scroll view): use the screen.
+        final width = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : MediaQuery.sizeOf(context).width;
+        final columns = columnsFor(width);
+        final grid = GridView.count(
+          crossAxisCount: columns,
+          mainAxisSpacing: spacing,
+          crossAxisSpacing: spacing,
+          childAspectRatio: childAspectRatio,
+          padding: padding,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          children: children,
+        );
+        return constraints.hasBoundedWidth
+            ? grid
+            : SizedBox(width: width, child: grid);
+      },
+    );
+  }
+}

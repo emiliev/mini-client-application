@@ -1,0 +1,12 @@
+INFO: Build completed successfully, 11 total actions
+//utility/mc_ds_buttons:buttons_test                                     PASSED in 0.8s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.1s
+//utility/mc_ds_feedback:feedback_test                                   PASSED in 0.8s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.1s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.3s
+//utility/mc_ds_layout:layout_test                                       PASSED in 0.7s
+//utility/mc_ds_testing:fonts_test                                       PASSED in 0.5s
+//utility/mc_ds_theme:golden_test                                        PASSED in 0.9s
+//utility/mc_ds_theme:theme_test                                         PASSED in 0.6s
+//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.3s
+Executed 10 out of 10 tests: 10 tests pass.

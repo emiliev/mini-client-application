@@ -1,0 +1,55 @@
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+# Inter (SIL OFL 1.1) plus the SDK's MaterialIcons font (the tester disables
+# asset fonts, so icons render as boxes unless loaded explicitly). Golden tests of every mc_ds_* package list this in
+# `data` so mcLoadFonts() finds the files in runfiles.
+filegroup(
+    name = "fonts",
+    srcs = glob(["assets/fonts/*"]) + ["@rules_flutter//flutter:material_icons"],
+)
+
+flutter_library(
+    name = "mc_ds_theme",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    package_name = "mc_ds_theme",
+    deps = [
+        "//utility/mc_ds_tokens",
+        "@pub_deps//:flutter",
+    ],
+)
+
+flutter_test(
+    name = "theme_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/theme_test.dart",
+    package_name = "mc_ds_theme",
+    deps = [
+        ":mc_ds_theme",
+        "//utility/mc_ds_tokens",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    data = [":fonts"] + glob(["test/goldens/**"], allow_empty = True),
+    language_version = "3.13",
+    main = "test/golden_test.dart",
+    package_name = "mc_ds_theme",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = [
+        "//utility/mc_ds_testing",
+        ":mc_ds_theme",
+        "//utility/mc_ds_tokens",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
