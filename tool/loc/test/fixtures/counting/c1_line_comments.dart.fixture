@@ -1,0 +1,9 @@
+// header
+
+import 'dart:io'; // trailing
+
+/// Doc comment
+void main() { // code after
+  print('x'); // y
+}
+// end

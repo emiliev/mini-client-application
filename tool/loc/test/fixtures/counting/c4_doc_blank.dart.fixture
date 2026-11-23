@@ -1,0 +1,11 @@
+/// Doc for Foo
+/// more
+class Foo {
+
+  /** javadoc style
+   * doc */
+  int x = 0;
+
+  // todo
+  void m() {}
+}

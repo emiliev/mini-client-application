@@ -1,0 +1,5 @@
+Feature: Login
+  Scenario: ok
+    Given a
+  Scenario: bad
+    Given b

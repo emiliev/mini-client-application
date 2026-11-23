@@ -1,0 +1,3 @@
+class Drift {
+  int v = 1;
+}

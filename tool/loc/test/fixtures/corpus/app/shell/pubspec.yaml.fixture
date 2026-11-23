@@ -1,0 +1,4 @@
+name: shell
+dependencies:
+  feature_a:
+    path: ../../feature/a

@@ -1,0 +1,13 @@
+name: loc
+description: LOC counter implementing the D8 / R1 rule (mc-loc/1).
+publish_to: none
+environment:
+  sdk: ^3.11.0
+dependencies:
+  analyzer: ^8.1.1
+  args: ^2.5.0
+  crypto: ^3.0.0
+  path: ^1.9.0
+  yaml: ^3.1.0
+dev_dependencies:
+  test: ^1.25.0

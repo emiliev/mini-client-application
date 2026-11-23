@@ -1,0 +1,13 @@
+const a = 'http://example.com // not comment';
+const b = '''
+line one
+
+// inside string
+''';
+const c = """
+  /* not comment */
+""";
+const d = r'/* raw';
+// real comment
+const e = 1;
+const f = 'a ${1 + 2} // b';

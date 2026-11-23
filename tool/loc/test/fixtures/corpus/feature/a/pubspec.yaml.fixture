@@ -1,0 +1,4 @@
+name: feature_a
+dependencies:
+  utility_core:
+    path: ../../utility/core

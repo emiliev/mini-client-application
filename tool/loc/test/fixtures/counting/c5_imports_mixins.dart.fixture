@@ -1,0 +1,5 @@
+import 'a.dart';
+import 'b.dart' as b;
+export 'c.dart';
+mixin M {}
+mixin class N {}
