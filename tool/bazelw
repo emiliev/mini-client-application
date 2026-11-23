@@ -1,0 +1,49 @@
+#!/bin/bash
+# tool/bazelw: the only way agents and scripts run Bazel in this repo (plan 03 §1.3, R18).
+#
+# Runs the installed-but-unlinked Homebrew bazelisk. bazelisk finds the repo's
+# `.bazelversion` (9.3.0) by walking up from the current directory, so run this
+# from anywhere inside the repo. The machine is not changed: the Homebrew
+# `bazel` formula (9.2.0) stays linked on PATH and is never used here (F-0006).
+#
+#   tool/bazelw build --config=sim //spike/hello:hello_ios
+#   tool/bazelw --budget16 build //...    # budget16 startup flags + --config=budget16
+#
+# `--budget16` is recognised only among the startup options, before the
+# command; anything after the command (or after `--`) is passed through as is.
+# Override the bazelisk path with MC_BAZELISK=/path/to/bazelisk.
+set -euo pipefail
+
+BAZELISK="${MC_BAZELISK:-/opt/homebrew/opt/bazelisk/bin/bazelisk}"
+if [[ ! -x "$BAZELISK" ]]; then
+  echo "tool/bazelw: bazelisk not found at $BAZELISK." >&2
+  echo "  Install it with 'brew install bazelisk' (it stays unlinked next to the bazel formula)," >&2
+  echo "  or point MC_BAZELISK at a bazelisk binary." >&2
+  exit 2
+fi
+
+# Split: leading startup options | command | command arguments.
+startup=()
+budget16=0
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --budget16) budget16=1; shift ;;
+    --) break ;;
+    -*) startup+=("$1"); shift ;;
+    *) break ;;
+  esac
+done
+
+if [[ $budget16 == 1 ]]; then
+  if [[ $# -eq 0 || "$1" == "--" ]]; then
+    echo "tool/bazelw: --budget16 needs a command, e.g. 'tool/bazelw --budget16 build //...'" >&2
+    exit 2
+  fi
+  # Startup options cannot come from a --config, so they are added here
+  # (plan 03 §1.4 note 1). The heap value is a proposal; P4-01 calibrates it.
+  cmd="$1"; shift
+  echo "tool/bazelw: budget16 (sample worker RSS with: ps -axo rss,comm | grep -i -E 'java|dart|worker')" >&2
+  exec "$BAZELISK" ${startup[@]+"${startup[@]}"} --host_jvm_args=-Xmx3g "$cmd" --config=budget16 "$@"
+fi
+
+exec "$BAZELISK" ${startup[@]+"${startup[@]}"} "$@"

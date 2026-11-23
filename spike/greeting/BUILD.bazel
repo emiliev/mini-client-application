@@ -1,0 +1,9 @@
+load("@rules_dart//dart:defs.bzl", "dart_library")
+
+dart_library(
+    name = "greeting",
+    package_name = "greeting",
+    srcs = ["lib/greeting.dart"],
+    language_version = "3.13",
+    visibility = ["//spike:__subpackages__"],
+)

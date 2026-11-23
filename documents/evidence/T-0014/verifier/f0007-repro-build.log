@@ -1,0 +1,74 @@
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //spike/hello:routes_g (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:routes_g (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:routes_g (0 packages loaded, 1 target configured).
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a43430bcd5c70bf88/spike/hello/BUILD.bazel:66:13: DartCodegen @@//spike/hello:routes_go_router_part failed: Worker process did not return a WorkResponse:
+
+---8<---8<--- Start of log, file at /private/tmp/mc-verify-t0014/bazel-workers/worker-15-DartCodegen.log ---8<---8<---
+Unhandled exception:
+Null check operator used on a null value
+#0      LibraryReader._readDirectiveUri.readWithSource (package:analyzer/src/summary2/bundle_reader.dart:418:52)
+#1      LibraryReader._readDirectiveUri (package:analyzer/src/summary2/bundle_reader.dart:431:22)
+#2      LibraryReader._readLibraryImports.<anonymous closure> (package:analyzer/src/summary2/bundle_reader.dart:996:14)
+#3      BinaryReader.readTypedList.<anonymous closure> (package:analyzer/src/binary/binary_reader.dart:228:18)
+#4      new _List.generate (dart:core-patch/array.dart:119:28)
+#5      BinaryReader.readTypedList (package:analyzer/src/binary/binary_reader.dart:227:12)
+#6      LibraryReader._readLibraryImports (package:analyzer/src/summary2/bundle_reader.dart:990:20)
+#7      LibraryReader._readLibraryFragment (package:analyzer/src/summary2/bundle_reader.dart:946:38)
+#8      LibraryReader.readElement (package:analyzer/src/summary2/bundle_reader.dart:159:37)
+#9      LinkedElementFactory._createLibraryElementForReading (package:analyzer/src/summary2/linked_element_factory.dart:258:33)
+#10     LinkedElementFactory.libraryOfUri (package:analyzer/src/summary2/linked_element_factory.dart:171:12)
+#11     LinkedElementFactory.libraryOfUri2 (package:analyzer/src/summary2/linked_element_factory.dart:175:19)
+#12     ResolutionReader.libraryOfUri (package:analyzer/src/summary2/bundle_reader.dart:1496:28)
+#13     LibraryReader._readLibraryFragment.<anonymous closure> (package:analyzer/src/summary2/bundle_reader.dart:935:32)
+#14     DeferredResolutionReadingMixin._ensureReadResolution (package:analyzer/src/dart/element/element.dart:1435:15)
+#15     LibraryFragmentImpl.libraryExports (package:analyzer/src/dart/element/element.dart:7964:5)
+#16     LibraryElementImpl.isFromDeprecatedExport (package:analyzer/src/dart/element/element.dart:7591:31)
+#17     new PrefixScope (package:analyzer/src/dart/element/scope.dart:672:45)
+#18     new LibraryFragmentScope (package:analyzer/src/dart/element/scope.dart:445:22)
+#19     LibraryFragmentImpl.scope (package:analyzer/src/dart/element/element.dart:8062:23)
+#20     LibraryBuilder.resolveTypes (package:analyzer/src/summary2/library_builder.dart:453:30)
+#21     Linker._resolveTypes (package:analyzer/src/summary2/link.dart:446:15)
+#22     Linker._buildOutlines (package:analyzer/src/summary2/link.dart:250:5)
+#23     Linker.link.<anonymous closure> (package:analyzer/src/summary2/link.dart:123:7)
+#24     OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#25     Linker.link (package:analyzer/src/summary2/link.dart:122:17)
+#26     link (package:analyzer/src/summary2/link.dart:44:10)
+#27     LibraryContext._loadBundle.<anonymous closure> (package:analyzer/src/dart/analysis/library_context.dart:360:20)
+#28     OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#29     LibraryContext._loadBundle (package:analyzer/src/dart/analysis/library_context.dart:359:40)
+#30     LibraryContext.load.<anonymous closure> (package:analyzer/src/dart/analysis/library_context.dart:147:9)
+#31     OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#32     LibraryContext.load (package:analyzer/src/dart/analysis/library_context.dart:144:17)
+#33     AnalysisDriver._getUnitElement.<anonymous closure>.<anonymous closure> (package:analyzer/src/dart/analysis/driver.dart:2082:24)
+#34     OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#35     AnalysisDriver._getUnitElement.<anonymous closure> (package:analyzer/src/dart/analysis/driver.dart:2081:19)
+#36     OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#37     AnalysisDriver._getUnitElement (package:analyzer/src/dart/analysis/driver.dart:2070:38)
+#38     AnalysisDriver.performWork (package:analyzer/src/dart/analysis/driver.dart:1231:7)
+#39     AnalysisDriverScheduler._run (package:analyzer/src/dart/analysis/driver.dart:2794:24)
+<asynchronous suspension>
+
+
+#0      LibraryContext._throwLibraryCycleLinkException (package:analyzer/src/dart/analysis/library_context.dart:525:5)
+#1      LibraryContext._loadBundle (package:analyzer/src/dart/analysis/library_context.dart:397:9)
+#2      LibraryContext.load.<anonymous closure> (package:analyzer/src/dart/analysis/library_context.dart:147:9)
+#3      OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#4      LibraryContext.load (package:analyzer/src/dart/analysis/library_context.dart:144:17)
+#5      AnalysisDriver._getUnitElement.<anonymous closure>.<anonymous closure> (package:analyzer/src/dart/analysis/driver.dart:2082:24)
+#6      OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#7      AnalysisDriver._getUnitElement.<anonymous closure> (package:analyzer/src/dart/analysis/driver.dart:2081:19)
+#8      OperationPerformanceImpl.run (package:analyzer/src/util/performance/operation_performance.dart:201:23)
+#9      AnalysisDriver._getUnitElement (package:analyzer/src/dart/analysis/driver.dart:2070:38)
+#10     AnalysisDriver.performWork (package:analyzer/src/dart/analysis/driver.dart:1231:7)
+#11     AnalysisDriverScheduler._run (package:analyzer/src/dart/analysis/driver.dart:2794:24)
+<asynchronous suspension>
+---8<---8<--- End of log ---8<---8<---
+Target //spike/hello:routes_g failed to build
+Use --verbose_failures to see the command lines of failed build steps.
+INFO: Elapsed time: 0.236s, Critical Path: 0.13s
+INFO: 940 processes: 1052 action cache hit, 939 internal, 1 worker.
+ERROR: Build did NOT complete successfully

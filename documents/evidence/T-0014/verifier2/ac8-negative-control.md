@@ -1,0 +1,23 @@
+# T-0014-AC8: configs parse
+
+| Command | Exit | Bad lines | Verdict |
+|---|---|---|---|
+| `tool/bazelw build --nobuild --config=lint //spike/...` | 0 | 0 | ok |
+| `tool/bazelw test --nobuild --config=lint //spike/...` | 1 | 0 | ok |
+| `tool/bazelw build --nobuild --config=ci --config=cold //spike/...` | 0 | 0 | ok |
+| `tool/bazelw build --nobuild --config=budget16 //spike/...` | 0 | 0 | ok |
+| `tool/bazelw --budget16 build --nobuild //spike/...` | 0 | 0 | ok |
+| `tool/bazelw build --nobuild --config=budget16_8c //spike/...` | 0 | 0 | ok |
+| `tool/bazelw build --nobuild --config=profile //spike/...` | 0 | 0 | ok |
+| `tool/bazelw build --nobuild --config=remote-cache //spike/...` | 0 | 0 | ok |
+| `tool/bazelw build --nobuild --config=sim //spike/hello:hello_ios` | 0 | 0 | ok |
+| `tool/bazelw build --nobuild --config=device-profile //spike/...` | 0 | 0 | ok |
+| `tool/bazelw test --nobuild --config=app //spike/...` | 1 | 0 | ok |
+| `tool/bazelw build --nobuild --config=no_such_config //spike/...` | 2 | 1 | ok |
+| `tool/bazelw build --config=lint //spike/...` | 1 | 0 | FAIL |
+| `fvm dart format --output=none --set-exit-if-changed spike` | 1 | 1 | FAIL |
+
+The `no_such_config` row is a negative control: an undefined config must fail.
+`test --nobuild` always exits 1 ("Unable to run tests"), so its row passes when analysis completed with no bad lines; `test --config=app` has no `app`-tagged test yet; "excluded by filters" shows its tag filter applied.
+
+**FAIL T-0014-AC8**

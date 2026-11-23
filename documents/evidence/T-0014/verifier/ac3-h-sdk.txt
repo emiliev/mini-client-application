@@ -1,0 +1,23 @@
+before: exit 0
+--- edited source:
+/// Pure-Dart leaf package. T-0014-AC3 edits only this function's body and
+/// checks that the package's `.koutline` stays byte-identical (H-SDK).
+String greeting() {
+  const who = 'mini-client';
+  final n = who.length; assert(n > 0);
+  return 'Hello, $who';
+}
+after: exit 0
+--- reverted: 0 changed files
+--- digest diff (only .kmod lines expected):
+8c8
+< b521d13d603c29813bfa81396ff339d6aad350b6bf5c6cf5cfa011fdec8cbd06  ./0.dill
+---
+> 43869fc1d746431cde389b95b5e6b706fc775f4f69abf29b767836825220d990  ./0.dill
+11c11
+< ec01590fcdaa26002f13309ab6ced517645d7f4d6341f485208d70849ff6f71f  ./0.dill
+---
+> 95ff15e8775a8160992ff3b73bde7a71d975bf8ae725c87f5a797d6e6cd4be5f  ./0.dill
+--- dart-sdk/version: 3.13.5
+--- fallback diagnostics in build logs: 0
+--- ... in worker logs: 0

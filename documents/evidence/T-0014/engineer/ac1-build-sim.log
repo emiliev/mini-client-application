@@ -1,0 +1,15 @@
+INFO: Invocation ID: d8a30990-2956-46ed-99dd-95d305855102
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: target //spike/hello:hello_ios (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/hello:hello_ios (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/hello:hello_ios (0 packages loaded, 7565 targets configured, 123 aspect applications).
+INFO: Found 1 target...
+Target //spike/hello:hello_ios up-to-date:
+  bazel-bin/spike/hello/hello_ios.ipa
+INFO: Elapsed time: 0.387s, Critical Path: 0.03s
+INFO: 1 process: 3449 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action

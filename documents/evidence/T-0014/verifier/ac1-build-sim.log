@@ -1,0 +1,23 @@
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: 2ade9c4b-90b7-4c0d-9476-13861ad4d791
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: target //spike/hello:hello_ios (6 packages loaded, 6 targets configured)
+Analyzing: target //spike/hello:hello_ios (6 packages loaded, 6 targets configured)
+
+Analyzing: target //spike/hello:hello_ios (257 packages loaded, 10232 targets configured, 244 aspect applications)
+
+Analyzing: target //spike/hello:hello_ios (283 packages loaded, 13189 targets configured, 246 aspect applications)
+
+Analyzing: target //spike/hello:hello_ios (283 packages loaded, 13189 targets configured, 246 aspect applications)
+
+INFO: Analyzed target //spike/hello:hello_ios (286 packages loaded, 16087 targets configured, 266 aspect applications).
+[3,449 / 3,450] [Prepa] runfiles for //spike/hello:hello_ios
+INFO: Found 1 target...
+Target //spike/hello:hello_ios up-to-date:
+  bazel-bin/spike/hello/hello_ios.ipa
+INFO: Elapsed time: 7.474s, Critical Path: 0.18s
+INFO: 3450 processes: 284 disk cache hit, 3166 internal.
+INFO: Build completed successfully, 3450 total actions
+tool/bazelw --output_base=/tmp/mc-verify-t0014 build --config=sim   0.03s user 0.03s system 0% cpu 7.741 total

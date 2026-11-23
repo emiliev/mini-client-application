@@ -1,0 +1,18 @@
+INFO: Invocation ID: fd4ae38e-636b-4d34-b09f-fef546ffddc5
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 7 targets (0 packages loaded, 0 targets configured)
+Analyzing: 7 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 7 targets (0 packages loaded, 0 targets configured).
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a43430bcd5c70bf88/spike/hello/BUILD.bazel:48:16: Checking Dart formatting of //spike/hello:_stage failed: (Exit 1): dart failed: error executing DartFormat command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on flutter_library rule target //spike/hello:_stage) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dart bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/format_runner.dill ... (remaining 1 argument skipped)
+Changed spike/hello/lib/src/pages.dart
+Formatted 2 files (1 changed) in 0.03 seconds.
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a43430bcd5c70bf88/spike/hello/BUILD.bazel:103:16: Checking Dart formatting of //spike/hello:hello_lib failed: (Exit 1): dart failed: error executing DartFormat command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on flutter_library rule target //spike/hello:hello_lib) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dart bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/format_runner.dill ... (remaining 1 argument skipped)
+Changed spike/hello/lib/src/pages.dart
+Formatted 4 files (1 changed) in 0.10 seconds.
+INFO: Found 7 targets...
+INFO: Elapsed time: 0.377s, Critical Path: 0.16s
+INFO: 457 processes: 3 action cache hit, 22 disk cache hit, 434 internal, 1 worker.
+ERROR: Build did NOT complete successfully

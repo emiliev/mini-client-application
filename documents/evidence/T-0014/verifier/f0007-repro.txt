@@ -1,0 +1,8 @@
+without sky_engine: routes_go_router_part --summary args: 12
+build exit: 1
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a43430bcd5c70bf88/spike/hello/BUILD.bazel:66:13: DartCodegen @@//spike/hello:routes_go_router_part failed: Worker process did not return a WorkResponse:
+Null check operator used on a null value
+#0      LibraryReader._readDirectiveUri.readWithSource (package:analyzer/src/summary2/bundle_reader.dart:418:52)
+#1      LibraryReader._readDirectiveUri (package:analyzer/src/summary2/bundle_reader.dart:431:22)
+#2      LibraryReader._readLibraryImports.<anonymous closure> (package:analyzer/src/summary2/bundle_reader.dart:996:14)
+#6      LibraryReader._readLibraryImports (package:analyzer/src/summary2/bundle_reader.dart:990:20)
