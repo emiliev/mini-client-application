@@ -415,6 +415,11 @@ test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint() {
   assert_not_contains "$EV/ac3-sigint/e2e-app_test.log" "Deleted simulator" "target log"
   ! sim_exists "$name" || fail "simulator $name still exists after SIGINT"
   assert_contains "$EV/ac3-sigint/e2e-summary.md" "INTERRUPTED"
+  # Review nit 10: the interrupted target's row links its log.
+  summary_row "$EV/ac3-sigint/e2e-summary.md" integration_test/app_test.dart |
+    grep -F -q "| INTERRUPTED |" || fail "interrupted target row does not say INTERRUPTED"
+  summary_row "$EV/ac3-sigint/e2e-summary.md" integration_test/app_test.dart |
+    grep -F -q "[e2e-app_test.log](e2e-app_test.log)" || fail "interrupted target row does not link its log"
   sleep 2
   if pgrep -f -- "-d $udid" >/dev/null; then
     pgrep -fl -- "-d $udid" | sed 's/^/      /'
@@ -623,13 +628,256 @@ test_T-0012-AC7_small_screenshot_not_upscaled() {
     fail "summary does not record small_600.png as unchanged"
 }
 
+# ------------------------------------------- code-review regression tests ---
+# Each one is named after the AC whose guarantee it protects.
+
+# Review finding 1: a screenshot that can't be written is an error (exit 4),
+# never a summary entry for a file that doesn't exist.
+test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom() {
+  ensure_stub_project
+  local d="$WORK/review1" rc out ev note
+  mkdir -p "$d/ro"
+  make_png 300 600 "$d/small.png"
+  make_png 600 1800 "$d/tall.png"
+  chmod 555 "$d/ro"
+
+  # Unit level, both branches (cp and sips) of the sourced function.
+  rc=0
+  "$BASH_BIN" -c 'source "$1"; downscale_if_tall "$2" "$3"' _ "$E2E" "$d/small.png" "$d/ro/small.png" \
+    >"$d/note-cp.txt" 2>"$OUT/ac1-review-unit-cp.err" || rc=$?
+  note=$(cat "$d/note-cp.txt")
+  assert_ne 0 "$rc" "downscale_if_tall exit code when cp can't write"
+  assert_eq "" "$note" "note printed for a failed copy"
+  [ ! -e "$d/ro/small.png" ] || fail "a failed copy left $d/ro/small.png"
+  rc=0
+  "$BASH_BIN" -c 'source "$1"; downscale_if_tall "$2" "$3"' _ "$E2E" "$d/tall.png" "$d/ro/tall.png" \
+    >"$d/note-sips.txt" 2>"$OUT/ac1-review-unit-sips.err" || rc=$?
+  note=$(cat "$d/note-sips.txt")
+  assert_ne 0 "$rc" "downscale_if_tall exit code when sips can't write"
+  assert_eq "" "$note" "note printed for a failed downscale"
+  [ ! -e "$d/ro/tall.png" ] || fail "a failed downscale left $d/ro/tall.png"
+  chmod 755 "$d/ro"
+  note "unit: cp and sips failures both return non-zero with no note"
+
+  # End to end: the runner makes the evidence file read-only, so the copy fails.
+  ev="$EV/ac1-review"
+  out="$OUT/ac1-review-run.out"
+  cat >"$d/runner.sh" <<'SH'
+cp "$1" "$SCREENSHOT_DIR/shot.png"
+: >"$2/shot.png"
+chmod 444 "$2/shot.png"
+SH
+  rc=0
+  run_e2e "$out" --task "$TASK" --role engineer --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    --runner-cmd "/bin/bash '$d/runner.sh' '$d/small.png' '$ev'" || rc=$?
+  note "run with an unwritable screenshot: exit $rc"
+  assert_eq 4 "$rc" "exit code when a screenshot can't be written (documented: 4)"
+  assert_contains "$out" "could not save screenshot"
+  assert_contains "$ev/e2e-summary.md" "| Result | **ERROR (exit 4)** |"
+  assert_not_contains "$ev/e2e-summary.md" "[shot.png]" "summary"
+  summary_row "$ev/e2e-summary.md" integration_test/stub_test.dart | grep -F -q "| ERROR |" ||
+    fail "target row does not show ERROR"
+  ! sim_exists "$(out_value "$out" SIMULATOR_NAME)" || fail "simulator left after exit 4"
+  chmod 644 "$ev/shot.png"
+}
+
+# Review nit 7: renamed logs and screenshots never collide.
+test_T-0012-AC1_multiple_targets_get_unique_names() {
+  local p="$WORK/stub_multi" d="$WORK/review7" ev="$EV/ac1-names" out="$OUT/ac1-names.out" rc f n
+  mkdir -p "$p/integration_test/sub" "$d"
+  printf 'name: stub_multi\n' >"$p/pubspec.yaml"
+  : >"$p/integration_test/a_test.dart"
+  : >"$p/integration_test/sub/a_test.dart"
+  : >"$p/integration_test/a_test-2.dart"
+  make_png 300 600 "$d/small.png"
+  cat >"$d/runner.sh" <<'SH'
+cp "$2" "$SCREENSHOT_DIR/x.png"
+if [ "$1" = "integration_test/a_test.dart" ]; then cp "$2" "$SCREENSHOT_DIR/a_test-x.png"; fi
+SH
+  rc=0
+  run_e2e "$out" --task "$TASK" --role engineer --project "$p" \
+    --target integration_test/a_test.dart --target integration_test/sub/a_test.dart \
+    --target integration_test/a_test-2.dart \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    --runner-cmd "/bin/bash '$d/runner.sh' {target} '$d/small.png'" || rc=$?
+  assert_eq 0 "$rc" "exit code"
+  for f in e2e-a_test.log e2e-a_test-2.log e2e-a_test-2-2.log; do
+    assert_file "$ev/$f"
+    assert_contains "$ev/e2e-summary.md" "[$f]($f)"
+  done
+  for f in x.png a_test-x.png a_test-3-x.png a_test-2-x.png; do
+    assert_file "$ev/$f"
+    assert_contains "$ev/e2e-summary.md" "[$f]($f)"
+  done
+  n=$(grep -c '^| \[.*\.png\](' "$ev/e2e-summary.md")
+  assert_eq 4 "$n" "screenshot rows in the summary"
+  note "3 targets: logs e2e-a_test{,-2,-2-2}.log; screenshots x, a_test-x, a_test-3-x, a_test-2-x"
+}
+
+# Review finding 2, nits 9 and 10: a second SIGINT during teardown can't stop
+# the simulator from being deleted; children that left the process tree (and
+# ignore SIGTERM) are killed; the interrupted target keeps its log link and
+# the screenshot it had already taken.
+test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans() {
+  ensure_stub_project
+  local d="$WORK/review2" ev="$EV/ac3-review" out="$OUT/ac3-review.out" token rc name
+  token="T0012-orphan-$SUITE_PID"
+  mkdir -p "$d"
+  make_png 300 600 "$d/small.png"
+  cat >"$d/runner.sh" <<'SH'
+cp "$1" "$SCREENSHOT_DIR/partial.png"
+# Orphan: its parent subshell exits at once, so it is re-parented to launchd
+# but stays in the runner's process group. It ignores SIGTERM.
+( /bin/bash -c "trap '' TERM; sleep 300; : $2" & )
+# The runner itself ignores SIGTERM too, so teardown has to wait 5 s for KILL.
+trap '' TERM
+echo runner-started
+sleep 300
+SH
+  set -m
+  start_e2e_bg "$out" --task "$TASK" --role engineer --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    --runner-cmd "/bin/bash '$d/runner.sh' '$d/small.png' '$token'"
+  set +m
+  wait_for_line "$ev/e2e-stub_test.log" "runner-started" 120 || fail "runner never started (see $out)"
+  name=$(out_value "$out" SIMULATOR_NAME)
+  pgrep -f -- "$token" >/dev/null || fail "orphan process was not started"
+  note "SIGINT, then a second SIGINT 1 s later during teardown ($name)"
+  kill -INT "$BG_PID"
+  sleep 1
+  kill -INT "$BG_PID" 2>/dev/null || fail "script already exited 1 s after SIGINT; teardown is not being exercised"
+  rc=0
+  wait_pid "$BG_PID" 60 || rc=$?
+  note "exit $rc"
+  assert_eq 130 "$rc" "exit code after two SIGINTs"
+  assert_contains "$out" "Deleted simulator $name"
+  assert_contains "$out" "SIMULATOR_DELETED_AT="
+  ! sim_exists "$name" || fail "simulator $name still exists after a second SIGINT"
+  sleep 1
+  if pgrep -f -- "$token" >/dev/null; then
+    pgrep -fl -- "$token" | sed 's/^/      /'
+    pkill -KILL -f -- "$token" || true
+    fail "orphaned runner child survived teardown"
+  fi
+  summary_row "$ev/e2e-summary.md" integration_test/stub_test.dart |
+    grep -F -q "[e2e-stub_test.log](e2e-stub_test.log)" || fail "interrupted row does not link its log"
+  assert_file "$ev/partial.png"
+  assert_contains "$ev/e2e-summary.md" "[partial.png](partial.png)"
+  assert_contains "$ev/e2e-stub_test.log" "# interrupted by SIGINT"
+}
+
+# Review finding 3: the default evidence dir is per role, and a rerun removes
+# the previous run's outputs (and only those).
+test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset() {
+  ensure_stub_project
+  local repo="$WORK/fake_repo" d="$WORK/review3" e v rc_e=0 rc_v=0 pid_e pid_v rc
+  mkdir -p "$repo/tool" "$d"
+  cp "$E2E" "$repo/tool/e2e_ios.sh"
+  e="$repo/documents/evidence/$TASK/engineer"
+  v="$repo/documents/evidence/$TASK/verifier"
+  mkdir -p "$e"
+  printf '# E2E summary: %s (engineer)\n\nold run\n' "$TASK" >"$e/e2e-summary.md"
+  make_png 10 10 "$e/stale.png"
+  echo old >"$e/e2e-old.log"
+  echo keep >"$e/notes.md"
+  make_png 300 600 "$d/small.png"
+  local runner="cp '$d/small.png' \"\$SCREENSHOT_DIR/shot.png\""
+
+  "$BASH_BIN" "$repo/tool/e2e_ios.sh" --task "$TASK" --role engineer --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --runner-cmd "$runner" >"$OUT/ac4-review-engineer.out" 2>&1 &
+  pid_e=$!
+  echo "$pid_e" >>"$BG_PIDS_FILE"
+  "$BASH_BIN" "$repo/tool/e2e_ios.sh" --task "$TASK" --role verifier --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --runner-cmd "$runner" >"$OUT/ac4-review-verifier.out" 2>&1 &
+  pid_v=$!
+  echo "$pid_v" >>"$BG_PIDS_FILE"
+  wait_pid "$pid_e" 300 || rc_e=$?
+  wait_pid "$pid_v" 300 || rc_v=$?
+  note "engineer exit $rc_e, verifier exit $rc_v"
+  assert_eq 0 "$rc_e" "engineer exit code"
+  assert_eq 0 "$rc_v" "verifier exit code"
+  assert_contains "$OUT/ac4-review-engineer.out" "Evidence dir: $e"
+  assert_contains "$OUT/ac4-review-verifier.out" "Evidence dir: $v"
+  assert_contains "$e/e2e-summary.md" "| Role | engineer |"
+  assert_contains "$v/e2e-summary.md" "| Role | verifier |"
+  assert_file "$e/shot.png"
+  assert_file "$v/shot.png"
+  [ ! -e "$e/stale.png" ] || fail "stale screenshot from the previous run is still there"
+  [ ! -e "$e/e2e-old.log" ] || fail "stale log from the previous run is still there"
+  assert_not_contains "$e/e2e-summary.md" "old run" "engineer summary"
+  assert_file "$e/notes.md"
+  note "per-role dirs written; stale.png and e2e-old.log removed; notes.md kept"
+
+  # A dir with PNGs that this script did not write is refused before any simulator.
+  mkdir -p "$d/foreign"
+  make_png 10 10 "$d/foreign/someone-elses.png"
+  rc=0
+  run_e2e "$OUT/ac4-review-foreign.out" --task "$TASK" --role engineer --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$d/foreign" --runner-cmd true || rc=$?
+  assert_eq 2 "$rc" "exit code for a foreign evidence dir"
+  assert_contains "$OUT/ac4-review-foreign.out" "did not write"
+  assert_not_contains "$OUT/ac4-review-foreign.out" "SIMULATOR_NAME="
+  assert_file "$d/foreign/someone-elses.png"
+}
+
+# Review nit 6: fvm is required only when the runner command uses it.
+test_T-0012-AC5_fvm_checked_only_when_runner_uses_it() {
+  ensure_stub_project
+  local nofvm="/usr/bin:/bin:/usr/sbin:/sbin" rc out
+  PATH="$nofvm" command -v fvm >/dev/null 2>&1 && fail "test setup: fvm is still on $nofvm"
+  out="$OUT/ac5-fvm-default.out"
+  rc=0
+  PATH="$nofvm" "$BASH_BIN" "$E2E" --task "$TASK" --role engineer --project "$STUB" \
+    --runtime com.apple.CoreSimulator.SimRuntime.iOS-99-9 >"$out" 2>&1 || rc=$?
+  assert_eq 2 "$rc" "exit code without fvm, default runner"
+  assert_contains "$out" "'fvm' not found"
+  out="$OUT/ac5-fvm-custom.out"
+  rc=0
+  PATH="$nofvm" "$BASH_BIN" "$E2E" --task "$TASK" --role engineer --project "$STUB" \
+    --runtime com.apple.CoreSimulator.SimRuntime.iOS-99-9 --runner-cmd true >"$out" 2>&1 || rc=$?
+  assert_eq 2 "$rc" "exit code without fvm, custom runner"
+  assert_not_contains "$out" "fvm" "pre-flight output for a runner without fvm"
+  assert_contains "$out" "iOS-99-9"
+  note "default runner needs fvm; --runner-cmd true does not (reached the runtime check)"
+}
+
+# Review finding 4: a failing simulator listing is an error, not "nothing to do".
+test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails() {
+  local fb="$WORK/fakebin-fail" fj="$WORK/fakebin-badjson" rc out
+  mkdir -p "$fb" "$fj"
+  printf '#!/bin/sh\necho "fake xcrun: simctl unavailable" >&2\nexit 1\n' >"$fb/xcrun"
+  printf '#!/bin/sh\necho "this is not json"\nexit 0\n' >"$fj/xcrun"
+  chmod +x "$fb/xcrun" "$fj/xcrun"
+  for case_dir in "$fb" "$fj"; do
+    out="$OUT/ac6-review-$(basename "$case_dir").out"
+    rc=0
+    PATH="$case_dir:$PATH" "$BASH_BIN" "$CLEANUP" >"$out" 2>&1 || rc=$?
+    note "$(basename "$case_dir"): exit $rc"
+    assert_eq 3 "$rc" "cleanup exit code when listing fails ($(basename "$case_dir"))"
+    assert_contains "$out" "could not list simulators"
+    assert_not_contains "$out" "No simulators named" "output ($(basename "$case_dir"))"
+  done
+  out="$OUT/ac6-review-missing-set.out"
+  rc=0
+  "$BASH_BIN" "$CLEANUP" --device-set "$WORK/no-such-device-set" >"$out" 2>&1 || rc=$?
+  assert_eq 2 "$rc" "cleanup exit code for a missing --device-set"
+  assert_not_contains "$out" "No simulators named" "output (missing set)"
+}
+
 ALL_TESTS="
 test_T-0012-AC1_pass_run_collects_evidence
+test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom
+test_T-0012-AC1_multiple_targets_get_unique_names
 test_T-0012-AC2_failing_target_reports_fail
 test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint
+test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans
 test_T-0012-AC4_parallel_runs_isolated
+test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset
 test_T-0012-AC5_bad_runtime_or_device_fails_fast
+test_T-0012-AC5_fvm_checked_only_when_runner_uses_it
 test_T-0012-AC6_cleanup_only_mc_simulators
+test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
 test_T-0012-AC7_small_screenshot_not_upscaled
 "
 
@@ -690,7 +938,8 @@ run_test() {
   set +e
   (
     set -eEuo pipefail
-    trap 'printf "    ERROR: command failed (exit %s) at line %s\n" "$?" "$LINENO"' ERR
+    # stderr: with -E the trap also fires inside $(...), whose stdout is data.
+    trap 'printf "    ERROR: command failed (exit %s) at line %s\n" "$?" "$LINENO" >&2' ERR
     "$t"
   )
   rc=$?
