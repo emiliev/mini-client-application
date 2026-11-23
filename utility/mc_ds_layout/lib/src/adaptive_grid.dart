@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:mc_ds_layout/src/breakpoints.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
-
-import 'breakpoints.dart';
 
 /// A non-scrolling grid whose column count follows the available width:
 /// 2 (compact), 3 (medium) or 4 (expanded). Put it inside a scroll view.

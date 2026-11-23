@@ -1,5 +1,5 @@
-import 'dart:ui' show Brightness;
 import 'dart:math' as math;
+import 'dart:ui' show Brightness;
 
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';

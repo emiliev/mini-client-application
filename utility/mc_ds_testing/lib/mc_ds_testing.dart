@@ -11,9 +11,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mc_ds_tokens/mc_ds_tokens.dart';
-
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 
 /// Bazel `data` label every golden-testing package must list.
 const String mcFontsDataLabel = '//utility/mc_ds_theme:fonts';
@@ -66,7 +65,9 @@ List<String> _materialIconsCandidates() {
 /// tester runs with asset fonts disabled and would otherwise draw Ahem boxes
 /// (F-0004 gotcha 1).
 Future<void> mcLoadFonts() async {
-  if (_fontsLoaded) return;
+  if (_fontsLoaded) {
+    return;
+  }
   final dir = _candidateDirs().firstWhere(
     (d) => File('$d/${_fontFiles.first}').existsSync(),
     orElse: () => throw StateError(
@@ -163,7 +164,9 @@ void mcGoldenMatrix({
           );
           await tester.pump();
           // A fixed fake-clock advance gives animations a deterministic frame.
-          if (settle > Duration.zero) await tester.pump(settle);
+          if (settle > Duration.zero) {
+            await tester.pump(settle);
+          }
           expect(tester.takeException(), isNull);
           await expectLater(
             find.byType(MaterialApp),

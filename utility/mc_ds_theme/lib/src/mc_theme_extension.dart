@@ -19,7 +19,9 @@ class McThemeExtension extends ThemeExtension<McThemeExtension> {
 
   @override
   McThemeExtension lerp(McThemeExtension? other, double t) {
-    if (other == null) return this;
+    if (other == null) {
+      return this;
+    }
     return McThemeExtension(
       variant: t < 0.5 ? variant : other.variant,
       palette: McPalette.lerp(palette, other.palette, t),

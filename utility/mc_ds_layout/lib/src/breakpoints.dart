@@ -17,8 +17,12 @@ enum McWidthClass {
   static const double expandedStart = 1024;
 
   static McWidthClass of(double width) {
-    if (width >= expandedStart) return expanded;
-    if (width >= mediumStart) return medium;
+    if (width >= expandedStart) {
+      return expanded;
+    }
+    if (width >= mediumStart) {
+      return medium;
+    }
     return compact;
   }
 }

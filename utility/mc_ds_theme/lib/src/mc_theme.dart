@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mc_ds_theme/src/mc_theme_extension.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
-
-import 'mc_theme_extension.dart';
 
 /// Builds the app `ThemeData` for each [McThemeVariant].
 abstract final class McTheme {
