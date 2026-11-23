@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0020](T-0020-config-monitoring-eventbus-storage.md) | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage` (P1-03) | **In Progress** | Engineer (Sonnet) | T-0017 | `fleet/T-0020-core-utils` |
 | [T-0018](T-0018-mocked-backend-and-character-fixtures.md) | `mc_mocked_backend` + character and media fixtures (P1-06, P1-07) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0018-mocked-backend` |
 | [T-0019](T-0019-design-system-foundation.md) | Design-system foundation (P1-11) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0019-design-system` |
 
