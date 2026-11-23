@@ -20,7 +20,7 @@ A **Flutter application** (not a package). Mobile-first, for **iOS and Android**
 ## Identity
 | Item | Value | Source |
 |---|---|---|
-| Bundle id / applicationId | `com.emiliev.miniclinet` (spelling to confirm) | Q-004 |
+| Bundle id / applicationId | `com.emiliev.miniclient` (TL choice; the PO delegated it, 2026-11-23) | Q-004 |
 | Dart package name | `mini_client` | TL default |
 | Display name | _TBD_, kept free of Marvel trademarks pending Q-007 | Q-007 |
 

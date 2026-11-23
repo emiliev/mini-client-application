@@ -359,13 +359,13 @@ flutter_application(name = "mini_client", package_name = "mini_client", main = "
                     deps = [":mini_client_lib", "@pub_deps//:flutter", "@rules_flutter//flutter:material_icons"])
 
 mc_ios_app(name = "mini_client_ios", application = ":mini_client",
-           bundle_id = "com.emiliev.miniclinet",      # Q-004 spelling pending; one constant in defs.bzl
+           bundle_id = "com.emiliev.miniclient",      # Q-004 spelling pending; one constant in defs.bzl
            app_name = "Marvel")                       # → flutter_ios_app (manual) + :mini_client_sim_build_test (tag app, macOS only)
 
 flutter_integration_test(name = "e2e_journeys", platform = "ios", package_name = "mini_client",
     main = "integration_test/journeys_test.dart", srcs = glob(["integration_test/**/*.dart"]),
     deps = [":mini_client_lib", "//utility/mc_e2e_utils", "@pub_deps//:flutter_test", "@pub_deps//:integration_test"],
-    ios_bundle_id = "com.emiliev.miniclinet.e2e", size = "enormous",
+    ios_bundle_id = "com.emiliev.miniclient.e2e", size = "enormous",
     tags = ["manual", "e2e", "exclusive"])            # manual until U-F1 (KD10)
 mc_package_tests(lib = ":mini_client_lib", kinds = ["unit", "app_journeys"])
 ```
@@ -486,7 +486,7 @@ Estimate **(inferred)**: about 45 codegen actions per feature and about 6k at S2
   - Pubspec `flutter: assets:` isn't read by Bazel, but mcgen writes it anyway for fvm.
 - **Fonts:** `mc_design_system` declares `flutter_font_family` targets (OFL fonts, P5 KD9) in `fonts` and uses `fontFamily: 'Inter', package: 'mc_design_system'`. The app adds `@rules_flutter//flutter:material_icons`.
 - **Manual tagging:** both `flutter_application` and `flutter_ios_app` are `manual` (KD8). `:mini_client_sim_build_test` (`flutter_ios_simulator_build_test(targets = [...], tags = ["app"], target_compatible_with = ["@platforms//os:macos"])`) builds the simulator app. It transitions to `-c dbg` (`debug_build.bzl:5-17`), so it runs in its **own invocation** (`--config=app`) and B3 / `test:fast` / `test:all` exclude the `app` tag; otherwise one `bazel test` would build the closure in two configurations (H-CFGDUP). Linux CI skips it as incompatible.
-- **Sandbox apps (01 §6.3):** 7 group sandboxes, each at `//app/sandbox/<group>_sandbox` with `flutter_application` + `flutter_ios_app` (manual) + its own `sim_build_test` + an mcgen-written `ios/Runner/` template (6 small files) + bundle id `com.emiliev.miniclinet.sandbox.<group>`. Each depends on one wiring, `app_core`, the root utilities and its domain mocks. Cost: one app build each, on demand only.
+- **Sandbox apps (01 §6.3):** 7 group sandboxes, each at `//app/sandbox/<group>_sandbox` with `flutter_application` + `flutter_ios_app` (manual) + its own `sim_build_test` + an mcgen-written `ios/Runner/` template (6 small files) + bundle id `com.emiliev.miniclient.sandbox.<group>`. Each depends on one wiring, `app_core`, the root utilities and its domain mocks. Cost: one app build each, on demand only.
 
 ---
 

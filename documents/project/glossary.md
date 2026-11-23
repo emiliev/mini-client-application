@@ -12,7 +12,7 @@
 | **Series** | A sequence of comics published under one title. |
 | **Event** | A cross-title storyline that spans several series. |
 | **Creator** | A person credited on a comic (writer, artist, …). |
-| **Bundle id / applicationId** | The app's unique store identifier on iOS / Android (`com.emiliev.miniclinet`, Q-004). |
+| **Bundle id / applicationId** | The app's unique store identifier on iOS / Android (`com.emiliev.miniclient`, Q-004, decided by the TL). |
 
 ## Process
 | Term | Meaning |
