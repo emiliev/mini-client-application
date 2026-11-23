@@ -2,59 +2,71 @@
 
 - **Verifier:** crew: Verifier (fresh agent, not the implementer)
 - **Date:** 2026-11-24
-- **Branch / commit verified:** `fleet/T-0023-api-client` @ **`bf39482`**, checked out as `fleet/T-0023-verify`
+- **Branch / commit verified:** `fleet/T-0023-api-client` @ **`e7f93dc`**, checked out as `fleet/T-0023-verify2`. That is `bf39482` plus the review fixes `018e613` plus the FAIL fixes `e7f93dc`. This report replaces my first pass on `bf39482` (branch `fleet/T-0023-verify`, commit `f630f7b`, which was FAIL on AC5). The first-pass findings are summarised under "First pass" below.
 - **Simulator:** none. This is a pure-Dart utility task with no UI and no e2e.
-- **Bazel:** `tool/bazelw --output_base=<verifier scratch>`, a private output base, shut down at the end.
-- **Verdict:** **FAIL**, on AC5's "Flutter-free (R15)" only. AC1 to AC4 pass. Both packages' Bazel closures reach `package:flutter` and `sky_engine` through `@pub_deps//:dio` (Issue 1). The cause is a third-party target, not the Engineer's code. The fix is one line in `MODULE.bazel`, and I tested it.
+- **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0023-verifier`, used by this Verifier only and shut down at the end. The check script ran through an `MC_BAZELISK` wrapper that adds the same output base.
+- **Verdict:** **PASS**. Every AC passes. The AC5 failure from the first pass is fixed, and its fix is guarded by a check that I watched fail.
 
-## Gates re-run independently (at `bf39482`)
+## Gates re-run independently (at `e7f93dc`)
 | Gate | Command | Result |
 |---|---|---|
-| All tests | `tool/bazelw test --nocache_test_results //...` | **31/31 PASS** |
+| All tests | `tool/bazelw test --nocache_test_results //...` | **31/31 PASS**. `mc_mocked_backend:mocked_backend_test` is now a `dart_test`. |
 | Analyze + format | `tool/bazelw build --config=lint //...` | OK |
 | Architecture | `tool/bazelw run //tool/mc_arch_check:bin` | `mc_arch_check: OK` |
+| AC5 closure | `tool/checks/T-0023-AC5_flutter_free.sh` | **PASS** with `cycle_breaks`. **FAIL** (exit 1) with the line removed. Reverted. |
 
 ## Acceptance criteria
 | AC | Scenario (short) | Mapped test(s) | Test really asserts the AC? | Result |
 |---|---|---|---|---|
-| T-0023-AC1 | Timeout, offline, 401, 404, 500 and malformed each map to the matching `ApiFailure` through `mc_mocked_backend` | `mc_api_client:api_client_test` (6 tests through `FailureRule`s); `mc_api_errors:api_failure_test` (direct) | Yes. Each test runs a real `FailureRule` through the adapter, `createApiDio` and `apiCall`, and checks the subtype. The 500 test also checks `status`. **My checks** (temporary `vfy_test`, now removed): all 6 kinds plus 503, 400 and 403 gave `ApiTimeout`, `ApiOffline`, `ApiUnauthorized`, `ApiNotFound`, `ApiServer(500)`, `ApiServer(503)`, `ApiMalformed` (`FormatException: Unexpected end of input`), `ApiUnexpected` and `ApiUnexpected`. **Mutation:** I mapped 404 to `ApiServer`. Both `T-0023-AC1: 404` and the direct test FAILED. Reverted. | PASS |
-| T-0023-AC2 | GET 503 with retry 2 makes 3 attempts; a POST is never retried | `api_client_test` "T-0023-AC2" x5 | Yes. The attempts are counted with `backend.recentTraffic`, which is the backend's own record. **My checks:** GET 503 traffic was exactly 3 entries, all `GET 503`. Retries 0, 1, 2 and 5 gave 1, 2, 3 and 6 attempts. POST and PATCH made 1 attempt each for 503, timeout and offline. PUT and DELETE 503 made 3. GET 404 and GET 401 made 1. The DI-built Dio (default retries 2) also made 3 attempts, with 1 log line per attempt. **Mutation:** I added `POST` to the idempotent set and `a POST is never retried` FAILED. Reverted. | PASS |
-| T-0023-AC3 | `ApiFailure.from(TypeError)` gives `unexpected` and keeps the message | `api_failure_test` "T-0023-AC3" | Yes. It causes a real `TypeError` with a bad cast and checks that the message contains `'$thrown'`. **My check:** I threw a `TypeError` inside `apiCall`, after a real 200 from `/v1/characters` (`results` cast to `int`). The result was `ApiUnexpected(_TypeError: type 'List<dynamic>' is not a subtype of type 'int' in type cast)`, which contains the original text. **Mutation:** I replaced the mapping with `const ApiUnexpected()` and AC3 FAILED (`Actual: 'Unexpected error'`). Reverted. | PASS |
-| T-0023-AC4 | `diContainer<Dio>()` is one shared instance on the mock adapter, and `/v1/characters` returns page 1 | `api_client_test` "T-0023-AC4" | Yes: `identical` across two lookups, `same(backend.adapter)`, and `offset 0`, `total 1500`, non-empty `results`. **My check:** I wired `MonitoringDIInitializer` and `ApiClientDIInitializer`. The instance was identical across lookups and the adapter was identical to `backend.adapter`. The response was 200, `offset 0`, 20 results (the default limit), and the backend recorded exactly one `GET /v1/characters`. | PASS |
-| T-0023-AC5 | Gates pass; both packages are Flutter-free (R15) | gates; `*:no_flutter_test` x2 | **Gates: yes.** The `no_flutter_test` checks catch a direct import: I added `lib/src/zz_vfy.dart` with `export 'package:flutter/foundation.dart';` and `mc_api_errors:no_flutter_test` FAILED, naming the file. Removed. **R15 "directly or transitively": no.** `bazel query 'somepath(//utility/mc_api_errors, @flutter_sky_engine//:sky_engine)'` gives `mc_api_errors → @pub_deps//:dio → …scc__dio__dio_web_adapter//:dio → sky_engine`. The same path reaches `@pub_deps__flutter//:flutter`. `aquery` of `mc_api_errors`'s `DartAnalyze` action lists `pub_deps__flutter/flutter.dart_analyzer_summary.sum` and `sky_engine.embedder_sdk.sum` as inputs. No first-party file imports Flutter. See Issue 1. | **FAIL** |
+| T-0023-AC1 | Timeout, offline, 401, 404, 500 and malformed map to the matching `ApiFailure` through `mc_mocked_backend` | `mc_api_client:api_client_test` (the original 6 plus "other 4xx is a client error"); `mc_api_errors:api_failure_test` (now with 422) | Yes. **My black-box suite** (temporary, re-run on `e7f93dc` and then removed): timeout, offline, 401, 404, 500, 503, malformed, 400 and 403 gave `ApiTimeout`, `ApiOffline`, `ApiUnauthorized`, `ApiNotFound`, `ApiServer(500)`, `ApiServer(503)`, `ApiMalformed`, `ApiClientError(400)` and `ApiClientError(403)`. **Mutation (this pass):** I mapped the other-4xx case to `ApiUnexpected`. Both the mocked-backend test and the direct test FAILED. Reverted. First pass: 404 → `ApiServer` was caught. | PASS |
+| T-0023-AC2 | GET 503 with retry 2 makes 3 attempts; a POST is never retried | `api_client_test` "T-0023-AC2" (the original 5 plus 4 new ones: FormData, stream body, receive timeout, cancel during backoff) | Yes. Attempts are counted with `backend.recentTraffic`. **My suite:** GET 503 made exactly 3 attempts. Retries 0, 1, 2 and 5 gave 1, 2, 3 and 6. POST and PATCH made 1 attempt for 503, connect timeout and offline. PUT and DELETE 503 made 3. GET 401 and 404 made 1. The DI Dio made 3 attempts with 1 log line each. First pass: making POST retryable was caught. | PASS |
+| T-0023-AC3 | `ApiFailure.from(TypeError)` gives `unexpected` and keeps the message | `api_failure_test` "T-0023-AC3" | Yes. **My check:** a real `TypeError` inside `apiCall`, after a 200 response, gave `ApiUnexpected(_TypeError: type 'List<dynamic>' is not a subtype of type 'int' in type cast)`. First pass: dropping the message was caught. | PASS |
+| T-0023-AC4 | `diContainer<Dio>()` is one shared instance on the mock adapter, and `/v1/characters` returns page 1 | `api_client_test` "T-0023-AC4" (3 tests: config base URL, explicit override, missing `Monitoring` fails loudly) | Yes. **My check:** I wired `ConfigDIInitializer` (`apiBaseUrl` `https://cfg.test`), `MonitoringDIInitializer` and `ApiClientDIInitializer(adapter: backend.adapter)`. The instance was identical across lookups, its adapter was identical to `backend.adapter`, and `baseUrl` was `https://cfg.test`. The response was 200 with `offset 0` and 20 results, and the backend recorded one `GET /v1/characters`. | PASS |
+| T-0023-AC5 | Gates pass; both packages are Flutter-free (R15) | gates, `*:no_flutter_test` x2, `tool/checks/T-0023-AC5_flutter_free.sh` | **Yes.** I ran `cquery 'deps(//utility/<pkg>)'` myself: `mc_api_errors` has 1,359 targets and `mc_api_client` has 1,395. In both, `sky_engine`, `pub_deps__flutter`, `@@rules_flutter` / `//flutter:` and `mc_mocked_backend` each occur **0** times. `dio` is now the single-package spoke `pub_deps__dio//:dio`, not the SCC. **Negative check:** with `cycle_breaks` removed, the script printed `pub_deps__flutter//:flutter` for both packages and closures of 2,685 and 2,714 targets, and exited 1. Reverted with `MODULE.bazel` and `MODULE.bazel.lock` restored. First pass: `no_flutter_test` catches a direct `export 'package:flutter/…'`. | PASS |
+
+## Review fixes (requested checks)
+| Check | Result |
+|---|---|
+| FormData cloned per attempt; streams not retried | Yes. `options.data is FormData ? clone() : data` on each retry, and `_replayable` refuses a `Stream` body. Tests: PUT with FormData makes 3 attempts and surfaces `ApiServer(503)`, not a "finalized" `StateError`. PUT with a stream makes 1 attempt. |
+| Receive timeouts not retried | Yes. `_retryable` is now connect timeout, connection error and 5xx only. `sendTimeout` was dropped too, which is reasonable. Test: a slow route with a 20 ms receive timeout gives `ApiTimeout` after 1 attempt. |
+| Backoff honours the cancel token | Yes. `Future.any([delay, token.whenCancel])`, then a `requestCancelled` exception. Test: cancelling during a 30 s backoff returns within 5 s, with a message containing "cancel" and 1 attempt. |
+| `ApiClientError` for other 4xx | Yes. `ApiClientError(status)` covers 4xx other than 401 and 404. It is a new case in the sealed family. |
+| `apiBaseUrl` from `AppConfig`, plus override | Yes. `AppConfig.apiBaseUrl` is required and present in `dev.json`, `e2e.json` and `perf.json`. The initializer uses `baseUrl ?? getIt<AppConfig>().apiBaseUrl`. Both paths are tested, and I checked the config path myself. |
+| Monitoring resolved per request | Yes. `Monitoring Function()` is passed to the interceptor. If `Monitoring` is missing, the request throws (tested). |
+| `dio ^5.11.0` | Yes, in all three pubspecs. `pubspec.lock` already had `dio 5.11.1`, so the lock is unchanged. |
+| `ApiUnexpected` message format | Yes. The wrapped-error branch is now `'${inner.runtimeType}: $inner'`, the same format as `ApiFailure.from`'s fallback. |
+| Dependency direction | `mc_mocked_backend` is only in `mc_api_client`'s `dev_dependencies` and its `api_client_test` deps. It is absent from the `dart_library` deps and from the cquery closure. `ApiClientDIInitializer` takes an `HttpClientAdapter`, which matches plan 01 §5's app-only wiring. |
 
 ## Conformance
-- **Tide's `api_client` (research §4.4, §5.5):** it matches. There is one shared `Dio`, configured once and registered in DI (`registerSingleton`; Tide uses `@lazySingleton`). Cross-cutting concerns are interceptors (logging, retry). Features are meant to declare their own retrofit APIs that take this `Dio`, and nothing in the package prevents that. The deliberate deviations from Tide's §5.6 (no error types, no retry) are what P1-05 asks for: the sealed `ApiFailure`, `apiCall` over `Result.guard`, and retry for idempotent methods only. The barrel exports more than Tide's (`createApiDio` and the interceptors), which is harmless.
-- **Flutter-free:** yes at the source level, no in the Bazel closure (AC5, Issue 1). The `dart_library` closure is otherwise `mc_api_errors`, `mc_di`, `mc_mocked_backend`, `mc_monitoring`, `mc_prelude`, `dio`, `get_it` and pure-Dart pub packages. `mc_fixtures_characters` (which brings the Flutter `mc_fixtures_media`) is a test dependency only.
-- **Plan 01 §5 wiring:** this deviates from the plan. See Issue 2.
+- **Tide's `api_client`:** it matches. One shared `Dio` is registered in DI. Cross-cutting concerns are interceptors. Features declare their own retrofit APIs over the injected `Dio`, and nothing here prevents that. The failure model, `apiCall` and the retry policy are the deviations that P1-05 asks for.
+- **Flutter-free:** both packages are Flutter-free at the source level and in the Bazel closure.
 
 ## Test-integrity audit
-- Tests deleted, skipped or weakened: none. Both packages are new.
-- Lint suppressions added: none (no `ignore:` in the diff).
+- Tests deleted, skipped or weakened: none. The `mc_mocked_backend` test moved from `flutter_test` to `dart_test` (`package:test`). Its one-line test change is the import, and the assertions are unchanged.
+- Lint suppressions added: none.
 - Golden files updated: none.
-- My temporary `vfy_test` target, the 3 mutations, the `zz_vfy.dart` probe and the `MODULE.bazel` cycle-break trial were all reverted. `git status` is clean apart from this report.
+- My temporary `vfy_test`, the mutation and the `cycle_breaks` removal were all reverted. `git status` was clean before this report.
 
 ## Hygiene
-- The only root change relative to `origin/main` is `pubspec.yaml`, with 2 workspace entries (`utility/mc_api_client`, `utility/mc_api_errors`). `pubspec.lock` and `MODULE.bazel` are unchanged. Everything else is under the 2 packages or `documents/`.
-- Nothing generated is committed: no `.g.dart`, `.config.dart`, `.dart_tool` or `bazel-*`.
+Root changes relative to `origin/main`:
+- `pubspec.yaml`: the 2 workspace entries.
+- `MODULE.bazel`: the `cycle_breaks` line, approved by the TL.
+- `MODULE.bazel.lock`: only the regenerated `flutter.pub` extension, with the dio SCC entries replaced by separate spokes.
+- `tool/bazel/config/{dev,e2e,perf}.json`: `apiBaseUrl`.
+- `tool/checks/T-0023-AC5_flutter_free.sh`.
+
+Outside the two packages, `mc_config` changed (`apiBaseUrl`) and `mc_mocked_backend` became pure Dart, with its `flutter` SDK constraint and `flutter_test` removed. Nothing generated is committed.
 
 ## Issues found
-1. **(high, blocks AC5) `@pub_deps//:dio` drags `package:flutter` and `sky_engine` into every closure that uses Dio.** rules_flutter merges the `dio` ↔ `dio_web_adapter` cycle into one SCC spoke, and `flutter_pub_scc_spoke.bzl:394` (`_emit_scc_root_build`) always adds `@pub_deps__flutter//:flutter` to a merged SCC when `flutter` is in the lock. Neither pubspec declares Flutter. Single-package spokes such as `get_it` and `async` don't get it.
-   - **Effect:** under plan 03 KD6 and F-0007, every codegen action over a library that reaches Dio has a Flutter closure. That is `mc_api_errors`, which KD6 names as pure Dart, plus every freezed bloc state that holds an `ApiFailure` and every retrofit API. Those actions either crash on the Flutter summary (F-0007) or have summaries switched off, which defeats the purpose of R15.
-   - **Not caused by T-0023:** `mc_mocked_backend` has had the same path since T-0018 (`somepath` confirmed).
-   - **Tested fix:** add `cycle_breaks = {"dio": ["dio_web_adapter"]}` to `flutter.pub(...)` in `MODULE.bazel`, as rules_flutter's README documents for this pair. The web adapter is only a conditional import for web, and we target iOS. With it, `somepath(//utility/mc_api_client, sky_engine ∪ @pub_deps//:flutter)` is empty, and `test --config=lint //utility/... //spike/...` passes 31/31. I did not check the iOS app build.
-   - **Follow-up:** this is a root change, so the TL decides. It deserves a finding and an upstream issue against rules_flutter. A test that asserts no `sky_engine` in the closure would catch a regression better than `no_flutter_test`, which only greps the package's own `lib/`.
-2. **(medium) `mc_api_client`'s `lib` depends on `mc_mocked_backend`, which inverts plan 01 §5.** The plan says "Wiring: app only. `MockedBackendDIInitializer` sets `dio.httpClientAdapter`", and puts the `NetworkDiagnostics` interface in `mc_api_client`, implemented by the mock.
-   - **Problems:**
-     - (a) When `NetworkDiagnostics` lands in `mc_api_client`, the dependency becomes a cycle (`mc_mocked_backend` → `mc_api_client` → `mc_mocked_backend`).
-     - (b) Every feature that depends on `mc_api_client` gets the mock engine in its production closure.
-   - **Partly in scope:** the task's Scope and AC4 do ask for an initializer that registers the Dio "with `mc_mocked_backend`'s adapter".
-   - **Suggested fix:** `ApiClientDIInitializer` takes an `HttpClientAdapter` (the app passes `backend.adapter`), and `mc_mocked_backend` moves to the test dependencies. AC4 would still hold.
-3. **(low) `ApiFailure.message` for an HTTP error is Dio's multi-line explanatory text** ("This exception was thrown because the response has a status code of 404 … Read more about status codes at https://developer.mozilla.org/…"). It is fine for logs. Features must not render `message` to users.
-4. **(low) The retry marker stays in the final error's `requestOptions.extra`** (`mc_api_client.retrying: true`). If a later interceptor replays `err.requestOptions`, for example `mc_api_auth`'s refresh-and-replay, that replay will never be retried. Worth a note for the `mc_api_auth` task.
-5. **(low, documented by the Engineer)** Any 4xx other than 401 and 404 maps to `ApiUnexpected('HTTP <n>: …')`, so a 400, 403, 409 or 422 has no typed case. That's acceptable for now, but forms (`mc_forms`) will probably want a `badRequest` or `validation` case.
+1. **(low, carried over)** `ApiFailure.message` for an HTTP error is Dio's multi-line explanatory text. It's fine for logs. Features must not render it to users.
+2. **(low, carried over)** The retry marker (`mc_api_client.retrying`) stays in the final error's `requestOptions.extra`. If `mc_api_auth` later replays `err.requestOptions` after a token refresh, that replay won't be retried. Note it for the `mc_api_auth` task.
+3. **(low)** The check script runs `tool/bazelw cquery` on the default output base. Parallel crew should run it with `MC_BAZELISK` pointing at a wrapper that adds their own `--output_base`, as I did, or the script should accept an output base.
+
+## First pass (`bf39482`, superseded)
+- **FAIL on AC5:** `@pub_deps//:dio` was the rules_flutter SCC spoke, which always depends on `@pub_deps__flutter//:flutter`. That pulled `sky_engine` into both closures. Now fixed by `cycle_breaks` and recorded in F-0019.
+- **Medium:** `mc_api_client`'s `lib` depended on `mc_mocked_backend`, the reverse of plan 01 §5. Now fixed by injecting the adapter.
+- **Low:** other 4xx mapped to `ApiUnexpected`. Now fixed by `ApiClientError`.
+- **Process:** I shared an output base with the T-0022 Verifier, and my shutdown killed its server. This pass used `/tmp/mc-ob-T-0023-verifier`.
 
 ## Notes for the Tech Lead
-- AC1 to AC4 are solid. The tests assert what they claim, and each of my 3 mutations was caught by a test named for its AC.
-- To turn this into a PASS: apply the `cycle_breaks` line (Issue 1), or formally scope R15 for AC5 to source imports and track Issue 1 separately. Then have a Verifier re-run the closure query.
-- Issue 2 is cheapest to fix now, before features depend on the `ApiClientDIInitializer(backend: …)` signature.
+- F-0019's upstream candidate (rules_flutter should not mark a merged SCC as Flutter unless a member depends on Flutter) is still unfiled. That is the TL's call.
