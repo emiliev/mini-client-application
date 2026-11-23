@@ -114,4 +114,75 @@ void main() {
     expect(actual, contains(contains('RouteTargets.other returns CharsPage')));
     expect(actual.join(), isNot(contains('RouteTargets.a ')));
   });
+
+  test('T-0017-AC4 a relative export of a page and a wildcard export that '
+      'declares one fail (R4)', () {
+    final actual = _check('barrel_relative_wildcard');
+
+    expect(actual, hasLength(2));
+    expect(
+      actual,
+      contains(allOf(contains('[R4]'), contains('exports CharsPage'))),
+    );
+    expect(
+      actual,
+      contains(
+        allOf(
+          contains('[R4]'),
+          contains('without show'),
+          contains('CharsDetailsPage'),
+        ),
+      ),
+    );
+    expect(actual.join(), isNot(contains('CharsFlow')));
+  });
+
+  test('T-0017-AC1 a conditional-import alternative is checked', () {
+    final actual = _check('import_edges');
+
+    expect(
+      actual,
+      contains(
+        allOf(
+          contains('u_a imports package:f_a'),
+          contains('utility → feature'),
+        ),
+      ),
+    );
+  });
+
+  test('T-0017-AC2 a relative path leaving the package fails as barrel-only, '
+      'and the edge it lands on is checked', () {
+    final actual = _check('import_edges');
+
+    expect(
+      actual,
+      contains(
+        allOf(contains('[barrel-only]'), contains('../../../f_a/lib/f_a.dart')),
+      ),
+    );
+    expect(
+      actual,
+      contains(
+        allOf(
+          contains('f_b imports a relative path into f_a'),
+          contains('feature → feature'),
+        ),
+      ),
+    );
+    expect(
+      actual,
+      contains(contains('../../../../utility/u_base/lib/u_base.dart')),
+    );
+  });
+
+  test('T-0017-AC4 RouteTargets getters are checked, and code after the '
+      'class is not (R15)', () {
+    final actual = _check('route_imports_feature');
+
+    expect(actual, contains(contains('RouteTargets.home returns Widget')));
+    // fixtures/ok has a later `Helper.build()` returning Widget and a
+    // nullable `AFlow? maybe()`; neither is flagged.
+    expect(_check('ok'), isEmpty);
+  });
 }

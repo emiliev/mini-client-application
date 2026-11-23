@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:test/test.dart';
@@ -206,6 +208,58 @@ void main() {
 
       expect(sut.isRegistered<Foo>(), isFalse);
       expect(diContainer.isRegistered<Foo>(), isTrue);
+    });
+  });
+
+  group('T-0017-AC7 lifecycle', () {
+    test('T-0017-AC7 a RootImport forwards factory parameters', () async {
+      await initializeDIContainer(<McDIInitializer>[
+        McDIInitializer(
+          (GetIt g, String? env) => g.registerFactoryParam<Counted, int, void>(
+            (int id, _) => Counted(id),
+          ),
+        ),
+      ]);
+      final sut = await createChildContainer(
+        rootImports: const <RootImport<Object>>[RootImport<Counted>()],
+      );
+
+      expect(sut<Counted>(parameter: 7).id, 7);
+    });
+
+    test('T-0017-AC7 reset during an in-flight init throws and the init '
+        'still publishes', () async {
+      final gate = Completer<void>();
+      final init = initializeDIContainer(<McDIInitializer>[
+        McDIInitializer((GetIt g, String? env) async {
+          await gate.future;
+          g.registerSingleton<Foo>(Foo());
+        }),
+      ]);
+
+      await expectLater(resetDIContainer(), throwsA(isA<StateError>()));
+      gate.complete();
+      await init;
+
+      expect(diContainer.isRegistered<Foo>(), isTrue);
+    });
+
+    test('T-0017-AC7 a child follows the root across a reset', () async {
+      McDIInitializer initializer(Foo foo) => McDIInitializer(
+        (GetIt g, String? env) => g.registerSingleton<Foo>(foo),
+      );
+      final first = Foo();
+      final second = Foo();
+      await initializeDIContainer(<McDIInitializer>[initializer(first)]);
+      final sut = await createChildContainer(
+        rootImports: const <RootImport<Object>>[RootImport<Foo>()],
+      );
+      expect(sut<Foo>(), same(first));
+
+      await resetDIContainer();
+      await initializeDIContainer(<McDIInitializer>[initializer(second)]);
+
+      expect(sut<Foo>(), same(second));
     });
   });
 

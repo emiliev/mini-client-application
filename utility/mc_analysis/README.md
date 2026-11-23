@@ -41,7 +41,7 @@ article (tide-core research §4.1). Source `Plan 01` is plan 01 §2 row 5 / D-06
 Also carried over from Tide: `strict-casts`, `strict-raw-types`, the error
 levels (`missing_required_param`, `missing_return`, `invalid_assignment`,
 `invalid_annotation_target`), and the excludes `*.g.dart`, `*.freezed.dart`,
-`*.config.dart`, `**/feature**/*_test.dart`. Plan 01 adds the gen-l10n output
+`*.config.dart`, `**/test/feature/*_test.dart`. Plan 01 adds the gen-l10n output
 exclude `**/lib/src/l10n/*_l10n*.dart`.
 
 ## Deviations from Tide's 22 rules
@@ -53,3 +53,10 @@ Dart 3.13.5 (F-0013):
   "shouldn't be enabled" on every project that includes this file.
 - `package_prefixed_library_names`: enabled, it reports nothing on a
   mismatched `library` name, so AC3 cannot be met.
+
+## Other deviations
+
+- Tide's BDD exclude `**/feature**/*_test.dart` matches every test under
+  `feature/` in this repo, so no hand-written feature test would be linted.
+  It is narrowed to the generated output directory `**/test/feature/*_test.dart`
+  (plan 05 §3, gitignored).

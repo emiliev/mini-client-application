@@ -42,8 +42,8 @@ sealed class Result<S, F> {
       return success(await func());
     } on Exception catch (e) {
       return failure(e);
-    } on Error catch (e, st) {
-      return failure(_errorToException(e, st));
+    } catch (e, st) {
+      return failure(_thrownToException(e, st));
     }
   }
 
@@ -53,8 +53,8 @@ sealed class Result<S, F> {
       return success(func());
     } on Exception catch (e) {
       return failure(e);
-    } on Error catch (e, st) {
-      return failure(_errorToException(e, st));
+    } catch (e, st) {
+      return failure(_thrownToException(e, st));
     }
   }
 
@@ -82,15 +82,20 @@ sealed class Result<S, F> {
   ) async {
     try {
       return success(await body());
-    } on Exception catch (e) {
-      return failure(mapError(e));
-    } on Error catch (e) {
+    } catch (e) {
+      // Exceptions, Errors and anything else `throw` accepts.
       return failure(mapError(e));
     }
   }
 
-  static Exception _errorToException(Error e, StackTrace thrownAt) =>
-      Exception('${e.runtimeType}: $e\n${e.stackTrace ?? thrownAt}');
+  /// An [Error] (or any other thrown object) as an [Exception] that keeps its
+  /// type, its message and the stack trace.
+  static Exception _thrownToException(
+    Object e,
+    StackTrace thrownAt,
+  ) => Exception(
+    '${e.runtimeType}: $e\n${e is Error ? e.stackTrace ?? thrownAt : thrownAt}',
+  );
 }
 
 /// The success case of [Result].
@@ -107,7 +112,8 @@ final class Success<S, F> extends Result<S, F> {
       ifSuccess(_s);
 
   @override
-  bool operator ==(Object other) => other is Success && other._s == _s;
+  bool operator ==(Object other) =>
+      other is Success && other.runtimeType == runtimeType && other._s == _s;
 
   @override
   int get hashCode => _s.hashCode;
@@ -130,7 +136,8 @@ final class Failure<S, F> extends Result<S, F> {
       ifFailure(_f);
 
   @override
-  bool operator ==(Object other) => other is Failure && other._f == _f;
+  bool operator ==(Object other) =>
+      other is Failure && other.runtimeType == runtimeType && other._f == _f;
 
   @override
   int get hashCode => _f.hashCode;

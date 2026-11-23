@@ -38,6 +38,7 @@ Tests are named with their AC IDs (ADR-0006). The utilities get solitary unit te
 
 ## Log
 - 2026-11-23: Created and dispatched in parallel with T-0014's fix round (PO asked for app code to start sooner).
+- 2026-11-23: Engineer: code-review fixes (7 findings and nits), see Review fixes below.
 - 2026-11-23: Engineer: rebased onto `origin/main` (e18ade6). Built `mc_analysis`, `mc_prelude`, `mc_di`, `mc_arch_check`; all hand-written `BUILD.bazel`; `tool/bazelw test //...` passes with the analyze aspect.
 
 ## Outcome
@@ -46,13 +47,13 @@ Done. Commits on `fleet/T-0017-foundation`. Evidence in `documents/evidence/T-00
 ### AC to test map
 | AC | Test (all pass) |
 |---|---|
-| AC1 | `tool/mc_arch_check/test/arch_check_test.dart`: `T-0017-AC1 ...` (3 tests; fixtures `feature_to_feature`, `utility_to_feature`, `ok`) |
-| AC2 | same file: `T-0017-AC2 ...` (2 tests; fixture `src_import`) |
-| AC3 | `utility/mc_analysis/test/lints_test.dart`: `T-0017-AC3 ...` (5 tests; one fixture per rule; list and sources in `utility/mc_analysis/README.md`) |
-| AC4 | arch_check_test: `T-0017-AC4 ...` (3 tests: R4 symbols, R15 route import, `RouteTargets` non-Flow return) |
-| AC5 | `utility/mc_prelude/test/result_test.dart`: `T-0017-AC5 ...` (18 tests, every member incl. `guard`, `fromAsync` over `StateError`, `guard` over `TypeError`) |
+| AC1 | `tool/mc_arch_check/test/arch_check_test.dart`: `T-0017-AC1 ...` (4 tests, incl. conditional import; fixtures `feature_to_feature`, `utility_to_feature`, `ok`) |
+| AC2 | same file: `T-0017-AC2 ...` (3 tests, incl. relative escape; fixture `src_import`) |
+| AC3 | `utility/mc_analysis/test/lints_test.dart`: `T-0017-AC3 ...` (6 tests, incl. hand-written feature test is linted; one fixture per rule; list and sources in `utility/mc_analysis/README.md`) |
+| AC4 | arch_check_test: `T-0017-AC4 ...` (5 tests: R4 symbols, R4 relative and wildcard exports, R15 route import, `RouteTargets` non-Flow return and getters) |
+| AC5 | `utility/mc_prelude/test/result_test.dart`: `T-0017-AC5 ...` (21 tests, every member incl. `guard`, `fromAsync` over `StateError`, `guard` over `TypeError`) |
 | AC6 | `utility/mc_di/test/di_container_test.dart`: `T-0017-AC6 ...` (4 tests: order, param/name, throw then retry, dispose on failure) |
-| AC7 | same file: `T-0017-AC7 ...` (8 tests: RootImport, named, missing import names T, child dispose, reset isolation, no second init) |
+| AC7 | same file: `T-0017-AC7 ...` (11 tests, incl. factory params, reset during init, child follows reset; RootImport, named, missing import names T, child dispose, reset isolation, no second init) |
 | AC8 | `tool/bazelw test //...` (analyze aspect on): 5/5 pass; `tool/bazelw run //tool/mc_arch_check:bin` prints OK on the repo (logs in evidence) |
 
 ### Notes and deviations
@@ -62,3 +63,14 @@ Done. Commits on `fleet/T-0017-foundation`. Evidence in `documents/evidence/T-00
 - `Result.guard` is async and takes `F Function(Object error)`; `fromAction` also keeps `Error` messages.
 - `mc_arch_check` is not itself a Bazel test over the real repo (needs the whole tree as data); it is run with `bazel run //tool/mc_arch_check:bin`. A `verify.sh` hook is a follow-up.
 - No `Optional` (out of scope).
+
+### Review fixes (code-review round)
+1. `mc_analysis` BDD exclude narrowed to `**/test/feature/*_test.dart`; test: a hand-written `feature/x/test/foo_test.dart` reports, a generated one does not (AC3).
+2. R4 now parsed with `package:analyzer`: relative exports are matched, every export needs `show`, and a wildcard export names the forbidden classes the file declares (AC4).
+3. Every URI of an import/export (conditional alternatives too) is checked; relative paths are resolved, flagged `barrel-only` when they leave the package, and the layer edge they land on is checked (AC1, AC2).
+4. `RouteTargets` check uses the AST: scoped to the class, includes getters, nullable `*Flow?` allowed (AC4). `analyzer` is now a runtime dep of `mc_arch_check`.
+5. `RootImport` forwards `param1` and `param2` (AC7).
+6. `fromAsync`, `fromAction` and `guard` catch any thrown object (AC5).
+7. `resetDIContainer()` throws while an init is running; `RootImport` forwarders read the current root, so children follow a reset (AC7).
+Nits: `lints_test` asserts a sentinel diagnostic so an analyzer that did not run fails the test; `Result ==` compares `runtimeType`.
+Results: `tool/bazelw test --config=lint //...` 5/5 pass; `build --config=lint //...` clean; `mc_arch_check` OK on the repo.

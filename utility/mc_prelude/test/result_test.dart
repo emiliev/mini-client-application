@@ -191,5 +191,33 @@ void main() {
       expect(message, startsWith('mapped: '));
       expect(message, contains("type 'String' is not a subtype of type 'int'"));
     });
+
+    test('T-0017-AC5 fromAsync and fromAction turn any thrown object into a '
+        'failure', () async {
+      final async = await Result.fromAsync<int>(() async => throw 'a string');
+      final sync = Result.fromAction<int>(() => throw 42);
+
+      expect(
+        async.fold((int _) => '', (Exception e) => '$e'),
+        contains('a string'),
+      );
+      expect(sync.fold((int _) => '', (Exception e) => '$e'), contains('42'));
+    });
+
+    test('T-0017-AC5 guard maps any thrown object', () async {
+      final actual = await Result.guard<int, String>(
+        () async => throw 'a string',
+        (Object e) => 'mapped $e',
+      );
+
+      expect(actual, failure<int, String>('mapped a string'));
+    });
+
+    test('T-0017-AC5 equality compares the type arguments', () {
+      expect(success<int, String>(1), isNot(success<num, String>(1)));
+      expect(success<int, String>(1), isNot(success<int, int>(1)));
+      expect(failure<int, String>('x'), isNot(failure<int, Object>('x')));
+      expect(success<int, String>(1), success<int, String>(1));
+    });
   });
 }

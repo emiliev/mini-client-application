@@ -47,12 +47,23 @@ Future<Map<String, Set<String>>> _analyse(Directory project) async {
     final file = parts[3].split('/').last.replaceAll('.dart', '');
     byFile.putIfAbsent(file, () => <String>{}).add(parts[2]);
   }
+  // The analyzer really ran: the sentinel file added by _project always
+  // reports, so an empty result cannot be mistaken for "no violations".
+  expect(
+    byFile['sentinel'],
+    contains('ALWAYS_DECLARE_RETURN_TYPES'),
+    reason: 'dart analyze did not run: ${result.stdout}${result.stderr}',
+  );
   return byFile;
 }
 
 /// A throwaway package that includes the shared options, so the fixtures
 /// need no package config of their own.
-Directory _project(Map<String, String> files, {String name = 'lint_fixtures'}) {
+Directory _project(
+  Map<String, String> files, {
+  String name = 'lint_fixtures',
+  Map<String, String> rootFiles = const {},
+}) {
   final dir = Directory.systemTemp.createTempSync('mc_analysis_');
   addTearDown(() => dir.deleteSync(recursive: true));
   File('${dir.path}/pubspec.yaml').writeAsStringSync(
@@ -66,8 +77,14 @@ Directory _project(Map<String, String> files, {String name = 'lint_fixtures'}) {
     '"rootUri": "../", "packageUri": "lib/", "languageVersion": "3.13"}]}',
   );
   Directory('${dir.path}/lib').createSync();
+  File('${dir.path}/lib/sentinel.dart').writeAsStringSync('f() => 1;\n');
   files.forEach((path, text) {
     File('${dir.path}/lib/$path').writeAsStringSync(text);
+  });
+  rootFiles.forEach((path, text) {
+    File('${dir.path}/$path')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(text);
   });
   return dir;
 }
@@ -131,5 +148,21 @@ void main() {
     final reported = await _analyse(project);
 
     expect(reported.keys.where((k) => k.startsWith('bad')), isEmpty);
+  });
+
+  test('T-0017-AC3 a hand-written feature test is linted, a generated BDD '
+      'test is not', () async {
+    final project = _project(
+      const {},
+      rootFiles: {
+        'feature/x/test/foo_test.dart': 'f() => 1;\n',
+        'feature/x/test/feature/generated_test.dart': 'f() => 1;\n',
+      },
+    );
+
+    final reported = await _analyse(project);
+
+    expect(reported['foo_test'], contains('ALWAYS_DECLARE_RETURN_TYPES'));
+    expect(reported.containsKey('generated_test'), isFalse);
   });
 }

@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:analyzer/dart/analysis/utilities.dart';
+import 'package:analyzer/dart/ast/ast.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
@@ -26,14 +28,11 @@ class _Package {
 
   final String name;
   final Layer layer;
+
+  /// Absolute, normalised.
   final String dir;
   final Set<String> dependencies;
 }
-
-final RegExp _directive = RegExp(
-  r'''^\s*(import|export)\s+['"]package:([a-z0-9_]+)/([^'"]+)['"]([^;]*);''',
-  multiLine: true,
-);
 
 /// Checks the packages under [root] (the folders `utility/`, `feature/` and
 /// `app/`) and returns every violation, sorted for stable output.
@@ -41,30 +40,60 @@ final RegExp _directive = RegExp(
 /// Rules (plan 01 §2 rows 2 and 4, §4.2, D-05, D-31):
 /// - utility depends on utilities only; feature on utilities only (never
 ///   another feature); app on anything (`layer`);
-/// - a package never imports another package's `src/` (`barrel-only`);
-/// - a feature barrel exports no page, bloc or DI initializer (`R4`);
-/// - a route library imports no feature barrel, and `RouteTargets` methods
-///   return a `*Flow` (`R15`).
+/// - a package never imports another package's `src/`, and no relative path
+///   leaves its own package (`barrel-only`);
+/// - a feature barrel exports with `show` and never a page, bloc or DI
+///   initializer (`R4`);
+/// - a route library imports no feature barrel, and every `RouteTargets`
+///   member returns a `*Flow` (`R15`).
+///
+/// Directives are read with `package:analyzer`'s parser, so every URI of a
+/// directive is checked, including conditional (`if (...)`) alternatives.
 List<Violation> checkArchitecture(String root) {
-  final packages = _discoverPackages(root);
+  final absRoot = p.normalize(p.absolute(root));
+  final packages = _discoverPackages(absRoot);
   final byName = <String, _Package>{for (final pkg in packages) pkg.name: pkg};
   final violations = <Violation>[];
   for (final pkg in packages) {
-    violations.addAll(_checkPubspec(root, pkg, byName));
+    violations.addAll(_checkPubspec(absRoot, pkg, byName));
     for (final file in _dartFiles(pkg.dir)) {
-      final rel = p.relative(file.path, from: root);
-      final source = file.readAsStringSync();
-      violations.addAll(_checkImports(rel, source, pkg, byName));
+      final unit = parseString(
+        content: file.readAsStringSync(),
+        path: file.path,
+        throwIfDiagnostics: false,
+      ).unit;
+      final ctx = _FileContext(absRoot, file.path, pkg, packages, byName, unit);
+      violations.addAll(_checkImports(ctx));
       if (pkg.layer == Layer.app) {
-        violations.addAll(_checkRoutes(rel, source, byName));
+        violations.addAll(_checkRoutes(ctx));
       }
     }
     if (pkg.layer == Layer.feature) {
-      violations.addAll(_checkBarrel(root, pkg));
+      violations.addAll(_checkBarrel(absRoot, pkg));
     }
   }
   violations.sort((a, b) => a.toString().compareTo(b.toString()));
   return violations;
+}
+
+class _FileContext {
+  _FileContext(
+    this.root,
+    this.path,
+    this.pkg,
+    this.packages,
+    this.byName,
+    this.unit,
+  );
+
+  final String root;
+  final String path;
+  final _Package pkg;
+  final List<_Package> packages;
+  final Map<String, _Package> byName;
+  final CompilationUnit unit;
+
+  String get rel => p.relative(path, from: root);
 }
 
 List<_Package> _discoverPackages(String root) {
@@ -88,10 +117,12 @@ List<_Package> _discoverPackages(String root) {
         continue;
       }
       packages.add(
-        _Package(yaml['name'] as String, layer, p.dirname(entity.path), {
-          ..._keys(yaml['dependencies']),
-          ..._keys(yaml['dev_dependencies']),
-        }),
+        _Package(
+          yaml['name'] as String,
+          layer,
+          p.normalize(p.dirname(entity.path)),
+          {..._keys(yaml['dependencies']), ..._keys(yaml['dev_dependencies'])},
+        ),
       );
     }
   }
@@ -164,143 +195,238 @@ Iterable<Violation> _checkPubspec(
   }
 }
 
-Iterable<Violation> _checkImports(
-  String rel,
-  String source,
-  _Package pkg,
-  Map<String, _Package> byName,
-) sync* {
-  for (final match in _directive.allMatches(source)) {
-    final name = match.group(2)!;
-    final path = match.group(3)!;
-    final target = byName[name];
+/// Every URI a directive can resolve to: the main one and each conditional
+/// alternative (`if (dart.library.io) 'package:x/x_io.dart'`).
+Iterable<String> _uris(NamespaceDirective directive) sync* {
+  final main = directive.uri.stringValue;
+  if (main != null) {
+    yield main;
+  }
+  for (final configuration in directive.configurations) {
+    final alternative = configuration.uri.stringValue;
+    if (alternative != null) {
+      yield alternative;
+    }
+  }
+}
+
+/// The package a file path belongs to, or null.
+_Package? _owner(String path, List<_Package> packages) {
+  _Package? best;
+  for (final pkg in packages) {
+    if (p.isWithin(pkg.dir, path) &&
+        (best == null || pkg.dir.length > best.dir.length)) {
+      best = pkg;
+    }
+  }
+  return best;
+}
+
+Iterable<Violation> _checkImports(_FileContext ctx) sync* {
+  for (final directive in ctx.unit.directives.whereType<NamespaceDirective>()) {
+    for (final uri in _uris(directive)) {
+      yield* _checkUri(ctx, uri);
+    }
+  }
+}
+
+Iterable<Violation> _checkUri(_FileContext ctx, String uri) sync* {
+  final pkg = ctx.pkg;
+  if (uri.startsWith('package:')) {
+    final slash = uri.indexOf('/');
+    if (slash < 0) {
+      return;
+    }
+    final name = uri.substring('package:'.length, slash);
+    final path = uri.substring(slash + 1);
+    final target = ctx.byName[name];
     if (target == null || target == pkg) {
-      continue;
+      return;
     }
-    final problem = _layerViolation(pkg.layer, target.layer);
-    if (problem != null) {
-      yield Violation(
-        'layer',
-        rel,
-        '${pkg.name} imports package:$name, $problem',
-      );
-    }
+    yield* _edge(ctx, target, 'package:$name');
     if (path.startsWith('src/')) {
       yield Violation(
         'barrel-only',
-        rel,
-        'imports package:$name/$path; import the barrel package:$name/$name.dart '
-            '(barrel-only, no package:x/src/)',
+        ctx.rel,
+        'imports package:$name/$path; import the barrel '
+            'package:$name/$name.dart (barrel-only, no package:x/src/)',
       );
     }
+    return;
+  }
+  if (uri.contains(':')) {
+    return; // dart:, file: and so on
+  }
+  // A relative URI: resolve it and see where it lands.
+  final resolved = p.normalize(p.join(p.dirname(ctx.path), uri));
+  if (p.isWithin(pkg.dir, resolved)) {
+    return;
+  }
+  final target = _owner(resolved, ctx.packages);
+  if (target != null) {
+    yield* _edge(ctx, target, 'a relative path into ${target.name}');
+  }
+  yield Violation(
+    'barrel-only',
+    ctx.rel,
+    'relative import $uri leaves package ${pkg.name} (barrel-only: reach '
+        'other packages through package:<name>/<name>.dart)',
+  );
+}
+
+Iterable<Violation> _edge(_FileContext ctx, _Package target, String how) sync* {
+  final problem = _layerViolation(ctx.pkg.layer, target.layer);
+  if (problem != null) {
+    yield Violation('layer', ctx.rel, '${ctx.pkg.name} imports $how, $problem');
   }
 }
 
 final RegExp _forbiddenSymbol = RegExp(
   r'(Page|Bloc|DIInitializer|DiInitializer)$',
 );
-final RegExp _forbiddenFile = RegExp(r'(_page|_bloc|di_initializer)\.dart$');
 
-/// R4: a feature barrel exports flows, navigators and argument/result types,
-/// never a page, a bloc or a DI initializer.
+/// Resolves an export URI of [pkg]'s barrel to a file, or null when it points
+/// outside the package.
+String? _exportFile(_Package pkg, String uri) {
+  if (uri.startsWith('package:${pkg.name}/')) {
+    return p.join(pkg.dir, 'lib', uri.substring('package:${pkg.name}/'.length));
+  }
+  if (!uri.contains(':')) {
+    return p.normalize(p.join(pkg.dir, 'lib', uri));
+  }
+  return null;
+}
+
+/// Names of the classes, mixins and extension types a file declares.
+Iterable<String> _declaredTypes(String path) sync* {
+  final file = File(path);
+  if (!file.existsSync()) {
+    return;
+  }
+  final unit = parseString(
+    content: file.readAsStringSync(),
+    path: path,
+    throwIfDiagnostics: false,
+  ).unit;
+  for (final declaration in unit.declarations) {
+    if (declaration is ClassDeclaration) {
+      yield declaration.namePart.typeName.lexeme;
+    }
+  }
+}
+
+/// R4: a feature barrel exports flows, navigators and arg/result types, never
+/// a page, a bloc or a DI initializer. Every export names its symbols with
+/// `show` (plan 01 D-05); a wildcard export is itself a violation, and the
+/// forbidden symbols the file declares are named.
 Iterable<Violation> _checkBarrel(String root, _Package pkg) sync* {
   final barrel = File(p.join(pkg.dir, 'lib', '${pkg.name}.dart'));
   if (!barrel.existsSync()) {
     return;
   }
   final rel = p.relative(barrel.path, from: root);
-  for (final match in _directive.allMatches(barrel.readAsStringSync())) {
-    if (match.group(1) != 'export') {
-      continue;
-    }
-    final file = match.group(3)!;
-    final shown = RegExp(r'\bshow\b([^;]*)').firstMatch(match.group(4)!);
-    if (shown != null) {
-      final symbols = shown
-          .group(1)!
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.isNotEmpty);
-      for (final symbol in symbols) {
+  final unit = parseString(
+    content: barrel.readAsStringSync(),
+    path: barrel.path,
+    throwIfDiagnostics: false,
+  ).unit;
+  for (final directive in unit.directives.whereType<ExportDirective>()) {
+    for (final uri in _uris(directive)) {
+      final shown = <String>[
+        for (final c in directive.combinators.whereType<ShowCombinator>())
+          for (final name in c.shownNames) name.name,
+      ];
+      var flagged = false;
+      for (final symbol in shown) {
         if (_forbiddenSymbol.hasMatch(symbol)) {
+          flagged = true;
           yield Violation(
             'R4',
             rel,
-            'barrel exports $symbol (from $file); a feature barrel exports '
+            'barrel exports $symbol (from $uri); a feature barrel exports '
                 'only flows, navigators and arg/result types',
           );
         }
       }
-    } else if (_forbiddenFile.hasMatch(file)) {
+      if (shown.isNotEmpty || flagged) {
+        continue;
+      }
+      final file = _exportFile(pkg, uri);
+      final declared = file == null
+          ? const <String>[]
+          : _declaredTypes(file).where(_forbiddenSymbol.hasMatch).toList();
       yield Violation(
         'R4',
         rel,
-        'barrel exports all of $file (a page, bloc or DI initializer); a '
-            'feature barrel exports only flows, navigators and arg/result types',
+        'barrel exports all of $uri without show'
+            '${declared.isEmpty ? '' : ', including ${declared.join(', ')}'}; '
+            'a feature barrel lists the flows, navigators and arg/result types '
+            'it exports with show',
       );
     }
   }
 }
 
-final RegExp _routeAnnotation = RegExp(
-  r'@(TypedGoRoute|TypedShellRoute|TypedStatefulShellRoute)\b',
-);
+const _routeAnnotations = {
+  'TypedGoRoute',
+  'TypedShellRoute',
+  'TypedStatefulShellRoute',
+};
 
 /// R15: a route library (one with typed-route annotations) imports no feature
 /// barrel, so its codegen closure stays free of Flutter feature code. Route
-/// targets are reached through `RouteTargets`, whose methods return `*Flow`.
-Iterable<Violation> _checkRoutes(
-  String rel,
-  String source,
-  Map<String, _Package> byName,
-) sync* {
-  if (_routeAnnotation.hasMatch(source)) {
-    for (final match in _directive.allMatches(source)) {
-      if (match.group(1) != 'import') {
-        continue;
-      }
-      final target = byName[match.group(2)!];
-      if (target != null && target.layer == Layer.feature) {
-        yield Violation(
-          'R15',
-          rel,
-          'route library imports feature barrel package:${target.name}; '
-              'use RouteTargets (route_targets.dart) instead',
-        );
+/// targets are reached through `RouteTargets`, whose members return `*Flow`.
+Iterable<Violation> _checkRoutes(_FileContext ctx) sync* {
+  final isRouteLibrary = ctx.unit.declarations.any(
+    (d) => d.metadata.any((m) => _routeAnnotations.contains(m.name.name)),
+  );
+  if (isRouteLibrary) {
+    for (final directive in ctx.unit.directives.whereType<ImportDirective>()) {
+      for (final uri in _uris(directive)) {
+        if (!uri.startsWith('package:')) {
+          continue;
+        }
+        final name = uri.substring('package:'.length, uri.indexOf('/'));
+        final target = ctx.byName[name];
+        if (target != null && target.layer == Layer.feature) {
+          yield Violation(
+            'R15',
+            ctx.rel,
+            'route library imports feature barrel package:$name; '
+                'use RouteTargets (route_targets.dart) instead',
+          );
+        }
       }
     }
   }
-  if (p.basename(rel) == 'route_targets.dart') {
-    yield* _checkRouteTargets(rel, source);
+  if (p.basename(ctx.path) == 'route_targets.dart') {
+    yield* _checkRouteTargets(ctx);
   }
 }
 
-final RegExp _routeTargetMethod = RegExp(
-  r'^\s*(?:abstract\s+)?([A-Za-z_][\w<>?, ]*?)\s+([a-z]\w*)\s*\(',
-  multiLine: true,
-);
-
-Iterable<Violation> _checkRouteTargets(String rel, String source) sync* {
-  final start = source.indexOf(RegExp(r'class\s+RouteTargets\b'));
-  if (start < 0) {
-    return;
-  }
-  final body = source.substring(start);
-  for (final match in _routeTargetMethod.allMatches(body)) {
-    final type = match.group(1)!.trim();
-    final name = match.group(2)!;
-    if (const {'return', 'if', 'for', 'while', 'switch', 'of'}.contains(name) ||
-        type.startsWith('static') ||
-        type.contains('class ')) {
+Iterable<Violation> _checkRouteTargets(_FileContext ctx) sync* {
+  for (final declaration in ctx.unit.declarations) {
+    if (declaration is! ClassDeclaration ||
+        declaration.namePart.typeName.lexeme != 'RouteTargets') {
       continue;
     }
-    if (!type.endsWith('Flow')) {
-      yield Violation(
-        'R15',
-        rel,
-        'RouteTargets.$name returns $type; a route builds a *Flow, never a '
-            'page or another widget',
-      );
+    for (final member
+        in declaration.body.members.whereType<MethodDeclaration>()) {
+      if (member.isStatic || member.isOperator || member.isSetter) {
+        continue;
+      }
+      final type = member.returnType?.toSource() ?? 'dynamic';
+      final bare = type.endsWith('?')
+          ? type.substring(0, type.length - 1)
+          : type;
+      if (!bare.endsWith('Flow')) {
+        yield Violation(
+          'R15',
+          ctx.rel,
+          'RouteTargets.${member.name.lexeme} returns $type; a route builds a '
+              '*Flow, never a page or another widget',
+        );
+      }
     }
   }
 }

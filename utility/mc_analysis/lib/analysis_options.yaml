@@ -7,7 +7,7 @@ analyzer:
     - "**/*.freezed.dart" # generated freezed models
     - "**/*.config.dart" # injectable DI configuration
     - "**/lib/src/l10n/*_l10n*.dart" # gen-l10n outputs (plan 01 D-06)
-    - "**/feature**/*_test.dart" # generated BDD tests
+    - "**/test/feature/*_test.dart" # generated BDD tests (the only test output dir)
   language:
     strict-casts: true
     strict-raw-types: true

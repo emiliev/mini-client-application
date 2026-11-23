@@ -59,6 +59,12 @@ Future<DIContainer> initializeDIContainer(
 /// Empties the root container, disposing its singletons. For test `setUp`
 /// only; production init never calls it.
 Future<void> resetDIContainer() async {
+  if (_initializing) {
+    throw StateError(
+      'resetDIContainer() was called while initializeDIContainer is running; '
+      'await the initialisation first.',
+    );
+  }
   final previous = _root;
   _root = GetIt.asNewInstance();
   _published = false;
@@ -67,7 +73,9 @@ Future<void> resetDIContainer() async {
 
 /// Declares that a child container needs [T] from the root container
 /// (R17). The child gets a forwarding registration, so `T` resolves to the
-/// root's registration (the root singleton, for a singleton).
+/// root's registration (the root singleton, for a singleton; factory
+/// parameters are passed on). The forwarder reads the current root on every
+/// resolve, so it follows [resetDIContainer] and re-initialisation.
 class RootImport<T extends Object> {
   const RootImport({this.name});
 
@@ -81,8 +89,11 @@ class RootImport<T extends Object> {
         'registered in the root container.',
       );
     }
-    child.registerFactory<T>(
-      () => root.get<T>(instanceName: name),
+    // Reads the current root at resolve time (a reset in between is seen)
+    // and passes both factory parameters on.
+    child.registerFactoryParam<T, Object?, Object?>(
+      (Object? param1, Object? param2) =>
+          _root.get<T>(instanceName: name, param1: param1, param2: param2),
       instanceName: name,
     );
   }

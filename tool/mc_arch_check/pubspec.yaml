@@ -8,10 +8,10 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
+  analyzer: any
   path: ^1.9.0
   yaml: ^3.1.0
 
 dev_dependencies:
-  analyzer: any
   mc_analysis: any
   test: ^1.25.0
