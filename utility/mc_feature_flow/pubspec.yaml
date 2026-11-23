@@ -1,0 +1,24 @@
+name: mc_feature_flow
+description: Intra-feature navigation over flow_builder with a per-flow DI container.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flow_builder: ^0.1.0
+  flutter:
+    sdk: flutter
+  mc_bloc_kit: any
+  mc_di: any
+  mc_ds_feedback: any
+  mc_monitoring: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_ds_testing: any
+  mc_ds_theme: any

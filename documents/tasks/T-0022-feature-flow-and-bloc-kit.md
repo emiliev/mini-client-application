@@ -31,6 +31,24 @@ Tide's `feature_flow` utility (intra-feature navigation over `flow_builder`) plu
 
 ## Log
 - 2026-11-23: Created.
+- 2026-11-23: Engineer implemented `mc_bloc_kit`, `mc_feature_flow` and `ChildDIContainer.debugResolveAll` in `mc_di`. Spike: flow_builder 0.1.0 works ([F-0017](../findings/F-0017-flow-builder-spike.md)). Handed off for verification.
 
 ## Outcome
-_Pending._
+**Engineer handoff.** Gates: `tool/bazelw test --nocache_test_results //...` 32/32 pass, `build --config=lint //...` pass, `run //tool/mc_arch_check:bin` OK. Evidence: `documents/evidence/T-0022/engineer/bazel-test-output.log`.
+
+| AC | Test |
+|---|---|
+| AC1 | `mc_feature_flow/test/feature_flow_test.dart` "T-0022-AC1 ..." |
+| AC2 | same file, "T-0022-AC2 ..." (error view, `recordError`, Retry re-runs) |
+| AC3 | same file "T-0022-AC3 complete(r) ..."; `mc_bloc_kit/test/feature_flow_controller_test.dart` |
+| AC4 | same file, "T-0022-AC4 ..." |
+| AC5 | same file, "T-0022-AC5 iOS edge swipe ..." (real drag gesture, route name `detail`) |
+| AC6 | same file (unregistered root import; `debugResolveAll` names both types); `mc_di/test/recording_test.dart` |
+| AC7 | `mc_bloc_kit/test/purity_test.dart` (no Flutter import, no `mixin`); `mc_bloc_test.dart` (McBloc logging); gates above; finding F-0017 |
+
+Deviations and notes:
+- `mc_di` was changed (`RecordingGetIt`, `ChildDIContainer.debugResolveAll`, a new test target) because AC6 needs registration recording (plan 01 U03). No existing test was changed.
+- `FeatureFlow` takes `List<McFlowPage>` (name + child) instead of bare widgets, so pages carry names. `FeatureFlowController<T>.complete([Object? result])` is untyped on the result; the plan's `<S,R>` form was not used because the task text says `<T>`.
+- No `// ignore:` added; no tests skipped or weakened.
+- Root changes: `pubspec.yaml` (two workspace members), `pubspec.lock` (`bloc 9.2.1`, `flow_builder 0.1.0`), `MODULE.bazel.lock`.
+
