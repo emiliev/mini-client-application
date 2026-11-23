@@ -1,3 +1,5 @@
+import 'dart:ui' show SemanticsAction;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
@@ -88,25 +90,54 @@ void main() {
     expect(find.text('Go'), findsOneWidget);
   });
 
-  testWidgets('T-0019-AC1 buttons: icon button announces its label once', (
+  testWidgets('T-0019-AC2 buttons: one node has label, button flag and tap', (
     tester,
   ) async {
     final handle = tester.ensureSemantics();
+    var taps = 0;
     await tester.pumpWidget(
       _app(
         McIconButton(
           icon: Icons.close,
           semanticLabel: 'Close',
-          onPressed: () {},
+          onPressed: () => taps++,
         ),
       ),
     );
-    expect(find.bySemanticsLabel('Close'), findsOneWidget);
-    // A duplicated announcement would read "Close\nClose".
     expect(
-      find.bySemanticsLabel(RegExp('Close.*Close', dotAll: true)),
-      findsNothing,
+      tester.getSemantics(find.byType(McIconButton)),
+      matchesSemantics(
+        label: 'Close',
+        isButton: true,
+        isEnabled: true,
+        hasEnabledState: true,
+        hasTapAction: true,
+      ),
     );
+    expect(find.bySemanticsLabel('Close'), findsOneWidget);
+    await tester.tap(find.byType(McIconButton));
+    expect(taps, 1);
+    handle.dispose();
+  });
+
+  testWidgets('T-0019-AC2 buttons: disabled icon button has no tap action', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      _app(
+        const McIconButton(
+          icon: Icons.close,
+          semanticLabel: 'Close',
+          onPressed: null,
+        ),
+      ),
+    );
+    final data = tester
+        .getSemantics(find.byType(McIconButton))
+        .getSemanticsData();
+    expect(data.label, 'Close');
+    expect(data.hasAction(SemanticsAction.tap), isFalse);
     handle.dispose();
   });
 }

@@ -6,6 +6,7 @@ void main() {
   mcGoldenMatrix(
     acId: 'T-0019-AC1',
     component: 'loading',
+    settle: const Duration(milliseconds: 700),
     builder: (_) => const SizedBox(height: 200, child: McLoading()),
     height: 220,
     heightAtScale2: 220,

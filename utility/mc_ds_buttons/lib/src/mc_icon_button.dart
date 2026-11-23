@@ -19,13 +19,17 @@ class McIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.mcPalette;
-    // One announcement: the Semantics label. The tooltip stays for sighted
-    // hover/long-press but is hidden from the semantics tree.
+    // One semantics node carries the label, the button flag and the tap
+    // action; the tooltip (sighted hover) and IconButton's own node are
+    // excluded so the label is never announced twice or split from the button.
     return Semantics(
       label: semanticLabel,
+      button: true,
+      enabled: onPressed != null,
+      onTap: onPressed,
+      excludeSemantics: true,
       child: Tooltip(
         message: semanticLabel,
-        excludeFromSemantics: true,
         child: IconButton(
           onPressed: onPressed,
           icon: Icon(icon),

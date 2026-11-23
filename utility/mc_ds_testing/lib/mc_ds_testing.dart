@@ -142,6 +142,7 @@ void mcGoldenMatrix({
   double width = 375,
   double height = 480,
   double heightAtScale2 = 800,
+  Duration settle = Duration.zero,
 }) {
   for (final variant in McThemeVariant.values) {
     for (final scale in const [1.0, 2.0]) {
@@ -161,6 +162,8 @@ void mcGoldenMatrix({
             ),
           );
           await tester.pump();
+          // A fixed fake-clock advance gives animations a deterministic frame.
+          if (settle > Duration.zero) await tester.pump(settle);
           expect(tester.takeException(), isNull);
           await expectLater(
             find.byType(MaterialApp),

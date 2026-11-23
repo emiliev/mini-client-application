@@ -89,4 +89,11 @@ void main() {
     expect(McPalette.highContrastDark.brightness, Brightness.dark);
     expect(McPalette.highContrastDark, isNot(McPalette.highContrast));
   });
+
+  test('T-0019-AC1 tokens: McPalette has value equality', () {
+    expect(McPalette.of(McThemeVariant.light), McPalette.light);
+    expect(McPalette.light.hashCode, McPalette.light.hashCode);
+    expect(McPalette.light == McPalette.dark, isFalse);
+    expect(McPalette.lerp(McPalette.light, McPalette.dark, 0), McPalette.light);
+  });
 }

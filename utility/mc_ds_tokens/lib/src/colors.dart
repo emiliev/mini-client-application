@@ -1,6 +1,6 @@
 import 'dart:ui' show Brightness, Color;
 
-import 'package:flutter/foundation.dart' show immutable;
+import 'package:flutter/foundation.dart' show immutable, listEquals;
 
 /// The three palettes the design system ships.
 enum McThemeVariant { light, dark, highContrast, highContrastDark }
@@ -36,6 +36,28 @@ class McPalette {
   final Color error;
   final Color onError;
   final Color success;
+
+  List<Object> get _fields => [
+    brightness,
+    primary,
+    onPrimary,
+    background,
+    surface,
+    surfaceVariant,
+    onSurface,
+    onSurfaceMuted,
+    outline,
+    error,
+    onError,
+    success,
+  ];
+
+  @override
+  bool operator ==(Object other) =>
+      other is McPalette && listEquals(_fields, other._fields);
+
+  @override
+  int get hashCode => Object.hashAll(_fields);
 
   static const McPalette light = McPalette(
     brightness: Brightness.light,
