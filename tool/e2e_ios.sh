@@ -85,6 +85,9 @@ png_dims() {
 # otherwise writes a copy resampled with `sips -Z` so it fits in 1200 px.
 # `sips -Z` alone would also enlarge small images (F-0004 gotcha 11).
 # Prints a note for the summary: "unchanged WxH" or "downscaled from WxH".
+# Returns 1 (and prints nothing on stdout) if dst could not be written.
+# Every step is checked explicitly: callers use it in `if note=$(...)`, where
+# `set -e` is off.
 downscale_if_tall() {
   local src=$1 dst=$2 dims w h
   dims=$(png_dims "$src")
@@ -95,10 +98,20 @@ downscale_if_tall() {
   w=${dims% *}
   h=${dims#* }
   if [ "$h" -gt "$E2E_MAX_HEIGHT" ]; then
-    sips -Z "$E2E_MAX_HEIGHT" "$src" --out "$dst" >/dev/null
+    if ! sips -Z "$E2E_MAX_HEIGHT" "$src" --out "$dst" >/dev/null 2>&1; then
+      printf 'e2e_ios: error: sips could not write %s\n' "$dst" >&2
+      return 1
+    fi
+    if [ -z "$(png_dims "$dst")" ]; then
+      printf 'e2e_ios: error: %s is missing or unreadable after sips\n' "$dst" >&2
+      return 1
+    fi
     printf 'downscaled from %sx%s\n' "$w" "$h"
   else
-    cp "$src" "$dst"
+    if ! cp "$src" "$dst"; then
+      printf 'e2e_ios: error: could not copy %s to %s\n' "$src" "$dst" >&2
+      return 1
+    fi
     printf 'unchanged %sx%s\n' "$w" "$h"
   fi
 }
