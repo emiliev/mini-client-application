@@ -3,3 +3,4 @@ import 'b.dart' as b;
 export 'c.dart';
 mixin M {}
 mixin class N {}
+class P with M, N {}

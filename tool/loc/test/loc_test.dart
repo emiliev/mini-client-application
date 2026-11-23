@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:loc/count.dart';
 import 'package:loc/loc.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-final fixtures = p.join(Directory.current.path, 'test', 'fixtures');
+/// Resolved from the package location so the cwd does not matter.
+late final String fixtures;
 
 /// Copies [src] into [dst], dropping the `.fixture` suffix so that fixture
 /// sources are not analysed or counted as real code in this repository.
@@ -26,6 +28,15 @@ int countOf(String name) => scanDart(
     .lines
     .length;
 
+void write(String rel, String content) => File(p.join(corpus, rel))
+  ..parent.createSync(recursive: true)
+  ..writeAsStringSync(content);
+
+void git(List<String> args) {
+  final r = Process.runSync('git', args, workingDirectory: corpus);
+  if (r.exitCode != 0) fail('git $args failed: ${r.stderr}');
+}
+
 late Directory tmp;
 late String corpus;
 late String genroot;
@@ -41,6 +52,11 @@ Map<String, Object?> run({bool strict = false, bool gen = false}) => runLoc(
 Map<String, Object?> m(Object? o) => (o as Map).cast<String, Object?>();
 
 void main() {
+  setUpAll(() async {
+    final lib = await Isolate.resolvePackageUri(Uri.parse('package:loc/loc.dart'));
+    fixtures = p.join(p.dirname(p.dirname(lib!.toFilePath())), 'test', 'fixtures');
+  });
+
   setUp(() {
     tmp = Directory.systemTemp.createTempSync('loc_test_');
     corpus = p.join(tmp.path, 'corpus');
@@ -68,9 +84,10 @@ void main() {
       final s = scanDart(File(
               p.join(fixtures, 'counting', 'c5_imports_mixins.dart.fixture'))
           .readAsStringSync());
-      expect(s.lines.length, 5);
+      expect(s.lines.length, 6);
       expect(s.imports, 2);
-      expect(s.mixins, 2);
+      expect(s.mixins, 1); // MixinDeclaration only; `mixin class` is a class
+      expect(s.withApplications, 2);
     });
   });
 
@@ -97,10 +114,34 @@ void main() {
     test('T-0015-AC2 generated bucket only with --generated-root', () {
       final g = m(m(run(gen: true)['totals'])['generated']);
       expect(g['freezed'], 2);
-      expect(g['json'], 3);
       expect(g['l10n'], 1);
-      expect(g['retrofit'], 0);
       expect(m(m(run()['totals'])['generated'])['freezed'], 0);
+    });
+
+    test('T-0015-AC2 generated root ignores external/ and non-generated copies', () {
+      final g = m(m(run(gen: true)['totals'])['generated']);
+      // genroot also holds external/x/y.freezed.dart (1 line) and a plain
+      // source copy (1 line): neither may be counted.
+      expect(g.values.fold<int>(0, (a, v) => a + (v as int)), 2 + 2 + 3 + 1);
+    });
+
+    test('T-0015-AC2 combined .g.dart is split by generator section', () {
+      final g = m(m(run(gen: true)['totals'])['generated']);
+      expect(g['json'], 2); // preamble + _$BFromJson
+      expect(g['retrofit'], 3); // class _Api { int x = 1; }
+    });
+
+    test('T-0015-AC2 l10n rule needs l10n.yaml and the configured output dir', () {
+      File(p.join(corpus, 'feature/a/l10n.yaml')).deleteSync();
+      var j = run();
+      expect(j['excluded_committed_generated'], isNot(contains('feature/a/lib/l10n/app_localizations.dart')));
+      expect(m(m(j['totals'])['source'])['hand'], 11 + 3);
+      // with the yaml but a file outside the output dir
+      File(p.join(corpus, 'feature/a/l10n.yaml')).writeAsStringSync('arb-dir: lib/l10n\n');
+      write('feature/a/lib/other/app_localizations.dart', 'int z = 1;\n');
+      j = run();
+      expect(j['excluded_committed_generated'], isNot(contains('feature/a/lib/other/app_localizations.dart')));
+      expect(m(m(j['totals'])['source'])['hand'], 11 + 1);
     });
   });
 
@@ -137,6 +178,27 @@ void main() {
         'di': 1,
         'other': 1,
       });
+    });
+
+    test('T-0015-AC3 files outside any module are counted, warned and fail strict', () {
+      write('utility/stray/lib/s.dart', 'int s = 1;\nint t = 2;\n');
+      final r = runLoc(LocOptions(root: corpus, strict: true, commit: 't'));
+      final t = m(r.json['totals']);
+      expect(m(t['source']), {'hand': 13, 'scaffold': 8});
+      expect(t['packages'], 4);
+      final syn = (r.json['modules'] as List).map(m).firstWhere((x) => x['synthetic'] == true);
+      expect(syn['name'], '(unowned:utility)');
+      expect(m(syn['source'])['hand'], 2);
+      expect(r.warnings.any((w) => w.contains('utility/stray/lib/s.dart')), isTrue);
+      expect(r.failures.any((w) => w.contains('outside any module')), isTrue);
+    });
+
+    test('T-0015-AC3 unparseable pubspec.yaml is not silently dropped', () {
+      write('app/shell/pubspec.yaml', ': : [\n');
+      final r = runLoc(LocOptions(root: corpus, strict: true, commit: 't'));
+      expect(m(m(r.json['totals'])['source'])['hand'], 11 + 0); // main.dart still counted
+      expect(r.warnings.any((w) => w.contains('unparseable pubspec.yaml')), isTrue);
+      expect(r.failures.any((w) => w.contains('unparseable pubspec.yaml')), isTrue);
     });
 
     test('T-0015-AC3 without a manifest everything is hand', () {
@@ -176,7 +238,7 @@ void main() {
         'feature_scenarios': 2,
         'fixture_files': 1,
       });
-      expect(j['mixins'], {'authored': 0, 'generated': 0});
+      expect(j['mixins'], {'authored': 0, 'generated': 0, 'with_applications': 0});
     });
 
     test('T-0015-AC4 fan-in/out histograms from sibling dependencies', () {
@@ -200,6 +262,35 @@ void main() {
   });
 
   group('T-0015-AC5 strict mode', () {
+    test('T-0015-AC5 malformed .arb and manifest warn instead of crashing', () {
+      write('feature/a/lib/l10n/app_en.arb', '{ nope');
+      write('feature/a/.mcgen/manifest.json', '[1,');
+      final r = runLoc(LocOptions(root: corpus, strict: true, commit: 't'));
+      final t = m(r.json['totals']);
+      expect(m(r.json['non_dart'])['arb_keys'], 0);
+      expect(m(t['source']), {'hand': 19, 'scaffold': 0});
+      expect(r.failures.any((w) => w.contains('malformed .arb')), isTrue);
+      expect(r.failures.any((w) => w.contains('malformed feature/a/.mcgen/manifest.json')), isTrue);
+    });
+
+    test('T-0015-AC5 strict uses git ls-files: untracked files only on request', () {
+      git(['init', '-q']);
+      git(['add', '-A']);
+      write('feature/a/lib/untracked.g.dart', 'int u = 1;\n');
+      final tracked = runLoc(LocOptions(root: corpus, strict: true, commit: 't'));
+      expect(tracked.failures, hasLength(8));
+      expect(tracked.warnings.any((w) => w.contains('not in a git work tree')), isFalse);
+      expect(tracked.failures.any((w) => w.contains('untracked.g.dart')), isFalse);
+      final all = runLoc(LocOptions(
+          root: corpus, strict: true, includeUntracked: true, commit: 't'));
+      expect(all.failures, hasLength(9));
+    });
+
+    test('T-0015-AC5 outside git it walks the tree and warns', () {
+      final r = runLoc(LocOptions(root: corpus, commit: 't'));
+      expect(r.warnings.single, contains('not in a git work tree'));
+    });
+
     test('T-0015-AC5 committed generated files fail naming each file', () {
       final r = runLoc(LocOptions(root: corpus, strict: true, commit: 't'));
       expect(r.failures, hasLength(8));

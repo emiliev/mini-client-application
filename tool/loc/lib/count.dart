@@ -1,16 +1,21 @@
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 import 'package:analyzer/dart/ast/token.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 
 /// Result of applying the D8 rule to one file.
 class FileScan {
-  FileScan(this.lines, this.imports, this.mixins);
+  FileScan(this.lines, this.imports, this.mixins, this.withApplications);
 
   /// 1-based line numbers that count: covered by at least one non-comment
   /// token and containing a non-whitespace character.
   final Set<int> lines;
   final int imports;
+  /// `MixinDeclaration` nodes (`mixin class` is a class, not counted).
   final int mixins;
+
+  /// Mixin types named in `with` clauses.
+  final int withApplications;
 }
 
 /// Counts lines of [content] per plan 02 section 4.1.
@@ -23,7 +28,6 @@ FileScan scanDart(String content) {
   final lineInfo = result.lineInfo;
   final text = content.split('\n');
   final lines = <int>{};
-  var mixins = 0;
   Token token = result.unit.beginToken;
   while (token.type != TokenType.EOF) {
     if (token.length > 0) {
@@ -32,12 +36,30 @@ FileScan scanDart(String content) {
       for (var l = first; l <= last; l++) {
         if (l - 1 < text.length && text[l - 1].trim().isNotEmpty) lines.add(l);
       }
-      if (token.type == Keyword.MIXIN) mixins++;
     }
     token = token.next!;
   }
   final imports = result.unit.directives.whereType<ImportDirective>().length;
-  return FileScan(lines, imports, mixins);
+  final v = _MixinVisitor();
+  result.unit.accept(v);
+  return FileScan(lines, imports, v.mixins, v.withApplications);
+}
+
+class _MixinVisitor extends RecursiveAstVisitor<void> {
+  int mixins = 0;
+  int withApplications = 0;
+
+  @override
+  void visitMixinDeclaration(MixinDeclaration node) {
+    mixins++;
+    super.visitMixinDeclaration(node);
+  }
+
+  @override
+  void visitWithClause(WithClause node) {
+    withApplications += node.mixinTypes.length;
+    super.visitWithClause(node);
+  }
 }
 
 /// 1-based lines strictly between `// mcgen:keep <id>` and `// mcgen:end <id>`.

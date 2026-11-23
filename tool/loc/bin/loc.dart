@@ -18,6 +18,9 @@ void main(List<String> args) {
     ..addOption('commit', help: 'Commit sha to record (default: git HEAD).')
     ..addFlag('strict',
         negatable: false, help: 'Fail on committed generated files (D7).')
+    ..addFlag('include-untracked',
+        negatable: false,
+        help: 'Also count files git does not track (default: tracked only).')
     ..addFlag('help', abbr: 'h', negatable: false);
   final ArgResults r;
   try {
@@ -34,6 +37,7 @@ void main(List<String> args) {
     strict: r['strict'] as bool,
     stamp: r['stamp'] as String?,
     commit: r['commit'] as String?,
+    includeUntracked: r['include-untracked'] as bool,
   ));
   final jsonOut = r['json'] as String?;
   final mdOut = r['md'] as String?;
@@ -49,6 +53,9 @@ void main(List<String> args) {
       ..writeAsStringSync(result.markdown);
   }
   if (jsonOut == null && mdOut == null) stdout.write(result.markdown);
+  for (final w in result.warnings) {
+    stderr.writeln('WARN: $w');
+  }
   for (final f in result.failures) {
     stderr.writeln('FAIL: $f');
   }
