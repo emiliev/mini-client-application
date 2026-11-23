@@ -5,6 +5,9 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0014](T-0014-toolchain-bring-up.md) | Toolchain bring-up under Bazel (P3-01) | **In Progress** | Engineer (Opus) | — | `fleet/T-0014-toolchain` |
+| [T-0015](T-0015-tool-loc.md) | `tool/loc` LOC counter (P2-02) | **In Progress** | Engineer (Sonnet) | — | `fleet/T-0015-tool-loc` |
+| [T-0016](T-0016-perf-harness.md) | Perf harness, ingestion, sampler (P4-01 to P4-03) | **In Progress** | Engineer (Sonnet) | — | `fleet/T-0016-perf-harness` |
 
 ## Done
 | ID | Title | Result |
@@ -27,7 +30,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0010](T-0010-e2e-visual-harness.md) | E2E & visual harness | P5-10 |
 | [T-0011](T-0011-mvp-journey-e2e.md) | Full MVP journey e2e | P5-12 |
 
-## Next up (Phase A, the de-risk spikes), ready to dispatch
+## Next up (Phase A waves A2 to A4)
 P3-01 toolchain + Dart version · P3-02 patch queue · P3-03 retrofit shim · P3-04 injectable two-stage · P3-05 BDD generator · P3-07 go_router + l10n + app shell · P1-04 flow_builder on 3.47.7 · P1-01 workspace skeleton · P2-02 `tool/loc` · P4-01 to P4-03 perf harness and sampler.
 
 ```mermaid

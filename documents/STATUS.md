@@ -5,15 +5,15 @@ _Last updated: 2026-11-23 by Tech Lead_
 | | |
 |---|---|
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
-| **Phase** | Planning **done** (plan verified). Next: **Phase A**, the de-risk spikes |
+| **Phase** | **Phase A, wave A1** (toolchain, `tool/loc`, perf harness) |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
 | **Code** | `tool/e2e_ios.sh`, `tool/sim_cleanup.sh` and their test suite (T-0012). No app code yet |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | None. T-0012 merged, T-0013 done |
+| **Active crew** | T-0014 Engineer (Opus), T-0015 Engineer (Sonnet), T-0016 Engineer (Sonnet) |
 
 ## Now
-- Nothing in flight. The plan ([T-0013](tasks/T-0013-enterprise-plan.md)) is verified and the simulator runner ([T-0012](tasks/T-0012-ios-sim-e2e-runner.md)) is merged.
+- [T-0014](tasks/T-0014-toolchain-bring-up.md) toolchain bring-up · [T-0015](tasks/T-0015-tool-loc.md) `tool/loc` · [T-0016](tasks/T-0016-perf-harness.md) perf harness: all **In Progress**
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
