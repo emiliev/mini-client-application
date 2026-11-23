@@ -1,0 +1,23 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_di",
+    package_name = "mc_di",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = ["@pub_deps//:get_it"],
+)
+
+dart_test(
+    name = "di_container_test",
+    size = "small",
+    package_name = "mc_di",
+    language_version = "3.13",
+    main = "test/di_container_test.dart",
+    deps = [
+        ":mc_di",
+        "@pub_deps//:get_it",
+        "@pub_deps//:test",
+    ],
+)

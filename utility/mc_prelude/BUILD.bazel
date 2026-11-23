@@ -1,0 +1,21 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_prelude",
+    package_name = "mc_prelude",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+)
+
+dart_test(
+    name = "result_test",
+    size = "small",
+    package_name = "mc_prelude",
+    language_version = "3.13",
+    main = "test/result_test.dart",
+    deps = [
+        ":mc_prelude",
+        "@pub_deps//:test",
+    ],
+)

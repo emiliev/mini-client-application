@@ -1,0 +1,4 @@
+name: f_a
+dependencies:
+  f_b:
+    path: ../../utility/f_b

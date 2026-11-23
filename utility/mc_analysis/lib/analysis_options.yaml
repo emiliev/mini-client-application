@@ -1,0 +1,42 @@
+# Shared lints (T-0017, plan 01 §2 row 5 and D-06).
+# Tide's tide_analysis (22 lint rules, generated-file excludes, error levels)
+# plus `strict-inference` and the gen-l10n excludes. See README.md.
+analyzer:
+  exclude:
+    - "**/*.g.dart" # common generated files
+    - "**/*.freezed.dart" # generated freezed models
+    - "**/*.config.dart" # injectable DI configuration
+    - "**/lib/src/l10n/*_l10n*.dart" # gen-l10n outputs (plan 01 D-06)
+    - "**/feature**/*_test.dart" # generated BDD tests
+  language:
+    strict-casts: true
+    strict-raw-types: true
+    strict-inference: true # plan 01 D-06
+  errors:
+    missing_required_param: error
+    missing_return: error
+    invalid_assignment: warning
+    invalid_annotation_target: ignore
+
+linter:
+  rules:
+    - always_declare_return_types
+    - always_put_control_body_on_new_line
+    - always_use_package_imports
+    - annotate_overrides
+    - directives_ordering
+    - null_check_on_nullable_type_parameter
+    - package_names
+    - parameter_assignments
+    - unnecessary_brace_in_string_interps
+    - unnecessary_const
+    - unnecessary_constructor_name
+    - unnecessary_getters_setters
+    - unnecessary_library_directive
+    - unnecessary_new
+    - unnecessary_null_aware_assignments
+    - unnecessary_null_checks
+    - unnecessary_null_in_if_null_operators
+    - unnecessary_nullable_for_final_variable_declarations
+    - unnecessary_overrides
+    - unnecessary_parenthesis

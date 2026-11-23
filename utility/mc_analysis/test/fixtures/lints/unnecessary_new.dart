@@ -1,0 +1,1 @@
+Object f() => new Object();

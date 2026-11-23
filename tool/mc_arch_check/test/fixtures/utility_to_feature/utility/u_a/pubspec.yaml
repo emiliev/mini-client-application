@@ -1,0 +1,4 @@
+name: u_a
+dependencies:
+  f_a:
+    path: ../f_a

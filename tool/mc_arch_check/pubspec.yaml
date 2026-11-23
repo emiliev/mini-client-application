@@ -1,0 +1,17 @@
+name: mc_arch_check
+description: Architecture guard. Enforces the Tide layer rules and the barrel rules R4 and R15.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  path: ^1.9.0
+  yaml: ^3.1.0
+
+dev_dependencies:
+  analyzer: any
+  mc_analysis: any
+  test: ^1.25.0
