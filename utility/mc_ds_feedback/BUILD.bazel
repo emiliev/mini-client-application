@@ -1,0 +1,46 @@
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//utility:__subpackages__"])
+
+_DEPS = [
+    "//utility/mc_ds_buttons",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "@pub_deps//:flutter",
+]
+
+flutter_library(
+    name = "mc_ds_feedback",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    package_name = "mc_ds_feedback",
+    deps = _DEPS,
+)
+
+flutter_test(
+    name = "feedback_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/feedback_test.dart",
+    package_name = "mc_ds_feedback",
+    deps = _DEPS + [
+        ":mc_ds_feedback",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    data = ["//utility/mc_ds_theme:fonts"] + glob(["test/goldens/**"], allow_empty = True),
+    language_version = "3.13",
+    main = "test/golden_test.dart",
+    package_name = "mc_ds_feedback",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _DEPS + [
+        ":mc_ds_feedback",
+        "@pub_deps//:flutter_test",
+    ],
+)

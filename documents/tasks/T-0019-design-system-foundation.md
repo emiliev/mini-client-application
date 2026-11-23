@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Ready for verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0019-design-system` (from `origin/main` `53c612d`+) |
@@ -31,4 +31,15 @@ The visual foundation every Marvel screen uses (Tide's `tide_design_system`, spl
 - 2026-11-23: Created and dispatched (app work, in parallel with T-0017).
 
 ## Outcome
-_Pending._
+Implemented 5 packages under `utility/` (tokens, theme, layout, buttons, feedback); root `pubspec.yaml` gained 5 `workspace:` lines.
+
+| AC | Tests | Result |
+|---|---|---|
+| AC1 | `tokens_test`, `theme_test`, `buttons_test`, `feedback_test` (names contain `T-0019-AC1`); `golden_test` in theme, layout, buttons, feedback: 42 goldens = 7 components (theme_sheet, adaptive_grid_375, adaptive_grid_1024, buttons, loading, error_view, empty_view) x light/dark/highContrast x text scale 1.0/2.0 | pass; real Inter text and MaterialIcons visible |
+| AC2 | `feedback_test`: Retry fires once; semantics label `Error: ...` exists | pass |
+| AC3 | `layout_test`: 2 columns at 375, 4 at 1024 (plus breakpoint edges); goldens at both widths | pass |
+| AC4 | `bazel test` on the 5 package globs: 9/9 pass; `build --config=lint //utility/...` clean; `dart format` clean; goldens byte-identical over 2 regenerations | pass |
+
+Font: Inter (SIL OFL 1.1), licence in `utility/mc_ds_theme/assets/fonts/OFL.txt`, recorded in the package README. Finding: F-0013. Evidence: `documents/evidence/T-0019/engineer/`.
+
+Notes: loading/error strings are parameters with English defaults (no `mc_l10n_core` yet). The golden harness lives in `mc_ds_theme/lib/mc_ds_golden.dart` until `mc_test_utils` exists. No tests deleted or weakened.

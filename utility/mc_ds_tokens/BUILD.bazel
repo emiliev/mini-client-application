@@ -1,0 +1,24 @@
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//utility:__subpackages__"])
+
+flutter_library(
+    name = "mc_ds_tokens",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    package_name = "mc_ds_tokens",
+    deps = ["@pub_deps//:flutter"],
+)
+
+flutter_test(
+    name = "tokens_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/tokens_test.dart",
+    package_name = "mc_ds_tokens",
+    deps = [
+        ":mc_ds_tokens",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
