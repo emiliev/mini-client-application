@@ -19,7 +19,7 @@ DartCodegen @@//spike/hello:routes_go_router_part failed: Worker process did not
 It is deterministic and happens on the first build. Every codegen action whose deps include any Flutter library is affected, not only go_router.
 
 ## Workaround (used in `spike/hello/BUILD.bazel`)
-Add `@flutter_sky_engine//:sky_engine` to that `dart_codegen`'s `deps`, and `use_repo(flutter, "flutter_sky_engine")` in `MODULE.bazel`. The guard then fires, summaries are off for that action only (0 `--summary` args, checked with `aquery`), and the shim analyzes `dart:ui` from source through `_embedder.yaml`. With that, go_router_builder 4.5.0 over **real go_router 17.5.0** produces a `.g.dart` byte-identical to build_runner's (once F-0008 is also applied). V3-01 is therefore **settled: go_router_builder stays Bazel-native and does not join the R28 fallback.**
+Add `@flutter_sky_engine//:sky_engine` to that `dart_codegen`'s `deps`, and `use_repo(flutter, "flutter_sky_engine")` in `MODULE.bazel`. The guard then fires, summaries are off for that action only (0 `--summary` args, checked with `aquery`), and the shim analyzes `dart:ui` from source through `_embedder.yaml`. With that, go_router_builder 4.5.0 over **real go_router 17.5.0** produces a `.g.dart` byte-identical to build_runner's (once F-0011 is also applied). V3-01 is therefore **settled: go_router_builder stays Bazel-native and does not join the R28 fallback.**
 
 Alternative: `--@rules_dart//dart:analyzer_summaries=false` also works, but it turns summaries off for every codegen action, including the roughly 95 % that are Flutter-free under CPR. Rejected.
 

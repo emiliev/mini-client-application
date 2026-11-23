@@ -13,7 +13,7 @@ _PKG = "hello"
 
 # Matches the pubspec SDK floor (^3.13.0). Without it the codegen shims run with
 # `--root-language-version 3.0`, so dart_style formats generated code in the
-# pre-3.7 "short" style and it no longer equals build_runner's output (F-0008).
+# pre-3.7 "short" style and it no longer equals build_runner's output (F-0011).
 _LANG = "3.13"
 
 _HAND_WRITTEN = glob(

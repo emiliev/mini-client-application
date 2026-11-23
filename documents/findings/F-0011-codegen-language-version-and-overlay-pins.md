@@ -1,4 +1,4 @@
-# F-0008: Codegen output equals build_runner's only with `language_version` set; the overlay needs two pins
+# F-0011: Codegen output equals build_runner's only with `language_version` set; the overlay needs two pins
 
 - **Date:** 2026-11-23
 - **Author:** crew: Engineer (T-0014)
