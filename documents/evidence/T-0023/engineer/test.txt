@@ -1,4 +1,4 @@
-//utility/mc_storage:no_flutter_test                                     PASSED in 0.3s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
 
 Executed 31 out of 31 tests: 31 tests pass.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

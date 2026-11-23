@@ -240,7 +240,7 @@ void main() {
     test('T-0023-AC4: an explicit baseUrl overrides the config', () async {
       await initializeDIContainer([
         ApiClientDIInitializer(
-          backend: _backend(),
+          adapter: _backend().adapter,
           baseUrl: 'https://override.test',
           retryDelay: Duration.zero,
         ),
@@ -250,7 +250,10 @@ void main() {
 
     test('T-0023-AC4: a missing Monitoring fails the request loudly', () async {
       await initializeDIContainer([
-        ApiClientDIInitializer(backend: _backend(), baseUrl: 'https://x.test'),
+        ApiClientDIInitializer(
+          adapter: _backend().adapter,
+          baseUrl: 'https://x.test',
+        ),
       ]);
       await expectLater(
         diContainer<Dio>().get<Object?>('/v1/characters'),
@@ -265,7 +268,7 @@ void main() {
         await initializeDIContainer([
           ConfigDIInitializer(() async => config),
           MonitoringDIInitializer(sinks: [InMemorySink()]),
-          ApiClientDIInitializer(backend: backend),
+          ApiClientDIInitializer(adapter: backend.adapter),
         ]);
         final dio = diContainer<Dio>();
         expect(dio.options.baseUrl, 'https://api.test');

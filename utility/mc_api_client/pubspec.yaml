@@ -13,11 +13,11 @@ dependencies:
   mc_api_errors: any
   mc_config: any
   mc_di: any
-  mc_mocked_backend: any
   mc_monitoring: any
   mc_prelude: any
 
 dev_dependencies:
   mc_analysis: any
   mc_fixtures_characters: any
+  mc_mocked_backend: any
   test: ^1.25.0
