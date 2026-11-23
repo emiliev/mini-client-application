@@ -19,7 +19,7 @@ _Last updated: 2026-11-23 by Tech Lead_
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
 
 ## Decisions needed from the PO
-[Q-010](open-questions.md#q-010) LOC definition · [Q-011](open-questions.md#q-011) release AOT goal split · [Q-012](open-questions.md#q-012) budget16 hardware / VM · [Q-013](open-questions.md#q-013) GitHub access for upstream · [Q-014](open-questions.md#q-014) Apple Developer team · [Q-004](open-questions.md#q-004) bundle id spelling · [Q-007](open-questions.md#q-007) store release vs Marvel IP
+[Q-010](open-questions.md#q-010) LOC definition · [Q-011](open-questions.md#q-011) release AOT goal split · [Q-012](open-questions.md#q-012) budget16 hardware / VM · [Q-013](open-questions.md#q-013) GitHub access for upstream. Defaults apply meanwhile. Answered 2026-11-23: Q-004 (bundle id `com.emiliev.miniclient`), Q-007 (no store release now), Q-014 (no physical devices until the PO calls for them).
 
 ## Recent decisions
 - [ADR-0007](adr/0007-tide-miniclient-architecture.md) Tide Miniclient architecture and stack (with recorded deviations)

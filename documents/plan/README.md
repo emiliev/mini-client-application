@@ -154,7 +154,7 @@ flowchart LR
 - **[Q-012](../open-questions.md#q-012):** budget16 fidelity. Approval to install a VM tool for L2, and whether a real 16 GB Mac (or a cloud Mac) is available for L3 sign-off.
 - **[Q-013](../open-questions.md#q-013):** GitHub access for upstream work: `gh auth login`, plus permission to fork the Mivr repos under your account and to file issues and PRs in your name.
 - **[Q-014](../open-questions.md#q-014):** Apple Developer team and provisioning for device builds; until then, device builds are deferred.
-- Still open: **Q-004** bundle id spelling, **Q-007** public store release vs Marvel IP.
+- Answered 2026-11-23: **Q-004** bundle id `com.emiliev.miniclient` (TL choice), **Q-007** no store release for now, **Q-014** no physical devices until the PO calls for them.
 
 ## 8. Verification of this plan (wave 3)
 Fresh Verifier agents that didn't write any of the plan audit it:
