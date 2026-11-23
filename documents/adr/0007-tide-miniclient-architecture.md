@@ -25,17 +25,17 @@ The PO chose Tide's *Project Miniclient* architecture (six Medium articles) and 
   - scaffolding: mason
 - **Our equivalents:** `mc_` package prefix in place of `tide_`; the data layer is `mc_mocked_backend` (a Dio adapter engine) plus per-domain `mc_fixtures_<domain>` packages.
 - **Catalogue at S2:** 169 modules, as listed in plan 01.
-- **Recorded deviations**, each justified in [plan 01 §2](../plan/01-architecture-and-modules.md) and summarised as R4 to R6 and R13 to R17 in the [plan README](../plan/README.md#4-conflict-resolutions-tl-decisions):
+- **Recorded deviations**, each justified in [plan 01 §2](../plan/01-architecture-and-modules.md) and summarised as R4 to R6, R13 and R15 to R17 (revised in the 2026-11-23 fix pass) in the [plan README](../plan/README.md#4-conflict-resolutions-tl-decisions):
   - go_router typed routes for cross-feature navigation
   - per-package gen-l10n
   - a console monitoring sink instead of Firebase
-  - the barrel also exports navigator interfaces
+  - the barrel also exports navigator interfaces and flow arg/result types (nothing else, checked)
   - an app layer split into `app_core`, 7 wirings and 9 apps (including sandboxes)
-  - feature tests: BDD + contract + l10n + golden
-  - no dart-defines in debug
-  - the codegen purity rule
-  - freezed 4 syntax
-  - per-flow DI containers
+  - feature tests: BDD + contract + l10n + golden, no solitary feature unit tests (Tide's own rule)
+  - no dart-defines or flavours in debug: a Bazel-selected config asset per environment
+  - the codegen purity rule (route targets; Flutter-free bloc imports; monitoring's Flutter hooks in `app_core`)
+  - freezed 4's `sealed` modifier only: private cases and `state.when` are kept
+  - per-flow DI containers with generated, resolve-tested root imports
 
 ## Consequences
 - **Positive:** a proven, team-scalable structure; a realistic, highly modular Bazel workload.

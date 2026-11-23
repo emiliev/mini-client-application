@@ -20,11 +20,11 @@
 - **KD5. Determinism by construction.** mcgen uses its own PRNG (SplitMix64) with *named forked streams* and a per-module seed. It sorts by code unit, writes LF line endings, embeds no timestamps or absolute paths, and runs `dart format` from the pinned SDK. Two runs on two machines in two checkout paths produce the same bytes.
 - **KD6. Realism is specified, measured and gated.** Shape profiles state distributions for file size, fan-out, field counts, widget depth, bloc states, l10n keys, mixins and import cycles. P2-03 calibrates them against open-source Flutter apps. Realism gates (percentile bands, a near-duplicate rate and a mixin quota) run in CI.
 - **KD7. `tool/loc` implements D8 with a lexer, not a regex.** It splits first-party LOC into `hand` and `scaffold`, and reports `test`, `generated` and `tooling` separately. It writes JSON and Markdown, and it is the CI gate for each rung.
-- **KD8. The scale ladder:** S0 has 15 packages and about 35k LOC; S1 50 and 150k; **S2 150 and 600k**; S3 about 190 and 1.0M. S4 is about 915 packages at 5M and about 1,820 at 10M. S4 is a **re-seeded synthesis** of the S3 catalogue (R replicas with fresh shapes and names), not a copy, and it still builds as an iOS app.
+- **KD8. The scale ladder:** S0 has 15 packages and about 35k LOC; S1 50 and 150k; **S2 is 01's catalogue: 169 and about 634k**; S3 about 190 and 1.0M. S4 is about 915 packages at 5M and about 1,820 at 10M. S4 is a **re-seeded synthesis** of the S3 catalogue (R replicas with fresh shapes and names), not a copy, and it still builds as an iOS app.
 - **KD9. Edit corpus.** `tool/edits` holds 14 required edits and 3 control edits. Each is deterministic and byte-reversible, and declares its **expected rebuilt set as bounds** over the dependency graph, broken down by mnemonic and configuration. It also requires that the incremental build equal a clean build. P4 uses this as its oracle.
 - **KD10. Parallelism.** A batch is one *domain group* of 6 to 10 modules plus that domain's fixture package. Shared glue (the app router, the DI list, pub workspace members, BUILD files and the `analysis_config` list) is **regenerated**, never merged by hand, by `mcgen wire` / `buildgen` at integration time. That is about 34 crew tasks in 6 waves to reach S2, and about 44 in 8 waves to reach S3.
 - **KD11. Fixtures live in per-domain `mc_fixtures_<domain>` data utilities**, not inside `mc_mocked_backend`. The mocked backend stays a data-free engine (D5), so one fixture edit fans out to one domain's tests instead of all of them.
-- **KD12. Templates use the generator versions the rules pin** (freezed 4.0.2 and json_serializable 6.14.1, `[rules_dart §6.2]`). States are therefore consumed with Dart 3 `switch` pattern matching, not freezed 2's `state.when` `[tide-core §5.8, §10.16]`. This is a recorded deviation.
+- **KD12. Templates use the generator versions the rules pin** (freezed 4.0.2 and json_serializable 6.14.1, `[rules_dart §6.2]`). freezed 4 only adds the `sealed` modifier: states keep Tide's private cases and are consumed with `state.when` `[tide-core §5.8]`, which freezed_annotation 3.1.0 restored (R16, 01 D-15). If P3-01 AC6 shows the stock shim doesn't emit `when`, the templates fall back to `switch` over public cases.
 
 ## Open conflicts for the TL
 
@@ -35,9 +35,9 @@
 | C3 | **Fixture ownership.** If all fixtures live in `mc_mocked_backend`, every fixture edit re-runs every BDD test (an asset fan-out we would only be measuring in our own design), and every batch collides on one package. | P1, P5, ADR-0005 | Use per-domain `utility/mc_fixtures_<domain>` data utilities (assets plus a route manifest). `mc_mocked_backend` holds only the engine. Feature tests dev-depend on their own domain's fixtures; the app depends on all of them. | P1/P5 |
 | C4 | **BUILD file generation.** Gazelle doesn't fit `lib/src/**` and splits packages `[rules_dart §7, R3]`, and it has no `flutter_*` kinds `[rules_flutter §16.1]`. P3 may propose its own generator. | P3 | Use one tool: `mcgen buildgen` emits every `BUILD.bazel`, hand-written packages included, from pubspec plus resolved imports. **P3 owns the macros** (`//tool/bazel:defs.bzl`); mcgen only calls them. | P3 + TL |
 | C5 | **Test-target granularity.** One `flutter_test` per test file, with each test's linked kernel (`DartKernelLink`) at an estimated 5 to 15 MB, gives about 2.3k links at S2 and about 80k at S4-10M. That last figure is hundreds of GB in `bazel-out` and the disk cache (H-TESTLINK). | P3, P5 | mcgen emits per-file tests (realistic) plus a `tests: per_file \| per_package` knob. The P3 macro aggregates at build time. S4 defaults to `per_package`. | P3/P5 |
-| C6 | **freezed 4 syntax** (KD12) departs from the articles' freezed 2 code. | Conformance verifiers (T-0013-AC4) | Record it in the deviation table. Exemplars use `sealed`/`abstract` freezed classes and `switch`. | TL (deviation entry) |
+| C6 | **freezed 4 syntax** (KD12) departs from the articles' freezed 2 code. | Conformance verifiers (T-0013-AC4) | **Resolved (R16):** only the `sealed` modifier differs; private cases and `state.when` stay (01 D-15). | — |
 | C7 | **Adding a module may churn `pubspec.lock`.** If first-party packages are path entries in the lock `[rules_flutter §4.1]`, adding one re-evaluates the `flutter.pub` extension and may re-fetch spokes. | P3 | P3 should keep first-party packages out of the lock (as plain `flutter_library` targets) or prove that a lock change re-fetches nothing. Edit E14 asserts "no existing spoke re-fetched". | P3 |
-| C8 | **Generated tests and self-confirmation** `[tide-nav §4.5]`, ADR-0006 §3. | P5 | Tests assert **examples written in the spec** (requirements), never values computed by the generator's own logic. Verifiers also hand-audit a 10 % file sample per batch. | TL to accept |
+| C8 | **Generated tests and self-confirmation** `[tide-nav §4.5]`, ADR-0006 §3. | P5 | Tests assert **examples written in the spec** (requirements), never values computed by the generator's own logic. The spec's endpoint shapes and `examples:` act as the external API spec: DTOs never feed fixtures or contract schemas [testing › Testing Data]. Verifiers also hand-audit a 10 % file sample per batch. | Accepted |
 
 ---
 
@@ -124,7 +124,7 @@ archetype: list_detail
 size_class: M                    # S | M | L | XL (§3.1)
 ownership: mixed                 # managed | mixed | ejected
 seed_salt: 0                     # bump to re-roll unconstrained choices only
-deps: [mc_prelude, mc_di, mc_api_client, mc_monitoring, mc_feature_flow, mc_design_system, mc_ds_cards, mc_formatters]
+deps: [mc_prelude, mc_di, mc_api_client, mc_monitoring, mc_feature_flow, mc_bloc_kit, mc_ds_cards, mc_formatters]   # never mc_design_system (spec lint)
 entities:
   - name: Character
     fields:
@@ -151,24 +151,25 @@ blocs:
     states: [initial, loading, loaded, loadingMore, empty, error]
     events: [load, loadMore, refresh, search(query), open(Character)]
     transformers: {search: debounce_300ms}
-flow: {state: [{name: selected, type: Character?}], pages: [CharactersListPage, CharacterDetailsPage]}
+flow: {state: [{name: previewId, type: CharacterId?}], pages: [CharactersListPage, CharacterPreviewPage]}
 screens:
   - {name: CharactersListPage, layout: sliver_grid, depth: 9, widgets: 7}
-  - {name: CharacterDetailsPage, layout: scroll_sections, depth: 11, widgets: 9}
-navigator: {name: CharactersNavigator, outbound: [openComic(ComicId)]}
-l10n: {locales: [en, es], keys: 64, placeholders: 9, plurals: 4, selects: 1}
+  - {name: CharacterPreviewPage, layout: scroll_sections, depth: 11, widgets: 9}
+navigator: {name: CharactersListNavigator, outbound: [openCharacter(CharacterId), openComic(ComicId), requestSignIn() -> bool]}
+l10n: {locales: [en, de, fr, es, ja], keys: 64, placeholders: 9, plurals: 4, selects: 1}   # en template; others pseudo (01)
 mixins: [{name: TileMotion, on: State}]
-assets: {placeholders: 3}
-bdd:
+bdd:                             # 05 §3 vocabulary; data setup before the flow opens (TD-05)
   - feature: browse_characters
-    background: "Given I am on the characters list"
+    background: "Given the backend serves {'characters.paged_45'}"
     scenarios:
-      - {id: MC-characters_list-01, title: "shows the first page", steps: ["When backend responds with {'page 1'}", "Then I see text {'Nova Sentinel'}"]}
-      - {id: MC-characters_list-02, title: "shows an error with retry", steps: ["When backend fails with {'server error'}", "Then I see key {'error_retry'}"]}
+      - {id: MC-characters_list-01, title: "The first page is listed in name order", steps: ["When I open the characters list", "Then I see {'Hero 01'}"]}
+      - {id: MC-characters_list-02, title: "A failed first page offers a retry", steps: ["Given the backend fails {'GET /v1/characters'} once with {'server_error'}", "When I open the characters list", "Then I see the error state"]}
+    outlines:                    # rule examples run through the flow (R6), one row per example
+      - {id: MC-characters_list-03, rule: badge, title: "A character's badge follows its comic count"}
 keep: [rules.badge.body]         # hand-owned region(s)
 ```
 
-The spec is the contract. Models, fixtures and tests all derive from it, and **test expectations come only from `examples:`** (C8). BDD steps come from a shared vocabulary in `mc_test_utils` (P5), extended per module where needed.
+The spec is the contract. Models, fixtures and tests all derive from it, and **test expectations come only from `examples:`** (C8). BDD steps come from `mc_test_steps` (05 §3.2), extended per module where needed. Placeholder art is never per feature: it comes from `mc_fixtures_media` (01 D-24).
 
 ### 2.3 Output per feature module
 
@@ -177,20 +178,20 @@ Folders follow Tide `[tide-core §5.2, §5.3]` and `[tide-nav §3.3]`. `domain/u
 | Output | Content | Main variation source |
 |---|---|---|
 | `pubspec.yaml`, `analysis_options.yaml`, `BUILD.bazel` | brick; deps computed from symbol use (strict deps `[rules_dart §4]`) | `deps` |
-| `lib/<module>.dart` | barrel exporting only the flow(s) `[tide-nav §3.3]` | `flow` |
+| `lib/<module>.dart` | barrel (R4): the flow(s), navigator(s) and flow arg/result types, as `package:` exports with `show`, no `library;` directive | `flow`, `navigator` |
 | `lib/src/di/di_initializer.dart` (+ `di_module.dart`) | Tide's boilerplate `[tide-core §5.9]` | — |
+| `lib/src/di/flow_scope.dart` | generated root imports (R17, 01 §4.5); written by `mcgen wire` | injectable constructors |
 | `lib/src/domain/model/*.dart` | freezed + json models, enums, unions, extension types, DTO→domain mappers | `entities` |
 | `lib/src/domain/api/<m>_api.dart` | `@RestApi` + `@injectable` interface `[tide-core §5.5]` | `endpoints` |
 | `lib/src/domain/repository/*.dart` | `Result` repositories, typed failures, pagination and caching `[tide-core §5.6]` | `endpoints`, `rules` |
 | `lib/src/domain/{usecase,rules}/*.dart` | use cases; rule implementations (classifier, comparator, validator, calculator, state machine) | `rules` |
-| `lib/src/presentation/bloc/*.dart` | Bloc with hand-style sealed events and freezed states as parts; monitoring in `onTransition` `[tide-core §5.8]` | `blocs` |
-| `lib/src/presentation/{page,widget}/*.dart` | pages (`BlocProvider(create: diContainer<…>)`, the only DI in the UI `[tide-core §5.10]`) and widget trees | `screens` |
+| `lib/src/presentation/bloc/*.dart` | Bloc with hand-style sealed events and a freezed `sealed` state with private cases, as parts; failure cases `@Implements<McFailureState>()`; monitoring in `McBloc.onTransition` `[tide-core §5.8]` | `blocs` |
+| `lib/src/presentation/{page,widget}/*.dart` | pages: `XPage` = `BlocProvider(create: (c) => c.di<XBloc>())`, the only DI call in the UI (R17); `_XPageContent` maps states with `state.when` `[tide-core §5.10]`; widget trees | `screens` |
 | `lib/src/flow/*.dart` | freezed flow state + `FeatureFlow` widget `[tide-nav §3.3]` | `flow` |
 | `lib/src/navigator/*.dart` | outbound navigator contract, implemented in the app `[tide-nav §3.4]` | `navigator` |
-| `lib/l10n/<m>_<locale>.arb` | ARB per locale (D4b); `@@locale` matches the file name `[rules_flutter §6]` | `l10n` |
-| `assets/**` | deterministic placeholder PNGs (D4d) | `assets` |
-| `test/unit/**_test.dart` | mapper round-trip, rule example, repository and bloc tests (`mocktail`, AAA, `sut` `[tide-nav §4.3]`) | spec |
-| `test/feature/*.feature`, `test/feature/step/*.dart` | Gherkin + steps (steps `owned` after first write, as bdd_widget_test stubs are `[tide-nav §4.6]`) | `bdd` |
+| `lib/src/l10n/<m>_<locale>.arb` | ARB per locale (D4b, 01 §3.3); `@@locale` matches the file name `[rules_flutter §6]` | `l10n` |
+| `test/feature/*.feature`, `test/feature/step/*.dart` | Gherkin in 05 §3's vocabulary (data before open), plus thin per-feature steps over `mc_test_steps` (`owned` after first write, as bdd_widget_test stubs are `[tide-nav §4.6]`). Rule `examples:` become Scenario Outline rows (R6) | `bdd`, `rules` |
+| `test/contract/*_test.dart`, `test/golden/*.feature` | mapper round-trips and DTO parsing over every fixture variant (05 TD-11); key-screen goldens. **No `test/unit/`** in features (R6) | `endpoints`, `screens` |
 | `utility/mc_fixtures_<domain>/fixtures/<m>/*.json` + `routes.json` | page 1/2, empty, error fixtures per endpoint (C3) | `endpoints`, seed |
 | `.mcgen/manifest.json` | generator version, spec hash, seed, per-file hash, ownership | — |
 
@@ -226,18 +227,19 @@ Utility archetypes (foundation, UI-kit, data) have their own inventories, derive
 | Gate | How the generator guarantees it | Verified by |
 |---|---|---|
 | Format | every file goes through the pinned `dart format` | `dart_format` aspect; `mcgen gen --check` |
-| Analyze (`mc_analysis` = Tide's 22 rules plus strict casts and raw types `[tide-core §4.1]`) | explicit return types, package imports, const-context tracking (no `unnecessary_const`), no `new`, typed JSON maps. **mcgen never emits `// ignore`** | `bazel test` with the `dart_analyze` aspect, where any diagnostic fails `[rules_flutter §8]`; generator CI runs a **fuzz analyze** of 50 synthesised specs per archetype with zero issues |
+| Analyze (`mc_analysis` = Tide's 22 rules plus strict casts and raw types `[tide-core §4.1]`) | explicit return types, package imports and `package:` barrel exports, no `library;` directive (`unnecessary_library_directive`), const-context tracking (no `unnecessary_const`), no `new`, typed JSON maps. **mcgen never emits `// ignore`** | `bazel test` with the `dart_analyze` aspect, where any diagnostic fails `[rules_flutter §8]`; generator CI runs a **fuzz analyze** of 50 synthesised specs per archetype with zero issues |
 | Strict deps / layering | deps come from the use-graph; feature→feature edges are refused in `spec lint` (D1) | `DartImportCheck` `[rules_dart §5.1]` |
 | Codegen inputs | freezed states stay `part of` the bloc file, as in Tide; parts are listed so P3's macros stage them `[tide-core §7.2]` | Bazel build |
-| Tests | rule tests assert spec `examples`; mapper round-trips go `fromJson(toJson(x)) == x`; bloc tests use `mocktail` repositories; BDD runs sociably through `mc_mocked_backend` in process at zero latency `[tide-nav §10]`, with an injected fixed clock | `bazel test //<module>/...`, plus `fvm flutter test` on sampled modules (the IDE/baseline path, D7) |
+| Tests | rule `examples` run as Scenario Outlines through the flow; mapper round-trips (`fromJson(toJson(x)) == x`) live in `test/contract/`; **no bloc or repository unit tests and no internal mocks** (R6) `[tide-nav §4.7]`; BDD runs sociably through `mc_mocked_backend` in process at zero latency `[tide-nav §10]`, with an injected fixed clock | `bazel test //<module>/...`, plus `fvm flutter test` on sampled modules (the IDE/baseline path, D7) |
 
 ### 2.8 Shared glue: `mcgen wire` and `buildgen`
 
 These files are **wire-owned**. Batches never edit them by hand; they are regenerated from the full set of specs:
 
-- `app/mini_client/lib/src/wiring/gen/<feature>_wiring.dart`: the typed `go_router_builder` route (D4a), navigator implementations and flow construction
-- `app/mini_client/lib/src/wiring/gen/features.dart`: the route list
-- the app's `pubspec.yaml` deps, the root `pubspec.yaml` workspace members (if P3 uses pub workspaces), the root `BUILD.bazel` `dart_analysis_config` list `[rules_dart §13]`, and all `BUILD.bazel` files (`buildgen`)
+- in each `app/wiring/<group>_wiring/` (R5, 01 §3.4): `lib/src/routes/<domain>_routes.dart` (typed `go_router_builder` routes, D4a), `route_targets.dart` and `route_targets_impl.dart` (flow construction, R15), the navigator-implementation skeletons `lib/src/navigators/<feature>_navigator_impl.dart` (`owned` after first write, since they hold mapping logic) and `test/flow_scopes_test.dart` (01 §4.5)
+- `app/wiring/app_core/lib/src/locations/app_locations.dart` (cross-group typed locations) and the wiring list in `app/mini_client` and each sandbox
+- each feature's `lib/src/di/flow_scope.dart` (generated root imports, R17)
+- the app's `pubspec.yaml` deps, the root `pubspec.yaml` workspace members, the root `BUILD.bazel` `dart_analysis_config` list `[rules_dart §13]`, and all `BUILD.bazel` files (`buildgen`)
 
 A merge conflict in a wire-owned file is **resolved by regenerating it** (`mcgen wire && mcgen buildgen`), never by hand.
 
@@ -275,7 +277,7 @@ These are **assumptions**, not measurements. I've seen no published shape data f
 | Cyclomatic complexity per function | 2 | 6 | 14 | — | rule and validator bodies sit in the tail |
 | l10n keys per feature | 60 | 160 | 250 | — | 15 % placeholders, 5 % plurals, 2 % selects |
 | Doc/comment lines : code lines | 0.2 | 0.35 | — | — | affects scan time, not LOC |
-| Test LOC : source LOC (per module) | 0.55 | 0.9 | — | — | 0.3 floor |
+| Test LOC : source LOC (per module) | features 0.25, utilities 0.8 | features 0.35 | — | — | 05 §4 owns the test budget; feature floor 0.2 |
 
 ### 3.3 Entity shapes
 
@@ -287,11 +289,11 @@ These are **assumptions**, not measurements. I've seen no published shape data f
 - **Widgets:** 70 % stateless, 25 % stateful (controllers, `SingleTickerProviderStateMixin`), 5 % `CustomPainter` (in dashboards). Layout is chosen by archetype: slivers (list), `Form` with validators and step indicators (wizard), `LayoutBuilder` responsive grids and charts (dashboard).
 - **Business rules** come from six kinds: classifier, comparator (multi-key sort), validator (single- and cross-field), calculator (aggregates, rounding), filter/grouper, and step state machine (wizard guards). Bodies contain real branching: `switch` on enums and sealed types, loops and collection pipelines.
 - **Blocs** use `Bloc` (not Cubit) with event transformers (debounce, droppable), `emit.forEach` over repository streams in 20 % of features, and monitoring in `onTransition` only `[tide-core §5.8]`.
-- **l10n:** every feature has `en` + `es`; 25 % add `de`. Locale count multiplies `flutter_gen_l10n` output.
+- **l10n:** every feature has 01's five locales: `en` (template) plus pseudo-translated `de`, `fr`, `es` and `ja`. Locale count multiplies `flutter_gen_l10n` output.
 
 ### 3.5 Import-graph realism
 
-- **Barrels (D1):** feature barrels export 1–3 flows. Foundation barrels export 5–40 files; UI-kit barrels 30–150 (`mc_design_system` is the widest, and the target of E06). 30 % of features also have internal folder barrels (`src/presentation/widget/widget.dart`).
+- **Barrels (D1, R4):** feature barrels export 1–3 flows plus their navigators and arg/result types. Foundation barrels export 5–40 files; UI-kit barrels 30–150 (`mc_design_system` is the widest, and the target of E06). 30 % of features also have internal folder barrels (`src/presentation/widget/widget.dart`).
 - **Inside a package:** files import siblings directly through `package:<self>/src/…` `[tide-core §2.4]`. **25 % of feature packages contain one intra-package import cycle (SCC) of 3–8 files** (page ↔ widget ↔ helper), because rules_dart compiles one kernel per import SCC `[rules_dart §5.1]`. Without SCCs we'd never exercise that path.
 - **Remember that `lib/src` is not private to the compiler.** Every library in the package is in its outline, so any signature change in `src` reaches the package's direct dependents (for a feature, that's the app). The edit oracle encodes this (E07, E08, E10).
 
@@ -299,7 +301,7 @@ These are **assumptions**, not measurements. I've seen no published shape data f
 
 | Kind | Quota at S2 | Examples | Why |
 |---|---|---|---|
-| Hot authored mixins in core/UI-kit utilities | **15**, each imported by ≥ 30 packages | `McPressableMixin`, `McFormFieldStateMixin`, `PaginatedBlocMixin` | E05 targets the hottest one |
+| Hot authored mixins in `mc_ds_*` UI-kit utilities (never in the cutoff-critical kits of 01 key decisions) | **15**, each imported by ≥ 30 packages | `McPressableMixin`, `McFormFieldStateMixin`, `McAnimatedVisibilityMixin` | E05 targets the hottest one |
 | Local feature mixins | 0–2 per feature (form features 1–3), about 150 in total | `TileMotion`, `StepValidation` | about 1 per 3.5 KLOC |
 | `mixin class` | 10 % of the above | — | language-feature mix |
 | Generated freezed mixins (`_$X`) | unavoidable, about 1 per freezed class | — | `tool/loc` reports the count; they inflate outline size |
@@ -317,6 +319,7 @@ Sealed classes and `switch` expressions (everywhere), records (10 % of functions
 3. Mixin quota (§3.6) and SCC quota (§3.5) are met.
 4. No single module holds more than 4 % of source LOC.
 5. Hand share is ≥ 5 % (C1).
+6. **Reachability** (Tide's "delete what exported entry points can't reach" [testing › Testing Best Practices]): mcgen emits a `src` declaration only if the spec ties it to a screen, flow or rule that a generated scenario exercises; per batch, every scaffolded file has ≥ 1 covered line, and the coverage gate's uncovered-line list goes into the Verifier's report.
 
 ---
 
@@ -338,7 +341,7 @@ A line counts iff (a) it is in a first-party `.dart` file under `app/`, `feature
 | `generated` | scanned from `bazel-bin` (`--generated-root`), or the build_runner baseline tree | reported separately, by generator |
 | `tooling` | `tool/**` (mcgen, loc, edits) | reported separately |
 
-A **committed generated file** (a generated suffix inside the git tree) is an error under `--strict`, which enforces D7.
+A **committed generated file** (a generated suffix inside the git tree) is an error under `--strict`, which enforces D7. The one exception is a file listed in `tool/build_runner_overlay/fallback.yaml` while a generator runs on the R28 fallback; it counts as `generated`, never as source.
 
 ### 4.2 Breakdowns and output
 
@@ -360,10 +363,10 @@ The output is deterministic (sorted keys, no wall-clock fields except an optiona
 
 | Rung | Packages ≥ | `source` (D8) ≥ | Test ratio ≥ | Other |
 |---|---|---|---|---|
-| S0 | 15 | 30k | 0.5 | 0 committed generated files; every archetype has an exemplar |
-| S1 | 50 | 140k | 0.45 | §3.8 gates 1–4 |
-| **S2** | **100** (planned 150) | **500k** (planned 600k) | 0.45 | §3.8 gates 1–5 |
-| S3 | 180 | 950k | 0.45 | §3.8 gates 1–5 |
+| S0 | 15 | 30k | 0.45 | 0 committed generated files outside the R28 manifest; every archetype has an exemplar |
+| S1 | 50 | 140k | 0.35 | §3.8 gates 1–4, 6 |
+| **S2** | **100** (planned 169) | **500k** (planned 634k) | 0.35 | §3.8 gates 1–6 |
+| S3 | 180 | 950k | 0.35 | §3.8 gates 1–6 |
 | S4 | — | target ±5 % | per `--tests` | reachability check (§5.2) |
 
 The gate runs as an `sh_test` named for its rung AC, e.g. `//tool/gates:T_XXXX_AC1_loc_gate_S2`, so ADR-0006's "test name contains the AC ID" holds.
@@ -377,11 +380,11 @@ The gate runs as an `sh_test` named for its rung AC, e.g. `//tool/gates:T_XXXX_A
 | Rung | Packages | `source` LOC (D8) | Test LOC | Generated LOC (est. ~1.1×) | Committed files | Bazel targets (est.)¹ | Clean actions, `test //...` (est.) | Content |
 |---|---|---|---|---|---|---|---|---|
 | **S0** | 15 | ~35k | ~18k | ~35k | ~850 | ~350 | ~1.5k | 8 core utilities, 3 utility exemplars, 3 feature exemplars, the app |
-| **S1** | 50 | ~150k | ~75k | ~165k | ~3.9k | ~1.8k | ~7k | S0 + 26 features + 9 utilities (5 batches) |
-| **S2** | 150 | **~600k** (≥ 500k) | ~330k | ~650k | ~14k | ~6.3k | ~25k | 115 features (60 list-detail, 30 form/wizard, 25 dashboard), 34 utilities (12 foundation, 10 UI-kit, 12 data), the app |
-| **S3** | ~190 | **~1.0M** | ~550k | ~1.1M | ~19k | ~9.4k | ~38k | +30 features, +10 utilities, about 20 % of features up one size class (C2) |
-| **S4-5M** | ~915 | ~5.0M | ~2.7M full / ~0.6M lean | ~5.5M | ~95k | ~46k full / ~18k lean | ~185k | R = 5 re-seeded replicas of S3's 181 non-core modules, plus the core, plus 1 super-app (+k slice apps) |
-| **S4-10M** | ~1,820 | ~10M | ~5.5M / ~1.2M | ~11M | ~190k | ~92k / ~40k | ~370k | R = 10 |
+| **S1** | 50 | ~150k | ~60k | ~165k | ~3.9k | ~1.8k | ~7k | S0 + 26 features + 9 utilities (5 batches) |
+| **S2** | 169 | **~634k** (≥ 500k) | ~250k (05 §4) | ~446k (01 §8) | ~14k | ~6.3k | ~25k | 01's catalogue: 100 features in 7 archetypes, 52 utilities, 8 app-layer libraries, 9 apps |
+| **S3** | ~190 | **~1.0M** | ~380k | ~1.1M | ~19k | ~9.4k | ~38k | +30 features, +10 utilities, about 20 % of features up one size class (C2) |
+| **S4-5M** | ~915 | ~5.0M | ~2.0M full / ~0.6M lean | ~5.5M | ~95k | ~46k full / ~18k lean | ~185k | R = 5 re-seeded replicas of S3's 181 non-core modules, plus the core, plus 1 super-app (+k slice apps) |
+| **S4-10M** | ~1,820 | ~10M | ~3.9M / ~1.2M | ~11M | ~190k | ~92k / ~40k | ~370k | R = 10 |
 
 ¹ Assumes P3's macros make about 1 target per annotated file chain and 1 per test file (`full`). `lean` means one test target per package and kind. P3-owned; to be re-estimated once P3 publishes its macros. The 15 S0 packages are:
 - the 8 hand-written core utilities: `mc_prelude`, `mc_di`, `mc_monitoring`, `mc_api_client`, `mc_feature_flow`, `mc_design_system`, `mc_mocked_backend` and `mc_test_utils`;
@@ -456,7 +459,7 @@ flowchart TB
 | E08 | Retrofit endpoint add | new `@GET` method on `F`'s API | `Cg` retrofit×1 + combine×1; `Ag` ≤ 1; `K{F,A}`; `TR` t(F)∪t(A) | sim: `K{F,A}` | retrofit shim |
 | E09 | l10n string change | `en` value of an existing key in `F` | `L10n`×1, `K{F}` only (a getter body), `TR` t(F) | sim: `K{F}` | cutoff through codegen |
 | E10 | ARB key add | new key in `F` (all locales) | `L10n`×1, `K{F,A}`, `TR` t(F)∪t(A) | sim: `K{F,A}` | gen-l10n API change |
-| E11 | Asset change | one pixel of a placeholder PNG in `F` | `AB` for t(F) (+ app tests that bundle it); **`K` = 0** | sim/device: `AB`+`CA`+`Pkg` only, **no `FKC`/`AOT`** | asset precision |
+| E11 | Asset change | one pixel of a placeholder PNG in `mc_fixtures_media` (features have no assets, D-24) | `AB` for the golden and app targets that bundle it; **`K` = 0** | sim/device: `AB`+`CA`+`Pkg` only, **no `FKC`/`AOT`** | asset precision |
 | E12 | Fixture JSON change | one value in `mc_fixtures_<d>` | `AB`+`TR` for t(features in d); **`K` = 0** | sim/device: `AB`+`CA`+`Pkg` | asset fan-out (C3) |
 | E13 | BDD scenario add | scenario in `F`'s `.feature` reusing existing steps | `Cg` bdd×1, `K`×1 (that test entry), `L`×1, `TR`×1 | none | BDD shim granularity |
 | E14 | New module add | `mcgen new list_detail <name>` + wire | all of `X`'s codegen; `K{X,A}`, `Az{X,A}`, `TR` t(X)∪t(A); **no existing pub spoke re-fetched**, every other action a cache hit | sim: `K{X,A}` | C7, analysis phase |
@@ -502,7 +505,7 @@ A violation becomes an upstream draft under `documents/upstream/` (D12), with `m
    - an extension-type-heavy value model
    - a deeply generic helper
 3. Run `mcgen check`, `mcgen owners --verify`, `tool/loc --modules <batch> --gate batch`, `bazel test //feature/<domain>_...  //utility/mc_fixtures_<domain>/...`, and `fvm flutter test` on 2 sampled modules (dual-path baseline).
-4. Wire locally, then run `bazel build --config=sim //app/mini_client:app_ios` and the batch's e2e smoke journey on simulator `mc-T-XXXX-engineer`. Delete the simulator afterwards (ADR-0006 §6).
+4. Wire locally, then run `bazel build --config=sim //app/mini_client:mini_client_ios` and the batch's e2e smoke journey on simulator `mc-T-XXXX-engineer`. Delete the simulator afterwards (ADR-0006 §6).
 
 ### 7.3 Per-batch verification (ADR-0006, fresh Verifier)
 
@@ -551,7 +554,7 @@ Every task follows ADR-0006: each AC gets a test or gate whose name contains the
 | | | AC2 | Given a spec that adds a field, when it's regenerated, then only files using that entity change. A named-stream test proves unrelated draws are unchanged. |
 | | | AC3 | Given a managed file edited outside keep regions, when `mcgen gen` runs, then it exits non-zero, names the file and writes nothing. |
 | | | AC4 | Given an edited keep region, when it's regenerated, then the region content survives verbatim. |
-| | | AC5 | Given an invalid spec (feature→feature dep, missing rule `examples`, a duplicate name), when `mcgen spec lint` runs, then each error is reported with its YAML path. |
+| | | AC5 | Given an invalid spec (feature→feature dep, `mc_design_system` in a feature's `deps`, missing rule `examples`, a duplicate name), when `mcgen spec lint` runs, then each error is reported with its YAML path. |
 | **P2-02** `tool/loc` | `tool/loc/` | AC1 | Given a fixture corpus with known answers (nested block comments, `//` inside strings, multi-line strings, blank lines inside strings, `///`), when it's counted, then every file matches its expected count exactly. |
 | | | AC2 | Given generated-suffix files and BDD outputs, when counted with `--generated-root`, then they appear only under `generated.<builder>`. |
 | | | AC3 | Given a committed `*.freezed.dart`, when `--strict` runs, then it fails. |
@@ -563,11 +566,14 @@ Every task follows ADR-0006: each AC gets a test or gate whose name contains the
 | **P2-04 to P2-07** templatise list-detail; form/wizard; dashboard; the three utility archetypes | `tool/mcgen/{emit/<archetype>,bricks/<archetype>*}` | AC1 | Given the archetype's exemplar and its spec, when `mcgen gen` runs, then the output equals the exemplar except keep-region contents (golden round-trip). |
 | | | AC2 | Given 50 synthesised specs of the archetype, when they're generated and analyzed under Bazel, then there are zero diagnostics and zero `// ignore`. |
 | | | AC3 | Given a generated module, when `bazel test //<module>/...` and `fvm flutter test` run, then both pass. |
+| | | AC4 | Given every brick and emitter output, when analysed with `mc_analysis`, then there are zero diagnostics (template-lint golden, incl. `unnecessary_library_directive`), and the output has no `test/unit/`, no `diContainer` call and no internal mock (R6, R17). |
 | **P2-08** `mcgen wire` + `buildgen` | `tool/mcgen/lib/src/{wire,buildgen}` | AC1 | Given the S0 specs, when wire and buildgen run, then the app builds with `--config=sim` and every flow is reachable from the catalogue screen. |
 | | | AC2 | Given two branches that each add modules, when they're merged and wire re-runs, then the result equals wiring the union of specs from scratch. |
 | | | AC3 | Given hand-written packages, when `buildgen` runs, then their BUILD deps match their imports (`DartImportCheck` passes). |
+| | | AC4 | Given a feature where a hand edit adds a constructor dependency on a root service, when `mcgen check` runs, then it fails naming the stale `flow_scope.dart`; after `mcgen wire`, the wiring's `flow_scopes_test` passes. |
 | **P2-09** shape engine + realism gates | `tool/mcgen/lib/src/shape/` | AC1 | Given a profile, when 1,000 modules are sampled, then each §3.2 metric falls inside its band. |
 | | | AC2 | Given S1, when `mcgen stats` runs, then the near-duplicate rate is < 2 % and the mixin and SCC quotas are met. |
+| | | AC3 | Given a spec declaring a widget no scenario reaches, when `mcgen gen` runs, then it refuses to emit it (gate 6); given a batch, then the uncovered-line list is in the verification report. |
 | **P2-10** edit corpus | `tool/edits/` | AC1 | Given S0, when every edit is applied and reverted, then the tree is byte-identical and all tests pass after `apply`. |
 | | | AC2 | Given `resolve --rung S0`, then the selectors pick the same targets on two runs. |
 | | | AC3 | Given E01, E04, E11 and E16 on S0, when `aquery` and the execution log are inspected, then the real mnemonic names are recorded and each edit's measured set is reported against its bounds (pass/fail goes to P4). |

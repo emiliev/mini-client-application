@@ -5,7 +5,6 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0013](T-0013-enterprise-plan.md) | Enterprise plan (Tide × Bazel stress test) | **In Verification**: wave-3 audits | TL + crew | Q-006 | TL branch → `main` |
 
 ## Done
 | ID | Title | Result |
@@ -14,6 +13,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0013](T-0013-enterprise-plan.md) | Enterprise plan (Tide × Bazel stress test) | verified; 49 audit findings resolved |
 | [T-0012](T-0012-ios-sim-e2e-runner.md) | iOS simulator e2e runner (`tool/e2e_ios.sh`) | merged; Verifier [PASS](../evidence/T-0012/verification-report.md); F-0005 |
 
 ## Superseded by the enterprise plan (2026-11-23)
@@ -27,7 +27,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0010](T-0010-e2e-visual-harness.md) | E2E & visual harness | P5-10 |
 | [T-0011](T-0011-mvp-journey-e2e.md) | Full MVP journey e2e | P5-12 |
 
-## Next up (Phase A, the de-risk spikes), dispatched after the plan is verified
+## Next up (Phase A, the de-risk spikes), ready to dispatch
 P3-01 toolchain + Dart version · P3-02 patch queue · P3-03 retrofit shim · P3-04 injectable two-stage · P3-05 BDD generator · P3-07 go_router + l10n + app shell · P1-04 flow_builder on 3.47.7 · P1-01 workspace skeleton · P2-02 `tool/loc` · P4-01 to P4-03 perf harness and sampler.
 
 ```mermaid

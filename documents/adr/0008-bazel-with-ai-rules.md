@@ -19,7 +19,9 @@
 - **Code generation:**
   - freezed, json_serializable, go_router_builder and gen-l10n use stock support.
   - retrofit (a SharedPart shim), injectable (two-stage, vendored 3.1.3 without lean_builder) and bdd_widget_test (3.0.5 parser-based) get **new shims on our rules_dart fork**.
-- **App targets:** every app target is `manual`; there are no dart-defines or flavors in sim-debug; iOS integration tests stay `manual` until patch U-F1.
+  - A shim that misses its Phase A timebox runs through the `build_runner` overlay (`tool/build_runner_overlay/`, outside the pub workspace) with committed, drift-checked outputs until it lands (plan README R28). The same contingency covers go_router_builder if its Flutter-closure spike fails.
+- **App targets:** every app target is `manual`; there are no dart-defines or flavors in sim-debug (configuration is a Bazel-selected asset); iOS integration tests stay `manual` until patch U-F1.
+- **Memory budget:** `--config=budget16` is defined once ([plan 04 §7.2](../plan/04-profiling-optimization-upstream.md)) and capped per worker mnemonic, singleplex and multiplex.
 
 ## Consequences
 - **Positive:** hermetic, cacheable builds that are measurable at action level, and the precondition for the stress-test goal.

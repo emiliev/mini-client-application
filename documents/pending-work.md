@@ -20,4 +20,6 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-015 | `tool/e2e_ios.sh`: per-target timeout (one target ran 370 s unbounded) | Tooling | T-0012 Verifier | Before Phase C e2e | — |
 | P-016 | `tool/e2e_ios.sh`: trap SIGHUP; isolate two runs with the same role; narrow the evidence-reset PNG deletion | Tooling | T-0012 Verifier | With P-015 | — |
 | P-017 | `tool/sim_cleanup.sh`: skip simulators whose owning `e2e_ios.sh` pid is still alive | Tooling | T-0012 Engineer | With P-015 | — |
+| P-018 | Recompute plan 01's per-module test-LOC column (402k is an upper estimate; the real budget is about 250k per plan 05 §4) | Docs | T-0013 fix pass | When `tool/loc` exists (P2-02) | — |
+| P-019 | Refresh plan 01 §7 graph metrics for the new `mc_feature_flow → mc_bloc_kit` edge | Docs | T-0013 fix pass | With P1-01 architecture guard | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

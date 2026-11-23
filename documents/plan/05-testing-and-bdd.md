@@ -1,4 +1,4 @@
-# 05: Testing and BDD strategy (Tide-style sociable BDD, verified at 150-module scale under Bazel)
+# 05: Testing and BDD strategy (Tide-style sociable BDD, verified at 169-module scale under Bazel)
 
 | | |
 |---|---|
@@ -23,7 +23,7 @@
 - **KD1. Tide's two tiers are kept** [testing › Solitary Unit Tests; › Sociable Feature Tests]:
   - Utilities get solitary unit tests (`test` + `mocktail`, AAA, `sut`).
   - Features get sociable BDD widget tests that enter **only through the flow** and double only external dependencies and the backend.
-  - **Features have no solitary unit tests.**
+  - **Features have no solitary unit tests** (R6). Generic pure logic lives in utilities (validators in `mc_forms`); feature-specific engines run as Scenario Outlines through the flow.
 - **KD2. The backend is doubled at the transport layer.** `McBackendHarness` drives `mc_mocked_backend`'s Dio `HttpClientAdapter` (D5): the same transport the app and e2e use, with fixture sets from PL-2's `mc_fixtures_<domain>` packages [P2 C3]. There are no interceptor stubs and no inline JSON.
 - **KD3. Tide's `test_utils` becomes three testonly utilities:**
   - `mc_test_utils`: harness, container, `initFlow`, mocks, golden and a11y helpers
@@ -31,13 +31,13 @@
   - `mc_e2e_utils`: simulator checkpoints and the app driver
 - **KD4. AC traceability is tag-based.**
   - Scenarios carry `@T-XXXX-ACn`, which is canonical. mcgen-generated scenarios also carry `@MC-<module>-NN` [P2 §2.2].
-  - The BDD generator appends the tags to each generated test name (`… [T-0123-AC1]`). That satisfies ADR-0006 §1 and makes `--test_filter='T-0123-AC1'` work.
-  - `tool/trace_acs` joins task ACs → tags → JUnit results automatically.
+  - The generator passes every scenario tag to `mcTestWidgets` as `tags:`. **`mcTestWidgets` itself** moves the `T-…`/`MC-…` tags into the test name (`… [T-0123-AC1]`) and keeps only category tags as Dart tags. So traceability doesn't depend on the generator: it holds for the fork generator and for stock `bdd_widget_test` under the R28 fallback. That satisfies ADR-0006 §1 and makes `--test_filter='T-0123-AC1'` work.
+  - `tool/trace_acs` joins task ACs → tags → JUnit results. As a second path it also maps `.feature` tags → scenario titles → `test.xml` names, so a missing name suffix can't hide an AC.
 - **KD5. Coverage follows Tide:** aim for 100 %, **fail below 90 % per package** [testing › Testing Best Practices].
   - It is measured on hand-written `lib/` code, with generated code excluded.
-  - The app package is gated by journeys instead of a percentage.
+  - App-layer **libraries** (`app_core`, the 7 `*_wiring`) are gated at 90 % too (R7). Only the 9 app targets' thin `main` compositions are exempt and gated by journeys.
 - **KD6. Bazel granularity: one aggregated test target per package and kind.**
-  - The kinds are `:unit_test`, `:bdd_test`, `:golden_test`, `:contract_test` and `:l10n_test`, which gives about 520 targets at 150 modules.
+  - The kinds are `:unit_test`, `:bdd_test`, `:golden_test`, `:contract_test` and `:l10n_test`, which gives about 500 targets at S2 (§4).
   - Per-file targets remain a switch for the H-TEST-1 experiment [P2 C5].
   - `flutter_prebuilt_test` is used only to re-run an already-built kernel under a different environment (chaos canary, random order).
 - **KD7. Configurations stay separate.** Tests run in the default configuration; only e2e builds use `--config=sim` (`-c dbg`). The two are never mixed in one invocation (H-TEST-2).
@@ -50,7 +50,7 @@
   - Bundled OFL fonts are loaded and the platform is set to iOS.
   - Sizes are iPhone 17 Pro (402×874) and iPhone SE (375×667) at DPR 1.
   - Golden targets are macOS-only (`target_compatible_with`).
-  - Key screens only: about 1,150 images at 150 modules.
+  - Key screens only: about 1,150 images at S2.
 - **KD10. E2E combines Bazel and T-0012.**
   - Bazel builds **one** aggregated journey app per run, not one per journey (counters H-ITEST).
   - `tool/e2e_ios.sh` (T-0012) owns the simulator, the run and the evidence.
@@ -67,12 +67,12 @@
 
 | # | Conflict | With | Proposal |
 |---|---|---|---|
-| **C1** | PL-2 generates feature `test/unit/**` (repository and bloc tests with mocktail, rule-example tests, mapper round-trips) and targets a **0.55** test:source ratio [P2 §2.3, §3.2]. Tide forbids mocking internal classes in features and says to test only exported classes [testing › Feature Testing bonus 4; › Testing Best Practices]. A feature exports only its flow. | PL-2, Tide | Features get **BDD + contract + l10n only**.<br>• Spec `rules.examples` become **Scenario Outline `Examples:`** driven through the flow (still spec-sourced, so P2 C8 holds).<br>• Mapper round-trips move into `:contract_test` (TD-11).<br>• Expected ratios: features about 0.3 (PL-2's floor), utilities about 0.7, about 0.4 overall: **about 230k test LOC at S2**, not 330k.<br>• If more test volume is wanted for the stress test, add spec-driven scenarios, not tests of internals. |
-| **C2** | ADR-0006 §2 gates at ≥ 80 % for domain, data and mock code, and gates UI on per-state widget tests. Tide gates at 90 % per package. | ADR-0006 | Amend ADR-0006 to 90 % per package over all hand-written `lib/` code: UI included, since sociable tests reach it. Generated code excluded. Per-state scenarios stay a required checklist. The app is exempt from the percentage. |
+| **C1** | PL-2 generated feature `test/unit/**` (repository and bloc tests with mocktail, rule-example tests, mapper round-trips) at a 0.55 ratio. Tide forbids mocking internal classes in features and says to test only exported classes [testing › Feature Testing bonus 4; › Testing Best Practices]. | PL-2, Tide | **Resolved (R6, 02 §2.3 updated):** features get **BDD + contract + l10n + golden**, no unit tests.<br>• Spec `rules.examples` become **Scenario Outline `Examples:`** driven through the flow (still spec-sourced, so P2 C8 holds).<br>• Mapper round-trips move into `:contract_test` (TD-11).<br>• Ratios: features about 0.25, utilities about 0.8: **about 250k test LOC at S2** (§4).<br>• More test volume for the stress test means more spec-driven scenarios, never tests of internals. |
+| **C2** | ADR-0006 §2 gates at ≥ 80 % for domain, data and mock code, and gates UI on per-state widget tests. Tide gates at 90 % per package. | ADR-0006 | **Resolved (R7, ADR-0010):** 90 % per package over all hand-written `lib/` code, UI and app-layer libraries included. Generated code excluded. Per-state scenarios stay a required checklist. Only the app targets are exempt. |
 | **C3** | T-0005 (`fvm flutter test --coverage`) and T-0010/T-0012 (default runner `fvm flutter drive`) are pub paths. Under D7 generated code isn't committed, so a pub build of the real app doesn't compile without `build_runner`. | T-0005, T-0010, T-0012, D7 | Rescope T-0005 → P5-09 (a Bazel wrapper). T-0012 stays as it is: it's stack-independent, and its fixture tests may use fvm. The app's e2e passes a **Bazel `--runner-cmd`** (P5-10). T-0010 is absorbed by P5-10/P5-11. |
 | **C4** | Neither rule set has a generator for `bdd_widget_test` [rules_dart §6.3; rules_flutter §6]. We also need behaviour it lacks: tags in test names, `testMethodName: mcTestWidgets`, shared-step resolution and lint-clean output. | D3, PL-3 | PL-3 owns the mechanism; §5.2 lists the requirements.<br>• Preferred: a `dart_binary` that reuses `bdd_widget_test`'s parser, plus a tag→name pre-pass.<br>• Fallback: our own generator for the **same stock dialect**, so PL-2's `fvm flutter test` baseline [P2 §7.2] still works.<br>• Upstream a shim (D12). |
-| **C5** | PL-2's example BDD vocabulary ("Background: I am on…", then "backend responds with {'page 1'}") follows Tide's open-then-stub order. | PL-2 §2.2 | mcgen emits the §3 vocabulary and **data-before-open** ordering (TD-05), and keeps `MC-<module>-NN` as a second tag family. |
-| **C6** | The feature barrel must also export its **navigator interface(s)**, so the app can implement them and tests can mock them. The articles say the flow is the only export [tide-test §3.3]. | D1, PL-1 | Barrel = flow(s) + navigator interfaces. The feature's l10n delegate stays internal: the flow provides its own `Localizations`. |
+| **C5** | PL-2's example BDD vocabulary ("Background: I am on…", then "backend responds with {'page 1'}") follows Tide's open-then-stub order. | PL-2 §2.2 | **Resolved (02 §2.2 updated):** mcgen emits the §3 vocabulary and **data-before-open** ordering (TD-05), and keeps `MC-<module>-NN` as a second tag family. |
+| **C6** | The feature barrel must also export its **navigator interface(s)**, so the app can implement them. The articles say the flow is the only export [tide-test §3.3]. | D1, PL-1 | **Resolved (R4):** barrel = flow(s) + navigator interfaces + flow arg/result types, checked by `mc_arch_check`. In-package tests could reach `src/`, so only the app needs the export. The feature's l10n delegate stays internal: the flow provides its own `Localizations`. |
 | **C7** | Contract tests import `src/domain/{api,model}` (TD-11). | Tide | Accept as a narrow deviation, enforced by the integrity checker (R7). |
 | **C8** | New testonly utilities `mc_test_steps` and `mc_e2e_utils`. | D2, PL-1, PL-2 S0 list | Add both to the catalogue. Each is about 1.5k LOC. |
 | **C9** | The `--disk_cache` shared across worktrees [P2 §7.1] means a "fresh" Verifier's build reuses the Engineer's cached outputs. | ADR-0006 §3 | Accept it: the cache is content-addressed. Add a nightly **cold** verify on an empty cache (§7.6). |
@@ -87,14 +87,14 @@
 | Tide element | Source | Our form |
 |---|---|---|
 | Solitary unit tests: one class per test, `test` + `mocktail`, mocks for external classes only | [testing › Solitary Unit Tests; › Creating Mocks] [tide-test §4.3] | Every `mc_*` utility. `sut`, `// Arrange / Act / Assert`, one purpose per test, `Mock<T>` plus no-op `createMock<T>()` factories in `test/util/`. |
-| Sociable feature tests through the flow; "mock only external dependencies (via mocktail) and API responses" | [testing › Sociable Feature Tests; › Feature Testing bonus 4] [tide-test §4.2, diagram §8.2] | Same. *External* means services owned by other packages: monitoring, storage, clock, platform, and **navigator contracts the app implements**. The bloc, repository, retrofit API, mappers and flow are never mocked. |
+| Sociable feature tests through the flow; "mock only external dependencies (via mocktail) and API responses" | [testing › Sociable Feature Tests; › Feature Testing bonus 4] [tide-test §4.2, diagram §8.2] | Same. *External* means services owned by other packages: monitoring, storage, clock, platform, and **navigator contracts the app implements** (passed through the flow constructor, the feature's contract [tide-nav §3.1]). The bloc, repository, retrofit API, mappers and flow are never mocked. |
 | Gherkin is the spec: `.feature` → generated `_test.dart`; step files are hand-owned after the first stub | [testing › Feature File; › Updating Step Files] [tide-test §4.6] | Same dialect (`bdd_widget_test`). Generation is a Bazel action (TD-09). |
 | `test_utils` package | [testing › Creating a Test Utilities Package … Barrel File] [tide-test §4.4] | `mc_test_utils` + `mc_test_steps` + `mc_e2e_utils` (TD-03) |
 | `FeatureTestInterceptor` | [testing › Mocking Networking Requests] | `McBackendHarness` (TD-01) |
 | `MockMonitoring`, `createMockMonitoring()` | [testing › Mocking Monitoring] | Same names, **exported** |
 | `TestContainer` | [testing › Test DI Initializer] | `McTestContainer` (TD-02) |
 | `initFlow(tester, flowBuilder)` | [testing › Flow Initializer] | `initFlow`, same name with an extended signature (TD-04) |
-| `GetIt.instance.reset()` inside `initializeDIContainer` | [testing › Flow Initializer] | Kept in `mc_di`; `McTestSession` also resets on teardown |
+| `GetIt.instance.reset()` inside `initializeDIContainer` | [testing › Flow Initializer] | Moved to test setup (01 D-17): `McTestSession` calls `resetDIContainer()` per test; production init never resets (child containers make it pointless) |
 | "Get the sample data from outside of the implementation" | [testing › Testing Data] | Fixtures come from `mc_fixtures_<domain>` against the documented contract (F-0003), never from feature DTOs (TD-06) |
 | Test only exported classes | [testing › Testing Best Practices] | Tests import only the barrel (integrity rule R7), except contract tests (TD-11) |
 | 100 % aim, 90 % CI floor | ibid. | §1.3 |
@@ -144,56 +144,55 @@ class McBackendHarness {
 enum BackendFailure { serverError, timeout, offline, notFound, unauthorized, malformed }
 
 Future<void> initFlow(WidgetTester tester, Widget Function() flow,
-    {List<ExternalDouble<Object>> externals = const []});
+    {List<ExternalDouble<Object>> externals = const []});   // non-navigator doubles only, e.g. a fake Clock
 // Pumps McTestApp: mc_design_system theme, the session's locale, text scale and brightness,
 // global l10n delegates, iOS platform. The flow brings its own feature delegate (C6).
 ```
 
-`McTestContainer` composes the **production** root initializers and swaps in doubles only at the edges (TD-02):
+`McTestContainer` **is** the production root list, `rootInitializers(wirings: const [])` (01 §3.4), with doubles swapped in only at the edges (TD-02). Every root service a flow can `RootImport` (config, analytics, session, api_auth, flags, event bus, l10n core) is therefore present, and `FeatureFlow`'s fail-fast check (01 §4.5) names any import that isn't:
 
 ```dart
-List<McDIInitializer> mcTestInitializers(McTestSession s) => [   // names follow PL-1
-  MonitoringTestInitializer(s.monitoring),        // MockMonitoring, no-op stubs [testing › Mocking Monitoring]
-  MockedBackendDIInitializer(s.backend.adapter),  // HttpClientAdapter → in-process mc_mocked_backend
-  const ApiClientDIInitializer(),                 // real Dio config and interceptors, over the adapter
-  StorageTestInitializer(InMemoryStorage()),      // mc_storage's own fake
-  ClockTestInitializer(FixedClock(DateTime.utc(2026))),
-  ...s.externals,                                 // e.g. navigator mocks
-];
+List<McDIInitializer> mcTestInitializers(McTestSession s) => rootInitializers(wirings: const []).overriding({
+  MonitoringDIInitializer: MonitoringTestInitializer(s.monitoring),   // MockMonitoring [testing › Mocking Monitoring]
+  MockedBackendDIInitializer: MockedBackendDIInitializer(s.backend.adapter), // in-process mc_mocked_backend
+  StorageDIInitializer: StorageTestInitializer(InMemoryStorage()),    // mc_storage's own fake
+  ConfigDIInitializer: ConfigTestInitializer(AppConfig.test()),       // no asset read
+}) + [ClockTestInitializer(FixedClock(DateTime.utc(2026))), ...s.externals];  // real Dio and interceptors stay
 ```
 
 The feature's own initializer still runs inside the flow's scope [tide-test §3.2]. So the real repository, retrofit API, bloc and flow are exercised, exactly as in Tide [tide-test §4.4].
 
 ### 1.3 Coverage policy
 
-- **Gate:** every `utility/*` and `feature/*` package must reach **≥ 90 %** line coverage, with **100 %** as the target (packages below 100 % are listed as info) [testing › Testing Best Practices].
+- **Gate:** every `utility/*`, `feature/*` and app-layer library (`app/wiring/app_core`, `app/wiring/*_wiring`) must reach **≥ 90 %** line coverage, with **100 %** as the target (packages below 100 % are listed as info) [testing › Testing Best Practices].
 - **Scope:**
   - Utilities are measured on their own unit tests.
   - Features are measured on their BDD and contract tests.
+  - App-layer libraries are measured on their own tests: route tests (`AppLocations` vs typed locations), navigator-implementation, mapper, guard and boot tests, and the generated `flow_scopes_test`. Host journeys in `mini_client` don't count toward them, because LCOV is scoped to the test's own package.
   - `bazel coverage` scopes LCOV to the test's own package [rules_flutter §8]. A feature's BDD run therefore never inflates a utility's number, which matches Tide's intent that utilities prove themselves.
 - **Exclusions:** `*.g.dart`, `*.freezed.dart`, `*.config.dart`, `*.gr.dart`, generated l10n and BDD-generated tests (the D8 list). This answers [tide-test §9.3.8].
 - **No escape hatch:** `// coverage:ignore` isn't honoured anyway [rules_dart §8], and Tide uses none.
-- **App:** `app/mini_client` is gated by its journeys (§6), not by a percentage.
+- **Apps:** only the 9 app targets (`mini_client`, `ds_catalog`, the sandboxes: thin `main` compositions) are gated by journeys (§6) instead of a percentage (R7).
 
 ### 1.4 Deviation register (testing)
 
 | ID | Tide | Ours | Why |
 |---|---|---|---|
 | TD-01 | `FeatureTestInterceptor`: path-only match, raw JSON strings, throws on unmocked paths | `McBackendHarness` over `mc_mocked_backend`'s adapter. Matches method + path + query subset. Supports `once`, holds and typed failures. Strict: an unmatched request fails the test | Fixes the gaps in [tide-test §9.3.2]. One fixture source for app, tests and e2e (D5) |
-| TD-02 | `TestContainer` registers a bare `Dio()` and replaces the whole utility layer | Real `mc_api_client` Dio over the mock adapter; only monitoring, storage, clock and navigators are doubled | Our interceptors (error mapping) are part of the behaviour |
+| TD-02 | `TestContainer` registers a bare `Dio()` and replaces the whole utility layer | The production root list with edge overrides; real `mc_api_client` Dio over the mock adapter; only monitoring, storage, config, clock and the transport are doubled. Navigators come through the flow constructor | Our interceptors (error mapping) are part of the behaviour |
 | TD-03 | `test_utils` hides `MockMonitoring` and `TestContainer`; one package | Everything useful is exported; split into three testonly packages | [tide-test §9.3.3]. A step edit doesn't re-run utility tests that use only the harness |
 | TD-04 | `initFlow` pumps a bare `MaterialApp` | `McTestApp`: theme, l10n, iOS, reference surface, text scale | [tide-test §9.3.4]; F-0004 #1 |
 | TD-05 | "Given I am on the page", then "When backend responds…", with a `pumpAndSettle` inside the backend step | Data-setup Givens come **before** the flow opens. Backend steps never pump; action steps end with `mcSettle` | Tide's ordering is implicit and fragile [tide-test §4.5] |
 | TD-06 | `test/util/data.dart`, pasted from the Marvel docs | Named fixture sets in `mc_fixtures_<domain>`, each with a documented "test-facing facts" table | The Marvel API is gone (F-0003). Same principle [testing › Testing Data] |
 | TD-07 | Assertions on raw text, including `DioException…` | User copy for spec facts; `ValueKey<String>('<pkg>.<element>')` for structure; never widget types from `src/` | [testing › Feature Testing bonus 2, 3] |
-| TD-08 | Scenario titles only | `@T-XXXX-ACn` (and `@MC-…`) tags, injected into test names | ADR-0006 §1 |
-| TD-09 | `build_runner` generates tests into the source tree | Generated in a Bazel action into `bazel-out` and never committed (D7). Stubs come from `bazel run //tool/bdd:scaffold` | [tide-test §6] |
+| TD-08 | Scenario titles only | `@T-XXXX-ACn` (and `@MC-…`) tags, moved into test names by `mcTestWidgets` | ADR-0006 §1 |
+| TD-09 | `build_runner` generates tests into the source tree | Generated in a Bazel action into `bazel-out` and never committed (D7). Stubs come from `bazel run //tool/bdd:scaffold`. **Under the R28 fallback** stock `bdd_widget_test` 3.0.5 runs in the overlay and its `test/feature/*_test.dart` outputs are committed (01 D-27); traceability is unchanged (KD4) | [tide-test §6] |
 | TD-10 | `flutter test --coverage`, no gate tool named | `bazel coverage` plus `//tool/coverage:gate` | Mechanism only; the targets are unchanged |
 | TD-11 | Test only exported classes | `test/contract/` may import `src/domain/{api,model}` | Contract checks need the DTOs. No other test may import `src/` |
-| TD-12 | Split the package if its suite takes more than "a few seconds" | A BDD target should run in ≤ 15 s wall on the M4 Pro; above 30 s, split the package or shard | Our M-size features are about 20× Tide's sample |
+| TD-12 | Split the package if its suite takes more than "a few seconds" | Each **shard** of a BDD target runs in ≤ 15 s wall on the M4 Pro: mcgen sets `shard_count = ceil(estimated suite seconds / 15)` from P5-16's per-case timings. A package whose suite exceeds 60 s CPU is split | Our M-size features are about 20× Tide's sample; §4's estimates (12 to 26 s) give 1 to 2 shards |
 | TD-13 | No golden, app-level, e2e, a11y, l10n or contract tests [tide-test §4.2] | Added (§2) | ADR-0006 L3 to L5; D4b |
 | TD-14 | `cached_network_image` to dodge `Image.network` in tests | Bundled placeholder assets (D4d), precached in goldens | [testing › Problem With Images] |
-| TD-15 | All steps live per feature | Shared `mc_test_steps` plus thin per-feature steps | Avoids re-implementing the same steps in 115 features [tide-test §9.3.6] |
+| TD-15 | All steps live per feature | Shared `mc_test_steps` plus thin per-feature steps | Avoids re-implementing the same steps in 100 features [tide-test §9.3.6] |
 
 ---
 
@@ -214,13 +213,13 @@ flowchart TB
   subgraph APP["app/mini_client"]
     J["App journeys (.feature)<br/>host L2 · simulator L4/L5"]
   end
-  subgraph FEAT["feature/* (115 at S2)"]
+  subgraph FEAT["feature/* (100 at S2)"]
     F["Sociable BDD via the flow (L2)<br/>@a11y · @l10n scenarios"]
     GO["Golden .feature (L3)"]
     C["Contract (L1)"]
     L["ARB checks (L1)"]
   end
-  subgraph UTIL["utility/* (34 at S2)"]
+  subgraph UTIL["utility/* (52 at S2)"]
     U["Solitary unit (L1)"]
     UG["Component goldens (L3), UI kit"]
     P["Provider contract (L1), mc_fixtures_*"]
@@ -332,7 +331,7 @@ app/mini_client/integration_test/journeys/{smoke,mvp,tour}/*.feature   # simulat
 - **Where tags go:**
   - only on `Scenario` / `Scenario Outline` lines, so the generator stays simple and the meaning is unambiguous;
   - category tags `@smoke` (the scenario that seeds the feature's e2e smoke journey), `@a11y`, `@l10n` and `@slow` become Dart `tags:`;
-  - `@T-…` and `@MC-…` go into the **name**: `Browse characters The first page is listed in name order [T-0123-AC1 MC-characters_list-01]`.
+  - `@T-…` and `@MC-…` go into the **name**, added by `mcTestWidgets` (KD4): `Browse characters The first page is listed in name order [T-0123-AC1 MC-characters_list-01]`.
 - **Non-BDD tests** keep ADR-0006's rule: the AC ID goes in the `test()` name. PL-2's `sh_test` gate names use `T_XXXX_ACn` [P2 §4.3]; the checker normalises `_` to `-`.
 - **Visual-only ACs:** the checkpoint file name starts with the AC ID (`T-0123-AC4-details.png`).
 - **Running one AC:** `bazel test //feature/characters_list:bdd_test --test_filter='T-0123-AC9'`.
@@ -381,10 +380,10 @@ Feature: Browse characters
     And the backend received {3} requests for {'GET /v1/characters'}
 
   @T-0123-AC4
-  Scenario: Tapping a character opens its details
+  Scenario: Tapping a character opens its preview
     When I open the characters list
     And I tap {'Hero 01'}
-    Then I see the character details for {'Hero 01'}
+    Then I see the character preview for {'Hero 01'}
     And I see {'Appears in 3 comics'}
 
   @T-0123-AC5
@@ -402,6 +401,13 @@ Feature: Browse characters
     And I tap {'Hero 01'}
     And I tap {'Comic 001'}
     Then the app was asked to open comic {'c-001'}
+
+  @T-0123-AC14
+  Scenario: The full profile hands over to the app
+    When I open the characters list
+    And I tap {'Hero 01'}
+    And I tap {'See full profile'}
+    Then the app was asked to open character {'h-01'}
 ```
 
 ```gherkin
@@ -492,8 +498,8 @@ class MockCharactersListNavigator extends Mock implements CharactersListNavigato
 /// One navigator mock per test, owned by the session and reset between tests.
 CharactersListNavigator charactersNavigator() =>
     McTestSession.current.putIfAbsent<CharactersListNavigator>(() {
-      final mock = MockCharactersListNavigator();
-      when(() => mock.openComic(any())).thenAnswer((_) async {}); // no-op by default [testing › Creating Mocks]
+      final mock = MockCharactersListNavigator();      // same interface as 01 §3.3 and the 02 spec
+      when(() => mock.requestSignIn()).thenAnswer((_) async => false); // void methods need no stub [testing › Creating Mocks]
       return mock;
     });
 const gridKey = ValueKey('characters_list.grid');
@@ -501,8 +507,8 @@ const gridKey = ValueKey('characters_list.grid');
 // i_open_the_characters_list.dart
 /// Usage: I open the characters list
 Future<void> iOpenTheCharactersList(WidgetTester tester) async {
-  await initFlow(tester, () => const CharactersListFlow(), // from the barrel, not src/
-      externals: [ExternalDouble<CharactersListNavigator>(charactersNavigator())]);
+  // The navigator goes through the flow constructor: the feature's contract [tide-nav §3.1].
+  await initFlow(tester, () => CharactersListFlow(navigator: charactersNavigator())); // barrel, not src/
   await mcSettle(tester);
 }
 
@@ -532,10 +538,10 @@ Future<void> iScrollTheCharactersListToTheEnd(WidgetTester tester) async {
 Future<void> iSeeTheEndOfTheList(WidgetTester tester) async =>
     expect(find.byKey(const ValueKey('characters_list.end')), findsOneWidget);
 
-// i_see_the_character_details_for.dart
-/// Usage: I see the character details for {'Hero 01'}
-Future<void> iSeeTheCharacterDetailsFor(WidgetTester tester, String name) async => expect(
-    find.descendant(of: find.byKey(const ValueKey('characters_list.details.title')),
+// i_see_the_character_preview_for.dart
+/// Usage: I see the character preview for {'Hero 01'}
+Future<void> iSeeTheCharacterPreviewFor(WidgetTester tester, String name) async => expect(
+    find.descendant(of: find.byKey(const ValueKey('characters_list.preview.title')),
         matching: find.text(name)),
     findsOneWidget);
 
@@ -543,6 +549,11 @@ Future<void> iSeeTheCharacterDetailsFor(WidgetTester tester, String name) async 
 /// Usage: the app was asked to open comic {'c-001'}
 Future<void> theAppWasAskedToOpenComic(WidgetTester tester, String comicId) async =>
     verify(() => charactersNavigator().openComic(ComicId(comicId))).called(1);
+
+// the_app_was_asked_to_open_character.dart
+/// Usage: the app was asked to open character {'h-01'}
+Future<void> theAppWasAskedToOpenCharacter(WidgetTester tester, String id) async =>
+    verify(() => charactersNavigator().openCharacter(CharacterId(id))).called(1);
 ```
 
 **Shared step definitions** (excerpt from `mc_test_steps`):
@@ -584,7 +595,7 @@ Future<void> theScreenMeetsTheIosAccessibilityGuidelines(WidgetTester tester) as
 }
 ```
 
-**Generated output** (excerpt, in `bazel-bin` and never committed):
+**Generated output** (excerpt, in `bazel-bin` and never committed; stock `bdd_widget_test` under R28 emits the same shape):
 
 ```dart
 void main() {
@@ -592,13 +603,13 @@ void main() {
     Future<void> bddSetUp(WidgetTester tester) async {
       await theBackendServes(tester, 'characters.paged_45');
     }
-    mcTestWidgets('''The first page is listed in name order [T-0123-AC1 MC-characters_list-01]''',
-        (tester) async {
+    mcTestWidgets('''The first page is listed in name order''', (tester) async {
       await bddSetUp(tester);
       await iOpenTheCharactersList(tester);
       await iSee(tester, 'Hero 01');
       await theBackendReceived(tester, 'GET /v1/characters?offset=0&limit=20');
-    }, tags: ['smoke']);
+    }, tags: ['T-0123-AC1', 'MC-characters_list-01', 'smoke']);
+    // mcTestWidgets registers "… name order [T-0123-AC1 MC-characters_list-01]" with Dart tag 'smoke'
   });
 }
 ```
@@ -607,26 +618,29 @@ void main() {
 
 ## 4. Test-pyramid budget per archetype
 
-The module mix is PL-2's S2 rung [P2 §5.1]: 60 list-detail, 30 form/wizard and 25 dashboard features; 12 foundation, 10 UI-kit and 12 data utilities; plus the app, for 150 modules. Features are M-size [P2 §3.1]. The per-case timings are estimates that P5-16 will measure.
+The module mix is 01's S2 catalogue (01 §6): 100 features in 7 archetypes (LD 32, SC 21, SR 8, FW 14, DB 7, ST 8, IX 10), 52 utilities, 8 app-layer libraries and 9 apps, 169 modules. Features are M-size. The per-case timings are estimates that P5-16 will measure.
 
-| Archetype (lib LOC) | Unit cases | BDD files / scenarios (generated cases) | Goldens | Contract / l10n | Test targets: package mode / file mode | Hand-written test Dart LOC (+ Gherkin lines) | Suite CPU (est.) |
+| Archetype (n; lib LOC) | Unit cases | BDD files / scenarios (generated cases) | Goldens | Contract / l10n | Test targets: package / file mode | Hand test Dart LOC (+ Gherkin) | Suite CPU (est.) → shards |
 |---|---|---|---|---|---|---|---|
-| List-detail feature (5.0k) | 0 | 6 / 36 (≈ 45) | 6 | ≈ 8 cases / generated | 4 / 9 | ≈ 1,250 (+ 380) | ≈ 21 s |
-| Form/wizard feature (6.0k) | 0 | 7 / 40 (≈ 70; validation Outlines) | 8 | ≈ 5 / generated | 4 / 10 | ≈ 1,500 (+ 500) | ≈ 26 s (2 shards) |
-| Dashboard feature (4.5k) | 0 | 5 / 28 (≈ 35; partial-failure per section) | 6 | ≈ 10 / generated | 4 / 8 | ≈ 1,100 (+ 300) | ≈ 19 s |
-| Foundation utility (2.5k) | ≈ 120 (12 files) | 0 | 0 | — | 1 / 12 | ≈ 1,800 | ≈ 5 s |
-| UI-kit utility (4.0k) | ≈ 150 widget-solitary (20 files) | 0 | ≈ 40 (component × state × theme) | l10n if it has strings | 2 / 21 | ≈ 2,400 | ≈ 32 s → split rule (TD-12) |
-| Data utility (3.5k) | ≈ 180 (18 files) | 0 | 0 | provider schema checks | 1 / 18 | ≈ 2,800 | ≈ 8 s |
-| App (≈ 5k glue) | ≈ 30 (route table) | 10 / ≈ 60 host journeys + ≈ 118 e2e journeys | 0 | — | 3 / ≈ 15 | ≈ 4,000 (+ 1,500) | ≈ 60 s host |
+| LD list-detail (32; 5.2k) | 0 | 6 / 36 (≈ 45) | 6 | ≈ 8 cases / generated | 4 / 9 | ≈ 1,250 (+ 380) | ≈ 21 s → 2 |
+| SC section/detail (21; 3.6k) | 0 | 4 / 24 (≈ 30) | 4 | ≈ 5 / generated | 4 / 7 | ≈ 900 (+ 260) | ≈ 14 s → 1 |
+| SR search (8; 4.4k) | 0 | 5 / 30 (≈ 38) | 5 | ≈ 6 / generated | 4 / 8 | ≈ 1,050 (+ 320) | ≈ 17 s → 2 |
+| FW form/wizard (14; 5.2k) | 0 | 7 / 40 (≈ 70; validation Outlines) | 8 | ≈ 5 / generated | 4 / 10 | ≈ 1,500 (+ 500) | ≈ 26 s → 2 |
+| DB dashboard (7; 5.6k) | 0 | 5 / 28 (≈ 35; partial failure per section) | 6 | ≈ 10 / generated | 4 / 8 | ≈ 1,100 (+ 300) | ≈ 19 s → 2 |
+| ST settings (8; 3.0k) | 0 | 4 / 20 (≈ 26) | 4 | ≈ 4 / generated | 4 / 7 | ≈ 750 (+ 220) | ≈ 12 s → 1 |
+| IX interactive (10; 6.0k) | 0 | 5 / 30 (≈ 50; engine Outlines, R6) | 6 | ≈ 6 / generated | 4 / 8 | ≈ 1,300 (+ 400) | ≈ 22 s → 2 |
+| Utilities (52) | ≈ 6.4k (15 LOC per case) | 0 | ≈ 600 (UI kit, 15 × 40) | provider schema checks (12 fixture packages); l10n (2) | ≈ 80 / ≈ 650 | ≈ 110k (01 §8, incl. 13.6k testonly) | ≈ 12 min total; UI kit ≈ 32 s each → 3 |
+| App-layer libraries (8) | ≈ 900 (routes, navigator impls, mappers, guards, boot) + 100 flow-scope checks | 0 | 0 | `app_core` l10n | ≈ 9 / ≈ 60 | ≈ 13.8k | ≈ 3 min |
+| Apps (9) | ≈ 30 (route table) | 10 / ≈ 60 host journeys + ≈ 103 e2e journeys | 0 | — | ≈ 12 (incl. 9 sim build tests) / ≈ 25 | ≈ 4,000 (+ 1,500) | ≈ 60 s host |
 
-| Total | at 130 modules | **at 150 (S2)** | at 170 | S3 (≈ 190) |
-|---|---|---|---|---|
-| Test targets, package mode (default) | ≈ 450 | **≈ 520** | ≈ 590 | ≈ 660 |
-| Test targets, file mode (H-TEST-1 arm) | ≈ 1,400 | **≈ 1,600** | ≈ 1,850 | ≈ 2,050 |
-| BDD cases / unit cases / golden images | 5.0k / 4.4k / 1.0k | **5.7k / 5.1k / 1.15k** | 6.5k / 5.8k / 1.3k | 7.3k / 6.5k / 1.45k |
-| Hand-written test Dart LOC (Gherkin) | ≈ 200k (41k) | **≈ 231k (47k)** | ≈ 261k (53k) | ≈ 380k at L/XL sizes |
-| Generated BDD test LOC (reported apart, D8) | ≈ 60k | ≈ 70k | ≈ 80k | ≈ 90k |
-| Clean test CPU · wall at `budget16` (4 jobs) · wall at 12 jobs | — | **≈ 51 CPU-min · ≈ 13 min · ≈ 4.5 min** | — | — |
+| Total | **S2 (169 modules)** | S3 (≈ 190) |
+|---|---|---|
+| Test targets, package mode (default) | **≈ 500** | ≈ 560 |
+| Test targets, file mode (H-TEST-1 arm) | **≈ 1,600** | ≈ 1,850 |
+| BDD cases / unit cases / golden images | **≈ 4.3k / 7.4k / 1.15k** | ≈ 5.5k / 8.5k / 1.4k |
+| Hand-written test Dart LOC (Gherkin) | **≈ 250k (37k)**: features 115k, utilities 110k, app layer 25k | ≈ 380k at L/XL sizes |
+| Generated BDD test LOC (reported apart, D8) | ≈ 55k | ≈ 70k |
+| Clean test CPU · wall at `budget16` (4 jobs) · wall at 12 jobs | **≈ 48 CPU-min · ≈ 13 min · ≈ 4.5 min** | ≈ 62 CPU-min |
 
 File mode adds about 1,100 tester start-ups and links, which roughly doubles clean test CPU and is the main cost behind H-TEST-1. PL-2's S4 synthetic workspaces should emit tests at these ratios (`--tests lean|full`, [P2 §5.2]), so that H-TEST-1 and H-TESTLINK can be measured at 5M and 10M LOC.
 
@@ -636,10 +650,10 @@ File mode adds about 1,100 tester start-ups and links, which roughly doubles cle
 
 ### 5.1 Target granularity
 
-| Option | Targets at 150 | For | Against | Use |
+| Option | Targets at S2 | For | Against | Use |
 |---|---|---|---|---|
 | A. One `flutter_test` per test file | ≈ 1,600 | Finest cache; matches Gazelle and upstream's one-main-per-target [rules_dart §7; rules_flutter §8] | Every file pays a `DartKernelLink` (5–15 MB, [P2 C5]) and a `flutter_tester` start-up (H-TEST-1). More analysis nodes (H-ANALYSIS) | Experiment only (`tests = "per_file"`) |
-| **B. One per package per kind, with a generated aggregator `main`** | **≈ 520** | Matches Tide's unit of ownership and its "split the package" rule. Coverage is per package. About 3× fewer links and start-ups. Shardable | Editing one test file re-runs that kind's suite (≤ 15 s). Tests share an isolate, so leaks are possible: mitigated by the `mcTestWidgets` reset plus a nightly random-order run. Golden test files must sit flat in `test/golden/` (comparator base dir) | **Default** |
+| **B. One per package per kind, with a generated aggregator `main`** | **≈ 500** | Matches Tide's unit of ownership and its "split the package" rule. Coverage is per package. About 3× fewer links and start-ups. Shardable | Editing one test file re-runs that kind's suite (≤ 15 s). Tests share an isolate, so leaks are possible: mitigated by the `mcTestWidgets` reset plus a nightly random-order run. Golden test files must sit flat in `test/golden/` (comparator base dir) | **Default** |
 | C. One aggregated `flutter_prebuilt_test` across packages | 1–10 | Fewest processes | Any edit re-runs everything, which defeats the very caching we are stress-testing | Only to re-run a built kernel with another environment |
 
 PL-2's edit E13 ("BDD scenario add") still holds under B [P2 §6.3]. It costs one generation action, one kernel compile, one link and one test run: the aggregator's outline doesn't change, so it isn't recompiled. The difference from per-file mode is that the test run covers the whole package suite.
@@ -666,12 +680,13 @@ It expands to:
    - Requirements:
      - stock `bdd_widget_test` dialect;
      - `testMethodName: mcTestWidgets`;
-     - `@T-…` / `@MC-…` appended to the name and category tags passed as `tags:`;
+     - every scenario tag passed as `tags:` (`mcTestWidgets` moves `T-…`/`MC-…` into the name, KD4);
+     - Gherkin data tables use `mc_test_steps`' own `DataTable`, never `package:bdd_widget_test/data_table.dart` (P3-05 AC4);
      - fail on a missing or shadowed step;
      - lint-clean output, or exclusion from the `dart_analyze` aspect. Tide excluded these files from analysis [tide-core §1.4].
 2. **One generated aggregator**, `bdd_all_test.dart`, which imports each generated test with a prefix and calls its `main` inside a `group`.
 3. **`flutter_test(name = "bdd_test", main = aggregator, …)`** with:
-   - deps: `lib`, `mc_test_utils`, `mc_test_steps`, `@deps//:bdd_widget_test` and `@deps//:mocktail`;
+   - deps: `lib`, `mc_test_utils`, `mc_test_steps` and `@pub_deps//:mocktail` (no runtime `bdd_widget_test`, R10);
    - assets: fixtures, placeholder images and fonts;
    - `size = "medium"`, `tags = ["bdd"]`.
 4. **`flutter_prebuilt_test(name = "bdd_test_chaos", …)`** over `:bdd_test`'s `test_kernel` output, with `env = {"MC_BACKEND_CHAOS": "empty"}` and tags `manual` and `canary`. It reuses the kernel, so there is **no recompilation** [rules_flutter §2.1].
@@ -688,7 +703,7 @@ It expands to:
 | Kind | Tags | `size` | `shard_count` |
 |---|---|---|---|
 | unit | `unit` | small | 1 |
-| bdd | `bdd` | medium | 1; 2 above 40 cases; 3 above 80 |
+| bdd | `bdd` | medium | `ceil(estimated suite s / 15)` (TD-12) |
 | golden | `golden` (+ macOS compatibility) | medium | 1 |
 | contract / l10n | `contract` / `l10n` | small | 1 |
 | app journeys (host) | `bdd`, `app` | large | 4 |
@@ -702,8 +717,9 @@ test --test_output=errors --test_summary=terse
 test --test_env=TZ=UTC --test_env=LANG=en_US.UTF-8
 test:fast      --test_tag_filters=unit,bdd,contract,l10n,-slow,-e2e
 test:golden    --test_tag_filters=golden
-test:all       --test_tag_filters=-e2e,-manual
-coverage:covgate --test_tag_filters=unit,bdd,contract --combined_report=lcov
+test:all       --build_tests_only --test_tag_filters=-e2e,-app   # host tests only (H-TEST-2)
+test:app       --build_tests_only --test_tag_filters=app         # sim build tests, own invocation (R14)
+coverage:covgate --build_tests_only --test_tag_filters=unit,bdd,contract --combined_report=lcov
 test:budget16    --local_test_jobs=4
 test:budget16_8c --local_test_jobs=3
 test:fullmac     --local_test_jobs=12
@@ -716,17 +732,17 @@ The attribute `flaky = True` is forbidden (integrity rule R2). Shards add **no**
 
 `flutter_tester` RSS is unmeasured upstream [rules_flutter §10.3]. Assume 0.3–0.7 GB per widget suite with fonts and images. The working budget for 16 GB (PL-4 owns the totals):
 - Bazel JVM: ≤ 3 GB
-- workers (`DartKernel` × 2, analyzer): about 1.5 GB
+- workers under 04 §7.2's caps: about 1.5 GB
 - OS, IDE and Simulator: about 4 GB
 
 That leaves about 6 GB for tests, which gives **4 concurrent testers** at ≤ 1 GB each, with headroom. Compile actions (`--jobs`) overlap test execution, so the peak is their sum.
 
-**Measured stress case: an `mc_test_utils` body edit.** The outline cutoff saves recompiles [rules_dart §5.2], but every dependent test kernel re-links and re-runs, because the test action key includes the kernel [rules_flutter §8]. That is about 480 targets, or about 13 min at `budget16`. It is the testing analogue of PL-2's E03. Keep `mc_test_utils` and `mc_test_steps` stable and mixin-free.
+**Measured stress case: an `mc_test_utils` body edit.** The outline cutoff saves recompiles [rules_dart §5.2], but every dependent test kernel re-links and re-runs, because the test action key includes the kernel [rules_flutter §8]. `mc_test_utils` has 117 dependent packages (01 §7); their BDD, golden and app-layer targets come to about 270, or about 9 min at `budget16`. It is the testing analogue of PL-2's E03. Keep `mc_test_utils` and `mc_test_steps` stable and mixin-free.
 
 ### 5.5 Coverage and the 90 % gate
 
 ```
-bazel coverage --config=covgate --config=budget16 //utility/... //feature/...
+bazel coverage --config=covgate --config=budget16 //utility/... //feature/... //app/wiring/...
 bazel run //tool/coverage:gate -- --testlogs="$(bazel info bazel-testlogs)" \
     --thresholds=tool/coverage/thresholds.json --out=documents/evidence/$TASK/coverage-summary.md
 ```
@@ -743,8 +759,8 @@ Results are cached per package. If P5-06 shows that `bazel coverage` does **not*
 
 | Stage | Command (inside `tool/verify.sh [--task T-XXXX] [--base origin/main] [--config budget16]`) | ADR-0006 |
 |---|---|---|
-| lint | `bazel build --config=lint //...` (the `dart_analyze` and `dart_format` aspects; any diagnostic fails [rules_flutter §12]) + `bazel test //tool/arch:all` (no feature→feature edges, barrel-only exports) | L0 |
-| tests + coverage | `bazel coverage --config=covgate //utility/... //feature/...`, then `bazel test --config=fast //app/... //tool/...` and `:l10n_test`s | L1, L2 |
+| lint | `bazel build --config=lint //...` (the `dart_analyze` and `dart_format` aspects, defined in 03 §1.4; any diagnostic fails [rules_flutter §12]) + `bazel test //tool/arch:all` (no feature→feature edges, barrel-only exports) + `mcgen check` (incl. generated root imports) | L0 |
+| tests + coverage | `bazel coverage --config=covgate //utility/... //feature/... //app/wiring/...`, then `bazel test --config=fast //app/... //tool/...` and `:l10n_test`s, then `bazel test --config=app //app/...` (sim build tests, macOS only) | L1, L2 |
 | goldens | `bazel test --config=golden //...` (skipped as incompatible on Linux) | L3 |
 | coverage gate | `bazel run //tool/coverage:gate` | gate |
 | traceability | `bazel run //tool/trace:trace_acs -- --task T-XXXX` | §1 |
@@ -760,10 +776,10 @@ Each stage prints one line and the script exits non-zero on any failure, as T-00
 
 | Journey | Count | Content | When |
 |---|---|---|---|
-| Feature smoke | 1 per user-facing feature (≈ 115) | Open the flow from the catalogue screen [P2 §7.3] or its typed route, content renders, one interaction, one checkpoint | Feature or batch tasks: the touched features. Nightly and wave exits: all |
+| Feature smoke | 1 per user-facing feature (≈ 100) | Open the flow from the catalogue screen [P2 §7.3] or its typed route, content renders, one interaction, one checkpoint | Feature or batch tasks: the touched features. Nightly and wave exits: all |
 | MVP (T-0011) | 2: happy path and error path | launch → browse → paginate → search → details → related comic → comic details → favourite → favourites tab; then injected failure → error → retry | Every feature task (≈ 60–90 s); phase exits on both devices |
 | Enterprise tour | 1 per wave | Every top-level area, about 25 checkpoints, light and dark | Wave exit |
-| Real relaunch | inside the MVP run | the runner does `simctl terminate`, then `simctl openurl <udid> minicl://favorites`, then `simctl io … screenshot`: the favourite persisted across a real process restart | MVP run |
+| Real relaunch | inside the MVP run | the runner does `simctl terminate`, then `simctl openurl <udid> miniclient://app/library/favourites` (the one scheme, 01 §4.4; a cold link held through boot, R29), then `simctl io … screenshot`: the favourite persisted across a real process restart | MVP run |
 
 The journeys are Gherkin. Where possible the **same `.feature`** runs on the host (`journey_test`, L2) and on the simulator. `McAppDriver` picks its bootstrap from the binding type: a host pump over `McTestContainer`, or the e2e entry with in-process `mc_mocked_backend` at zero latency.
 
@@ -775,11 +791,13 @@ The journeys are Gherkin. Where possible the **same `.feature`** runs on the hos
 - T-0012 gives us simulator hygiene (ADR-0006 §6), screenshots and summaries, but its default runner is a pub path (C3).
 
 **Decision:**
-1. **One e2e app per run.** All journeys are generated into one entry point, `integration_test/journeys_test.dart`, with the same aggregation as §5.2. So `//app/mini_client:e2e_app` costs **one** `ios_application` build whether it holds 1 or 118 journeys.
-   - Journeys are selected **at run time** with `MC_E2E_FILTER`, passed as `SIMCTL_CHILD_MC_E2E_FILTER` or through the rule's environment.
+1. **One e2e app per run.** All journeys are generated into one entry point, `integration_test/journeys_test.dart`, with the same aggregation as §5.2. So `//app/mini_client:e2e_app` costs **one** `ios_application` build whether it holds 1 or 103 journeys.
+   - Journeys are selected **at run time** by a **file in the app's data container**, not by environment: on iOS `Platform.environment` is empty, so `SIMCTL_CHILD_*` never reaches Dart (the upstream launcher works around this the same way, V3-02).
+   - The runner installs the app, writes the filter (a journey-id regex, one line) to `$(xcrun simctl get_app_container <udid> <bundle-id> data)/tmp/mc_e2e_filter`, then launches. `mc_e2e_utils.journeyFilter()` reads `${Directory.systemTemp.path}/mc_e2e_filter`; no file means every journey runs.
+   - Under option (c) below, T-0012's runner writes the file. Under option (a), patch U-F2 adds the same pre-launch write from `--test_env=MC_E2E_FILTER=<regex>`.
    - Never with `--dart-define`, which would push the debug build off the modular kernel path [rules_flutter §16.1].
 2. **Bazel builds, T-0012 runs.** `tool/e2e_ios.sh` keeps create / boot / `bootstatus` / trap-delete, downscaling and `e2e-summary.md`. Its `--runner-cmd` becomes a Bazel call. Spike P5-10 picks, in order of preference:
-   - (a) `bazel test --config=sim //app/mini_client:e2e_journeys --test_env=MC_SIM_UDID={udid}`, if the rule can target an existing device and keep screenshots;
+   - (a) `bazel test --config=sim //app/mini_client:e2e_journeys --test_env=RULES_FLUTTER_IOS_SIMULATOR_UDID={udid}` (U-F1, 03 §6), if the rule can target an existing device and keep screenshots;
    - (b) `flutter_drive_test` aimed at `{udid}`;
    - (c) `bazel build --config=sim //app/mini_client:e2e_app`, then `simctl install/launch` and an in-app JSON result file pulled with `simctl get_app_container`.
 
@@ -807,7 +825,7 @@ The journeys are Gherkin. Where possible the **same `.feature`** runs on the hos
 
 ## 7. Verification at scale
 
-PL-2 generates about 135 modules in domain batches of 6 to 10, verified per batch [P2 §7]. A full ADR-0006 audit of every module would mean reading about 230k test lines. Instead: **machine-check everything, deep-audit a sample, and trust only verified generators.**
+PL-2 generates about 150 modules in domain batches of 6 to 10, verified per batch [P2 §7]. A full ADR-0006 audit of every module would mean reading about 250k test lines. Instead: **machine-check everything, deep-audit a sample, and trust only verified generators.**
 
 ```mermaid
 flowchart LR
@@ -873,7 +891,7 @@ A Dart CLI and `dart_binary`.
 | R4 | Weakening: fewer `expect`/`verify` calls or Then steps per case; matcher downgrades (`findsOneWidget` → `findsWidgets`/`findsAny`, `equals` → `isNotNull`/`anything`); raised timeouts or `size` | Flags for the Verifier |
 | R5 | Lowered coverage thresholds, removed tags, changed `shard_count` with fewer cases | Fails |
 | R6 | Changed golden PNGs without `documents/evidence/T-XXXX/goldens/<name>.{before,after,diff}.png` | Fails |
-| R7 | A test imports `package:<self>/src/` outside `test/contract/` | Fails |
+| R7 | A test imports `package:<self>/src/` outside `test/contract/` (no exemptions: features have no `test/unit/`, R6) | Fails |
 | R8 | A `Then` step whose body has no assertion (`expect`, `verify`, `expectLater`, or a shared assertion step) | Fails |
 | R9 | Fixtures and feature code changed in one task | Flags ("did the tests move to match the code?") |
 
@@ -909,7 +927,7 @@ Every task follows ADR-0006. The order: P5-01 to P5-04 come with PL-3's skeleton
 | | | AC4 | Given `initFlow`, then inside the flow `Theme.of` is the design-system theme, the locale is `en`, and `defaultTargetPlatform` is iOS. `MockMonitoring` and `McTestContainer` are exported, and package coverage is ≥ 90 %. |
 | **P5-02** | `mc_test_steps` v1 (P5-01) | AC1 | Given each catalogue step (§3.2), then it has a passing test, and each assertion step also has a test proving it can fail. |
 | | | AC2 | Given `bazel run //tool/bdd:catalogue`, then the README and `step_index.json` list every step's usage line, and a diff test guards both against drift. |
-| **P5-03** | BDD under Bazel, `mc_bdd_tests` (PL-3 codegen) | AC1 | Given `characters_list` with the two §3.5 feature files, when `bazel test //feature/characters_list:bdd_test` runs, then every scenario passes, and `test.xml` names contain `[T-0123-AC1]` … `[T-0123-AC13]`. |
+| **P5-03** | BDD under Bazel, `mc_bdd_tests` (PL-3 codegen) | AC1 | Given `characters_list` with the two §3.5 feature files, when `bazel test //feature/characters_list:bdd_test` runs, then every scenario passes, and `test.xml` names contain `[T-0123-AC1]` … `[T-0123-AC14]`. |
 | | | AC2 | Given one `.feature` edited, then the execution log shows exactly one generation action, one compile, one link and one test run, and other packages' results come from the cache. |
 | | | AC3 | Given `--test_filter='T-0123-AC9'`, then only that AC's three Outline rows run. Given a local step that shadows a shared one, generation fails, naming both. |
 | | | AC4 | Given a missing step, when `bazel run //tool/bdd:scaffold` runs, then only the stub file with its `/// Usage:` line appears in the source tree. Given `bazel build --config=lint //...`, then generated tests give zero diagnostics. |
@@ -925,6 +943,7 @@ Every task follows ADR-0006. The order: P5-01 to P5-04 come with PL-3's skeleton
 | **P5-07** | AC traceability checker | AC1 | Given ACs 1 to 3 and passing scenarios tagged AC1 and AC2, then AC3 is reported MISSING and the tool exits non-zero. |
 | | | AC2 | Given a tag `@T-0123-AC14` that isn't in the task file, then it is reported UNKNOWN. Given a mapped case that is skipped or absent from `test.xml`, it is reported SKIPPED or NOT RUN. |
 | | | AC3 | Given a visual-only AC, then a `T-XXXX-ACn*.png` in the evidence folder is required. `T_XXXX_ACn` gate names are normalised. |
+| | | AC4 | Given a feature whose generated tests came from stock `bdd_widget_test` (R28 fallback mode), then every `@T-…` tag is still traced to a passing `test.xml` case, both through the name suffix and through the `.feature` tag → scenario title join (V2-07). |
 | **P5-08** | Test-integrity checker (R1–R9) | AC1 | Given one scratch commit per rule violation, then each produces its stated effect, naming the file and the rule. |
 | | | AC2 | Given a clean feature branch, then the report is empty and the tool exits 0. |
 | **P5-09** | `tool/verify.sh` on Bazel (rescopes T-0005) | AC1 | Given a clean tree, then every stage passes, prints one line, and the script exits 0. A second run with no changes finishes in < 60 s on the M4 Pro. |
@@ -932,12 +951,12 @@ Every task follows ADR-0006. The order: P5-01 to P5-04 come with PL-3's skeleton
 | | | AC3 | Given a push, then GitHub Actions on Linux runs the same script, and goldens and e2e are skipped, not failed. |
 | **P5-10** | E2E under Bazel + T-0012 runner-cmd (spike, then build) (T-0012, PL-3 iOS app) | AC1 | Given `//app/mini_client:e2e_app` and a simulator created by `tool/e2e_ios.sh`, when the Bazel runner-cmd runs the smoke journey, then it passes on that simulator, and the simulator is gone afterwards. |
 | | | AC2 | Given 10 journeys in the aggregated entry point, then the execution log shows one `ios_application` build. The 10 separate targets of the perf fixture are measured, and a finding records H-ITEST and which runner option won. |
-| | | AC3 | Given `MC_E2E_FILTER=characters_list`, then only that smoke runs, and `aquery` shows no `--dart-define`. Checkpoints land in `documents/evidence/T-XXXX/e2e/iphone-17-pro/`. |
-| **P5-11** | App-level host journeys and feature smokes (P5-01, P5-02, P5-10) | AC1 | Given `test/journey/boot.feature`, then DI failure, timeout and retry pass on the host. |
+| | | AC3 | Given the filter file `tmp/mc_e2e_filter` = `characters_list` written into the app container before launch, then only that smoke runs; given no file, all run; `aquery` shows no `--dart-define`. Checkpoints land in `documents/evidence/T-XXXX/e2e/iphone-17-pro/`. |
+| **P5-11** | App-level host journeys and feature smokes (P5-01, P5-02, P5-10) | AC1 | Given `test/journey/boot.feature`, then DI failure, timeout and retry pass on the host, including a cold-start deep link (`defaultRouteNameTestValue`) during a slow boot and during a failed boot: no route builds before `ready`, and the link is replayed once after success (R29). |
 | | | AC2 | Given the characters → comic hop, then the app's navigator implementation runs with real flows on the host, and the same `.feature` passes on the simulator. |
 | | | AC3 | Given every feature, then exactly one `@smoke` journey exists (checked), and all of them pass in one `e2e_app` launch. |
 | **P5-12** | MVP and enterprise journeys (= T-0011 ACs) | AC1 | Given both reference devices, then the MVP happy and error journeys pass, and the light/dark screenshot tour is in `documents/evidence/T-0011/`. |
-| | | AC2 | Given a favourite saved, when the runner terminates the app and reopens `minicl://favorites`, then the `simctl` screenshot shows the favourite. |
+| | | AC2 | Given a favourite saved, when the runner terminates the app and opens `miniclient://app/library/favourites`, then the `simctl` screenshot shows the favourite. |
 | **P5-13** | a11y + l10n kit | AC1 | Given a 30×30 pt button, then the a11y step fails, naming `iOSTapTargetGuideline`. Given a 2.0 text scale overflow, `nothing overflows` fails. |
 | | | AC2 | Given a key missing from `_de.arb`, or a placeholder mismatch, then `:l10n_test` fails, naming the key and the locale. |
 | | | AC3 | Given a hard-coded `Text('Retry')`, then the pseudo-locale scenario fails, naming the string. Backend data strings don't trip it. |
@@ -954,5 +973,5 @@ Every task follows ADR-0006. The order: P5-01 to P5-04 come with PL-3's skeleton
 
 - **`flutter_test_config.dart`.** Whether ai_rules_flutter's test bootstrap honours it is unverified. `mcTestWidgets` makes us independent of it.
 - **Golden comparator base directory** for generated or aggregated tests in `bazel-bin`: P5-05 AC3.
-- **`bdd_widget_test` features we lean on:** `testMethodName`, Outline `{<param>}`, tags → `tags:`, external steps. These are from package knowledge (verify) and decide C4's preferred route.
+- **`bdd_widget_test` features we lean on:** `testMethodName`, Outline `{<param>}`, tags → `tags:`, external steps. P3-05 AC5 verifies them on stock 3.0.5 first, because the R28 fallback depends on them too.
 - **Simulator ownership** inside `flutter_integration_test`. If the rule can't target our simulator, option (c) in §6.2 is the fallback.

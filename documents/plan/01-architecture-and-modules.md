@@ -10,7 +10,7 @@
 ## Key decisions
 
 - **169 Lego modules:** 52 utilities, 100 features in 25 domains, 8 app-layer libraries and 9 app targets. There are also 3 Dart tooling packages under `tool/`, which are not counted. This is inside D8's 130 to 170 band.
-- **Hand-written budget: 633.8k LOC.** Features 470.6k, utilities 133.1k, app layer 30.1k. The 500k floor holds even if every module lands 21 % under its profile. Generated code is about 446k LOC and tests about 402k (D8 counting).
+- **Hand-written budget: 633.8k LOC.** Features 470.6k, utilities 133.1k, app layer 30.1k. The 500k floor holds even if every module lands 21 % under its profile. Generated code is about 446k LOC. Tests are budgeted at about 250k by 05 §4 (this catalogue's upper estimate is 402k; §8).
 - **Seven feature archetypes:** list-detail `LD`, section/detail `SC`, search `SR`, form/wizard `FW`, dashboard `DB`, settings `ST` and interactive `IX`. Each has S / M / L size classes (×0.8, ×1.0, ×1.3). There are also seven utility archetypes (`UC UF UD UK UI UM UT`) and five app archetypes (`AL AW AM AS AC`). P2 builds generators from these.
 - **Layout:** `utility/<pkg>` stays flat, as in Tide; features are grouped one level as `feature/<domain>/<domain>_<capability>`; the app layer is `app/mini_client`, `app/ds_catalog`, `app/sandbox/<group>_sandbox` and `app/wiring/{app_core,<group>_wiring}`; Dart tooling goes in `tool/`.
 - **The app layer is split into 8 libraries**, so the app stays "glue" `[tide-nav §2.1]` without becoming one 20k LOC package that rebuilds on every edit:
@@ -24,18 +24,20 @@
   - The flow receives the navigator through its constructor, which is the feature's contract `[tide-nav §3.1]`, and registers it into the flow's DI scope.
   - The wiring implements the navigator over `GoRouter`.
   - Flows return results through `FeatureFlowController.complete(r)` and `onComplete`, which the route builder turns into `context.pop(r)`.
-- **DI scopes are tree-scoped:**
+- **DI scopes are tree-scoped (R17):**
   - Each `FeatureFlow` owns a child `GetIt` instance. It imports root services explicitly with `RootImport<T>`.
+  - The `RootImport` list is **generated** (`lib/src/di/flow_scope.dart`, §4.5), never hand-maintained, and every flow's scope is resolve-tested in its wiring.
   - This replaces Tide's global scope stack, which breaks with `StatefulShellRoute` tabs `[tide-nav §3.2]`.
-  - `GetIt.reset()` moves from production init to test setup.
+  - `GetIt.reset()` moves from production init to test setup. Root init is transactional, so a boot retry never re-registers (§3.4).
 - **Data (aligned with P2 KD11 and P5 KD2):**
   - `mc_mocked_backend` is the data-free engine: a Dio `HttpClientAdapter` with routing, latency, failure rules, scenarios and a traffic log.
   - Data and endpoints live in 10 domain packages, `utility/mc_fixtures_<domain>`, plus `mc_fixtures_media`, which holds the bundled placeholder art (D4d).
   - Features never depend on fixtures in `lib`, only in tests.
 - **Stack shape:**
-  - freezed unions are rendered with Dart 3 `switch` over public sealed subclasses, not `state.when`.
+  - freezed unions keep Tide's shape: **private** cases, rendered with `state.when` (R16). Only the `sealed` modifier is new (freezed 4).
   - Repositories return `Result<T, ApiFailure>`.
-  - Blocs extend the abstract base class `McBloc`. **Hot utilities contain no mixins**, because mixins keep their bodies in outlines `[rules_dart §5.2]`.
+  - Blocs extend the abstract base class `McBloc`. **Cutoff-critical kits (`mc_prelude`, `mc_di`, `mc_bloc_kit`, `mc_paging`, `mc_test_*`) contain no mixins**, because mixins keep their bodies in outlines `[rules_dart §5.2]`. The 15 deliberate hot mixins of 02 §3.6 live in `mc_ds_*`.
+  - Everything a generator reads is Flutter-free (R15): blocs import `package:bloc`, `FeatureFlowController` lives in pure-Dart `mc_bloc_kit`, and `mc_monitoring` is pure Dart (the Flutter error hooks sit in `app_core`).
   - Features depend on the fine-grained `mc_ds_*` packages; only the app layer imports the `mc_design_system` umbrella.
 - **One version set:**
   - a pub workspace at the repo root, one `pubspec.lock`, consumed by Bazel's `@pub_deps` hub (P3);
@@ -45,7 +47,7 @@
   - ARB files live in `lib/src/l10n/<pkg>_<locale>.arb` in every feature and in `mc_l10n_core` and `app_core`.
   - Five locales: `en` is the template; `de`, `fr`, `es` and `ja` are generated pseudo-translations.
   - The flow installs its own delegate through `Localizations.override`, so the app never lists 100 delegates.
-- **Generated code is never committed (D7).** BUILD files go at the package root (`<pkg>/BUILD.bazel`, owned by P3), because that root is `lib_root` `[rules_dart §7]`.
+- **Generated code is never committed (D7)**, except a generator's outputs while it runs on the R28 build_runner fallback (D-27). BUILD files go at the package root (`<pkg>/BUILD.bazel`, owned by P3), because that root is `lib_root` `[rules_dart §7]`.
 
 ## Open conflicts for the TL
 
@@ -54,10 +56,10 @@
 | C1 | **Codegen shims missing.** All 100 features use injectable, retrofit and bdd_widget_test (D3), and rules_dart ships no shim for any of them; consumers also can't reuse `builder_shim` `[rules_dart §6.3]`. Until P3 lands the shims, the catalogue can't build under Bazel. | D3, D7, P3 | P3's first deliverable, on our fork, and upstreamed (D12). Fallback: replace injectable with hand-written initializers in a *subset* of features, as an A/B cost probe. Never drop it globally, because that deviates from Tide. |
 | C2 | **App layer is 8 libraries plus 9 apps**, where D1/D2 name a single `app/mini_client`. Features are also grouped as `feature/<domain>/`. Both change P2's paths and P3's visibility patterns. | D1, D2, P2, P3 | Keep both. Wirings reduce the rebuilt surface (a navigator edit rebuilds 1 of 7 wirings), give crew ownership per group (D11), and let sandboxes reuse routes. Visibility: features → `//app/wiring/<group>_wiring` only. |
 | C3 | **Fixture packages hold domain handlers.** P2 KD11 and P5 describe `mc_fixtures_<domain>` as data (JSON plus a route manifest). Pagination, search, sorting and mutations (cart, favourites) need logic, which we place in the same package (`lib/src/handlers/`, pure Dart). | P2, P5 | Names aligned to `mc_fixtures_<domain>`. Each package holds JSON assets (P5 fixture sets), a route manifest **and** small handlers (mean 4.3k LOC). The engine stays data-free. |
-| C4 | **The barrel exports more than the flow:** the flow(s), the navigator interface(s) and flow argument/result types. The articles say the flow should ideally be the only export `[tide-nav §3.1]`. P2 §2.3 says "flow(s) only"; P5 C6 agrees with P1. | Tide, P2 | Navigators must be visible to the app and to tests. P2's template should add the navigator export. |
+| C4 | **The barrel exports more than the flow:** the flow(s), the navigator interface(s) and flow argument/result types. The articles say the flow should ideally be the only export `[tide-nav §3.1]`. P2 §2.3 says "flow(s) only"; P5 C6 agrees with P1. | Tide, P2 | **Resolved (R4):** navigators must be visible to the app, which implements them (in-package tests could reach `src/`). `mc_arch_check` limits barrels to `*Flow`, `*Navigator` and flow arg/result types. |
 | C5 | **Module count vs 1M.** P2 S3 needs about 190 modules for 1M. D8 says plan for 130 to 170. | P2, D8 | This catalogue is S2 (169 modules, 634k). The 1M path in §8 follows P2 S3: +20 features (to about 190 modules) plus about 20 % of features up one size class. TL to accept 190 at S3. |
 | C6 | **Testing packages.** P5 has `mc_test_utils` (including mocks), `mc_test_steps` and `mc_e2e_utils`. P1 had a separate `mc_mocks`. | P5 | Aligned with P5: 3 testonly packages, and mocks live in `mc_test_utils`. Their LOC (13.6k) counts as **test** LOC. |
-| C7 | **Feature unit tests.** P2 generates `test/unit/**` for blocs and repositories; Tide says to test only exported API `[tide-nav §4.7]`. | P2, P5 C1 | Agree with P5: features get BDD, contract, l10n and golden tests. The only exception is `test/unit/` for pure engines (IX scoring, FW validators) that the UI cannot enumerate. |
+| C7 | **Feature unit tests.** P2 generates `test/unit/**` for blocs and repositories; Tide says to test only exported API `[tide-nav §4.7]`. | P2, P5 C1 | **Resolved (R6):** features get BDD, contract, l10n and golden tests, and **no** `test/unit/`. Generic pure logic lives in utilities with solitary tests (validators in `mc_forms`); feature-specific engines (IX scoring) are covered by Scenario Outlines through the flow. |
 | C8 | **"Hand-written" (D8)** must mean committed, non-build-generated `.dart`, so mcgen-scaffolded code counts. Test-support libraries count as test LOC. | P2, P4 | The TL should state this once in the assembled plan. |
 | C9 | **Per-flow child containers** change the article's `diContainer<T>()` UI call into `context.di<T>()`, and `TestContainer` into `McTestContainer` with root imports. | Tide, P5 | A justified deviation (D-17). P5's `McTestContainer` already composes the production root initializers, so it is compatible. |
 | C10 | **No plugins in v1.** `mc_storage` uses `dart:io` under the app's temp/support directory, with no `path_provider`. P3 may want a deliberate native-plugin probe. | P3 | Add one plugin later as a probe module; it's not needed for the architecture. |
@@ -102,7 +104,7 @@ Testonly utilities (`mc_test_*`, `mc_e2e_utils`) and `mc_fixtures_*` are visible
 | 3 | Package form | local pub packages, `publish_to: none`, path deps, drifting carets `[tide-core §2.3]` | Same path deps; pub workspace and one lock | D-04 |
 | 4 | Encapsulation | `lib/src/` plus barrel only `[tide-core §2.4]` | Same; feature barrel = flow + navigator + arg/result types | D-05 |
 | 5 | `tide_analysis` | 22 rules, generated-file excludes `[tide-core §4.1]` | `mc_analysis`: same rules + `strict-inference`; excludes add l10n outputs | D-06 |
-| 6 | `tide_prelude` / `Result` | sealed `Result<S,F>` with `fold`…`fromPredicate` `[tide-core §4.2]` | `mc_prelude`: identical API, plus `Optional` (homework), `Result.guard`, message-preserving `fromAsync` | D-07 |
+| 6 | `tide_prelude` / `Result` | sealed `Result<S,F>` with `fold`…`fromPredicate` `[tide-core §4.2]` | `mc_prelude`: identical API, plus `Optional` (homework), `Result.guard` (catches `Exception` and `Error`, like `fromAsync`), message-preserving `fromAsync` | D-07 |
 | 7 | `tide_di` | `TideDIInitializer`, `diContainer`, `initializeDIContainer` `[tide-core §4.3]` | `mc_di`: `McDIInitializer`, same functions, plus child containers and `RootImport<T>` | D-17 |
 | 8 | Per-package DI boilerplate | `src/di/di_initializer.dart` + `@injectableInit`, scaffolded by mason `[tide-core §5.9]` | Identical file in every package with registrations | — |
 | 9 | App DI list | ordered utility initializers; features self-initialise in flows `[tide-nav §2.4, §3.5]` | `app_core.rootInitializers()` (utilities + wirings); features through `FeatureFlow` | — |
@@ -113,8 +115,8 @@ Testonly utilities (`mc_test_*`, `mc_e2e_utils`) and `mc_fixtures_*` are visible
 | 14 | Feature folders | `di/`, `domain/{api,model,repository}`, `navigator/`, `presentation/bloc/`, later `flow/` `[tide-core §5.2]` | Same, plus optional `domain/usecase/` and `l10n/` | D-13 |
 | 15 | Models | freezed + `fromJson`, `@JsonKey(name:)` on every field `[tide-core §5.4]` | Same; DTO and domain model split in L-size features ("would need to split") | — |
 | 16 | Retrofit API | `@injectable @RestApi`, `@factoryMethod` `[tide-core §5.5]` | Same | — |
-| 17 | Repository | `Future<Result<T, Exception>>` via `fromAsync` `[tide-core §5.6]` | `Future<Result<T, ApiFailure>>` via `Result.guard` | D-14 |
-| 18 | Bloc | `Bloc` (not Cubit), hand-written sealed events, freezed union state, load in constructor, `onTransition` logging `[tide-core §5.8]` | Same; `switch` instead of `when`; logging in the `McBloc` base class | D-15, D-16 |
+| 17 | Repository | `Future<Result<T, Exception>>` via `fromAsync` `[tide-core §5.6]` | `Future<Result<T, ApiFailure>>` via `Result.guard(…, ApiFailure.from)`; non-Dio throwables become `ApiFailure.unexpected` | D-14 |
+| 18 | Bloc | `Bloc` (not Cubit), hand-written sealed events, freezed union state, load in constructor, `onTransition` logging `[tide-core §5.8]` | Same, including private state cases and `state.when`; `sealed` modifier (freezed 4); logging in the `McBloc` base class | D-15, D-16 |
 | 19 | DI in UI | only `diContainer<Bloc>()` in `BlocProvider.create` `[tide-core §5.10]` | Same single call site: `context.di<Bloc>()` | D-17 |
 | 20 | Feature entry | always a widget; later the flow alone `[tide-core §5.11]` | One or more `*Flow` widgets | — |
 | 21 | `feature_flow` | `FeatureFlow<T>` over `flow_builder`; scope per flow; listed defects `[tide-nav §3.2]` | `mc_feature_flow`, hardened (§4.5) | D-18 |
@@ -123,15 +125,15 @@ Testonly utilities (`mc_test_*`, `mc_e2e_utils`) and `mc_fixtures_*` are visible
 | 24 | External navigation | go_router or auto_route; Tide production uses auto_route `[tide-nav §3.1]` | go_router + go_router_builder in `*_wiring` | D-19 |
 | 25 | Navigator contract | "defined in the feature, implemented on the application level" `[tide-core §3.2]` | `lib/src/navigator/`, passed through the flow constructor, implemented in the wiring | D-20 |
 | 26 | Boot page | `FutureBuilder` over `initDi()` `[tide-nav §2.5]` | `BootBloc`: error, timeout, retry (homework) | D-21 |
-| 27 | Run configs | `.vscode/launch.json` dart-defines `[tide-nav §2.2]` | `--dart-define-from-file=config/<flavour>.json`; `bazel run` | D-22 |
+| 27 | Run configs | `.vscode/launch.json` dart-defines `[tide-nav §2.2]` | Bazel-selected `app_config.json` asset (`--//tool/bazel/config:env=<env>`); no defines, no flavours (R13); `bazel run` | D-22 |
 | 28 | `test_utils` | interceptor, `MockMonitoring`, `TestContainer`, `initFlow` `[tide-nav §4.4]` | `mc_test_utils`, `mc_test_steps`, `mc_e2e_utils` (P5) | D-23 |
 | 29 | Utility tests | solitary, AAA, `sut` `[tide-nav §4.3]` | Same | — |
-| 30 | Feature tests | sociable BDD through the flow; `test/feature/step/` `[tide-nav §4.5]` | Same; Scenario titles carry AC IDs (ADR-0006) | — |
+| 30 | Feature tests | sociable BDD through the flow; `test/feature/step/` `[tide-nav §4.5]` | Same; `@T-XXXX-ACn` tags on scenarios carry AC IDs (ADR-0006, 05 §3.3); no solitary unit tests (R6) | D-30 |
 | 31 | Test policy | test only exported API; 90 % coverage; split slow packages `[tide-nav §4.7]` | Same (P5 owns the gates) | — |
 | 32 | Images | `cached_network_image` `[tide-nav §4.7]` | Bundled art via `McImage` and a resolver | D-24 |
 | 33 | mason | scaffolds DI initializers `[tide-core §5.9]` | `tool/bricks/` for every archetype, consumed by P2's mcgen | D-25 |
 | 34 | l10n | not covered `[tide-core §5.11]` | gen-l10n per feature | D-26 |
-| 35 | Generated files | unstated, implied in-tree `[tide-core §7.3]` | Not committed; Bazel outputs | D-27 |
+| 35 | Generated files | unstated, implied in-tree `[tide-core §7.3]` | Not committed; Bazel outputs (except R28 fallback outputs) | D-27 |
 | 36 | Data shared between features | not covered `[tide-core §10.6]` | Backend as source of truth + `mc_event_bus` invalidation | D-28 |
 | 37 | Shared domain models | only the envelope `[tide-core §3.3]` | Same: models private per feature; duplication accepted | — |
 | 38 | Running a feature standalone | not described `[tide-core §5.12]` | Group sandboxes + `initFlow` | D-29 |
@@ -143,33 +145,36 @@ Testonly utilities (`mc_test_*`, `mc_e2e_utils`) and `mc_fixtures_*` are visible
 |---|---|---|---|---|
 | D-01 | iOS only | android + ios | `flutter create --platforms=ios` | Q-009; brief D6 |
 | D-02 | Naming and folders | `tide_*`; unprefixed `api_client`, `feature_flow`, `test_utils`; flat `feature/` | `mc_*` for every utility; `feature/<domain>/`; `tool/` | D2. 100 features need domain patterns (`//feature/comics/...`) for profiling and ownership |
-| D-03 | App-layer libraries | one app package | `app_core` + 7 `*_wiring` + 9 apps | Smaller rebuild on navigator edits; sandboxes reuse wiring; parallel crew ownership (D11). Open conflict C2 |
+| D-03 | App-layer libraries (R5) | one app package | `app_core` + 7 `*_wiring` + 9 apps | Smaller rebuild on navigator edits; sandboxes reuse wiring; parallel crew ownership (D11). Adds rules (wiring ↛ wiring), no new edges (V1, V2 judged it conformant in spirit) |
 | D-04 | Versions | per-package carets, which drift (8.0.4 vs 8.0.5) | pub workspace, one lock, `@pub_deps` | One version per package is required by rules_dart `[rules_dart §14.2 R8]` |
-| D-05 | Barrel | ideally the flow only | flow + navigator(s) + arg/result types | The app implements navigators and tests mock them. Conflict C4 |
+| D-05 | Barrel (R4) | ideally the flow only | flow + navigator(s) + arg/result types, `package:` exports with `show`, no `library;` directive | The app implements the navigators, so it must see them. `mc_arch_check` rejects any other barrel export (pages, blocs, DI initializers) |
 | D-06 | Lints | 22 rules | + `strict-inference`; excludes include gen-l10n outputs | Stricter, as the homework suggests |
-| D-07 | `Result` | `fromAsync` keeps only type and stack of an `Error` | message preserved; `guard(mapError)`; `Optional` | Fixes a defect `[tide-core §4.2]`; homework |
+| D-07 | `Result` | `fromAsync` keeps only type and stack of an `Error` | message preserved; `guard(body, mapError)` catches `Exception` **and** `Error` (JSON-shape `TypeError`s become failures, as in Tide), then maps; `Optional` | Fixes a defect `[tide-core §4.2]`; homework |
 | D-08 | Strict deps | `get_it` imported transitively | every import declared | Bazel strict deps `[tide-core §3.4]` |
 | D-09 | Auth | Marvel MD5 keys via dart-define | bearer token from `mc_session` against mock identity | No Marvel API (F-0003) |
 | D-10 | Envelope | `MarvelResponse<T>` | `ApiResponse<T>`, `ApiPage<T>` | Our own contract (ADR-0005) |
-| D-11 | Monitoring | Firebase | console + in-memory sinks | D4c; no native SDK under Bazel iOS |
-| D-12 | Design system | one package, `Error` widget | 15 packages, `Mc*` names, tokens | `Error` shadows `dart:core`. Features import only the `mc_ds_*` they use, so an API change fans out narrowly; the umbrella is the barrel probe |
+| D-11 | Monitoring | Firebase; Flutter error hooks in the package's `@preResolve` init | console + in-memory sinks; `mc_monitoring` is pure Dart and `app_core`'s `McApp` installs the Flutter error hooks | D4c; no native SDK under Bazel iOS; R15 (every bloc imports `Monitoring`, so it must stay Flutter-free) |
+| D-12 | Design system | one package, `Error` widget | 15 packages, `Mc*` names, tokens | `Error` shadows `dart:core`. Leaf DS packages fan out narrowly; the core (`mc_ds_tokens`, `_theme`, `_layout`, `_feedback`) reaches every feature (edit #3: 134 dependents), which is a deliberate stress shape. The umbrella is the barrel probe |
 | D-13 | Folders | no use-case example | optional `domain/usecase/`; `lib/src/l10n/` | FW/DB orchestrate several repositories; l10n per D4b |
 | D-14 | Errors | `Exception`; UI shows `e.toString()` | sealed `ApiFailure`, localised messages | Distinct UI states for injected failures (ADR-0005) |
-| D-15 | Union rendering | `state.when(...)` | `switch` over public sealed cases | `when`/`map` changed in freezed ≥3; rules_dart pins freezed 4.0.2 `[rules_dart §6.2]` |
+| D-15 | Union declaration (R16) | `@freezed class` with private cases; `state.when(...)` | `@freezed sealed class` with **private** cases; `state.when(...)` kept | freezed 4.0.2 (the rules' pin) requires the `sealed`/`abstract` modifier; freezed_annotation 3.1.0 restored `when`/`map` (default on). P3-01 AC6 confirms the stock shim emits them. Fallback only if it doesn't: `switch` over public cases, at the cost of making the cases public API |
 | D-16 | Bloc monitoring | `onTransition` override in each bloc | `abstract base class McBloc` in `mc_bloc_kit` | One place to log. Not a mixin, which would defeat the outline cutoff |
-| D-17 | DI scope | global `GetIt` scope stack; reset in production init | child `GetIt` per flow + `RootImport<T>`; reset only in tests | Tabs (`IndexedStack`) shadow scopes `[tide-nav §3.2]`; test reset `[tide-nav §9.2]` |
+| D-17 | DI scope (R17) | global `GetIt` scope stack; `diContainer<T>()` in UI; reset in production init | child `GetIt` per flow + `RootImport<T>`; `context.di<T>()` in UI; reset only in tests; transactional root init | Tabs (`IndexedStack`) shadow scopes `[tide-nav §3.2]`; test reset `[tide-nav §9.2]`. **Cost:** a flow's root imports are a contract a global container doesn't need. Mitigated: the list is generated, `mcgen check` fails on drift, `FeatureFlow` fails fast on an unregistered import, and each wiring resolve-tests every flow scope (§4.5) |
 | D-18 | `FeatureFlow` | defects: never builds without an initializer, swallows errors, unnamed pages, no results | fixed; plus `onComplete` and l10n delegates | `[tide-nav §3.2, §3.6]` |
 | D-19 | External router | auto_route (production) | go_router + go_router_builder | D4a; curated Bazel builder to stress |
 | D-20 | Navigator delivery | unspecified | flow constructor → flow scope; implemented in wiring, registered with injectable | Constructor = contract `[tide-nav §3.1]`; testable with mocktail |
 | D-21 | Boot | no failure or timeout handling | `BootBloc` with error, timeout, retry | Homework `[tide-nav §7]` |
-| D-22 | Run configs | `launch.json` | dart-define files + `bazel run` | Bazel is the source of truth (D7); homework suggests `--dart-define-from-file` |
+| D-22 | Run configs (R13) | `launch.json` dart-defines; homework: `--dart-define-from-file` | one typed `config/<env>.json` per environment, bundled as the asset `app_config.json` chosen by `--//tool/bazel/config:env`; read once at boot by `mc_config`; `bazel run`. No defines, no flavours | Any define or flavour forces the whole-program worker (about 1.75 GiB). The homework's benefit (one typed file per environment) is kept; its motive (API keys) is moot (D-09) |
 | D-23 | Test utilities | one package, hidden mocks, path-only interceptor | 3 testonly packages + `McBackendHarness` | P5 TD-01 to TD-03 |
 | D-24 | Images | network images | bundled placeholder art via `mc_fixtures_media` | D4d; deterministic e2e; R-005 |
 | D-25 | mason | DI initializer only | bricks for every archetype | 100 uniform features; P2 KD2 |
 | D-26 | l10n | none | gen-l10n ARB per package; flow-scoped delegates | D4b |
-| D-27 | Generated files | in-tree | `bazel-out` only | D7 |
+| D-27 | Generated files | in-tree, excluded from analysis | `bazel-out` only. While a generator runs on the R28 fallback, its outputs are committed (listed in `tool/build_runner_overlay/fallback.yaml`, git-ignore negations, explicit `srcs`); the `mc_analysis` excludes stay as Tide's | D7; R28 |
 | D-28 | Cross-feature data | not covered | the backend owns state; `mc_event_bus` publishes `DataChanged(topic)` | Keeps features independent |
-| D-29 | Standalone run | none | 7 group sandboxes + `ds_catalog` | §6.3 |
+| D-29 | Standalone run | none (the articles don't mention sandboxes) | 7 group sandboxes + `ds_catalog` | Our extension, §6.3 |
+| D-30 | Feature tests (R6) | sociable BDD through the flow; test only exported classes | BDD + contract + l10n + golden; **no** solitary feature unit tests. Generic engines move to utilities (validators in `mc_forms`); feature-specific engines are covered by Scenario Outlines | Tide's own rule [tide-nav §4.7]; contract tests are the one recorded exception (05 TD-11) |
+| D-31 | Codegen purity (R15) | not covered | a library a generator reads imports no Flutter; route files call a `RouteTargets` interface whose implementation imports the feature barrels | Keeps analyzer summaries on for about 95 % of codegen (03 KD6) |
+| D-32 | Homework declined or deferred | SSL pinning; `build.yaml` codegen tuning; replace get_it; more lints | SSL pinning: N/A, no network in v1 (D5). `build.yaml`: Bazel's per-file `dart_codegen` replaces it; the R28 overlay writes `generate_for` from buildgen's annotation scan. get_it: kept (it is Tide's stack). Lints: `strict-inference` only; P1-01 trials more against the exemplars | Recorded so the conformance audit sees decisions, not omissions |
 
 ## 3. Package templates
 
@@ -184,7 +189,7 @@ Testonly utilities (`mc_test_*`, `mc_e2e_utils`) and `mc_fixtures_*` are visible
   - Generators sit in `dev_dependencies` **for IDE / pub mode only**; Bazel ignores them.
 - **analysis:** `analysis_options.yaml` is one line: `include: package:mc_analysis/analysis_options.yaml`.
 - **BUILD:** `<pkg>/BUILD.bazel` at the package root, a placeholder that P3/mcgen `buildgen` fills.
-- **`.gitignore`:** `*.g.dart`, `*.freezed.dart`, `*.config.dart`, `lib/src/l10n/*_localizations*.dart`, `test/feature/*_test.dart` (pub-mode outputs).
+- **`.gitignore`:** `*.g.dart`, `*.freezed.dart`, `*.config.dart`, `lib/src/l10n/*_l10n*.dart`, `test/feature/*_test.dart` (the root `.gitignore`, 03 §7.1). An active R28 fallback adds one negation per committed output in a managed block.
 
 ### 3.2 (a) Utility package, e.g. `utility/mc_paging` (archetype `UK`)
 
@@ -204,11 +209,10 @@ utility/mc_paging/
 ```
 
 ```dart
-// lib/mc_paging.dart
-library;
-export 'src/di/di_initializer.dart' show McPagingDIInitializer;
-export 'src/paged_state.dart' show PagedState, PageRequest;
-export 'src/query/debounced_query.dart' show DebouncedQuery;
+// lib/mc_paging.dart (no `library;`: Tide's `unnecessary_library_directive` would flag it)
+export 'package:mc_paging/src/di/di_initializer.dart' show McPagingDIInitializer;
+export 'package:mc_paging/src/paged_state.dart' show PagedState, PageRequest;
+export 'package:mc_paging/src/query/debounced_query.dart' show DebouncedQuery;
 ```
 
 ### 3.3 (b) Feature package, e.g. `feature/characters/characters_list` (archetype `LD`)
@@ -220,6 +224,7 @@ feature/characters/characters_list/
     characters_list.dart                         # barrel
     src/
       di/di_initializer.dart                     # CharactersListDIInitializer (+ di_module.dart if needed)
+      di/flow_scope.dart                         # generated by mcgen wire: root imports + scope types (§4.5)
       domain/
         api/characters_list_api.dart             # @RestApi
         model/character.dart                     # @freezed + fromJson (domain)
@@ -239,16 +244,15 @@ feature/characters/characters_list/
     feature/characters_list.feature  feature/characters_list_paging.feature
     feature/step/*.dart                          # hand-owned steps
     feature/util/characters_list_env.dart        # navigator mocks, fixture-set names (P5)
-    contract/  golden/  unit/                    # unit/: pure engines only (C7)
+    contract/  golden/                           # no unit/ (R6)
 ```
 
 The pubspec declares the 19 `B + LD+` utilities (§6.2) and, as dev dependencies, `mc_analysis`, `mc_test_utils`, `mc_test_steps` and `mc_fixtures_characters`.
 
 ```dart
-// lib/characters_list.dart
-library;
-export 'src/flow/characters_list_flow.dart' show CharactersListFlow;
-export 'src/navigator/characters_list_navigator.dart' show CharactersListNavigator;
+// lib/characters_list.dart: only *Flow, *Navigator and flow arg/result types (R4, mc_arch_check)
+export 'package:characters_list/src/flow/characters_list_flow.dart' show CharactersListFlow;
+export 'package:characters_list/src/navigator/characters_list_navigator.dart' show CharactersListNavigator;
 ```
 
 ```dart
@@ -271,9 +275,9 @@ FutureOr<GetIt> _init(GetIt getIt, String? environment) =>
 ```dart
 // lib/src/navigator/characters_list_navigator.dart
 /// What characters_list needs from outside. Implemented in app/wiring/universe_wiring.
-abstract interface class CharactersListNavigator {
-  void openCharacter(String characterId);
-  void openSearch();
+abstract interface class CharactersListNavigator {   // the one interface 01, 02 and 05 use
+  void openCharacter(CharacterId id);   // preview's "See full profile" → characters_details
+  void openComic(ComicId id);           // a related comic on the preview → comics_details
   Future<bool> requestSignIn();
 }
 ```
@@ -289,7 +293,7 @@ class CharactersListFlow extends StatelessWidget {
   Widget build(BuildContext context) => FeatureFlow<CharactersListFlowState, void>(
         name: 'characters_list',
         flowInitializer: const CharactersListDIInitializer(),
-        imports: const [RootImport<Dio>(), RootImport<Monitoring>(), RootImport<Analytics>()],
+        imports: charactersListRootImports,       // generated, lib/src/di/flow_scope.dart
         provide: (scope) => scope.registerSingleton<CharactersListNavigator>(navigator),
         localizationsDelegates: const [CharactersListLocalizations.delegate],
         state: CharactersListFlowState(teamId: initialTeamId),
@@ -305,7 +309,7 @@ class CharactersListFlow extends StatelessWidget {
 ```dart
 // lib/src/presentation/bloc/characters_list_bloc.dart
 part 'characters_list_event.dart';   // hand-written sealed events [tide-core §5.8]
-part 'characters_list_state.dart';   // freezed union, public cases: CharactersListLoading, …
+part 'characters_list_state.dart';   // @freezed sealed class, private cases (R16), see below
 part 'characters_list_bloc.freezed.dart';
 
 @injectable
@@ -323,6 +327,15 @@ class CharactersListBloc extends McBloc<CharactersListEvent, CharactersListState
   final FeatureFlowController<CharactersListFlowState, void> _flow;
   final CharactersListNavigator _navigator;
   // _onLoad: emit(state from (await _repository.fetchPage(q)).fold(success, failure))
+}
+
+// characters_list_state.dart: Tide's shape; freezed 4 adds only `sealed`
+@freezed
+sealed class CharactersListState with _$CharactersListState {
+  const factory CharactersListState.loading() = _Loading;
+  const factory CharactersListState.success(PagedSlice<Character> page) = _Success;
+  @Implements<McFailureState>()     // McBloc.onTransition logs states that implement it (D-16)
+  const factory CharactersListState.failure(ApiFailure failure) = _Failure;
 }
 ```
 
@@ -351,19 +364,25 @@ class CharactersListRepository {
 
 ```dart
 // lib/src/presentation/page/characters_list_page.dart
-class CharactersListPage extends StatelessWidget {
+class CharactersListPage extends StatelessWidget {           // BlocProvider only [tide-core §5.10]
   const CharactersListPage({super.key});
   @override
   Widget build(BuildContext context) => BlocProvider(
         create: (context) => context.di<CharactersListBloc>(), // the only DI call in UI
-        child: BlocBuilder<CharactersListBloc, CharactersListState>(
-          builder: (context, state) => switch (state) {
-            CharactersListLoading() => const McLoading(),
-            CharactersListFailure(:final failure) => McErrorView(
-                message: failure.message(context),
-                onRetry: () => context.read<CharactersListBloc>().add(const CharactersListEvent.load())),
-            CharactersListSuccess(:final page) => McPagedGrid(page: page, itemBuilder: CharacterTile.new),
-          },
+        child: const _CharactersListPageContent(),
+      );
+}
+
+class _CharactersListPageContent extends StatelessWidget {   // maps states to UI
+  const _CharactersListPageContent();
+  @override
+  Widget build(BuildContext context) => BlocBuilder<CharactersListBloc, CharactersListState>(
+        builder: (context, state) => state.when(
+          loading: () => const McLoading(),
+          failure: (failure) => McErrorView(
+              message: failure.message(context),
+              onRetry: () => context.read<CharactersListBloc>().add(const CharactersListEvent.load())),
+          success: (page) => McPagedGrid(page: page, itemBuilder: CharacterTile.new),
         ),
       );
 }
@@ -371,7 +390,7 @@ class CharactersListPage extends StatelessWidget {
 
 **Fixtures:** none in the feature. Fixture sets such as `characters.paged_45` come from `utility/mc_fixtures_characters` (P5 §1.2). `test/feature/util/` holds only fixture-set names and navigator mocks.
 
-**BDD:** one Scenario per AC, title `T-XXXX-ACn …`. `bdd_widget_test` generates `characters_list_test.dart` into `bazel-out`.
+**BDD:** each AC maps to ≥ 1 scenario tagged `@T-XXXX-ACn`; titles carry no AC ID (05 §3.3). The fork's BDD generator writes `characters_list_test.dart` into `bazel-out` (under R28, stock `bdd_widget_test` writes it into `test/feature/`).
 
 ### 3.4 (c) The app layer
 
@@ -380,12 +399,13 @@ app/wiring/app_core/lib/src/{boot/, di/root_initializers.dart, locations/app_loc
                              shell/mc_app.dart, guards/auth_redirect.dart, l10n/app_core_en.arb, sandbox/stub_page.dart}
 app/wiring/universe_wiring/lib/
   universe_wiring.dart            # exports: universeRoutes, UniverseWiringDIInitializer
-  src/routes/characters_routes.dart  teams_routes.dart  locations_routes.dart   # one route tree per domain
+  src/routes/characters_routes.dart  teams_routes.dart  locations_routes.dart   # @TypedGoRoute trees; import only RouteTargets (R15)
+  src/routes/route_targets.dart  route_targets_impl.dart                        # interface; unannotated impl imports the barrels
   src/navigators/characters_list_navigator_impl.dart …                          # one file per feature navigator
-  src/mappers/                    # map one feature's result type into another's
+  src/mappers/                    # map one feature's result type into another's (pure field maps)
 app/mini_client/
   ios/ (Runner, Info.plist: FlutterDeepLinkingEnabled, URL scheme `miniclient`)
-  config/{dev,e2e,perf}.json      # --dart-define-from-file
+  config/{dev,e2e,perf}.json      # one per env; Bazel bundles the selected one as assets/app_config.json (R13)
   lib/main.dart  lib/src/router/app_router.dart  lib/src/router/shell_branches.dart
   test/  integration_test/
 app/sandbox/universe_sandbox/lib/main.dart  # McApp(wirings: [universe], fallback: SandboxStubPage)
@@ -409,6 +429,15 @@ List<McDIInitializer> rootInitializers({required List<McDIInitializer> wirings})
     ];
 ```
 
+**Run configuration (R13).** `config/<env>.json` holds `{env, backend: {seed, latency, scenario}, build}`. `//tool/bazel/config:env` is a `string_flag` (`dev` by default, also `e2e` and `perf`); the app's BUILD copies the selected file to the asset `assets/app_config.json` through `select()`. `ConfigDIInitializer` reads it once (`@preResolve`) into `AppConfig`. Switching environment changes one asset, never a kernel. In pub/IDE mode `tool/ide_sync --env <env>` writes the same (git-ignored) asset.
+
+**Boot and router lifecycle (R29).** Tide's guarantee, "nothing feature-side builds before DI is done" [tide-nav §2.5], carries over to `MaterialApp.router` like this:
+1. `main()` registers a `PendingLinks` `WidgetsBindingObserver` **before** `runApp`. It records `PlatformDispatcher.defaultRouteName` (the cold-start link) and consumes every `didPushRouteInformation` while boot isn't done (it returns `true`, so no other observer sees the link).
+2. `McApp` provides `BootBloc`. While the state is `booting`, `failed` or `timedOut`, it renders `MaterialApp(home: BootPage)`: **no `GoRouter` exists**, so no route builder, `redirect` or navigator can run.
+3. `BootBloc` runs `initializeDIContainer(rootInitializers(...))`. `mc_di` builds into a fresh `GetIt.asNewInstance()` and publishes it as the root **only on success**, so a failed or timed-out attempt is discarded and Retry never re-registers into a half-filled container. A late result from an abandoned attempt is ignored (attempt counter).
+4. On `ready`, `McApp` creates the `GoRouter` once, with `initialLocation` = the last recorded link (or `/`), and switches to `MaterialApp.router`. `PendingLinks` detaches; later links go to go_router. The guard `redirect` therefore always sees `mc_session`.
+5. Flow scopes follow widget lifetime: a route's `FeatureFlow` state owns its child container, `StatefulShellRoute.indexedStack` keeps each tab's scopes alive, and a popped route disposes its scope. State restoration is out of scope for v1.
+
 ## 4. Cross-feature navigation
 
 ### 4.1 Declaring outbound needs
@@ -421,7 +450,8 @@ List<McDIInitializer> rootInitializers({required List<McDIInitializer> wirings})
 
 ### 4.2 How the app wires routes
 - **Typed routes.** Each wiring holds one route library per domain: `@TypedGoRoute` trees with nested entity paths (`/characters/:id/powers`), so deep links rebuild a sensible back stack. The tree must sit in one library, because generated mixins are part-private.
-- **Route `build`** creates the flow with its navigator: `CharactersListFlow(navigator: diContainer<CharactersListNavigator>(), initialTeamId: team)`. This is app-layer code, so the global container is allowed.
+- **Route `build`** calls `RouteTargets.of(context).charactersList(teamId: team)` (R15). The route library imports only `go_router` and `route_targets.dart`, so its codegen closure stays at Flutter + go_router + 2 files (03 §4.5). The unannotated `route_targets_impl.dart` imports the feature barrels and builds `CharactersListFlow(navigator: diContainer<CharactersListNavigator>(), initialTeamId: team)`; this is app-layer code, so the global container is allowed.
+- **A route builds a `*Flow`, never a page.** It's structural: barrels export only flows, navigators and arg/result types (R4), so a page can't be imported. Sub-screens are reached through flow arguments (§4.4).
 - **Navigator implementations** are `@LazySingleton(as: CharactersListNavigator)` classes over `GoRouter`, registered by the wiring's injectable initializer.
   - Targets in the same group use typed locations (`CharacterDetailsRoute(id: id).location`).
   - Targets in other groups use `AppLocations.comic(id)` from `app_core`.
@@ -448,7 +478,7 @@ sequenceDiagram
 Features never share types, so the wiring maps one feature's result type into the other's.
 
 ### 4.4 Deep links
-- **iOS:** `FlutterDeepLinkingEnabled = YES` and the custom scheme `miniclient://app/<path>`. E2E drives it with `xcrun simctl openurl booted miniclient://app/characters/1011334`.
+- **iOS:** `FlutterDeepLinkingEnabled = YES` and the custom scheme `miniclient://app/<path>`, the only scheme anywhere in the plan. E2E drives it with `xcrun simctl openurl <udid> miniclient://app/characters/1011334` (never `booted`). A link that arrives during boot is held and replayed (§3.4, R29).
 - **Rule:** every entity route takes its ID as a path parameter, and its flow can start from the ID alone. `$extra` is only for non-linkable picker arguments.
 - **Sub-screens:** flow constructor arguments seed the flow state (`/comics/:id/read?page=12` → `ComicsReaderFlow(comicId:, page:)`).
 
@@ -460,6 +490,9 @@ Features never share types, so the wiring maps one feature's result type into th
   - pages carry a name and a key (for analytics and restoration);
   - `complete(r)` exists.
 - **DI scope:** each flow creates a child `GetIt.asNewInstance()`. Each `RootImport<T>` forwards `T` to the root. The scope is exposed through an `InheritedWidget`, so side-by-side tabs never shadow each other. Back navigation reverts flow state, as `flow_builder` does.
+- **Generated root imports (R17).** `lib/src/di/flow_scope.dart` is written by `mcgen wire` and never by hand. It holds `const <x>RootImports = [RootImport<Dio>(), …]`: the parameter types of every injectable-annotated constructor and `@factoryMethod` in the package, as `package:analyzer` resolves them, minus the types the package registers and the flow-provided ones (`FeatureFlowController`, the navigator, `provide:`). That is the same input injectable reads. `mcgen check` fails when the committed file differs from a fresh derivation, so a hand edit that adds a dependency fails `verify.sh`, not the app at run time.
+- **Fail fast.** On creation, `FeatureFlow` asserts each `RootImport<T>` `isRegistered` at the root and names the missing `T`. An incomplete `McTestContainer` therefore fails in `initFlow`, not on first resolution.
+- **Resolve-everything test.** `mc_di`'s child container records every `register*` call. Each wiring has a generated `test/flow_scopes_test.dart` that opens each flow of its group in `McTestApp` over `rootInitializers(wirings: const [])`, with navigator mocks and the backend in `absorb` mode (every request gets a 503 and none fails the test). It then calls `McScope.debugResolveAll()`, which resolves every recorded type and fails naming the type and its missing dependency. The test needs only barrels, so no `src/` import.
 
 ## 5. `mc_mocked_backend` design (D5, aligned with P2 KD11 and P5 KD2)
 
@@ -474,8 +507,8 @@ Features never share types, so the wiring maps one feature's result type into th
 | Failures | `FailureRule` | Matcher: method + path pattern + optional query predicate. Kind: `timeout`, `offline`, `http(status)`, `not_found`, `unauthorized`, `malformed`, `empty`, `slow(d)`. Trigger: `always`, `times(n)` (`once`), `afterCalls(n)`, `probability(p)` (seeded). These are P5's failure vocabulary |
 | Scenarios | per domain | Named bundles (`characters.empty`, `characters.server_error`) of overrides and failures. Selected by config, by a BDD step or from the dev menu |
 | Control | `NetworkDiagnostics` (interface in `mc_api_client`) | `setLatency`, `failNext`, `useScenario`, `traffic` (ring buffer of 500 requests). The mock implements it. `developer_menu` and `developer_network_inspector` use it with no mock dependency |
-| Wiring | app only | `MockedBackendDIInitializer` sets `dio.httpClientAdapter`. Config comes from `config/<flavour>.json` (`MC_BACKEND_SEED`, `_LATENCY`, `_SCENARIO`). Features see only `Dio` |
-| Tests | P5 | `McTestContainer` composes the production root initializers with a zero-latency backend and the test's own fixture sets (`McBackendHarness`, strict on unmatched requests) |
+| Wiring | app only | `MockedBackendDIInitializer` sets `dio.httpClientAdapter`. Config comes from the bundled `app_config.json` (`backend.seed`, `.latency`, `.scenario`; R13, §3.4). Features see only `Dio` |
+| Tests | P5 | `McTestContainer` is `rootInitializers(wirings: const [])` with edge overrides: a zero-latency backend with the test's own fixture sets (`McBackendHarness`, strict on unmatched requests), `MockMonitoring`, in-memory storage and a fixed clock |
 | Images | `mc_fixtures_media` | About 120 original placeholder PNGs (2x/3x). `ApiImage(path: 'mock-asset://covers/017')` is resolved by `BundledImageResolver` through `McMediaScope`. Tests use a 1×1 memory image, except goldens |
 
 The contract has about 180 endpoints across 10 domains. It is documented per domain in `mc_fixtures_<domain>/CONTRACT.md` (T-0007 owns the format).
@@ -557,14 +590,14 @@ Generated-LOC model: freezed about 180 per class; json about 35 per DTO; retrofi
 |---|---|---|---|---|---|---|---|---|
 | U01 | `utility/mc_analysis` | utility/foundation | Shared lints (Tide's 22 rules + strict-inference); generated-file excludes | — | — | UC | 0 | 0 |
 | U02 | `utility/mc_prelude` | utility/foundation | `Result<S,F>` (Tide API), `Optional`, `Unit`, typed-ID extension types, `Clock`, async/collection extensions | — | — | UF | 3.2k | 3.4k |
-| U03 | `utility/mc_di` | utility/foundation | `DIContainer`, `McDIInitializer`, root `initializeDIContainer`, per-flow child containers, `RootImport<T>`, test reset | — | — | UF | 1.1k | 1.3k |
-| U04 | `utility/mc_config` | utility/foundation | `AppConfig` from `--dart-define-from-file` (env, backend mode, latency), build info | mc_prelude, mc_di | I | UF | 1.2k | 0.9k |
-| U05 | `utility/mc_monitoring` | utility/foundation | `Monitoring` (`log`, `trackEvent`, `recordError`, `setKey`); console + in-memory sinks; Flutter error hooks via one `@preResolve` | mc_prelude, mc_di, mc_config | I | UF | 1.9k | 1.6k |
+| U03 | `utility/mc_di` | utility/foundation | `DIContainer`, `McDIInitializer`, transactional root `initializeDIContainer` (publish on success), per-flow child containers, `RootImport<T>`, registration recording for `debugResolveAll`, test reset | — | — | UF | 1.1k | 1.3k |
+| U04 | `utility/mc_config` | utility/foundation | `AppConfig` from the bundled `app_config.json` asset (env, backend seed, latency, scenario), build info; no defines (R13) | mc_prelude, mc_di | I | UF | 1.2k | 0.9k |
+| U05 | `utility/mc_monitoring` | utility/foundation | `Monitoring` (`log`, `trackEvent`, `recordError`, `setKey`); console + in-memory sinks; one `@preResolve`; pure Dart (R15: the Flutter error hooks are in `app_core`) | mc_prelude, mc_di, mc_config | I | UF | 1.9k | 1.6k |
 | U06 | `utility/mc_analytics` | utility/services | Screen/event tracking facade, consent gate, in-memory sink, app-lifecycle sessions | mc_prelude, mc_di, mc_config, mc_monitoring | F J I | UF | 2.2k | 1.8k |
 | U07 | `utility/mc_event_bus` | utility/foundation | Typed in-process topics; `DataChanged(topic)` invalidation between features | mc_prelude, mc_di | I | UF | 0.9k | 0.9k |
 | U08 | `utility/mc_session` | utility/services | `SessionReader` / `SessionWriter`, token store, auth-state stream | mc_prelude, mc_di, mc_event_bus, mc_storage | F J I | UD | 1.8k | 1.6k |
 | U09 | `utility/mc_feature_flags` | utility/services | Flag registry, evaluation, local overrides, experiment buckets, remote fetch | mc_prelude, mc_di, mc_config, mc_storage, mc_api_client, mc_api_errors | F J I R | UD | 2.6k | 2.0k |
-| U10 | `utility/mc_feature_flow` | utility/kit | Hardened `FeatureFlow<S,R>` / `FeatureFlowController` over flow_builder: scoped DI, named pages, results, l10n delegates | mc_prelude, mc_di, mc_monitoring | — | UK | 2.4k | 2.6k |
+| U10 | `utility/mc_feature_flow` | utility/kit | Hardened `FeatureFlow<S,R>` over flow_builder (implements `mc_bloc_kit`'s `FeatureFlowController`): scoped DI, root-import checks, named pages, results, l10n delegates | mc_prelude, mc_di, mc_monitoring, mc_bloc_kit | — | UK | 2.4k | 2.6k |
 | U11 | `utility/mc_storage` | utility/foundation | Key-value + document store abstraction; in-memory and `dart:io` file implementations | mc_prelude, mc_di, mc_config | I | UD | 2.0k | 1.8k |
 | U12 | `utility/mc_cache` | utility/services | HTTP response cache interceptor, memory LRU, TTL, stale-while-offline | mc_prelude, mc_di, mc_storage, mc_api_client | F J I | UD | 2.8k | 2.4k |
 | U13 | `utility/mc_offline` | utility/services | Connectivity model, offline mutation queue, replay on reconnect | mc_prelude, mc_di, mc_storage, mc_cache, mc_event_bus, mc_api_client | F J I | UD | 3.0k | 2.6k |
@@ -572,7 +605,7 @@ Generated-LOC model: freezed about 180 per class; json about 35 per DTO; retrofi
 | U15 | `utility/mc_api_errors` | utility/services | Sealed `ApiFailure` (freezed), Dio-error mapping, l10n message keys | mc_prelude | F | UD | 1.3k | 1.2k |
 | U16 | `utility/mc_api_client` | utility/services | Shared `Dio`, base URL, `ApiResponse<T>` / `ApiPage<T>` envelope, logging, retry/backoff, `NetworkDiagnostics` port | mc_prelude, mc_di, mc_config, mc_monitoring, mc_api_errors | F J I | UD | 3.4k | 3.0k |
 | U17 | `utility/mc_api_auth` | utility/services | Bearer-token interceptor, 401 refresh, forced sign-out | mc_prelude, mc_di, mc_api_client, mc_session | I | UD | 1.4k | 1.4k |
-| U18 | `utility/mc_bloc_kit` | utility/kit | `McBloc` abstract base class (monitoring in `onTransition`), event transformers, `BlocObserver` | mc_prelude, mc_monitoring | — | UK | 1.8k | 1.5k |
+| U18 | `utility/mc_bloc_kit` | utility/kit | `McBloc` abstract base class (logs `McFailureState` states in `onTransition`), `FeatureFlowController<S,R>` interface, event transformers, `BlocObserver`; pure Dart (R15) | mc_prelude, mc_monitoring | — | UK | 1.8k | 1.5k |
 | U19 | `utility/mc_paging` | utility/kit | `PagedState<T>`, paging bloc helpers, debounced query + search history + facets | mc_prelude, mc_bloc_kit, mc_api_errors, mc_storage | F J | UK | 3.6k | 3.0k |
 | U20 | `utility/mc_forms` | utility/kit | Field/form state, validators, wizard step controller | mc_prelude, mc_bloc_kit | F | UK | 3.2k | 2.8k |
 | U21 | `utility/mc_l10n_core` | utility/l10n | Common-strings ARB, `LocaleController`, supported locales, flow delegate helper | mc_prelude, mc_di | L I | UK | 1.5k | 1.0k |
@@ -707,7 +740,7 @@ Generated-LOC model: freezed about 180 per class; json about 35 per DTO; retrofi
 | F098 | `feature/help/help_contact` | feature | Support ticket form | B + FW+, mc_session | F J I R L B | FW/S | 4.2k | 2.6k |
 | F099 | `feature/help/help_glossary` | feature | Marvel glossary A to Z | B + LD+, mc_ds_markup | F J I R L B | LD/S | 4.2k | 2.4k |
 | F100 | `feature/system/system_status` | feature | Maintenance / forced-update / degraded-service screens | B + SC+, mc_feature_flags | F J I R L B | SC/S | 2.9k | 1.6k |
-| A01 | `app/wiring/app_core` | app-lib | Shared app-layer code: typed `AppLocations`, boot page/bloc (error, timeout, retry), root DI list, `McApp` shell, guards, sandbox stubs | mc_prelude, mc_di, mc_config, mc_monitoring, mc_analytics, mc_api_client, mc_api_auth, mc_session, mc_feature_flags, mc_l10n_core, mc_media, mc_design_system, mc_event_bus | I L | AL | 4.4k | 3.0k |
+| A01 | `app/wiring/app_core` | app-lib | Shared app-layer code: typed `AppLocations`, boot page/bloc (error, timeout, retry) and the R29 router gate, Flutter error hooks, root DI list, `McApp` shell, guards, sandbox stubs | mc_prelude, mc_di, mc_config, mc_monitoring, mc_analytics, mc_api_client, mc_api_auth, mc_session, mc_feature_flags, mc_l10n_core, mc_media, mc_design_system, mc_event_bus | I L | AL | 4.4k | 3.0k |
 | A02 | `app/wiring/universe_wiring` | app-lib | Typed go_router routes, navigator implementations and result mappers for the universe group (16 features) | 16 group features, app_core, mc_di, mc_prelude | G I | AW | 2.2k | 1.7k |
 | A03 | `app/wiring/publishing_wiring` | app-lib | Typed go_router routes, navigator implementations and result mappers for the publishing group (22 features) | 22 group features, app_core, mc_di, mc_prelude | G I | AW | 2.9k | 2.2k |
 | A04 | `app/wiring/chronicle_wiring` | app-lib | Typed go_router routes, navigator implementations and result mappers for the chronicle group (11 features) | 11 group features, app_core, mc_di, mc_prelude | G I | AW | 1.6k | 1.3k |
@@ -715,7 +748,7 @@ Generated-LOC model: freezed about 180 per class; json about 35 per DTO; retrofi
 | A06 | `app/wiring/library_wiring` | app-lib | Typed go_router routes, navigator implementations and result mappers for the library group (8 features) | 8 group features, app_core, mc_di, mc_prelude | G I | AW | 1.3k | 1.0k |
 | A07 | `app/wiring/commerce_wiring` | app-lib | Typed go_router routes, navigator implementations and result mappers for the commerce group (13 features) | 13 group features, app_core, mc_di, mc_prelude | G I | AW | 1.9k | 1.4k |
 | A08 | `app/wiring/discovery_wiring` | app-lib | Typed go_router routes, navigator implementations and result mappers for the discovery group (11 features) | 11 group features, app_core, mc_di, mc_prelude | G I | AW | 1.6k | 1.3k |
-| A09 | `app/mini_client` | app | The Marvel app: composes all 7 wirings, `StatefulShellRoute` tabs, auth redirect, deep links, flavours | 7 `*_wiring`, app_core, 17 root utilities, 10 `mc_fixtures_*` | G I L | AM | 2.0k | 7.5k |
+| A09 | `app/mini_client` | app | The Marvel app: composes all 7 wirings, `StatefulShellRoute` tabs, auth redirect, deep links, per-env config asset (R13) | 7 `*_wiring`, app_core, 17 root utilities, 10 `mc_fixtures_*` | G I L | AM | 2.0k | 7.5k |
 | A10 | `app/ds_catalog` | app | Design-system gallery: every component x theme x text scale; golden source | mc_design_system, mc_ds_markup, mc_fixtures_media, mc_media, mc_l10n_core, mc_ds_theme | — | AC | 6.0k | 2.5k |
 | A11 | `app/sandbox/universe_sandbox` | app | Runs the universe group standalone; out-of-group navigation lands on a stub page | universe_wiring, app_core, 17 root utilities, 1 domain mock(s) | — | AS | 0.5k | 0.2k |
 | A12 | `app/sandbox/publishing_sandbox` | app | Runs the publishing group standalone; out-of-group navigation lands on a stub page | publishing_wiring, app_core, 17 root utilities, 1 domain mock(s) | — | AS | 0.6k | 0.2k |
@@ -809,7 +842,7 @@ The groups are acyclic: foundation ← services ← kits ← design system, with
 
 **Floor and margin.** The 500k floor holds if delivery averages ≥ 79 % of profile.
 
-**Test ratio.** P5 C1 expects about 0.3 for features, which would put feature test LOC near 140k. Our 267k assumes richer spec-driven Scenario Outlines. The TL sets the target; it doesn't change the hand-written budget.
+**Test ratio (TL decision, fix pass).** The test budget is 05 §4's: features about 0.25 (Dart; about 0.3 with Gherkin), utilities about 0.8, about 250k hand-written test LOC at S2. The test and generated columns above and in §6.4 are P1's upper estimates (richer Scenario Outlines); they aren't gated and don't change the hand-written budget.
 
 **Path to 1M (aligned with P2 S3).**
 
@@ -830,11 +863,11 @@ Every task owns the listed paths exclusively (D11). AC IDs are renumbered to `T-
 
 | ID | Task | Owns | Depends | Acceptance criteria |
 |---|---|---|---|---|
-| P1-01 | Workspace skeleton + architecture guard | root `pubspec.yaml`, `utility/mc_analysis`, `tool/mc_arch_check`, `tool/mc_loc` | — | **AC1** Given a feature importing another feature's barrel, when `fvm dart run mc_arch_check` runs, then it exits 1 naming the `feature → feature` edge. **AC2** Given `package:x/src/…` imported from another package, then it fails with "barrel-only". **AC3** Given a fixture tree with `*.g.dart`, l10n and BDD outputs, when `mc_loc` runs, then hand, generated and test LOC match the fixture's expected counts (D8). **AC4** Given a file violating each of the 22 Tide rules, when analysed with `mc_analysis`, then each rule reports. |
-| P1-02 | `mc_prelude`, `mc_di` | those two packages | P1-01 | **AC1** Given every `Result` member from the article, then each has a passing unit test. **AC2** Given `fromAsync` over a thrown `Error`, then the failure keeps its message. **AC3** Given two initializers, when `initializeDIContainer` runs, then they run in order and `diContainer<T>()` resolves both. **AC4** Given a child container with `RootImport<Foo>`, then `Foo` resolves to the root singleton and child-only types are invisible at the root. **AC5** Given `resetDIContainer()` in test setUp, then the second test sees nothing from the first; production init never resets. |
-| P1-03 | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage`, `mc_media` | those packages | P1-02 | **AC1** Given `config/e2e.json` with latency 0, then `AppConfig.backend.latency == Duration.zero`. **AC2** Given an in-memory sink, when `log`, `trackEvent` and `recordError` are called, then the sink holds the entries in order. **AC3** Given two subscribers to `favourites`, when `DataChanged('favourites')` is published, then each receives it once. **AC4** Given a file store, when a value is written and a new store opens the same directory, then the value reads back. |
-| P1-04 | `mc_feature_flow` (+ `flow_builder` 3.47.7 spike) | `utility/mc_feature_flow` | P1-02, P1-03 | **AC1** Given no `flowInitializer`, when pumped, then the first page renders. **AC2** Given a throwing initializer, then an error view with Retry shows and `recordError` is called; Retry re-runs it. **AC3** Given `complete(r)`, then `onComplete` receives `r` exactly once. **AC4** Given two instances of one flow in an `IndexedStack`, then each resolves its own controller. **AC5** Given a pushed page, when back is triggered, then the flow state reverts and the page has its declared `name`. |
-| P1-05 | Services | `mc_api_errors`, `mc_api_client`, `mc_api_auth`, `mc_session`, `mc_analytics`, `mc_feature_flags`, `mc_cache`, `mc_offline` | P1-03 | **AC1** Given each Dio failure (timeout, offline, 401, 404, 500, malformed), then it maps to the matching `ApiFailure`. **AC2** Given a signed-in session, then requests carry the bearer token; given a 401, then one refresh is attempted, then sign-out. **AC3** Given GET 503 with retry 2, then 3 attempts; POST is never retried. **AC4** Given analytics consent off, then nothing reaches the sink. **AC5** Given offline, when a mutation is queued, then it replays once on reconnect. |
+| P1-01 | Workspace skeleton + architecture guard | root `pubspec.yaml`, `utility/mc_analysis`, `tool/mc_arch_check`, `tool/mc_loc` | — | **AC1** Given a feature importing another feature's barrel, when `fvm dart run mc_arch_check` runs, then it exits 1 naming the `feature → feature` edge. **AC2** Given `package:x/src/…` imported from another package, then it fails with "barrel-only". **AC3** Given a fixture tree with `*.g.dart`, l10n and BDD outputs, when `mc_loc` runs, then hand, generated and test LOC match the fixture's expected counts (D8). **AC4** Given a file violating each of the 22 Tide rules, when analysed with `mc_analysis`, then each rule reports. **AC5** Given a feature barrel exporting a page, bloc or DI initializer, when `mc_arch_check` runs, then it fails naming the symbol (R4). **AC6** Given a route library importing a feature barrel, then it fails (R15); given a `RouteTargets` method returning a non-`*Flow` widget, then it fails (§4.2). |
+| P1-02 | `mc_prelude`, `mc_di` | those two packages | P1-01 | **AC1** Given every `Result` member from the article, then each has a passing unit test. **AC2** Given `fromAsync` over a thrown `Error`, then the failure keeps its message. **AC3** Given two initializers, when `initializeDIContainer` runs, then they run in order and `diContainer<T>()` resolves both; given the second throws, then nothing is published and a retry registers each type exactly once. **AC4** Given a child container with `RootImport<Foo>`, then `Foo` resolves to the root singleton and child-only types are invisible at the root. **AC5** Given `resetDIContainer()` in test setUp, then the second test sees nothing from the first; production init never resets. **AC6** Given `Result.guard` over a body that throws a `TypeError`, then it returns a failure from `mapError` that keeps the message. |
+| P1-03 | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage`, `mc_media` | those packages | P1-02 | **AC1** Given `--//tool/bazel/config:env=e2e` (latency 0 in `config/e2e.json`), then the bundled `app_config.json` yields `AppConfig.backend.latency == Duration.zero`, and `aquery` shows no `--dart-define`. **AC2** Given an in-memory sink, when `log`, `trackEvent` and `recordError` are called, then the sink holds the entries in order. **AC3** Given two subscribers to `favourites`, when `DataChanged('favourites')` is published, then each receives it once. **AC4** Given a file store, when a value is written and a new store opens the same directory, then the value reads back. |
+| P1-04 | `mc_feature_flow` (+ `flow_builder` 3.47.7 spike) | `utility/mc_feature_flow` | P1-02, P1-03 | **AC1** Given no `flowInitializer`, when pumped, then the first page renders. **AC2** Given a throwing initializer, then an error view with Retry shows and `recordError` is called; Retry re-runs it. **AC3** Given `complete(r)`, then `onComplete` receives `r` exactly once. **AC4** Given two instances of one flow in an `IndexedStack`, then each resolves its own controller. **AC5** Given a pushed page, when back is triggered by the iOS edge-swipe gesture (not only `Navigator.pop`), then the flow state reverts and the page has its declared `name`. **AC6** Given a `RootImport<T>` with no root registration, when the flow is created, then it fails naming `T`; given `debugResolveAll()` and a registration with a missing dependency, then it fails naming both types. |
+| P1-05 | Services | `mc_api_errors`, `mc_api_client`, `mc_api_auth`, `mc_session`, `mc_analytics`, `mc_feature_flags`, `mc_cache`, `mc_offline` | P1-03 | **AC1** Given each Dio failure (timeout, offline, 401, 404, 500, malformed), then it maps to the matching `ApiFailure`. **AC2** Given a signed-in session, then requests carry the bearer token; given a 401, then one refresh is attempted, then sign-out. **AC3** Given GET 503 with retry 2, then 3 attempts; POST is never retried. **AC4** Given analytics consent off, then nothing reaches the sink. **AC5** Given offline, when a mutation is queued, then it replays once on reconnect. **AC6** Given `ApiFailure.from` over a non-Dio throwable (a `TypeError` from a bad JSON shape), then it is `ApiFailure.unexpected` with the message kept. |
 | P1-06 | `mc_mocked_backend` engine | `utility/mc_mocked_backend` | P1-05 | **AC1** Given seed 42, when one request sequence runs on two backends, then the responses are byte-identical. **AC2** Given latency `none` under `fake_async`, then requests complete without advancing time; given `realistic`, then the delay equals the seeded value. **AC3** Given `FailureRule(GET /v1/x, timeout, once)`, then call 1 throws `connectionTimeout` and call 2 succeeds. **AC4** Given an unregistered route, then the response is 404 with a body naming the path. **AC5** Given traffic logging, then `NetworkDiagnostics.traffic` emits method, path, status and duration. |
 | P1-07 | `mc_fixtures_characters`, `mc_fixtures_media` | those packages + `CONTRACT.md` | P1-06 | **AC1** Given `GET /v1/characters?offset=30&limit=30`, then page 2 of 1,500 comes back in stable order. **AC2** Given `nameStartsWith=spi`, then every name starts with "spi" (case-insensitive). **AC3** Given the provider contract snapshots, then the responses match them. **AC4** Given any `ApiImage` in a response, when resolved, then the bundled asset exists. |
 | P1-08 | Fixture domains A | `mc_fixtures_comics`, `_events`, `_identity` | P1-06 | Per package: **AC1** determinism (as P1-06 AC1); **AC2** every endpoint has `default`, `empty` and `server_error` sets; **AC3** contract snapshots match; **AC4** mutations (sign-in, preferences) persist until `reset()`. |
@@ -843,14 +876,14 @@ Every task owns the listed paths exclusively (D11). AC IDs are renumbered to `T-
 | P1-11 | DS foundation | `mc_ds_tokens`, `mc_ds_theme` (+ fonts), `mc_ds_layout`, `mc_ds_buttons`, `mc_ds_feedback` | P1-01 | **AC1** Given each component × light/dark/high-contrast × text scale 1.0/2.0, then the goldens match with real fonts (F-0004). **AC2** Given `McErrorView(onRetry)`, when Retry is tapped, then the callback fires once and a semantics label exists. **AC3** Given widths 375 and 1024, then the adaptive grid shows 2 and 4 columns. |
 | P1-12 | DS components + `ds_catalog` | remaining `mc_ds_*`, `mc_design_system`, `app/ds_catalog` | P1-11, P1-14 | **AC1** Goldens for every component (as P1-11 AC1). **AC2** Given `McPagedGrid` scrolled to 80 %, then the next page is requested once. **AC3** Given `McImage`, then a placeholder shows, then the resolved image. **AC4** Given the catalogue app on simulator `mc-P1-12-e2e`, then the screenshot of each category page is in evidence. |
 | P1-13 | l10n | `mc_l10n_core`, `mc_formatters` | P1-02 | **AC1** Given locale `de`, then the common strings resolve in German. **AC2** Given `Money(1999, EUR)` in `de`, then it formats as `19,99 €`. **AC3** Given a package ARB set missing a locale, when the l10n check runs, then it fails naming the locale. |
-| P1-14 | Presentation kits | `mc_bloc_kit`, `mc_paging`, `mc_forms` | P1-03, P1-05 | **AC1** Given an `McBloc` emitting a failure state, then `Monitoring.log` is called from `onTransition`, not from the handler. **AC2** Given `PagedState` at its end, when `loadMore` is called, then no request is made. **AC3** Given a debounced query, when typing 5 characters in 200 ms, then 1 search fires. **AC4** Given wizard validators, then errors are reported per step. |
+| P1-14 | Presentation kits | `mc_bloc_kit`, `mc_paging`, `mc_forms` | P1-03, P1-05 | **AC1** Given an `McBloc` emitting a state that implements `McFailureState` (freezed `@Implements`), then `Monitoring.log` is called once from `onTransition` with its `failure`, not from the handler; other states aren't logged. **AC2** Given `PagedState` at its end, when `loadMore` is called, then no request is made. **AC3** Given a debounced query, when typing 5 characters in 200 ms, then 1 search fires. **AC4** Given wizard validators, then errors are reported per step. |
 | P1-15 | Testing utilities (with P5) | `mc_test_utils`, `mc_test_steps`, `mc_e2e_utils` | P1-04, P1-06, P1-11 | P5's ACs for TD-01 to TD-04, plus **AC1** Given `initFlow`, then the theme is `McTheme`, the platform is iOS and the flow's delegates are installed. |
-| P1-16 | App layer skeleton | `app/wiring/app_core`, 7 empty `*_wiring` skeletons, `app/mini_client` | P1-05, P1-06, P1-12, P1-13 | **AC1** Given a failing root initializer, then boot shows an error, and Retry succeeds on the second attempt. **AC2** Given boot taking > 10 s, then the timeout state shows. **AC3** Given `simctl openurl … miniclient://app/<placeholder>` on `mc-P1-16-e2e`, then that route shows (screenshot). **AC4** Given signed-out access to a guarded path, then the app redirects to sign-in with `from`. |
-| P1-17 | Exemplar **LD** `characters_list` | feature + `universe_wiring` contents + `universe_sandbox` | P1-04, P1-07, P1-12, P1-14, P1-15, P1-16 | **EX-AC1** happy path: Given `characters.default`, when I open the list, then I see 30 characters. **EX-AC2** failure: Given `server_error`, then an error with Retry shows; Retry recovers. **EX-AC3** outbound: when I tap a character, then `openCharacter(id)` is called (feature test), and the wiring test pushes the `CharacterDetailsRoute` location. **EX-AC4** Given locale `de`, then the title comes from the German ARB. **EX-AC5** the sandbox launches on the simulator showing the list (screenshot). **EX-AC6** when I scroll to the end, then page 2 loads. |
+| P1-16 | App layer skeleton | `app/wiring/app_core`, 7 empty `*_wiring` skeletons, `app/mini_client` | P1-05, P1-06, P1-12, P1-13 | **AC1** Given a failing root initializer, then boot shows an error, and Retry succeeds on the second attempt. **AC2** Given boot taking > 10 s, then the timeout state shows. **AC3** Given `simctl openurl … miniclient://app/<placeholder>` on `mc-P1-16-e2e`, then that route shows (screenshot). **AC4** Given signed-out access to a guarded path, then the app redirects to sign-in with `from`. **AC5** Given a cold-start link `miniclient://app/<placeholder>` while boot is held, when boot succeeds, then that route shows and no route builder or `redirect` ran before `ready` (counted). **AC6** Given the same link and a failing first boot, when Retry succeeds, then the link is replayed once and every root type is registered exactly once. |
+| P1-17 | Exemplar **LD** `characters_list` | feature + `universe_wiring` contents + `universe_sandbox` | P1-04, P1-07, P1-12, P1-14, P1-15, P1-16 | **EX-AC1** happy path: Given `characters.default`, when I open the list, then I see 30 characters. **EX-AC2** failure: Given `server_error`, then an error with Retry shows; Retry recovers. **EX-AC3** outbound: when I tap a character, then its preview opens (flow state); when I tap "See full profile", then `openCharacter(id)` is called (feature test), and the wiring test pushes the `CharacterDetailsRoute` location. **EX-AC4** Given locale `de`, then the title comes from the German ARB. **EX-AC5** the sandbox launches on the simulator showing the list (screenshot). **EX-AC6** when I scroll to the end, then page 2 loads. |
 | P1-18 | Exemplar **SC** `comics_details` | feature + `publishing_wiring` + `publishing_sandbox` | as P1-17, with P1-08 | EX-AC1–5, plus **AC6** Given signed out, when I tap favourite, then `requestSignIn()` is awaited; on `true` the favourite is saved and `DataChanged('favourites')` is published. |
 | P1-19 | Exemplar **SR** `discovery_search` | feature + `discovery_wiring` + `discovery_sandbox` | as P1-17, with P1-10 | EX-AC1–5, plus **AC6** Given typing "spi", then 1 debounced request fires, results are grouped by domain, and the query is saved in history. |
 | P1-20 | Exemplar **FW** `library_reading_list_editor` | feature + `library_wiring` + `library_sandbox` | as P1-17, with P1-09 | EX-AC1–5, plus **AC6** Given an invalid step, then Next is disabled and the error is shown; when submitted, then the flow completes with the new list ID, which the wiring returns to the caller. |
 | P1-21 | Exemplar **DB** `store_home` | feature + `commerce_wiring` + `commerce_sandbox` | as P1-17, with P1-09 | EX-AC1–5, plus **AC6** Given the deals endpoint failing, then only that section shows an error and the other sections render. |
 | P1-22 | Exemplar **ST** `settings_appearance` | feature + `account_wiring` + `account_sandbox` | as P1-17, with P1-08 | EX-AC1–5, plus **AC6** when dark mode is chosen, then the whole app re-themes and the choice survives a restart (fixture identity sync). |
-| P1-23 | Exemplar **IX** `trivia_quiz` | feature + `chronicle_wiring` + `chronicle_sandbox` | as P1-17, with P1-10 | EX-AC1–5, plus **AC6** Given seed 42, then a 10-question round scores deterministically; `test/unit/` covers the pure scoring engine (C7 exception). |
-| P1-24 | Mason bricks from the exemplars | `tool/bricks/**` | P1-17 to P1-23 | **AC1** Given `mason make mc_feature_<arch>` with an exemplar's variables, then the output equals the exemplar's fixed-shape files (P2 KD1 golden). **AC2** Given a new name, then the generated package passes `mc_arch_check`, analysis and its template BDD test. |
+| P1-23 | Exemplar **IX** `trivia_quiz` | feature + `chronicle_wiring` + `chronicle_sandbox` | as P1-17, with P1-10 | EX-AC1–5, plus **AC6** Given seed 42, then a 10-question round scores deterministically; a Scenario Outline with the spec's scoring examples covers the engine through the flow (R6, no `test/unit/`). |
+| P1-24 | Mason bricks from the exemplars | `tool/bricks/**` | P1-17 to P1-23 | **AC1** Given `mason make mc_feature_<arch>` with an exemplar's variables, then the output equals the exemplar's fixed-shape files (P2 KD1 golden). **AC2** Given a new name, then the generated package passes `mc_arch_check`, analysis and its template BDD test. **AC3** Given every brick's output, when analysed with `mc_analysis`, then there are zero diagnostics (template-lint golden; catches `unnecessary_library_directive`). |

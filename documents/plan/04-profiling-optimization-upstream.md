@@ -59,7 +59,7 @@ _Planner P4 · T-0013 wave 2 · 2026-11-23 · Status: draft for TL assembly_
 | C-6 | P1's 9 apps (including sandboxes) are all reached by `bazel build //...`. In fastbuild every `flutter_application` is AOT `[rules_flutter §16.1]`, so up to 9 TFA and `gen_snapshot` chains can stack. | P1, P3 | Sandbox and secondary apps are tagged `manual` or built with `--config=sim`. X-02 adds memory-aware scheduling in any case. P2's `--apps k` is the test knob. |
 | C-7 | Test granularity: one `flutter_test` per file (P5, the rules' model) against per-package aggregation (`[P2 C5]` defaults S4 to `per_package`). | P2, P3, P5 | Support both. X-16 decides the S2 default with data, and S4 uses `per_package` until then. |
 | C-8 | `.bazelrc` ownership. P3 defines `--config=budget16`; P4 produces its values. | P3 | P3 owns the file and its structure. P4 experiments propose value changes through a task, citing A/B evidence. The `T` arm (§3.3) is `--config=budget16`. |
-| C-9 | Bazel version: this Mac has Homebrew 9.2.0 and no bazelisk, while upstream pins 9.3.0. Numbers are comparable only within one Bazel version. | P3 | P3 pins `.bazelversion`, and P4-01 refuses to run on a mismatch. Bazelisk needs TL/PO approval to install. |
+| C-9 | Bazel version: this Mac has Homebrew 9.2.0 and an installed but unlinked bazelisk, while upstream pins 9.3.0. Numbers are comparable only within one Bazel version. | P3 | **Resolved (R18):** `.bazelversion` 9.3.0 through `tool/bazelw` over the unlinked bazelisk; P4-01 refuses to run on a mismatch. |
 | C-10 | `flutter_integration_test(platform="ios")` boots a simulator the rules choose, and CLAUDE.md forbids touching shared simulators. | P3, P5 | B3i stays out of the matrix until the device can be pinned to `mc-<task>-<role>`. |
 | C-11 | `documents/perf/DASHBOARD.md` and `documents/upstream/README.md` are indexes, which CLAUDE.md gives to the TL. | TL | Crew write only per-run and per-U-ID files. The TL regenerates the dashboard (one command) and updates the tracking table at merge. |
 
@@ -73,7 +73,7 @@ _Planner P4 · T-0013 wave 2 · 2026-11-23 · Status: draft for TL assembly_
 |---|---|---|---|
 | S0 | 15 | ~35k | quick gates, harness bring-up |
 | S1 | 50 | ~150k | growth point |
-| **S2** | 150 | ~600k | nightly reference |
+| **S2** | 169 | ~634k | nightly reference |
 | S3 | ~190 | ~1.0M | weekly; the strict limit for release AOT (C-2) |
 | S4-5M | ~915 | ~5M | RAM study (out of tree, `mcgen synth`) |
 | S4-10M | ~1,820 | ~10M | RAM study, milestone |
@@ -84,12 +84,12 @@ P2 guarantees S4 reachability, meaning every flow is routed from a catalogue scr
 
 | ID | Build | Command |
 |---|---|---|
-| B1 | sim-debug app | `bazel build --config=sim //app/mini_client:app_ios` |
-| B2 | device AOT | `bazel build --config=device //app/mini_client:__app_framework_framework` (KD-11) |
-| B3 | host tests | `bazel test --test_tag_filters=-ios_integration //...` (analyze aspect on, P2's `test` config) |
+| B1 | sim-debug app | `bazel build --config=sim //app/mini_client:mini_client_ios` |
+| B2 | device AOT | `bazel build --config=device //app/mini_client:__mini_client_ios_app_framework` (KD-11; the label is private to the macro, so P4-01 AC5 asserts it at every pin bump) |
+| B3 | host tests | `bazel test --build_tests_only --test_tag_filters=-ios_integration,-app //...` (analyze aspect on, P2's `test` config). The `app` sim build tests transition to `-c dbg`, so they run separately (`--config=app`) unless a cell measures H-CFGDUP on purpose |
 | B3i | simulator integration | weekly, once C-10 is resolved |
-| B4 | lint | `bazel build --config=lint //...` (`dart_analyze` + format output groups `[rules_dart §13]`) |
-| B5 | dev session | `fl run -t //app/mini_client:app_ios -d mc-<task>-perf`, then hot reloads per edit |
+| B4 | lint | `bazel build --config=lint //...` (`dart_analyze` + format output groups `[rules_dart §13]`; the config is defined in 03 §1.4) |
+| B5 | dev session | `flutter_bazel run -t //app/mini_client:mini_client_ios -d ios-simulator:<udid>`, where the harness first resolves `mc-<task>-perf` to its UDID (a bare name or UDID is refused); then hot reloads per edit |
 
 ### 3.3 Resource profiles and flag arms
 
@@ -338,9 +338,9 @@ flowchart TB
 |---|---|---|---|---|
 | Ballast | none | adaptive | adaptive | — |
 | `--host_jvm_args` | default | `-Xmx4g` | `-Xmx3g` | `-XX:ActiveProcessorCount=8` |
-| `--local_resources` | default | `memory=10977` | `memory=9000` | `cpu=8` |
+| `--local_resources` | default | `memory=10977` | `memory=9000`, `cpu=14` | `cpu=8` |
 | `--jobs` / `--local_test_jobs` | auto | auto | auto / 4 | 8 / 4 |
-| Worker caps | default | default | `--worker_max_multiplex_instances=DartKernel=4`, `--worker_max_instances=DartCodegen=1`, `FlutterKernelCompile=1`, `DartAnalyzerSummary=2` | — |
+| Worker caps | default | default | multiplex `DartKernel=4` (rules_dart kernels); singleplex `DartKernel=2` (Flutter `.flutter.kmod`, `flutter_kernel_module.bzl:409-414`), `DartCodegen=1`, `DartSqlCodegen=1` (BDD), `DartAggregateCodegen=1`, `DartAnalyzerSummary=2`, `DartAnalyze=2`, `DartKernelLink=1`, `FlutterKernelCompile=1`. Pools are per worker key (mnemonic + executable), so each shim binary gets its own | — |
 | Pool shrinking | workspace rc | workspace rc (`--experimental_shrink_worker_pool`) | + `--experimental_total_worker_memory_limit_mb=3072`† | — |
 | `--loading_phase_threads` | auto | auto | auto | 8 |
 
@@ -362,6 +362,8 @@ flowchart TB
 3. **Nothing is killed.** No `OutOfMemoryError`, no worker crash in `java.log`, no memorystatus kill in the unified log, and the Simulator app and the analysis server are still alive afterwards.
 4. **No thrashing.** The median wall time is ≤ 1.20× that of the same command and arm under profile U.
 5. **Pressure (gated at L2 and L3 only).** The pressure level is never critical, and is at "warn" for ≤ 5 % of samples. At L1 this is recorded only, because the thresholds are skewed (§7.1).
+
+**This table is the single definition of `--config=budget16`** (V3-05). 03 §1.4 carries the identical `.bazelrc` block, and `//tool/perf:budget16_rc_test` fails if the two differ.
 
 **Where the caps come from:** 16 GiB − 4.5 GiB (OS and desktop) − 2.0 GiB (Simulator with the app at S2) − 2.5 GiB (analysis server at S2) − 1.0 GiB (file-cache headroom) = **6.0 GiB**. Whole-repo cells close the Simulator, which gives **8.0 GiB**. The resident load is measured on every run. If the load alone leaves less than the cap, the cell is reported as *environment-bound* instead of passing or failing.
 
@@ -439,7 +441,7 @@ Execution order differs from impact. The cheap flag-only cards run first (X-08 c
 | X-20 | H-ITEST | Each `flutter_integration_test` builds its own app and runs `exclusive` | app builds for 10 targets | rules_flutter: several entry points in one app; the simulator as an extra resource instead of `exclusive` | app builds drop from 10 to 1 |
 | X-21 | host tools | rules_swift worker and abseil exec-configuration builds are a large share of clean CPU `[rules_flutter §10.3]` | attribution of exec-config spawns | `--host_compilation_mode`†; disk cache across output bases | lower clean CPU |
 | X-22 | disk | Output base, disk cache and test kernels grow faster than LOC | `du` per rung; growth per edit; `--experimental_disk_cache_gc_max_size`† | ours: a GC policy; upstream, if test kernels duplicate the base dill | K11 met |
-| X-23 | H-CACHE | The app-JIT runner snapshot and the incremental-worker route miss across machines `[rules_dart §9, rules_flutter §9]` | O1 with L2 as the second machine | ours: `test_runner_snapshot=false` and `incremental_kernel=false` for shared caches | hit rate ≥ 99.5 % |
+| X-23 | H-CACHE | The app-JIT runner snapshot and the incremental-worker route miss across machines `[rules_dart §9, rules_flutter §9]` | O1 with L2 as the second machine | ours: `test_runner_snapshot=false` and `dev_incremental_serialization=false` for shared caches (the source attributes non-identical dills to the latter, not to `incremental_kernel`) | hit rate ≥ 99.5 % |
 
 H-GAZELLE and H-PODS are functional questions owned by P3, and are not in this backlog.
 
@@ -634,12 +636,13 @@ flowchart LR
 | | AC2 | another run holds the lock, or a foreign Bazel server or Simulator exists | a timed run starts | it refuses; if an intruder appears mid-run, the run is marked contaminated |
 | | AC3 | any run | it completes | `env.json` holds the repo and fork SHAs, the Bazel, Flutter, Dart, Xcode and macOS versions, the machine id, power, thermal state, profile, arm, rung and `bench_version`; a mismatch with `.bazelversion` refuses the run |
 | | AC4 | calibration drifting more than 5 % | the run summarises | it is flagged `machine_drift` and excluded from gates |
+| | AC5 | a pin bump | `bench.py flags` runs | every B1-B5 label (including the macro-private `__mini_client_ios_app_framework`) resolves with `bazel query`, and the `budget16` block in `.bazelrc` equals §7.2 |
 | **P4-02** Ingestion (exec log, BEP, profile, aquery) | AC1 | an S0 compact log and its BEP | both are ingested | executed and cache-hit counts per mnemonic agree with BEP `action_summary` |
 | | AC2 | two logs of one build with one file edited between them | they are diffed | spawns pair 1:1, and exactly those whose input digests changed are reported |
 | | AC3 | an S4-10M-sized log | it is ingested | it streams with ≤ 1 GiB RSS and no sorting |
 | | AC4 | a trace profile | it is parsed | phase totals match `bazel analyze-profile` within 1 % |
 | **P4-03** macOS tree sampler | AC1 | 3 children each touching 512 MiB of random bytes | they are sampled | the tree's peak footprint is 1.5 GiB + baseline ± 10 %, with ΣRSS reported alongside |
-| | AC2 | an S0 Bazel build | it is sampled | ≤ 5 % of peak bytes fall in class `other`; per-phase and per-class peaks and peak attribution are written |
+| | AC2 | an S0 Bazel build | it is sampled | ≤ 5 % of peak bytes fall in class `other`; workers are classed by mnemonic **plus executable** (one row per shim pool); per-phase and per-class peaks and peak attribution are written |
 | | AC3 | 200 pids | they are sampled at 250 ms | overhead is ≤ 2 % of one core; swap, swapouts and pressure series are written at 1 s |
 | **P4-04** budget16 environment and evaluator | AC1 | this Mac | `ballast up --target-available 11.5G` runs | available memory is 11.5 ± 0.25 GiB, the wired delta ≈ the ballast, and the compressor size changes by ≤ 5 % |
 | | AC2 | the ballast is up | the resident load starts and the run then ends, normally or on error | `mc-<task>-perfload` ran the app and the analysis server reported idle; afterwards the ballast is released and the simulator deleted (`simctl list`, `vm_stat`) |
@@ -670,10 +673,11 @@ flowchart LR
 | | AC2 | each rung | the `-Xmx` sweep runs | the minimum `-Xmx` with wall time ≤ 1.05× and no `OutOfMemoryError` is recorded; the sandboxing cost is recorded |
 | **P4-14** Codegen (X-09, X-10) | AC1 | S2 clean | it runs | concurrent codegen pools and their Σ footprint are reported, along with time and peak per builder per request in Flutter and pure-Dart packages, summaries on and off |
 | | AC2 | a capped arm | it runs | Σ codegen ≤ 2 GiB with outputs identical |
+| | AC3 | the S0 and S2 trees | `tool/build_runner_overlay/run.sh` (03 §7.3) and Bazel codegen each run clean and after E07, E08 and E13 | wall time, CPU, peak footprint and rerun counts are compared in a finding and feed the R28 report and upstream issues |
 | **P4-15** Tests (X-15 to X-17, X-20) | AC1 | the B3 `--local_test_jobs` sweep | it runs under budget16 | the lowest-wall-time setting that passes is recorded |
 | | AC2 | per-file and per-package modes at S2 | both run | CPU, disk, peak and test precision are compared; the double-compile count is recorded |
 | **P4-16** Graph, analysis, disk (X-12, X-13, X-18, X-19, X-21 to X-23) | AC1 | a fork patch to analysis | it is measured | the aquery action graph is identical before and after, and the analysis exponent drops |
-| | AC2 | S2 | the coverage check runs | 100 % of first-party libraries have a stripped outline and a summary, apart from listed exceptions |
+| | AC2 | S2 | the coverage check runs | 100 % of first-party libraries have a stripped outline and a summary, apart from listed exceptions, and `aquery` shows `--summary` inputs on every `DartCodegen` action except the route files (V3-18) |
 | | AC3 | each rung | disk is measured | output base, cache growth per edit and GC behaviour are reported against K11 |
 | **P4-17** Upstream pipeline | AC1 | an anomaly | `upstream.py new U-NNNN` runs | the folder skeleton is created from the template |
 | | AC2 | `repro/run.sh` | it runs in a temporary directory | it shows the symptom against upstream pins and passes against the fork patch |

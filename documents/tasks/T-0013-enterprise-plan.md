@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (2026-11-23) |
 | Owner | Tech Lead (orchestrating Researchers → Planners → Verifiers) |
 | Branch | TL branch → `main` (docs only) |
 | Created | 2026-11-22 |
@@ -35,5 +35,11 @@ A complete, verified plan for building an enterprise Marvel app that follows Tid
 - 2026-11-22/23: Wave 2 ran with interruptions (usage-limit pauses three times; agents resumed one at a time). All five sections were written: 01 (169 modules, ~634k LOC), 02 (mcgen, S0 to S4, edit corpus), 03 (pins, patch queue, codegen shims), 04 (KPIs, budget16, oracles, 23 experiments, upstream pipeline), 05 (Tide tiers, BDD AC tags, Bazel test targets).
 - 2026-11-23: TL assembled `documents/plan/README.md`: resolutions R1 to R27, roadmap Phases A to H, superseded tasks. Wrote ADR-0007 to ADR-0010 and raised Q-010 to Q-014. Wave 3 (V1 to V3) dispatched.
 
+- 2026-11-23: Wave 3 ran: V1 (14 findings), V2 (16), V3 (19), with 0 blockers. A plan-editor fix pass resolved all 49 (47 fixed, 1 accepted deviation V2-13, 1 spike V3-01 → P3-01). Changed R4, R6, R7, R13 to R17, R19, R25 and R28; added R29 (boot and deep links). Leftovers: P-018, P-019.
+
 ## Outcome
-_Pending verification (AC4)._
+- **AC1, AC2:** `documents/research/` (4 docs).
+- **AC3:** `documents/plan/` (README + 5 sections): 169 modules, about 634k LOC at S2, S3 at about 1M, S4 synthetic 5M and 10M; Bazel integration; profiling and upstream programme; BDD testing; Phases A to H.
+- **AC4:** `documents/plan/reviews/V1..V3` with a Resolution column; every finding resolved.
+- **AC5:** ADR-0007 to ADR-0010; BOARD and STATUS updated; Q-010 to Q-014 raised.
+- **Next:** Phase A de-risk spikes.
