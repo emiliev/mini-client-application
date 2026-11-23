@@ -36,4 +36,7 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-031 | Declare Inter in the Bazel app bundle (`flutter_application` fonts) so the app renders the DS font | Feature | T-0019 Verifier | App-shell task | — |
 | P-032 | Restrict DS visibility from `//visibility:public` to the P3-06 layer package_group | Tooling | T-0019 | With P3-06 | — |
 | P-033 | Move the `mc_ds_testing` golden harness into `mc_test_utils` | Tooling | T-0019 | With P5-01 | — |
+| P-034 | `mc_mocked_backend`: a `once` rule is consumed even when the request then times out or is cancelled | Bug (low) | T-0018 Verifier | With P1-05 | — |
+| P-035 | `mc_mocked_backend`: per-route latency overrides; contract JSON schemas | Feature | T-0018 | With P5-14 | — |
+| P-036 | Lesson: parallel branches that predate a new lint or ruleset fail the post-merge gate; rebase before handoff when `main` gains shared rules | Process | T-0018 merge | Ongoing | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

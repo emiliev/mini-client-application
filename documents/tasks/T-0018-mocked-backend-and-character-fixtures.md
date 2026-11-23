@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready for verification |
+| Status | Done (merged 2026-11-23; Verifier PASS `3290e44`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0018-mocked-backend` (from `origin/main` `53c612d`+) |
@@ -78,3 +78,7 @@ Deviations and choices to review:
 | 6 | `characters.empty` | Shares the list query validation | `T-0018-AC6: the empty scenario validates like the normal handler` |
 | 7 | Router ties | `add` throws when two same-method routes can match one path with equal literal counts; more literals wins | `T-0018-AC4: ambiguous routes are rejected, literal precedence is kept` |
 | 8 | Headers | List values join with `", "` | `T-0018-AC4: list-valued headers are joined with a comma and a space` |
+
+## Merge (TL)
+- 2026-11-23: First Verifier pass PASS (`e50cbae`). `/code-review` found 8 issues (rule counting, timeouts, malformed input, strict parsing, cancellation, scenario validation, router ties, headers), fixed in `1357160`; the Verifier's low items were fixed in `8a93613`. Re-verify PASS `3290e44`, with the Verifier's mutation checks caught. The TL's first post-merge gate **failed**: T-0017's `mc_analysis` lints weren't met by this pre-T-0017 branch. The merge was aborted; the Engineer rebased and conformed (`752948b`). Second merge: `test --nocache_test_results //...` passed 19/19, lint was clean and `mc_arch_check` reported OK. `MODULE.bazel.lock` was updated for the new `dio` hub entries.
+- Follow-ups: P-034 (a `once` rule is consumed even when the request then times out or is cancelled), P-035 (per-route latency overrides and contract JSON schemas).

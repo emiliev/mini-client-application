@@ -21,3 +21,4 @@ A finding is knowledge we earned and don't want to earn twice: environment gotch
 | [F-0012](F-0012-test-analyze-format-top-level-only.md) | `bazel test` analyzes and format-checks only the test target | Lesson | 2026-11-23 | Use `build --config=lint //...` for full coverage |
 | [F-0013](F-0013-lint-and-runfiles-facts.md) | Lint and runfiles facts: Tide rules on Dart 3.13.5, aspect vs `dart analyze` gap | Lesson | 2026-11-23 | `mc_analysis` carries 21 rules; one aspect miss under investigation (P-030) |
 | [F-0014](F-0014-goldens-under-bazel-flutter-test.md) | Goldens under Bazel `flutter_test`: read path, update command, fonts and icons | Lesson | 2026-11-23 | Real fonts via the golden harness; MaterialIcons resolved via runfiles or an env var |
+| [F-0015](F-0015-mocked-backend-bazel-test-gotchas.md) | Mocked backend Bazel test and data-file gotchas | Lesson | 2026-11-23 | Fixture assets and test data under Bazel runfiles |
