@@ -44,12 +44,17 @@ Defaults:
   --driver       test_driver/integration_test.dart
   --device       iPhone 17 Pro
   --runtime      com.apple.CoreSimulator.SimRuntime.iOS-26-2
-  --evidence-dir <repo>/documents/evidence/<task>
+  --evidence-dir <repo>/documents/evidence/<task>/<role>
   --runner-cmd   fvm flutter drive --driver={driver} --target={target} -d {udid}
                  (run from --project; placeholders are replaced shell-quoted)
 
+The evidence dir belongs to the run: at start, the previous run's outputs
+(e2e-summary.md, e2e-*.log, *.png) are removed from it; other files are kept.
+A dir holding PNGs but no e2e-summary.md is refused (exit 2).
+
 Exit codes: 0 all targets passed; 1 a target failed; 2 bad arguments or failed
-pre-flight (no simulator was created); 3 simulator setup failed;
+pre-flight (no simulator was created); 3 simulator setup or teardown failed;
+4 evidence (log, screenshot or summary) could not be written;
 130 / 143 interrupted by SIGINT / SIGTERM.
 EOF
 }
@@ -142,15 +147,24 @@ descendants() {
   done
 }
 
-# kill_tree <pid>: TERM the process and all its descendants, KILL after 5 s.
+# group_alive <pgid>: true while any process is left in the process group.
+group_alive() { pgrep -g "$1" >/dev/null 2>&1; }
+
+# kill_tree <pid>: TERM the process, its process group and all its
+# descendants; KILL whatever is left after 5 s. run_child starts the runner in
+# its own process group (pgid = pid), so the group kill also reaches children
+# that were re-parented to launchd. The descendant walk is repeated before the
+# final KILL to catch late children that moved to another group.
 kill_tree() {
-  local root=$1 pids i
+  local root=$1 pids i p alive
   pids="$root $(descendants "$root" | tr '\n' ' ')"
+  kill -TERM -- "-$root" 2>/dev/null || true
   # shellcheck disable=SC2086
   kill -TERM $pids 2>/dev/null || true
   i=0
   while [ "$i" -lt 50 ]; do
-    local alive=0 p
+    alive=0
+    group_alive "$root" && alive=1
     for p in $pids; do
       if kill -0 "$p" 2>/dev/null; then alive=1; break; fi
     done
@@ -158,6 +172,8 @@ kill_tree() {
     sleep 0.1
     i=$((i + 1))
   done
+  pids="$pids $(descendants "$root" | tr '\n' ' ')"
+  kill -KILL -- "-$root" 2>/dev/null || true
   # shellcheck disable=SC2086
   kill -KILL $pids 2>/dev/null || true
 }
@@ -187,6 +203,10 @@ STARTED_AT=""
 SUMMARY_FINAL=0
 SIGNAL_NAME=""
 CURRENT_IDX=-1
+CURRENT_LOG=""
+CURRENT_SHOTS=""
+CURRENT_T0=0
+CURRENT_COLLECTED=0
 
 T_RESULTS=()
 T_DURATIONS=()
@@ -228,7 +248,9 @@ write_summary() {
       if [ "$i" -lt "${#T_RESULTS[@]}" ]; then
         echo "| \`${TARGETS[$i]}\` | ${T_RESULTS[$i]} | ${T_DURATIONS[$i]} s | [${T_LOGS[$i]}](${T_LOGS[$i]}) |"
       elif [ "$i" -eq "$CURRENT_IDX" ]; then
-        echo "| \`${TARGETS[$i]}\` | INTERRUPTED | - | - |"
+        local state=ERROR
+        [ -n "$SIGNAL_NAME" ] && state=INTERRUPTED
+        echo "| \`${TARGETS[$i]}\` | $state | $(($(date +%s) - CURRENT_T0)) s | [$CURRENT_LOG]($CURRENT_LOG) |"
       else
         echo "| \`${TARGETS[$i]}\` | NOT RUN | - | - |"
       fi
@@ -248,14 +270,18 @@ write_summary() {
         i=$((i + 1))
       done
     fi
-  } >"$tmp"
-  mv "$tmp" "$f"
+  } >"$tmp" || return 1
+  mv "$tmp" "$f" || return 1
 }
 
 # ------------------------------------------------------------- teardown ----
 cleanup() {
   local rc=$?
-  trap - EXIT INT TERM
+  # Ignore (not reset) INT/TERM: `trap -` would restore the default action,
+  # and a second Ctrl-C during teardown would kill the script before the
+  # simulator is deleted. Children started from here inherit the ignore too.
+  trap '' INT TERM
+  trap - EXIT
   set +e
 
   if [ -n "$CHILD_PID" ] && kill -0 "$CHILD_PID" 2>/dev/null; then
@@ -267,6 +293,14 @@ cleanup() {
     } 2>/dev/null
   fi
   CHILD_PID=""
+
+  # Keep what an interrupted target produced so far (nit: partial evidence).
+  if [ -n "$SIGNAL_NAME" ] && [ "$CURRENT_IDX" -ge 0 ] && [ "$CURRENT_COLLECTED" -eq 0 ]; then
+    printf '\n# interrupted by SIG%s\n' "$SIGNAL_NAME" >>"$EVIDENCE_DIR/$CURRENT_LOG" 2>/dev/null
+    collect_screenshots "$CURRENT_SHOTS" "${TARGETS[$CURRENT_IDX]}" ||
+      warn "could not collect all screenshots of the interrupted target"
+    CURRENT_COLLECTED=1
+  fi
 
   if [ "$SIM_CREATE_STARTED" -eq 1 ]; then
     if [ "$KEEP_SIM" -eq 1 ]; then
@@ -283,11 +317,17 @@ cleanup() {
           log "Deleted simulator $SIM_NAME ($u)"
         fi
       done
-      if [ -n "$(udids_named "$SIM_NAME")" ]; then
+      # Report deletion only when a fresh listing confirms it.
+      local remaining
+      if ! remaining=$(udids_named "$SIM_NAME"); then
+        warn "could not list simulators to confirm that $SIM_NAME was deleted; check with tool/sim_cleanup.sh --dry-run"
+        [ "$rc" -eq 0 ] && rc=3
+      elif [ -n "$remaining" ]; then
         warn "simulator $SIM_NAME still exists; run tool/sim_cleanup.sh"
         [ "$rc" -eq 0 ] && rc=3
+      else
+        printf 'SIMULATOR_DELETED_AT=%s\n' "$(date +%s)"
       fi
-      printf 'SIMULATOR_DELETED_AT=%s\n' "$(date +%s)"
     fi
   fi
 
@@ -305,6 +345,7 @@ cleanup() {
 }
 
 on_signal() {
+  trap '' INT TERM
   SIGNAL_NAME=$1
   printf 'e2e_ios: received SIG%s, cleaning up\n' "$1" >&2
   if [ "$1" = "INT" ]; then exit 130; else exit 143; fi
@@ -348,9 +389,12 @@ parse_args() {
 
 preflight_tools() {
   local tool
-  for tool in xcrun fvm sips; do
+  for tool in xcrun sips pgrep; do
     command -v "$tool" >/dev/null 2>&1 || die "'$tool' not found on PATH"
   done
+  case $RUNNER_CMD_TEMPLATE in
+    *fvm*) command -v fvm >/dev/null 2>&1 || die "'fvm' not found on PATH (the runner command uses it)" ;;
+  esac
   [ -x "$E2E_PY" ] || die "$E2E_PY not found (needed to parse simctl JSON)"
   xcrun --find simctl >/dev/null 2>&1 || die "'xcrun simctl' is not available (install Xcode)"
 }
@@ -440,11 +484,16 @@ render_cmd() {
 # can kill the child's process tree (F-0005).
 # The redirection must stay on the background command: redirecting the
 # run_child call itself would also redirect the trap's output into <logfile>.
+#
+# `set -m` around the `&` puts the child in its own process group (pgid = its
+# pid) so kill_tree can kill the whole group, including re-parented children.
 run_child() {
   local logfile=$1
   shift
+  set -m
   "$@" >>"$logfile" 2>&1 </dev/null &
   CHILD_PID=$!
+  set +m
   local rc=0
   wait "$CHILD_PID" || rc=$?
   CHILD_PID=""
@@ -478,24 +527,34 @@ create_and_boot() {
   log "Booted in $(($(date +%s) - t0)) s"
 }
 
-# collect_screenshots <shot-dir> <target>
+# in_list <needle> [items...]: true if needle equals one of the items.
+in_list() {
+  local needle=$1 x
+  shift
+  for x in "$@"; do
+    [ "$x" = "$needle" ] && return 0
+  done
+  return 1
+}
+
+# collect_screenshots <shot-dir> <target>: copies every PNG into the evidence
+# dir under a name unique within this run. Returns 1 if one could not be
+# written; it is then left out of the summary.
 collect_screenshots() {
-  local dir=$1 target=$2 f name dst note stem j clash
+  local dir=$1 target=$2 f base name dst note stem n
   stem=$(basename "$target")
   stem=${stem%.dart}
   for f in "$dir"/*.png; do
     [ -e "$f" ] || continue
-    name=$(basename "$f")
-    clash=0
-    j=0
-    while [ "$j" -lt "${#S_FILES[@]}" ]; do
-      [ "${S_FILES[$j]}" = "$name" ] && clash=1
-      j=$((j + 1))
+    base=$(basename "$f")
+    name=$base
+    n=1
+    while in_list "$name" ${S_FILES[@]+"${S_FILES[@]}"}; do
+      n=$((n + 1))
+      if [ "$n" -eq 2 ]; then name="$stem-$base"; else name="$stem-$n-$base"; fi
     done
-    if [ "$clash" -eq 1 ]; then
-      warn "screenshot $name from $target clashes with an earlier target; saving as $stem-$name"
-      name="$stem-$name"
-    fi
+    [ "$name" = "$base" ] ||
+      warn "screenshot $base from $target clashes with an earlier one; saving it as $name"
     dst="$EVIDENCE_DIR/$name"
     if note=$(downscale_if_tall "$f" "$dst"); then
       S_FILES+=("$name")
@@ -503,49 +562,70 @@ collect_screenshots() {
       S_TARGETS+=("$target")
       log "  screenshot $name ($note)"
     else
-      warn "could not process screenshot $f"
+      printf 'e2e_ios: error: could not save screenshot %s as %s\n' "$f" "$dst" >&2
+      return 1
     fi
   done
+  return 0
 }
 
-# run_target <index>: returns 0 on PASS, 1 on FAIL.
+# run_target <index>: returns 0 on PASS, 1 on FAIL, and 4 if evidence (log,
+# screenshot, summary) could not be written. Every infrastructure step is
+# checked explicitly: the caller uses `run_target || rc=$?`, so `set -e` is
+# off in here.
 run_target() {
-  local idx=$1 target=${TARGETS[$1]} stem logname logfile shots cmd t0 rc j
+  local idx=$1 target=${TARGETS[$1]} stem logname logfile shots cmd rc n dur
   stem=$(basename "$target")
   stem=${stem%.dart}
   logname="e2e-$stem.log"
-  j=0
-  while [ "$j" -lt "${#T_LOGS[@]}" ]; do
-    [ "${T_LOGS[$j]}" = "$logname" ] && logname="e2e-$stem-$((idx + 1)).log"
-    j=$((j + 1))
+  n=1
+  while in_list "$logname" ${T_LOGS[@]+"${T_LOGS[@]}"}; do
+    n=$((n + 1))
+    logname="e2e-$stem-$n.log"
   done
   logfile="$EVIDENCE_DIR/$logname"
   shots="$WORK_TMP/screenshots/$((idx + 1))-$stem"
-  mkdir -p "$shots"
+  if ! mkdir -p "$shots"; then
+    printf 'e2e_ios: error: cannot create %s\n' "$shots" >&2
+    return 4
+  fi
   cmd=$(render_cmd "$target")
 
-  CURRENT_IDX=$idx
   log "Running target $((idx + 1))/${#TARGETS[@]}: $target"
   log "  \$ $cmd"
   log "  log: $logfile"
-  {
+  if ! {
     echo "# e2e_ios.sh: $TASK $ROLE on $SIM_NAME ($SIM_UDID)"
     echo "# cwd: $PROJECT_DIR"
     echo "# SCREENSHOT_DIR=$shots"
     echo "\$ $cmd"
     echo
-  } >"$logfile"
+  } >"$logfile"; then
+    printf 'e2e_ios: error: cannot write %s\n' "$logfile" >&2
+    return 4
+  fi
 
-  t0=$(date +%s)
+  CURRENT_IDX=$idx
+  CURRENT_LOG=$logname
+  CURRENT_SHOTS=$shots
+  CURRENT_T0=$(date +%s)
+  CURRENT_COLLECTED=0
   rc=0
   run_child "$logfile" /bin/bash -c "cd \"\$1\" && SCREENSHOT_DIR=\"\$2\" exec /bin/bash -c \"\$3\"" \
     e2e-runner "$PROJECT_DIR" "$shots" "$cmd" || rc=$?
-  local dur=$(($(date +%s) - t0))
-  printf '\n# exit code: %s\n' "$rc" >>"$logfile"
+  dur=$(($(date +%s) - CURRENT_T0))
+  if ! printf '\n# exit code: %s\n' "$rc" >>"$logfile"; then
+    printf 'e2e_ios: error: cannot write %s\n' "$logfile" >&2
+    return 4
+  fi
 
-  collect_screenshots "$shots" "$target"
+  # While CURRENT_IDX is still set, a failure here shows the target as ERROR.
+  CURRENT_COLLECTED=1
+  collect_screenshots "$shots" "$target" || return 4
+
   T_DURATIONS+=("$dur")
   T_LOGS+=("$logname")
+  CURRENT_IDX=-1
   if [ "$rc" -eq 0 ]; then
     T_RESULTS+=("PASS")
     log "PASS $target (${dur} s)"
@@ -554,9 +634,39 @@ run_target() {
     log "FAIL $target (${dur} s, exit $rc). Last lines of $logname:"
     tail -n 30 "$logfile" | sed 's/^/    /' >&2
   fi
-  CURRENT_IDX=-1
-  write_summary "RUNNING"
-  [ "$rc" -eq 0 ]
+  if ! write_summary "RUNNING"; then
+    printf 'e2e_ios: error: cannot write %s/e2e-summary.md\n' "$EVIDENCE_DIR" >&2
+    return 4
+  fi
+  [ "$rc" -eq 0 ] && return 0
+  return 1
+}
+
+# prepare_evidence_dir: resolves the evidence dir (default: one per role, so
+# Engineer and Verifier runs never overwrite each other) and removes the
+# previous run's e2e outputs from it, so no stale screenshot lingers.
+# Refuses a dir with PNGs that no earlier run of this script wrote.
+prepare_evidence_dir() {
+  local f has_png=0 ours=0
+  [ -n "$EVIDENCE_DIR" ] || EVIDENCE_DIR="$E2E_REPO_ROOT/documents/evidence/$TASK/$ROLE"
+  mkdir -p "$EVIDENCE_DIR" 2>/dev/null || die "cannot create evidence dir '$EVIDENCE_DIR'"
+  EVIDENCE_DIR=$(cd "$EVIDENCE_DIR" && pwd)
+  [ -w "$EVIDENCE_DIR" ] || die "evidence dir '$EVIDENCE_DIR' is not writable"
+  for f in "$EVIDENCE_DIR"/*.png; do
+    [ -e "$f" ] && has_png=1 && break
+  done
+  if [ -f "$EVIDENCE_DIR/e2e-summary.md" ] &&
+    head -n 1 "$EVIDENCE_DIR/e2e-summary.md" | grep -q '^# E2E summary: '; then
+    ours=1
+  fi
+  if [ "$has_png" -eq 1 ] && [ "$ours" -eq 0 ]; then
+    die "evidence dir '$EVIDENCE_DIR' holds PNG files that e2e_ios.sh did not write (no e2e-summary.md); use an empty dir"
+  fi
+  if [ "$ours" -eq 1 ]; then
+    log "Removing the previous run's e2e outputs from $EVIDENCE_DIR"
+    rm -f "$EVIDENCE_DIR/e2e-summary.md" "$EVIDENCE_DIR"/*.png || die "cannot clear '$EVIDENCE_DIR'"
+  fi
+  rm -f "$EVIDENCE_DIR"/e2e-*.log "$EVIDENCE_DIR"/e2e-summary.md.tmp.* || die "cannot clear '$EVIDENCE_DIR'"
 }
 
 main() {
@@ -564,10 +674,8 @@ main() {
   preflight_tools
   preflight_project
   preflight_simulator
+  prepare_evidence_dir
 
-  [ -n "$EVIDENCE_DIR" ] || EVIDENCE_DIR="$E2E_REPO_ROOT/documents/evidence/$TASK"
-  mkdir -p "$EVIDENCE_DIR"
-  EVIDENCE_DIR=$(cd "$EVIDENCE_DIR" && pwd)
   WORK_TMP=$(mktemp -d "${TMPDIR:-/tmp}/e2e_ios.XXXXXX")
   STARTED_AT=$(now_utc)
 
@@ -579,17 +687,24 @@ main() {
   log "Evidence dir: $EVIDENCE_DIR"
   create_and_boot
 
-  local i=0 failed=0
+  local i=0 failed=0 rc
   while [ "$i" -lt "${#TARGETS[@]}" ]; do
-    run_target "$i" || failed=$((failed + 1))
+    rc=0
+    run_target "$i" || rc=$?
+    case $rc in
+      0) ;;
+      1) failed=$((failed + 1)) ;;
+      *)
+        printf 'e2e_ios: error: evidence for %s could not be written; stopping (exit 4)\n' "${TARGETS[$i]}" >&2
+        exit 4
+        ;;
+    esac
     i=$((i + 1))
   done
 
-  if [ "$failed" -eq 0 ]; then
-    write_summary "PASS"
-  else
-    write_summary "FAIL"
-  fi
+  local overall=PASS
+  [ "$failed" -eq 0 ] || overall=FAIL
+  write_summary "$overall" || { printf 'e2e_ios: error: cannot write the summary\n' >&2; exit 4; }
   SUMMARY_FINAL=1
   log "Summary: $EVIDENCE_DIR/e2e-summary.md"
   if [ "$failed" -eq 0 ]; then

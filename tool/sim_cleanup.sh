@@ -29,7 +29,7 @@ Warning: in the default device set this also deletes the simulator of an e2e
 run that is still in progress. Only run it when no tool/e2e_ios.sh is running.
 
 Exit codes: 0 done (or nothing to do); 1 a simulator could not be deleted;
-2 bad arguments.
+2 bad arguments; 3 the simulators could not be listed.
 EOF
 }
 
@@ -76,6 +76,13 @@ for devices in data.get("devices", {}).values():
 ' "$PREFIX"
 }
 
+# Capture the listing with its exit status checked: a failing `simctl list` or
+# JSON parse must not look like "nothing to clean up".
+if ! LISTING=$(list_fleet_sims); then
+  printf 'sim_cleanup: error: could not list simulators (xcrun simctl list devices -j failed or returned bad JSON)\n' >&2
+  exit 3
+fi
+
 UDIDS=()
 STATES=()
 NAMES=()
@@ -84,7 +91,9 @@ while IFS="$(printf '\t')" read -r udid state name; do
   UDIDS+=("$udid")
   STATES+=("$state")
   NAMES+=("$name")
-done < <(list_fleet_sims)
+done <<EOF
+$LISTING
+EOF
 
 where="default device set"
 [ -n "$DEVICE_SET" ] && where="device set $DEVICE_SET"
