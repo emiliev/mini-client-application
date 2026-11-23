@@ -13,3 +13,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0009](T-0009/verification-report.md) | PASS (TL spot-check) | Verification pipeline spike: 4 screenshots |
 | [T-0012](T-0012/verification-report.md) | PASS (fresh Verifier) | Simulator e2e runner: engineer and verifier evidence, 13-test suite |
 | [T-0015](T-0015/verification-report.md) | PASS (fresh Verifier, re-verified after fixes) | `tool/loc`: hand-counted fixtures, CLI strict check |
+| [T-0016](T-0016/verification-report.md) | PASS (re-verified after first FAIL) | Perf harness: fresh-clone suite, AC7 5/5 under load |

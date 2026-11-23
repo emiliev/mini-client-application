@@ -24,4 +24,5 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-019 | Refresh plan 01 §7 graph metrics for the new `mc_feature_flow → mc_bloc_kit` edge | Docs | T-0013 fix pass | With P1-01 architecture guard | — |
 | P-020 | Plan 04 §6.3 / KD-7 correction: `bazel analyze-profile` and `--verbose_explanations` are absent in Bazel 9.2.0 (T-0016). Re-check on 9.3.0 and update the flag inventory and the AC5 reference | Docs/Tooling | T-0016 | With T-0014 (Bazel 9.3.0) | — |
 | P-021 | Compact execution-log ingestion: build Bazel's converter from the pinned 9.3.0 source (KD-7); JSON ingestion works today | Tooling | T-0016 | Before S1 perf runs | — |
+| P-022 | `tool/perf` sampler: use a monotonic clock for intervals (a host sleep of 699 s made one AC7 run fail) | Tooling | T-0016 Verifier | Before nightly perf runs | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

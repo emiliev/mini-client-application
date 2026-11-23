@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-23; Verifier PASS `a6d6553`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Sonnet, fresh; low-risk tooling) |
 | Branch | `fleet/T-0016-perf-harness` |
@@ -65,3 +65,7 @@ Nits: `bazel_help` raises on a non-zero exit and uses a per-process output base 
 - The calibration run itself (S0 null build, `dart compile kernel`, `gen_snapshot`) and the reference values are not implemented; only the drift check is (needs the S0 app).
 - A foreign Bazel server from another worktree was running during the work, so a timed `bench.py run` here would refuse, as designed.
 - Not done (deferred ACs): P4-01 AC5, P4-02 AC1, P4-03 AC2.
+
+## Merge (TL)
+- 2026-11-23: The first Verifier pass **FAILED** (AC5 assertion missing, AC7 flaky). `/code-review` found 8 important issues. All were fixed in `470faad`, rebuilt as one commit so the dangling symlinks never reach `main`. AC5 was amended by the TL (`analyze-profile` is gone in Bazel 9.2) to a 1 % match against BEP wall time. AC7 was root-caused: sampler overhead fell from 1.19 % to 0.35 % with the threshold unchanged. The re-verify gave PASS `a6d6553`, from a fresh clone. The TL merged `--no-ff` and re-ran the suite on the merge result: 41 tests OK, 1 skipped.
+- Follow-ups: P-020, P-021, P-022. The deferred ACs (P4-01 AC5, P4-02 AC1, P4-03 AC2) go to a post-S0 task.
