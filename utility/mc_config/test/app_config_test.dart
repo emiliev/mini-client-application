@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 
 const _json =
     '{"env":"dev","backend":{"seed":7,"latencyMs":250,"scenario":"happy"},'
-    '"build":"3"}';
+    '"apiBaseUrl":"https://api.test","build":"3"}';
 
 void main() {
   setUp(resetDIContainer);
@@ -16,6 +16,7 @@ void main() {
     expect(config.backend.latency, const Duration(milliseconds: 250));
     expect(config.backend.scenario, 'happy');
     expect(config.build, '3');
+    expect(config.apiBaseUrl, 'https://api.test');
   });
 
   test(

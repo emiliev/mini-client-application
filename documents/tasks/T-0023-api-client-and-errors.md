@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Review |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0023-api-client` |
@@ -30,4 +30,27 @@ Tide's `api_client` utility: the shared Dio instance that every feature's retrof
 - 2026-11-23: Created.
 
 ## Outcome
-_Pending._
+Implemented by the Engineer; gates pass (`test //...` 31/31, lint, `mc_arch_check`). Evidence: `documents/evidence/T-0023/engineer/`. Finding: F-0017.
+
+| AC | Test |
+|---|---|
+| AC1 | `mc_api_client:api_client_test` "T-0023-AC1: ..." (six, through `mc_mocked_backend` failure rules); `mc_api_errors:api_failure_test` (direct mapping) |
+| AC2 | `api_client_test` "T-0023-AC2: ..." (503 GET = 3 attempts; recovery on 3rd; POST once; 404 not retried; one log per attempt) |
+| AC3 | `api_failure_test` "T-0023-AC3: ..." |
+| AC4 | `api_client_test` "T-0023-AC4: ..." |
+| AC5 | the gates above plus `no_flutter_test` in both packages ("T-0023-AC5") |
+
+Review fixes (2nd commit):
+- Retry: FormData cloned per attempt, stream bodies and receive timeouts not retried, backoff raced against `CancelToken` (AC2 tests "request bodies and cancellation").
+- `ApiClientError(status)` for other 4xx (AC1 tests in both packages).
+- `AppConfig.apiBaseUrl` added (`mc_config`, `tool/bazel/config/*.json`, `app_config_test`); `ApiClientDIInitializer` reads it, with an `baseUrl` override (AC4 tests). Monitoring is resolved per request; a missing one fails the request (AC4 test).
+- `dio: ^5.11.0`; `ApiUnexpected` message format `Type: message`; `mc_mocked_backend` made pure Dart with `dart_test`.
+
+Verifier FAIL fixes (3rd commit):
+- AC5: `cycle_breaks = {"dio": ["dio_web_adapter"]}` in `MODULE.bazel` (TL-approved; F-0019). `tool/checks/T-0023-AC5_flutter_free.sh` runs `cquery 'deps(...)'` for both packages and fails on Flutter markers or on `mc_mocked_backend` in the closure (negative control: it fails without the `MODULE.bazel` line). Report: `documents/evidence/T-0023/engineer/AC5_flutter_free.md`.
+- Dependency direction: `ApiClientDIInitializer` takes an `HttpClientAdapter`; `mc_mocked_backend` is a dev/test dependency of `mc_api_client` only. `app_core` (T-0021) passes `MockBackend.adapter`.
+
+Decisions and gaps:
+- The app builds the `MockBackend` from `AppConfig` and passes its adapter.
+- `mc_fixtures_characters` still uses `flutter_test` and `dio: ^5.9.0` (follow-up).
+- No tests were deleted, skipped or weakened (mocked_backend tests only changed their test import); no `ignore:` added.

@@ -32,6 +32,10 @@ flutter = use_extension("@rules_flutter//flutter:extensions.bzl", "flutter")
 flutter.toolchain(flutter_version = "3.47.7")
 flutter.pub(
     name = "pub_deps",
+    # dio and dio_web_adapter depend on each other; without this, rules_flutter
+    # merges them into one Flutter target and pure-Dart closures reach
+    # sky_engine (F-0019).
+    cycle_breaks = {"dio": ["dio_web_adapter"]},
     lock = "//:pubspec.lock",  # no plugins, so no Podfile / SwiftPM inputs
 )
 use_repo(flutter, "flutter_ios_engine", "flutter_sky_engine", "flutter_toolchains", "pub_deps")

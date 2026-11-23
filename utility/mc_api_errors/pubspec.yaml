@@ -1,0 +1,15 @@
+name: mc_api_errors
+description: Sealed ApiFailure and the Dio-error mapping (T-0023).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  dio: ^5.11.0
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

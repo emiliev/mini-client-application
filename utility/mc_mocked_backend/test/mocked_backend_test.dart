@@ -4,8 +4,8 @@ import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:fake_async/fake_async.dart';
-import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:test/test.dart';
 
 int handlerCalls = 0;
 

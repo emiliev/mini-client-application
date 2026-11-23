@@ -12,6 +12,8 @@ workspace:
   - spike/hello
   - tool/mc_arch_check
   - utility/mc_analysis
+  - utility/mc_api_client
+  - utility/mc_api_errors
   - utility/mc_config
   - utility/mc_di
   - utility/mc_ds_buttons

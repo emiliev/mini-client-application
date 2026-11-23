@@ -1,0 +1,1 @@
+mc_arch_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-aca679a0641a45584)
