@@ -1,0 +1,44 @@
+# T-0027 spike: the `ApiResponse<T>` / `ApiPage<T>` envelope (json_serializable,
+# genericArgumentFactories). A separate package, so the retrofit action in
+# //spike/retrofit_api reads it through analyzer summaries.
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "api_envelope"
+
+_LANG = "3.13"  # the pubspec floor; F-0011
+
+_MODELS = [
+    "api_page",
+    "api_response",
+]
+
+[dart_codegen(
+    name = "_%s_json_part" % m,
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/%s.dart" % m,
+    generator_bin = "@rules_dart//dart/ext/json_serializable:shim",
+    output_suffixes = [".json_serializable.g.part"],
+    deps = ["@pub_deps//:json_annotation"],
+) for m in _MODELS]
+
+[dart_codegen(
+    name = "_%s_g" % m,
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/%s.dart" % m,
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    output_suffixes = [".g.dart"],
+    parts = [":_%s_json_part" % m],
+) for m in _MODELS]
+
+dart_library(
+    name = "api_envelope",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = ["lib/api_envelope.dart"] + ["lib/src/%s.dart" % m for m in _MODELS] + [":_%s_g" % m for m in _MODELS],
+    visibility = ["//spike:__subpackages__"],
+    deps = ["@pub_deps//:json_annotation"],
+)

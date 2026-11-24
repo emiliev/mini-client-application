@@ -1,0 +1,19 @@
+# T-0027 spike (P3-03): a Tide-shaped feature `@RestApi` (dio + retrofit) over
+# a freezed + json model and the `ApiResponse<T>` envelope from another
+# package. Pure Dart (CPR, KD6), so every codegen action runs on summaries.
+name: retrofit_api
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  api_envelope: any
+  dio: ^5.11.0
+  freezed_annotation: 3.1.0
+  json_annotation: 4.12.0
+  retrofit: 4.10.0
+
+dev_dependencies:
+  test: ^1.25.0
