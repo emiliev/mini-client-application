@@ -11,6 +11,33 @@ class _Selection {
   final String? selected;
 }
 
+class _Nav {
+  const _Nav({this.filter = 'none', this.detail, this.sub});
+
+  final String filter;
+  final String? detail;
+  final String? sub;
+
+  _Nav copyWith({String? filter, String? detail, String? sub}) => _Nav(
+    filter: filter ?? this.filter,
+    detail: detail ?? this.detail,
+    sub: sub ?? this.sub,
+  );
+}
+
+class _NavProbe extends StatelessWidget {
+  const _NavProbe({required this.onController, required this.filter});
+
+  final void Function(FeatureFlowController<_Nav>) onController;
+  final String filter;
+
+  @override
+  Widget build(BuildContext context) {
+    onController(context.di<FeatureFlowController<_Nav>>());
+    return Text('list $filter');
+  }
+}
+
 class _Dep {}
 
 class _NeedsDep {
@@ -230,6 +257,86 @@ void main() {
     },
   );
 
+  Future<FeatureFlowController<_Nav>> pumpNav(WidgetTester tester) async {
+    late FeatureFlowController<_Nav> controller;
+    await tester.pumpWidget(
+      _app(
+        FeatureFlow<_Nav>(
+          state: const _Nav(),
+          onGeneratePages: (s) => [
+            McFlowPage(
+              name: 'list',
+              child: _NavProbe(
+                filter: s.filter,
+                onController: (c) => controller = c,
+              ),
+            ),
+            if (s.detail != null)
+              McFlowPage(name: 'detail', child: Text('detail ${s.detail}')),
+            if (s.sub != null)
+              McFlowPage(name: 'sub', child: Text('sub ${s.sub}')),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return controller;
+  }
+
+  Future<void> edgeSwipe(WidgetTester tester) async {
+    final gesture = await tester.startGesture(const Offset(2, 300));
+    await gesture.moveBy(const Offset(400, 0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets(
+    'T-0022-AC5 a filter changed on the list survives push and edge swipe',
+    (tester) async {
+      final controller = await pumpNav(tester);
+      controller.update((s) => s.copyWith(filter: 'foo'));
+      await tester.pumpAndSettle();
+      controller.update((s) => s.copyWith(detail: 'x'));
+      await tester.pumpAndSettle();
+      expect(find.text('detail x'), findsOneWidget);
+
+      await edgeSwipe(tester);
+
+      expect(find.text('detail x'), findsNothing);
+      expect(find.text('list foo'), findsOneWidget);
+      expect(controller.state.filter, 'foo');
+      expect(controller.state.detail, isNull);
+    },
+  );
+
+  testWidgets('T-0022-AC5 two pushes then two edge swipes restore each level', (
+    tester,
+  ) async {
+    final controller = await pumpNav(tester);
+    controller.update((s) => s.copyWith(filter: 'foo'));
+    await tester.pumpAndSettle();
+    controller.update((s) => s.copyWith(detail: 'a'));
+    await tester.pumpAndSettle();
+    controller.update((s) => s.copyWith(detail: 'b')); // in place, depth 2
+    await tester.pumpAndSettle();
+    controller.update((s) => s.copyWith(sub: 's'));
+    await tester.pumpAndSettle();
+    expect(find.text('sub s'), findsOneWidget);
+
+    await edgeSwipe(tester);
+    expect(find.text('sub s'), findsNothing);
+    expect(find.text('detail b'), findsOneWidget);
+    expect(controller.state.detail, 'b');
+    expect(controller.state.sub, isNull);
+    expect(controller.state.filter, 'foo');
+
+    await edgeSwipe(tester);
+    expect(find.text('detail b'), findsNothing);
+    expect(find.text('list foo'), findsOneWidget);
+    expect(controller.state.detail, isNull);
+    expect(controller.state.filter, 'foo');
+  });
+
   testWidgets('T-0022-AC6 an unregistered root import fails naming its type', (
     tester,
   ) async {
@@ -260,8 +367,8 @@ void main() {
           state: const _Selection(),
           rootImports: const [RootImport<_Dep>()],
           flowInitializer: McDIInitializer((getIt, _) {
-            // _NeedsDep is registered, but the dependency it asks for is
-            // not: _Selection.
+            // _NeedsDep resolves (its _Dep is a root import); _Other asks for
+            // _Missing, which nobody registered.
             getIt.registerFactory<_NeedsDep>(() => _NeedsDep(getIt<_Dep>()));
             getIt.registerFactory<_Other>(() => _Other(getIt<_Missing>()));
           }),

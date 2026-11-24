@@ -64,6 +64,8 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
   late final FlowController<T> _flowController;
   final List<StreamSubscription<Object?>> _subscriptions = [];
   late Future<ChildDIContainer> _container;
+  final Map<int, T> _snapshots = {};
+  bool _forwarding = false;
   Object? _configError;
   StackTrace? _configStack;
 
@@ -72,6 +74,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
     super.initState();
     _controller = FeatureFlowController<T>(widget.state);
     _flowController = FlowController<T>(widget.state);
+    _snapshots[_names(widget.state).length] = widget.state;
     // Controller -> pages.
     _subscriptions
       ..add(_controller.states.listen(_onControllerState))
@@ -85,13 +88,27 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
     _container = _open();
   }
 
-  /// flow_builder records a history entry per update and a back gesture
-  /// restores the previous entry, so only an update that changes the page
-  /// stack may reach it. In-place updates stay in the controller and reach
-  /// the pages through [_LivePage].
+  /// The controller's state is authoritative. flow_builder records a history
+  /// entry per update and a back gesture restores the previous entry, so only
+  /// an update that changes the page stack may reach it; in-place updates
+  /// reach the pages through [_LivePage].
+  ///
+  /// [_snapshots] holds, per page depth, the latest state seen while the stack
+  /// had that depth. A pop to depth n restores the snapshot of depth n: what
+  /// changed in a pushed page is dropped, what changed in the page below
+  /// (while it was on top) is kept.
   void _onControllerState(T next) {
+    final depth = _names(next).length;
+    _snapshots
+      ..removeWhere((d, _) => d > depth)
+      ..[depth] = next;
     if (!listEquals(_names(_flowController.state), _names(next))) {
-      _flowController.update((_) => next);
+      _forwarding = true;
+      try {
+        _flowController.update((_) => next);
+      } finally {
+        _forwarding = false;
+      }
     }
   }
 
@@ -99,7 +116,16 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
     for (final page in widget.onGeneratePages(state)) page.name,
   ];
 
-  void _onFlowChanged() => _controller.restore(_flowController.state);
+  /// Called for changes flow_builder makes itself: a back gesture or a pop.
+  void _onFlowChanged() {
+    if (_forwarding) {
+      return;
+    }
+    final depth = _names(_controller.state).length - 1;
+    final restored = _snapshots[depth] ?? _flowController.state;
+    _snapshots.removeWhere((d, _) => d > depth);
+    _controller.restore(restored);
+  }
 
   Future<ChildDIContainer> _open() async {
     try {
