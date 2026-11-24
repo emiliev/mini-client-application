@@ -20,6 +20,9 @@ dependencies:
 dev_dependencies:
   # Generator-side versions match rules_dart's dart/ext/pubspec.lock @ e7163aa.
   analyzer: 14.5.0
+  # R28 BDD fallback (T-0029-AC5): the stock Builder, same version as
+  # rules_dart's dart/ext/bdd. 3.1.x needs build ^5.
+  bdd_widget_test: 3.0.5
   build_runner: 2.16.2
   freezed: 4.0.2
   go_router_builder: 4.5.0

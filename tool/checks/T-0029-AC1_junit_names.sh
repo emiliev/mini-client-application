@@ -34,8 +34,8 @@ grep -q 'failures="0" errors="0" skipped="0"' "$xml" || { report "- FAIL: failur
 if [[ -n "$OUT" ]]; then
   ev="$(dirname "$OUT")"
   mkdir -p "$ev/generated"
-  cp "$xml" "$ev/T-0029-AC1_bdd_test.xml"
-  cp "$bin"/*.dart "$ev/generated/"
+  cp "$xml" "$ev/T-0029-AC1_bdd_test.xml" && chmod 644 "$ev/T-0029-AC1_bdd_test.xml"
+  cp "$bin"/*.dart "$ev/generated/" && chmod 644 "$ev"/generated/*.dart
   report "" "Saved: \`T-0029-AC1_bdd_test.xml\` and \`generated/*.dart\` (the bazel-bin outputs)."
 fi
 rm -f "$log"
