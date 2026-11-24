@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Ready for Verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0025-l10n` |
@@ -28,6 +28,22 @@ Localisation, which Tide's articles don't cover (D4b). Common strings and format
 
 ## Log
 - 2026-11-24: Created and dispatched.
+- 2026-11-24: Engineer implemented; handed to Verifier.
 
 ## Outcome
-_Pending._
+Engineer handoff (branch `fleet/T-0025-l10n`).
+
+- `utility/mc_l10n_core`: ARBs `en`, `de`, `en_XA` in `lib/src/l10n/`, `flutter_gen_l10n` target `_l10n` (class `McL10nCoreL10n`), `mcLocalizationsDelegates`, `mcSupportedLocales({includePseudo})` (en_XA only for tests, R24), `l10n.yaml` for IDE/CLI baseline.
+- `utility/mc_formatters` (pure Dart, intl): `Money(minorUnits, Currency)`, `formatMoney/Date/DateTime/Compact/Number`, `initializeFormatters()`. Does not depend on `mc_l10n_core` (plan lists it; nothing needs it yet).
+- `tool/l10n_check` (`bazelw run //tool/l10n_check:bin [root] [--locales en,de]`): required locales en+de; reports missing locale, missing/unknown key, `@@locale` mismatch, naming the package, locale and key.
+- Root: 3 workspace members in `pubspec.yaml`, `pubspec.lock` (intl 0.20.3, flutter_localizations), `MODULE.bazel.lock`, `.gitignore` (+ `**/lib/src/l10n/*_l10n*.dart`).
+
+| AC | Tests |
+|---|---|
+| AC1 | `//utility/mc_l10n_core:l10n_test` (4 tests, `T-0025-AC1 ...`) |
+| AC2 | `//utility/mc_formatters:formatters_test` (`T-0025-AC2 ...`) |
+| AC3 | `//tool/l10n_check:l10n_check_test` (`T-0025-AC3 ...`); repo run: `l10n_check: OK` |
+| AC4 | `tool/checks/T-0025-AC4_gen_l10n_parity.sh`: **identical after `dart format`, raw differs in whitespace only** (F-0022). AC wording needs TL/PO acceptance. |
+
+Gates: `test //...` 42/42, `build --config=lint //...`, `mc_arch_check`, `l10n_check` all PASS (`documents/evidence/T-0025/engineer/`). Deviations: de money uses U+00A0 between amount and symbol (intl's output); `formatDate` de is `24. Nov. 2026`.
+

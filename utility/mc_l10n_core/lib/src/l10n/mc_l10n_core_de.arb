@@ -1,0 +1,11 @@
+{
+  "@@locale": "de",
+  "commonOk": "OK",
+  "commonCancel": "Abbrechen",
+  "commonRetry": "Erneut versuchen",
+  "commonClose": "Schließen",
+  "errorGeneric": "Etwas ist schiefgelaufen.",
+  "errorNetwork": "Keine Verbindung. Prüfe dein Netzwerk und versuche es erneut.",
+  "errorTimeout": "Die Anfrage hat zu lange gedauert. Bitte versuche es erneut.",
+  "errorServer": "Auf dem Server ist ein Fehler aufgetreten. Bitte versuche es später erneut."
+}

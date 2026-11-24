@@ -1,0 +1,24 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+dart_library(
+    name = "mc_formatters",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    package_name = "mc_formatters",
+    deps = ["@pub_deps//:intl"],
+)
+
+dart_test(
+    name = "formatters_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/formatters_test.dart",
+    package_name = "mc_formatters",
+    deps = [
+        ":mc_formatters",
+        "@pub_deps//:test",
+    ],
+)

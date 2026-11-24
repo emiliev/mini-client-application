@@ -1,0 +1,19 @@
+name: mc_l10n_core
+description: Common strings (en, de, pseudo-locale en_XA) and the l10n delegate.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

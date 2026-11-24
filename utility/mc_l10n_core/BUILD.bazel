@@ -1,0 +1,42 @@
+load("@rules_flutter//flutter:defs.bzl", "flutter_gen_l10n", "flutter_library", "flutter_test")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+# Outputs land next to the ARBs (lib/src/l10n/mc_l10n_core_l10n*.dart). The
+# rule ignores l10n.yaml; these attributes mirror it (rules_flutter §6).
+flutter_gen_l10n(
+    name = "_l10n",
+    arbs = glob(["lib/src/l10n/*.arb"]),
+    nullable_getter = False,
+    output_class = "McL10nCoreL10n",
+    output_localization_file = "mc_l10n_core_l10n.dart",
+    template_arb_file = "mc_l10n_core_en.arb",
+    visibility = ["//visibility:private"],
+)
+
+_DEPS = [
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_localizations",
+    "@pub_deps//:intl",
+]
+
+flutter_library(
+    name = "mc_l10n_core",
+    srcs = glob(["lib/**/*.dart"]) + [":_l10n"],
+    language_version = "3.13",
+    package_name = "mc_l10n_core",
+    deps = _DEPS,
+)
+
+flutter_test(
+    name = "l10n_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/l10n_test.dart",
+    package_name = "mc_l10n_core",
+    deps = _DEPS + [
+        ":mc_l10n_core",
+        "@pub_deps//:flutter_test",
+    ],
+)

@@ -1,0 +1,12 @@
+name: l10n_check
+description: Verifies every package's ARB set has every required locale and no missing keys.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

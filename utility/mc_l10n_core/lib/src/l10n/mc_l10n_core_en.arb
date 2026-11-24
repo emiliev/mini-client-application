@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "commonOk": "OK",
+  "@commonOk": {"description": "Confirm button label."},
+  "commonCancel": "Cancel",
+  "@commonCancel": {"description": "Cancel button label."},
+  "commonRetry": "Retry",
+  "@commonRetry": {"description": "Retry button label, shown next to an error."},
+  "commonClose": "Close",
+  "@commonClose": {"description": "Close button label."},
+  "errorGeneric": "Something went wrong.",
+  "@errorGeneric": {"description": "Generic failure message."},
+  "errorNetwork": "No connection. Check your network and try again.",
+  "@errorNetwork": {"description": "Failure message for an unreachable network."},
+  "errorTimeout": "The request took too long. Please try again.",
+  "@errorTimeout": {"description": "Failure message for a timed-out request."},
+  "errorServer": "The server had a problem. Please try again later.",
+  "@errorServer": {"description": "Failure message for a 5xx response."}
+}
