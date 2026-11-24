@@ -24,3 +24,4 @@ coverage/
 # A future build_runner fallback (R28) adds explicit negations below.
 *.g.dart
 *.freezed.dart
+.bazelrc.user.tmp

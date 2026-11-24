@@ -166,8 +166,8 @@ cp "$TMP/seed.patch" "$QDIR/0001-Seed.patch"
 cp "$TMP/seed.patch" "$QDIR/0002-Other.patch"
 "$REPO/tool/rules_fork.sh" checkout ai_rules_dart >/dev/null 2>&1
 before="$(queue_names)"
-out="$("$REPO/tool/rules_fork.sh" export ai_rules_dart 2>&1)"; r=$?
-if [[ $r -ne 0 && ( "$out" == *"git am"* || "$out" == *"queue holds"* ) && "$(queue_names)" == "$before" ]]; then ok T-0024-AC2_export_refuses_after_failed_checkout
+cd "$REPO"; out="$("$REPO/tool/rules_fork.sh" export ai_rules_dart 2>&1)"; r=$?
+if [[ $r -ne 0 && "$out" == *"unfinished git am/rebase in"* && "$(queue_names)" == "$before" ]]; then ok T-0024-AC2_export_refuses_after_failed_checkout
 else bad T-0024-AC2_export_refuses_after_failed_checkout "r=$r $out"; fi
 
 # AC1: a fork HEAD off branch 'fork' is refused

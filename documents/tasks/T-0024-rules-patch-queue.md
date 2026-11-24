@@ -55,3 +55,6 @@ Notes for the Verifier and TL:
 
 ### Verifier FAIL follow-up (3fb08ff)
 The AC3 net-diff finding was already fixed in 3f04d95. New: `tool/rules_fork.sh check [<repo>]` replays each queued patch with `git am` (strict) on the pin, using the fork dir or a pin cache (`MC_PIN_CACHE`), fetching only if needed; it exits non-zero naming the first bad patch. Bazel patcher silently drops a stale end-of-file hunk and crashes unnamed on a wrong removed line at EOF, so the build cannot be trusted (F-0022, table corrected from the Verifier report). Tests: `AC2_check_accepts_good_queue`, `AC2_check_rejects_wrong_context_line_at_eof`, `AC2_check_rejects_wrong_removed_line_at_eof`, `AC2_check_fetches_pin_without_fork_dir`. `tool/README.md` says `check` must run before merging any queue change; the TL wires it into the verify gate. Re-run: rules_fork_test 21/21, bazelw_test 8/8, gates green.
+
+### Verifier FAIL follow-up (7fd9b02)
+Open-am guard used a relative path and checked the wrong dir from the repo root; now `--path-format=absolute`. The test runs from the repo root and asserts the exact "unfinished git am/rebase in" message (confirmed it fails without the fix). `.bazelrc.user.tmp` is git-ignored. Suites 21/21 and 8/8, gates green.

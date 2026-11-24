@@ -113,7 +113,7 @@ cmd_export() {
   [[ -d "$dir/.git" ]] || die "no fork checkout at $dir (run: tool/rules_fork.sh checkout $repo)"
   local g
   for g in rebase-apply rebase-merge; do
-    [[ ! -e "$(git -C "$dir" rev-parse --git-path "$g")" ]] \
+    [[ ! -e "$(git -C "$dir" rev-parse --path-format=absolute --git-path "$g")" ]] \
       || die "unfinished git am/rebase in $dir ($g exists); finish or abort it first"
   done
   [[ "$(git -C "$dir" symbolic-ref --short -q HEAD || true)" == "fork" ]] \
