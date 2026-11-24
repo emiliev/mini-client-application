@@ -6,7 +6,6 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
 | [T-0021](T-0021-app-shell.md) | App shell: `app_core` + `app/mini_client` on the simulator (P1-16) | **In Progress** | Engineer (Opus) | T-0020 | — |
-| [T-0022](T-0022-feature-flow-and-bloc-kit.md) | `mc_bloc_kit` + `mc_feature_flow` (P1-04) | **In Progress** | Engineer (Sonnet) | T-0020 | — |
 
 ## Done
 | ID | Title | Result |
@@ -15,6 +14,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0022](T-0022-feature-flow-and-bloc-kit.md) | `mc_bloc_kit` + `mc_feature_flow` (P1-04, flow_builder spike) | merged; Verifier [PASS](../evidence/T-0022/verification-report.md) (3 rounds); F-0018 |
 | [T-0023](T-0023-api-client-and-errors.md) | `mc_api_errors` + `mc_api_client` (P1-05 subset) | merged; Verifier [PASS](../evidence/T-0023/verification-report.md); F-0017, F-0019 |
 | [T-0020](T-0020-config-monitoring-eventbus-storage.md) | `mc_config`, `mc_monitoring`, `mc_event_bus`, `mc_storage` (P1-03) | merged; Verifier [PASS](../evidence/T-0020/verification-report.md); F-0016 |
 | [T-0018](T-0018-mocked-backend-and-character-fixtures.md) | `mc_mocked_backend` + character and media fixtures (P1-06, P1-07) | merged; Verifier [PASS](../evidence/T-0018/verification-report.md); F-0015 |

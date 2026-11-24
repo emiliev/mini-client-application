@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-24; Verifier PASS `4457551`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0022-feature-flow` |
@@ -56,3 +56,6 @@ Deviations and notes:
 - Review fixes are tested by `T-0022-AC5` (in-place update then swipe), `T-0022-AC3` (late complete after dispose) and `T-0022-AC6` (unregister, reset, pushNewScope, popScope, dropScope, signalsReady, never-ready dependency, async singleton).
 - Root changes: `pubspec.yaml` (two workspace members), `pubspec.lock` (`bloc 9.2.1`, `flow_builder 0.1.0`), `MODULE.bazel.lock`.
 
+## Merge (TL)
+- 2026-11-24: flow_builder 0.1.0 works on Flutter 3.47.7 under Bazel (spike, F-0018). `/code-review` found 5 important issues, fixed in `496e8bb`; the TL approved one lint suppression (journal 2026-11-24). AC5 took three Verifier rounds: (1) FAIL, the fix regressed the filter-then-push case → TL designed per-depth snapshots; (2) FAIL, state right but pages stale (restore didn't notify) → broadcast on restore, tests assert visible text; (3) PASS `4457551`, with mutations caught. The TL merged `--no-ff`; on the merge result tests passed 36/36, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-041 (pops that remove several pages at once restore only the target depth; F-0018).

@@ -20,3 +20,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0018](T-0018/verification-report.md) | PASS (re-verified after review fixes) | Mocked backend: black-box checks, mutation checks |
 | [T-0020](T-0020/verification-report.md) | PASS (re-verified after review fixes) | Config env flag, monitoring sinks, event bus, atomic storage |
 | [T-0023](T-0023/verification-report.md) | PASS (re-verified after FAIL) | API client: failure mapping, retries, Flutter-free closure check |
+| [T-0022](T-0022/verification-report.md) | PASS (3rd round) | Feature flow: edge-swipe state and content probes, mutation checks |
