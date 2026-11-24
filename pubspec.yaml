@@ -18,6 +18,7 @@ workspace:
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
   - spike/api_envelope
+  - spike/di_sample
   - spike/greeting
   - spike/hello
   - spike/retrofit_api
