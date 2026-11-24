@@ -1,4 +1,3 @@
-import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_media/mc_media.dart';
@@ -18,7 +17,7 @@ void main() {
     );
   });
 
-  test('T-0030-AC6: a resolved bundled image provides an AssetImage', () {
+  test('T-0030-AC6: a resolved bundled image is a ResolvedImage', () {
     const McImageResolver sut = BundledImageResolver();
 
     final ResolvedImage resolved = sut.resolve(
@@ -29,9 +28,8 @@ void main() {
     );
 
     expect(resolved.variant, ImageVariant.standard);
-    final provider = resolved.provider as AssetImage;
     expect(
-      provider.assetName,
+      (resolved as BundledImage).assetKey,
       'packages/mc_fixtures_media/assets/characters/003.png',
     );
   });

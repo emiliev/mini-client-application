@@ -7,7 +7,6 @@ _LANG = "3.13"
 
 _DEPS = [
     "//utility/mc_media",
-    "@pub_deps//:flutter",
 ]
 
 # The same files as test data, so a test can check that each asset exists.

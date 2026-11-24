@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:mc_media/src/image_resolver.dart';
+import 'package:mc_media/mc_media.dart';
 
 /// Provides the [McImageResolver] to the widgets below it.
 class McMediaScope extends InheritedWidget {

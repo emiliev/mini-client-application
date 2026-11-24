@@ -1,4 +1,3 @@
-import 'package:flutter/painting.dart';
 import 'package:mc_media/mc_media.dart';
 
 /// How many placeholder images each set bundles. Image ids run `000` to
@@ -23,9 +22,6 @@ final class BundledImage implements ResolvedImage {
   final String id;
   @override
   final ImageVariant variant;
-
-  @override
-  ImageProvider get provider => AssetImage(assetKey);
 
   /// The 1x file inside this package, e.g. `assets/characters/017.png`.
   /// Flutter finds the `2.0x/` and `3.0x/` siblings by itself.

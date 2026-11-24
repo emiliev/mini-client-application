@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_media/mc_media.dart';
+import 'package:mc_media/mc_media_scope.dart';
 
 class _FakeResolver implements McImageResolver {
   @override
