@@ -13,13 +13,18 @@
 # system prompt "Open in “Mini Client”?" (F-0020), and simctl cannot tap it,
 # so the two openurl screenshots show that prompt and AC3 is not decided
 # here; the verdict covers AC6 only. The simulator is always deleted.
-#   [MC_OUTPUT_BASE=/tmp/mc-ob-…] tool/checks/T-0021-AC3_AC6_sim.sh [--role engineer|verifier] [--out FILE]
+#   [MC_OUTPUT_BASE=/tmp/mc-ob-…] [MC_SIM_DEVICE="iPhone SE (3rd generation)"] \
+#   [MC_SIM_RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-18-2] \
+#   tool/checks/T-0021-AC3_AC6_sim.sh [--role engineer|verifier] [--out FILE]
+# Defaults: iPhone 17 Pro on iOS 26.2.
 # Screenshots go next to FILE, or into a temp dir whose path is printed.
 set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO"
 BUNDLE_ID=com.emiliev.miniclient
 TARGET=//app/mini_client:mini_client_ios
+DEVICE="${MC_SIM_DEVICE:-iPhone 17 Pro}"
+RUNTIME="${MC_SIM_RUNTIME:-com.apple.CoreSimulator.SimRuntime.iOS-26-2}"
 TMP="$(mktemp -d)"
 SHOT_DIR="${OUT:+$(dirname "$OUT")}"; SHOT_DIR="${SHOT_DIR:-$TMP}"
 mkdir -p "$SHOT_DIR"
@@ -73,8 +78,8 @@ report "- FontManifest has \`packages/mc_ds_theme/Inter\`: $inter; Inter .ttf fi
   "- bundled \`assets/app_config.json\` env: \`${config_env:-missing}\`" \
   "- Info.plist: URL scheme \`${scheme:-missing}\`, FlutterDeepLinkingEnabled \`${deeplink:-missing}\`"
 
-NAME="mc-T-0021-$ROLE-$$"
-UDID=$(xcrun simctl create "$NAME" "iPhone 17 Pro" com.apple.CoreSimulator.SimRuntime.iOS-26-2) || finish T-0021-AC3_AC6 1
+NAME="mc-T-0021-$ROLE-${RUNTIME##*.}-$$"
+UDID=$(xcrun simctl create "$NAME" "$DEVICE" "$RUNTIME") || finish T-0021-AC3_AC6 1
 xcrun simctl boot "$UDID" && xcrun simctl bootstatus "$UDID" -b >/dev/null
 # A fresh device shows system banners for a while (F-0009 gotcha 5).
 sleep 20
@@ -97,7 +102,7 @@ sleep 10
 run_cold=$(running)
 shot ac4-openurl-cold.png
 
-report "- simulator: \`$NAME\` ($UDID), iPhone 17 Pro, iOS 26.2; deleted on exit" \
+report "- simulator: \`$NAME\` ($UDID), $DEVICE, \`$RUNTIME\`; deleted on exit" \
   "- app: $(basename "$APP"), bundle id \`$BUNDLE_ID\`" \
   "- \`simctl launch\`: exit $rc_launch ($launch); launchctl entries 10 s later: $run_home" \
   "- \`simctl openurl\` warm (placeholder/42): exit $rc_warm" \
