@@ -25,8 +25,7 @@ enum ImageVariant {
 /// An image reference as the API sends it: a path plus a variant.
 ///
 /// A real backend would send an `https://` path; the mocked backend sends
-/// `mock-asset://<set>/<id>`. This type moves to `mc_media` when that package
-/// lands (plan 01 §6.4, U39); its JSON shape stays.
+/// `mock-asset://<set>/<id>`.
 final class ApiImage {
   const ApiImage({
     required this.path,

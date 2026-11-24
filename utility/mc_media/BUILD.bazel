@@ -1,0 +1,38 @@
+# T-0030 (U14): ApiImage, McImageResolver and McMediaScope.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+flutter_library(
+    name = "mc_media",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "mc_media",
+    deps = ["@pub_deps//:flutter"],
+)
+
+_TEST_DEPS = [
+    ":mc_media",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_test",
+]
+
+flutter_test(
+    name = "api_image_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/api_image_test.dart",
+    package_name = "mc_media",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "media_scope_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/media_scope_test.dart",
+    package_name = "mc_media",
+    deps = _TEST_DEPS,
+)
