@@ -1,0 +1,44 @@
+# T-0029 (P3-05): the shared Gherkin step library, skeleton. Test-only.
+# The v1 catalogue (plan 05 §3.2) is P5-02.
+load("@rules_dart//dart/ext/bdd:defs.bzl", "bdd_step_index")
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_test_utils",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_test",
+]
+
+flutter_library(
+    name = "mc_test_steps",
+    testonly = True,
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "mc_test_steps",
+    deps = _DEPS,
+)
+
+# Every step file (one step per file); the BDD generator resolves these to the
+# barrel and fails on a local step of the same name.
+bdd_step_index(
+    name = "step_index",
+    testonly = True,
+    srcs = glob(
+        ["lib/src/**/*.dart"],
+        exclude = ["lib/src/data_table.dart"],
+    ),
+    import_uri = "package:mc_test_steps/mc_test_steps.dart",
+)
+
+flutter_test(
+    name = "data_table_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/data_table_test.dart",
+    package_name = "mc_test_steps",
+    deps = _DEPS + [":mc_test_steps"],
+)

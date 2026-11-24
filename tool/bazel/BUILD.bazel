@@ -1,0 +1,2 @@
+# Shared Starlark macros (plan 03 KD5): `load("//tool/bazel:defs.bzl", ...)`.
+exports_files(["defs.bzl"])
