@@ -22,6 +22,15 @@
 
 `tool/verify.sh` does not exist yet; the gates above are its equivalent.
 
+Final re-run of the Engineer's four check scripts on the clean tree, after all my mutations and the fork negative control were reverted and the override removed (pin + queue):
+
+```
+T-0028-AC1_injectable_matches_build_runner rc=0 **PASS T-0028-AC1**   (config d373324740114210 EQUAL)
+T-0028-AC2_di_cutoff                       rc=0 **PASS T-0028-AC2**
+T-0028-AC3_ext_lock                        rc=0 **PASS T-0028-AC3**   (vendored lib/ = pub.dev 3.1.3 minus lib/lean_builder/)
+T-0028-AC4_empty_shard_and_failing_init    rc=0 **PASS T-0028-AC4**
+```
+
 ## Acceptance criteria
 | AC | Scenario (short) | Mapped test(s) / checkpoint | Test really asserts the AC? | Result |
 |---|---|---|---|---|
