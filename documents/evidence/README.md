@@ -24,3 +24,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0021](T-0021/verification-report.md) | PASS (re-verified after review fixes) | **First app screens**: home in Inter, deep-link detail, `openurl` dialog (iOS 26.2 and 18.2) |
 | [T-0025](T-0025/verification-report.md) | PASS (re-verified after review fixes) | l10n: de/en/en_XA strings, money and dates, ARB gate, gen-l10n parity |
 | [T-0024](T-0024/verification-report.md) | PASS (3rd round) | Patch queue: real-pin round trip, stale-patch drift, export guards |
+| [T-0026](T-0026/verification-report.md) | PASS (re-verified after review fixes) | Test harness: isolation probes, unmatched requests, fail/hold/release |

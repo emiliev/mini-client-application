@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready for Verification |
+| Status | Done (merged 2026-11-24; Verifier PASS `29360b8`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0026-test-utils` |
@@ -47,3 +47,7 @@ Status: ready for the Verifier.
 **Review round (2026-11-24, after Verifier PASS and `/code-review`):** fixed (each with an AC-named test in `harness_test.dart` / `isolation_test.dart`): untyped `ExternalDouble` (rejected with the type to write) and externals that duplicate a root type (rejected); fixture-set scenarios now registered (`MockBackend.addDomain`, small `mc_mocked_backend` change, TL-approved); malformed URLs forwarded (400); `fail` on an unrouted path no longer unmatched; held requests honour cancellation. Nits: `containerInitialized` set after a successful init, session built before any global is touched, body stack trace kept, `tearDownAll` safe on subset runs, per-package `analysis_options.yaml` dropped (F-0021), finding renumbered F-0022 to F-0024. Gates re-run green (43/43, lint, arch_check); coverage 97.7 % (300/307); isolation test passes under seeds 11, 222, 3333.
 
 **Follow-ups:** (1) drift-guard test in `app_core` comparing its root list with `McTestContainer.initializers`; (2) migrate the `mc_ds_*` golden tests to `mc_test_utils` and delete the `mc_ds_testing` shim; (3) `expectScreenGolden`, `GoldenDevice`, `expectIosAccessibility` and `servedStrings` from plan 05 §1.2 are not built (not in this task's scope); (4) `@isTest` annotation needs `meta`.
+
+## Merge (TL)
+- 2026-11-24: Verifier PASS `5762cd7` (97.8 % coverage; isolation across 7 seeds). `/code-review` found 5 important harness bugs (untyped externals, fixture-set scenarios, malformed URLs, `fail()` on unrouted paths, held-request cancellation), fixed in `608796a`; the TL approved `MockBackend.addDomain`. Re-verify PASS `29360b8` (14/14 probes). The TL merged `--no-ff`; on the merge result tests passed 47/47, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-049 (strengthen the held-cancel test to assert the backend is never hit after release; correct F-0024 #13 on `%FF` giving 404 vs 400; add an `addDomain` unit test; the `app_core` drift guard for the `McTestContainer` root list; migrate the DS goldens off the `mc_ds_testing` shim).
