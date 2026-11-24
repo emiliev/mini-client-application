@@ -78,3 +78,12 @@ dart_test(
     main = "test/purity_test.dart",
     deps = ["@pub_deps//:test"],
 )
+
+dart_test(
+    name = "paged_state_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/paged_state_test.dart",
+    deps = _TEST_DEPS,
+)
