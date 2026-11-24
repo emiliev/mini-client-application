@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready for Verifier |
+| Status | Done (merged 2026-11-24; Verifier PASS `5db8693`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0024-patch-queue` |
@@ -58,3 +58,7 @@ The AC3 net-diff finding was already fixed in 3f04d95. New: `tool/rules_fork.sh 
 
 ### Verifier FAIL follow-up (7fd9b02)
 Open-am guard used a relative path and checked the wrong dir from the repo root; now `--path-format=absolute`. The test runs from the repo root and asserts the exact "unfinished git am/rebase in" message (confirmed it fails without the fix). `.bazelrc.user.tmp` is git-ignored. Suites 21/21 and 8/8, gates green.
+
+## Merge (TL)
+- 2026-11-24: The first Verifier pass FAILED (AC3: binary check on the net diff only) and found a serious gap: Bazel's patcher can silently drop a stale end-of-file hunk (F-0022). `/code-review` found 4 important issues (`.bazelrc.user` wiped, the net-diff binary check, export after a failed checkout, merge commits), fixed in `3f04d95`; a strict `rules_fork.sh check` (a `git am` replay) was added in `7fd9b02`. Second FAIL: the open-`git am` guard used a relative path; fixed in `543e414`. Re-verify PASS `5db8693`. The TL merged `--no-ff` (resolving a `.gitignore` conflict); on the merge result `rules_fork_test` passed 21/21, `check` was OK, tests passed 43/43, lint was clean and `mc_arch_check` reported OK.
+- Follow-up: P-048 (wire `rules_fork.sh check` into the verify gate).
