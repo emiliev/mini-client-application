@@ -37,6 +37,7 @@ _INJECTABLE = [
 ]
 
 _RUNTIME_DEPS = [
+    "@pub_deps//:dio",
     "//utility/mc_di",
     "@pub_deps//:get_it",
     "@pub_deps//:injectable",
@@ -47,7 +48,7 @@ _RUNTIME_DEPS = [
 dart_library(
     name = "_stage",
     package_name = _PKG,
-    srcs = [s for s in _HAND_WRITTEN if s != _INIT and s != "lib/di_sample.dart"],
+    srcs = [s for s in _HAND_WRITTEN if s != _INIT],
     language_version = _LANG,
     tags = ["no-dart-analyze", "no-dart-format"],
     deps = _RUNTIME_DEPS,

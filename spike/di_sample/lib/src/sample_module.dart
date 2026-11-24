@@ -1,8 +1,12 @@
+import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 
 /// Values and async resources the sample gets from a module.
 @module
 abstract class SampleModule {
+  @lazySingleton
+  Dio get dio => Dio();
+
   @Named('appName')
   String get appName => 'mini-client';
 
