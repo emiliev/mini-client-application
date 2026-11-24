@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification (Engineer handoff 2026-11-24) |
 | Owner | crew: Engineer (Opus, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0027-retrofit-shim` |
@@ -32,8 +32,31 @@ One Engineer pass plus one fix round. If the shim can't be made byte-identical t
 - **T-0027-AC3:** The ext lock resolves with analyzer 14.5.0; `rules_fork.sh check` and `status` pass; `test //...`, lint and `mc_arch_check` are green with the patch applied.
 - **T-0027-AC4:** The upstream draft exists, with a minimal repro workspace.
 
+## Verification map
+| AC | Check (name carries the AC ID) | Evidence |
+|---|---|---|
+| T-0027-AC1 | `tool/checks/T-0027-AC1_retrofit_matches_build_runner.sh` (runs `spike_reference.sh` on `spike/api_envelope` and `spike/retrofit_api`, plus an `aquery` of the retrofit action); the `dart_test` `//spike/retrofit_api:characters_api_test` (cases `T-0027-AC1 …`) exercises the generated client | [T-0027-AC1.md](../evidence/T-0027/engineer/T-0027-AC1.md) |
+| T-0027-AC2 | `tool/checks/T-0027-AC2_retrofit_rerun_scope.sh` (body edit, JSON execution log) | [T-0027-AC2.md](../evidence/T-0027/engineer/T-0027-AC2.md) |
+| T-0027-AC3 | `tool/checks/T-0027-AC3_patch_queue_and_ext_lock.sh` (`rules_fork.sh check` / `status`, the ext lock as Bazel patched it, `test --lockfile_mode=error //...`, lint, `mc_arch_check`) | [T-0027-AC3.md](../evidence/T-0027/engineer/T-0027-AC3.md) |
+| T-0027-AC4 | `tool/checks/T-0027-AC4_upstream_draft.sh` (with `MC_RULES_FORK=<patched checkout>` it also runs the repro) | [T-0027-AC4.md](../evidence/T-0027/engineer/T-0027-AC4.md), [repro run](../evidence/T-0027/engineer/T-0027-AC4-repro.log) |
+
 ## Log
 - 2026-11-24: Created and dispatched (codegen wave, Phase A3).
+- 2026-11-24 (Engineer): The fork commit adds `dart/ext/retrofit/` (shim, `retrofit_library`, BUILD), retrofit_generator 10.3.3 in the ext lock (plus retrofit 4.10.0, dio 5.11.1 and dio_web_adapter 2.2.2; nothing else moves), a direct analysis test, a doc extract and docs. It was exported as `0001-feat-ext-add-a-retrofit_generator-shim-and-retrofit_.patch` (347 lines) and wired into `MODULE.bazel`. The fork's own `MODULE.bazel.lock` refresh is left out of the patch: a dependency's lock is never read by consumers, and our refresh was macOS-flavoured (see the upstream draft). New sample packages are `spike/api_envelope` (`ApiResponse<T>` / `ApiPage<T>`, json `genericArgumentFactories`) and `spike/retrofit_api` (a freezed + json `CharacterDto` and an `@RestApi` `CharactersApi`, with per-file staging). `retrofit 4.10.0` joins the root lock; the overlay gains json_serializable 6.14.1, retrofit_generator 10.3.3, retrofit, dio and json_annotation.
+- 2026-11-24 (Engineer): The **first pass was byte-identical** for all 5 generated files, so the R28 timebox wasn't needed. One thing had to be fixed on the way (F-0025): a bare `@freezed` model gets no JSON under the shim, so the DTO uses `@Freezed(fromJson: true, toJson: true)`. Rebased onto `origin/main` @ `2bab83d` (T-0026 merged); no conflicts.
+- 2026-11-24 (Engineer): Gates on the committed form (pin + patch, no `--override_module`): `test --lockfile_mode=error //...` 48/48, `build --config=lint //...` clean, `mc_arch_check` OK, `rules_fork.sh check` and `status` OK, `tool/test/rules_fork_test.sh` 21/21. `tool/verify.sh` doesn't exist yet (T-0005), so these are the equivalent gates. In the fork workspace, `//dart/ext/... //docs/... //dart/tests:all`: 631 of 633 tests pass. The 2 that fail to build (`dart/tests/defines_fixture`) fail with `DartKernel` exit 247 and have no `dart/ext` dependency. They were not investigated further.
+- Test integrity: no tests deleted, skipped or weakened; no lint suppressions.
+- 2026-11-24: Verifier **FAIL** (`26b3745`): the AC1 check reported PASS on a failed Bazel build. The shim itself was fine (AC2 to AC4 passed, bytes identical). This is the R28 fix round, one round:
+  1. `spike_reference.sh` now fails (exit 1, `BAZEL BUILD FAILED`) when the codegen build fails, instead of `|| true`. **This closes P-024.** The AC1 check now requires both runs to exit 0 and exactly the 5 named files to be `EQUAL`; a missing or uncompared file fails. It also keeps Bazel `ERROR` lines in its report, and the double "0" is gone. Negative proof: with `config = "{not json",` on `_characters_api_retrofit_part`, the check FAILs ([evidence](../evidence/T-0027/engineer/T-0027-AC1-negative-bad-config.md)); the edit was then reverted.
+  2. `f0025-bare-freezed-diff.log` held another task's log. It was regenerated from a real bare-`@freezed` run.
+  3. Patch 0001: `Changelog:` and `Co-Authored-By:` now share the final paragraph, and `git interpret-trailers --parse` returns both. The AC4 check reads the trailer from the patch and requires it to equal the README's.
+  4. The AC4 check runs `repro.sh` with `DART="fvm dart"` and `BAZEL=tool/bazelw`. `repro.sh` now runs `test --nocache_test_results` and shuts its server down. A fresh run with `MC_RULES_FORK` set passed (2024 actions in a new workspace, the test uncached, 3/3 `EQUAL`).
+  5. Patch 0001: `retrofit_generator` sits after `mockito` in `dart/ext/pubspec.yaml`. Re-exported; `rules_fork.sh check` OK.
+  6. The U-D-retrofit README now says plainly that the 2 failing fork tests (`defines_fixture`) were not investigated.
+  - TL decision on F-0025 (adopted) is recorded in the finding.
 
 ## Outcome
-_Pending._
+**Merged** 2026-11-24 (`979164b`) after Verifier [PASS](../evidence/T-0027/verification-report.md) at `5f5c71e` (first pass FAIL: the AC1 check masked a failed build). retrofit_generator runs as a Bazel action through the fork shim (patch 0001). Its `.g.dart` equals build_runner's byte for byte (`characters_api.g.dart` sha256 `36eebd91a5ab2f756b46e271c0d1dbe5f8f21cda31492298eb180e1f6c55d0ea`), so retrofit stays Bazel-native and the R28 fallback isn't used. A body edit in the API file reruns 11 spawns, all in `//spike/retrofit_api`: retrofit part and combine (×2 configurations, X9), the summary (×2), kernel, analyze, format, link and the test. Nothing in the model or envelope codegen reruns.
+- Findings: [F-0025](../findings/F-0025-freezed-json-autodetect-fails-under-bazel-shim.md) (bare `@freezed` loses JSON under the shim), [F-0026](../findings/F-0026-retrofit-shim-spike-facts.md) (spike facts: factory name, ext lock, source_helper pin, rerun scope, the `--disk_cache` measurement gotcha).
+- Upstream draft: [U-D-retrofit](../upstream/U-D-retrofit/README.md), with `repro.sh` (verified: test PASS, 3/3 files EQUAL).
+- Follow-ups for the TL (pending-work candidates): (1) templates and buildgen must emit `@Freezed(fromJson: true, toJson: true)` and flag bare `@freezed` + `fromJson` (F-0025), a recorded Tide deviation; (2) `mc_codegen` (P3-06) wiring for `retrofit = [...]` with per-file staging (F-0026 §Implications); (3) upstream issue candidates: the shim's source `fullName` vs build_runner's asset paths (F-0025), and Gazelle `@RestApi` registration plus an `e2e/ext_exemplar/retrofit` exemplar (U-D-retrofit follow-ups); (4) `mc_api_client` doesn't have `ApiResponse<T>` / `ApiPage<T>` yet, and the spike envelope is the template for it (P1-05 follow-up).

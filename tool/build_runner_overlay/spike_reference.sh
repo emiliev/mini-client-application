@@ -14,7 +14,8 @@
 # 4. Runs build_runner; fails if `dart analyze` reports an unresolved import.
 # 5. cmp's each *.g.dart / *.freezed.dart against bazel-bin/<pkg>/.
 # Nothing is copied back into the source tree (R10 / D7).
-# Exit: 0 all equal, 1 a difference / missing file / drift / unresolved import, 2 bad usage.
+# Exit: 0 all equal, 1 a failed Bazel build / difference / missing file / drift /
+# unresolved import, 2 bad usage.
 set -euo pipefail
 
 ROOT="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
@@ -30,8 +31,12 @@ echo "== 1. Bazel codegen for //$PKG_DIR"
 cd "$ROOT"
 targets=$("$BAZELW" query "kind(\"dart_codegen\", //$PKG_DIR:*)" 2>/dev/null)
 [[ -n "$targets" ]] || { echo "no dart_codegen targets in //$PKG_DIR" >&2; exit 2; }
+mkdir -p "$ROOT/.dart_tool"
 # shellcheck disable=SC2086
-"$BAZELW" build --remote_download_all $targets 2>&1 | tr '\r' '\n' | grep -a -E '^(ERROR|INFO: Build completed)' || true
+"$BAZELW" build --remote_download_all $targets > "$ROOT/.dart_tool/mc_overlay_bazel.log" 2>&1 && build_rc=0 || build_rc=$?
+tr '\r' '\n' < "$ROOT/.dart_tool/mc_overlay_bazel.log" | grep -a -E '^(ERROR|INFO: Build completed)' || true
+# A failed build would leave stale or missing outputs in bazel-bin (P-024).
+if [[ $build_rc -ne 0 ]]; then echo "BAZEL BUILD FAILED (exit $build_rc): not comparing stale outputs"; exit 1; fi
 BAZEL_BIN="$("$BAZELW" info bazel-bin 2>/dev/null)"
 
 echo "== 2. Overlay scratch tree ${SCRATCH#"$ROOT"/}"

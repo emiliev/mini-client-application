@@ -1,0 +1,128 @@
+# T-0027 spike (P3-03): retrofit_generator as a Bazel action through the fork
+# shim `@rules_dart//dart/ext/retrofit:shim` (rules patch 0001), over a
+# freezed + json model and the `ApiResponse<T>` envelope of //spike/api_envelope.
+#
+# Codegen is wired file by file through `dart_codegen` (KD5), in the
+# freezed -> json / retrofit cascade of plan 03 §3.4. Staging is per file: the
+# API file is in no staging library, so editing it reruns only its own
+# retrofit, combine and kernel actions (T-0027-AC2).
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "retrofit_api"
+
+_LANG = "3.13"  # the pubspec floor; F-0011
+
+_ANN = [
+    "@pub_deps//:freezed_annotation",
+    "@pub_deps//:json_annotation",
+]
+
+# --- character_dto.dart: freezed, then json over the freezed output ---------
+dart_codegen(
+    name = "_character_dto_freezed",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/character_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    output_suffixes = [".freezed.dart"],
+    deps = _ANN,
+)
+
+# The model with its freezed output, staged for the json and retrofit actions
+# only. Never a dep of another library or test (V3-18).
+dart_library(
+    name = "_stage_frz",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = [
+        "lib/src/character_dto.dart",
+        ":_character_dto_freezed",
+    ],
+    # The json part comes in the next stage, so this library doesn't analyze.
+    tags = ["no-dart-analyze"],
+    deps = _ANN,
+)
+
+dart_codegen(
+    name = "_character_dto_json_part",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/character_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/json_serializable:shim",
+    output_suffixes = [".json_serializable.g.part"],
+    deps = _ANN + [":_stage_frz"],
+)
+
+dart_codegen(
+    name = "_character_dto_g",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/character_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    output_suffixes = [".g.dart"],
+    parts = [":_character_dto_json_part"],
+)
+
+# --- characters_api.dart: retrofit (fork shim, patch 0001) ------------------
+dart_codegen(
+    name = "_characters_api_retrofit_part",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/characters_api.dart",
+    generator_bin = "@rules_dart//dart/ext/retrofit:shim",
+    output_suffixes = [".retrofit.g.part"],
+    deps = _ANN + [
+        ":_stage_frz",
+        "//spike/api_envelope",
+        "@pub_deps//:dio",
+        "@pub_deps//:retrofit",
+    ],
+)
+
+dart_codegen(
+    name = "_characters_api_g",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/characters_api.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    output_suffixes = [".g.dart"],
+    parts = [":_characters_api_retrofit_part"],
+)
+
+# --- The package library ----------------------------------------------------
+_RUNTIME_DEPS = _ANN + [
+    "//spike/api_envelope",
+    "@pub_deps//:dio",
+    "@pub_deps//:retrofit",
+]
+
+dart_library(
+    name = "retrofit_api",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = [
+        "lib/retrofit_api.dart",
+        "lib/src/character_dto.dart",
+        "lib/src/characters_api.dart",
+        ":_character_dto_freezed",
+        ":_character_dto_g",
+        ":_characters_api_g",
+    ],
+    visibility = ["//spike:__subpackages__"],
+    deps = _RUNTIME_DEPS,
+)
+
+# The generated client works end to end against a canned Dio adapter.
+dart_test(
+    name = "characters_api_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/characters_api_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":retrofit_api",
+        "@pub_deps//:test",
+    ],
+)

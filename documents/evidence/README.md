@@ -25,3 +25,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0025](T-0025/verification-report.md) | PASS (re-verified after review fixes) | l10n: de/en/en_XA strings, money and dates, ARB gate, gen-l10n parity |
 | [T-0024](T-0024/verification-report.md) | PASS (3rd round) | Patch queue: real-pin round trip, stale-patch drift, export guards |
 | [T-0026](T-0026/verification-report.md) | PASS (re-verified after review fixes) | Test harness: isolation probes, unmatched requests, fail/hold/release |
+| [T-0027](T-0027/verification-report.md) | PASS (re-verified after FAIL) | retrofit shim: byte identity incl. cross-package summaries, rerun scope, masked-build negative |

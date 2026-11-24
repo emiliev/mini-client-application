@@ -1,0 +1,13 @@
+# T-0027 spike: Tide's shared transport envelope (`MarvelResponse<T>` in the
+# articles; `ApiResponse<T>` / `ApiPage<T>` here, plan 01 D-10). It lives in its
+# own package, as in `mc_api_client`, so the retrofit codegen action resolves it
+# from another package (analyzer summaries), not as a staged sibling.
+name: api_envelope
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  json_annotation: 4.12.0

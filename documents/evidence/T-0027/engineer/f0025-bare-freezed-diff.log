@@ -1,0 +1,101 @@
+# F-0025 negative run: character_dto.dart with a bare @freezed (tool/build_runner_overlay/spike_reference.sh spike/retrofit_api, 2026-11-24). Expected: DIFFER for the freezed and json outputs, EQUAL for the retrofit output.
+== 1. Bazel codegen for //spike/retrofit_api
+INFO: Build completed successfully, 9 total actions
+== 2. Overlay scratch tree .dart_tool/mc_overlay/retrofit_api
+   first-party path dep: api_envelope (spike/api_envelope)
+== 3. Resolve (hosted versions must equal the committed overlay lock)
+== 4. build_runner
+  Built with build_runner/aot in 14s; wrote 5 outputs.
+   dart analyze: no unresolved imports
+== 5. Compare with bazel-bin
+DIFFER  spike/retrofit_api/lib/src/character_dto.freezed.dart
+--- ./lib/src/character_dto.freezed.dart	2026-11-24 19:58:28
++++ /privatebazel-out/darwin_arm64-fastbuild/bin/spike/retrofit_api/lib/src/character_dto.freezed.dart	2026-11-24 19:58:11
+@@ -12,7 +12,6 @@
+ // GENERATED CODE - DO NOT MODIFY BY HAND
+ // dart format off
+ T _$identity<T>(T value) => value;
+-
+ /// @nodoc
+ mixin _$CharacterDto {
+ 
+@@ -23,8 +22,6 @@
+ @pragma('vm:prefer-inline')
+ $CharacterDtoCopyWith<CharacterDto> get copyWith => _$CharacterDtoCopyWithImpl<CharacterDto>(this as CharacterDto, _$identity);
+ 
+-  /// Serializes this CharacterDto to a JSON map.
+-  Map<String, dynamic> toJson();
+ 
+ 
+ @override
+@@ -33,7 +30,7 @@
+   return identical(this, other) || (other.runtimeType == runtimeType&&other is CharacterDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.thumbnailUrl, _this.thumbnailUrl) || other.thumbnailUrl == _this.thumbnailUrl));
+ }
+ 
+-@JsonKey(includeFromJson: false, includeToJson: false)
++
+ @override
+ int get hashCode {
+   final _this = this as CharacterDto;
+@@ -215,11 +212,11 @@
+ }
+ 
+ /// @nodoc
+-@JsonSerializable()
+ 
++
+ class _CharacterDto implements CharacterDto {
+   const _CharacterDto({required this.id, required this.name, this.description = '', @JsonKey(name: 'thumbnail_url') this.thumbnailUrl});
+-  factory _CharacterDto.fromJson(Map<String, dynamic> json) => _$CharacterDtoFromJson(json);
++  
+ 
+ @override final  int id;
+ @override final  String name;
+@@ -232,17 +229,14 @@
+ @pragma('vm:prefer-inline')
+ _$CharacterDtoCopyWith<_CharacterDto> get copyWith => __$CharacterDtoCopyWithImpl<_CharacterDto>(this, _$identity);
+ 
+-@override
+-Map<String, dynamic> toJson() {
+-  return _$CharacterDtoToJson(this, );
+-}
+ 
++
+ @override
+ bool operator ==(Object other) {
+     return identical(this, other) || (other.runtimeType == runtimeType&&other is _CharacterDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.thumbnailUrl, thumbnailUrl) || other.thumbnailUrl == thumbnailUrl));
+ }
+ 
+-@JsonKey(includeFromJson: false, includeToJson: false)
++
+ @override
+ int get hashCode {
+     return Object.hash(runtimeType,id,name,description,thumbnailUrl);
+DIFFER  spike/retrofit_api/lib/src/character_dto.g.dart
+--- ./lib/src/character_dto.g.dart	2026-11-24 19:58:28
++++ /privatebazel-out/darwin_arm64-fastbuild/bin/spike/retrofit_api/lib/src/character_dto.g.dart	2026-11-24 19:58:11
+@@ -1,23 +1,3 @@
+ // GENERATED CODE - DO NOT MODIFY BY HAND
+ 
+ part of 'character_dto.dart';
+-
+-// **************************************************************************
+-// JsonSerializableGenerator
+-// **************************************************************************
+-
+-_CharacterDto _$CharacterDtoFromJson(Map<String, dynamic> json) =>
+-    _CharacterDto(
+-      id: (json['id'] as num).toInt(),
+-      name: json['name'] as String,
+-      description: json['description'] as String? ?? '',
+-      thumbnailUrl: json['thumbnail_url'] as String?,
+-    );
+-
+-Map<String, dynamic> _$CharacterDtoToJson(_CharacterDto instance) =>
+-    <String, dynamic>{
+-      'id': instance.id,
+-      'name': instance.name,
+-      'description': instance.description,
+-      'thumbnail_url': instance.thumbnailUrl,
+-    };
+EQUAL   spike/retrofit_api/lib/src/characters_api.g.dart
