@@ -17,6 +17,7 @@ workspace:
   - app/wiring/library_wiring
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
+  - spike/di_sample
   - spike/greeting
   - spike/hello
   - tool/l10n_check
