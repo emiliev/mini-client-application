@@ -5,6 +5,8 @@
 #                                             queued patches as commits, write .bazelrc.user
 #   tool/rules_fork.sh export [--force] <repo>  turn the fork's commits (pin..HEAD) into numbered patches
 #   tool/rules_fork.sh status                 pin, queue, fork dir and override per repo
+#   tool/rules_fork.sh check [<repo>]         verify every queued patch applies strictly on the pin
+#                                             (git am, no fuzz). Run before merging any queue change.
 #
 # <repo> is ai_rules_dart or ai_rules_flutter. The pin (commit + remote) is read from the
 # git_override in MODULE.bazel. Fork dirs live outside the repo (a Bazel package inside it
@@ -155,6 +157,44 @@ $merges"
   echo "    ],"
 }
 
+# check: every queued patch must apply strictly (git am: context must match, no fuzz) on the pin.
+# Bazel's own patcher is lenient and can silently drop a stale hunk (F-0022), so run this before
+# merging any queue change. Uses the fork dir or the pin cache when it has the pin; else fetches.
+cmd_check_one() {
+  local repo="$1" commit remote src work p n=0
+  commit="$(pin_field "$repo" commit)"; remote="${MC_FORK_REMOTE:-$(pin_field "$repo" remote)}"
+  [[ -n "$commit" ]] || die "no git_override pin for $repo in MODULE.bazel"
+  load_queue "$repo"
+  if [[ ${#QUEUE[@]} -eq 0 ]]; then echo "check $repo: queue empty, OK"; return 0; fi
+  src="$(fork_dir "$repo")"
+  if ! git -C "$src" cat-file -e "$commit^{commit}" 2>/dev/null; then
+    src="${MC_PIN_CACHE:-$HOME/.cache/mc-bazel/pins}/$repo"
+    if [[ ! -d "$src/.git" ]]; then mkdir -p "$(dirname "$src")"; git clone --quiet --no-checkout "$remote" "$src"; fi
+    git -C "$src" cat-file -e "$commit^{commit}" 2>/dev/null || git -C "$src" fetch --quiet origin "$commit" \
+      || die "cannot fetch pin $commit for $repo"
+  fi
+  work="$(mktemp -d)"
+  git clone --quiet --shared --no-checkout "$src" "$work/w"
+  git -C "$work/w" checkout --quiet -b check "$commit"
+  for p in "${QUEUE[@]}"; do
+    if ! git -C "$work/w" -c user.name=check -c user.email=check@localhost am --quiet "$p" >"$work/log" 2>&1; then
+      echo "rules_fork: patch $(basename "$p") does not apply strictly on pin ${commit:0:12} ($repo):" >&2
+      sed 's/^/  /' "$work/log" >&2
+      rm -rf "$work"; return 1
+    fi
+    n=$((n+1))
+  done
+  rm -rf "$work"
+  echo "check $repo: $n patch(es) apply strictly on pin ${commit:0:12}"
+}
+
+cmd_check() {
+  local repos=(ai_rules_dart ai_rules_flutter) r rc=0
+  if [[ -n "${1:-}" ]]; then check_repo "$1"; repos=("$1"); fi
+  for r in "${repos[@]}"; do cmd_check_one "$r" || rc=1; done
+  return $rc
+}
+
 cmd_status() {
   local repo rc=0
   for repo in ai_rules_dart ai_rules_flutter; do
@@ -189,6 +229,7 @@ cmd_status() {
 case "${1:-}" in
   checkout) shift; cmd_checkout "$@" ;;
   export)   shift; cmd_export "$@" ;;
+  check)    shift; cmd_check "$@" ;;
   status)   cmd_status ;;
-  *) sed -n '2,8p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

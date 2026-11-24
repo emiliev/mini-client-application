@@ -11,8 +11,12 @@ PASS T-0024-AC1_export_refuses_merge_commits
 PASS T-0024-AC2_export_refuses_after_failed_checkout
 PASS T-0024-AC1_export_refuses_detached_head
 PASS T-0024-AC1_export_refuses_dropping_patches_without_force
+PASS T-0024-AC2_check_accepts_good_queue
+PASS T-0024-AC2_check_rejects_wrong_context_line_at_eof
+PASS T-0024-AC2_check_rejects_wrong_removed_line_at_eof
+PASS T-0024-AC2_check_fetches_pin_without_fork_dir
 PASS T-0024-AC4_status_ignores_commented_override
 PASS T-0024-AC4_status_detects_order_mismatch
 PASS T-0024-AC4_status_accepts_matching_order
 PASS T-0024-AC4_committed_queue_matches_module_bazel
-rules_fork_test: 17 passed, 0 failed
+rules_fork_test: 21 passed, 0 failed

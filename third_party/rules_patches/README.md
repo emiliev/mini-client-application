@@ -22,5 +22,6 @@ tool/rules_fork.sh status
 
 - `.bazelrc.user` is git-ignored. The committed `MODULE.bazel` must build `//...` without it, so delete the file (or the line) before you hand off.
 - Text patches only. `export` refuses a binary change and names the file.
-- Bazel's patcher does not verify context lines (F-0022). `checkout` replays the queue with `git am`, which does, so a stale patch is caught there. Run `checkout` on a clean pin after you rebase the queue.
+- Bazel's patcher is lenient and can silently drop a stale hunk (F-0022). `check` and `checkout` replay the queue with `git am`, which is strict.
+- Run `tool/rules_fork.sh check` before merging any queue change (strict `git am` replay on the pin; names the first bad patch).
 - To move the pin: change `commit` in `MODULE.bazel`, `checkout` (fails naming the first patch that no longer applies), fix in the fork, `export`.

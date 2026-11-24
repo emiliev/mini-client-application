@@ -187,6 +187,40 @@ out2="$("$REPO/tool/rules_fork.sh" export --force ai_rules_dart 2>&1)"; r2=$?
 if [[ $r -ne 0 && "$out" == *"drop"* && -n "$kept" && $r2 -eq 0 && -z "$(queue_names)" ]]; then ok T-0024-AC1_export_refuses_dropping_patches_without_force
 else bad T-0024-AC1_export_refuses_dropping_patches_without_force "r=$r r2=$r2 kept='$kept' $out"; fi
 
+# ---- AC2: `check` applies the queue strictly on the pin; Bazel's lenient patcher is not enough (F-0022)
+# Case A: pure addition at EOF, then a wrong context line (Bazel silently drops this hunk).
+reset_fork
+(cd "$FORK" && printf 'line one\nline two\nline three\nline four\n' > data.txt && git_ commit -qam "Append line four")
+"$REPO/tool/rules_fork.sh" export ai_rules_dart >/dev/null 2>&1
+write_module 0001-Append-line-four.patch
+PA="$QDIR/0001-Append-line-four.patch"
+out="$("$REPO/tool/rules_fork.sh" check ai_rules_dart 2>&1)"; r=$?
+if [[ $r -eq 0 ]]; then ok T-0024-AC2_check_accepts_good_queue
+else bad T-0024-AC2_check_accepts_good_queue "$out"; fi
+sed 's/^ line three$/ line THREE/' "$PA" > "$PA.tmp" && mv "$PA.tmp" "$PA"
+out="$("$REPO/tool/rules_fork.sh" check ai_rules_dart 2>&1)"; r=$?
+if [[ $r -ne 0 && "$out" == *"0001-Append-line-four.patch"* ]]; then ok T-0024-AC2_check_rejects_wrong_context_line_at_eof
+else bad T-0024-AC2_check_rejects_wrong_context_line_at_eof "r=$r $out"; fi
+
+# Case B: a change to the last line, then a wrong removed line (Bazel crashes without naming the patch).
+reset_fork
+(cd "$FORK" && printf 'line one\nline two\nline 3\n' > data.txt && git_ commit -qam "Reword last line")
+"$REPO/tool/rules_fork.sh" export ai_rules_dart >/dev/null 2>&1
+write_module 0001-Reword-last-line.patch
+PB="$QDIR/0001-Reword-last-line.patch"
+sed 's/^-line three$/-line threeX/' "$PB" > "$PB.tmp" && mv "$PB.tmp" "$PB"
+out="$("$REPO/tool/rules_fork.sh" check ai_rules_dart 2>&1)"; r=$?
+if [[ $r -ne 0 && "$out" == *"0001-Reword-last-line.patch"* ]]; then ok T-0024-AC2_check_rejects_wrong_removed_line_at_eof
+else bad T-0024-AC2_check_rejects_wrong_removed_line_at_eof "r=$r $out"; fi
+
+# check without a fork dir fetches the pin into a cache (MC_PIN_CACHE), then works from it.
+rm -rf "$FORK"
+out="$(MC_PIN_CACHE="$TMP/pins" "$REPO/tool/rules_fork.sh" check ai_rules_dart 2>&1)"; r=$?
+if [[ $r -ne 0 && "$out" == *"0001-Reword-last-line.patch"* && -d "$TMP/pins/ai_rules_dart/.git" ]]; then ok T-0024-AC2_check_fetches_pin_without_fork_dir
+else bad T-0024-AC2_check_fetches_pin_without_fork_dir "r=$r $out"; fi
+rm -f "$QDIR"/[0-9]*.patch
+write_module
+
 # ---- AC4 / status: names and order are compared; commented override lines are not ACTIVE
 reset_fork
 printf '# common --override_module=ai_rules_dart=/nowhere\n' > "$WS/.bazelrc.user"

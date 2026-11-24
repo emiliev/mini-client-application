@@ -99,3 +99,5 @@ tool/rules_fork.sh status
 ```
 
 Test: `tool/test/rules_fork_test.sh` (local fake upstream, real Bazel, no network).
+
+**`check` must run before merging any queue change.** `tool/rules_fork.sh check [<repo>]` replays every queued patch on the pinned commit with `git am` (strict, no fuzz) and exits non-zero naming the first bad patch. Bazel's own patcher is lenient and can silently drop a stale hunk (F-0022), so a green build proves nothing about the queue. It uses the fork dir or a pin cache (`~/.cache/mc-bazel/pins`, `MC_PIN_CACHE`) and fetches the pin only when neither has it. The TL wires it into the verify gate.
