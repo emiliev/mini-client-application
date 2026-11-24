@@ -1,15 +1,4 @@
-//utility/mc_event_bus:event_bus_test                                    PASSED in 0.2s
-//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.2s
-//utility/mc_feature_flow:feature_flow_test                              PASSED in 1.1s
-//utility/mc_fixtures_characters:characters_test                         PASSED in 0.5s
-//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.8s
-//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.4s
-//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 1.8s
-//utility/mc_monitoring:monitoring_test                                  PASSED in 0.2s
-//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.2s
-//utility/mc_prelude:result_test                                         PASSED in 0.2s
-//utility/mc_storage:file_store_test                                     PASSED in 0.3s
-//utility/mc_storage:no_flutter_test                                     PASSED in 0.4s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
 
 Executed 39 out of 39 tests: 39 tests pass.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

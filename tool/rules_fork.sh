@@ -1,16 +1,18 @@
 #!/bin/bash
 # tool/rules_fork.sh: patch-queue tooling for the rules forks (plan 03 KD2, T-0024).
 #
-#   tool/rules_fork.sh checkout <repo>   clone the pinned commit into a fork dir, re-apply the
-#                                        queued patches as commits, write .bazelrc.user
-#   tool/rules_fork.sh export <repo>     turn the fork's commits (pin..HEAD) into numbered patches
-#   tool/rules_fork.sh status            pin, queue, fork dir and override per repo
+#   tool/rules_fork.sh checkout <repo>        clone the pinned commit into a fork dir, re-apply the
+#                                             queued patches as commits, write .bazelrc.user
+#   tool/rules_fork.sh export [--force] <repo>  turn the fork's commits (pin..HEAD) into numbered patches
+#   tool/rules_fork.sh status                 pin, queue, fork dir and override per repo
 #
 # <repo> is ai_rules_dart or ai_rules_flutter. The pin (commit + remote) is read from the
 # git_override in MODULE.bazel. Fork dirs live outside the repo (a Bazel package inside it
-# would be picked up by //...): $MC_FORK_DIR, default ~/.cache/mc-bazel/forks/<worktree>/<repo>.
+# would be picked up by //...): $MC_FORK_DIR, default ~/.cache/mc-bazel/forks/<worktree>-<hash>/<repo>.
 # Patches are `git format-patch` files in third_party/rules_patches/<repo>/ (patch_strip = 1).
-# Export refuses binary hunks. The final MODULE.bazel must list the exported files in `patches`.
+# Export refuses: binary changes in any commit, merge commits, an unfinished `git am`/rebase,
+# a fork HEAD that is not on branch `fork`, and (without --force) fewer patches than the queue has.
+# The final MODULE.bazel must list the exported files in `patches`.
 set -euo pipefail
 
 REPO_ROOT="${MC_REPO_ROOT:-$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)}"
@@ -40,24 +42,41 @@ pin_field() {
 }
 
 fork_dir() {
-  if [[ -n "${MC_FORK_DIR:-}" ]]; then echo "$MC_FORK_DIR/$1"
-  else echo "$HOME/.cache/mc-bazel/forks/$(basename "$REPO_ROOT")/$1"; fi
+  if [[ -n "${MC_FORK_DIR:-}" ]]; then echo "$MC_FORK_DIR/$1"; return; fi
+  local h; h="$(printf '%s' "$REPO_ROOT" | shasum | cut -c1-10)"
+  echo "$HOME/.cache/mc-bazel/forks/$(basename "$REPO_ROOT")-$h/$1"
 }
 
-queue_files() { ls "$QUEUE_ROOT/$1"/[0-9][0-9][0-9][0-9]-*.patch 2>/dev/null || true; }
+# Fill QUEUE with the queued patch paths (sorted; safe with spaces).
+QUEUE=()
+load_queue() {
+  local old; old="$(shopt -p nullglob || true)"
+  shopt -s nullglob
+  QUEUE=("$QUEUE_ROOT/$1"/[0-9][0-9][0-9][0-9]-*.patch)
+  eval "$old"
+}
 
-# Rewrite .bazelrc.user: keep other repos' override lines, set this repo's.
+# Names listed in MODULE.bazel's patches for <repo>, in order (comments ignored).
+listed_patches() {
+  grep -v '^[[:space:]]*#' "$MODULE" | sed -n "s|.*\"//third_party/rules_patches/$1:\\([^\"]*\\)\".*|\\1|p"
+}
+
+# Rewrite only the managed block of .bazelrc.user; everything else is kept as is.
 write_override() {  # repo, abs path
-  local repo="$1" path="$2" lines=""
+  local repo="$1" path="$2" others="" block
   if [[ -f "$RC_USER" ]]; then
-    lines="$(grep -E "^common --override_module=" "$RC_USER" | grep -v "override_module=${repo}=" || true)"
+    others="$(awk -v b="$BEGIN" -v e="$END" 'index($0,b)==1{i=1;next} index($0,e)==1{i=0;next} i' "$RC_USER" \
+      | grep -E '^common --override_module=' | grep -v "override_module=${repo}=" || true)"
   fi
-  lines="${lines:+$lines$'\n'}common --override_module=${repo}=${path}"
-  {
-    echo "$BEGIN (generated; git-ignored)"
-    echo "$lines"
-    echo "$END"
-  } > "$RC_USER"
+  block="$BEGIN (generated; git-ignored)"$'\n'"${others:+$others$'\n'}common --override_module=${repo}=${path}"$'\n'"$END"
+  if [[ -f "$RC_USER" ]] && grep -qF "$BEGIN" "$RC_USER"; then
+    BLK="$block" awk -v b="$BEGIN" -v e="$END" '
+      index($0,b)==1 { print ENVIRON["BLK"]; skip=1; next }
+      skip && index($0,e)==1 { skip=0; next }
+      !skip { print }' "$RC_USER" > "$RC_USER.tmp" && mv "$RC_USER.tmp" "$RC_USER"
+  else
+    { [[ -f "$RC_USER" ]] && cat "$RC_USER"; echo "$block"; } > "$RC_USER.tmp" && mv "$RC_USER.tmp" "$RC_USER"
+  fi
 }
 
 cmd_checkout() {
@@ -72,34 +91,58 @@ cmd_checkout() {
   git clone --quiet "$remote" "$dir"
   git -C "$dir" checkout --quiet -b fork "$commit"
   local p
-  for p in $(queue_files "$repo"); do
+  load_queue "$repo"
+  for p in ${QUEUE[@]+"${QUEUE[@]}"}; do
     git -C "$dir" -c user.name=fork -c user.email=fork@localhost am --quiet "$p" \
       || die "queued patch $(basename "$p") does not apply to $commit (fork left in $dir)"
   done
   dir="$(cd "$dir" && pwd -P)"
   write_override "$repo" "$dir"
-  echo "fork: $dir (branch 'fork', pin $commit, $(queue_files "$repo" | wc -l | tr -d ' ') queued patch(es) applied)"
+  echo "fork: $dir (branch 'fork', pin $commit, ${#QUEUE[@]} queued patch(es) applied)"
   echo "wrote $RC_USER (absolute --override_module)"
 }
 
 cmd_export() {
+  local force=0
+  if [[ "${1:-}" == "--force" ]]; then force=1; shift; fi
   local repo="${1:-}"; check_repo "$repo"
   local commit dir
   commit="$(pin_field "$repo" commit)"; dir="$(fork_dir "$repo")"
   [[ -d "$dir/.git" ]] || die "no fork checkout at $dir (run: tool/rules_fork.sh checkout $repo)"
+  local g
+  for g in rebase-apply rebase-merge; do
+    [[ ! -e "$(git -C "$dir" rev-parse --git-path "$g")" ]] \
+      || die "unfinished git am/rebase in $dir ($g exists); finish or abort it first"
+  done
+  [[ "$(git -C "$dir" symbolic-ref --short -q HEAD || true)" == "fork" ]] \
+    || die "fork HEAD is not on branch 'fork' ($dir)"
   [[ -z "$(git -C "$dir" status --porcelain)" ]] || die "fork has uncommitted changes; commit them first ($dir)"
   git -C "$dir" cat-file -e "$commit^{commit}" 2>/dev/null || die "pin $commit not in fork"
   git -C "$dir" merge-base --is-ancestor "$commit" HEAD || die "fork HEAD is not based on pin $commit"
+  local merges
+  merges="$(git -C "$dir" rev-list --merges "$commit..HEAD")"
+  [[ -z "$merges" ]] || die "fork has merge commits (format-patch would drop them); rebase them away:
+$merges"
+  # Per commit, so a binary added and removed again is still caught.
   local bin
-  bin="$(git -C "$dir" diff --numstat "$commit" HEAD | awk -F'\t' '$1 == "-" && $2 == "-" { print $3 }')"
+  bin="$(git -C "$dir" log --numstat --format= "$commit..HEAD" | awk -F'\t' '$1 == "-" && $2 == "-" { print $3 }' | sort -u)"
   if [[ -n "$bin" ]]; then
     echo "rules_fork: refusing to export, binary change(s) cannot go in a text patch queue:" >&2
     echo "$bin" | sed 's/^/  /' >&2
     exit 1
   fi
-  out="$(mktemp -d)"
+  local count
+  count="$(git -C "$dir" rev-list --count "$commit..HEAD")"
+  load_queue "$repo"
+  if [[ $force == 0 && "$count" -lt "${#QUEUE[@]}" ]]; then
+    die "fork has $count commit(s) but the queue holds ${#QUEUE[@]} patch(es); exporting would drop some. Re-run checkout, or pass --force"
+  fi
+  local out; out="$(mktemp -d)"
   trap 'rm -rf "${out:-}"' EXIT
-  git -C "$dir" format-patch --quiet --no-signature --zero-commit --no-stat -o "$out" "$commit..HEAD"
+  git -C "$dir" format-patch --quiet --no-signature --zero-commit --no-stat --no-binary -o "$out" "$commit..HEAD"
+  if grep -lE '^Binary files |^GIT binary patch' "$out"/*.patch >/dev/null 2>&1; then
+    die "export produced a binary hunk; refusing"
+  fi
   mkdir -p "$QUEUE_ROOT/$repo"
   rm -f "$QUEUE_ROOT/$repo"/[0-9][0-9][0-9][0-9]-*.patch
   local n=0 f
@@ -107,29 +150,40 @@ cmd_export() {
   echo "exported $n patch(es) to third_party/rules_patches/$repo/"
   echo "MODULE.bazel git_override($repo) must list, with patch_strip = 1:"
   echo "    patches = ["
-  for f in $(queue_files "$repo"); do echo "        \"//third_party/rules_patches/$repo:$(basename "$f")\","; done
+  load_queue "$repo"
+  for f in ${QUEUE[@]+"${QUEUE[@]}"}; do echo "        \"//third_party/rules_patches/$repo:$(basename "$f")\","; done
   echo "    ],"
 }
 
 cmd_status() {
-  local repo
+  local repo rc=0
   for repo in ai_rules_dart ai_rules_flutter; do
-    local commit dir n listed
+    local commit dir f queued listed
     commit="$(pin_field "$repo" commit)"; dir="$(fork_dir "$repo")"
-    n="$(queue_files "$repo" | wc -l | tr -d ' ')"
-    listed="$(grep -v '^[[:space:]]*#' "$MODULE" | grep -c "\"//third_party/rules_patches/$repo:" || true)"
-    echo "$repo: pin ${commit:0:12}, queue $n patch(es), MODULE.bazel lists $listed"
+    load_queue "$repo"
+    queued=""
+    for f in ${QUEUE[@]+"${QUEUE[@]}"}; do queued="$queued$(basename "$f")"$'\n'; done
+    listed="$(listed_patches "$repo")"$'\n'
+    [[ "$listed" == $'\n' ]] && listed=""
+    echo "$repo: pin ${commit:0:12}, queue ${#QUEUE[@]} patch(es)"
+    if [[ "$queued" == "$listed" ]]; then
+      echo "  MODULE.bazel: patches match the queue (names and order)"
+    else
+      echo "  MODULE.bazel: MISMATCH. queue: [$(echo -n "$queued" | tr '\n' ' ')] listed: [$(echo -n "$listed" | tr '\n' ' ')]"
+      rc=1
+    fi
     if [[ -d "$dir/.git" ]]; then
       echo "  fork: $dir ($(git -C "$dir" rev-list --count "$commit..HEAD" 2>/dev/null || echo '?') commit(s) over pin, $(git -C "$dir" status --porcelain | wc -l | tr -d ' ') dirty file(s))"
     else
       echo "  fork: none (run: tool/rules_fork.sh checkout $repo)"
     fi
-    if [[ -f "$RC_USER" ]] && grep -q "override_module=${repo}=" "$RC_USER"; then
+    if [[ -f "$RC_USER" ]] && grep -qE "^common --override_module=${repo}=" "$RC_USER"; then
       echo "  override: ACTIVE in .bazelrc.user (builds use the fork, not the queue)"
     else
       echo "  override: none (builds use pin + queue)"
     fi
   done
+  return $rc
 }
 
 case "${1:-}" in
