@@ -1,0 +1,12 @@
+# T-0029: writes step stubs for a package's `.feature` files into the source
+# tree (plan 05 §5.2). Never part of a build:
+#   tool/bazelw run //tool/bdd:scaffold -- //feature/characters_list
+load("@rules_dart//dart:defs.bzl", "dart_binary")
+
+dart_binary(
+    name = "scaffold",
+    srcs = ["scaffold.dart"],
+    language_version = "3.13",
+    main = "scaffold.dart",
+    deps = ["@rules_dart//dart/ext/bdd:bdd_generator"],
+)

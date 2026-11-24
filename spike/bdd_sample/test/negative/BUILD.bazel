@@ -1,0 +1,25 @@
+# T-0029-AC2 / T-0029-AC3 fixtures: features the build must refuse. `manual`,
+# so `//...` never builds them; tool/checks/T-0029-AC2_missing_step.sh does.
+load("@rules_dart//dart/ext/bdd:defs.bzl", "bdd_feature_test")
+
+# A step nobody defines: the build fails naming it and writes nothing.
+bdd_feature_test(
+    name = "missing_step",
+    testonly = True,
+    src = "missing_step.feature",
+    package_name = "bdd_sample",
+    step_indexes = ["//utility/mc_test_steps:step_index"],
+    steps = [],
+    tags = ["manual"],
+)
+
+# A local step named like a shared one: refused (plan 05 §3.2 rule 4).
+bdd_feature_test(
+    name = "shadowed_step",
+    testonly = True,
+    src = "shadowed_step.feature",
+    package_name = "bdd_sample",
+    step_indexes = ["//utility/mc_test_steps:step_index"],
+    steps = ["step/i_see.dart"],
+    tags = ["manual"],
+)
