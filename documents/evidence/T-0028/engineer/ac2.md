@@ -1,6 +1,6 @@
 # T-0028-AC2: injectable early cutoff (H-DI-CUTOFF)
 
-Edit: method body of `spike/di_sample/lib/src/greeting_repository.dart` (`greeting()` string; token `cutoff-1795525076-19110`), then `build //spike/di_sample:di_config` with `--execution_log_json_file`.
+Edit: method body of `spike/di_sample/lib/src/greeting_repository.dart` (`greeting()` string; token `cutoff-1795542513-47697`), then `build //spike/di_sample:di_config` with `--execution_log_json_file`.
 
 | | before | after |
 |---|---|---|
@@ -18,7 +18,8 @@ DartCodegen	//spike/di_sample:_di_config_src_plain_helper_inj	cacheHit=False	exi
 DartCodegen	//spike/di_sample:_di_config_src_sample_module_inj	cacheHit=False	exitCode=0
 ```
 
-- shard action executed: DartCodegen	//spike/di_sample:_di_config_src_greeting_repository_inj	cacheHit=False	exitCode=0
+- edited file's shard executed (cacheHit=False): DartCodegen	//spike/di_sample:_di_config_src_greeting_repository_inj	cacheHit=False	exitCode=0
+- aggregate spawns that were not cache hits: none
 - aggregate action spawns: none (action-cache hit)
 
 Package-local inputs of the aggregate action (aquery):

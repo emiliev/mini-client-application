@@ -35,6 +35,7 @@ One Engineer pass plus one fix round. Otherwise stop with a precise finding, and
 ## Log
 - 2026-11-24: Created and dispatched (codegen wave, Phase A3).
 - 2026-11-24: Engineer (resumed after the usage-limit stop; worktree re-created on the existing branch, fast-forwarded to `e630d67`). Fork patch **`0002-ext-injectable-two-stage.patch`** (`dart/ext/injectable/`: `shim_json`, `shim_config`, `defs.bzl` with `injectable_package`, Builder wrappers + unit test, vendored injectable_generator 3.1.3 without `lib/lean_builder/` with `VENDORED.md` provenance, `injectable 3.0.0` in the ext lock, `docs/ext.md`). Sample `spike/di_sample` (5 annotated classes + a comment-only file + `@InjectableInit` via `McDIInitializer`). First pass: byte-identical on the plain sample, but **not** once the barrel is staged or a class takes `Dio` (the shim's `Resolver.libraries` order, F-0028). Fix round: both shims use a build_runner-order resolver; byte-identical in all cases. R28 fallback not needed. Gates green (see Outcome).
+- 2026-11-24: Verifier PASS (`ced0c05`). Code-review fix round (Engineer): (1) `injectable_reference.sh` exits 1 when the Bazel build or build_runner fails, and compares only the outputs the targets declare (`cquery --output=files`; a stale shard in bazel-bin is ignored, checked); (2) AC3 check queries the hub by its canonical name `@@ai_rules_dart++pub+ext_pub_deps` with a positive control (analyzer, injectable listed), fails if the fetch or the query fails, and fails when the archive comparison can't run (offline = NOT CHECKED); (3) AC2 check requires the edited file's shard spawn with `cacheHit=False` and fails on any `DartAggregateCodegen` spawn without `cacheHit=True`; (4) finding renumbered F-0026 → **F-0028** everywhere (fork comment included; the Verifier's report keeps its original wording); (5) the sample test that claimed AC4 is renamed (the shell check is the AC4 evidence); (6) `injectable_shards` fails naming both files when two sources map to the same target suffix (checked with `a_b.dart` vs `a/b.dart`); (7) `LICENSE` is byte-identical in the fork; Bazel's patcher appends a final newline (it ignores `\ No newline at end of file`), now documented in `VENDORED.md`; (8) `_stage` comment explains why the barrel's dangling export of the init file is harmless, proved by AC1 with the barrel staged. Patch 0002 re-exported, `check` passes. Gates and all four AC checks re-run: PASS.
 
 ## Outcome
 **Done** (Engineer, awaiting a fresh Verifier). One pass plus one fix round, within R28.
@@ -53,4 +54,12 @@ Notes for the TL:
 - **Overlay split:** the injectable reference has its own pubspec/lock (`tool/build_runner_overlay/injectable/`) because lean_builder forces analyzer 14.1.0 (F-0028 §3).
 - No tests were deleted, skipped or weakened; no `// ignore:` added. `tool/verify.sh` does not exist yet; the equivalent gates above were run.
 
-Follow-ups (for `pending-work.md`): an `e2e/ext_exemplar/injectable/` exemplar and Gazelle support in the upstream PR; the general `Resolver.libraries` fix in `builder_shim.dart` (U-D-injectable follow-up issue); narrower shard deps in buildgen so an edit re-runs one shard, not all (F-0028 §5); micro-package `.module.dart` untested.
+Follow-ups (for `pending-work.md`):
+- An `e2e/ext_exemplar/injectable/` exemplar and Gazelle support in the upstream PR.
+- The general `Resolver.libraries` fix in `builder_shim.dart` (U-D-injectable follow-up issue).
+- Narrower shard deps in buildgen, so an edit re-runs one shard, not all (F-0028 §5).
+- Micro-package `.module.dart` output: untested.
+- `InjectableConfigBuilder`'s shard check uses a hard-coded `lib/**.injectable.json` glob, not the annotation's `generateForDir`.
+- An annotated file missing from `srcs` is silently dropped from the config (no shard); buildgen's annotation scan must cover it.
+- `tool/build_runner_overlay/injectable_reference.sh` is hard-coded to the sample's first-party deps (`mc_di`); generalise it (as `spike_reference.sh` does) before using it on other packages.
+- Rebase patch 0002 onto T-0027's 0001 once T-0027 is merged (TL request), regenerate the ext lock with both, re-export, `check`.
