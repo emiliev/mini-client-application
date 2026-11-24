@@ -1,0 +1,45 @@
+# T-0021 (P1-16): app_core, the shared app layer (plan 01 §3.4).
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//app:__subpackages__"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_config",
+    "//utility/mc_di",
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_theme",
+    "//utility/mc_event_bus",
+    "//utility/mc_mocked_backend",
+    "//utility/mc_monitoring",
+    "//utility/mc_storage",
+    "@pub_deps//:dio",
+    "@pub_deps//:flutter",
+    "@pub_deps//:get_it",
+    "@pub_deps//:go_router",
+]
+
+flutter_library(
+    name = "app_core",
+    package_name = "app_core",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    deps = _DEPS,
+)
+
+[flutter_test(
+    name = t,
+    size = "small",
+    package_name = "app_core",
+    language_version = _LANG,
+    main = "test/%s.dart" % t,
+    deps = _DEPS + [
+        ":app_core",
+        "@pub_deps//:flutter_test",
+    ],
+) for t in [
+    "boot_test",
+    "links_and_hooks_test",
+]]

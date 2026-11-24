@@ -1,0 +1,150 @@
+# T-0021 (P1-16): the Marvel app (plan 01 §3.4, plan 03 §5).
+#
+# Codegen is wired file by file through `dart_codegen` (as in spike/hello).
+#   tool/bazelw build --config=sim //app/mini_client:mini_client_ios
+#   tool/bazelw build --config=sim --//tool/bazel/config:env=e2e //app/mini_client:mini_client_ios
+load("@rules_dart//dart:defs.bzl", "dart_codegen")
+load("@rules_flutter//flutter:defs.bzl", "flutter_application", "flutter_library", "flutter_test")
+load("@rules_flutter//flutter:ios.bzl", "IOS_MINIMUM_OS_VERSION", "flutter_ios_app")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "mini_client"
+
+# The pubspec SDK floor; without it codegen output differs from
+# build_runner's (F-0011).
+_LANG = "3.13"
+
+_WIRINGS = [
+    "//app/wiring/account_wiring",
+    "//app/wiring/chronicle_wiring",
+    "//app/wiring/commerce_wiring",
+    "//app/wiring/discovery_wiring",
+    "//app/wiring/library_wiring",
+    "//app/wiring/publishing_wiring",
+    "//app/wiring/universe_wiring",
+]
+
+_RUNTIME_DEPS = _WIRINGS + [
+    "//app/wiring/app_core",
+    "//utility/mc_config",
+    "//utility/mc_di",
+    "//utility/mc_ds_buttons",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_theme",
+    "@pub_deps//:flutter",
+    "@pub_deps//:get_it",
+    "@pub_deps//:go_router",
+]
+
+_HAND_WRITTEN = glob(
+    ["lib/**/*.dart"],
+    exclude = ["lib/**/*.g.dart"],
+)
+
+# R13: the environment's config, selected by --//tool/bazel/config:env and
+# bundled as `assets/app_config.json`. An asset must live in this package to
+# get that key, so the selected file is copied here.
+genrule(
+    name = "app_config_asset",
+    srcs = ["//tool/bazel/config:app_config"],
+    outs = ["assets/app_config.json"],
+    cmd = "cp $< $@",
+)
+
+# --- go_router_builder (F-0007 workaround) ----------------------------------
+# Same-package files the route library imports, staged for codegen only.
+flutter_library(
+    name = "_stage",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = ["lib/src/pages/placeholder_pages.dart"],
+    deps = [
+        "//utility/mc_ds_buttons",
+        "//utility/mc_ds_layout",
+        "@pub_deps//:flutter",
+        "@pub_deps//:go_router",
+    ],
+)
+
+dart_codegen(
+    name = "app_routes_go_router_part",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/router/app_routes.dart",
+    generator_bin = "@rules_dart//dart/ext/go_router:shim",
+    output_suffixes = [".go_router.g.part"],
+    deps = [
+        ":_stage",
+        "//app/wiring/app_core",
+        "//utility/mc_config",
+        "//utility/mc_di",
+        "//utility/mc_ds_buttons",
+        "//utility/mc_ds_layout",
+        # F-0007: turns analyzer summaries off for this action, because the
+        # closure holds Flutter and the dart:ui-less summary crashes the shim.
+        "@flutter_sky_engine//:sky_engine",
+        "@pub_deps//:flutter",
+        "@pub_deps//:go_router",
+    ],
+)
+
+dart_codegen(
+    name = "app_routes_g",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/router/app_routes.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    output_suffixes = [".g.dart"],
+    parts = [":app_routes_go_router_part"],
+)
+
+_GENERATED = [":app_routes_g"]
+
+# --- The package library (tests and analysis) -------------------------------
+flutter_library(
+    name = "mini_client_lib",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = _HAND_WRITTEN + _GENERATED,
+    deps = _RUNTIME_DEPS,
+)
+
+flutter_test(
+    name = "app_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/app_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_event_bus",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_storage",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# --- The app (manual, R14) --------------------------------------------------
+# The app rule carries no DartInfo, so its sources are listed again (as
+# spike/hello does) instead of depending on :mini_client_lib.
+flutter_application(
+    name = "mini_client_app",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = [s for s in _HAND_WRITTEN if s != "lib/main.dart"] + _GENERATED,
+    main = "lib/main.dart",
+    assets = [":app_config_asset"],
+    min_os_version = IOS_MINIMUM_OS_VERSION,
+    tags = ["manual"],
+    deps = _RUNTIME_DEPS + ["@rules_flutter//flutter:material_icons"],
+)
+
+flutter_ios_app(
+    name = "mini_client_ios",
+    application = ":mini_client_app",
+    bundle_id = "com.emiliev.miniclient",
+    tags = ["manual"],
+)
