@@ -46,6 +46,7 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 ## Log
 - 2026-11-25: Created and dispatched (TL).
 - 2026-11-25: Engineer: `mc_media` (pure `:mc_media` + Flutter `:mc_media_scope`), `mc_paging` (freezed `PagedState`, `PagingController`, `DebouncedQuery`, `SearchHistory`), `mc_fixtures_media` implements `McImageResolver`. First cut with one Flutter `mc_media` library broke `//utility/mc_api_client:api_client_test` (pure test reaching Flutter through the fixtures chain), so it was split (F-0029). Handoff.
+- 2026-11-25: Fix round (TL items 1 to 14): SearchHistory (serialised clear, self-healing corrupt store, cap on load, one-instance-per-key doc), PagingController (disposed guards, Errors propagate, copied results, ArgumentError for bad limit/offset, last-wins doc), DebouncedQuery (no repeat search, clear only after a fired search, dead after dispose, fake_async), mc_media purity test scans a glob. Spec change approved by the TL: typing and deleting inside the delay now emits no clear (test renamed accordingly). Evidence: `evidence/T-0030/engineer/fixround-tests-fail-without-fix.txt`. T-0029 merged into the branch; locks unchanged after re-resolve.
 
 ## Outcome
 **Handed off** for verification on `fleet/T-0030-paging-and-media`. Evidence: `documents/evidence/T-0030/engineer/`.
@@ -62,7 +63,7 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 | AC7 | `//utility/mc_paging:purity_test`, `//utility/mc_media:purity_test`, `tool/checks/T-0030-AC7_closure.sh` ([report](../evidence/T-0030/engineer/AC7_closure.md), [negative control](../evidence/T-0030/engineer/AC7_negative_control.md)), gates below |
 
 ### Gates (logs in the evidence directory)
-`test //...` 58/58 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
+`test //...` 60/60 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
 
 ### Root changes
 `pubspec.yaml` workspace: `utility/mc_media`, `utility/mc_paging`. `pubspec.lock` re-resolved with `fvm dart pub get` (no new third-party packages; `freezed_annotation 3.1.0` was already locked). `MODULE.bazel.lock` unchanged.
