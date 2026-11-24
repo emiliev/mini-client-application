@@ -1,13 +1,12 @@
 # Task Board
 
-_Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fleet/protocol.md](../fleet/protocol.md#task-lifecycle). Merge gate: [ADR-0006](../adr/0006-verification-strategy.md). The delivery roadmap (Phases A to H, with P-task IDs) is in [plan/README.md §5](../plan/README.md#5-delivery-roadmap). P-tasks become `T-` tasks here when they are dispatched.
+_Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fleet/protocol.md](../fleet/protocol.md#task-lifecycle). Merge gate: [ADR-0006](../adr/0006-verification-strategy.md). The delivery roadmap (Phases A to H, with P-task IDs) is in [plan/README.md §5](../plan/README.md#5-delivery-roadmap). P-tasks become `T-` tasks here when they are dispatched.
 
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0029](T-0029-bdd-generator.md) | BDD generator + `mc_bdd_tests` + `mc_test_steps` skeleton (P3-05) | **In Progress** | Engineer (Opus) | T-0024, T-0026 | `fleet/T-0029-bdd-generator` |
-| [T-0027](T-0027-retrofit-shim.md) | retrofit codegen shim on the rules_dart fork (P3-03) | **In Progress** | Engineer (Opus) | T-0024 | `fleet/T-0027-retrofit-shim` |
-| [T-0028](T-0028-injectable-shim.md) | injectable two-stage shim, vendored generator (P3-04) | **In Progress** | Engineer (Opus) | T-0024 | `fleet/T-0028-injectable-shim` |
+| [T-0029](T-0029-bdd-generator.md) | BDD generator + `mc_bdd_tests` + `mc_test_steps` skeleton (P3-05) | **Verified**; rebase onto 0001+0002 | Engineer (Opus) | T-0024, T-0026 | `fleet/T-0029-bdd-generator` |
+| [T-0028](T-0028-injectable-shim.md) | injectable two-stage shim, vendored generator (P3-04) | **Verified**; rebase onto 0001 | Engineer (Opus) | T-0024 | `fleet/T-0028-injectable-shim` |
 
 ## Done
 | ID | Title | Result |
@@ -16,6 +15,7 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0027](T-0027-retrofit-shim.md) | retrofit codegen shim, patch 0001 (P3-03): byte-identical to build_runner | merged; Verifier [PASS](../evidence/T-0027/verification-report.md) (re-verified after FAIL); F-0025, F-0026 |
 | [T-0026](T-0026-test-utils-harness.md) | `mc_test_utils` harness: Tide's `test_utils` (P5-01) | merged; Verifier [PASS](../evidence/T-0026/verification-report.md); F-0024 |
 | [T-0024](T-0024-rules-patch-queue.md) | Rules patch queue: `tool/rules_fork.sh` (P3-02) | merged; Verifier [PASS](../evidence/T-0024/verification-report.md) (3 rounds); F-0022 |
 | [T-0025](T-0025-l10n-core.md) | `mc_l10n_core`, `mc_formatters`, `l10n_check` + workspace gate (P1-13) | merged; Verifier [PASS](../evidence/T-0025/verification-report.md); F-0023 |

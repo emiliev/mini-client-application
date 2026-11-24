@@ -36,6 +36,7 @@ The PO chose Tide's *Project Miniclient* architecture (six Medium articles) and 
   - the codegen purity rule (route targets; Flutter-free bloc imports; monitoring's Flutter hooks in `app_core`)
   - freezed 4's `sealed` modifier only: private cases and `state.when` are kept
   - per-flow DI containers with generated, resolve-tested root imports
+  - freezed models with JSON spell out `@Freezed(fromJson: true, toJson: true)`; Tide writes a bare `@freezed` (R30, F-0025)
 
 ## Consequences
 - **Positive:** a proven, team-scalable structure; a realistic, highly modular Bazel workload.

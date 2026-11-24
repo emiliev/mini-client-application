@@ -25,3 +25,5 @@ tool/rules_fork.sh status
 - Bazel's patcher is lenient and can silently drop a stale hunk (F-0022). `check` and `checkout` replay the queue with `git am`, which is strict.
 - Run `tool/rules_fork.sh check` before merging any queue change (strict `git am` replay on the pin; names the first bad patch).
 - To move the pin: change `commit` in `MODULE.bazel`, `checkout` (fails naming the first patch that no longer applies), fix in the fork, `export`.
+- **No fork `MODULE.bazel.lock` in queue patches** (TL decision, 2026-11-24). Our builds never read a dependency's lockfile, and a lock hunk goes stale silently when patches stack (the T-0029 Verifier showed a wrong hash surviving `check`). Run fork-side tests with `--lockfile_mode=update`; an upstream PR draft regenerates the fork lock for that PR only.
+- When patches touch the same file (for example `dart/ext/pubspec.yaml`, `pubspec.lock`, `docs/ext.md`), the later task rebases its fork commit onto the merged queue, **re-resolves** `dart/ext/pubspec.lock` (never hand-merge it), re-exports, and runs `check`.

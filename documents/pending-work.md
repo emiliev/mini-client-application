@@ -26,7 +26,7 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-021 | Compact execution-log ingestion: build Bazel's converter from the pinned 9.3.0 source (KD-7); JSON ingestion works today | Tooling | T-0016 | Before S1 perf runs | — |
 | P-022 | `tool/perf` sampler: use a monotonic clock for intervals (a host sleep of 699 s made one AC7 run fail) | Tooling | T-0016 Verifier | Before nightly perf runs | — |
 | P-023 | `--config=profile`: `%workspace%` isn't expanded in the trace and memory-profile paths (only the exec log is written, exit 0) | Tooling | T-0014 Verifier | Before P4 perf runs | — |
-| P-024 | `spike_reference.sh` ignores a failed Bazel build (could compare stale outputs) | Tooling | T-0014 Verifier | Before P3-03 shims | — |
+| P-024 | `spike_reference.sh` ignores a failed Bazel build (could compare stale outputs) | Tooling | T-0014 Verifier | Before P3-03 shims | **Done** 2026-11-24 in T-0027 (exits 1 on a failed build) |
 | P-025 | Reconcile the budget16 `--jobs` value between plan 03 and plan 04 | Docs | T-0014 | With P4-04 | — |
 | P-026 | A debug simulator build also downloads the release iOS engine (fetch-cost upstream candidate) | Perf/Upstream | T-0014 | Phase F | — |
 | P-027 | mcgen buildgen must emit `language_version` and the `sky_engine` codegen dep (F-0007, F-0011) | Tooling | T-0014 | With P2-08 | — |
@@ -52,4 +52,10 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-047 | l10n: the generated `supportedLocales` still lists `en_XA` (apps must use `mcSupportedLocales()`); the workspace gate skips packages not listed in its data, so make registration automatic (buildgen) | Hygiene | T-0025 Verifier | With P2-08 | — |
 | P-048 | Wire `tool/rules_fork.sh check` into the verify gate (`tool/verify.sh` / CI), so no stale patch can merge | Tooling | T-0024 Verifier | With P5-09 | — |
 | P-049 | `mc_test_utils` follow-ups: the held-cancel test must assert the backend is never hit after release (it survives the mutant); F-0024 #13 (`%FF` gives 404 vs 400); an `addDomain` unit test; an `app_core` drift guard vs `McTestContainer`; migrate the DS goldens off the shim | Quality | T-0026 Verifier | Before P5-02 | — |
+| P-050 | `@Freezed(fromJson: true, toJson: true)` in templates and buildgen; a lint or `buildgen --check` rule flags a bare `@freezed` with a `fromJson` factory (R30, F-0025) | Tooling | T-0027 | With P1-24 / P2-08 | — |
+| P-051 | **Upstream:** rules_dart's builder shim gives sources a file-path `fullName`, not build_runner's `/<package>/lib/…`, which breaks freezed's `hasJson` (F-0025). Alternative: freezed checks the library URI | Upstream | T-0027 | With P3-13 drafts | — |
+| P-052 | `mc_codegen` (P3-06) `retrofit = [...]` wiring with per-file staging; Gazelle `@RestApi` support and an `e2e/ext_exemplar/retrofit` upstream | Tooling | T-0027, F-0026 | With P3-06 | — |
+| P-053 | `mc_api_client`: `ApiResponse<T>` / `ApiPage<T>` envelope, using `spike/api_envelope` as the template | Feature | T-0027 | With `characters_list` (P1-17) | — |
+| P-054 | `spike_reference.sh`: compare only the outputs the codegen targets declare (a warm `bazel-bin` can still hold a stale file that compares EQUAL), as `injectable_reference.sh` does | Tooling | T-0027 Verifier | Before P4-14 | — |
+| P-055 | Fork tests `dart/tests/defines_fixture` fail with `DartKernel` exit 247 in the fork workspace (not investigated; no `dart/ext` dependency) | Upstream? | T-0027 | Before filing U-D-retrofit | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |
