@@ -130,3 +130,104 @@ All 23 mutations were killed. None survived.
 ## Notes for the Tech Lead
 - Every gate was re-run on a fresh output base with `--nocache_test_results`. The first `test //...` was served entirely from the shared disk cache, so it proves nothing by itself.
 - Issues 2 to 5 are good inputs for P1-12 and `characters_list`, when the bloc wiring and the search UI land. None of them breaks an AC.
+
+---
+
+## Re-verification at b8d3abe
+
+- **Verifier:** the same fresh Verifier agent (not the implementer). Detached at `b8d3abe` in its own worktree, output base `/tmp/mc-ob-T-0030-verifier`.
+- **Commits since 350e215:**
+  - `f10c257` and `b53b963`: the fix round
+  - `f5c6ca5`: a merge of `origin/main` (`c14706e`)
+  - `b8d3abe`: refreshed evidence
+- **Verdict:** **PASS** on every AC. All 14 fix items are confirmed. There are no new blockers or majors; the five minor items and two info notes below don't break any AC.
+
+Evidence (`verifier/`):
+- [`reverify_new_tests_on_prefix_lib.txt`](verifier/reverify_new_tests_on_prefix_lib.txt)
+- [`reverify_mutations.md`](verifier/reverify_mutations.md)
+- [`reverify_probe_test.dart.txt`](verifier/reverify_probe_test.dart.txt)
+- [`reverify_AC7_closure.md`](verifier/reverify_AC7_closure.md)
+- [`reverify_AC7_negative_control_media.md`](verifier/reverify_AC7_negative_control_media.md)
+
+### Do the new tests fail on the pre-fix lib sources from 350e215?
+Method: restore one pre-fix `lib` file from `350e215` (`git show 350e215:<file>`), keep the new tests, and run the target with `test --nocache_test_results`. The new `page.dart` stays in place, so the test still compiles against `PageRequest.checked`. Afterwards, restore the file from HEAD.
+
+| Pre-fix file restored | New tests that FAIL (my run) |
+|---|---|
+| `paging_controller.dart` | "every entry point does nothing after dispose"; "an Error from the fetcher propagates and frees the controller"; "later changes to the fetcher list do not change the state"; "a limit of zero or less is an ArgumentError" |
+| `query/debounced_query.dart` | "an unchanged trimmed query does not search again"; "deleting text while a search is pending cancels it, no clear"; "update after dispose does nothing" |
+| `query/search_history.dart` | "a corrupt file loads as empty and add heals it"; "clear that is not awaited runs after earlier adds"; "load applies the cap to an oversized stored list" |
+
+This matches the engineer's `fixround-tests-fail-without-fix.txt`, including the clear-ordering test that the file's note mentions. Two tests pass on the old code by design, because they pin behaviour that already existed:
+- "a stale response does not clear the newer in-flight flag"
+- "add after clear starts a fresh history"
+
+I pinned both with mutations instead (see the table below).
+
+### The 14 items
+| # | Item | Check | Result |
+|---|---|---|---|
+| 1 | `clear` runs through `_tail` | `search_history.dart:36-43` uses `_enqueue` for both `add` and `clear`. The test fails on the pre-fix code. Mutation k1 (clear outside the queue) is killed by 2 tests. | **OK** |
+| 2 | A corrupt store loads as empty and `add` heals it | `load` returns `success(read.fold(_decode, (_) => []))`. The test checks that `add('x')` returns `['x']` and that a new instance reads `['x']`. Fails on the pre-fix code; mutation k3 is killed. Probe: a *directory* in place of the file loads as `[]`, and `add` then returns a failure, because the write fails. That is acceptable. | **OK** |
+| 3 | `load` applies the cap | `_decode` calls `.take(cap)`. The test fails on the pre-fix code; mutation k2 is killed. | **OK** (see minor R4) |
+| 4 | One instance per key is documented | `search_history.dart:7-9`: "Use one instance per store key … one can overwrite the other's update (accepted)." | **OK** |
+| 5 | Disposed: every entry point is a no-op; only the generation-matched run clears `_inFlight` | `_disposed` guards at `:52`, `:65`, `:76` and `:88`. The test fails on the pre-fix code. Mutations r4a (`loadFirst`), r4b (`refresh`) and r4d (`retry`) are killed. **r4c (`loadMore`) survives**, because the test's `loadMore` is already blocked by the failure guard; the probe confirms the real code is guarded. Mutation r1 (clearing `_inFlight` before the generation check) is killed. **r2 (the Error path clears `_inFlight` regardless of generation) survives**; the probe confirms the real code is correct. | **OK** (test gaps R2, R3) |
+| 6 | Only an `Exception` becomes an `ApiFailure`; an `Error` propagates and the controller stays usable | `on Exception catch` / `on Object { … rethrow; }` at `:107-118`. The test fails on the pre-fix code; mutation r3 (`on Object catch`) is killed. A `FormatException` still maps (the original m9, re-run, is killed). Probe: after an `Error`, the next `loadMore` works, so the controller is usable. **However, `state.isLoadingMore` stays `true`** (minor R1). | **OK** (minor R1) |
+| 7 | `results` are copied | `List<T>.of(page.results)` on replace; spread on append. The test fails on the pre-fix code; mutation r5 is killed. | **OK** |
+| 8 | `PageRequest.checked` throws `ArgumentError` in release too, on every path that builds a request | `page.dart:7-15` uses explicit `throw`s, not asserts. The `limit` test fails on the pre-fix code, and mutation r6 (unchecked constructor) is killed. **Only the constructor (`paging_controller.dart:25`) calls `.checked`.** `loadFirst` (`:57-58`), `refresh` (`:70`) and the next-page request (`:133`) use the plain constructor. They are safe by construction: `limit` is `final` and validated once, and each offset is either `0` or `request.offset + results.length`, which is ≥ 0. No path can build an invalid request. | **OK** (info R6) |
+| 9 | Overlap semantics are documented | `paging_controller.dart:49-50, 61-63`: "the last one wins. The earlier fetches are not cancelled; their responses are dropped." | **OK** |
+| 10 | No repeat search for an unchanged trimmed query | `debounced_query.dart:52-54`. The test fails on the pre-fix code; mutation q1 is killed. "Searched again after a clear" is also tested. | **OK** |
+| 11 | A clear fires only after a search actually fired (approved spec change) | `_searched` is set inside the timer callback (`:55-58`). The replaced test now asserts `clears == 0` for type-then-delete within the delay. It fails on the pre-fix code, and mutation q2 (set `_searched` when scheduling instead of when firing) is killed, so the new behaviour is pinned. The case "a blank query after a fired search clears" is still asserted. This change is not a weakening. | **OK** |
+| 12 | `update` after `dispose` does nothing | `_disposed` guard at `:39-41`. The test fails on the pre-fix code; mutation q3 is killed. | **OK** |
+| 13 | `fake_async` replaces the real Timer, with no lock change | The real-`Timer` test is gone. The new test runs the *default* `_realTimer` under `fakeAsync`, with nothing at 299 ms and a fire at 300 ms. `fake_async 1.3.3` (sha256 `5368f2…`) is identical in `pubspec.lock` at `350e215` and at `b8d3abe`. The only new dependency is the `pub_deps//:fake_async` test dep in BUILD. `git diff origin/main b8d3abe -- pubspec.lock MODULE.bazel.lock MODULE.bazel` is **empty**, and `fvm dart pub get` leaves the tree clean. | **OK** |
+| 14 | The purity glob and test catch a Flutter import | `_PURE_SRCS = glob(lib/**/*.dart, exclude the 2 scope files)` feeds both the library and the test data, and the test lists the directory. Probe: a new `lib/src/zz_verifier_probe.dart` importing `package:flutter/widgets.dart` makes `//utility/mc_media:purity_test` FAIL (`Actual: ['utility/mc_media/lib/src/zz_verifier_probe.dart']`). The probe file was removed afterwards. | **OK** |
+
+### Mutations at b8d3abe ([diffs](verifier/reverify_mutations.md)); every one was restored and the tree is clean
+- **Killed (22 of 25):**
+  - **New behaviour:** r1, r3, r4a, r4b, r4d, r5, r6 (controller); q1–q4 (debounce); k1–k4 (history)
+  - **Original mutations re-run, no regression:** re-m1 (end guard), re-m2 (in-flight guard), re-m3 (retry asks for page 1), re-m4 (retry appends without de-dup), re-m5 (stale guard), re-m7 (end check off by one), re-m9 (an `Exception` no longer mapped)
+- **Survived (3):**
+  - r2: the Error path clears `_inFlight` regardless of generation
+  - r4c: no `_disposed` guard in `loadMore`
+  - k5: no cap in `add`; `load` caps on the next read
+
+  In all three, the real code behaves correctly; only the tests don't pin it (R2 to R4).
+
+### Gates at b8d3abe
+| Gate | Result |
+|---|---|
+| `test --nocache_test_results //...` | **60 / 60 pass**, all executed: 58 plus the 2 `mc_test_steps` targets from the merge |
+| `build --config=lint //...` | `Build completed successfully` |
+| `run //tool/mc_arch_check:bin` | `mc_arch_check: OK` |
+| `tool/rules_fork.sh check` | `ai_rules_dart: 3 patch(es) apply strictly on pin e7163aab8f91` (0003 comes from T-0029 on main); `ai_rules_flutter: queue empty, OK` |
+| `fvm dart format … utility/mc_paging utility/mc_media utility/mc_fixtures_media` | `24 files (0 changed)`. Repo-wide, only `tool/loc/**` and T-0029 evidence `.dart` files would change; both come from main, not T-0030. |
+| Coverage (own parser, union of LCOV) | **`mc_paging` 116/116 = 100 %** (`page` 18, `paging_controller` 57, `debounced_query` 20, `search_history` 21); **`mc_media` 21/21 = 100 %** |
+| AC7 closure check | `PASS`: `mc_paging` 2918 targets and `mc_media` 1107, no markers; the positive control shows Flutter |
+| AC7 negative control (`@pub_deps//:flutter` added to the pure `:mc_media`) | exit 1, `mc_media` 2298 targets, `pub_deps__flutter//:flutter`; result **FAIL T-0030-AC7** |
+| AC6 dependents | `git diff origin/main b8d3abe` over `mc_fixtures_characters/`, `mc_api_client/` and `bundled_image_resolver_test.dart` is empty; all pass in the uncached run |
+
+### Merge commit f5c6ca5 (parents `b53b963` and `c14706e` = `origin/main`)
+- `git show --remerge-diff f5c6ca5` is **empty**: the merge resolved no conflicts by hand.
+- Against its `origin/main` parent, the merge result differs outside the T-0030 paths in only two files:
+  - `pubspec.yaml`: the two workspace lines, `utility/mc_media` and `utility/mc_paging`
+  - the T-0030 task file
+- Nothing unrelated came in. `b8d3abe` after the merge touches only T-0030 engineer evidence and the task file.
+
+### Test integrity in the fix round
+- Four old test names are gone, and each one is replaced:
+  - "the pure mc_media library imports no Flutter" becomes the glob version. It is stronger: every file is scanned, and the test requires at least 3.
+  - "clearing while a search is pending cancels it" becomes "deleting text … no clear". This is the approved spec change, pinned by q2.
+  - "the default timer is a real Timer" becomes the `fakeAsync` version. It is stronger: it asserts both the 299 ms and the 300 ms boundary.
+  - "an unreadable store is a failure" becomes "a corrupt file loads as empty and add heals it". This follows the TL decision, and the new test asserts more.
+- There is no `skip:`, `solo:`, `// ignore` or hand-written `mixin` in the fix-round diff.
+
+### Issues at b8d3abe (none blocking)
+- **R1 (minor)** `utility/mc_paging/lib/src/paging_controller.dart:111-118`: when an `Error` propagates, no state is emitted, so `state.isLoadingMore` stays `true` (the probe printed `isLoadingMore after Error: true`). The UI would keep showing a spinner until the next call. Fix: emit `copyWith(isLoadingMore: false)` before `rethrow` when the generation matches, and assert it in the Error test.
+- **R2 (minor, test gap)** `paging_controller.dart:76`: nothing pins the `_disposed` guard in `loadMore`. The test "every entry point does nothing after dispose" calls `loadMore` while a failure is set, and the failure guard already blocks it, so mutation r4c survives. Fix: call `loadMore` after dispose in a healthy state.
+- **R3 (minor, test gap)** `paging_controller.dart:114`: nothing pins the generation check on the Error path, so mutation r2 survives. The case is a stale `Error` arriving while a newer `refresh` is in flight: it must not let `loadMore` start a parallel request. My probe shows the real code is correct.
+- **R4 (minor, test gap)** `utility/mc_paging/lib/src/query/search_history.dart:50`: nothing pins `add`'s own `take(cap)`, because `load` caps on read, so mutation k5 survives. Without it, `add` would return a list longer than the cap and the file would grow without bound. Fix: assert the length of `add`'s return value in the 12-query test.
+- **R5 (minor, doc)** `paging_controller.dart:6`: the `PageFetcher` doc still says "A thrown error is mapped with `ApiFailure.from`". Only an `Exception` is mapped now; an `Error` propagates.
+- **R6 (info)** Item 8: `.checked` is called only in the constructor (`paging_controller.dart:25`). The other three request builders are safe by construction, as explained in the items table.
+- **R7 (info)** `documents/tasks/T-0030-paging-and-media-kits.md:66` still says `mc_paging` coverage is "98/98". It is now 116/116, which the engineer's `coverage.txt` shows correctly.
+
+The earlier issues 1 to 5 from the first round are resolved by fix items 13, 4, 2, 3, and 5/8/12.
