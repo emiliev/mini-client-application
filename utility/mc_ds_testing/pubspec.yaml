@@ -6,9 +6,4 @@ environment:
   sdk: ^3.13.0
 
 dependencies:
-  flutter:
-    sdk: flutter
-  flutter_test:
-    sdk: flutter
-  mc_ds_theme: any
-  mc_ds_tokens: any
+  mc_test_utils: any

@@ -1,0 +1,29 @@
+name: mc_test_utils
+description: Test harness (testonly). mcTestWidgets, McBackendHarness, McTestContainer, initFlow, MockMonitoring and the golden helpers.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  dio: ^5.11.0
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  get_it: ^8.0.0
+  mc_api_client: any
+  mc_config: any
+  mc_di: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_event_bus: any
+  mc_mocked_backend: any
+  mc_monitoring: any
+  mc_storage: any
+
+dev_dependencies:
+  mc_analysis: any
+  mc_feature_flow: any
