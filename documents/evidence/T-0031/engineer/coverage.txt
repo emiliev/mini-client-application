@@ -1,0 +1,21 @@
+== mc_ds_media
+package:mc_ds_media/src/image_provider_for.dart: 2/2 100.0% missed=[]
+package:mc_ds_media/src/mc_avatar.dart: 8/8 100.0% missed=[]
+package:mc_ds_media/src/mc_image.dart: 45/45 100.0% missed=[]
+package:mc_ds_media/src/mc_media_scope.dart: 7/7 100.0% missed=[]
+TOTAL 62/62 100.0%
+exit=0
+== mc_ds_cards
+package:mc_ds_cards/src/mc_media_card.dart: 63/63 100.0% missed=[]
+TOTAL 63/63 100.0%
+exit=0
+== mc_ds_lists
+package:mc_ds_lists/src/mc_paged_grid.dart: 35/35 100.0% missed=[]
+package:mc_ds_lists/src/mc_paged_list.dart: 24/24 100.0% missed=[]
+package:mc_ds_lists/src/paged_body.dart: 72/72 100.0% missed=[]
+TOTAL 131/131 100.0%
+exit=0
+== mc_media
+package:mc_media/src/api_image.dart: 14/14 100.0% missed=[]
+TOTAL 14/14 100.0%
+exit=0
