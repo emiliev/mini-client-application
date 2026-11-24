@@ -6,7 +6,7 @@
 - **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0027-verifier` for all builds. The check scripts were routed there through `MC_BAZELISK=<wrapper adding --output_base>`. The repro ran on `/tmp/mc-ob-T-0027-verifier-repro`, and the fork lock probe on `/tmp/mc-ob-T-0027-verifier-fork`. All three servers were shut down at the end.
 - **Fork:** own dir, `MC_FORK_DIR=<scratch>/forks`, through `tool/rules_fork.sh checkout ai_rules_dart`. The generated `.bazelrc.user` was deleted before any gate in the worktree ran.
 - **Simulator:** none. This is a pure-Dart build-tooling task with no UI and no e2e journey.
-- **Verdict:** **FAIL.** All of the product behaviour is confirmed: byte identity, the mutation, rerun scope, the gates and the repro. But the check mapped to AC1 reports PASS on a failed Bazel build (defect 1, major). This is the P-024 bug class the brief asked about, and P-024 was scheduled "before P3-03 shims", which is this task. The fix is small and fits the one fix round: honour the build's exit status in `spike_reference.sh` and/or the AC1 check. After that, a quick re-verify of AC1 is enough.
+- **Verdict:** **PASS at `5f5c71e`** (see "Re-verification at 5f5c71e" below). It was **FAIL at `eee1877`**: All of the product behaviour is confirmed: byte identity, the mutation, rerun scope, the gates and the repro. But the check mapped to AC1 reports PASS on a failed Bazel build (defect 1, major). This is the P-024 bug class the brief asked about, and P-024 was scheduled "before P3-03 shims", which is this task. The fix is small and fits the one fix round: honour the build's exit status in `spike_reference.sh` and/or the AC1 check. After that, a quick re-verify of AC1 is enough.
 
 ## Gates re-run independently
 | Gate | Command | Result |
@@ -99,3 +99,33 @@ I didn't verify those patches, only replayed them. Script: `git am` on pin `e716
 ## Notes for the Tech Lead
 - Re-verify only AC1 after fixing defect 1, ideally with the failure repro above as a negative case. Fix defect 2 at the same time. Everything else passed on `eee1877`.
 - The 2 fork tests that fail to build (`dart/tests/defines_fixture`, exit 247) were not re-run by me. They have no `dart/ext` dependency.
+
+## Re-verification at 5f5c71e
+- **Commit:** `fleet/T-0027-retrofit-shim` @ `5f5c71e`, checked out detached. The fix commits are `c0a2fd5`, `cd9dfef`, `d8206e5` and `5f5c71e`, on top of `26b3745`.
+- **Bazel:** output base `/tmp/mc-ob-T-0027-verifier`. The repro used its own `/tmp/mc-ob-T-0027-verifier-repro`, which was deleted before the final run so that run was cold.
+- **Fork:** fresh `rules_fork.sh checkout` into my own `MC_FORK_DIR`. The generated `.bazelrc.user` was removed before any gate ran.
+- **Evidence:** [verifier/reverify-5f5c71e/](verifier/reverify-5f5c71e/), with the negatives in [negatives.md](verifier/reverify-5f5c71e/negatives.md).
+- **Verdict:** **PASS** on all four ACs. One minor residual issue is noted below (R1).
+
+| # | Item | Result |
+|---|---|---|
+| 1 | Masked build failures | **Fixed.** With the `{not json` repro, `spike_reference.sh` prints `BAZEL BUILD FAILED (exit 1)` and exits 1, and the AC1 check reports `FAIL` ("2 of 5" EQUAL). With a generated file really absent from `bazel-bin`, the check reports `MISSING … character_dto.g.dart`, "4 of 5" and **FAIL**. `T-0014-AC7_codegen_matches_build_runner.sh` still **PASS**es (2 EQUAL). There is one residual edge case: see R1. |
+| 2 | Regenerated F-0025 log | **Fixed.** `engineer/f0025-bare-freezed-diff.log` is now the real `spike_reference.sh spike/retrofit_api` run with a bare `@freezed`: `DIFFER` for `character_dto.freezed.dart` and `.g.dart` (the `toJson`, `@JsonSerializable()` and `_CharacterDto.fromJson` lines removed) and `EQUAL` for `characters_api.g.dart`. It matches my own reproduction line for line. It no longer contains anything from T-0028 or `di_sample`. |
+| 3 | Patch trailers | **Fixed.** `git log -1 --format=%B \| git interpret-trailers --parse` on the fork commit gives both `Changelog: \`retrofit_library\` runs retrofit_generator for \`@RestApi\` dio clients` and `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`; `%(trailers)` agrees. **Negative:** I changed the README `Changelog:` line (dropped "dio"), and the AC4 check reported `no: patch … README …` and **FAIL** (rc 1). Reverted afterwards. |
+| 4 | AC4 non-interactive | **PASS.** I ran it under `env -i HOME=… PATH=/opt/homebrew/bin:/usr/bin:/bin… bash --noprofile --norc` with `MC_RULES_FORK=<my fork>`. The check calls `DART="fvm dart"` and `BAZEL=tool/bazelw`, and I routed `MC_BAZELISK` to a wrapper for a separate output base. On a cold output base ("2024 processes: … 30 darwin-sandbox, 211 worker"): `//:characters_api_test PASSED`, "test PASSED (uncached) 1, cached 0; 3 EQUAL, 0 DIFFER", exit 0. The repro shut its Bazel server down afterwards (0 processes left). |
+| 5 | Dependency order | **Fixed.** In the patched `dart/ext/pubspec.yaml`, the generator group reads `built_value_generator, copy_with_extension_gen, drift_dev, freezed, go_router_builder, json_serializable, mockito, retrofit_generator, stacked_generator`, which is sorted. The file keeps its separate infra group (`analyzer` … `path`) above it, as upstream has it. |
+| 6 | README wording | **Fixed.** `U-D-retrofit/README.md:35` names `modular_comma_defines_test` and `:test_defines_test`, says "We did not investigate them, and we have not checked whether they also fail on the unpatched base", and drops the "look like local resource limits" guess. |
+| 7 | Gates | **PASS.** `rules_fork.sh check`: "1 patch(es) apply strictly on pin e7163aab8f91". `status`: "patches match the queue". `test --lockfile_mode=error --nocache_test_results //...`: **48/48** executed and passed. `build --config=lint //...` exit 0. `mc_arch_check: OK`. `dart format`: 7 files, 0 changed. A fresh export from my fork left `git status` clean, so the patch is **byte-identical** to the committed one. AC1 on a clean tree: 5 of 5 `EQUAL`, `characters_api.g.dart` sha256 `36eebd91…d0ea`. AC2: 11 spawns, the same `DartCodegen` set, shard and `.g.dart` hashes unchanged, PASS. AC3 check PASS (analyzer 14.5.0). |
+
+**Integrity of the fix round:**
+- No tests were deleted, skipped or weakened, and no `// ignore:` was added.
+- The AC1 check is stricter now. It requires both runs to exit 0 and exactly the 5 expected files `EQUAL`, and fails on `DIFFER`, `MISSING`, `BAZEL BUILD FAILED` or `ERROR`. The `|| true` / `|| echo 0` fallbacks on its counters are gone.
+- The AC4 check now parses real git trailers and requires an uncached `PASSED`.
+- F-0025 gained a "TL decision: adopted" line. The TL should confirm it reflects their decision, since crew don't normally record TL decisions.
+
+**Residual (minor, not blocking):**
+- **R1. An orphaned stale output can still pass AC1.** If a BUILD or shim change stops *declaring* a file (here I changed the DTO combine's `output_suffixes` to `.gen.dart`), Bazel leaves the earlier `character_dto.g.dart` in a warm `bazel-bin`. `spike_reference.sh` (`tool/build_runner_overlay/spike_reference.sh`, step 5) compares it and reports `EQUAL`, so the AC1 check passes (negatives N2a).
+  - On a clean output base, or once the orphan is gone, it correctly reports `MISSING` and FAIL (N2b).
+  - The full gate still catches this case: the library's `part 'character_dto.g.dart'` no longer resolves, so `test //...` fails.
+  - Suggested follow-up: compare only the files the codegen targets declare (`cquery --output=files`), as T-0028's `injectable_reference.sh` does. A pending-work item is enough.
+- The combined-queue fragility from the first pass (0002 and 0003 don't apply on top of 0001) is unchanged and remains a TL integration item.
