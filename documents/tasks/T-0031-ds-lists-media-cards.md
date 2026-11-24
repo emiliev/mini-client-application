@@ -73,7 +73,7 @@ The design-system widgets the `characters_list` exemplar (P1-17) renders: a page
 | AC6 | `//utility/mc_media:purity_test` ("T-0031-AC6 mc_media has one barrel"), `//utility/mc_ds_media:media_scope_test` (moved, renamed to T-0031-AC6), `tool/checks/T-0031-AC6_closure.sh` ([report](../evidence/T-0031/engineer/AC6_closure.md), [negative control](../evidence/T-0031/engineer/AC6_negative_control.md)), gates below |
 
 ### Gates (logs in the evidence directory)
-`test //...` 66/66 pass (`gate-test.log`); `build --config=lint //...` green; `run //tool/mc_arch_check:bin` OK; `tool/rules_fork.sh check` OK; `dart format` clean. Coverage (`bazel coverage`, union of per-target LCOV with `merge_lcov.py`): `mc_ds_media` 62/62, `mc_ds_cards` 63/63, `mc_ds_lists` 131/131, `mc_media` 36/36 (all 100 %).
+`test //...` 68/68 pass after merging `origin/main` 4f4c8de (`gate-test.log`; the `mc_ds_*` and `mc_media` targets also re-run uncached, `gate-test-uncached.log`); `build --config=lint //...` green; `run //tool/mc_arch_check:bin` OK; `tool/rules_fork.sh check` OK (3 patches); `dart format` clean. Coverage (`bazel coverage`, union of per-target LCOV with `merge_lcov.py`): `mc_ds_media` 62/62, `mc_ds_cards` 63/63, `mc_ds_lists` 131/131, `mc_media` 36/36 (all 100 %).
 
 ### Root changes
 - Workspace `pubspec.yaml`: added `utility/mc_ds_cards`, `mc_ds_lists`, `mc_ds_media`. `pubspec.lock` and `MODULE.bazel.lock` did not change (no new third-party package).
