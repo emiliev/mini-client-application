@@ -20,6 +20,21 @@ GetIt _root = GetIt.asNewInstance();
 bool _published = false;
 bool _initializing = false;
 
+/// Bumped by [abandonDIContainerInitialization]; a run whose generation is
+/// no longer current never publishes.
+int _generation = 0;
+
+/// Thrown by an [initializeDIContainer] call that was abandoned with
+/// [abandonDIContainerInitialization] once its current initializer returns.
+class DIInitializationAbandoned implements Exception {
+  const DIInitializationAbandoned();
+
+  @override
+  String toString() =>
+      'DIInitializationAbandoned: a newer initializeDIContainer call '
+      'replaced this one; its registrations were disposed.';
+}
+
 /// Runs [initializers] in order and publishes the result as the root
 /// container.
 ///
@@ -27,6 +42,9 @@ bool _initializing = false;
 /// root only when every initializer succeeded. If one throws, the staging
 /// container is discarded (disposing what it created), the root is unchanged,
 /// and the error is rethrown, so a retry registers each type exactly once.
+///
+/// One call runs at a time. A call that hangs can be given up with
+/// [abandonDIContainerInitialization]; a fresh call may then start.
 ///
 /// Production init never resets: a second call after success throws. Tests
 /// isolate themselves with [resetDIContainer].
@@ -43,20 +61,40 @@ Future<DIContainer> initializeDIContainer(
     throw StateError('initializeDIContainer is already running.');
   }
   _initializing = true;
+  final generation = ++_generation;
   final staged = GetIt.asNewInstance();
   try {
     for (final initializer in initializers) {
       await initializer.init(staged);
+      if (generation != _generation) {
+        throw const DIInitializationAbandoned();
+      }
     }
   } catch (_) {
     await staged.reset();
     rethrow;
   } finally {
-    _initializing = false;
+    // An abandoned run no longer owns the in-flight flag.
+    if (generation == _generation) {
+      _initializing = false;
+    }
   }
   _root = staged;
   _published = true;
   return diContainer;
+}
+
+/// Gives up the running [initializeDIContainer] call (boot timed out and the
+/// user chose Retry, P-028). The in-flight guard is released at once, so a
+/// fresh call can start. The abandoned call never publishes: when its current
+/// initializer returns (if ever), it disposes its staging container and
+/// throws [DIInitializationAbandoned]. Its pending initializer itself cannot
+/// be cancelled. Does nothing when no call is running.
+void abandonDIContainerInitialization() {
+  if (_initializing) {
+    _generation++;
+    _initializing = false;
+  }
 }
 
 /// Empties the root container, disposing its singletons. For test `setUp`

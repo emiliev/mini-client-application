@@ -1,0 +1,17 @@
+# T-0021 (P1-16): the commerce_wiring skeleton (plan 01 §3.4). No features yet.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library")
+
+package(default_visibility = ["//app:__subpackages__"])
+
+flutter_library(
+    name = "commerce_wiring",
+    package_name = "commerce_wiring",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    deps = [
+        "//utility/mc_di",
+        "@pub_deps//:flutter",
+        "@pub_deps//:get_it",
+        "@pub_deps//:go_router",
+    ],
+)

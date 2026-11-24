@@ -1,0 +1,86 @@
+===== test
+Computing main repo mapping: 
+
+INFO: Analyzed 90 targets (281 packages loaded, 18267 targets configured, 1227 aspect applications).
+INFO: Found 51 targets and 39 test targets...
+INFO: Elapsed time: 9.322s, Critical Path: 3.15s
+INFO: 228 processes: 10715 action cache hit, 134 disk cache hit, 55 internal, 39 darwin-sandbox.
+INFO: Build completed successfully, 228 total actions
+//app/mini_client:app_test                                               PASSED in 1.0s
+//app/wiring/app_core:boot_test                                          PASSED in 1.2s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.5s
+//spike/hello:widget_test                                                PASSED in 0.7s
+//tool/mc_arch_check:arch_check_test                                     PASSED in 0.3s
+//utility/mc_analysis:lints_test                                         PASSED in 2.8s
+//utility/mc_api_client:api_client_test                                  PASSED in 0.4s
+//utility/mc_api_client:no_flutter_test                                  PASSED in 0.3s
+//utility/mc_api_errors:api_failure_test                                 PASSED in 0.2s
+//utility/mc_api_errors:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_bloc_kit:feature_flow_controller_test                       PASSED in 0.2s
+//utility/mc_bloc_kit:mc_bloc_test                                       PASSED in 0.2s
+//utility/mc_bloc_kit:purity_test                                        PASSED in 0.2s
+//utility/mc_config:app_config_test                                      PASSED in 0.2s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.2s
+//utility/mc_di:di_container_test                                        PASSED in 0.2s
+//utility/mc_di:recording_test                                           PASSED in 0.3s
+//utility/mc_ds_buttons:buttons_test                                     PASSED in 1.2s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.2s
+//utility/mc_ds_feedback:feedback_test                                   PASSED in 0.8s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.8s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.4s
+//utility/mc_ds_layout:layout_test                                       PASSED in 0.9s
+//utility/mc_ds_testing:fonts_test                                       PASSED in 0.7s
+//utility/mc_ds_theme:golden_test                                        PASSED in 1.1s
+//utility/mc_ds_theme:theme_test                                         PASSED in 0.6s
+//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.5s
+//utility/mc_event_bus:event_bus_test                                    PASSED in 0.2s
+//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.2s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 1.3s
+//utility/mc_fixtures_characters:characters_test                         PASSED in 0.8s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.5s
+//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.5s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 1.8s
+//utility/mc_monitoring:monitoring_test                                  PASSED in 0.2s
+//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_prelude:result_test                                         PASSED in 0.2s
+//utility/mc_storage:file_store_test                                     PASSED in 0.3s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
+
+Executed 39 out of 39 tests: 39 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+EXIT 0
+===== lint
+INFO: Invocation ID: 7d161f21-4818-4f31-a083-b2a2f5c8377c
+Computing main repo mapping: 
+
+INFO: Analyzed 90 targets (0 packages loaded, 67 targets configured, 138 aspect applications).
+INFO: Found 90 targets...
+INFO: Elapsed time: 1.312s, Critical Path: 0.01s
+INFO: 1 process: 1048 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action
+EXIT 0
+===== arch
+INFO: Invocation ID: ddb645db-ff7e-47c8-8e75-ebc96cdc8bb6
+Computing main repo mapping: 
+
+INFO: Analyzed target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: Elapsed time: 0.440s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/tool/mc_arch_check/bin
+mc_arch_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a5dbec9c1d430feb7)
+EXIT 0
+===== sim
+INFO: Invocation ID: cd767704-3346-468d-914f-776ad3d1c086
+Computing main repo mapping: 
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+
+INFO: Analyzed target //app/mini_client:mini_client_ios (112 packages loaded, 8824 targets configured, 279 aspect applications).
+INFO: Found 1 target...
+Target //app/mini_client:mini_client_ios up-to-date:
+  bazel-bin/app/mini_client/mini_client_ios.ipa
+INFO: Elapsed time: 1.005s, Critical Path: 0.15s
+INFO: 49 processes: 3836 action cache hit, 31 disk cache hit, 18 internal.
+INFO: Build completed successfully, 49 total actions
+EXIT 0

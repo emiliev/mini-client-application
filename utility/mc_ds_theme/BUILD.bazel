@@ -1,4 +1,4 @@
-load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("@rules_flutter//flutter:defs.bzl", "flutter_font_family", "flutter_library", "flutter_test")
 
 # Public until the P3-06 package_group exists (follow-up: restrict to layers).
 package(default_visibility = ["//visibility:public"])
@@ -11,9 +11,23 @@ filegroup(
     srcs = glob(["assets/fonts/*"]) + ["@rules_flutter//flutter:material_icons"],
 )
 
+# Inter, bundled as `packages/mc_ds_theme/Inter` in every app that depends on
+# this library (the pubspec `flutter: fonts:` entry, for Bazel; P-031).
+flutter_font_family(
+    name = "inter",
+    family = "Inter",
+    fonts = [
+        {"asset": "assets/fonts/Inter-Regular.ttf"},
+        {"asset": "assets/fonts/Inter-Medium.ttf", "weight": 500},
+        {"asset": "assets/fonts/Inter-SemiBold.ttf", "weight": 600},
+        {"asset": "assets/fonts/Inter-Bold.ttf", "weight": 700},
+    ],
+)
+
 flutter_library(
     name = "mc_ds_theme",
     srcs = glob(["lib/**/*.dart"]),
+    fonts = [":inter"],
     language_version = "3.13",
     package_name = "mc_ds_theme",
     deps = [

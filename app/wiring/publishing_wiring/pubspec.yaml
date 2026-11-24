@@ -1,0 +1,20 @@
+# T-0021 (P1-16): skeleton. Typed routes, navigator implementations and
+# result mappers for the publishing group (comics, series, creators) arrive with its features.
+name: publishing_wiring
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get_it: ^8.0.0
+  go_router: 17.5.0
+  mc_di: any
+
+dev_dependencies:
+  mc_analysis: any

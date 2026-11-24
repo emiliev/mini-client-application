@@ -127,6 +127,47 @@ void main() {
     );
   });
 
+  group('T-0021-AC2 abandoning a hung initialisation', () {
+    test('T-0021-AC2 a fresh call succeeds after abandon, and the abandoned '
+        'call never publishes and disposes what it registered', () async {
+      final hang = Completer<void>();
+      var disposed = 0;
+      final hung = initializeDIContainer(<McDIInitializer>[
+        McDIInitializer((GetIt g, String? env) {
+          g.registerSingleton<Foo>(Foo(), dispose: (_) => disposed++);
+        }),
+        McDIInitializer((GetIt g, String? env) => hang.future),
+      ]);
+      await pumpEventQueue();
+      expect(
+        () => initializeDIContainer(<McDIInitializer>[]),
+        throwsStateError,
+        reason: 'still one call at a time',
+      );
+
+      abandonDIContainerInitialization();
+      final fresh = Foo();
+      await initializeDIContainer(<McDIInitializer>[
+        McDIInitializer((GetIt g, String? env) {
+          g.registerSingleton<Foo>(fresh);
+        }),
+      ]);
+      expect(diContainer<Foo>(), same(fresh));
+
+      // The hung initializer finally returns: nothing replaces the root.
+      hang.complete();
+      await expectLater(hung, throwsA(isA<DIInitializationAbandoned>()));
+      expect(diContainer<Foo>(), same(fresh));
+      expect(disposed, 1);
+    });
+
+    test('T-0021-AC2 abandon with nothing running does nothing', () async {
+      abandonDIContainerInitialization();
+      await initializeDIContainer(<McDIInitializer>[]);
+      expect(diContainer.isRegistered<Foo>(), isFalse);
+    });
+  });
+
   group('T-0017-AC7 child containers', () {
     test('T-0017-AC7 RootImport<Foo> resolves to the root singleton, '
         'child-only types are invisible at the root', () async {

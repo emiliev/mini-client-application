@@ -8,6 +8,15 @@ environment:
   sdk: ^3.13.0
 
 workspace:
+  - app/mini_client
+  - app/wiring/account_wiring
+  - app/wiring/app_core
+  - app/wiring/chronicle_wiring
+  - app/wiring/commerce_wiring
+  - app/wiring/discovery_wiring
+  - app/wiring/library_wiring
+  - app/wiring/publishing_wiring
+  - app/wiring/universe_wiring
   - spike/greeting
   - spike/hello
   - tool/mc_arch_check

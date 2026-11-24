@@ -1,0 +1,45 @@
+# T-0021 (P1-16): the Marvel app. Composes app_core and the 7 wirings; the
+# config asset comes from //tool/bazel/config:app_config (R13).
+name: mini_client
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  account_wiring: any
+  app_core: any
+  chronicle_wiring: any
+  commerce_wiring: any
+  discovery_wiring: any
+  flutter:
+    sdk: flutter
+  get_it: ^8.0.0
+  go_router: 17.5.0
+  library_wiring: any
+  mc_config: any
+  mc_di: any
+  mc_ds_buttons: any
+  mc_ds_layout: any
+  mc_ds_theme: any
+  publishing_wiring: any
+  universe_wiring: any
+
+dev_dependencies:
+  dio: ^5.11.0
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_event_bus: any
+  mc_mocked_backend: any
+  mc_monitoring: any
+  mc_storage: any
+
+flutter:
+  uses-material-design: true
+  # No `assets:` entry: Bazel bundles assets/app_config.json from
+  # //tool/bazel/config:app_config (BUILD.bazel). Pub / IDE mode gets it once
+  # `tool/ide_sync` exists (plan 01 §3.4).
