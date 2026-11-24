@@ -1,0 +1,9 @@
+PASS plain_passthrough
+PASS budget16_after_command_inserted
+PASS budget16_with_startup_option_first
+PASS budget16_after_command_not_matched
+PASS budget16_after_dashdash_not_matched
+PASS startup_options_kept_in_order
+PASS budget16_without_command_fails
+PASS missing_bazelisk_exit_2
+bazelw_test: 8 passed, 0 failed

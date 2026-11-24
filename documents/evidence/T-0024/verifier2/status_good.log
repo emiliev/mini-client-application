@@ -1,0 +1,8 @@
+ai_rules_dart: pin e7163aab8f91, queue 1 patch(es)
+  MODULE.bazel: patches match the queue (names and order)
+  fork: /Users/emililiev/.cache/mc-bazel/forks/agent-ad69b6af6d5e7192e-001753ca99/ai_rules_dart (1 commit(s) over pin, 0 dirty file(s))
+  override: none (builds use pin + queue)
+ai_rules_flutter: pin 876e263d65ca, queue 0 patch(es)
+  MODULE.bazel: patches match the queue (names and order)
+  fork: none (run: tool/rules_fork.sh checkout ai_rules_flutter)
+  override: none (builds use pin + queue)

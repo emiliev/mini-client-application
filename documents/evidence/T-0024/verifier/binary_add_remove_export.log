@@ -1,0 +1,7 @@
+exported 3 patch(es) to third_party/rules_patches/ai_rules_dart/
+MODULE.bazel git_override(ai_rules_dart) must list, with patch_strip = 1:
+    patches = [
+        "//third_party/rules_patches/ai_rules_dart:0001-Add-verifier-marker-comment-to-defs.bzl.patch",
+        "//third_party/rules_patches/ai_rules_dart:0002-Add-binary-icon.patch",
+        "//third_party/rules_patches/ai_rules_dart:0003-Remove-binary-icon.patch",
+    ],

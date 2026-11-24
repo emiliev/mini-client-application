@@ -1,0 +1,64 @@
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: f2ea78fd-3c48-42e6-becb-cbe98cc9a6c6
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: 90 targets (42 packages loaded, 6 targets configured)
+Analyzing: 90 targets (42 packages loaded, 7 targets configured)
+
+Analyzing: 90 targets (280 packages loaded, 18049 targets configured, 334 aspect applications)
+[6 / 6] no actions running
+Analyzing: 90 targets (283 packages loaded, 18200 targets configured, 914 aspect applications)
+[3,482 / 4,160] Writing file utility/mc_fixtures_characters/provider_contract_test.dart_analyze.format_manifest; 0s local ... (12 actions, 0 running)
+INFO: Analyzed 90 targets (283 packages loaded, 18267 targets configured, 1227 aspect applications).
+[8,280 / 9,473] Testing //utility/mc_ds_tokens:tokens_test; 0s darwin-sandbox ... (14 actions, 8 running)
+[10,565 / 10,659] 6 / 39 tests; Testing //utility/mc_ds_feedback:golden_test; 1s darwin-sandbox ... (14 actions, 9 running)
+[10,882 / 10,906] 21 / 39 tests; Testing //app/wiring/app_core:boot_test; 0s darwin-sandbox ... (14 actions, 9 running)
+[10,940 / 10,943] 37 / 39 tests; Testing //utility/mc_analysis:lints_test; 1s darwin-sandbox ... (3 actions running)
+[10,942 / 10,943] 38 / 39 tests; Testing //utility/mc_analysis:lints_test; 2s darwin-sandbox
+INFO: Found 51 targets and 39 test targets...
+INFO: Elapsed time: 9.173s, Critical Path: 3.49s
+INFO: 10943 processes: 795 disk cache hit, 10109 internal, 39 darwin-sandbox.
+INFO: Build completed successfully, 10943 total actions
+//app/mini_client:app_test                                               PASSED in 1.0s
+//app/wiring/app_core:boot_test                                          PASSED in 1.0s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.5s
+//spike/hello:widget_test                                                PASSED in 0.9s
+//tool/mc_arch_check:arch_check_test                                     PASSED in 0.3s
+//utility/mc_analysis:lints_test                                         PASSED in 2.8s
+//utility/mc_api_client:api_client_test                                  PASSED in 0.9s
+//utility/mc_api_client:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_api_errors:api_failure_test                                 PASSED in 0.2s
+//utility/mc_api_errors:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_bloc_kit:feature_flow_controller_test                       PASSED in 0.2s
+//utility/mc_bloc_kit:mc_bloc_test                                       PASSED in 0.2s
+//utility/mc_bloc_kit:purity_test                                        PASSED in 0.2s
+//utility/mc_config:app_config_test                                      PASSED in 0.2s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.2s
+//utility/mc_di:di_container_test                                        PASSED in 0.2s
+//utility/mc_di:recording_test                                           PASSED in 0.3s
+//utility/mc_ds_buttons:buttons_test                                     PASSED in 0.8s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.1s
+//utility/mc_ds_feedback:feedback_test                                   PASSED in 1.2s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.9s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.3s
+//utility/mc_ds_layout:layout_test                                       PASSED in 0.7s
+//utility/mc_ds_testing:fonts_test                                       PASSED in 0.5s
+//utility/mc_ds_theme:golden_test                                        PASSED in 1.4s
+//utility/mc_ds_theme:theme_test                                         PASSED in 0.9s
+//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.7s
+//utility/mc_event_bus:event_bus_test                                    PASSED in 0.2s
+//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.6s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 1.2s
+//utility/mc_fixtures_characters:characters_test                         PASSED in 0.8s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.9s
+//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.7s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 1.8s
+//utility/mc_monitoring:monitoring_test                                  PASSED in 0.2s
+//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_prelude:result_test                                         PASSED in 0.3s
+//utility/mc_storage:file_store_test                                     PASSED in 0.3s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
+
+Executed 39 out of 39 tests: 39 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

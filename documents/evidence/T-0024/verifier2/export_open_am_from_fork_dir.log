@@ -1,0 +1,6 @@
+# Open git am in the fork (.git/rebase-apply exists).
+# From the repo root: export exits 0 (see export_open_am.log).
+# From inside the fork dir: export refuses:
+rules_fork: unfinished git am/rebase in <fork> (rebase-apply exists); finish or abort it first
+rc=1
+# Cause: git -C <fork> rev-parse --git-path rebase-apply prints '.git/rebase-apply' (relative), and the -e test runs in the caller's cwd.

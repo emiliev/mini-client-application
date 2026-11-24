@@ -1,0 +1,2 @@
+rules_fork: fork has merge commits (format-patch would drop them); rebase them away:
+4b89fa8f83f0a87f4a0b55f0a4353dabd58e444c

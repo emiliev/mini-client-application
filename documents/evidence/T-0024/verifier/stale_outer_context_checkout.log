@@ -1,0 +1,9 @@
+error: patch failed: dart/defs.bzl:45
+error: dart/defs.bzl: patch does not apply
+hint: Use 'git am --show-current-patch=diff' to see the failed patch
+hint: When you have resolved this problem, run "git am --continue".
+hint: If you prefer to skip this patch, run "git am --skip" instead.
+hint: To restore the original branch and stop patching, run "git am --abort".
+hint: Disable this message with "git config set advice.mergeConflict false"
+Patch failed at 0001 Stale outer context line mid-file
+rules_fork: queued patch 0001-Add-verifier-marker-comment-to-defs.bzl.patch does not apply to e7163aab8f9171f54693cd1b99feb7d3cee9602d (fork left in /Users/emililiev/.cache/mc-bazel/forks/agent-ad69b6af6d5e7192e/ai_rules_dart)

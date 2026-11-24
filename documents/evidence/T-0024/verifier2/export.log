@@ -1,0 +1,5 @@
+exported 1 patch(es) to third_party/rules_patches/ai_rules_dart/
+MODULE.bazel git_override(ai_rules_dart) must list, with patch_strip = 1:
+    patches = [
+        "//third_party/rules_patches/ai_rules_dart:0001-Add-verifier-marker-comment-to-defs.bzl.patch",
+    ],

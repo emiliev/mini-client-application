@@ -1,0 +1,7 @@
+# my personal settings
+common --color=yes
+build --verbose_failures
+# >>> rules_fork.sh (generated; git-ignored)
+common --override_module=ai_rules_dart=/Users/emililiev/.cache/mc-bazel/forks/agent-ad69b6af6d5e7192e-001753ca99/ai_rules_dart
+# <<< rules_fork.sh
+build --jobs=8
