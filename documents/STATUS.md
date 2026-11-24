@@ -10,14 +10,15 @@ _Last updated: 2026-11-24 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`): 24 packages (foundation utilities, design system, mocked backend and fixtures, API client, feature flow), 39 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7 |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0030 Verifier, T-0031 engineer (Sonnet) |
+| **Active crew** | T-0031 engineer (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
 - **T-0027 merged:** retrofit codegen runs in Bazel through patch 0001, byte-identical to build_runner. New rule R30: freezed models spell out `@Freezed(fromJson: true, toJson: true)`.
 - **T-0028 merged:** injectable codegen runs in Bazel (patch 0002), byte-identical to build_runner, with the aggregate step cached across body edits.
 - **T-0029 merged:** `.feature` files generate AC-tagged widget tests in Bazel (patch 0003). **No generator needed the build_runner fallback (R28).**
-- T-0030 (`mc_paging`, `mc_media`) is in verification; next the DS list and media widgets, then `characters_list` (P1-17).
+- **T-0030 merged:** `mc_paging` (paging controller, debounce, search history) and pure-Dart `mc_media`.
+- T-0031 (DS lists, media, cards) merges `main` and goes to its Verifier; then **T-0032 `characters_list`**, the first Marvel feature (Opus).
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).

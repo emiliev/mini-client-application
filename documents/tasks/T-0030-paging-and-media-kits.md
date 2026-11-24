@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-25 `0a959ef`; Verifier PASS `7e87517`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0030-paging-and-media` |
@@ -77,3 +77,6 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 
 ### Follow-ups
 P1-12: `McImage` and a `ResolvedImage` to `ImageProvider` bridge; `McPagedList` / `McPagedGrid` over `PagedState`; DI initializer for `mc_paging` if the plan's `McPagingDIInitializer` is still wanted (nothing registers yet, so none was added).
+
+## Merge (TL)
+- 2026-11-25: Verifier PASS `350e215` (23/23 mutations, 100 % coverage). `/code-review` and the Verifier found edge-case bugs (an un-awaited `clear` revived the history; a corrupt store blocked every `add`; a disposed controller still fetched; `Error`s became retryable failures; repeat searches on trailing whitespace; a clear without a prior search). Fixed in `b8d3abe` (14 items, each test shown to fail on the pre-fix sources). TL decisions: self-healing history, the debounce spec change (no clear without a fired search), the "no mixins" rule covers hand-written code only, and `McMediaScope` moves to `mc_ds_media` in T-0031. Re-verify PASS `7e87517` (22/25 mutations; the 3 survivors are test gaps, P-063). The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 60/60 tests, lint was clean and `mc_arch_check` reported OK.
