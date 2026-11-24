@@ -1,0 +1,23 @@
+# T-0029 spike: a sample feature package whose `.feature` files become Bazel
+# BDD tests (plan 03 §4.4, P3-05). Not a real feature: it lives in spike/.
+name: bdd_sample
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  dio: ^5.11.0
+  flutter:
+    sdk: flutter
+  mc_di: any
+  mc_feature_flow: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_mocked_backend: any
+  mc_test_steps: any
+  mc_test_utils: any

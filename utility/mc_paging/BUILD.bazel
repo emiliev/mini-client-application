@@ -38,6 +38,7 @@ dart_library(
 
 _TEST_DEPS = _DEPS + [
     ":mc_paging",
+    "@pub_deps//:fake_async",
     "@pub_deps//:test",
 ]
 

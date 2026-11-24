@@ -21,16 +21,16 @@ final class PagingController<T> {
     required this.onState,
     this.limit = 20,
   }) : _fetcher = fetcher,
-       _state = PagedState<T>(request: PageRequest(offset: 0, limit: limit)) {
-    assert(limit > 0, 'limit must be positive');
-  }
+       _state = PagedState<T>(
+         request: PageRequest.checked(offset: 0, limit: limit),
+       );
 
   final PageFetcher<T> _fetcher;
 
   /// Called with every new state.
   final void Function(PagedState<T> state) onState;
 
-  /// Items per request.
+  /// Items per request. A value of zero or less throws an [ArgumentError].
   final int limit;
 
   PagedState<T> _state;
@@ -45,24 +45,38 @@ final class PagingController<T> {
   PagedState<T> get state => _state;
 
   /// Starts over: clears the items and loads the first page.
-  Future<void> loadFirst() {
+  ///
+  /// Overlapping [loadFirst] and [refresh] calls: the last one wins. The
+  /// earlier fetches are not cancelled; their responses are dropped.
+  Future<void> loadFirst() async {
+    if (_disposed) {
+      return;
+    }
     _generation++;
     _failed = null;
     _emit(PagedState<T>(request: PageRequest(offset: 0, limit: limit)));
-    return _run(PageRequest(offset: 0, limit: limit), replace: true);
+    await _run(PageRequest(offset: 0, limit: limit), replace: true);
   }
 
-  /// Reloads the first page but keeps the shown items until it arrives.
-  Future<void> refresh() {
+  /// Reloads the first page but keeps the shown items until it arrives. The
+  /// last of overlapping [loadFirst] and [refresh] calls wins (see
+  /// [loadFirst]).
+  Future<void> refresh() async {
+    if (_disposed) {
+      return;
+    }
     _generation++;
     _failed = null;
-    return _run(PageRequest(offset: 0, limit: limit), replace: true);
+    await _run(PageRequest(offset: 0, limit: limit), replace: true);
   }
 
   /// Loads the next page. Does nothing at the end, while a request is in
   /// flight, or after a failure (use [retry]).
   Future<void> loadMore() async {
-    if (_state.hasReachedEnd || _inFlight || _state.failure != null) {
+    if (_disposed ||
+        _state.hasReachedEnd ||
+        _inFlight ||
+        _state.failure != null) {
       return;
     }
     await _run(_state.request, replace: false);
@@ -71,7 +85,7 @@ final class PagingController<T> {
   /// Repeats the request that failed. Does nothing when nothing failed.
   Future<void> retry() async {
     final failed = _failed;
-    if (failed == null || _inFlight) {
+    if (_disposed || failed == null || _inFlight) {
       return;
     }
     await _run(failed.request, replace: failed.replace);
@@ -92,8 +106,15 @@ final class PagingController<T> {
     Result<Page<T>, ApiFailure> result;
     try {
       result = await _fetcher(request);
-    } on Object catch (error) {
+    } on Exception catch (error) {
       result = failure(ApiFailure.from(error));
+    } on Object {
+      // An Error is a bug, not a failed request: let it propagate, but do
+      // not leave this run's request marked as in flight.
+      if (generation == _generation) {
+        _inFlight = false;
+      }
+      rethrow;
     }
     if (generation != _generation) {
       return;
@@ -103,7 +124,7 @@ final class PagingController<T> {
     result.fold(
       (page) {
         final items = replace
-            ? page.results
+            ? List<T>.of(page.results)
             : [..._state.items, ...page.results];
         final nextOffset = request.offset + page.results.length;
         _emit(

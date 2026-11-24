@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-25 `0a959ef`; Verifier PASS `7e87517`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0030-paging-and-media` |
@@ -46,6 +46,7 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 ## Log
 - 2026-11-25: Created and dispatched (TL).
 - 2026-11-25: Engineer: `mc_media` (pure `:mc_media` + Flutter `:mc_media_scope`), `mc_paging` (freezed `PagedState`, `PagingController`, `DebouncedQuery`, `SearchHistory`), `mc_fixtures_media` implements `McImageResolver`. First cut with one Flutter `mc_media` library broke `//utility/mc_api_client:api_client_test` (pure test reaching Flutter through the fixtures chain), so it was split (F-0029). Handoff.
+- 2026-11-25: Fix round (TL items 1 to 14): SearchHistory (serialised clear, self-healing corrupt store, cap on load, one-instance-per-key doc), PagingController (disposed guards, Errors propagate, copied results, ArgumentError for bad limit/offset, last-wins doc), DebouncedQuery (no repeat search, clear only after a fired search, dead after dispose, fake_async), mc_media purity test scans a glob. Spec change approved by the TL: typing and deleting inside the delay now emits no clear (test renamed accordingly). Evidence: `evidence/T-0030/engineer/fixround-tests-fail-without-fix.txt`. T-0029 merged into the branch; locks unchanged after re-resolve.
 
 ## Outcome
 **Handed off** for verification on `fleet/T-0030-paging-and-media`. Evidence: `documents/evidence/T-0030/engineer/`.
@@ -62,7 +63,7 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 | AC7 | `//utility/mc_paging:purity_test`, `//utility/mc_media:purity_test`, `tool/checks/T-0030-AC7_closure.sh` ([report](../evidence/T-0030/engineer/AC7_closure.md), [negative control](../evidence/T-0030/engineer/AC7_negative_control.md)), gates below |
 
 ### Gates (logs in the evidence directory)
-`test //...` 58/58 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
+`test //...` 60/60 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
 
 ### Root changes
 `pubspec.yaml` workspace: `utility/mc_media`, `utility/mc_paging`. `pubspec.lock` re-resolved with `fvm dart pub get` (no new third-party packages; `freezed_annotation 3.1.0` was already locked). `MODULE.bazel.lock` unchanged.
@@ -76,3 +77,6 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 
 ### Follow-ups
 P1-12: `McImage` and a `ResolvedImage` to `ImageProvider` bridge; `McPagedList` / `McPagedGrid` over `PagedState`; DI initializer for `mc_paging` if the plan's `McPagingDIInitializer` is still wanted (nothing registers yet, so none was added).
+
+## Merge (TL)
+- 2026-11-25: Verifier PASS `350e215` (23/23 mutations, 100 % coverage). `/code-review` and the Verifier found edge-case bugs (an un-awaited `clear` revived the history; a corrupt store blocked every `add`; a disposed controller still fetched; `Error`s became retryable failures; repeat searches on trailing whitespace; a clear without a prior search). Fixed in `b8d3abe` (14 items, each test shown to fail on the pre-fix sources). TL decisions: self-healing history, the debounce spec change (no clear without a fired search), the "no mixins" rule covers hand-written code only, and `McMediaScope` moves to `mc_ds_media` in T-0031. Re-verify PASS `7e87517` (22/25 mutations; the 3 survivors are test gaps, P-063). The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 60/60 tests, lint was clean and `mc_arch_check` reported OK.

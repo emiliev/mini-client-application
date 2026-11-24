@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="spike/bdd_sample/test/feature/bdd_test_main.dart" tests="3" failures="0" errors="0" skipped="0" time="0.326">
+    <testcase name="greeting_browse Greeting The greeting is shown [T-0001-AC1]" classname="spike/bdd_sample/test/feature/bdd_test_main.dart" time="0.262"></testcase>
+    <testcase name="greeting_browse Greeting Tapping the button says goodbye [T-0029-AC1]" classname="spike/bdd_sample/test/feature/bdd_test_main.dart" time="0.048"></testcase>
+    <testcase name="greeting_table Greeting texts Every label is on screen [T-0029-AC4]" classname="spike/bdd_sample/test/feature/bdd_test_main.dart" time="0.016"></testcase>
+  </testsuite>
+</testsuites>

@@ -2,6 +2,18 @@
 final class PageRequest {
   const PageRequest({required this.offset, required this.limit});
 
+  /// Like the constructor, but throws an [ArgumentError] (in release builds
+  /// too) for a negative [offset] or a [limit] of zero or less.
+  factory PageRequest.checked({required int offset, required int limit}) {
+    if (offset < 0) {
+      throw ArgumentError.value(offset, 'offset', 'must not be negative');
+    }
+    if (limit <= 0) {
+      throw ArgumentError.value(limit, 'limit', 'must be positive');
+    }
+    return PageRequest(offset: offset, limit: limit);
+  }
+
   final int offset;
   final int limit;
 

@@ -1,0 +1,24 @@
+import sys, glob, re, collections
+
+# usage: cov.py <bazel-out dir> <pkgname>
+root, pkg = sys.argv[1], sys.argv[2]
+hits = collections.defaultdict(dict)
+for dat in glob.glob(f"{root}/*/testlogs/utility/{pkg}/*/coverage.dat"):
+    sf = None
+    for line in open(dat):
+        line = line.strip()
+        if line.startswith("SF:"):
+            p = line[3:]
+            m = re.search(rf"(?:package:{pkg}/|^utility/{pkg}/lib/)(.*)$", p)
+            sf = ("lib/" + m.group(1)) if m and not p.endswith(".freezed.dart") else None
+        elif sf and line.startswith("DA:"):
+            n, c = line[3:].split(",")[:2]
+            hits[sf][int(n)] = max(hits[sf].get(int(n), 0), int(c))
+T = C = 0
+for f in sorted(hits):
+    d = hits[f]
+    c = sum(1 for v in d.values() if v > 0)
+    T += len(d)
+    C += c
+    print(f"{f}: {c}/{len(d)} missed={sorted(k for k, v in d.items() if v == 0)}")
+print(f"TOTAL {pkg} {C}/{T} = {100 * C / T if T else 0:.1f}%")

@@ -23,6 +23,8 @@ git_override(
         "//third_party/rules_patches/ai_rules_dart:0001-feat-ext-add-a-retrofit_generator-shim-and-retrofit_.patch",
         # U-D-injectable (T-0028): dart/ext/injectable two-stage shim + vendored injectable_generator.
         "//third_party/rules_patches/ai_rules_dart:0002-ext-injectable-two-stage.patch",
+        # U-D-bdd (T-0029): dart/ext/bdd hermetic bdd_widget_test generator.
+        "//third_party/rules_patches/ai_rules_dart:0003-ext-bdd-generator.patch",
     ],
 )
 

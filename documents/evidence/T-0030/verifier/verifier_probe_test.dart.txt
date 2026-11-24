@@ -1,0 +1,454 @@
+// Verifier probes (T-0030). Temporary; not committed.
+import 'dart:async';
+import 'dart:io';
+
+import 'package:mc_api_errors/mc_api_errors.dart';
+import 'package:mc_paging/mc_paging.dart';
+import 'package:mc_prelude/mc_prelude.dart';
+import 'package:mc_storage/mc_storage.dart';
+import 'package:test/test.dart';
+
+/// Each request gets its own completer, so the test decides response order.
+class _Manual {
+  final calls = <(PageRequest, Completer<Result<Page<int>, ApiFailure>>)>[];
+  Future<Result<Page<int>, ApiFailure>> fetch(PageRequest r) {
+    final c = Completer<Result<Page<int>, ApiFailure>>();
+    calls.add((r, c));
+    return c.future;
+  }
+
+  void answer(int i, {int total = 45}) {
+    final r = calls[i].$1;
+    final end = (r.offset + r.limit).clamp(0, total);
+    calls[i].$2.complete(
+      success(
+        Page(
+          offset: r.offset,
+          limit: r.limit,
+          total: total,
+          results: [for (var k = r.offset; k < end; k++) k],
+        ),
+      ),
+    );
+  }
+
+  void fail(int i) => calls[i].$2.complete(failure(const ApiFailure.offline()));
+}
+
+Future<void> _pump() => Future<void>.delayed(Duration.zero);
+
+void main() {
+  group('paging', () {
+    test(
+      'refresh while loadMore in flight, stale loadMore lands last',
+      () async {
+        final m = _Manual();
+        final seen = <PagedState<int>>[];
+        final sut = PagingController<int>(fetcher: m.fetch, onState: seen.add);
+        final f0 = sut.loadFirst();
+        m.answer(0);
+        await f0;
+        final more = sut.loadMore(); // call 1, offset 20
+        final ref = sut.refresh(); // call 2, offset 0
+        await _pump();
+        m.answer(2);
+        await ref;
+        m.answer(1); // stale
+        await more;
+        print('requests: ${m.calls.map((c) => c.$1.offset).toList()}');
+        expect(sut.state.items, List.generate(20, (i) => i));
+        expect(sut.state.request.offset, 20);
+        expect(sut.state.isLoadingMore, isFalse);
+        // next loadMore works
+        final next = sut.loadMore();
+        await _pump();
+        expect(m.calls, hasLength(4));
+        expect(m.calls.last.$1.offset, 20);
+        m.answer(3);
+        await next;
+        expect(sut.state.items, List.generate(40, (i) => i));
+      },
+    );
+
+    test(
+      'refresh while loadMore in flight, stale loadMore lands first',
+      () async {
+        final m = _Manual();
+        final sut = PagingController<int>(fetcher: m.fetch, onState: (_) {});
+        final f0 = sut.loadFirst();
+        m.answer(0);
+        await f0;
+        final more = sut.loadMore();
+        final ref = sut.refresh();
+        await _pump();
+        m.answer(1); // stale first
+        await more;
+        expect(
+          sut.state.items,
+          List.generate(20, (i) => i),
+          reason: 'stale page 2 must not append',
+        );
+        expect(
+          sut.state.isLoadingMore,
+          isTrue,
+          reason: 'refresh still in flight',
+        );
+        // a loadMore now must not fire (refresh in flight)
+        await sut.loadMore();
+        expect(m.calls, hasLength(3));
+        m.answer(2);
+        await ref;
+        expect(sut.state.items, List.generate(20, (i) => i));
+        expect(sut.state.isLoadingMore, isFalse);
+      },
+    );
+
+    test(
+      'stale failing response after refresh is dropped, no retry target',
+      () async {
+        final m = _Manual();
+        final sut = PagingController<int>(fetcher: m.fetch, onState: (_) {});
+        final f0 = sut.loadFirst();
+        m.answer(0);
+        await f0;
+        final more = sut.loadMore();
+        final ref = sut.refresh();
+        await _pump();
+        m.answer(2);
+        await ref;
+        m.fail(1);
+        await more;
+        expect(sut.state.failure, isNull);
+        await sut.retry();
+        expect(
+          m.calls,
+          hasLength(3),
+          reason: 'retry must not replay stale request',
+        );
+      },
+    );
+
+    test('two refreshes, older lands last', () async {
+      final m = _Manual();
+      final sut = PagingController<int>(fetcher: m.fetch, onState: (_) {});
+      final a = sut.refresh();
+      final b = sut.refresh();
+      await _pump();
+      m.answer(1, total: 5);
+      await b;
+      m.answer(0, total: 45);
+      await a;
+      expect(sut.state.items, [0, 1, 2, 3, 4]);
+      expect(sut.state.total, 5);
+      expect(sut.state.hasReachedEnd, isTrue);
+    });
+
+    test('total shrinks between pages', () async {
+      var total = 45;
+      final sut = PagingController<int>(
+        fetcher: (r) async {
+          final end = (r.offset + r.limit).clamp(0, total);
+          return success(
+            Page(
+              offset: r.offset,
+              limit: r.limit,
+              total: total,
+              results: [for (var k = r.offset; k < end; k++) k],
+            ),
+          );
+        },
+        onState: (_) {},
+      );
+      await sut.loadFirst();
+      total = 30;
+      await sut.loadMore();
+      expect(sut.state.items, List.generate(30, (i) => i));
+      expect(sut.state.total, 30);
+      expect(sut.state.hasReachedEnd, isTrue);
+    });
+
+    test('total grows between pages', () async {
+      var total = 25;
+      final requests = <int>[];
+      final sut = PagingController<int>(
+        fetcher: (r) async {
+          requests.add(r.offset);
+          final end = (r.offset + r.limit).clamp(0, total);
+          return success(
+            Page(
+              offset: r.offset,
+              limit: r.limit,
+              total: total,
+              results: [for (var k = r.offset; k < end; k++) k],
+            ),
+          );
+        },
+        onState: (_) {},
+      );
+      await sut.loadFirst();
+      total = 60;
+      await sut.loadMore();
+      expect(sut.state.hasReachedEnd, isFalse);
+      await sut.loadMore();
+      expect(sut.state.items, List.generate(60, (i) => i));
+      expect(sut.state.hasReachedEnd, isTrue);
+      expect(requests, [0, 20, 40]);
+    });
+
+    test(
+      'short page with total claiming more keeps going, empty page ends',
+      () async {
+        final sut = PagingController<int>(
+          fetcher: (r) async => success(
+            Page(
+              offset: r.offset,
+              limit: r.limit,
+              total: 100,
+              results: r.offset == 0 ? [1, 2, 3] : <int>[],
+            ),
+          ),
+          onState: (_) {},
+        );
+        await sut.loadFirst();
+        expect(sut.state.request.offset, 3);
+        await sut.loadMore();
+        expect(sut.state.hasReachedEnd, isTrue);
+      },
+    );
+
+    test('limit 0 is rejected by an assert', () {
+      expect(
+        () => PagingController<int>(
+          fetcher: (_) async => failure(const ApiFailure.offline()),
+          onState: (_) {},
+          limit: 0,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('negative limit is rejected by an assert', () {
+      expect(
+        () => PagingController<int>(
+          fetcher: (_) async => failure(const ApiFailure.offline()),
+          onState: (_) {},
+          limit: -5,
+        ),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('PageRequest accepts a negative offset (no validation)', () {
+      const r = PageRequest(offset: -1, limit: 20);
+      expect(r.offset, -1);
+    });
+
+    test(
+      'fetcher that throws synchronously becomes a failure; retry works',
+      () async {
+        var n = 0;
+        final sut = PagingController<int>(
+          fetcher: (r) {
+            if (n++ == 0) {
+              throw StateError("boom");
+            }
+            return Future.value(
+              success(Page(offset: 0, limit: 20, total: 1, results: [7])),
+            );
+          },
+          onState: (_) {},
+        );
+        await sut.loadFirst();
+        print('sync throw failure: ${sut.state.failure}');
+        expect(sut.state.failure, isNotNull);
+        expect(sut.state.isLoadingMore, isFalse);
+        await sut.retry();
+        expect(sut.state.items, [7]);
+      },
+    );
+
+    test(
+      'fetcher that throws an Error (not Exception) becomes a failure',
+      () async {
+        final sut = PagingController<int>(
+          fetcher: (r) async => throw ArgumentError('x'),
+          onState: (_) {},
+        );
+        await sut.loadFirst();
+        print('Error failure: ${sut.state.failure}');
+        expect(sut.state.failure, isNotNull);
+      },
+    );
+
+    test('after dispose, loadMore still calls the fetcher (probe)', () async {
+      var calls = 0;
+      final sut = PagingController<int>(
+        fetcher: (r) async {
+          calls++;
+          return success(
+            Page(
+              offset: r.offset,
+              limit: r.limit,
+              total: 100,
+              results: List.filled(20, 0),
+            ),
+          );
+        },
+        onState: (_) {},
+      );
+      await sut.loadFirst();
+      sut.dispose();
+      await sut.loadMore();
+      await sut.refresh();
+      print('fetcher calls after dispose: ${calls - 1}');
+    });
+  });
+
+  group('debounce', () {
+    late List<void Function()> timers;
+    Timer fakeFactory(Duration d, void Function() run) {
+      final t = _T();
+      timers.add(() {
+        if (t.isActive) {
+          t.active = false;
+          run();
+        }
+      });
+      return t;
+    }
+
+    setUp(() {
+      timers = [];
+    });
+
+    test('keystroke after a fire starts a new window; same text re-fires', () {
+      final searches = <String>[];
+      final sut = DebouncedQuery(
+        onSearch: searches.add,
+        onClear: () {},
+        timerFactory: fakeFactory,
+      );
+      sut.update('a');
+      timers.last();
+      sut.update('ab');
+      expect(searches, ['a']);
+      timers.last();
+      expect(searches, ['a', 'ab']);
+      sut.update('ab ');
+      timers.last();
+      print('searches after retyping same trimmed text: $searches');
+    });
+
+    test('update after dispose still schedules (probe)', () {
+      final searches = <String>[];
+      final sut = DebouncedQuery(
+        onSearch: searches.add,
+        onClear: () {},
+        timerFactory: fakeFactory,
+      );
+      sut.dispose();
+      sut.update('x');
+      print('timers scheduled after dispose: ${timers.length}');
+    });
+
+    test('two clears in a row emit one clear', () {
+      var clears = 0;
+      final sut = DebouncedQuery(
+        onSearch: (_) {},
+        onClear: () => clears++,
+        timerFactory: fakeFactory,
+      );
+      sut.update('a');
+      timers.last();
+      sut.update('');
+      sut.update(' ');
+      expect(clears, 1);
+    });
+  });
+
+  group('history', () {
+    test('two SearchHistory on ONE FileStore, concurrent adds', () async {
+      final d = Directory.systemTemp.createTempSync('probe_hist2');
+      final store = FileStore(d);
+      final a = SearchHistory(store);
+      final b = SearchHistory(store);
+      await Future.wait([a.add('x'), b.add('y'), a.add('z'), b.add('w')]);
+      print('one-store two-instance result: ${(await a.load()).getOrNull()}');
+      d.deleteSync(recursive: true);
+    });
+
+    late Directory dir;
+    setUp(() => dir = Directory.systemTemp.createTempSync('probe_hist'));
+    tearDown(() => dir.deleteSync(recursive: true));
+
+    test('concurrent adds from two instances on one store', () async {
+      final a = SearchHistory(FileStore(dir));
+      final b = SearchHistory(FileStore(dir));
+      await Future.wait([a.add('x'), b.add('y'), a.add('z'), b.add('w')]);
+      final loaded = (await a.load()).getOrNull();
+      print('two-instance concurrent result: $loaded');
+    });
+
+    test('concurrent adds on one instance, many', () async {
+      final sut = SearchHistory(FileStore(dir));
+      await Future.wait([for (var i = 0; i < 15; i++) sut.add('q$i')]);
+      expect((await sut.load()).getOrNull(), [
+        for (var i = 14; i >= 5; i--) 'q$i',
+      ]);
+    });
+
+    test('corrupted file: load fails, add fails, clear recovers', () async {
+      final store = FileStore(dir);
+      final sut = SearchHistory(store);
+      await sut.add('a');
+      final f = dir.listSync().whereType<File>().single;
+      f.writeAsStringSync('[not json');
+      expect((await sut.load()).getOrNull(), isNull);
+      expect((await sut.add('b')).getOrNull(), isNull);
+      await sut.clear();
+      expect((await sut.add('c')).getOrNull(), ['c']);
+    });
+
+    test('a list with non-string entries is filtered', () async {
+      final store = FileStore(dir);
+      await store.write('search_history', ['a', 1, null, 'b']);
+      expect((await SearchHistory(store).load()).getOrNull(), ['a', 'b']);
+    });
+
+    test(
+      'a stored list longer than cap is not capped on load (probe)',
+      () async {
+        final store = FileStore(dir);
+        await store.write('search_history', [
+          for (var i = 0; i < 15; i++) 'q$i',
+        ]);
+        final loaded = (await SearchHistory(store, cap: 10).load()).getOrNull();
+        print('load length with cap 10 over 15 stored: ${loaded!.length}');
+      },
+    );
+
+    test('a failing add does not block later adds', () async {
+      final store = FileStore(dir);
+      final sut = SearchHistory(store);
+      final f =
+          File(
+              '${dir.path}/${'search_history'.codeUnits.map((b) => b.toRadixString(16).padLeft(2, '0')).join()}.json',
+            )
+            ..createSync(recursive: true)
+            ..writeAsStringSync('{');
+      expect((await sut.add('a')).getOrNull(), isNull);
+      f.deleteSync();
+      expect((await sut.add('b')).getOrNull(), ['b']);
+    });
+  });
+}
+
+class _T implements Timer {
+  bool active = true;
+  @override
+  void cancel() => active = false;
+  @override
+  bool get isActive => active;
+  @override
+  int get tick => 0;
+}

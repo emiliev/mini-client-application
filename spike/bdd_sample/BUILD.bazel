@@ -1,0 +1,40 @@
+# T-0029 spike (P3-05): `.feature` files become one aggregated `:bdd_test`
+# (plan 05 §5.2). The generated tests live in bazel-bin only.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library")
+load("//tool/bazel:defs.bzl", "mc_bdd_tests")
+
+package(default_visibility = ["//visibility:private"])
+
+_LANG = "3.13"
+
+flutter_library(
+    name = "bdd_sample",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "bdd_sample",
+    deps = [
+        "//utility/mc_di",
+        "//utility/mc_feature_flow",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter",
+    ],
+)
+
+mc_bdd_tests(
+    name = "bdd_test",
+    features = glob(["test/feature/*.feature"]),
+    language_version = _LANG,
+    lib = ":bdd_sample",
+    package_name = "bdd_sample",
+    setup = "test/feature/util/greeting_env.dart",
+    steps = glob([
+        "test/feature/step/**/*.dart",
+        "test/feature/util/*.dart",
+    ]),
+    deps = [
+        "//utility/mc_mocked_backend",
+        "//utility/mc_di",
+        "//utility/mc_feature_flow",
+        "@pub_deps//:dio",
+    ],
+)

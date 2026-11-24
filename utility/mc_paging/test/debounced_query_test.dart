@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fake_async/fake_async.dart';
 import 'package:mc_paging/mc_paging.dart';
 import 'package:test/test.dart';
 
@@ -100,15 +101,18 @@ void main() {
     expect(clears, 1);
   });
 
-  test('T-0030-AC4: clearing while a search is pending cancels it', () {
-    sut.update('hu');
+  test(
+    'T-0030-AC4: deleting text while a search is pending cancels it, no clear',
+    () {
+      sut.update('h');
 
-    sut.update('');
-    clock.advance(const Duration(seconds: 1));
+      sut.update('');
+      clock.advance(const Duration(seconds: 1));
 
-    expect(searches, isEmpty);
-    expect(clears, 1);
-  });
+      expect(searches, isEmpty);
+      expect(clears, 0);
+    },
+  );
 
   test('T-0030-AC4: a blank query with no earlier query does nothing', () {
     sut.update('');
@@ -135,16 +139,49 @@ void main() {
     expect(searches, isEmpty);
   });
 
-  test('T-0030-AC4: the default timer is a real Timer', () async {
-    final done = Completer<String>();
-    final real = DebouncedQuery(
-      onSearch: done.complete,
-      onClear: () {},
-      delay: const Duration(milliseconds: 1),
-    );
+  test('T-0030-AC4: an unchanged trimmed query does not search again', () {
+    sut.update('thor');
+    clock.advance(const Duration(milliseconds: 300));
 
-    real.update('loki');
+    sut.update('thor ');
+    clock.advance(const Duration(seconds: 1));
 
-    expect(await done.future, 'loki');
+    expect(searches, ['thor']);
+  });
+
+  test('T-0030-AC4: the same query is searched again after a clear', () {
+    sut.update('thor');
+    clock.advance(const Duration(milliseconds: 300));
+    sut.update('');
+
+    sut.update('thor');
+    clock.advance(const Duration(milliseconds: 300));
+
+    expect(searches, ['thor', 'thor']);
+    expect(clears, 1);
+  });
+
+  test('T-0030-AC4: update after dispose does nothing', () {
+    sut.dispose();
+
+    sut.update('thor');
+    clock.advance(const Duration(seconds: 1));
+
+    expect(searches, isEmpty);
+    expect(clears, 0);
+  });
+
+  test('T-0030-AC4: the default timer fires after the delay (fake async)', () {
+    fakeAsync((async) {
+      final found = <String>[];
+      final sut = DebouncedQuery(onSearch: found.add, onClear: () {});
+
+      sut.update('loki');
+      async.elapse(const Duration(milliseconds: 299));
+      expect(found, isEmpty);
+      async.elapse(const Duration(milliseconds: 1));
+
+      expect(found, ['loki']);
+    });
   });
 }

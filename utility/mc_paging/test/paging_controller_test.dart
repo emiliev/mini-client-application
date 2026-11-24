@@ -299,4 +299,108 @@ void main() {
       expect(seen, hasLength(emitted));
     });
   });
+
+  group('T-0030-AC2 disposed controller', () {
+    test('T-0030-AC2: every entry point does nothing after dispose', () async {
+      final (:sut, :backend, :seen) = _make();
+      await sut.loadFirst();
+      backend.failOffsets.add(20);
+      await sut.loadMore();
+      sut.dispose();
+      final requests = backend.requests.length;
+      final emitted = seen.length;
+
+      await sut.loadFirst();
+      await sut.refresh();
+      await sut.loadMore();
+      await sut.retry();
+
+      expect(backend.requests, hasLength(requests));
+      expect(seen, hasLength(emitted));
+    });
+
+    test(
+      'T-0030-AC2: a stale response does not clear the newer in-flight flag',
+      () async {
+        final (:sut, :backend, seen: _) = _make();
+        final gateA = Completer<void>();
+        backend.gate = gateA;
+        final first = sut.loadFirst();
+        final gateB = Completer<void>();
+        backend.gate = gateB;
+        final second = sut.loadFirst();
+
+        gateA.complete();
+        await first;
+        backend.gate = null;
+        await sut.loadMore();
+        expect(backend.requests, hasLength(2));
+        gateB.complete();
+        await second;
+
+        expect(sut.state.items, hasLength(20));
+      },
+    );
+  });
+
+  group('T-0030-AC3 errors and inputs', () {
+    test('T-0030-AC3: an Error from the fetcher propagates and frees the controller', () async {
+      final (:sut, :backend, seen: _) = _make();
+      backend.throwOnNext = TypeError();
+
+      await expectLater(sut.loadFirst(), throwsA(isA<TypeError>()));
+      await sut.loadFirst();
+
+      expect(sut.state.failure, isNull);
+      expect(sut.state.items, hasLength(20));
+    });
+
+    test(
+      'T-0030-AC1: later changes to the fetcher list do not change the state',
+      () async {
+        final shared = <int>[1, 2, 3];
+        final sut = PagingController<int>(
+          fetcher: (r) async =>
+              success(Page(offset: 0, limit: 20, total: 3, results: shared)),
+          onState: (_) {},
+        );
+
+        await sut.loadFirst();
+        shared.add(4);
+
+        expect(sut.state.items, [1, 2, 3]);
+      },
+    );
+
+    test('T-0030-AC1: a limit of zero or less is an ArgumentError', () {
+      for (final limit in [0, -1]) {
+        expect(
+          () => PagingController<int>(
+            fetcher: _make().backend.fetch,
+            onState: (_) {},
+            limit: limit,
+          ),
+          throwsArgumentError,
+        );
+      }
+    });
+
+    test(
+      'T-0030-AC1: PageRequest.checked rejects negative offset and bad limit',
+      () {
+        expect(
+          () => PageRequest.checked(offset: -1, limit: 20),
+          throwsArgumentError,
+        );
+        expect(
+          () => PageRequest.checked(offset: 0, limit: 0),
+          throwsArgumentError,
+        );
+        expect(
+          PageRequest.checked(offset: 5, limit: 10),
+          const PageRequest(offset: 5, limit: 10),
+        );
+      },
+    );
+  });
 }

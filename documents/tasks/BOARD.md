@@ -5,8 +5,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0030](T-0030-paging-and-media-kits.md) | `mc_paging` + `mc_media` kits for the LD archetype (P1-14 subset, U14, U19) | **In Progress** | Engineer (Sonnet) | T-0026 | `fleet/T-0030-paging-and-media` |
-| [T-0029](T-0029-bdd-generator.md) | BDD generator + `mc_bdd_tests` + `mc_test_steps` skeleton (P3-05) | **Verified**; rebasing onto 0001+0002 | Engineer (Opus) | T-0024, T-0026 | `fleet/T-0029-bdd-generator` |
+| [T-0032](T-0032-characters-list-exemplar.md) | **`characters_list` exemplar feature** (LD, P1-17 feature package) | Ready | Engineer (Opus) | T-0030, T-0031 | `fleet/T-0032-characters-list` |
+| [T-0031](T-0031-ds-lists-media-cards.md) | DS `mc_ds_media`, `mc_ds_lists`, `mc_ds_cards` for LD (P1-12 subset) | **In Progress** | Engineer (Sonnet) | T-0030 | `fleet/T-0031-ds-lists-media-cards` |
 
 ## Done
 | ID | Title | Result |
@@ -15,6 +15,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0030](T-0030-paging-and-media-kits.md) | `mc_paging` + `mc_media` kits (P1-14 subset, U14, U19) | merged; Verifier [PASS](../evidence/T-0030/verification-report.md) (re-verified after review fixes); F-0029 |
+| [T-0029](T-0029-bdd-generator.md) | BDD generator (`.feature` → tests), `mc_bdd_tests`, `mc_test_steps` skeleton, patch 0003 (P3-05) | merged; Verifier [PASS](../evidence/T-0029/verification-report.md) (re-verified after FAIL); F-0027 |
 | [T-0028](T-0028-injectable-shim.md) | injectable two-stage shim, vendored generator without lean_builder, patch 0002 (P3-04) | merged; Verifier [PASS](../evidence/T-0028/verification-report.md) (re-verified after review fixes); F-0028 |
 | [T-0027](T-0027-retrofit-shim.md) | retrofit codegen shim, patch 0001 (P3-03): byte-identical to build_runner | merged; Verifier [PASS](../evidence/T-0027/verification-report.md) (re-verified after FAIL); F-0025, F-0026 |
 | [T-0026](T-0026-test-utils-harness.md) | `mc_test_utils` harness: Tide's `test_utils` (P5-01) | merged; Verifier [PASS](../evidence/T-0026/verification-report.md); F-0024 |
