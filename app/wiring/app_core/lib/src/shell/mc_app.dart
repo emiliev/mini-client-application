@@ -1,11 +1,15 @@
+import 'dart:async';
+
 import 'package:app_core/src/boot/boot_bloc.dart';
 import 'package:app_core/src/boot/boot_page.dart';
 import 'package:app_core/src/boot/boot_state.dart';
 import 'package:app_core/src/links/pending_links.dart';
 import 'package:app_core/src/shell/route_probe.dart';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
 
 /// Builds the app's router once boot is ready, starting at
 /// [initialLocation] (the held deep link, or `/`).
@@ -27,6 +31,7 @@ class McApp extends StatefulWidget {
     this.themeMode,
     this.title = 'Mini Client',
     this.probe,
+    this.bootMonitoring,
     super.key,
   });
 
@@ -43,6 +48,11 @@ class McApp extends StatefulWidget {
   /// Counts route builds and redirects (tests only).
   final McRouteProbe? probe;
 
+  /// Where the [BootBloc] reports transitions and boot failures. Root
+  /// `Monitoring` doesn't exist until boot succeeds, so this defaults to a
+  /// console-only instance.
+  final Monitoring? bootMonitoring;
+
   @override
   State<McApp> createState() => _McAppState();
 }
@@ -51,7 +61,9 @@ class _McAppState extends State<McApp> {
   late final BootBloc _boot = BootBloc(
     task: widget.boot,
     timeout: widget.bootTimeout,
+    monitoring: widget.bootMonitoring ?? Monitoring([ConsoleSink()]),
   );
+  StreamSubscription<BootState>? _bootStates;
   late final McThemeModeController _themeMode =
       widget.themeMode ?? McThemeModeController();
   GoRouter? _router;
@@ -59,13 +71,12 @@ class _McAppState extends State<McApp> {
   @override
   void initState() {
     super.initState();
-    _boot
-      ..addListener(_onBoot)
-      ..start();
+    _bootStates = _boot.stream.listen(_onBoot);
+    _boot.add(const BootStarted());
   }
 
-  void _onBoot() {
-    if (_boot.state is BootReady && _router == null) {
+  void _onBoot(BootState state) {
+    if (state is BootReady && _router == null && mounted) {
       widget.probe?.markReady();
       final router = widget.router(widget.links.take());
       widget.links.detach();
@@ -75,9 +86,8 @@ class _McAppState extends State<McApp> {
 
   @override
   void dispose() {
-    _boot
-      ..removeListener(_onBoot)
-      ..dispose();
+    unawaited(_bootStates?.cancel());
+    unawaited(_boot.close());
     _router?.dispose();
     if (widget.themeMode == null) {
       _themeMode.dispose();
@@ -87,11 +97,12 @@ class _McAppState extends State<McApp> {
 
   Route<void> _bootRoute() => MaterialPageRoute<void>(
     settings: const RouteSettings(name: '/'),
-    builder: (_) => ListenableBuilder(
-      listenable: _boot,
-      builder: (_, _) => BootPage(
-        state: _boot.state,
-        onRetry: _boot.retry,
+    builder: (_) => StreamBuilder<BootState>(
+      stream: _boot.stream,
+      initialData: _boot.state,
+      builder: (_, snapshot) => BootPage(
+        state: snapshot.data ?? _boot.state,
+        onRetry: () => _boot.add(const BootRetried()),
         title: widget.title,
       ),
     ),

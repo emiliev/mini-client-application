@@ -1,12 +1,18 @@
-# F-0020: `simctl openurl` with a custom scheme shows "Open in …?" on iOS 26.2, and simctl cannot answer it
+# F-0020: `simctl openurl` with a custom scheme shows "Open in …?" (iOS 26.2 and 18.2), and simctl cannot answer it
 
 - **Date:** 2026-11-24
 - **Author:** crew: Engineer (T-0021)
 - **Type:** Gotcha (e2e tooling)
 - **Related:** T-0021-AC3 / AC4, plan 01 §4.4, R19, R29, [evidence](../evidence/T-0021/engineer/ac3-ac6-sim.md)
 
+## Runtimes checked
+| Runtime | Device | Prompt on `simctl openurl miniclient://…` |
+|---|---|---|
+| iOS 26.2 (23C54) | iPhone 17 Pro | **yes**, warm and cold ([screenshots](../evidence/T-0021/engineer/)) |
+| iOS 18.2 (22C150) | iPhone SE (3rd generation) | **yes**, warm and cold ([screenshots](../evidence/T-0021/engineer/ios18-2/)) |
+
 ## Summary
-On the iOS 26.2 simulator (Xcode 26.2), `xcrun simctl openurl <udid> miniclient://app/placeholder/42` doesn't deliver the link straight away. SpringBoard first shows a system alert, **Open in “Mini Client”?**, with Cancel and Open. This happens whether the app is frontmost (warm) or not running (cold), and it happens again on every call. `simctl` has no tap or key input, so a script can't confirm it. The link reaches the app only after someone taps Open.
+On the iOS 26.2 simulator (Xcode 26.2; 18.2 behaves the same), `xcrun simctl openurl <udid> miniclient://app/placeholder/42` doesn't deliver the link straight away. SpringBoard first shows a system alert, **Open in “Mini Client”?**, with Cancel and Open. This happens whether the app is frontmost (warm) or not running (cold), and it happens again on every call. `simctl` has no tap or key input, so a script can't confirm it. The link reaches the app only after someone taps Open.
 
 Plan 01 §4.4 and P1-16 AC3 assumed `simctl openurl` is enough to drive a deep link in e2e. It isn't on this runtime.
 
@@ -20,7 +26,10 @@ Plan 01 §4.4 and P1-16 AC3 assumed `simctl openurl` is enough to drive a deep l
 - `uiopen` doesn't exist in the 26.2 runtime.
 - AppleScript UI scripting of Simulator.app needs Accessibility permission for the terminal. That would mean a system prompt on the PO's machine, so it wasn't pursued.
 
-## Options (TL decides)
+## Decision (TL, 2026-11-24)
+AC3 was amended. (a) A widget test delivers the URI on `flutter/navigation` (`pushRouteInformation`, what the embedder sends for `openurl`), and the route shows. (b) An on-simulator screenshot of a deep link that reaches the app through the e2e start-link file: `<data container>/tmp/mc_e2e_link`, read once by `main()` outside release builds (the R19 file mechanism), then held by `PendingLinks` and opened by `GoRouter`. The real `openurl` e2e is follow-up **P-042** (an XCUITest or Patrol tap on the prompt).
+
+## Options considered
 1. **XCUITest springboard tap:** a tiny UI-test runner that calls `XCUIApplication(bundleIdentifier: "com.apple.springboard").buttons["Open"].tap()` after `openurl`. This is what Detox and Maestro do. It needs an Xcode test bundle (P5 e2e harness).
 2. **Patrol-style native automation** in the e2e journey (P5), which can tap system alerts.
 3. **SimulatorKit HID injection** (what idb does) from a small Swift script. That uses a private API and is fragile.

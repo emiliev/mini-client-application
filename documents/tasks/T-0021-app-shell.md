@@ -31,15 +31,20 @@ The Tide "glue" app running on the iOS simulator: boot page, DI start-up from th
 
 ## Log
 - 2026-11-23: Created.
-- 2026-11-24 (Engineer): Implemented and rebased on `c9dc283` (T-0023), with `mc_api_client`'s `Dio` wired over the mocked backend. AC1, AC2, AC4, AC5 and AC6 pass. **AC3 is blocked on tooling:** iOS 26.2 answers `simctl openurl miniclient://…` with a system prompt, **Open in “Mini Client”?**, which simctl can't tap ([F-0020](../findings/F-0020-simctl-openurl-confirmation-prompt.md)). The screenshots show the prompt, not the route. Gates and the AC map: [evidence/T-0021/engineer/gates.md](../evidence/T-0021/engineer/gates.md).
+- 2026-11-24 (Engineer): Implemented and rebased on `c9dc283` (T-0023), with `mc_api_client`'s `Dio` wired over the mocked backend. AC1, AC2, AC4, AC5 and AC6 pass. **AC3 is blocked on tooling:** iOS 26.2 answers `simctl openurl miniclient://…` with a system prompt, **Open in “Mini Client”?**, which simctl can't tap ([F-0020](../findings/F-0020-simctl-openurl-confirmation-prompt.md)). The screenshots show the prompt, not the route.
+- 2026-11-24 (Engineer, round 2, TL decisions):
+  - iOS 18.2 (iPhone SE 3rd gen) shows the same prompt, so the TL amended **AC3**: (a) a widget test that delivers the URI on the platform navigation channel, and the route shows; (b) an on-simulator deep-link screenshot. (b) uses the e2e start-link file `<data>/tmp/mc_e2e_link`, which `main()` reads outside release builds and hands to `PendingLinks`. The real `openurl` e2e is P-042.
+  - Rebased on `61373cc` (T-0022). `BootBloc` is now a `McBloc` (events `BootStarted` / `BootRetried`; `BootFailed` is a `McFailureState`, so boot failures reach monitoring).
+  - analysis_options: the Flutter packages have none, the same convention as `mc_ds_*`, `mc_fixtures_*` and `spike/hello` (8 of the 9 Flutter packages on main). The root file applies, including its formatter setting; `mc_feature_flow`'s rewritten file is the exception (F-0021).
+  - All gates are green; see [evidence/T-0021/engineer/gates.md](../evidence/T-0021/engineer/gates.md).
 
 ## Outcome
-**Engineer handoff (2026-11-24): AC1, AC2, AC4, AC5 and AC6 done; AC3 blocked (F-0020).**
+**Engineer handoff (2026-11-24, round 2): all six ACs done, AC3 as amended by the TL (F-0020). Real `openurl` e2e → P-042.**
 
 - **`app/wiring/app_core`**
-  - `BootBloc` (a `ChangeNotifier` until `McBloc` lands in T-0022). It has a 10 s timeout and Retry (fixes P-028). A failed run is discarded. Retry after a timeout waits for the still-running run instead of starting a second one, because `initializeDIContainer` runs one at a time, and a run that finished late is picked up by Retry.
+  - `BootBloc`, a `McBloc` from `mc_bloc_kit`. It has a 10 s timeout and Retry (fixes P-028); `McApp` gives it a console `Monitoring` until the root one exists. A failed run is discarded. Retry after a timeout waits for the still-running run instead of starting a second one, because `initializeDIContainer` runs one at a time, and a run that finished late is picked up by Retry.
   - `BootPage` (DS `McLoading` / `McErrorView`).
-  - `PendingLinks` (R29).
+  - `PendingLinks` (R29), with `offer()` for the e2e start link (`readE2eStartLink`).
   - `McApp`: `MaterialApp(home: BootPage)` until ready, then one `GoRouter` with the held link and `overridePlatformDefaultLocation`.
   - `McRouteProbe` (route-build and redirect counter for tests).
   - Flutter error hooks into `Monitoring`.
@@ -56,8 +61,7 @@ The Tide "glue" app running on the iOS simulator: boot page, DI start-up from th
 - **Root edits:** 9 `workspace:` members. The lock is unchanged.
 - **Findings:** F-0020 (openurl prompt), F-0021 (`pub get` rewrites Flutter packages' `analysis_options.yaml`, so the new packages have none).
 - **Follow-ups for the TL:**
-  - an XCUITest or Patrol tap for system alerts, to close AC3 (F-0020);
-  - port `BootBloc` onto `McBloc` after T-0022;
+  - P-042: real `simctl openurl` e2e through an XCUITest or Patrol tap on the prompt (F-0020);
   - `tool/ide_sync` for the pub-mode `app_config.json`;
   - add the auth guard to the router's `redirect` with `mc_api_auth`;
   - `tool/loc` on main isn't `dart format`-clean (seen while formatting; left untouched).

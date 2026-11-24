@@ -7,6 +7,7 @@ _LANG = "3.13"
 
 _DEPS = [
     "//utility/mc_api_client",
+    "//utility/mc_bloc_kit",
     "//utility/mc_config",
     "//utility/mc_di",
     "//utility/mc_ds_feedback",
@@ -16,6 +17,7 @@ _DEPS = [
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
     "//utility/mc_storage",
+    "@pub_deps//:bloc",
     "@pub_deps//:dio",
     "@pub_deps//:flutter",
     "@pub_deps//:get_it",

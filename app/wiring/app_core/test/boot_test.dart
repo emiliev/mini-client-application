@@ -157,11 +157,13 @@ void main() {
     },
   );
 
-  test('T-0021-AC1 a failed run is discarded, so Retry runs the task again '
-      'while a timed-out run is reused', () async {
+  test('T-0021-AC1 BootBloc (a McBloc) discards a failed run, so Retry runs '
+      'the task again, and the failure is recorded to monitoring', () async {
     var runs = 0;
     var fail = true;
+    final sink = InMemorySink();
     final bloc = BootBloc(
+      monitoring: Monitoring([sink]),
       task: () async {
         runs++;
         if (fail) {
@@ -169,22 +171,26 @@ void main() {
           throw StateError('first');
         }
       },
-    )..start();
+    )..add(const BootStarted());
     await pumpEventQueue();
     expect(bloc.state, isA<BootFailed>());
     expect((bloc.state as BootFailed).attempt, 1);
-    bloc.retry();
-    expect(bloc.state, isA<BootBooting>());
+    final errors = sink.entries.whereType<ErrorEntry>().toList();
+    expect(errors, hasLength(1));
+    expect(errors.single.error.toString(), contains('first'));
+
+    bloc.add(const BootRetried());
     await pumpEventQueue();
     expect(bloc.state, isA<BootReady>());
     expect(runs, 2);
     expect(bloc.taskRuns, 2);
     // Terminal: retry and start do nothing.
     bloc
-      ..retry()
-      ..start();
+      ..add(const BootRetried())
+      ..add(const BootStarted());
+    await pumpEventQueue();
     expect(runs, 2);
-    bloc.dispose();
+    await bloc.close();
   });
 
   test('the root list registers every root type once, with the backend '

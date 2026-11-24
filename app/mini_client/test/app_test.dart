@@ -226,6 +226,37 @@ void main() {
     },
   );
 
+  testWidgets(
+    'T-0021-AC3 a miniclient://app/placeholder link delivered on the '
+    'platform navigation channel to the running app shows that route',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      final probe = McRouteProbe();
+      await tester.pumpWidget(
+        MiniClientApp(links: links, initializers: roots(), probe: probe),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(find.text('Marvel universe'), findsOneWidget);
+
+      // What the iOS embedder sends for `simctl openurl` (FlutterDeepLinking).
+      await _pushLink(tester, 'miniclient://app/placeholder/42');
+      await tester.pumpAndSettle();
+
+      expect(find.text('Placeholder detail 42'), findsOneWidget);
+      expect(probe.builds, contains('placeholder'));
+      // Nested under home, so back returns to the home placeholder.
+      final router = GoRouter.of(
+        tester.element(find.text('Placeholder detail 42')),
+      );
+      expect(router.canPop(), isTrue);
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Marvel universe'), findsOneWidget);
+    },
+  );
+
   testWidgets('the home placeholder shows the bundled config env', (
     tester,
   ) async {

@@ -48,6 +48,14 @@ class PendingLinks extends WidgetsBindingObserver {
     return SynchronousFuture<bool>(true);
   }
 
+  /// Holds [link] as if the platform had pushed it (the e2e start link).
+  /// Ignored once detached.
+  void offer(String link) {
+    if (_attached) {
+      _latest = normalise(link);
+    }
+  }
+
   /// The held location (newest wins), or `/`, and clears it.
   String take() {
     _takes++;

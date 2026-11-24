@@ -5,14 +5,18 @@
 # it on a private `mc-T-0021-<role>-<pid>` simulator and take screenshots
 # (at most 1200 px tall):
 #   ac6-home.png         launch → the home placeholder in Inter
+#   ac3-e2e-link.png     the app terminated, `miniclient://app/placeholder/42`
+#                        written to <data>/tmp/mc_e2e_link, launched → that
+#                        route via PendingLinks → GoRouter (AC3 as amended)
 #   ac3-openurl-warm.png `simctl openurl <udid> miniclient://app/placeholder/42`
 #                        while the app runs → that route
 #   ac4-openurl-cold.png the app terminated, then `openurl …/placeholder/7`
 #                        (a cold-start link) → that route after boot
-# On iOS 26.2 every `simctl openurl` of a custom scheme first shows the
-# system prompt "Open in “Mini Client”?" (F-0020), and simctl cannot tap it,
-# so the two openurl screenshots show that prompt and AC3 is not decided
-# here; the verdict covers AC6 only. The simulator is always deleted.
+# On iOS 26.2 and 18.2 every `simctl openurl` of a custom scheme first shows
+# the system prompt "Open in “Mini Client”?" (F-0020), and simctl cannot tap
+# it, so the two openurl screenshots show that prompt (follow-up P-042). The
+# verdict covers AC6 and the e2e-link half of AC3. The simulator is always
+# deleted.
 #   [MC_OUTPUT_BASE=/tmp/mc-ob-…] [MC_SIM_DEVICE="iPhone SE (3rd generation)"] \
 #   [MC_SIM_RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-18-2] \
 #   tool/checks/T-0021-AC3_AC6_sim.sh [--role engineer|verifier] [--out FILE]
@@ -89,6 +93,18 @@ sleep 10
 run_home=$(running)
 shot ac6-home.png
 
+# AC3 (amended): a deep link through the e2e start-link file (R19 mechanism).
+xcrun simctl terminate "$UDID" "$BUNDLE_ID" >/dev/null 2>&1
+sleep 2
+DATA=$(xcrun simctl get_app_container "$UDID" "$BUNDLE_ID" data 2>/dev/null)
+mkdir -p "$DATA/tmp" && printf 'miniclient://app/placeholder/42\n' > "$DATA/tmp/mc_e2e_link"
+link_written=$([[ -s "$DATA/tmp/mc_e2e_link" ]] && echo 1 || echo 0)
+xcrun simctl launch "$UDID" "$BUNDLE_ID" >/dev/null 2>&1; rc_link=$?
+sleep 10
+link_consumed=$([[ -e "$DATA/tmp/mc_e2e_link" ]] && echo 0 || echo 1)
+shot ac3-e2e-link.png
+report "- e2e start link written: $link_written; relaunch exit $rc_link; file consumed by the app: $link_consumed"
+
 rc_warm=0
 xcrun simctl openurl "$UDID" "miniclient://app/placeholder/42" || rc_warm=$?
 sleep 5
@@ -108,9 +124,10 @@ report "- simulator: \`$NAME\` ($UDID), $DEVICE, \`$RUNTIME\`; deleted on exit" 
   "- \`simctl openurl\` warm (placeholder/42): exit $rc_warm" \
   "- \`simctl openurl\` cold (placeholder/7, app terminated first): exit $rc_cold; launchctl entries 10 s later: $run_cold" \
   "" "The screenshots are the visual checkpoints: a reviewer must look at them." \
-  "AC3 (openurl screenshots): expected to show the iOS \"Open in “Mini Client”?\" prompt (F-0020); not decided by this script."
+  "AC3: \`ac3-e2e-link.png\` must show *Placeholder detail 42*. The openurl screenshots are expected to show the iOS \"Open in “Mini Client”?\" prompt (F-0020, P-042)."
 ok=0
 [[ $inter -eq 1 && "$inter_files" -eq 4 && -n "$config_env" && "$scheme" == miniclient && "$deeplink" == true \
   && $rc_launch -eq 0 && "$run_home" -ge 1 && $rc_warm -eq 0 && $rc_cold -eq 0 \
+  && "$link_written" -eq 1 && $rc_link -eq 0 && "$link_consumed" -eq 1 && -s "$SHOT_DIR/ac3-e2e-link.png" \
   && -s "$SHOT_DIR/ac6-home.png" && -s "$SHOT_DIR/ac3-openurl-warm.png" && -s "$SHOT_DIR/ac4-openurl-cold.png" ]] && ok=1
-finish T-0021-AC6 $([[ $ok -eq 1 ]] && echo 0 || echo 1)
+finish "T-0021-AC6 + AC3 (e2e link)" $([[ $ok -eq 1 ]] && echo 0 || echo 1)

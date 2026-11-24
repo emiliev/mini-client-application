@@ -1,3 +1,5 @@
+import 'package:mc_bloc_kit/mc_bloc_kit.dart';
+
 /// Where boot is (plan 01 §3.4, R29). Until [BootReady] no `GoRouter`
 /// exists, so no route builder or `redirect` can run.
 sealed class BootState {
@@ -11,12 +13,15 @@ final class BootBooting extends BootState {
   final int attempt;
 }
 
-/// An initializer threw. Retry starts a fresh attempt.
-final class BootFailed extends BootState {
+/// An initializer threw. Retry starts a fresh attempt. `McBloc` records the
+/// error to monitoring.
+final class BootFailed extends BootState implements McFailureState {
   const BootFailed(this.attempt, this.error, this.stackTrace);
 
   final int attempt;
+  @override
   final Object error;
+  @override
   final StackTrace stackTrace;
 }
 

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app_core/app_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -54,6 +56,29 @@ void main() {
     expect(links.received, 0);
     expect(links.isAttached, isFalse);
     expect(probe.seen, ['/placeholder/4']);
+  });
+
+  testWidgets('the e2e start link is read once and offered as a held link', (
+    tester,
+  ) async {
+    final tmp = Directory.systemTemp.createTempSync('e2e_link');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+    expect(readE2eStartLink(tmp: tmp), isNull);
+    File(
+      '${tmp.path}/$e2eStartLinkFile',
+    ).writeAsStringSync('miniclient://app/placeholder/42\n');
+    final link = readE2eStartLink(tmp: tmp);
+    expect(link, 'miniclient://app/placeholder/42');
+    expect(readE2eStartLink(tmp: tmp), isNull, reason: 'deleted after reading');
+
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    links.offer(link!);
+    expect(links.take(), '/placeholder/42');
+    links
+      ..detach()
+      ..offer('/placeholder/1');
+    expect(links.pending, isNull, reason: 'ignored once detached');
   });
 
   group('error hooks', () {
