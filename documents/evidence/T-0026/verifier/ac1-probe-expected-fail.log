@@ -1,0 +1,44 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //utility/mc_test_utils:verifier_ac1_probe_test
+-----------------------------------------------------------------------------
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Unmatched request GET /v1/verifier/unfixtured
+No route answers it. Switch on a fixture set that has it (active: none) or register a domain with
+useDomain.
+When the exception was thrown, this was the stack:
+The test description was:
+  VPROBE-AC1-a no fixture set at all
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  VPROBE-AC1-a no fixture set at all
+        String: Test failed. See exception logs above.
+        The test description was: VPROBE-AC1-a no fixture set at all
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Unmatched request GET /v1/verifier/missing
+No route answers it. Switch on a fixture set that has it (active: verifier.basic) or register a
+domain with useDomain.
+When the exception was thrown, this was the stack:
+The test description was:
+  VPROBE-AC1-b wrong fixture set
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  VPROBE-AC1-b wrong fixture set
+        String: Test failed. See exception logs above.
+        The test description was: VPROBE-AC1-b wrong fixture set
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Unmatched request GET /v1/verifier/elsewhere
+No route answers it. Switch on a fixture set that has it (active: none) or register a domain with
+useDomain.
+The test body failed: Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "ok:7": []>
+   Which: means none were found but one was expected
+When the exception was thrown, this was the stack:
+The test description was:
+  VPROBE-AC1-c body fails first
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  VPROBE-AC1-c body fails first
+        String: Test failed. See exception logs above.
+        The test description was: VPROBE-AC1-c body fails first
+  PASS  VPROBE-AC1-control fixtured route passes
+1 passed, 3 failed

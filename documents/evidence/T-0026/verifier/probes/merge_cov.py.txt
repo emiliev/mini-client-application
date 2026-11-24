@@ -1,0 +1,16 @@
+import sys,collections
+hits=collections.defaultdict(dict)
+for p in sys.argv[1:]:
+    sf=None
+    for line in open(p):
+        line=line.strip()
+        if line.startswith('SF:'): sf=line[3:]
+        elif line.startswith('DA:') and sf:
+            ln,c=line[3:].split(',')[:2]
+            hits[sf][int(ln)]=max(hits[sf].get(int(ln),0),int(c))
+th=tl=0
+for sf in sorted(hits):
+    if 'mc_test_utils' not in sf or '/lib/' not in sf and 'package:mc_test_utils' not in sf: continue
+    d=hits[sf]; h=sum(1 for v in d.values() if v>0); th+=h; tl+=len(d)
+    print(f"{sf}: {h}/{len(d)} {100*h/len(d):.1f}% missed={sorted(k for k,v in d.items() if v==0)}")
+print(f"TOTAL {th}/{tl} {100*th/tl:.1f}%")

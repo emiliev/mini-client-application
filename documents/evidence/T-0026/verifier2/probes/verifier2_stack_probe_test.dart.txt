@@ -1,0 +1,16 @@
+// Verifier round-2 probe, EXPECTED TO FAIL: the body throws after an
+// unmatched request; the failure must name the route AND keep the body's
+// stack (the frame `verifierThrower`).
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import 'verifier_flow.dart';
+
+void main() {
+  mcTestWidgets('V2-6-stack body failure keeps its stack', (tester) async {
+    await initFlow(tester, () => verifierFlow('/v1/verifier/unfixtured'));
+    await mcSettle(tester);
+    verifierThrower();
+  });
+}
+
+Never verifierThrower() => throw StateError('thrown by verifierThrower');

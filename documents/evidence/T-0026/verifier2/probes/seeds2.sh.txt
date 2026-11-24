@@ -1,0 +1,20 @@
+#!/bin/bash
+# Verifier: run the aggregated mc_test_utils targets under several random ordering seeds.
+cd /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7ff0e9e511f2f178 || exit 2
+OUT=documents/evidence/T-0026/verifier2/seeds.log
+: > "$OUT"
+for seed in 5 77 2024 65535; do
+  tool/bazelw --output_base=/tmp/mc-ob-T-0026-verifier test --nocache_test_results \
+    --test_arg=--test-randomize-ordering-seed=$seed \
+    //utility/mc_test_utils:isolation_test //utility/mc_test_utils:harness_test \
+    //utility/mc_test_utils:init_flow_test //utility/mc_test_utils:verifier2_probe_test \
+    > /tmp/mc-ob-T-0026-seed.log 2>&1
+  rc=$?
+  echo "seed=$seed exit=$rc" >> "$OUT"
+  for t in isolation_test harness_test init_flow_test verifier2_probe_test; do
+    log=bazel-testlogs/utility/mc_test_utils/$t/test.log
+    printf '  %s: %s | %s\n' "$t" "$(grep -o 'randomized order; reproduce with --test-randomize-ordering-seed=[0-9]*' "$log" | head -1)" "$(grep -E '^[0-9]+ passed|passed, [0-9]+ failed| failed$' "$log" | tail -1)" >> "$OUT"
+    grep -E '^  (PASS|FAIL) ' "$log" | sed 's/^/    /' >> "$OUT"
+  done
+done
+cat "$OUT"

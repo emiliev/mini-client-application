@@ -1,0 +1,168 @@
+seed=5 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=5 | 5 passed
+      PASS  container initialises once per test
+      PASS  T-0026-AC2 isolation, second
+      PASS  every root service of the production list is present
+      PASS  T-0026-AC2 isolation, first
+      PASS  T-0026-AC2 externals need an explicit, unclaimed type
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=5 | 15 passed
+      PASS  fixture set answers; recorded requests and routes
+      PASS  route syntax and unknown names are rejected
+      PASS  T-0026-AC3 a failed unrouted path is answered, not unmatched
+      PASS  an unreleased hold fails the test
+      PASS  mcSettle outside a session just settles
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  T-0026-AC1 malformed URLs reach the engine, which answers 400
+      PASS  T-0026-AC3 fixture-set scenarios are selectable
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  T-0026-AC3 a held request honours cancellation
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=5 | 3 passed
+      PASS  the flow reaches the root monitoring double
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+      PASS  initFlow honours the session text scale and variant
+  verifier2_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=5 | 14 passed
+      PASS  V2-4 always-failing unrouted path is never unmatched
+      PASS  V2-2 fixture-set scenarios are registered and work
+      PASS  V2-4 a query-subset rule does not cover other queries
+      PASS  V2-3 malformed /v1/nowhere/%FF gives 404
+      PASS  V2-3 malformed /v1/verifier/items?q=%FF gives 400
+      PASS  V2-3 malformed /v1/verifier/items/%FF gives 404
+      PASS  V2-1 untyped and duplicate externals are rejected
+      PASS  V2-3 malformed /v1/verifier/p/%FF gives 400
+      PASS  V2-4 two stacked once-rules mirror the engine
+      PASS  V2-4 unrouted fail: not unmatched while active
+      PASS  V2-2 useDomain also registers scenarios
+      PASS  V2-5 held then cancelled throws requestCancelled
+      PASS  V2-6 a throwing wiring leaves containerInitialized false
+      PASS  V2-3 malformed /v1/nowhere?q=%E0%A4%A gives 400
+seed=77 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=77 | 5 passed
+      PASS  T-0026-AC2 isolation, first
+      PASS  every root service of the production list is present
+      PASS  T-0026-AC2 isolation, second
+      PASS  T-0026-AC2 externals need an explicit, unclaimed type
+      PASS  container initialises once per test
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=77 | 15 passed
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  T-0026-AC1 malformed URLs reach the engine, which answers 400
+      PASS  mcSettle outside a session just settles
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC3 a held request honours cancellation
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  an unreleased hold fails the test
+      PASS  T-0026-AC3 fixture-set scenarios are selectable
+      PASS  route syntax and unknown names are rejected
+      PASS  T-0026-AC3 a failed unrouted path is answered, not unmatched
+      PASS  fixture set answers; recorded requests and routes
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=77 | 3 passed
+      PASS  the flow reaches the root monitoring double
+      PASS  initFlow honours the session text scale and variant
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+  verifier2_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=77 | 14 passed
+      PASS  V2-4 unrouted fail: not unmatched while active
+      PASS  V2-4 two stacked once-rules mirror the engine
+      PASS  V2-2 fixture-set scenarios are registered and work
+      PASS  V2-3 malformed /v1/verifier/p/%FF gives 400
+      PASS  V2-5 held then cancelled throws requestCancelled
+      PASS  V2-4 always-failing unrouted path is never unmatched
+      PASS  V2-1 untyped and duplicate externals are rejected
+      PASS  V2-3 malformed /v1/nowhere?q=%E0%A4%A gives 400
+      PASS  V2-3 malformed /v1/verifier/items?q=%FF gives 400
+      PASS  V2-3 malformed /v1/nowhere/%FF gives 404
+      PASS  V2-3 malformed /v1/verifier/items/%FF gives 404
+      PASS  V2-6 a throwing wiring leaves containerInitialized false
+      PASS  V2-4 a query-subset rule does not cover other queries
+      PASS  V2-2 useDomain also registers scenarios
+seed=2024 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=2024 | 5 passed
+      PASS  T-0026-AC2 isolation, second
+      PASS  T-0026-AC2 externals need an explicit, unclaimed type
+      PASS  T-0026-AC2 isolation, first
+      PASS  every root service of the production list is present
+      PASS  container initialises once per test
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=2024 | 15 passed
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  an unreleased hold fails the test
+      PASS  route syntax and unknown names are rejected
+      PASS  T-0026-AC3 a failed unrouted path is answered, not unmatched
+      PASS  T-0026-AC3 a held request honours cancellation
+      PASS  fixture set answers; recorded requests and routes
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  T-0026-AC3 fixture-set scenarios are selectable
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  mcSettle outside a session just settles
+      PASS  fail() with a query subset only fails matching requests
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC1 malformed URLs reach the engine, which answers 400
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=2024 | 3 passed
+      PASS  initFlow honours the session text scale and variant
+      PASS  the flow reaches the root monitoring double
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+  verifier2_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=2024 | 14 passed
+      PASS  V2-5 held then cancelled throws requestCancelled
+      PASS  V2-6 a throwing wiring leaves containerInitialized false
+      PASS  V2-3 malformed /v1/nowhere?q=%E0%A4%A gives 400
+      PASS  V2-1 untyped and duplicate externals are rejected
+      PASS  V2-4 two stacked once-rules mirror the engine
+      PASS  V2-3 malformed /v1/verifier/items?q=%FF gives 400
+      PASS  V2-3 malformed /v1/verifier/items/%FF gives 404
+      PASS  V2-2 fixture-set scenarios are registered and work
+      PASS  V2-3 malformed /v1/verifier/p/%FF gives 400
+      PASS  V2-4 unrouted fail: not unmatched while active
+      PASS  V2-4 always-failing unrouted path is never unmatched
+      PASS  V2-2 useDomain also registers scenarios
+      PASS  V2-3 malformed /v1/nowhere/%FF gives 404
+      PASS  V2-4 a query-subset rule does not cover other queries
+seed=65535 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=65535 | 5 passed
+      PASS  every root service of the production list is present
+      PASS  T-0026-AC2 isolation, second
+      PASS  T-0026-AC2 externals need an explicit, unclaimed type
+      PASS  T-0026-AC2 isolation, first
+      PASS  container initialises once per test
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=65535 | 15 passed
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  T-0026-AC3 fixture-set scenarios are selectable
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC3 a failed unrouted path is answered, not unmatched
+      PASS  T-0026-AC3 a held request honours cancellation
+      PASS  T-0026-AC1 malformed URLs reach the engine, which answers 400
+      PASS  mcSettle outside a session just settles
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  fail() with a query subset only fails matching requests
+      PASS  an unreleased hold fails the test
+      PASS  fixture set answers; recorded requests and routes
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  route syntax and unknown names are rejected
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=65535 | 3 passed
+      PASS  initFlow honours the session text scale and variant
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+      PASS  the flow reaches the root monitoring double
+  verifier2_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=65535 | 14 passed
+      PASS  V2-5 held then cancelled throws requestCancelled
+      PASS  V2-4 two stacked once-rules mirror the engine
+      PASS  V2-2 fixture-set scenarios are registered and work
+      PASS  V2-3 malformed /v1/verifier/p/%FF gives 400
+      PASS  V2-4 unrouted fail: not unmatched while active
+      PASS  V2-3 malformed /v1/verifier/items?q=%FF gives 400
+      PASS  V2-6 a throwing wiring leaves containerInitialized false
+      PASS  V2-3 malformed /v1/nowhere?q=%E0%A4%A gives 400
+      PASS  V2-3 malformed /v1/verifier/items/%FF gives 404
+      PASS  V2-3 malformed /v1/nowhere/%FF gives 404
+      PASS  V2-2 useDomain also registers scenarios
+      PASS  V2-1 untyped and duplicate externals are rejected
+      PASS  V2-4 always-failing unrouted path is never unmatched
+      PASS  V2-4 a query-subset rule does not cover other queries

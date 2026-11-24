@@ -1,0 +1,88 @@
+// Verifier-owned probe flow (T-0026 verification). Not the Engineer's code.
+import 'package:dio/dio.dart';
+import 'package:flutter/material.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_feature_flow/mc_feature_flow.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+
+/// `GET /v1/verifier/items` answers `{"n": 7}`.
+class VerifierDomain implements MockDomain {
+  @override
+  String get name => 'verifier';
+
+  @override
+  void register(MockRouter router, MockDomainEnvironment environment) {
+    router.get(
+      '/v1/verifier/items',
+      (request, context) => const MockResponse.ok({'n': 7}),
+    );
+  }
+
+  @override
+  Map<String, MockScenario> get scenarios => const {};
+}
+
+/// A flow that GETs [path] on start, shows `loading`, `ok:<n>` or
+/// `failed:<status>`, and has a `retry` button that issues the call again.
+Widget verifierFlow(String path, {void Function(BuildContext)? onBuild}) =>
+    FeatureFlow<int>(
+      state: 0,
+      rootImports: const [RootImport<Dio>()],
+      onGeneratePages: (_) => [
+        McFlowPage(
+          name: 'verifier',
+          child: _Page(path: path, onBuild: onBuild),
+        ),
+      ],
+    );
+
+class _Page extends StatefulWidget {
+  const _Page({required this.path, this.onBuild});
+  final String path;
+  final void Function(BuildContext)? onBuild;
+  @override
+  State<_Page> createState() => _PageState();
+}
+
+class _PageState extends State<_Page> {
+  String _text = 'loading';
+  bool _started = false;
+
+  Future<void> _load(Dio dio) async {
+    try {
+      final r = await dio.get<Map<String, dynamic>>(widget.path);
+      if (mounted) {
+        setState(() => _text = 'ok:${r.data!['n']}');
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        setState(() => _text = 'failed:${e.response?.statusCode}');
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    widget.onBuild?.call(context);
+    final dio = context.di<Dio>();
+    if (!_started) {
+      _started = true;
+      _load(dio);
+    }
+    return Scaffold(
+      body: Column(
+        children: [
+          Text(_text, key: const ValueKey('verifier.text')),
+          TextButton(
+            key: const ValueKey('verifier.retry'),
+            onPressed: () {
+              setState(() => _text = 'loading');
+              _load(dio);
+            },
+            child: const Text('retry'),
+          ),
+        ],
+      ),
+    );
+  }
+}

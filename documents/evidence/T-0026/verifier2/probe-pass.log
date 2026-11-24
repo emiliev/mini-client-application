@@ -1,0 +1,15 @@
+  PASS  V2-1 untyped and duplicate externals are rejected
+  PASS  V2-6 a throwing wiring leaves containerInitialized false
+  PASS  V2-2 fixture-set scenarios are registered and work
+  PASS  V2-2 useDomain also registers scenarios
+  PASS  V2-3 malformed /v1/verifier/p/%FF gives 400
+  PASS  V2-3 malformed /v1/verifier/items?q=%FF gives 400
+  PASS  V2-3 malformed /v1/nowhere?q=%E0%A4%A gives 400
+  PASS  V2-3 malformed /v1/verifier/items/%FF gives 404
+  PASS  V2-3 malformed /v1/nowhere/%FF gives 404
+  PASS  V2-4 unrouted fail: not unmatched while active
+  PASS  V2-4 two stacked once-rules mirror the engine
+  PASS  V2-4 always-failing unrouted path is never unmatched
+  PASS  V2-4 a query-subset rule does not cover other queries
+  PASS  V2-5 held then cancelled throws requestCancelled
+14 passed
