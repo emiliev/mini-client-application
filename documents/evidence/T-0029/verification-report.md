@@ -6,7 +6,8 @@
 - **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0029-verifier`, with no `.bazelrc.user` override. It builds the committed queue: pin `e7163aa` + `0003-ext-bdd-generator.patch`.
 - **Fork dir:** `MC_FORK_DIR=/tmp/mc-fork-T-0029-verifier`, the Verifier's own.
 - **Simulator:** none. There is no UI or e2e in scope.
-- **Verdict:** **FAIL**. AC1 to AC5 pass. AC6 fails on one gate: `dart format` is not clean on the patch's Dart files (D2). There is also one major scaffold defect (D1). Both are mechanical fixes, within R28's one fix round.
+- **Verdict at `a4e984b`:** **FAIL**. AC1 to AC5 pass. AC6 fails on one gate: `dart format` is not clean on the patch's Dart files (D2). There is also one major scaffold defect (D1). Both are mechanical fixes, within R28's one fix round.
+- **Verdict at `4cb1d5a` (re-verification, at the end of this report):** **PASS**.
 
 ## Gates re-run independently
 | Gate | Command | Result |
@@ -104,3 +105,85 @@
 ## Notes for the Tech Lead
 - The fix round needs D1 (a one-line import order fix, plus a build of a scaffolded stub in the AC3 check) and D2 (format 4 files, re-export, run `check`). D3 to D6 are documentation or small fixes that can ride along. After that, the same checks can be repeated quickly; the determinism, AC2 and AC4 results don't depend on these changes.
 - The Verifier's fork dir `/tmp/mc-fork-T-0029-verifier` and output base `/tmp/mc-ob-T-0029-verifier` (shut down) can be deleted.
+
+---
+
+## Re-verification at 4cb1d5a
+
+- **Commit verified:** `fleet/T-0029-bdd-generator` @ `4cb1d5a`, a detached checkout. The fix round is `2416810` and `4cb1d5a`, on top of the first report `909321e`.
+- **Setup:**
+  - Output base: `/tmp/mc-ob-T-0029-verifier`.
+  - Fresh fork dir: `/tmp/mc-fork-T-0029-verifier`, recreated with `rules_fork.sh checkout`.
+  - The fork's own Bazel ran with `bazelisk --output_base=/tmp/mc-ob-T-0029-verifier-fork` in the fork checkout. That is a separate workspace, so it needs its own output base.
+- **Verdict: PASS.** D1 to D6 are fixed, and every spot-checked nit behaves as claimed. One queue-policy point is left for the TL (R1), plus two cosmetic nits.
+
+### Gates
+| Gate | Result |
+|---|---|
+| `tool/rules_fork.sh check` | PASS: `1 patch(es) apply strictly on pin e7163aab8f91`; ai_rules_flutter queue empty |
+| Patch = export | PASS: `checkout` then `export` is byte-identical to the committed `0003-ext-bdd-generator.patch` (sha1 `1b42a827…`, 5,085 lines). The tree and `.bazelrc.user` were restored afterwards. |
+| `test //... --keep_going --nocache_test_results --lockfile_mode=error` | PASS: `Executed 49 out of 49 tests: 49 tests pass.` |
+| `build --config=lint //... --keep_going` | PASS: exit 0 |
+| `run //tool/mc_arch_check:bin` | PASS: `mc_arch_check: OK`, exit 0 |
+| `dart format --set-exit-if-changed` on the 13 touched repo `.dart` files | PASS: `0 changed` |
+| `dart format --set-exit-if-changed dart/ext/bdd` (fork) | PASS: `Formatted 4 files (0 changed)` |
+| Fork's own `bazelisk test --nocache_test_results //dart/ext/bdd:all`, with the fork's `.bazelrc` (`dart_analyze` + `dart_format` aspects, `--lockfile_mode=error`) | PASS: `//dart/ext/bdd:bdd_generator_test PASSED`. It's also green from the consumer side (`@rules_dart//dart/ext/bdd:all`). |
+| T-0029 checks AC1 to AC5 | All PASS. AC1 names `[T-0001-AC1]`, `[T-0029-AC1]` and `[T-0029-AC4]`. AC2 names both missing steps and the shadowed one, and the tree is unchanged. AC4: no analyzer in `--notool_deps`, and the analyzer family only in `b1a3e4e` (exec). |
+| Determinism | Two `clean` + `build --disk_cache=` runs give identical sha1s (`bdd_test_main.dart c80e5d8a…`, `greeting_browse_test.dart 31d1aa1e…`, `greeting_table_test.dart 4b776ac8…`). Both `_test.dart` files equal the Engineer's `engineer/generated/`. |
+
+### 1. Scaffolded stubs (D1)
+- **The committed check passes.** `T-0029-AC3_scaffold.sh` exits 0. Phase 2 scaffolds `i_wave_times.dart` and `the_greeting_rows_are.dart` into the real tree for a probe feature. `build --config=lint //spike/bdd_sample:bdd_test` exits 0, and the probe is removed afterwards.
+- The data-table stub now reads `import 'package:flutter_test/flutter_test.dart';` followed by `import 'package:mc_test_steps/mc_test_steps.dart' as bdd;`.
+- **Regression probe.** In my fork I replaced `[..._sortedImports(imports), '']` with the unsorted `[...imports, '']` in `_rewriteImports`, pointed the repo at the fork (`.bazelrc.user --override_module`), and re-ran the AC3 check. It gave **exit 1, `FAIL T-0029-AC3`**, with `the_greeting_rows_are.dart:2:1 … directives_ordering` and `- FAIL: the scaffolded stubs do not build cleanly`. The probe files were removed (`spike/bdd_sample is as before`).
+- **The fork's own gates catch it too.** The first mutation left `_sortedImports` unused, and the fork's analyze aspect failed with `unused_element`, which shows the fork's analyze gate is live. A second mutation kept the helper referenced. Then `bdd_generator_test` FAILED: `imports are sorted for directives_ordering [E]` and `a data-table stub sorts its DataTable import [E]`.
+- Mutations reverted; the fork is clean again (`git status` empty).
+
+### 2. Fork gate (D2)
+- The fork's format and analyze aspects are **live**. I appended `const   int verifierProbe=1;` to `lib/scaffold.dart`, and the fork's `bazel test` failed with `Checking Dart formatting of //dart/ext/bdd:bdd_generator failed … Changed dart/ext/bdd/lib/scaffold.dart`. Reverted.
+- **(a) `// ignore: implementation_imports`: accepted.**
+  - The patch adds exactly 8, at `lib/bdd_generator.dart:25–39`. Each sits directly above one of the 8 `package:bdd_widget_test/src/...` imports.
+  - There are no other `// ignore` lines in `dart/ext/bdd`. The only other suppression is the generated `// ignore_for_file: type=lint` that `bdd_suite_main` emits, unchanged from round 1.
+  - Our repo's code (`tool/`, `utility/`, `spike/`, `MODULE.bazel`, `pubspec.yaml`) has **no** new `ignore` lines.
+  - The pattern matches `dart/ext/lib/builder_shim.dart:31–35`. One cosmetic difference: our comments add a reason after the code (`implementation_imports, bdd_widget_test exports no parser …`), and the fork's analyzer accepts it.
+- **(b) The fork's `MODULE.bazel.lock` in patch 0003: it does make the queue more fragile than it needs to be (R1 below).**
+
+### 3. Shared steps come from `:step_index` (D6)
+- `:step_index` is now `glob(["lib/src/*/**/*.dart"])`, so its JSON lists only `i_dont_see`, `i_see`, `i_see_the_texts`, `i_tap` and `the_backend_serves`. `//tool/bdd:scaffold` reads it via `--step-index=$(rootpath …)`.
+- **Probe:** I added `utility/mc_test_steps/lib/src/helper_text.dart` (a helper directly in `lib/src/`, not a step) and a feature step `Then helper text`.
+  - The **generator** reports it missing: `1 step(s) have no definition: "helper text" -> test/feature/step/helper_text.dart`.
+  - The **scaffold** agrees: `scaffold: wrote spike/bdd_sample/test/feature/step/helper_text.dart`.
+  - With that local stub, `build --config=lint :bdd_test` succeeds. The local stub is not treated as shadowing, because the helper is not in the index.
+- Shared steps in a group folder are still not stubbed (AC3 check: `no stub for shared steps`).
+- Probe files removed.
+
+### 4. Nits (negative cases, all in a throwaway package `spike/bdd_sample/test/vprobe`, removed afterwards)
+| Nit | Case | Observed |
+|---|---|---|
+| 7 | `mc_bdd_tests(features = ["root.feature"])` at the package root | Builds; writes `root_bdd_main.dart` (no directory prefix) importing `root_test.dart` |
+| 8 | `features = ["a/b.feature", "a_b.feature"]` | `Error in fail: mc_bdd_tests: a/b.feature and a_b.feature both map to the target name _c_bdd_gen_a_b (`/` becomes `_`); rename one of them.` |
+| 9 | `features = []` | `Error in fail: mc_bdd_tests(name = "e_bdd"): `features` is empty; …` |
+| 10 | `steps = ["step/x_one.dart", "step/sub/x_one.dart"]` | `BDD generation failed: root.feature: two step files named x_one.dart: step/x_one.dart and step/sub/x_one.dart.` |
+| 11 | a truncated `bad.bdd_steps.json` as a step index; `config = {"testMethodName": 3}` | `bad.bdd_steps.json: not JSON (Unexpected end of input).`; `bdd config "testMethodName" has the wrong type (int).` (a `BddGenerationError`, not a raw throw). Bad `--config` JSON is covered by the fork test `bad config and bad indexes are reported, not thrown raw` (`decodeConfig('{')`). |
+| 12 | `sub/up.feature` with `stepFolderName: "../step"` | Builds; `import './../step/x_one.dart';` and `await xOne(tester);` |
+| 13 | A feature under `test/feature/sub/` with an undefined step | The scaffold writes nothing (`every step is defined`), matching `glob(["test/feature/*.feature"])`. Config keys go through the shared `optionsFromConfig`. |
+| 14 | AC5 overlay | Check PASS. `_deps/mc_ds_theme/pubspec.yaml` keeps `flutter: … fonts: - family: Inter …`, `assets/fonts/Inter-*.ttf` are copied, and `dev_dependencies` / `resolution` are dropped. The Engineer's AC5 evidence is now committed (D3). |
+| 15 | AC4 check FAIL branches | By reading the code: each `rc=1` branch now prints a `- FAIL: …` line. Not forced. |
+
+There are 15 fork tests, including `two local steps with one file name fail`, `a step folder above the feature is accepted` and the two import-order tests.
+
+### Remaining issues
+1. **R1 (minor; a queue policy for the TL to decide): the fork's `MODULE.bazel.lock` hunk in 0003.**
+   - It is 3,735 of the patch's 5,085 lines. It is only needed for the fork's own gate (`common --lockfile_mode=error`). **Consumers never read it**, because Bazel ignores a non-root module's lockfile.
+   - It's fragile because, on the pin, `git am` of 0002 (T-0028 @ `ced0c05`) then 0003 **applies cleanly**, yet the result is wrong. The fork lock still records `FILE:@@//dart/ext/pubspec.lock 79c18ae7…` (the hash of the pin+0003 ext lock), while the actual ext lock is `f27dbf9e…`, and it has no `ext_pub_deps__injectable` entry.
+   - `rules_fork.sh check` passes on that stack. Only a fork-side `bazel test` under `lockfile_mode=error` would notice.
+   - On top of 0001 (T-0027 @ `eee1877`), 0003 still fails in `dart/ext/pubspec.{lock,yaml}`. That one fails loudly, and F-0027 fact 11 now documents the rebase.
+   - It is also inconsistent with T-0027, which dropped its fork-lock hunk (`44c8c83`).
+   - **Recommendation:** keep the fork `MODULE.bazel.lock` out of the per-feature patches. Either regenerate it once, in a final queue-tail patch after 0001 to 0003 are rebased, or run fork-side gates with `--lockfile_mode=update`. That shrinks 0003 by about 70 % and removes a hunk that can go stale silently.
+   - This doesn't affect any T-0029 AC or our gates.
+2. **R2 (cosmetic):** F-0027's facts are numbered 1–9, 12, 13, 10, 11 (`documents/findings/F-0027-bdd-generator-under-bazel.md:21–24`).
+3. **R3 (cosmetic):** the 8 ignore comments carry a reason after the code, where `builder_shim.dart` uses the bare form. The fork's analyzer accepts it.
+
+### Test integrity (fix round)
+- No tests deleted, skipped or weakened. Fork tests went from 10 to 15. The AC3 check gained a build-under-lint phase, and every AC4 FAIL path now reports.
+- Suppressions: the 8 fork `implementation_imports` ignores, accepted by the TL within the limits confirmed above. None in our repo's code.
+- All Verifier probes (scaffold stubs, helper file, `vprobe/` package, fork mutations, `.bazelrc.user`) were removed. The worktree and the fork are clean.
