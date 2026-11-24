@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | Targets | https://github.com/Milad-Akarie/injectable (issue) and lean_builder's repository (issue; also by Milad Akarie, see its pub.dev page) |
-| Task | T-0028; plan 03 X3; finding F-0026 |
+| Task | T-0028; plan 03 X3; finding F-0028 |
 | Status | Draft, not sent (Q-013) |
 
 ## Issue 1, injectable: "injectable_generator forces lean_builder (and an old _fe_analyzer_shared) on build_runner users"

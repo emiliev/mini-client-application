@@ -1,4 +1,4 @@
-# F-0026: injectable under the rules_dart shim: `Resolver.libraries` order decides the output; the overlay needs its own lock
+# F-0028: injectable under the rules_dart shim: `Resolver.libraries` order decides the output; the overlay needs its own lock
 
 - **Date:** 2026-11-24
 - **Author:** crew: Engineer (T-0028)

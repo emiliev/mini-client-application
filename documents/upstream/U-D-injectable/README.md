@@ -4,7 +4,7 @@
 |---|---|
 | Target | https://github.com/Mivr/ai_rules_dart (pull request against `main`, based on v0.28.3 `e7163aa`) |
 | Patch | `third_party/rules_patches/ai_rules_dart/0002-ext-injectable-two-stage.patch` (one commit; `git am` applies it on the pin) |
-| Task | T-0028; finding F-0026 |
+| Task | T-0028; finding F-0028 |
 | Status | Draft, not sent (Q-013: GitHub access for upstream) |
 
 ## PR title

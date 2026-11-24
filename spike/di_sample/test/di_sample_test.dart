@@ -26,10 +26,13 @@ void main() {
     expect(container<Badge>(parameter: 'new').render(), startsWith('[new '));
   });
 
-  test('T-0028-AC4 a file whose shard is [] registers nothing', () async {
-    final getIt = GetIt.asNewInstance();
-    await diSampleDIInitializer.init(getIt);
-    expect(getIt.isRegistered<PlainHelper>(), isFalse);
-    expect(const PlainHelper().shout('a'), 'A');
-  });
+  test(
+    'a class in a file with no injectable annotation is not registered',
+    () async {
+      final getIt = GetIt.asNewInstance();
+      await diSampleDIInitializer.init(getIt);
+      expect(getIt.isRegistered<PlainHelper>(), isFalse);
+      expect(const PlainHelper().shout('a'), 'A');
+    },
+  );
 }
