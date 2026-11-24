@@ -55,5 +55,38 @@ n="$(find "$step" -type f | wc -l | tr -d ' ')"
 "${BZ[@]}" run //tool/bdd:scaffold -- --workspace "$ws" //spike/bdd_sample > "$log" 2>&1
 plain "$log" | grep -q 'every step is defined' && report "- a second run writes nothing" \
   || { report "- FAIL: the second run wrote again"; rc=1; }
+
+# Phase 2: the stubs must build under the package's lint gate. Bazel needs the
+# real workspace, so a probe feature goes into spike/bdd_sample for the length
+# of the build and is removed with the stubs afterwards (trap), leaving the
+# tree as it was.
+probe=spike/bdd_sample/test/feature/t0029_ac3_probe.feature
+stubs=()
+cleanup() {
+  rm -f "$REPO/$probe"
+  for s in "${stubs[@]}"; do rm -f "$REPO/$s"; done
+  rm -rf "$ws"
+}
+trap cleanup EXIT
+before_status="$(git status --porcelain --ignored spike/bdd_sample)"
+cp "$ws/spike/bdd_sample/test/feature/greeting_new.feature" "$REPO/$probe"
+"${BZ[@]}" run //tool/bdd:scaffold -- //spike/bdd_sample > "$log" 2>&1
+while IFS= read -r line; do stubs+=("${line#scaffold: wrote }"); done \
+  < <(plain "$log" | grep '^scaffold: wrote ')
+report "" "## The stubs build under \`--config=lint\`" \
+  "Scaffolded into the real tree for a probe feature: ${stubs[*]:-none}"
+[[ ${#stubs[@]} == 2 ]] || { report "- FAIL: expected 2 stubs in the real tree"; rc=1; }
+"${BZ[@]}" build --config=lint //spike/bdd_sample:bdd_test > "$log" 2>&1
+code=$?
+report "\`tool/bazelw build --config=lint //spike/bdd_sample:bdd_test\` (dart_analyze + dart_format on the stubs): exit $code"
+if [[ $code != 0 ]]; then
+  report '```' "$(plain "$log" | grep -E 'ERROR|info -|warning -|error -|Changed' | head -20)" '```'
+  report "- FAIL: the scaffolded stubs do not build cleanly"; rc=1
+fi
+cleanup
+trap - EXIT
+[[ "$(git status --porcelain --ignored spike/bdd_sample)" == "$before_status" ]] \
+  && report "- probe feature and stubs removed; spike/bdd_sample is as before" \
+  || { report "- FAIL: spike/bdd_sample changed"; rc=1; }
 rm -f "$log"
 finish T-0029-AC3 $rc

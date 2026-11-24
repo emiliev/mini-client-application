@@ -18,7 +18,8 @@ n="$(wc -l <<< "$runtime" | tr -d ' ')"
 hits="$(grep -E "$GEN" <<< "$runtime" | head -5)"
 report "## \`cquery 'deps($target)' --notool_deps\` ($n targets)" '```' \
   "analyzer / build / bdd_widget_test: ${hits:-none}" '```'
-[[ "$n" -gt 100 && -z "$hits" ]] || rc=1
+if [[ "$n" -le 100 ]]; then report "- FAIL: the runtime closure has only $n targets (cquery failed?)"; rc=1; fi
+if [[ -n "$hits" ]]; then report "- FAIL: analyzer, build or bdd_widget_test is in the runtime closure"; rc=1; fi
 
 all="$("${BZ[@]}" cquery "deps($target)" 2>/dev/null)"
 gen_cfg="$(grep -E '^@rules_dart//dart/ext/bdd:generator ' <<< "$all" | sed 's/.*(\(.*\))/\1/')"
@@ -29,7 +30,11 @@ report "## \`cquery 'deps($target)'\` with tool deps ($(wc -l <<< "$all" | tr -d
   "- analyzer / build / bdd_widget_test targets are only in: \`${analyzer_cfgs:-none}\`" \
   "  (the generator formats its output with dart_style, which depends on analyzer;" \
   "  none of it is compiled into or linked with the test)"
-[[ -n "$gen_cfg" && "$gen_cfg" != "$test_cfg" && ( -z "$analyzer_cfgs" || "$analyzer_cfgs" == "$gen_cfg " ) ]] || rc=1
+if [[ -z "$gen_cfg" || "$gen_cfg" == "$test_cfg" ]]; then
+  report "- FAIL: the generator is not in its own (exec) configuration"; rc=1
+elif [[ -n "$analyzer_cfgs" && "$analyzer_cfgs" != "$gen_cfg " ]]; then
+  report "- FAIL: analyzer, build or bdd_widget_test is in a configuration other than the generator's"; rc=1
+fi
 
 gen="$("${BZ[@]}" info bazel-bin 2>/dev/null)/spike/bdd_sample/test/feature/greeting_table_test.dart"
 "${BZ[@]}" build "$target" > /dev/null 2>&1 || { report "- FAIL: $target does not build"; rc=1; }

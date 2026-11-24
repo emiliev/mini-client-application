@@ -12,6 +12,8 @@
 set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO"
+# The run cd's into the scratch package, so make --out absolute.
+[[ -n "$OUT" && "$OUT" != /* ]] && OUT="$REPO/$OUT"
 rc=0
 OVERLAY="$REPO/tool/build_runner_overlay"
 PKG=spike/bdd_sample
@@ -56,7 +58,18 @@ PY
   while IFS=$'\t' read -r dep dir; do
     mkdir -p "$SCRATCH/_deps/$dep"
     cp -R "$dir/lib" "$SCRATCH/_deps/$dep/lib"
-    grep -v '^resolution: workspace' "$dir/pubspec.yaml" | sed '/^dev_dependencies:/,$d' > "$SCRATCH/_deps/$dep/pubspec.yaml"
+    # Drop `resolution: workspace` and the dev_dependencies block only (a
+    # later top-level section such as `flutter:` stays).
+    /usr/bin/python3 -I - "$dir/pubspec.yaml" > "$SCRATCH/_deps/$dep/pubspec.yaml" <<'PY'
+import re, sys
+out, skip = [], False
+for line in open(sys.argv[1]).read().splitlines():
+    if re.match(r"^\S", line):
+        skip = line.startswith("dev_dependencies:")
+    if not skip and not line.startswith("resolution: workspace"):
+        out.append(line)
+print("\n".join(out))
+PY
     printf '  %s:\n    path: _deps/%s\n' "$dep" "$dep"
   done <<< "$first_party"
 } > "$SCRATCH/pubspec.yaml"
@@ -73,7 +86,8 @@ PY
 cp "$OVERLAY/pubspec.lock" "$SCRATCH/pubspec.lock"
 
 # Stock options. Shared steps can only be named by file path
-# (`externalSteps` matches on the file name), so list mc_test_steps' files.
+# (`externalSteps` matches on the file name), so list mc_test_steps' step files
+# (the same set as :step_index: lib/src/<group>/**).
 {
   echo "targets:"
   echo "  \$default:"
@@ -85,7 +99,7 @@ cp "$OVERLAY/pubspec.lock" "$SCRATCH/pubspec.lock"
   echo "            - \"import 'package:flutter_test/flutter_test.dart';\""
   echo "            - \"import 'package:mc_test_utils/mc_test_utils.dart';\""
   echo "          externalSteps:"
-  (cd utility/mc_test_steps/lib && find src -name '*.dart' ! -name data_table.dart | sort) \
+  (cd utility/mc_test_steps/lib && find src -mindepth 2 -name '*.dart' | sort) \
     | sed 's|^|            - package:mc_test_steps/|'
 } > "$SCRATCH/build.yaml"
 # The suite entry the fallback would also need (fixture registration once).

@@ -22,15 +22,14 @@ flutter_library(
     deps = _DEPS,
 )
 
-# Every step file (one step per file); the BDD generator resolves these to the
-# barrel and fails on a local step of the same name.
+# Every step file: one step per file, in a group folder `lib/src/<group>/`.
+# Files directly in lib/src/ (data_table.dart) are helpers, not steps. The
+# BDD generator resolves indexed steps to the barrel and fails on a local
+# step of the same name; //tool/bdd:scaffold reads this same index.
 bdd_step_index(
     name = "step_index",
     testonly = True,
-    srcs = glob(
-        ["lib/src/**/*.dart"],
-        exclude = ["lib/src/data_table.dart"],
-    ),
+    srcs = glob(["lib/src/*/**/*.dart"]),
     import_uri = "package:mc_test_steps/mc_test_steps.dart",
 )
 

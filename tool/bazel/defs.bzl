@@ -60,11 +60,19 @@ def mc_bdd_tests(
         tags: Extra test tags; `bdd` is always added.
         **kwargs: Passed to `flutter_test`.
     """
+    if not features:
+        fail("mc_bdd_tests(name = %r): `features` is empty; a package without " % name +
+             "`.feature` files has no BDD test target.")
     generated = []
+    seen = {}
     for feature in features:
         if not feature.endswith(".feature"):
             fail("mc_bdd_tests: %s is not a .feature file" % feature)
         gen = "_%s_gen_%s" % (name, feature[:-len(".feature")].replace("/", "_"))
+        if gen in seen:
+            fail(("mc_bdd_tests: %s and %s both map to the target name %s " +
+                  "(`/` becomes `_`); rename one of them.") % (seen[gen], feature, gen))
+        seen[gen] = feature
         bdd_feature_test(
             name = gen,
             testonly = True,
@@ -77,11 +85,11 @@ def mc_bdd_tests(
         )
         generated.append(":" + gen)
 
-    main_dir = features[0].rpartition("/")[0] if features else "test/feature"
+    main_dir = features[0].rpartition("/")[0]
     bdd_suite_main(
         name = name + "_main",
         testonly = True,
-        out = "%s/%s_main.dart" % (main_dir, name),
+        out = ("%s/%s_main.dart" % (main_dir, name)) if main_dir else ("%s_main.dart" % name),
         tests = generated,
         setup = setup,
     )
