@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Emil Iliev <emil_iliev1994@yahoo.com>
 Date: Tue, 24 Nov 2026 14:55:47 +0200
-Subject: [PATCH] ext: injectable two-stage
+Subject: [PATCH 2/2] ext: injectable two-stage
 
 Adds `//dart/ext/injectable`: injectable (an aggregate builder) under
 rules_dart without build_runner.
@@ -4513,10 +4513,10 @@ index 00000000..99be3c88
 +  lints: ^6.0.0
 +  coverage: ^1.15.0
 diff --git a/dart/ext/pubspec.lock b/dart/ext/pubspec.lock
-index c989f2a4..b8b3157b 100644
+index d44155ed..b19b3159 100644
 --- a/dart/ext/pubspec.lock
 +++ b/dart/ext/pubspec.lock
-@@ -329,6 +329,14 @@ packages:
+@@ -345,6 +345,14 @@ packages:
        url: "https://pub.dev"
      source: hosted
      version: "4.1.2"
@@ -4532,25 +4532,25 @@ index c989f2a4..b8b3157b 100644
      dependency: transitive
      description:
 diff --git a/dart/ext/pubspec.yaml b/dart/ext/pubspec.yaml
-index 5c399a76..a4ec5414 100644
+index a869fa22..34925d28 100644
 --- a/dart/ext/pubspec.yaml
 +++ b/dart/ext/pubspec.yaml
-@@ -17,6 +17,9 @@ dependencies:
-   logging: ^1.3.0
-   package_config: ^3.0.0
-   path: ^1.9.0
+@@ -22,6 +22,9 @@ dependencies:
+   drift_dev: ^2.32.0
+   freezed: ^4.0.1
+   go_router_builder: ^4.3.0
 +  # Runtime annotations for the vendored injectable_generator 3.1.3
 +  # (dart/ext/injectable/third_party/injectable_generator; no lean_builder).
 +  injectable: ^3.0.0
-   built_value_generator: ^8.12.0
-   copy_with_extension_gen: ^18.0.0
-   drift_dev: ^2.32.0
+   json_serializable: ^6.13.0
+   mockito: ^5.6.0
+   retrofit_generator: ^10.3.3
 diff --git a/docs/ext.md b/docs/ext.md
-index d631c5d2..43169d79 100644
+index 38df3bef..adef2c4c 100644
 --- a/docs/ext.md
 +++ b/docs/ext.md
-@@ -46,6 +46,9 @@ dart/ext/
- ├── copy_with_extension_gen/
+@@ -47,6 +47,9 @@ dart/ext/
+ ├── retrofit/                  SharedPart (`.retrofit.g.part`); `@RestApi` dio clients.
  ├── stacked/                   Six independent LibraryBuilders.
  ├── drift/                     Four-stage: prep + discover/analyzer/driftBuilder.
 +├── injectable/                Two-stage: per-file .injectable.json shards, then an
@@ -4559,7 +4559,7 @@ index d631c5d2..43169d79 100644
  └── tools/
      └── check_dual_build_collisions
                                 Walks a source tree for committed `build_runner`
-@@ -459,6 +462,17 @@ configuration.
+@@ -460,6 +463,17 @@ configuration.
  | `drift` / `drift_dev`                            | `e2e/ext_exemplar/drift/`             | `@DriftDatabase(include: {'…drift'})`, Dart-only tables with FK, `@DriftAccessor` DAO, `TypeConverter`, multi-table joins via both Dart DSL and `.drift` named queries |
  | `stacked` / `stacked_generator` (6 sub-builders) | `e2e/ext_exemplar/stacked/`           | `@StackedApp` → locator (behavioral) + router/dialog/bottomsheet/logger (structural); `@FormView` → form (structural)                                                  |
  
