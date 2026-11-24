@@ -103,8 +103,9 @@ void main() {
       final sut = SearchHistory(store);
       await sut.add('a');
 
-      unawaited(sut.add('c'));
-      await sut.clear();
+      final added = sut.add('c');
+      final cleared = sut.clear();
+      await Future.wait([added, cleared]);
 
       expect((await sut.load()).getOrNull(), isEmpty);
     },
