@@ -19,6 +19,7 @@ git_override(
     patch_strip = 1,
     patches = [
         # tool/rules_fork.sh export prints the lines to paste here.
+        "//third_party/rules_patches/ai_rules_dart:0003-ext-bdd-generator.patch",  # T-0029, U-D-bdd
     ],
 )
 
