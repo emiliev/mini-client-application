@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0030 merges) |
+| Status | In Progress (branched from T-0030 head `63dbaf4`; merges `origin/main` after T-0030) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0031-ds-lists-media-cards` |
@@ -56,4 +56,4 @@ The design-system widgets the `characters_list` exemplar (P1-17) renders: a page
 - Findings start at F-0030.
 
 ## Log
-- 2026-11-25: Created (TL); dispatch after T-0030 merges.
+- 2026-11-25: Created and dispatched (TL), on top of T-0030 so the work overlaps its verification.
