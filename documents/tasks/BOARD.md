@@ -5,6 +5,9 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0024](T-0024-rules-patch-queue.md) | Patch queue for the rules forks (P3-02) | **In Progress** | Engineer (Sonnet) | T-0014 | `fleet/T-0024-patch-queue` |
+| [T-0025](T-0025-l10n-core.md) | `mc_l10n_core` + `mc_formatters` + l10n check (P1-13) | **In Progress** | Engineer (Sonnet) | T-0017 | `fleet/T-0025-l10n` |
+| [T-0026](T-0026-test-utils-harness.md) | `mc_test_utils` harness (P5-01) | **In Progress** | Engineer (Sonnet) | foundation | `fleet/T-0026-test-utils` |
 
 ## Done
 | ID | Title | Result |
