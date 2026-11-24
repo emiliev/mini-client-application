@@ -2,70 +2,63 @@
 
 - **Verifier:** crew: Verifier (fresh agent, not the implementer)
 - **Date:** 2026-11-24
-- **Branch / commit verified:** `fleet/T-0022-feature-flow` @ `496e8bb` (the original `2f13f65` plus review fixes), checked out as `fleet/T-0022-verify`
+- **Branch / commit verified:** `fleet/T-0022-feature-flow` @ **`cd30e2e`** (rebased onto main `c9dc283`; per-depth snapshot design for AC5), checked out as `fleet/T-0022-verify2`. This supersedes the first verification of `496e8bb` (FAIL on AC5), summarised at the end.
 - **Simulator:** none. This is a utility task with no e2e journey, and Android is deferred (Q-009).
-- **Bazel:** the Verifier's own output base (`mc-ob-T-0022-verifier`). All gates were re-run on it after the coordinator warned that an output base had been shared with the T-0023 Verifier.
-- **Verdict:** **FAIL**. AC5 fails on a realistic case (Issue 1). AC1 to AC4, AC6 and AC7 pass.
+- **Bazel output base:** `/tmp/mc-ob-T-0022-verifier` (the Verifier's own).
+- **Verdict:** **FAIL**. The flow *state* is now right in every back case. But after a swipe back the *page content* can show a state that no longer exists (Issue 1), so AC5 still fails. AC1 to AC4, AC6 and AC7 pass.
 
-## Gates re-run independently
+## Gates re-run independently (at `cd30e2e`)
 | Gate | Command | Result |
 |---|---|---|
-| L1–L3 Tests | `tool/bazelw test --nocache_test_results //...` | **32 / 32 pass** |
+| L1–L3 Tests | `tool/bazelw test --nocache_test_results //...` | **36 / 36 pass** |
 | L0 Lint (format + analyze aspects) | `tool/bazelw build --config=lint //...` | pass |
 | Architecture | `tool/bazelw run //tool/mc_arch_check:bin` | `mc_arch_check: OK` |
 | L4 E2E | n/a (utility task) | — |
 
-Logs: [`verifier/gates.log`](verifier/gates.log).
+Logs: [`verifier/gates.log`](verifier/gates.log). My probes: [`verifier/probes-cd30e2e.dart.txt`](verifier/probes-cd30e2e.dart.txt). I appended them to `feature_flow_test.dart` temporarily, with a dump of the visible `Text` widgets after each swipe; they were never committed.
 
 ## Acceptance criteria
 | AC | Scenario (short) | Mapped test(s) | Test really asserts the AC? | Result |
 |---|---|---|---|---|
 | T-0022-AC1 | no initializer → first page renders | `feature_flow_test` "T-0022-AC1 …" | Yes. It pumps a flow without a `flowInitializer` and finds `list page`. This is Tide's "never builds" defect, fixed. | PASS |
-| T-0022-AC2 | throwing initializer → error view, Retry, `recordError`; Retry re-runs | "T-0022-AC2 …" | Yes. It checks for `Retry` and the fixed message, that the raw error is not shown, and that there is exactly 1 `ErrorEntry` in the monitoring sink. After the Retry tap it asserts `attempts == 2` and that the first page renders. | PASS |
-| T-0022-AC3 | `complete(r)` → `onComplete(r)` exactly once | widget "T-0022-AC3 complete(r) …"; `feature_flow_controller_test` (4 tests) | Yes. The widget test calls `complete('done')` and then `complete('again')`, and `onComplete` receives exactly `['done']`. **Late complete after dispose:** the unit test disposes the controller, then calls `update`, `restore` and `complete`. All return normally, the state is unchanged, `isCompleted` is false and nothing is emitted. `dispose` sets `_disposed` synchronously before closing the streams, and `_FeatureFlowState.dispose` disposes the controller. No widget-level "complete after unmount" test exists, but the unit test covers the no-op. | PASS |
-| T-0022-AC4 | two flows in an `IndexedStack` → own controllers | "T-0022-AC4 …" | Yes. Each flow resolves its controller through `context.di` from its own `FlowScope`. The two controllers are not identical, and their states are `a` and `b`. | PASS |
-| T-0022-AC5 | iOS edge swipe → state reverts; the page has its declared `name` | "T-0022-AC5 iOS edge swipe …", "T-0022-AC5 an in-place update then an edge swipe …" | The tests are genuine: a real drag from x=2 with `platform: iOS`, the route name `detail` is asserted, and `controller.state.selected` is asserted null. **Mutation:** with the history-vs-pages fix removed (every update forwarded to flow_builder), the new test **fails** (`Expected: null, Actual: 'x'`) and the others still pass, so the test guards the fix. **But the fix breaks a different case (Issue 1):** after an in-place update on the root page, a push and a swipe back, the state reverts to a stale value. | **FAIL** |
-| T-0022-AC6 | missing `RootImport<T>` names `T`; `debugResolveAll` names both types | widget "T-0022-AC6 …" ×2; `mc_di/test/recording_test.dart` (10 tests) | Yes. The widget test sees a `StateError` that contains `_Dep`, rethrown from `build` rather than shown as a Retry view. The `debugResolveAll` tests (widget and unit) check that the message contains both `_Other` and `_Missing`, and both `_B` and `_A`. **Scoped registrations:** `pushNewScope` registrations are recorded and fail naming both types. `popScope`, `dropScope('one')` (only that scope), `unregister` and `reset` all forget their entries. **Readiness:** a `signalsReady` singleton that never signals, and a `dependsOn` on a never-completing async singleton, both fail with "not ready" plus the type within the 50 ms timeout instead of hanging. A real async singleton is awaited. | PASS |
-| T-0022-AC7 | `mc_bloc_kit` has no Flutter and no mixins; gates; spike finding | `purity_test`, `mc_bloc_test` (3), gates, F-0018 | Yes. The purity test scans `lib/**` for `package:flutter` or `dart:ui` imports and exports, and for `mixin` declarations. I grepped by hand too: the only hit is the word "mixin" in a doc comment. `pubspec.yaml` depends only on `bloc` and `mc_monitoring`. `McBloc` is an `abstract base class`, and the tests check that it logs transitions, records `McFailureState` transitions and records `addError`. All gates are green and F-0018 exists. | PASS |
+| T-0022-AC2 | throwing initializer → error view, Retry, `recordError`; Retry re-runs | "T-0022-AC2 …" | Yes. It checks for `Retry` and the fixed message, that the raw error is not shown, and that there is exactly 1 `ErrorEntry`. After the Retry tap it asserts `attempts == 2` and that the first page renders. | PASS |
+| T-0022-AC3 | `complete(r)` → `onComplete(r)` exactly once | widget "T-0022-AC3 …"; `feature_flow_controller_test` (4) | Yes. `complete('done')` then `complete('again')` gives exactly `['done']`. A late `update`, `restore` or `complete` after `dispose` is a no-op: no throw, no state change, no emission, and `isCompleted` stays false. | PASS |
+| T-0022-AC4 | two flows in an `IndexedStack` → own controllers | "T-0022-AC4 …" | Yes. Each flow resolves its controller through `context.di` from its own `FlowScope`. The controllers are distinct, with states `a` and `b`. | PASS |
+| T-0022-AC5 | iOS edge swipe → state reverts; the page has its declared `name` | "T-0022-AC5 …" ×4 (basic; in-place then swipe; filter then push then swipe; two levels) | The tests are genuine: a real drag from x=2 on iOS, the route name `detail` is asserted, and the state is asserted. **Full mutant** (per-depth fix removed, pre-`496e8bb` forwarding restored): "in-place update then edge swipe" and "two pushes then two edge swipes" **fail**, so the new tests guard the fix. **My own repros:** the state is correct in all of them, but in 2 of 4 the page shows stale content (Issue 1). | **FAIL** |
+| T-0022-AC6 | missing `RootImport<T>` names `T`; `debugResolveAll` names both types | widget "T-0022-AC6 …" ×2; `mc_di/test/recording_test.dart` (10) | Yes. Nothing changed since the first verification, and everything still passes. The stale `_Selection` comment is fixed. | PASS |
+| T-0022-AC7 | `mc_bloc_kit` has no Flutter and no mixins; gates; spike finding | `purity_test`, `mc_bloc_test` (3), gates, F-0018 | Yes. Unchanged, and the gates are green. | PASS |
 
-## Issue 1 (important, fails AC5): an in-place update on a lower page is lost on back
-`_onControllerState` forwards to flow_builder only those updates that change the page-name list. flow_builder records a history entry only on `update`, and on pop it restores `_history.last` (`flow_builder.dart:187-191`). So any in-place update made **before** a push is missing from flow_builder's history, and the pop "reverts" past it.
+### My AC5 repros at `cd30e2e` (state vs what is on screen after each swipe)
+| Probe | Steps | `controller.state` after the swipe | Visible | Result |
+|---|---|---|---|---|
+| VPROBE1, my regression case | list filter `foo` → push detail `x` → swipe | `(foo, null)` ✓ | `vlist foo` ✓ | PASS |
+| VPROBE2, the reviewer's case | filter `foo` → push detail `x` → in place inside detail: detail `y`, filter `bar` → swipe | `(foo, null)` ✓ (pre-push) | **`vlist bar`** ✗ | **FAIL** |
+| VPROBE3, two levels | filter `foo` → push detail `a` → in place `b` → push sub `s` → in place sub `t`, detail `z` → swipe → swipe → filter `qux`, push `c`, swipe | 1st: `(foo, b, null)` ✓; 2nd: `(foo, null)` ✓; re-push and swipe: `(qux, null)` ✓ | 1st swipe: **`vdetail z`** ✗ (state says `b`) | **FAIL** |
+| VPROBE4, same-depth replace (extra) | push detail → replace it with `settings` (same depth) → swipe | `(none, null)` | `vlist none` | PASS (pages match state) |
 
-Repro (a temporary test, not committed; `FeatureFlow<(String, String?)>`, where `$1` is a filter on the `list` page and `$2` a selection that pushes `detail`):
-1. `update((s) => ('foo', s.$2))`: an in-place update, not forwarded. The list shows `filter foo`.
-2. `update((s) => (s.$1, 'x'))`: a push, forwarded. flow_builder's history is `[('none', null), ('foo', 'x')]`.
-3. Edge swipe back. flow_builder restores `('none', null)`, `controller.state.$1` is **`'none'`** (expected `'foo'`), and the list shows `filter none`.
+## Issue 1 (important, fails AC5): page content is not updated when a pop restores a snapshot
+`_onFlowChanged` restores the depth snapshot with `FeatureFlowController.restore(...)`, which by design does **not** emit on `states`. `_LivePage` builds page content from a `StreamBuilder` on `controller.states`, so after a pop it keeps the **last emitted** state. Any in-place change made on the popped page that also touches data shown by the revealed page (VPROBE2: the filter), or by a page below (VPROBE3: the detail), stays on screen while the controller holds the restored snapshot. The screen and the bloc-visible state then disagree, which is the class of bug AC5 exists to prevent.
 
-On `496e8bb` the probe **fails** (`Expected: 'foo', Actual: 'none'`). On the mutated pre-fix code it **passes**, and the new AC5 test fails instead. The review fix traded one state-vs-history divergence for another. This is the Marvel-style case of a filter or search on the list, then opening a detail page. F-0018 §8 ("keeps state and pages in step") overstates the fix.
+The Engineer's tests miss it by coincidence. In "filter then push" the last emission before the pop already carries `filter: foo`. In "two levels" the only in-place change at depth 2 happens before the push to depth 3.
 
-Suggested direction (the Engineer's call): keep `FeatureFlow`'s own history, one entry per page stack. An in-place update replaces the top entry, and a structural update pushes an entry. On a flow_builder pop, restore from that history instead of from flow_builder's value. Or move to the C11 Navigator `pages` and `onDidRemovePage` fallback. Add the probe above as an AC5 test.
+Diagnosis confirmed by an experiment, which is not a proposed fix. Replacing `restore(restored)` with `update((_) => restored)` makes all 4 probes and all 10 tests pass. That shortcut is wrong as shipped (`update` is ignored after `complete`, and it re-enters `_onControllerState`), but it shows that notifying the live pages is the missing piece. Suggested direction: drive `_LivePage` from a `ValueNotifier<T>` (or `setState`) owned by `_FeatureFlowState`, set in both `_onControllerState` and `_onFlowChanged`. Then add VPROBE2 and VPROBE3, with their visible-text assertions, as AC5 tests.
 
-## Other issues (minor)
-2. **F-0018 §5 contradicts the code and §10.** It says the two `@visibleForTesting` switches are "stored as plain fields instead of forwarding (forwarding fails the lint)". The code forwards them under the file-level ignore, as §10 says.
-3. **Stale test comment.** In "T-0022-AC6 debugResolveAll names both types", the comment says the missing dependency is `_Selection`. It is `_Missing`.
-4. **Engineer evidence is partial.** `engineer/test-output.log` shows `Executed 6 out of 6 tests` (the T-0022 and `mc_di` targets). The Outcome claims 32/32 for `//...`. My independent run confirms 32/32, so this affects only the evidence.
-5. **Plan §4.5 scope gap (for the TL, not an AC):** `FeatureFlow<S, R>`, `provide`, `localizationsDelegates` and `name` are not implemented. The task scope says `<T>` and doesn't list them, so this is pending work, not a defect here.
-
-## Tide conformance
-- **Matches the article:** `FeatureFlow<T>` is a `StatefulWidget` with `state`, `onGeneratePages` and `flowInitializer`. It builds `ColoredBox(scaffoldBackground)` → `FutureBuilder` → `FlowBuilder<T>` over `MaterialPage`s. It registers `FeatureFlowController<T>` as a singleton in the flow's scope **before** the feature initializer runs. Blocs drive navigation through `controller.update(...)`, and a gesture pop reverts the state. The flow is the feature's entry widget.
-- **Deviations, all justified:**
-  - **R17/D-17:** a child `GetIt.asNewInstance()` per flow, published through an `InheritedWidget` (`FlowScope`), with `RootImport<T>` and `context.di<T>()`. This replaces the global `pushNewScope(hashCode)`, `dropScope` and `diContainer<T>()`, and fixes the Tide defect where tabs shadow each other (AC4 proves it).
-  - **D-16:** `McBloc` is an `abstract base class` rather than a per-bloc `onTransition` override or a mixin. It gives one logging point and keeps the outline cutoff.
-  - **D-18 hardening:** it builds without an initializer, an initializer error shows an error view with Retry and `recordError`, pages are named and keyed (`McFlowPage`), and it adds `complete` and `onComplete`.
-  - **`FeatureFlowController` lives in pure-Dart `mc_bloc_kit` (R15),** so it owns its state and streams instead of wrapping flow_builder's `FlowController`. `FeatureFlow` bridges the two. That bridge is where Issue 1 sits.
-  - **`onGeneratePages` returns `List<McFlowPage>`,** not `List<Widget>`, so pages carry names.
-
-## Spike claim (F-0018)
-Confirmed. `MODULE.bazel` pins `flutter.toolchain(flutter_version = "3.47.7")`, and the Bazel SDK is Dart `3.13.5`. `pubspec.lock` resolves `flow_builder 0.1.0` (and `bloc 9.2.1`). `//utility/mc_feature_flow:feature_flow_test` compiles and passes under `flutter_test`, including a real iOS edge-swipe pop through flow_builder's deprecated `onPopPage`. No lint warning comes from it.
+## Other checks
+- **F-0018 now matches the code for §5** (the switches are forwarded under the file-level ignore). **§8 is still slightly overstated:** "keeps `FeatureFlowController.state` authoritative … Page content follows in-place updates through a `StreamBuilder`" is true, but restored state never reaches the `StreamBuilder` (Issue 1). Update it with the fix.
+- **Engineer evidence** now shows `Executed 36 out of 36 tests`, so the partial-log issue from the first round is closed.
+- **Spike claim:** confirmed. `flutter.toolchain(flutter_version = "3.47.7")`, Dart 3.13.5, `flow_builder 0.1.0` in `pubspec.lock`, and `feature_flow_test` passes under Bazel `flutter_test`, including the real edge-swipe pop through flow_builder's `onPopPage`.
+- **Tide conformance:** unchanged from the first round. It matches the article (flow_builder `FlowBuilder` over `MaterialPage`s; the controller is registered in the flow's scope before the feature initializer; blocs navigate through `controller.update`; the flow is the feature's entry widget). The deviations are justified: R17/D-17 child `GetIt` per flow with `RootImport` and `context.di` (fixes tab shadowing, proven by AC4); D-16 `McBloc` as an `abstract base class` (one logging point, keeps the outline cutoff); D-18 hardening; `FeatureFlowController` in pure-Dart `mc_bloc_kit` (R15), bridged to flow_builder by `FeatureFlow`, which is where Issue 1 sits.
+- **Plan §4.5 scope gap (for the TL, not an AC):** `FeatureFlow<S, R>`, `provide`, `localizationsDelegates` and `name` are not implemented. They are outside this task's scope, so they belong in `pending-work.md` if not already tracked.
 
 ## Test-integrity audit and hygiene
-- **Tests deleted, skipped or weakened:** none. The existing `mc_di/test/di_container_test.dart` is unchanged and passes. One assertion changed: AC2 now expects the fixed message, which the handoff declared.
-- **Lint suppressions:** one, `// ignore_for_file: invalid_use_of_visible_for_testing_member` in `mc_di/lib/src/recording_get_it.dart` (approved by the TL). I removed it temporarily and ran lint on `//utility/mc_di/...`. Exactly 4 warnings appeared, all on the forwarding getters and setters of `skipDoubleRegistration` and `allowRegisterMultipleImplementationsOfoneType` (lines 267 to 277). So the suppression covers only that purpose. I then restored it.
-- **`mc_di` changes:** `createChildContainer` now runs initializers through `RecordingGetIt`. Root `initializeDIContainer` is untouched. `di_container_test` passes.
-- **Root changes, as listed:** `pubspec.yaml` (+`utility/mc_bloc_kit`, +`utility/mc_feature_flow`), `pubspec.lock` (+`bloc`, +`flow_builder` only) and `MODULE.bazel.lock`. Nothing else outside the two new packages, `utility/mc_di` and `documents/` changed.
-- **Golden files:** none.
-- **Worktree:** every mutation and probe was reverted with `git checkout`, and `git status` was clean before this report was committed.
+- **Tests deleted, skipped or weakened:** none. Three AC5 tests were added and one comment was fixed. The `mc_di` tests are unchanged and pass.
+- **Lint suppressions:** only the TL-approved `// ignore_for_file: invalid_use_of_visible_for_testing_member` in `mc_di/lib/src/recording_get_it.dart`. In the first round, removing it produced exactly 4 warnings, all on the two forwarded get_it switches. The file is unchanged since, so the suppression is still limited to that purpose.
+- **Root changes:** `pubspec.yaml` (+2 workspace members), `pubspec.lock` (+`bloc`, +`flow_builder`) and `MODULE.bazel.lock`, as listed.
+- **Worktree:** every mutant, probe and experiment was reverted with `git checkout`. The tree was clean before lint, arch_check and this commit.
+
+## First verification at `496e8bb` (superseded)
+FAIL on AC5. Only page-changing updates were forwarded to flow_builder, so a list-page in-place update made before a push was lost on back (state `'none'` instead of `'foo'`). The mutant with the history fix removed failed the then-new AC5 test as expected. Minor issues then: F-0018 §5 contradicted the code, a stale test comment, and the Engineer log showed 6 tests rather than 32. All three are fixed in `cd30e2e`.
 
 ## Notes for the Tech Lead
-- Send T-0022 back to the Engineer for Issue 1, with a test for the root-page in-place-update-then-push-then-swipe case. Issues 2 and 3 are one-line fixes in the same pass.
-- Consider adding plan §4.5's `<S, R>`, `provide`, `localizationsDelegates` and `name` to `pending-work.md` if they are not already tracked.
+- Send T-0022 back for Issue 1. It is a small change: notify the live pages on restore. Add VPROBE2 and VPROBE3 (with visible-text assertions) as AC5 tests and update F-0018 §8.
+- Everything else is ready. AC1 to AC4, AC6, AC7, the gates, the spike, hygiene and Tide conformance all pass.
