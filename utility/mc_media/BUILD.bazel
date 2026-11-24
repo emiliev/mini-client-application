@@ -12,13 +12,18 @@ package(default_visibility = ["//visibility:public"])
 
 _LANG = "3.13"
 
+# Everything except the two Flutter files.
+_PURE_SRCS = glob(
+    ["lib/**/*.dart"],
+    exclude = [
+        "lib/mc_media_scope.dart",
+        "lib/src/media_scope.dart",
+    ],
+)
+
 dart_library(
     name = "mc_media",
-    srcs = [
-        "lib/mc_media.dart",
-        "lib/src/api_image.dart",
-        "lib/src/image_resolver.dart",
-    ],
+    srcs = _PURE_SRCS,
     language_version = _LANG,
     package_name = "mc_media",
 )
@@ -67,11 +72,7 @@ flutter_test(
 dart_test(
     name = "purity_test",
     size = "small",
-    data = [
-        "lib/mc_media.dart",
-        "lib/src/api_image.dart",
-        "lib/src/image_resolver.dart",
-    ],
+    data = _PURE_SRCS,
     language_version = _LANG,
     main = "test/purity_test.dart",
     package_name = "mc_media",

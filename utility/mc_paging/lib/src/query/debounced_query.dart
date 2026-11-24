@@ -26,29 +26,42 @@ final class DebouncedQuery {
   final TimerFactory _timerFactory;
 
   Timer? _timer;
-  bool _hasQuery = false;
+  bool _disposed = false;
 
-  /// The field's current text.
+  /// The query [onSearch] last fired for; null after a clear.
+  String? _searched;
+
+  /// The field's current text. A query equal to the one last searched does
+  /// not search again. A blank text clears only when a search actually fired
+  /// for the previous query, so typing and deleting within the delay emits
+  /// nothing. Does nothing after [dispose].
   void update(String text) {
+    if (_disposed) {
+      return;
+    }
     _timer?.cancel();
     _timer = null;
     final query = text.trim();
     if (query.isEmpty) {
-      if (_hasQuery) {
-        _hasQuery = false;
+      if (_searched != null) {
+        _searched = null;
         onClear();
       }
       return;
     }
-    _hasQuery = true;
+    if (query == _searched) {
+      return;
+    }
     _timer = _timerFactory(delay, () {
       _timer = null;
+      _searched = query;
       onSearch(query);
     });
   }
 
-  /// Cancels a pending search.
+  /// Cancels a pending search and ignores later updates.
   void dispose() {
+    _disposed = true;
     _timer?.cancel();
     _timer = null;
   }

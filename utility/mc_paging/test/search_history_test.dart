@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:mc_paging/mc_paging.dart';
@@ -84,18 +85,57 @@ void main() {
     expect((await SearchHistory(store).load()).getOrNull(), isEmpty);
   });
 
-  test('T-0030-AC5: an unreadable store is a failure', () async {
-    File('${dir.path}/${_hexKey('search_history')}.json')
-      ..createSync(recursive: true)
-      ..writeAsStringSync('{broken');
+  test('T-0030-AC5: a corrupt file loads as empty and add heals it', () async {
+    _writeCorrupt(dir);
     final sut = SearchHistory(store);
 
     final loaded = await sut.load();
     final added = await sut.add('x');
 
-    expect(loaded.getOrNull(), isNull);
-    expect(added.getOrNull(), isNull);
+    expect(loaded.getOrNull(), isEmpty);
+    expect(added.getOrNull(), ['x']);
+    expect((await SearchHistory(store).load()).getOrNull(), ['x']);
   });
+
+  test(
+    'T-0030-AC5: clear that is not awaited runs after earlier adds',
+    () async {
+      final sut = SearchHistory(store);
+      await sut.add('a');
+
+      unawaited(sut.add('c'));
+      await sut.clear();
+
+      expect((await sut.load()).getOrNull(), isEmpty);
+    },
+  );
+
+  test('T-0030-AC5: add after clear starts a fresh history', () async {
+    final sut = SearchHistory(store);
+    await sut.add('a');
+
+    unawaited(sut.clear());
+    final added = await sut.add('b');
+
+    expect(added.getOrNull(), ['b']);
+  });
+
+  test(
+    'T-0030-AC5: load applies the cap to an oversized stored list',
+    () async {
+      await store.write('search_history', ['a', 'b', 'c', 'd']);
+
+      final loaded = await SearchHistory(store, cap: 2).load();
+
+      expect(loaded.getOrNull(), ['a', 'b']);
+    },
+  );
+}
+
+void _writeCorrupt(Directory dir) {
+  File('${dir.path}/${_hexKey('search_history')}.json')
+    ..createSync(recursive: true)
+    ..writeAsStringSync('{broken');
 }
 
 String _hexKey(String key) =>
