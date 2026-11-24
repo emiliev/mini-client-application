@@ -15,5 +15,10 @@ Flutter markers: @@ai_rules_flutter++flutter+pub_deps__flutter//:flutter
 ```
 none
 ```
+## production mc_ds_* targets checked (9):  //utility/mc_ds_buttons:mc_ds_buttons //utility/mc_ds_cards:mc_ds_cards //utility/mc_ds_feedback:mc_ds_feedback //utility/mc_ds_layout:mc_ds_layout //utility/mc_ds_lists:mc_ds_lists //utility/mc_ds_media:mc_ds_media //utility/mc_ds_testing:mc_ds_testing //utility/mc_ds_theme:mc_ds_theme //utility/mc_ds_tokens:mc_ds_tokens
+```
+fixtures dependencies: none
+```
+## positive control: //utility/mc_ds_media:image_test (a test) depends on: //utility/mc_fixtures_media:asset_files //utility/mc_fixtures_media:assets/characters/000.png //utility/mc_fixtures_media:assets/characters/001.png 
 
 **PASS T-0031-AC6**

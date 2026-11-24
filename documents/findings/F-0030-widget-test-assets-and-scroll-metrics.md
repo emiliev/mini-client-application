@@ -16,5 +16,5 @@
 
 ## Implications / actions
 - `McMediaScope` lives in `mc_ds_media`; `mc_media` is pure Dart with one barrel (F-0029 follow-up done).
-- `mc_ds_media` depends on `mc_fixtures_media` for `BundledImage` (the bundled `assetKey` to `AssetImage` path). When a network resolver arrives, `mcImageProviderFor` gets a second case, and the bundled one can move behind a registry so a production DS package stops depending on fixtures (follow-up).
+- `ResolvedImage` is a sealed pure-Dart type (`ResolvedImage.asset(key, {package})`, `ResolvedImage.network(url)`), each with its variant. `McImage` maps the cases to `AssetImage` / `NetworkImage` with an exhaustive `switch` (`mcImageProviderFor`). `BundledImageResolver` (fixtures) returns `ResolvedImage.asset(...)`; `BundledImage` stays a fixtures-side value class (file layout facts) and `locate()` returns it. So no production `mc_ds_*` target depends on `mc_fixtures_*`; `tool/checks/T-0031-AC6_closure.sh` enforces that with `cquery deps(...)` over every `mc_ds_*` library, with a positive control (a test target does depend on fixtures) and a negative control (adding the dep to `mc_ds_media` fails the check). The earlier provider-registry idea is moot.
 - Other golden packages that want real art use the same two helpers.

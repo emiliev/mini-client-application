@@ -10,17 +10,12 @@ import 'package:mc_test_utils/mc_test_utils.dart';
 const _art = 'packages/mc_fixtures_media/assets/characters/000.png';
 const _good = ApiImage(path: 'mock-asset://characters/0');
 
-class _OtherResolved implements ResolvedImage {
-  @override
-  ImageVariant get variant => ImageVariant.standard;
-}
-
-class _OtherResolver implements McImageResolver {
+class _ThrowingResolver implements McImageResolver {
   @override
   bool canResolve(ApiImage image) => true;
 
   @override
-  ResolvedImage resolve(ApiImage image) => _OtherResolved();
+  ResolvedImage resolve(ApiImage image) => throw StateError('no');
 }
 
 Widget _app(
@@ -148,16 +143,31 @@ void main() {
       },
     );
 
-    testWidgets('T-0031-AC3: an image kind it cannot draw shows the fallback', (
+    testWidgets('T-0031-AC3: a resolver that throws shows the fallback', (
       tester,
     ) async {
       await tester.pumpWidget(
         _app(
           const SizedBox(width: 100, child: McImage(image: _good)),
-          resolver: _OtherResolver(),
+          resolver: _ThrowingResolver(),
         ),
       );
       expect(find.byKey(McImage.fallbackKey), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    test('T-0031-AC3: each ResolvedImage case maps to its ImageProvider', () {
+      final asset = mcImageProviderFor(
+        const ResolvedImage.asset('assets/a.png', package: 'p'),
+      );
+      expect(asset, isA<AssetImage>());
+      expect((asset as AssetImage).keyName, 'packages/p/assets/a.png');
+
+      final net = mcImageProviderFor(
+        ResolvedImage.network(Uri.parse('https://x.test/a.png')),
+      );
+      expect(net, isA<NetworkImage>());
+      expect((net as NetworkImage).url, 'https://x.test/a.png');
     });
 
     testWidgets('T-0031-AC3: a file that fails to load shows the fallback', (

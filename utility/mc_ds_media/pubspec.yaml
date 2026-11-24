@@ -13,10 +13,10 @@ dependencies:
   mc_ds_layout: any
   mc_ds_theme: any
   mc_ds_tokens: any
-  mc_fixtures_media: any
   mc_media: any
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  mc_fixtures_media: any
   mc_test_utils: any

@@ -60,7 +60,7 @@ The design-system widgets the `characters_list` exemplar (P1-17) renders: a page
 - 2026-11-25: Engineer: built `mc_ds_media`, `mc_ds_cards`, `mc_ds_lists`; moved `McMediaScope` out of `mc_media`; extended `mc_test_utils` with a fixture asset bundle; generated 80 goldens; all gates green (below).
 
 ## Outcome
-**Handed off** for verification on `fleet/T-0031-ds-lists-media-cards` (built on T-0030 head `63dbaf4`; `origin/main` is not merged yet, merge it after T-0030 lands). Evidence: `documents/evidence/T-0031/engineer/` (gate logs, `coverage.txt`, `AC6_closure.md`, `AC6_negative_control.md`, ten golden PNGs under `goldens/`). Finding: [F-0030](../findings/F-0030-widget-test-assets-and-scroll-metrics.md).
+**Handed off** for verification on `fleet/T-0031-ds-lists-media-cards` (built on T-0030 head `63dbaf4`; `origin/main` is not merged yet, merge it after T-0030 lands). Evidence: `documents/evidence/T-0031/engineer/` (gate logs, `coverage.txt`, `AC6_closure.md`, `AC6_negative_control.md`, ten golden PNGs under `goldens/` (copied at their natural size; none exceeds 1200 px)). Finding: [F-0030](../findings/F-0030-widget-test-assets-and-scroll-metrics.md).
 
 ### AC to test map
 | AC | Tests (name contains the ID) |
@@ -73,17 +73,17 @@ The design-system widgets the `characters_list` exemplar (P1-17) renders: a page
 | AC6 | `//utility/mc_media:purity_test` ("T-0031-AC6 mc_media has one barrel"), `//utility/mc_ds_media:media_scope_test` (moved, renamed to T-0031-AC6), `tool/checks/T-0031-AC6_closure.sh` ([report](../evidence/T-0031/engineer/AC6_closure.md), [negative control](../evidence/T-0031/engineer/AC6_negative_control.md)), gates below |
 
 ### Gates (logs in the evidence directory)
-`test //...` 65/65 pass (`gate-test.log`); `build --config=lint //...` green; `run //tool/mc_arch_check:bin` OK; `tool/rules_fork.sh check` OK; `dart format` clean. Coverage (`bazel coverage`, union of per-target LCOV with `merge_lcov.py`): `mc_ds_media` 62/62, `mc_ds_cards` 63/63, `mc_ds_lists` 131/131, `mc_media` 14/14 (all 100 %).
+`test //...` 66/66 pass (`gate-test.log`); `build --config=lint //...` green; `run //tool/mc_arch_check:bin` OK; `tool/rules_fork.sh check` OK; `dart format` clean. Coverage (`bazel coverage`, union of per-target LCOV with `merge_lcov.py`): `mc_ds_media` 62/62, `mc_ds_cards` 63/63, `mc_ds_lists` 131/131, `mc_media` 36/36 (all 100 %).
 
 ### Root changes
 - Workspace `pubspec.yaml`: added `utility/mc_ds_cards`, `mc_ds_lists`, `mc_ds_media`. `pubspec.lock` and `MODULE.bazel.lock` did not change (no new third-party package).
-- `mc_media`: `mc_media_scope.dart`, `src/media_scope.dart` and the `mc_media_scope` Bazel library deleted; pubspec lost its `flutter` dependencies (now pure Dart). Its `media_scope_test` moved (git rename) to `mc_ds_media`; `purity_test` now takes `glob(lib/**)` and asserts one barrel.
+- `mc_media`: `ResolvedImage` sealed (asset, network); `mc_fixtures_media` `BundledImageResolver` gained `locate()` and `resolve` returns the sealed type; `mc_fixtures_characters` provider contract test and `mc_fixtures_media` tests use `locate()`. `mc_media_scope.dart`, `src/media_scope.dart` and the `mc_media_scope` Bazel library deleted; pubspec lost its `flutter` dependencies (now pure Dart). Its `media_scope_test` moved (git rename) to `mc_ds_media`; `purity_test` now takes `glob(lib/**)` and asserts one barrel.
 - `mc_test_utils`: new `fixture_assets.dart` (`McFixtureAssetBundle`, `mcPrecacheFixtureImages`, `mcFixtureAssetsDataLabel`); `mcGoldenApp` gained `bundle:`, `mcGoldenMatrix` gained `assetBundle:` and `precache:`. Both are optional, so existing callers are unchanged.
 - `tool/checks/T-0030-AC7_closure.sh`: the positive control is now `//utility/mc_ds_media:mc_ds_media` (the old target is gone). New `tool/checks/T-0031-AC6_closure.sh` wraps it.
 
 ### Decisions and deviations for the TL
 1. **`McImage` resolves synchronously.** `McImageResolver.resolve` is synchronous (T-0030), so "a resolver that completes later" in AC3 is tested as the image load completing later (a gated asset bundle); the placeholder shows until the first frame.
-2. **`mc_ds_media` depends on `mc_fixtures_media`** for `BundledImage.assetKey` to `AssetImage`, as the task says. A production package depending on fixtures is smelly; F-0030 notes the follow-up (a provider registry).
+2. **No fixtures dependency (TL fix round).** `mc_media`'s `ResolvedImage` is now sealed (`ResolvedImage.asset(key, {package})`, `ResolvedImage.network(url)`). `BundledImageResolver.resolve` returns `ResolvedImage.asset(...)` (`locate()` gives the old `BundledImage` value for file checks). `McImage` maps the cases with an exhaustive `switch` (`mcImageProviderFor`). `mc_ds_media` has `mc_fixtures_media` as a dev dependency only. `T-0031-AC6_closure.sh` fails if any production `mc_ds_*` target depends on `mc_fixtures_*` (cquery, with positive and negative controls). New tests: `mc_media:resolved_image_test`.
 3. **Grid cell height is a callback** (`cellHeight(cellWidth, textScaler)`), with `McMediaCard.heightFor` as the matching function, so cards with text do not overflow at large text scales. `mc_ds_lists` has no dependency on `mc_ds_cards`, as in plan U31.
 4. **No `// ignore:` added. No tests deleted, skipped or weakened.** The three `T-0030-AC6` `McMediaScope` tests moved to `mc_ds_media` and were renamed `T-0031-AC6`; the other `mc_media` tests are untouched.
 5. `ScrollMetricsNotification` handling and the once-per-state guard are described in F-0030. `McPagedList` has an `itemBuilder(context, item, index)`; skeletons are builders (`skeletonBuilder`), with a spinner when none is given.
@@ -92,5 +92,4 @@ The design-system widgets the `characters_list` exemplar (P1-17) renders: a page
 
 ### Follow-ups
 - `characters_list` (P1-17) wires `McMediaScope(resolver: BundledImageResolver())` at the app root and uses `McPagedGrid` + `McMediaCard`.
-- A provider registry so `mc_ds_media` does not need `mc_fixtures_media` (F-0030).
 - Carousel, gallery, zoom and the `ds_catalog` screenshots stay out of scope (P1-12 AC4).

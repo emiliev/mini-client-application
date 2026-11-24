@@ -8,8 +8,10 @@ final RegExp _digits = RegExp(r'^\d+$');
 
 const String mockAssetScheme = 'mock-asset';
 
-/// A bundled asset an [ApiImage] resolved to.
-final class BundledImage implements ResolvedImage {
+/// A bundled asset an [ApiImage] points at, with the file layout facts the
+/// tests check. [BundledImageResolver.resolve] hands the UI a
+/// [ResolvedImage.asset] built from it.
+final class BundledImage {
   const BundledImage({
     required this.set,
     required this.id,
@@ -20,7 +22,6 @@ final class BundledImage implements ResolvedImage {
 
   /// Zero-padded to three digits, e.g. `017`.
   final String id;
-  @override
   final ImageVariant variant;
 
   /// The 1x file inside this package, e.g. `assets/characters/017.png`.
@@ -29,6 +30,13 @@ final class BundledImage implements ResolvedImage {
 
   /// What `AssetImage` takes with no `package:` argument.
   String get assetKey => 'packages/mc_fixtures_media/$packageRelativePath';
+
+  /// What the UI loads: the package asset, no Flutter types.
+  ResolvedImage toResolved() => ResolvedImage.asset(
+    packageRelativePath,
+    package: 'mc_fixtures_media',
+    variant: variant,
+  );
 
   /// Every density variant, 1x first.
   List<String> get allDensityPaths => [
@@ -60,7 +68,10 @@ final class BundledImageResolver implements McImageResolver {
       Uri.tryParse(image.path)?.scheme == mockAssetScheme;
 
   @override
-  BundledImage resolve(ApiImage image) {
+  ResolvedImage resolve(ApiImage image) => locate(image).toResolved();
+
+  /// The bundled file [image] points at. Throws [UnresolvedImageException].
+  BundledImage locate(ApiImage image) {
     final uri = Uri.tryParse(image.path);
     if (uri == null || uri.scheme != mockAssetScheme) {
       throw UnresolvedImageException(

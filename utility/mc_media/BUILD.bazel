@@ -30,6 +30,18 @@ dart_test(
     ],
 )
 
+dart_test(
+    name = "resolved_image_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/resolved_image_test.dart",
+    package_name = "mc_media",
+    deps = [
+        ":mc_media",
+        "@pub_deps//:test",
+    ],
+)
+
 # AC7: the pure library imports no Flutter.
 dart_test(
     name = "purity_test",
