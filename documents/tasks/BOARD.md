@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0031](T-0031-ds-lists-media-cards.md) | DS `mc_ds_media`, `mc_ds_lists`, `mc_ds_cards` for LD (P1-12 subset) | Ready | Engineer (Sonnet) | T-0030 | `fleet/T-0031-ds-lists-media-cards` |
 | [T-0030](T-0030-paging-and-media-kits.md) | `mc_paging` + `mc_media` kits for the LD archetype (P1-14 subset, U14, U19) | **In Verification** | Engineer (Sonnet) | T-0026 | `fleet/T-0030-paging-and-media` |
 
 ## Done
