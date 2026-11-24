@@ -1,14 +1,33 @@
-INFO: Invocation ID: 1cd10d95-c915-4c04-a9d1-096757850277
+INFO: Invocation ID: 6e215b06-ee64-4eea-86e6-601c0598afb1
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
-Analyzing: 73 targets (28 packages loaded, 2 targets configured)
-Analyzing: 73 targets (28 packages loaded, 2 targets configured)
+Analyzing: 73 targets (15 packages loaded, 0 targets configured)
+Analyzing: 73 targets (15 packages loaded, 0 targets configured)
 
-Analyzing: 73 targets (191 packages loaded, 14030 targets configured, 280 aspect applications)
-[444 / 584] Writing file utility/mc_fixtures_characters/mc_fixtures_characters.dart_analyzer_summary.package_config.json; 0s local ... (7 actions, 2 running)
-Analyzing: 73 targets (221 packages loaded, 17076 targets configured, 622 aspect applications)
-[3,668 / 3,682] Testing //utility/mc_feature_flow:feature_flow_test; 0s darwin-sandbox ... (14 actions, 9 running)
+INFO: From Testing //utility/mc_bloc_kit:purity_test:
+==================== Test output for //utility/mc_bloc_kit:purity_test:
+00:00 +0: loading utility/mc_bloc_kit/test/purity_test.dart
+00:00 +0: T-0022-AC7 lib imports no Flutter and declares no mixins
+00:00 +1: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_bloc_kit:feature_flow_controller_test:
+==================== Test output for //utility/mc_bloc_kit:feature_flow_controller_test:
+00:00 +0: loading utility/mc_bloc_kit/test/feature_flow_controller_test.dart
+00:00 +0: T-0022-AC3 complete emits the result exactly once
+00:00 +1: T-0022-AC5 update and restore both notify states
+00:00 +2: T-0022-AC3 update after completion is ignored
+00:00 +3: T-0022-AC3 a late update, restore or complete after dispose is a no-op
+00:00 +4: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_bloc_kit:mc_bloc_test:
+==================== Test output for //utility/mc_bloc_kit:mc_bloc_test:
+00:00 +0: loading utility/mc_bloc_kit/test/mc_bloc_test.dart
+00:00 +0: T-0022-AC7 a transition is logged once through monitoring
+00:00 +1: T-0022-AC7 a McFailureState transition records its error
+00:00 +2: T-0022-AC7 an error added to the bloc is recorded
+00:00 +3: All tests passed!
+================================================================================
 INFO: From Testing //utility/mc_ds_tokens:tokens_test:
 ==================== Test output for //utility/mc_ds_tokens:tokens_test:
   PASS  T-0019-AC1 tokens: text pairs meet WCAG AA, high contrast meets AAA
@@ -20,48 +39,9 @@ INFO: From Testing //utility/mc_ds_tokens:tokens_test:
 
 6 passed
 ================================================================================
-INFO: From Testing //utility/mc_ds_testing:fonts_test:
-==================== Test output for //utility/mc_ds_testing:fonts_test:
-  PASS  T-0019-AC1 fonts: harness registers the name the app resolves
-  PASS  T-0019-AC1 fonts: McTypeScale renders Inter, not Ahem
-
-2 passed
-================================================================================
-INFO: From Testing //utility/mc_ds_layout:layout_test:
-==================== Test output for //utility/mc_ds_layout:layout_test:
-  PASS  T-0019-AC3 grid shows 2 columns at width 375
-  PASS  T-0019-AC3 grid shows 4 columns at width 1024
-  PASS  T-0019-AC3 breakpoints: 599 compact, 600 medium, 1024 expanded
-  PASS  T-0019-AC1 a11y: McA11y.duration is zero under reduced motion
-  PASS  T-0019-AC3 grid in unbounded width falls back to the screen
-
-5 passed
-================================================================================
-INFO: From Testing //utility/mc_ds_feedback:feedback_test:
-==================== Test output for //utility/mc_ds_feedback:feedback_test:
-  PASS  T-0019-AC2 Retry fires onRetry exactly once
-  PASS  T-0019-AC2 error view has a semantics label
-  PASS  T-0019-AC2 custom retry label and title are honoured
-  PASS  T-0019-AC1 loading shows a progress indicator with a label
-  PASS  T-0019-AC1 empty view shows its message
-
-5 passed
-================================================================================
-Analyzing: 73 targets (225 packages loaded, 17817 targets configured, 1099 aspect applications)
-[6,520 / 6,822] 4 / 34 tests; Testing //utility/mc_feature_flow:feature_flow_test; 1s darwin-sandbox ... (13 actions, 8 running)
-INFO: From Testing //utility/mc_ds_buttons:buttons_test:
-==================== Test output for //utility/mc_ds_buttons:buttons_test:
-  PASS  T-0019-AC1 buttons: each variant fires onPressed once
-  PASS  T-0019-AC1 buttons: null onPressed disables the button
-  PASS  T-0019-AC1 buttons: tap targets are at least 44x44
-  PASS  T-0019-AC1 buttons: icon button exposes its semantic label
-  PASS  T-0019-AC1 buttons: expand works in a Row without throwing
-  PASS  T-0019-AC2 buttons: one node has label, button flag and tap
-  PASS  T-0019-AC2 buttons: disabled icon button has no tap action
-
-7 passed
-================================================================================
-INFO: Analyzed 73 targets (225 packages loaded, 17819 targets configured, 1118 aspect applications).
+Analyzing: 73 targets (39 packages loaded, 2435 targets configured, 394 aspect applications)
+[1,856 / 1,945] 4 / 35 tests; Testing //utility/mc_ds_theme:theme_test; 0s darwin-sandbox ... (12 actions, 8 running)
+INFO: Analyzed 73 targets (39 packages loaded, 2437 targets configured, 435 aspect applications).
 INFO: From Testing //utility/mc_fixtures_media:bundled_image_resolver_test:
 ==================== Test output for //utility/mc_fixtures_media:bundled_image_resolver_test:
   PASS  T-0018-AC7 image resolution T-0018-AC7: every placeholder id resolves to files that exist
@@ -71,116 +51,19 @@ INFO: From Testing //utility/mc_fixtures_media:bundled_image_resolver_test:
 
 4 passed
 ================================================================================
-INFO: From Testing //utility/mc_feature_flow:feature_flow_test:
-==================== Test output for //utility/mc_feature_flow:feature_flow_test:
-  PASS  T-0022-AC1 no flowInitializer renders the first page
-  PASS  T-0022-AC2 a throwing initializer shows Retry and records
-  PASS  T-0022-AC3 complete(r) calls onComplete once with r
-  PASS  T-0022-AC4 two flows in an IndexedStack own their controllers
-  PASS  T-0022-AC5 iOS edge swipe pops a named page and reverts state
-  PASS  T-0022-AC5 an in-place update then an edge swipe keeps state and pages in step
-  PASS  T-0022-AC5 a filter changed on the list survives push and edge swipe
-  PASS  T-0022-AC5 two pushes then two edge swipes restore each level
-  PASS  T-0022-AC6 an unregistered root import fails naming its type
-Error while creating _Other
-Stack trace:
- #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
-#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
-#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
-#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
-#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
-#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
-#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:373:61)
-#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
-#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
-#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
-#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
-#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:139:22)
-<asynchronous suspension>
-#12     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
-<asynchronous suspension>
-#13     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
-<asynchronous suspension>
-#14     OutstandingWork.complete (package:test_api/hooks.dart:77:3)
-<asynchronous suspension>
-#15     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
-<asynchronous suspension>
-#16     main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:390:5)
-<asynchronous suspension>
-#17     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
-<asynchronous suspension>
-#18     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
-<asynchronous suspension>
-#19     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
-<asynchronous suspension>
-
-  PASS  T-0022-AC6 debugResolveAll names both types
-
-10 passed
+INFO: From Testing //utility/mc_monitoring:monitoring_test:
+==================== Test output for //utility/mc_monitoring:monitoring_test:
+00:00 +0: loading utility/mc_monitoring/test/monitoring_test.dart
+00:00 +0: T-0020-AC2 in-memory sink holds entries in order with levels and attributes
+00:00 +1: T-0020-AC2 console sink prints one line per entry
+00:00 +2: T-0020-AC2 a throwing sink neither blocks later sinks nor throws
+00:00 +3: All tests passed!
 ================================================================================
-INFO: From Testing //utility/mc_ds_theme:theme_test:
-==================== Test output for //utility/mc_ds_theme:theme_test:
-  PASS  T-0019-AC1 theme: each variant carries its palette and font
-  PASS  T-0019-AC1 theme: variantFor honours high contrast first
-  PASS  T-0019-AC1 theme: high contrast respects brightness
-  PASS  T-0019-AC1 theme: extension lerp interpolates the palette
-  PASS  T-0019-AC1 theme: mode controller notifies on change only
-  PASS  T-0019-AC1 theme: context.mcPalette resolves from the tree
-
-6 passed
-================================================================================
-INFO: From Testing //utility/mc_fixtures_characters:characters_test:
-==================== Test output for //utility/mc_fixtures_characters:characters_test:
-  PASS  T-0018-AC6 pagination T-0018-AC6: offset 30 limit 30 is page 2 of 1,500
-  PASS  T-0018-AC6 pagination T-0018-AC6: the order is stable, sorted and covers every character
-  PASS  T-0018-AC6 pagination T-0018-AC6: the last page is short and past the end is empty
-  PASS  T-0018-AC6 pagination T-0018-AC6: invalid paging parameters are 400
-  PASS  T-0018-AC6 search T-0018-AC6: nameStartsWith=spi matches names starting with spi, ignoring case
-  PASS  T-0018-AC6 search T-0018-AC6: other prefixes do not leak in (Sparrow is not spi)
-  PASS  T-0018-AC6 search T-0018-AC6: orderBy -name reverses and ties break on id
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: detail by id, 404 for an unknown id
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: names are unique and the cast is 1,500
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: the seed changes details but not the catalogue of names
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: ids and paging values are strict decimal digits
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: the empty scenario validates like the normal handler
-  PASS  T-0018-AC6 detail and universe T-0018-AC6: scenarios empty and server_error
-
-13 passed
-================================================================================
-[9,043 / 9,092] 9 / 36 tests; Testing //utility/mc_ds_layout:golden_test; 2s darwin-sandbox ... (14 actions, 12 running)
-INFO: From Testing //utility/mc_ds_layout:golden_test:
-==================== Test output for //utility/mc_ds_layout:golden_test:
-  PASS  T-0019-AC1 adaptive_grid_375 golden light x1
-  PASS  T-0019-AC1 adaptive_grid_375 golden light x2
-  PASS  T-0019-AC1 adaptive_grid_375 golden dark x1
-  PASS  T-0019-AC1 adaptive_grid_375 golden dark x2
-  PASS  T-0019-AC1 adaptive_grid_375 golden highContrast x1
-  PASS  T-0019-AC1 adaptive_grid_375 golden highContrast x2
-  PASS  T-0019-AC1 adaptive_grid_375 golden highContrastDark x1
-  PASS  T-0019-AC1 adaptive_grid_375 golden highContrastDark x2
-  PASS  T-0019-AC1 adaptive_grid_1024 golden light x1
-  PASS  T-0019-AC1 adaptive_grid_1024 golden light x2
-  PASS  T-0019-AC1 adaptive_grid_1024 golden dark x1
-  PASS  T-0019-AC1 adaptive_grid_1024 golden dark x2
-  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrast x1
-  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrast x2
-  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrastDark x1
-  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrastDark x2
-
-16 passed
-================================================================================
-INFO: From Testing //utility/mc_ds_theme:golden_test:
-==================== Test output for //utility/mc_ds_theme:golden_test:
-  PASS  T-0019-AC1 theme_sheet golden light x1
-  PASS  T-0019-AC1 theme_sheet golden light x2
-  PASS  T-0019-AC1 theme_sheet golden dark x1
-  PASS  T-0019-AC1 theme_sheet golden dark x2
-  PASS  T-0019-AC1 theme_sheet golden highContrast x1
-  PASS  T-0019-AC1 theme_sheet golden highContrast x2
-  PASS  T-0019-AC1 theme_sheet golden highContrastDark x1
-  PASS  T-0019-AC1 theme_sheet golden highContrastDark x2
-
-8 passed
+INFO: From Testing //utility/mc_api_errors:no_flutter_test:
+==================== Test output for //utility/mc_api_errors:no_flutter_test:
+00:00 +0: loading utility/mc_api_errors/test/no_flutter_test.dart
+00:00 +0: T-0023-AC5 lib imports no Flutter
+00:00 +1: All tests passed!
 ================================================================================
 INFO: From Testing //utility/mc_fixtures_characters:provider_contract_test:
 ==================== Test output for //utility/mc_fixtures_characters:provider_contract_test:
@@ -199,141 +82,16 @@ INFO: From Testing //utility/mc_fixtures_characters:provider_contract_test:
 
 12 passed
 ================================================================================
-INFO: From Testing //utility/mc_ds_feedback:golden_test:
-==================== Test output for //utility/mc_ds_feedback:golden_test:
-  PASS  T-0019-AC1 loading golden light x1
-  PASS  T-0019-AC1 loading golden light x2
-  PASS  T-0019-AC1 loading golden dark x1
-  PASS  T-0019-AC1 loading golden dark x2
-  PASS  T-0019-AC1 loading golden highContrast x1
-  PASS  T-0019-AC1 loading golden highContrast x2
-  PASS  T-0019-AC1 loading golden highContrastDark x1
-  PASS  T-0019-AC1 loading golden highContrastDark x2
-  PASS  T-0019-AC1 error_view golden light x1
-  PASS  T-0019-AC1 error_view golden light x2
-  PASS  T-0019-AC1 error_view golden dark x1
-  PASS  T-0019-AC1 error_view golden dark x2
-  PASS  T-0019-AC1 error_view golden highContrast x1
-  PASS  T-0019-AC1 error_view golden highContrast x2
-  PASS  T-0019-AC1 error_view golden highContrastDark x1
-  PASS  T-0019-AC1 error_view golden highContrastDark x2
-  PASS  T-0019-AC1 empty_view golden light x1
-  PASS  T-0019-AC1 empty_view golden light x2
-  PASS  T-0019-AC1 empty_view golden dark x1
-  PASS  T-0019-AC1 empty_view golden dark x2
-  PASS  T-0019-AC1 empty_view golden highContrast x1
-  PASS  T-0019-AC1 empty_view golden highContrast x2
-  PASS  T-0019-AC1 empty_view golden highContrastDark x1
-  PASS  T-0019-AC1 empty_view golden highContrastDark x2
+INFO: From Testing //utility/mc_ds_theme:theme_test:
+==================== Test output for //utility/mc_ds_theme:theme_test:
+  PASS  T-0019-AC1 theme: each variant carries its palette and font
+  PASS  T-0019-AC1 theme: variantFor honours high contrast first
+  PASS  T-0019-AC1 theme: high contrast respects brightness
+  PASS  T-0019-AC1 theme: extension lerp interpolates the palette
+  PASS  T-0019-AC1 theme: mode controller notifies on change only
+  PASS  T-0019-AC1 theme: context.mcPalette resolves from the tree
 
-24 passed
-================================================================================
-INFO: From Testing //utility/mc_ds_buttons:golden_test:
-==================== Test output for //utility/mc_ds_buttons:golden_test:
-  PASS  T-0019-AC1 buttons golden light x1
-  PASS  T-0019-AC1 buttons golden light x2
-  PASS  T-0019-AC1 buttons golden dark x1
-  PASS  T-0019-AC1 buttons golden dark x2
-  PASS  T-0019-AC1 buttons golden highContrast x1
-  PASS  T-0019-AC1 buttons golden highContrast x2
-  PASS  T-0019-AC1 buttons golden highContrastDark x1
-  PASS  T-0019-AC1 buttons golden highContrastDark x2
-
-8 passed
-================================================================================
-INFO: From Testing //utility/mc_api_errors:no_flutter_test:
-==================== Test output for //utility/mc_api_errors:no_flutter_test:
-00:00 +0: loading utility/mc_api_errors/test/no_flutter_test.dart
-00:00 +0: T-0023-AC5 lib imports no Flutter
-00:00 +1: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_api_client:no_flutter_test:
-==================== Test output for //utility/mc_api_client:no_flutter_test:
-00:00 +0: loading utility/mc_api_client/test/no_flutter_test.dart
-00:00 +0: T-0023-AC5 lib imports no Flutter
-00:00 +1: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_monitoring:monitoring_test:
-==================== Test output for //utility/mc_monitoring:monitoring_test:
-00:00 +0: loading utility/mc_monitoring/test/monitoring_test.dart
-00:00 +0: T-0020-AC2 in-memory sink holds entries in order with levels and attributes
-00:00 +1: T-0020-AC2 console sink prints one line per entry
-00:00 +2: T-0020-AC2 a throwing sink neither blocks later sinks nor throws
-00:00 +3: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_storage:no_flutter_test:
-==================== Test output for //utility/mc_storage:no_flutter_test:
-00:00 +0: loading utility/mc_storage/test/no_flutter_test.dart
-00:00 +0: T-0020-AC5 lib imports no Flutter
-00:00 +1: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_bloc_kit:mc_bloc_test:
-==================== Test output for //utility/mc_bloc_kit:mc_bloc_test:
-00:00 +0: loading utility/mc_bloc_kit/test/mc_bloc_test.dart
-00:00 +0: T-0022-AC7 a transition is logged once through monitoring
-00:00 +1: T-0022-AC7 a McFailureState transition records its error
-00:00 +2: T-0022-AC7 an error added to the bloc is recorded
-00:00 +3: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_api_errors:api_failure_test:
-==================== Test output for //utility/mc_api_errors:api_failure_test:
-00:00 +0: loading utility/mc_api_errors/test/api_failure_test.dart
-00:00 +0: T-0023-AC3: a TypeError is unexpected and keeps its message
-00:00 +1: T-0023-AC1: Dio types and statuses map to the matching failure
-00:00 +2: an ApiFailure passes through unchanged
-00:00 +3: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_event_bus:event_bus_test:
-==================== Test output for //utility/mc_event_bus:event_bus_test:
-00:00 +0: loading utility/mc_event_bus/test/event_bus_test.dart
-00:00 +0: T-0020-AC3 two subscribers each receive the event exactly once
-00:00 +1: T-0020-AC3 an unsubscribed listener receives nothing
-00:00 +2: T-0020-AC3 a listener may publish from inside its callback
-00:00 +3: T-0020-AC3 publish after dispose is a no-op
-00:00 +4: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_prelude:result_test:
-==================== Test output for //utility/mc_prelude:result_test:
-00:00 +0: loading utility/mc_prelude/test/result_test.dart
-00:00 +0: T-0017-AC5 Result T-0017-AC5 fold applies the success branch
-00:00 +1: T-0017-AC5 Result T-0017-AC5 fold applies the failure branch
-00:00 +2: T-0017-AC5 Result T-0017-AC5 success and failure expose value, equality, hashCode
-00:00 +3: T-0017-AC5 Result T-0017-AC5 map transforms success, propagates failure
-00:00 +4: T-0017-AC5 Result T-0017-AC5 flatMap chains, propagates failure
-00:00 +5: T-0017-AC5 Result T-0017-AC5 asyncFlatMap chains, propagates failure
-00:00 +6: T-0017-AC5 Result T-0017-AC5 forEach runs on success only
-00:00 +7: T-0017-AC5 Result T-0017-AC5 getOrElse
-00:00 +8: T-0017-AC5 Result T-0017-AC5 getOrNull
-00:00 +9: T-0017-AC5 Result T-0017-AC5 fromAsync success
-00:00 +10: T-0017-AC5 Result T-0017-AC5 fromAsync keeps a thrown Exception
-00:00 +11: T-0017-AC5 Result T-0017-AC5 fromAsync over a thrown Error keeps the message
-00:00 +12: T-0017-AC5 Result T-0017-AC5 fromAction success and thrown values
-00:00 +13: T-0017-AC5 Result T-0017-AC5 fromNullable
-00:00 +14: T-0017-AC5 Result T-0017-AC5 fromPredicate
-00:00 +15: T-0017-AC5 Result T-0017-AC5 guard returns a success
-00:00 +16: T-0017-AC5 Result T-0017-AC5 guard maps a thrown Exception
-00:00 +17: T-0017-AC5 Result T-0017-AC5 guard over a TypeError keeps the message
-00:00 +18: T-0017-AC5 Result T-0017-AC5 fromAsync and fromAction turn any thrown object into a failure
-00:00 +19: T-0017-AC5 Result T-0017-AC5 guard maps any thrown object
-00:00 +20: T-0017-AC5 Result T-0017-AC5 equality compares the type arguments
-00:00 +21: All tests passed!
-================================================================================
-INFO: From Testing //tool/mc_arch_check:arch_check_test:
-==================== Test output for //tool/mc_arch_check:arch_check_test:
-00:00 +0: loading tool/mc_arch_check/test/arch_check_test.dart
-00:00 +0: T-0017-AC1 allowed edges produce no violation
-00:00 +1: T-0017-AC1 feature importing another feature barrel fails, naming the feature → feature edge
-00:00 +2: T-0017-AC1 utility importing a feature fails, naming the utility → feature edge
-00:00 +3: T-0017-AC2 package:x/src/ from another package fails as barrel-only
-00:00 +4: T-0017-AC2 the same package importing its own src/ is allowed
-00:00 +5: T-0017-AC4 a feature barrel exporting a page, bloc or DI initializer fails naming the symbol (R4)
-00:00 +6: T-0017-AC4 a route library importing a feature barrel fails (R15)
-00:00 +7: T-0017-AC4 a RouteTargets method returning a non-Flow fails (R15)
-00:00 +8: T-0017-AC4 a relative export of a page and a wildcard export that declares one fail (R4)
-00:00 +9: T-0017-AC1 a conditional-import alternative is checked
-00:00 +10: T-0017-AC2 a relative path leaving the package fails as barrel-only, and the edge it lands on is checked
-00:00 +11: T-0017-AC4 RouteTargets getters are checked, and code after the class is not (R15)
-00:00 +12: All tests passed!
+6 passed
 ================================================================================
 INFO: From Testing //utility/mc_di:di_container_test:
 ==================== Test output for //utility/mc_di:di_container_test:
@@ -355,68 +113,52 @@ INFO: From Testing //utility/mc_di:di_container_test:
 00:00 +14: T-0017-AC7 resetDIContainer T-0017-AC7 reset disposes the singletons
 00:00 +15: All tests passed!
 ================================================================================
-INFO: From Testing //utility/mc_bloc_kit:purity_test:
-==================== Test output for //utility/mc_bloc_kit:purity_test:
-00:00 +0: loading utility/mc_bloc_kit/test/purity_test.dart
-00:00 +0: T-0022-AC7 lib imports no Flutter and declares no mixins
-00:00 +1: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_config:app_config_test:
-==================== Test output for //utility/mc_config:app_config_test:
-00:00 +0: loading utility/mc_config/test/app_config_test.dart
-00:00 +0: T-0020-AC1 parses typed values, latency as a Duration
-00:00 +1: T-0020-AC1 initializer reads the source once and registers it
-00:00 +2: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_monitoring:no_flutter_test:
-==================== Test output for //utility/mc_monitoring:no_flutter_test:
-00:00 +0: loading utility/mc_monitoring/test/no_flutter_test.dart
-00:00 +0: T-0020-AC5 lib imports no Flutter
-00:00 +1: All tests passed!
-================================================================================
-INFO: From Testing //spike/hello:widget_test:
-==================== Test output for //spike/hello:widget_test:
-  PASS  T-0014-AC2 hello app renders and counts under Bazel
-  PASS  T-0014-AC6 state.when / maybeWhen / map on a private-case union
-  PASS  T-0014-AC7 generated $appRoutes navigates to the typed DetailRoute
+INFO: From Testing //utility/mc_ds_layout:layout_test:
+==================== Test output for //utility/mc_ds_layout:layout_test:
+  PASS  T-0019-AC3 grid shows 2 columns at width 375
+  PASS  T-0019-AC3 grid shows 4 columns at width 1024
+  PASS  T-0019-AC3 breakpoints: 599 compact, 600 medium, 1024 expanded
+  PASS  T-0019-AC1 a11y: McA11y.duration is zero under reduced motion
+  PASS  T-0019-AC3 grid in unbounded width falls back to the screen
 
-3 passed
+5 passed
 ================================================================================
-INFO: From Testing //utility/mc_config:bundled_config_test:
-==================== Test output for //utility/mc_config:bundled_config_test:
-00:00 +0: loading utility/mc_config/test/bundled_config_test.dart
-00:00 +0: T-0020-AC1 bundled app_config.json matches the selected env
-00:00 +1: All tests passed!
-================================================================================
-INFO: From Testing //utility/mc_event_bus:no_flutter_test:
-==================== Test output for //utility/mc_event_bus:no_flutter_test:
-00:00 +0: loading utility/mc_event_bus/test/no_flutter_test.dart
-00:00 +0: T-0020-AC5 lib imports no Flutter
-00:00 +1: All tests passed!
-================================================================================
-[9,097 / 9,103] 31 / 36 tests; Testing //utility/mc_analysis:lints_test; 1s darwin-sandbox ... (6 actions running)
-INFO: From Testing //utility/mc_bloc_kit:feature_flow_controller_test:
-==================== Test output for //utility/mc_bloc_kit:feature_flow_controller_test:
-00:00 +0: loading utility/mc_bloc_kit/test/feature_flow_controller_test.dart
-00:00 +0: T-0022-AC3 complete emits the result exactly once
-00:00 +1: T-0022-AC3 update notifies states; restore does not
-00:00 +2: T-0022-AC3 update after completion is ignored
-00:00 +3: T-0022-AC3 a late update, restore or complete after dispose is a no-op
+INFO: From Testing //utility/mc_event_bus:event_bus_test:
+==================== Test output for //utility/mc_event_bus:event_bus_test:
+00:00 +0: loading utility/mc_event_bus/test/event_bus_test.dart
+00:00 +0: T-0020-AC3 two subscribers each receive the event exactly once
+00:00 +1: T-0020-AC3 an unsubscribed listener receives nothing
+00:00 +2: T-0020-AC3 a listener may publish from inside its callback
+00:00 +3: T-0020-AC3 publish after dispose is a no-op
 00:00 +4: All tests passed!
 ================================================================================
-INFO: From Testing //utility/mc_storage:file_store_test:
-==================== Test output for //utility/mc_storage:file_store_test:
-00:00 +0: loading utility/mc_storage/test/file_store_test.dart
-00:00 +0: T-0020-AC4 a value written is read back by a new store
-00:00 +1: T-0020-AC4 a missing key reads as null
-00:00 +2: T-0020-AC4 a corrupt file is a typed failure, not a crash
-00:00 +3: T-0020-AC4 overlapping writes leave the last value, whole
-00:00 +4: T-0020-AC4 delete removes the value and is idempotent
-00:00 +5: T-0020-AC4 a read racing a delete is not reported as corrupt
-00:00 +6: T-0020-AC4 keys differing only by case use distinct files
-00:00 +7: T-0020-AC4 a write into an unusable directory is a typed failure
-00:00 +8: T-0020-AC4 a directory at the key path is a typed failure
-00:00 +9: All tests passed!
+INFO: From Testing //utility/mc_ds_feedback:feedback_test:
+==================== Test output for //utility/mc_ds_feedback:feedback_test:
+  PASS  T-0019-AC2 Retry fires onRetry exactly once
+  PASS  T-0019-AC2 error view has a semantics label
+  PASS  T-0019-AC2 custom retry label and title are honoured
+  PASS  T-0019-AC1 loading shows a progress indicator with a label
+  PASS  T-0019-AC1 empty view shows its message
+
+5 passed
+================================================================================
+INFO: From Testing //utility/mc_ds_buttons:buttons_test:
+==================== Test output for //utility/mc_ds_buttons:buttons_test:
+  PASS  T-0019-AC1 buttons: each variant fires onPressed once
+  PASS  T-0019-AC1 buttons: null onPressed disables the button
+  PASS  T-0019-AC1 buttons: tap targets are at least 44x44
+  PASS  T-0019-AC1 buttons: icon button exposes its semantic label
+  PASS  T-0019-AC1 buttons: expand works in a Row without throwing
+  PASS  T-0019-AC2 buttons: one node has label, button flag and tap
+  PASS  T-0019-AC2 buttons: disabled icon button has no tap action
+
+7 passed
+================================================================================
+INFO: From Testing //utility/mc_api_client:no_flutter_test:
+==================== Test output for //utility/mc_api_client:no_flutter_test:
+00:00 +0: loading utility/mc_api_client/test/no_flutter_test.dart
+00:00 +0: T-0023-AC5 lib imports no Flutter
+00:00 +1: All tests passed!
 ================================================================================
 INFO: From Testing //utility/mc_di:recording_test:
 ==================== Test output for //utility/mc_di:recording_test:
@@ -479,6 +221,105 @@ Stack trace:
 00:00 +9: T-0022-AC6 an async singleton is awaited, not failed
 00:00 +10: All tests passed!
 ================================================================================
+INFO: From Testing //utility/mc_config:app_config_test:
+==================== Test output for //utility/mc_config:app_config_test:
+00:00 +0: loading utility/mc_config/test/app_config_test.dart
+00:00 +0: T-0020-AC1 parses typed values, latency as a Duration
+00:00 +1: T-0020-AC1 initializer reads the source once and registers it
+00:00 +2: All tests passed!
+================================================================================
+[4,767 / 4,788] 17 / 36 tests; Testing //utility/mc_feature_flow:feature_flow_test; 1s darwin-sandbox ... (14 actions, 9 running)
+INFO: From Testing //utility/mc_fixtures_characters:characters_test:
+==================== Test output for //utility/mc_fixtures_characters:characters_test:
+  PASS  T-0018-AC6 pagination T-0018-AC6: offset 30 limit 30 is page 2 of 1,500
+  PASS  T-0018-AC6 pagination T-0018-AC6: the order is stable, sorted and covers every character
+  PASS  T-0018-AC6 pagination T-0018-AC6: the last page is short and past the end is empty
+  PASS  T-0018-AC6 pagination T-0018-AC6: invalid paging parameters are 400
+  PASS  T-0018-AC6 search T-0018-AC6: nameStartsWith=spi matches names starting with spi, ignoring case
+  PASS  T-0018-AC6 search T-0018-AC6: other prefixes do not leak in (Sparrow is not spi)
+  PASS  T-0018-AC6 search T-0018-AC6: orderBy -name reverses and ties break on id
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: detail by id, 404 for an unknown id
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: names are unique and the cast is 1,500
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: the seed changes details but not the catalogue of names
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: ids and paging values are strict decimal digits
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: the empty scenario validates like the normal handler
+  PASS  T-0018-AC6 detail and universe T-0018-AC6: scenarios empty and server_error
+
+13 passed
+================================================================================
+INFO: From Testing //utility/mc_event_bus:no_flutter_test:
+==================== Test output for //utility/mc_event_bus:no_flutter_test:
+00:00 +0: loading utility/mc_event_bus/test/no_flutter_test.dart
+00:00 +0: T-0020-AC5 lib imports no Flutter
+00:00 +1: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_storage:no_flutter_test:
+==================== Test output for //utility/mc_storage:no_flutter_test:
+00:00 +0: loading utility/mc_storage/test/no_flutter_test.dart
+00:00 +0: T-0020-AC5 lib imports no Flutter
+00:00 +1: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_storage:file_store_test:
+==================== Test output for //utility/mc_storage:file_store_test:
+00:00 +0: loading utility/mc_storage/test/file_store_test.dart
+00:00 +0: T-0020-AC4 a value written is read back by a new store
+00:00 +1: T-0020-AC4 a missing key reads as null
+00:00 +2: T-0020-AC4 a corrupt file is a typed failure, not a crash
+00:00 +3: T-0020-AC4 overlapping writes leave the last value, whole
+00:00 +4: T-0020-AC4 delete removes the value and is idempotent
+00:00 +5: T-0020-AC4 a read racing a delete is not reported as corrupt
+00:00 +6: T-0020-AC4 keys differing only by case use distinct files
+00:00 +7: T-0020-AC4 a write into an unusable directory is a typed failure
+00:00 +8: T-0020-AC4 a directory at the key path is a typed failure
+00:00 +9: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_feature_flow:feature_flow_test:
+==================== Test output for //utility/mc_feature_flow:feature_flow_test:
+  PASS  T-0022-AC1 no flowInitializer renders the first page
+  PASS  T-0022-AC2 a throwing initializer shows Retry and records
+  PASS  T-0022-AC3 complete(r) calls onComplete once with r
+  PASS  T-0022-AC4 two flows in an IndexedStack own their controllers
+  PASS  T-0022-AC5 iOS edge swipe pops a named page and reverts state
+  PASS  T-0022-AC5 an in-place update then an edge swipe keeps state and pages in step
+  PASS  T-0022-AC5 a filter changed on the list survives push and edge swipe
+  PASS  T-0022-AC5 two pushes then two edge swipes restore each level
+  PASS  T-0022-AC6 an unregistered root import fails naming its type
+Error while creating _Other
+Stack trace:
+ #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
+#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
+#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
+#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
+#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:380:61)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
+#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:139:22)
+<asynchronous suspension>
+#12     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#13     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#14     OutstandingWork.complete (package:test_api/hooks.dart:77:3)
+<asynchronous suspension>
+#15     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#16     main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:397:5)
+<asynchronous suspension>
+#17     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#18     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#19     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+  PASS  T-0022-AC6 debugResolveAll names both types
+
+10 passed
+================================================================================
 INFO: From Testing //utility/mc_api_client:api_client_test:
 ==================== Test output for //utility/mc_api_client:api_client_test:
 00:00 +0: loading utility/mc_api_client/test/api_client_test.dart
@@ -503,7 +344,132 @@ INFO: From Testing //utility/mc_api_client:api_client_test:
 00:00 +18: T-0023-AC4 DI T-0023-AC4: one shared Dio on the mocked backend returns page 1
 00:00 +19: All tests passed!
 ================================================================================
-[9,101 / 9,103] 35 / 36 tests; Testing //utility/mc_analysis:lints_test; 2s darwin-sandbox ... (2 actions running)
+INFO: From Testing //utility/mc_ds_testing:fonts_test:
+==================== Test output for //utility/mc_ds_testing:fonts_test:
+  PASS  T-0019-AC1 fonts: harness registers the name the app resolves
+  PASS  T-0019-AC1 fonts: McTypeScale renders Inter, not Ahem
+
+2 passed
+================================================================================
+INFO: From Testing //utility/mc_config:bundled_config_test:
+==================== Test output for //utility/mc_config:bundled_config_test:
+00:00 +0: loading utility/mc_config/test/bundled_config_test.dart
+00:00 +0: T-0020-AC1 bundled app_config.json matches the selected env
+00:00 +1: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_prelude:result_test:
+==================== Test output for //utility/mc_prelude:result_test:
+00:00 +0: loading utility/mc_prelude/test/result_test.dart
+00:00 +0: T-0017-AC5 Result T-0017-AC5 fold applies the success branch
+00:00 +1: T-0017-AC5 Result T-0017-AC5 fold applies the failure branch
+00:00 +2: T-0017-AC5 Result T-0017-AC5 success and failure expose value, equality, hashCode
+00:00 +3: T-0017-AC5 Result T-0017-AC5 map transforms success, propagates failure
+00:00 +4: T-0017-AC5 Result T-0017-AC5 flatMap chains, propagates failure
+00:00 +5: T-0017-AC5 Result T-0017-AC5 asyncFlatMap chains, propagates failure
+00:00 +6: T-0017-AC5 Result T-0017-AC5 forEach runs on success only
+00:00 +7: T-0017-AC5 Result T-0017-AC5 getOrElse
+00:00 +8: T-0017-AC5 Result T-0017-AC5 getOrNull
+00:00 +9: T-0017-AC5 Result T-0017-AC5 fromAsync success
+00:00 +10: T-0017-AC5 Result T-0017-AC5 fromAsync keeps a thrown Exception
+00:00 +11: T-0017-AC5 Result T-0017-AC5 fromAsync over a thrown Error keeps the message
+00:00 +12: T-0017-AC5 Result T-0017-AC5 fromAction success and thrown values
+00:00 +13: T-0017-AC5 Result T-0017-AC5 fromNullable
+00:00 +14: T-0017-AC5 Result T-0017-AC5 fromPredicate
+00:00 +15: T-0017-AC5 Result T-0017-AC5 guard returns a success
+00:00 +16: T-0017-AC5 Result T-0017-AC5 guard maps a thrown Exception
+00:00 +17: T-0017-AC5 Result T-0017-AC5 guard over a TypeError keeps the message
+00:00 +18: T-0017-AC5 Result T-0017-AC5 fromAsync and fromAction turn any thrown object into a failure
+00:00 +19: T-0017-AC5 Result T-0017-AC5 guard maps any thrown object
+00:00 +20: T-0017-AC5 Result T-0017-AC5 equality compares the type arguments
+00:00 +21: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_monitoring:no_flutter_test:
+==================== Test output for //utility/mc_monitoring:no_flutter_test:
+00:00 +0: loading utility/mc_monitoring/test/no_flutter_test.dart
+00:00 +0: T-0020-AC5 lib imports no Flutter
+00:00 +1: All tests passed!
+================================================================================
+INFO: From Testing //utility/mc_api_errors:api_failure_test:
+==================== Test output for //utility/mc_api_errors:api_failure_test:
+00:00 +0: loading utility/mc_api_errors/test/api_failure_test.dart
+00:00 +0: T-0023-AC3: a TypeError is unexpected and keeps its message
+00:00 +1: T-0023-AC1: Dio types and statuses map to the matching failure
+00:00 +2: an ApiFailure passes through unchanged
+00:00 +3: All tests passed!
+================================================================================
+[4,781 / 4,789] 29 / 36 tests; Testing //utility/mc_mocked_backend:mocked_backend_test; 1s darwin-sandbox ... (8 actions running)
+INFO: From Testing //tool/mc_arch_check:arch_check_test:
+==================== Test output for //tool/mc_arch_check:arch_check_test:
+00:00 +0: loading tool/mc_arch_check/test/arch_check_test.dart
+00:00 +0: T-0017-AC1 allowed edges produce no violation
+00:00 +1: T-0017-AC1 feature importing another feature barrel fails, naming the feature → feature edge
+00:00 +2: T-0017-AC1 utility importing a feature fails, naming the utility → feature edge
+00:00 +3: T-0017-AC2 package:x/src/ from another package fails as barrel-only
+00:00 +4: T-0017-AC2 the same package importing its own src/ is allowed
+00:00 +5: T-0017-AC4 a feature barrel exporting a page, bloc or DI initializer fails naming the symbol (R4)
+00:00 +6: T-0017-AC4 a route library importing a feature barrel fails (R15)
+00:00 +7: T-0017-AC4 a RouteTargets method returning a non-Flow fails (R15)
+00:00 +8: T-0017-AC4 a relative export of a page and a wildcard export that declares one fail (R4)
+00:00 +9: T-0017-AC1 a conditional-import alternative is checked
+00:00 +10: T-0017-AC2 a relative path leaving the package fails as barrel-only, and the edge it lands on is checked
+00:00 +11: T-0017-AC4 RouteTargets getters are checked, and code after the class is not (R15)
+00:00 +12: All tests passed!
+================================================================================
+INFO: From Testing //spike/hello:widget_test:
+==================== Test output for //spike/hello:widget_test:
+  PASS  T-0014-AC2 hello app renders and counts under Bazel
+  PASS  T-0014-AC6 state.when / maybeWhen / map on a private-case union
+  PASS  T-0014-AC7 generated $appRoutes navigates to the typed DetailRoute
+
+3 passed
+================================================================================
+INFO: From Testing //utility/mc_ds_theme:golden_test:
+==================== Test output for //utility/mc_ds_theme:golden_test:
+  PASS  T-0019-AC1 theme_sheet golden light x1
+  PASS  T-0019-AC1 theme_sheet golden light x2
+  PASS  T-0019-AC1 theme_sheet golden dark x1
+  PASS  T-0019-AC1 theme_sheet golden dark x2
+  PASS  T-0019-AC1 theme_sheet golden highContrast x1
+  PASS  T-0019-AC1 theme_sheet golden highContrast x2
+  PASS  T-0019-AC1 theme_sheet golden highContrastDark x1
+  PASS  T-0019-AC1 theme_sheet golden highContrastDark x2
+
+8 passed
+================================================================================
+INFO: From Testing //utility/mc_ds_buttons:golden_test:
+==================== Test output for //utility/mc_ds_buttons:golden_test:
+  PASS  T-0019-AC1 buttons golden light x1
+  PASS  T-0019-AC1 buttons golden light x2
+  PASS  T-0019-AC1 buttons golden dark x1
+  PASS  T-0019-AC1 buttons golden dark x2
+  PASS  T-0019-AC1 buttons golden highContrast x1
+  PASS  T-0019-AC1 buttons golden highContrast x2
+  PASS  T-0019-AC1 buttons golden highContrastDark x1
+  PASS  T-0019-AC1 buttons golden highContrastDark x2
+
+8 passed
+================================================================================
+INFO: From Testing //utility/mc_ds_layout:golden_test:
+==================== Test output for //utility/mc_ds_layout:golden_test:
+  PASS  T-0019-AC1 adaptive_grid_375 golden light x1
+  PASS  T-0019-AC1 adaptive_grid_375 golden light x2
+  PASS  T-0019-AC1 adaptive_grid_375 golden dark x1
+  PASS  T-0019-AC1 adaptive_grid_375 golden dark x2
+  PASS  T-0019-AC1 adaptive_grid_375 golden highContrast x1
+  PASS  T-0019-AC1 adaptive_grid_375 golden highContrast x2
+  PASS  T-0019-AC1 adaptive_grid_375 golden highContrastDark x1
+  PASS  T-0019-AC1 adaptive_grid_375 golden highContrastDark x2
+  PASS  T-0019-AC1 adaptive_grid_1024 golden light x1
+  PASS  T-0019-AC1 adaptive_grid_1024 golden light x2
+  PASS  T-0019-AC1 adaptive_grid_1024 golden dark x1
+  PASS  T-0019-AC1 adaptive_grid_1024 golden dark x2
+  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrast x1
+  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrast x2
+  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrastDark x1
+  PASS  T-0019-AC1 adaptive_grid_1024 golden highContrastDark x2
+
+16 passed
+================================================================================
 INFO: From Testing //utility/mc_mocked_backend:mocked_backend_test:
 ==================== Test output for //utility/mc_mocked_backend:mocked_backend_test:
 00:00 +0: loading utility/mc_mocked_backend/test/mocked_backend_test.dart
@@ -530,6 +496,36 @@ INFO: From Testing //utility/mc_mocked_backend:mocked_backend_test:
 00:01 +20: review regressions T-0018-AC4: list-valued headers are joined with a comma and a space
 00:01 +21: All tests passed!
 ================================================================================
+INFO: From Testing //utility/mc_ds_feedback:golden_test:
+==================== Test output for //utility/mc_ds_feedback:golden_test:
+  PASS  T-0019-AC1 loading golden light x1
+  PASS  T-0019-AC1 loading golden light x2
+  PASS  T-0019-AC1 loading golden dark x1
+  PASS  T-0019-AC1 loading golden dark x2
+  PASS  T-0019-AC1 loading golden highContrast x1
+  PASS  T-0019-AC1 loading golden highContrast x2
+  PASS  T-0019-AC1 loading golden highContrastDark x1
+  PASS  T-0019-AC1 loading golden highContrastDark x2
+  PASS  T-0019-AC1 error_view golden light x1
+  PASS  T-0019-AC1 error_view golden light x2
+  PASS  T-0019-AC1 error_view golden dark x1
+  PASS  T-0019-AC1 error_view golden dark x2
+  PASS  T-0019-AC1 error_view golden highContrast x1
+  PASS  T-0019-AC1 error_view golden highContrast x2
+  PASS  T-0019-AC1 error_view golden highContrastDark x1
+  PASS  T-0019-AC1 error_view golden highContrastDark x2
+  PASS  T-0019-AC1 empty_view golden light x1
+  PASS  T-0019-AC1 empty_view golden light x2
+  PASS  T-0019-AC1 empty_view golden dark x1
+  PASS  T-0019-AC1 empty_view golden dark x2
+  PASS  T-0019-AC1 empty_view golden highContrast x1
+  PASS  T-0019-AC1 empty_view golden highContrast x2
+  PASS  T-0019-AC1 empty_view golden highContrastDark x1
+  PASS  T-0019-AC1 empty_view golden highContrastDark x2
+
+24 passed
+================================================================================
+[4,788 / 4,789] 35 / 36 tests; Testing //utility/mc_analysis:lints_test; 2s darwin-sandbox
 INFO: From Testing //utility/mc_analysis:lints_test:
 ==================== Test output for //utility/mc_analysis:lints_test:
 00:00 +0: loading utility/mc_analysis/test/lints_test.dart
@@ -542,45 +538,45 @@ INFO: From Testing //utility/mc_analysis:lints_test:
 00:02 +6: All tests passed!
 ================================================================================
 INFO: Found 37 targets and 36 test targets...
-INFO: Elapsed time: 7.651s, Critical Path: 3.30s
-INFO: 6517 processes: 2586 action cache hit, 561 disk cache hit, 5903 internal, 36 darwin-sandbox, 17 worker.
-INFO: Build completed successfully, 6517 total actions
-//spike/hello:widget_test                                                PASSED in 1.2s
-//tool/mc_arch_check:arch_check_test                                     PASSED in 0.4s
+INFO: Elapsed time: 5.544s, Critical Path: 3.45s
+INFO: 45 processes: 4744 action cache hit, 5 disk cache hit, 4 internal, 36 darwin-sandbox.
+INFO: Build completed successfully, 45 total actions
+//spike/hello:widget_test                                                PASSED in 1.0s
+//tool/mc_arch_check:arch_check_test                                     PASSED in 0.5s
 //utility/mc_analysis:lints_test                                         PASSED in 3.1s
-//utility/mc_api_client:api_client_test                                  PASSED in 0.4s
-//utility/mc_api_client:no_flutter_test                                  PASSED in 0.4s
+//utility/mc_api_client:api_client_test                                  PASSED in 0.6s
+//utility/mc_api_client:no_flutter_test                                  PASSED in 0.3s
 //utility/mc_api_errors:api_failure_test                                 PASSED in 0.2s
-//utility/mc_api_errors:no_flutter_test                                  PASSED in 0.6s
-//utility/mc_bloc_kit:feature_flow_controller_test                       PASSED in 0.2s
-//utility/mc_bloc_kit:mc_bloc_test                                       PASSED in 0.2s
-//utility/mc_bloc_kit:purity_test                                        PASSED in 0.2s
-//utility/mc_config:app_config_test                                      PASSED in 0.2s
-//utility/mc_config:bundled_config_test                                  PASSED in 0.2s
-//utility/mc_di:di_container_test                                        PASSED in 0.2s
-//utility/mc_di:recording_test                                           PASSED in 0.3s
-//utility/mc_ds_buttons:buttons_test                                     PASSED in 1.5s
-//utility/mc_ds_buttons:golden_test                                      PASSED in 2.4s
-//utility/mc_ds_feedback:feedback_test                                   PASSED in 1.3s
-//utility/mc_ds_feedback:golden_test                                     PASSED in 2.6s
-//utility/mc_ds_layout:golden_test                                       PASSED in 2.5s
-//utility/mc_ds_layout:layout_test                                       PASSED in 0.8s
+//utility/mc_api_errors:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_bloc_kit:feature_flow_controller_test                       PASSED in 0.4s
+//utility/mc_bloc_kit:mc_bloc_test                                       PASSED in 0.5s
+//utility/mc_bloc_kit:purity_test                                        PASSED in 0.5s
+//utility/mc_config:app_config_test                                      PASSED in 0.3s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.3s
+//utility/mc_di:di_container_test                                        PASSED in 0.3s
+//utility/mc_di:recording_test                                           PASSED in 0.4s
+//utility/mc_ds_buttons:buttons_test                                     PASSED in 1.7s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.2s
+//utility/mc_ds_feedback:feedback_test                                   PASSED in 1.6s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.4s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.5s
+//utility/mc_ds_layout:layout_test                                       PASSED in 1.5s
 //utility/mc_ds_testing:fonts_test                                       PASSED in 0.6s
-//utility/mc_ds_theme:golden_test                                        PASSED in 1.9s
-//utility/mc_ds_theme:theme_test                                         PASSED in 1.3s
-//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.4s
-//utility/mc_event_bus:event_bus_test                                    PASSED in 0.2s
-//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.2s
-//utility/mc_feature_flow:feature_flow_test                              PASSED in 2.1s
-//utility/mc_fixtures_characters:characters_test                         PASSED in 1.0s
-//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.7s
-//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.4s
-//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 1.8s
-//utility/mc_monitoring:monitoring_test                                  PASSED in 0.6s
+//utility/mc_ds_theme:golden_test                                        PASSED in 1.1s
+//utility/mc_ds_theme:theme_test                                         PASSED in 1.4s
+//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.9s
+//utility/mc_event_bus:event_bus_test                                    PASSED in 0.3s
+//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.3s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 1.7s
+//utility/mc_fixtures_characters:characters_test                         PASSED in 0.7s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.8s
+//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.5s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 1.9s
+//utility/mc_monitoring:monitoring_test                                  PASSED in 0.3s
 //utility/mc_monitoring:no_flutter_test                                  PASSED in 0.2s
-//utility/mc_prelude:result_test                                         PASSED in 0.2s
-//utility/mc_storage:file_store_test                                     PASSED in 0.2s
-//utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
+//utility/mc_prelude:result_test                                         PASSED in 0.3s
+//utility/mc_storage:file_store_test                                     PASSED in 0.5s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.3s
 
 Executed 36 out of 36 tests: 36 tests pass.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

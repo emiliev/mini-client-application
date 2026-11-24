@@ -42,14 +42,16 @@ class FeatureFlowController<T> {
     _states.add(_state);
   }
 
-  /// Records a state that the host changed itself (for example the iOS back
-  /// gesture popped a page). Does not notify [states], so the host does not
-  /// hear its own change.
+  /// Sets a state that the host decided on itself (for example the iOS back
+  /// gesture popped a page and the flow restores what that level looked
+  /// like). Notifies [states] like [update], so every listener, including the
+  /// pages, shows the restored state.
   void restore(T state) {
     if (_disposed) {
       return;
     }
     _state = state;
+    _states.add(state);
   }
 
   /// Finishes the flow. The first call emits [result] on [completions]; later

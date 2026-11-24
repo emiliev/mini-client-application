@@ -299,11 +299,15 @@ void main() {
       controller.update((s) => s.copyWith(detail: 'x'));
       await tester.pumpAndSettle();
       expect(find.text('detail x'), findsOneWidget);
+      // Changed inside the pushed page: the list underneath shows it too.
+      controller.update((s) => s.copyWith(filter: 'bar'));
+      await tester.pumpAndSettle();
 
       await edgeSwipe(tester);
 
       expect(find.text('detail x'), findsNothing);
       expect(find.text('list foo'), findsOneWidget);
+      expect(find.text('list bar'), findsNothing);
       expect(controller.state.filter, 'foo');
       expect(controller.state.detail, isNull);
     },
@@ -322,10 +326,13 @@ void main() {
     controller.update((s) => s.copyWith(sub: 's'));
     await tester.pumpAndSettle();
     expect(find.text('sub s'), findsOneWidget);
+    controller.update((s) => s.copyWith(detail: 'z')); // in place, depth 3
+    await tester.pumpAndSettle();
 
     await edgeSwipe(tester);
     expect(find.text('sub s'), findsNothing);
     expect(find.text('detail b'), findsOneWidget);
+    expect(find.text('detail z'), findsNothing);
     expect(controller.state.detail, 'b');
     expect(controller.state.sub, isNull);
     expect(controller.state.filter, 'foo');

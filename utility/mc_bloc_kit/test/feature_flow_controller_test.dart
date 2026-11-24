@@ -14,14 +14,14 @@ void main() {
     expect(controller.result, 'first');
   });
 
-  test('T-0022-AC3 update notifies states; restore does not', () {
+  test('T-0022-AC5 update and restore both notify states', () {
     final controller = FeatureFlowController<int>(0);
     final seen = <int>[];
     controller.states.listen(seen.add);
     controller
       ..update((s) => s + 1)
       ..restore(0);
-    expect(seen, [1]);
+    expect(seen, [1, 0]);
     expect(controller.state, 0);
   });
 
