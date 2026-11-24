@@ -1,0 +1,28 @@
+name: mc_ds_lists
+description: Design-system paged list and grid bound to PagedState (T-0031, plan 01 U31).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mc_ds_buttons: any
+  mc_ds_feedback: any
+  mc_ds_layout: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_paging: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_api_errors: any
+  mc_ds_cards: any
+  mc_ds_media: any
+  mc_fixtures_media: any
+  mc_media: any
+  mc_test_utils: any

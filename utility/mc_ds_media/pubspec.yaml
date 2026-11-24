@@ -1,0 +1,22 @@
+name: mc_ds_media
+description: Design-system media widgets. McImage, McAvatar and McMediaScope (T-0031, plan 01 U29).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mc_ds_layout: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_fixtures_media: any
+  mc_media: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_test_utils: any

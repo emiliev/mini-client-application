@@ -1,0 +1,57 @@
+# T-0031: McMediaCard and its skeleton.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_ds_media",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "//utility/mc_media",
+    "@pub_deps//:flutter",
+]
+
+flutter_library(
+    name = "mc_ds_cards",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "mc_ds_cards",
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_ds_cards",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_test_utils",
+    "@pub_deps//:flutter_test",
+]
+
+_DATA = [
+    "//utility/mc_ds_theme:fonts",
+    "//utility/mc_fixtures_media:asset_files",
+]
+
+flutter_test(
+    name = "card_test",
+    size = "small",
+    data = _DATA,
+    language_version = _LANG,
+    main = "test/card_test.dart",
+    package_name = "mc_ds_cards",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    data = _DATA + glob(["test/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden_test.dart",
+    package_name = "mc_ds_cards",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS,
+)

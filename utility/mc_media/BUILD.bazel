@@ -1,12 +1,7 @@
-# T-0030 (U14): ApiImage, McImageResolver and McMediaScope.
-#
-# Two libraries of one package, split so pure-Dart code (the mocked backend
-# fixtures, and through them the api client's tests) never pulls Flutter into
-# its closure (F-0029):
-#   :mc_media        pure Dart; ApiImage and the resolver interface
-#   :mc_media_scope  Flutter; McMediaScope, its own barrel mc_media_scope.dart
+# T-0030 (U14): ApiImage and the McImageResolver interface. Pure Dart, one barrel.
+# McMediaScope moved to //utility/mc_ds_media in T-0031 (F-0029 follow-up), so
+# fixtures and pure tests never see Flutter through this package.
 load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
-load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -23,20 +18,6 @@ dart_library(
     package_name = "mc_media",
 )
 
-flutter_library(
-    name = "mc_media_scope",
-    srcs = [
-        "lib/mc_media_scope.dart",
-        "lib/src/media_scope.dart",
-    ],
-    language_version = _LANG,
-    package_name = "mc_media",
-    deps = [
-        ":mc_media",
-        "@pub_deps//:flutter",
-    ],
-)
-
 dart_test(
     name = "api_image_test",
     size = "small",
@@ -46,20 +27,6 @@ dart_test(
     deps = [
         ":mc_media",
         "@pub_deps//:test",
-    ],
-)
-
-flutter_test(
-    name = "media_scope_test",
-    size = "small",
-    language_version = _LANG,
-    main = "test/media_scope_test.dart",
-    package_name = "mc_media",
-    deps = [
-        ":mc_media",
-        ":mc_media_scope",
-        "@pub_deps//:flutter",
-        "@pub_deps//:flutter_test",
     ],
 )
 

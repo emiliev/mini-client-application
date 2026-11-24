@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_test_utils/src/fixture_assets.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 
 /// Bazel `data` label every golden-testing package must list.
@@ -101,9 +102,10 @@ Widget mcGoldenApp({
   required Widget child,
   McThemeVariant variant = McThemeVariant.light,
   double textScale = 1.0,
+  AssetBundle? bundle,
 }) {
   final theme = McTheme.of(variant).copyWith(platform: TargetPlatform.iOS);
-  return MaterialApp(
+  final app = MaterialApp(
     debugShowCheckedModeBanner: false,
     theme: theme,
     builder: (context, app) => MediaQuery(
@@ -119,6 +121,7 @@ Widget mcGoldenApp({
       body: Align(alignment: Alignment.topCenter, child: child),
     ),
   );
+  return bundle == null ? app : DefaultAssetBundle(bundle: bundle, child: app);
 }
 
 /// Sets a [width] x [height] logical surface at 2x and resets it afterwards.
@@ -133,6 +136,10 @@ void mcSetSurface(WidgetTester tester, double width, double height) {
 /// Test names carry [acId] for ADR-0006 traceability. Goldens are read from
 /// `goldens/<component>.<variant>.x<scale>.png` next to the test file, which
 /// under Bazel must be listed in `data`.
+///
+/// To draw fixture art, pass [assetBundle] (a [McFixtureAssetBundle]) and the
+/// asset keys in [precache]; they are decoded before the first frame, so the
+/// golden shows the pictures, not placeholders.
 void mcGoldenMatrix({
   required String acId,
   required String component,
@@ -141,6 +148,8 @@ void mcGoldenMatrix({
   double height = 480,
   double heightAtScale2 = 800,
   Duration settle = Duration.zero,
+  AssetBundle? assetBundle,
+  Iterable<String> precache = const [],
 }) {
   for (final variant in McThemeVariant.values) {
     for (final scale in const [1.0, 2.0]) {
@@ -152,10 +161,14 @@ void mcGoldenMatrix({
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         try {
           mcSetSurface(tester, width, scale > 1 ? heightAtScale2 : height);
+          if (precache.isNotEmpty) {
+            await mcPrecacheFixtureImages(tester, assetBundle!, precache);
+          }
           await tester.pumpWidget(
             mcGoldenApp(
               variant: variant,
               textScale: scale,
+              bundle: assetBundle,
               child: Builder(builder: builder),
             ),
           );

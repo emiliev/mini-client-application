@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_media/mc_media.dart';
-import 'package:mc_media/mc_media_scope.dart';
 
 class _FakeResolver implements McImageResolver {
   @override
@@ -12,7 +12,7 @@ class _FakeResolver implements McImageResolver {
 }
 
 void main() {
-  testWidgets('T-0030-AC6: of(context) returns the scope resolver', (
+  testWidgets('T-0031-AC6: of(context) returns the scope resolver', (
     tester,
   ) async {
     final resolver = _FakeResolver();
@@ -33,7 +33,7 @@ void main() {
     expect(found, same(resolver));
   });
 
-  testWidgets('T-0030-AC6: of(context) without a scope throws FlutterError', (
+  testWidgets('T-0031-AC6: of(context) without a scope throws FlutterError', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -50,7 +50,7 @@ void main() {
     expect(error.toString(), contains('McMediaScope'));
   });
 
-  testWidgets('T-0030-AC6: a new resolver rebuilds dependents only', (
+  testWidgets('T-0031-AC6: a new resolver rebuilds dependents only', (
     tester,
   ) async {
     final first = _FakeResolver();
