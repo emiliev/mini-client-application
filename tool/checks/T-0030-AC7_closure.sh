@@ -1,7 +1,7 @@
 #!/bin/bash
 # T-0030-AC7: the closures of //utility/mc_paging and //utility/mc_media (the
 # pure library) contain no Flutter and no sky_engine. Positive control: the
-# closure of //utility/mc_media:mc_media_scope must show Flutter markers, so a
+# closure of //utility/mc_ds_media:mc_ds_media (where McMediaScope lives since T-0031) must show Flutter markers, so a
 # query that cannot see Flutter fails the check.
 #   MC_OUTPUT_BASE=/tmp/mc-ob-x tool/checks/T-0030-AC7_closure.sh [--out FILE]
 set -uo pipefail
@@ -18,7 +18,7 @@ for target in //utility/mc_paging:mc_paging //utility/mc_media:mc_media; do
   report "## $target ($n targets in the closure)" '```' "Flutter markers: ${hits:-none}" '```'
   [[ "$n" -lt 100 || -n "$hits" ]] && rc=1
 done
-control="$(bz cquery "deps(//utility/mc_media:mc_media_scope)" 2>/dev/null | sed 's/ (.*//' | grep -E "$FLUTTER" | sort -u | head -3)"
-report "## positive control: //utility/mc_media:mc_media_scope" '```' "Flutter markers: ${control:-none}" '```'
+control="$(bz cquery "deps(//utility/mc_ds_media:mc_ds_media)" 2>/dev/null | sed 's/ (.*//' | grep -E "$FLUTTER" | sort -u | head -3)"
+report "## positive control: //utility/mc_ds_media:mc_ds_media" '```' "Flutter markers: ${control:-none}" '```'
 [[ -z "$control" ]] && rc=1
 finish T-0030-AC7 $rc

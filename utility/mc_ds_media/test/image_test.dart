@@ -29,15 +29,15 @@ Widget _app(
   AssetBundle? bundle,
   bool disableAnimations = false,
 }) {
-  Widget body = McMediaScope(resolver: resolver, child: child);
-  if (disableAnimations) {
-    body = Builder(
-      builder: (context) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(disableAnimations: true),
-        child: body,
-      ),
-    );
-  }
+  final scoped = McMediaScope(resolver: resolver, child: child);
+  final body = disableAnimations
+      ? Builder(
+          builder: (context) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(disableAnimations: true),
+            child: scoped,
+          ),
+        )
+      : scoped;
   return mcGoldenApp(child: body, bundle: bundle);
 }
 
@@ -46,7 +46,9 @@ Widget _app(
 /// arrives.
 Future<void> _pumpUntilFound(WidgetTester tester, Finder finder) async {
   for (var i = 0; i < 200 && finder.evaluate().isEmpty; i++) {
-    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 10)));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 10)),
+    );
     await tester.pump();
   }
   expect(finder, findsOneWidget, reason: 'the image never finished loading');
@@ -131,7 +133,10 @@ void main() {
         ]) {
           await tester.pumpWidget(
             _app(
-              SizedBox(width: 100, child: McImage(image: ApiImage(path: path))),
+              SizedBox(
+                width: 100,
+                child: McImage(image: ApiImage(path: path)),
+              ),
               bundle: McFixtureAssetBundle(),
             ),
           );

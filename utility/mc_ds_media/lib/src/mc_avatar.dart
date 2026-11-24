@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mc_ds_media/src/mc_image.dart';
 import 'package:mc_media/mc_media.dart';
-
-import 'mc_image.dart';
 
 /// A circular [McImage].
 class McAvatar extends StatelessWidget {

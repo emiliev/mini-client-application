@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
-import 'package:mc_media/mc_media.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
 const _art = 'packages/mc_fixtures_media/assets/characters/003.png';

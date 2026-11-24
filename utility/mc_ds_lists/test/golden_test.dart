@@ -4,7 +4,6 @@ import 'package:mc_ds_cards/mc_ds_cards.dart';
 import 'package:mc_ds_lists/mc_ds_lists.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
-import 'package:mc_media/mc_media.dart';
 import 'package:mc_paging/mc_paging.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 

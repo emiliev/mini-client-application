@@ -103,8 +103,11 @@ class McPagedGrid<T> extends StatelessWidget {
           ? null
           : (context) =>
                 _grid(context, skeletonCount, (ctx, _) => skeleton(ctx)),
-      itemsSliver: (context, items) =>
-          _grid(context, items.length, (ctx, i) => itemBuilder(ctx, items[i], i)),
+      itemsSliver: (context, items) => _grid(
+        context,
+        items.length,
+        (ctx, i) => itemBuilder(ctx, items[i], i),
+      ),
     );
   }
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mc_ds_cards/mc_ds_cards.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
-import 'package:mc_media/mc_media.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
 const _art = 'packages/mc_fixtures_media/assets/characters/005.png';
@@ -54,7 +53,8 @@ void main() {
     builder: (_) => _cell(
       McMediaCard(
         image: _image,
-        title: 'Wiimm the Wanderer of the Nine Realms and Keeper of the Long Name',
+        title:
+            'Wiimm the Wanderer of the Nine Realms and Keeper of the Long Name',
         subtitle: 'A subtitle that is also much too long to fit on a line',
         onTap: () {},
       ),

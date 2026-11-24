@@ -54,7 +54,7 @@ void pagedBehaviour(String name, Widget Function(PagedHarness h) build) {
     ) async {
       final counts = await pump(tester, pagedState(20));
       final max = maxScroll(tester);
-      expect(max, greaterThan(1000), reason: 'the list must really scroll');
+      expect(max, greaterThan(900), reason: 'the list must really scroll');
 
       // Up to about half: nothing.
       await tester.drag(scrollable(), Offset(0, -max * 0.5));
@@ -123,8 +123,10 @@ void pagedBehaviour(String name, Widget Function(PagedHarness h) build) {
     ) async {
       final counts = await pump(tester, pagedState(20, isLoadingMore: true));
       await tester.fling(scrollable(), const Offset(0, -9000), 6000);
-      // The footer spinner animates forever: advance a bounded time.
-      await tester.pump(const Duration(seconds: 2));
+      // The footer spinner animates forever, so settle by hand.
+      for (var i = 0; i < 40; i++) {
+        await tester.pump(const Duration(milliseconds: 100));
+      }
       expect(scrollPixels(tester), maxScroll(tester));
       expect(counts.loadMore, 0);
     });

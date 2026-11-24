@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
+import 'package:mc_ds_media/src/image_provider_for.dart';
+import 'package:mc_ds_media/src/mc_media_scope.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_media/mc_media.dart';
-
-import 'image_provider_for.dart';
-import 'mc_media_scope.dart';
 
 /// An [ApiImage] resolved through the nearest [McMediaScope].
 ///

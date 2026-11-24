@@ -34,11 +34,7 @@ dart_test(
 dart_test(
     name = "purity_test",
     size = "small",
-    data = [
-        "lib/mc_media.dart",
-        "lib/src/api_image.dart",
-        "lib/src/image_resolver.dart",
-    ],
+    data = glob(["lib/**/*.dart"]),
     language_version = _LANG,
     main = "test/purity_test.dart",
     package_name = "mc_media",

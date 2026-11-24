@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show Theme;
-import 'package:flutter/widgets.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_feedback/mc_ds_feedback.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
@@ -77,26 +76,24 @@ class _PagedBodyState<T> extends State<PagedBody<T>> {
       m.axis == Axis.vertical &&
       m.pixels >= m.maxScrollExtent * mcPagedLoadMoreThreshold;
 
-  void _request() {
-    _requested = true;
-    widget.onLoadMore();
+  /// Asks the owner for the next page when [m] is past the threshold and no
+  /// request is outstanding for the current state.
+  void _maybeRequest(ScrollMetrics m, int depth) {
+    if (depth == 0 && _canLoadMore && _pastThreshold(m)) {
+      _requested = true;
+      widget.onLoadMore();
+    }
   }
 
   bool _onScroll(ScrollNotification n) {
-    if (n.depth == 0 && _canLoadMore && _pastThreshold(n.metrics)) {
-      if (n is ScrollMetricsNotification) {
-        // Sent during layout: ask once the frame is done. This is the case of
-        // a list that does not fill the viewport yet.
-        _requested = true;
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted) {
-            widget.onLoadMore();
-          }
-        });
-      } else {
-        _request();
-      }
-    }
+    _maybeRequest(n.metrics, n.depth);
+    return false;
+  }
+
+  /// Sent after layout when the extents change. This is how a list that does
+  /// not fill the viewport yet (nothing to scroll) asks for its next page.
+  bool _onMetrics(ScrollMetricsNotification n) {
+    _maybeRequest(n.metrics, n.depth);
     return false;
   }
 
@@ -134,26 +131,29 @@ class _PagedBodyState<T> extends State<PagedBody<T>> {
       content = widget.itemsSliver(context, s.items);
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: _onScroll,
-      child: CustomScrollView(
-        controller: widget.controller,
-        physics: const AlwaysScrollableScrollPhysics(
-          parent: BouncingScrollPhysics(),
-        ),
-        slivers: [
-          CupertinoSliverRefreshControl(onRefresh: widget.onRefresh),
-          content,
-          if (!firstLoad)
-            SliverToBoxAdapter(
-              child: _Footer(
-                state: s,
-                message: widget.footerErrorMessage,
-                retryLabel: widget.retryLabel,
-                onRetry: widget.onRetry,
+    return NotificationListener<ScrollMetricsNotification>(
+      onNotification: _onMetrics,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _onScroll,
+        child: CustomScrollView(
+          controller: widget.controller,
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
+          slivers: [
+            CupertinoSliverRefreshControl(onRefresh: widget.onRefresh),
+            content,
+            if (!firstLoad)
+              SliverToBoxAdapter(
+                child: _Footer(
+                  state: s,
+                  message: widget.footerErrorMessage,
+                  retryLabel: widget.retryLabel,
+                  onRetry: widget.onRetry,
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -185,7 +185,8 @@ class _Footer extends StatelessWidget {
                 liveRegion: true,
                 child: Text(
                   message,
-                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(color: p.error),
+                  style: Theme.of(context).textTheme.bodyMedium!
+                      .copyWith(color: p.error),
                 ),
               ),
             ),

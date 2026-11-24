@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_cards/mc_ds_cards.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
-import 'package:mc_media/mc_media.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
 const _image = ApiImage(path: 'mock-asset://characters/2');
@@ -23,7 +22,10 @@ void main() {
       _app(
         SizedBox(
           width: 160,
-          height: 260,
+          height: McMediaCard.heightFor(
+            width: 160,
+            textScaler: TextScaler.noScaling,
+          ),
           child: McMediaCard(
             image: _image,
             title: 'Wiimm the Wanderer',
@@ -34,7 +36,9 @@ void main() {
       ),
     );
 
-    final node = tester.getSemantics(find.bySemanticsLabel('Wiimm the Wanderer'));
+    final node = tester.getSemantics(
+      find.bySemanticsLabel('Wiimm the Wanderer'),
+    );
     expect(node, isSemantics(isButton: true, label: 'Wiimm the Wanderer'));
     expect(node.value, 'Hero');
     handle.dispose();
@@ -48,7 +52,10 @@ void main() {
       _app(
         SizedBox(
           width: 160,
-          height: 260,
+          height: McMediaCard.heightFor(
+            width: 160,
+            textScaler: TextScaler.noScaling,
+          ),
           child: McMediaCard(image: _image, title: 'Wiimm', onTap: () {}),
         ),
       ),
@@ -85,7 +92,10 @@ void main() {
       _app(
         SizedBox(
           width: 160,
-          height: 260,
+          height: McMediaCard.heightFor(
+            width: 160,
+            textScaler: TextScaler.noScaling,
+          ),
           child: McMediaCard(
             image: _image,
             title: 'Wiimm',
@@ -104,7 +114,9 @@ void main() {
   ) async {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(
-      _app(const SizedBox(width: 160, height: 260, child: McMediaCard.skeleton())),
+      _app(
+        const SizedBox(width: 160, height: 300, child: McMediaCard.skeleton()),
+      ),
     );
     expect(find.byType(McImage), findsNothing);
     expect(find.byType(Text), findsNothing);
@@ -128,9 +140,9 @@ void main() {
             ),
             child: McMediaCard(
               image: _image,
-              title:
-                  'Wiimm the Wanderer of the Nine Realms and Keeper of the Long Name',
-              subtitle: 'A subtitle that is also much too long to fit on a line',
+              title: 'Wiimm the Wanderer of the Nine Realms and Keeper of the Long Name',
+              subtitle:
+                  'A subtitle that is also much too long to fit on a line',
               onTap: () {},
             ),
           ),

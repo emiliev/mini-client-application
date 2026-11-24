@@ -7,7 +7,6 @@ library;
 
 import 'dart:async';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -65,7 +64,9 @@ class McFixtureAssetBundle extends CachingAssetBundle {
     if (failingKeys.contains(key) || !key.startsWith(_prefix)) {
       throw FlutterError('Unable to load asset: "$key".');
     }
-    final file = File('${_fixturesDir().path}/${key.substring(_prefix.length)}');
+    final file = File(
+      '${_fixturesDir().path}/${key.substring(_prefix.length)}',
+    );
     if (!file.existsSync()) {
       throw FlutterError('Unable to load asset: "$key" (no such file).');
     }

@@ -36,8 +36,10 @@ Future<void> pumpOnSurface(
   await tester.pump();
 }
 
-double scrollPixels(WidgetTester tester) =>
-    tester.state<ScrollableState>(find.byType(Scrollable).first).position.pixels;
+double scrollPixels(WidgetTester tester) => tester
+    .state<ScrollableState>(find.byType(Scrollable).first)
+    .position
+    .pixels;
 
 double maxScroll(WidgetTester tester) => tester
     .state<ScrollableState>(find.byType(Scrollable).first)
