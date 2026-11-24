@@ -62,7 +62,7 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 | AC7 | `//utility/mc_paging:purity_test`, `//utility/mc_media:purity_test`, `tool/checks/T-0030-AC7_closure.sh` ([report](../evidence/T-0030/engineer/AC7_closure.md), [negative control](../evidence/T-0030/engineer/AC7_negative_control.md)), gates below |
 
 ### Gates (logs in the evidence directory)
-`test //...` 57/57 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
+`test //...` 58/58 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
 
 ### Root changes
 `pubspec.yaml` workspace: `utility/mc_media`, `utility/mc_paging`. `pubspec.lock` re-resolved with `fvm dart pub get` (no new third-party packages; `freezed_annotation 3.1.0` was already locked). `MODULE.bazel.lock` unchanged.
