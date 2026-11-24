@@ -1,0 +1,10 @@
+== workspace: <scratch>/repro
+== pub get (writes pubspec.lock for pub.from_lock)
+== bazel test //...
+//:characters_api_test                                          (cached) PASSED in 0.6s
+Executed 0 out of 1 test: 1 test passes.
+== build_runner reference (generator versions as in dart/ext/pubspec.lock)
+  Built with build_runner/aot in 13s; wrote 6 outputs.
+EQUAL   lib/src/character.g.dart
+EQUAL   lib/src/envelope.g.dart
+EQUAL   lib/src/characters_api.g.dart
