@@ -1,0 +1,6 @@
+f_nokey: locale de is missing key bye
+f_nokey: locale en_XA is missing key hello
+f_nolocale: missing locale de (expected f_nolocale_de.arb)
+u_badloc: locale de has unknown key b
+u_badloc: u_badloc_en.arb has @@locale "de", expected "en"
+l10n_check: 5 violation(s) in /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/arbroot
