@@ -6,15 +6,23 @@ part 'api_page.g.dart';
 /// [ApiResponse] as `ApiResponse<ApiPage<T>>`.
 @JsonSerializable(genericArgumentFactories: true)
 class ApiPage<T> {
-  const ApiPage({required this.offset, required this.limit, required this.total, required this.results});
+  const ApiPage({
+    required this.offset,
+    required this.limit,
+    required this.total,
+    required this.results,
+  });
 
-  factory ApiPage.fromJson(Map<String, dynamic> json, T Function(Object? json) fromJsonT) =>
-      _$ApiPageFromJson(json, fromJsonT);
+  factory ApiPage.fromJson(
+    Map<String, dynamic> json,
+    T Function(Object? json) fromJsonT,
+  ) => _$ApiPageFromJson(json, fromJsonT);
 
   final int offset;
   final int limit;
   final int total;
   final List<T> results;
 
-  Map<String, dynamic> toJson(Object? Function(T value) toJsonT) => _$ApiPageToJson(this, toJsonT);
+  Map<String, dynamic> toJson(Object? Function(T value) toJsonT) =>
+      _$ApiPageToJson(this, toJsonT);
 }

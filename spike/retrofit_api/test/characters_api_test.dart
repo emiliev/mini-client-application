@@ -18,7 +18,11 @@ class _CannedAdapter implements HttpClientAdapter {
         'limit': 30,
         'total': 1,
         'results': [
-          {'id': 1009610, 'name': 'Spider-Man', 'thumbnail_url': 'https://example.test/s.jpg'},
+          {
+            'id': 1009610,
+            'name': 'Spider-Man',
+            'thumbnail_url': 'https://example.test/s.jpg',
+          },
         ],
       },
     },
@@ -31,10 +35,16 @@ class _CannedAdapter implements HttpClientAdapter {
   };
 
   @override
-  Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancelFuture) async {
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
     requests.add(options);
     final key = '${options.method} ${options.uri.path}';
-    if (!_routes.containsKey(key)) return ResponseBody.fromString('', 404);
+    if (!_routes.containsKey(key)) {
+      return ResponseBody.fromString('', 404);
+    }
     return ResponseBody.fromString(
       jsonEncode(_routes[key]),
       200,
@@ -54,16 +64,34 @@ void main() {
 
   setUp(() {
     adapter = _CannedAdapter();
-    api = CharactersApi(Dio()..httpClientAdapter = adapter, baseUrl: 'https://api.example.test/');
+    api = CharactersApi(
+      Dio()..httpClientAdapter = adapter,
+      baseUrl: 'https://api.example.test/',
+    );
   });
 
   test('T-0027-AC1 generated client decodes ApiResponse<ApiPage<CharacterDto>> with query params', () async {
-    final response = await api.getCharacters(offset: 0, limit: 30, team: 'avengers');
+    final response = await api.getCharacters(
+      offset: 0,
+      limit: 30,
+      team: 'avengers',
+    );
 
     expect(response.code, 200);
     expect(response.data.total, 1);
-    expect(response.data.results.single, const CharacterDto(id: 1009610, name: 'Spider-Man', thumbnailUrl: 'https://example.test/s.jpg'));
-    expect(adapter.requests.single.uri.queryParameters, {'offset': '0', 'limit': '30', 'team': 'avengers'});
+    expect(
+      response.data.results.single,
+      const CharacterDto(
+        id: 1009610,
+        name: 'Spider-Man',
+        thumbnailUrl: 'https://example.test/s.jpg',
+      ),
+    );
+    expect(adapter.requests.single.uri.queryParameters, {
+      'offset': '0',
+      'limit': '30',
+      'team': 'avengers',
+    });
   });
 
   test('T-0027-AC1 generated client fills path params and sends a freezed @Body as JSON', () async {

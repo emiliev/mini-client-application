@@ -2,7 +2,7 @@ import 'package:api_envelope/api_envelope.dart';
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
-import 'character_dto.dart';
+import 'package:retrofit_api/src/character_dto.dart';
 
 part 'characters_api.g.dart';
 
@@ -28,5 +28,6 @@ abstract class CharactersApi {
 /// Hand-written helpers next to the API. T-0027-AC2 edits this body (not a
 /// signature) and checks which actions rerun.
 extension CharactersApiPaging on CharactersApi {
-  Future<ApiResponse<ApiPage<CharacterDto>>> firstPage({String? team}) => getCharacters(limit: 30, team: team);
+  Future<ApiResponse<ApiPage<CharacterDto>>> firstPage({String? team}) =>
+      getCharacters(limit: 30, team: team);
 }
