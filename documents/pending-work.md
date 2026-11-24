@@ -44,4 +44,8 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-039 | **Upstream:** rules_flutter merges `dio` + `dio_web_adapter` (a pub cycle) into a Flutter target, which pulls `sky_engine` into pure-Dart closures and disables codegen summaries. Workaround: `cycle_breaks` (T-0023, F-0019) | Upstream | T-0023 Verifier | With P3-13 drafts | — |
 | P-040 | `mc_api_client`: shorten Dio failure messages; clear the retry marker on the final error; wrap the `T-0023-AC5` check with an output base | Tooling | T-0023 Verifier | With P1-05 follow-up | — |
 | P-041 | `mc_feature_flow`: pops that remove several pages at once (e.g. pop-to-root) restore only the target depth; test and support them | Feature | T-0022 Verifier | Before features use deep flows | — |
+| P-042 | Real `simctl openurl` deep-link e2e: tap the system confirmation dialog via XCUITest or Patrol | Quality | T-0021, F-0020 | With P5-10 | — |
+| P-043 | File-drop e2e link hook is also active in profile builds; `main.dart` files aren't covered by the lint aspect | Hygiene | T-0021 Verifier | With P5-09 | — |
+| P-044 | `tool/ide_sync` so pub/IDE mode gets `app_config.json`; auth guard in the router `redirect` (P1-16 AC4) | Feature | T-0021 | With P3-10 / P1-05 auth | — |
+| P-045 | Update plan 01 text: actual DI initializer order and not-found page location | Docs | T-0021 Verifier | Next plan touch | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

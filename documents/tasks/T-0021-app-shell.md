@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-24; Verifier PASS `47eba5c`) |
 | Owner | crew: Engineer (Opus, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0021-app-shell` |
@@ -76,3 +76,7 @@ The Tide "glue" app running on the iOS simulator: boot page, DI start-up from th
   - `tool/ide_sync` for the pub-mode `app_config.json`;
   - add the auth guard to the router's `redirect` with `mc_api_auth`;
   - `tool/loc` on main isn't `dart format`-clean (seen while formatting; left untouched).
+
+## Merge (TL)
+- 2026-11-24: **AC3 amended by the TL:** iOS 26.2 and 18.2 both show a confirmation dialog for `simctl openurl` that simctl can't tap (F-0020). AC3 is met by a platform-channel deep-link test plus an R19-style file-drop link screenshot; the real `openurl` e2e is P-042. The TL also approved the `mc_di` `abandonDIContainerInitialization()` API (needed to retry a hung boot, P-028). Verifier PASS `6c625cf` (mutations caught; release binary has no file-drop hook; 0 `FlutterAotMacho` in a cold `build //...`). `/code-review` found 3 important boot-lifecycle issues (a link lost between ready and the router mounting, failure after timeout ignored, Retry unable to escape a hung boot), fixed in `f7a4fe8`. Re-verify PASS `47eba5c`. The TL merged `--no-ff`; on the merge result tests passed 39/39, lint was clean, `mc_arch_check` reported OK and the sim build succeeded.
+- Follow-ups: P-042 (real `openurl` e2e via XCUITest or Patrol), P-043 (file-drop hook also active in profile builds; `main.dart` not covered by lint), P-044 (`tool/ide_sync` for `app_config.json` in pub mode; auth guard in the router redirect), P-045 (plan 01 text: DI order and not-found page location).

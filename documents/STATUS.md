@@ -5,16 +5,15 @@ _Last updated: 2026-11-23 by Tech Lead_
 | | |
 |---|---|
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
-| **Phase** | **Phase A, wave A1** (toolchain, `tool/loc`, perf harness) |
+| **Phase** | Phase A/B: foundation **done**; next is the first feature (`characters_list`) plus the codegen shims (retrofit, injectable, BDD) |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
-| **Code** | Bazel 9.3.0 + Flutter 3.47.7 toolchain (`MODULE.bazel`, `.bazelrc`, `tool/bazelw`), the first Flutter iOS app `spike/hello` under Bazel, `tool/{e2e_ios,loc,perf,checks}` |
+| **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`): 24 packages (foundation utilities, design system, mocked backend and fixtures, API client, feature flow), 39 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7 |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0017 Engineer (Sonnet): workspace, arch guard, `mc_prelude`, `mc_di` |
+| **Active crew** | None (between waves) |
 
 ## Now
-- Wave A1 **done**: T-0014, T-0015 and T-0016 merged.
-- [T-0017](tasks/T-0017-workspace-and-foundation.md) workspace + foundation utilities: **In Progress**
+- Foundation wave done: T-0017 to T-0023 and T-0021 merged.
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
