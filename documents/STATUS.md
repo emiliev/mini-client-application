@@ -5,18 +5,19 @@ _Last updated: 2026-11-24 by Tech Lead_
 | | |
 |---|---|
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
-| **Phase** | Phase A/B: foundation **done**; next is the first feature (`characters_list`) plus the codegen shims (retrofit, injectable, BDD) |
+| **Phase** | Phase A done: foundation and all three codegen shims (retrofit, injectable, BDD) are Bazel-native. Now Phase C: the LD kits, then the first feature, `characters_list` |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`): 24 packages (foundation utilities, design system, mocked backend and fixtures, API client, feature flow), 39 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7 |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0029 engineer (rebase for merge), T-0030 engineer (Sonnet) |
+| **Active crew** | T-0030 Verifier, T-0031 engineer (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
 - **T-0027 merged:** retrofit codegen runs in Bazel through patch 0001, byte-identical to build_runner. New rule R30: freezed models spell out `@Freezed(fromJson: true, toJson: true)`.
 - **T-0028 merged:** injectable codegen runs in Bazel (patch 0002), byte-identical to build_runner, with the aggregate step cached across body edits.
-- T-0029 (BDD) is verified and rebasing onto 0001+0002. T-0030 (`mc_paging`, `mc_media`) is in progress, then the DS list and media widgets, then `characters_list` (P1-17).
+- **T-0029 merged:** `.feature` files generate AC-tagged widget tests in Bazel (patch 0003). **No generator needed the build_runner fallback (R28).**
+- T-0030 (`mc_paging`, `mc_media`) is in verification; next the DS list and media widgets, then `characters_list` (P1-17).
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).

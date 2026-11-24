@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-25 `3bd9372`; Verifier PASS `73ab4bd`) |
 | Owner | crew: Engineer (Opus, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0029-bdd-generator` |
@@ -34,8 +34,33 @@ One Engineer pass plus one fix round. Otherwise stop with a precise finding, and
 - **T-0029-AC5:** Given stock `bdd_widget_test` 3.0.5 in the overlay with `testMethodName: mcTestWidgets`, when it generates a tagged feature, then each scenario's tags reach `mcTestWidgets` as `tags:` and the JUnit name carries the AC ID. This decides that the R28 BDD fallback stays traceable (V2-07).
 - **T-0029-AC6:** `rules_fork.sh check` passes; `test //...`, lint and `mc_arch_check` are green; the upstream draft exists.
 
+## Verification plan (Engineer)
+| AC | Layer | Test / check | Evidence (`documents/evidence/T-0029/engineer/`) |
+|---|---|---|---|
+| AC1 | L2 | `tool/checks/T-0029-AC1_junit_names.sh` (runs `//spike/bdd_sample:bdd_test` uncached and reads its `test.xml`); scenarios tagged `@T-0001-AC1`, `@T-0029-AC1`, `@T-0029-AC4` | `T-0029-AC1_junit_names.md`, `T-0029-AC1_bdd_test.xml`, `generated/` |
+| AC2 | L1 | `tool/checks/T-0029-AC2_missing_step.sh` (manual fixtures `//spike/bdd_sample/test/negative:missing_step` and `:shadowed_step`; hashes every file under `spike/bdd_sample` + `git status --ignored` before and after); fork test `bdd_generator_test` ("missing steps fail naming each of them") | `T-0029-AC2_missing_step.md` |
+| AC3 | L1 | `tool/checks/T-0029-AC3_scaffold.sh` (`bazel run //tool/bdd:scaffold` on a temp copy) | `T-0029-AC3_scaffold.md` |
+| AC4 | L1 | `tool/checks/T-0029-AC4_no_analyzer.sh`; `//utility/mc_test_steps:data_table_test` (`T-0029-AC4 DataTable keeps the generated const shape`); the `greeting_table.feature` scenario `[T-0029-AC4]` | `T-0029-AC4_no_analyzer.md`, `T-0029-AC4_cquery_notool_deps.txt`, `T-0029-AC4_tool_closure_generator_targets.txt` |
+| AC5 | L2 | `tool/checks/T-0029-AC5_stock_fallback.sh` (stock bdd_widget_test 3.0.5 + build_runner in an overlay copy, then `flutter test`) | `T-0029-AC5_stock_fallback.md`, `T-0029-AC5_fallback_junit.xml`, `T-0029-AC5_stock_greeting_browse_test.dart` |
+| AC6 | L0/L1 | `tool/rules_fork.sh check`, `tool/bazelw test //...`, `tool/bazelw build --config=lint //...`, `tool/bazelw run //tool/mc_arch_check:bin`, `test @rules_dart//dart/ext/bdd:all`; upstream draft `documents/upstream/U-D-bdd/` | `T-0029-AC6_gates.md` |
+
 ## Log
 - 2026-11-24: Created and dispatched (codegen wave, Phase A3).
+- 2026-11-24 (Engineer): Done in one pass, inside the R28 timebox; no fallback needed. Patch `0003-ext-bdd-generator.patch` (`dart/ext/bdd/`, ext lock + `bdd_widget_test: 3.0.5`). Deviations from plan 03 §4.4 (F-0027): the generator is a plain `dart_binary` speaking the shim contract (not `shimMain`); step indexes go to `dart_sqlcodegen` as `parts` (`asset_deps` refuses other packages' files); the analyzer is in the generator's exec closure (via `dart_style`), so AC4 is checked on `--notool_deps`. `tool/verify.sh` does not exist yet; its gates were run one by one (AC6).
+- 2026-11-24 (Engineer, R28 fix round after Verifier FAIL `909321e`): (1) imports re-sorted after the rewrites, stubs formatted at the package's language version, the AC3 check now builds scaffolded stubs under `--config=lint`; (2) `dart/ext/bdd` format-clean, and the fork's own `bazel test //dart/ext/bdd:all` passes (it also needed the fork's `MODULE.bazel.lock` and 8 `// ignore: implementation_imports`, matching `builder_shim.dart`); (3) AC5 evidence is now written (the `--out` path was relative to the scratch dir); (4) F-0027 fact 11 and U-D-bdd: 0003 is rebased onto 0001+0002 at merge time; (5) BUILD comment corrected; (6) the scaffold reads `:step_index`, which now lists only `lib/src/<group>/**`; (7–9) `mc_bdd_tests` handles a root-level feature, fails on target-name collisions and on empty `features`; (10) duplicate local step basenames fail; (11) bad `--config` / index JSON and wrongly typed options give a `BddGenerationError`; (12) `../` step folders are accepted; (13) the scaffold scans the same top-level features and validates the same config keys; (14) the AC5 overlay keeps each dep's `flutter:` section (and copies `assets/`); (15) every AC4 `rc=1` branch reports a FAIL line. Fork tests: 15.
+- 2026-11-25 (Engineer, merge prep after Verifier PASS `73ab4bd`): merged `origin/main` (0aab035, patches 0001 retrofit + 0002 injectable). Patch 0003 rebuilt in a fresh fork on top of 0001+0002 (fork `9fd728e6`): the fork `MODULE.bazel.lock` hunk is dropped (queue rule); `bdd_widget_test: 3.0.5` sits in sorted order in `dart/ext/pubspec.yaml`; `dart/ext/pubspec.lock` re-resolved with every generator: added bdd_widget_test 3.0.5, characters 1.4.1, cucumber_gherkin 42.0.1, cucumber_messages 34.2.1, diacritic 0.1.6; no version moved; `build` 4.0.11. 0001/0002 restored byte-identical from origin/main. Root `pubspec.yaml` = union of members (`pub get`: root lock unchanged); overlay lock re-resolved (adds the 4 BDD packages only); `MODULE.bazel.lock` regenerated by Bazel. AC5 check fixed for the merged overlay pubspec (it already declares `dio`); its scratch resolve now reports a harmless `test_api 0.7.15 -> 0.7.12` (the SDK's `flutter_test` pin in the scratch package only). F-0027 facts renumbered.
 
 ## Outcome
-_Pending._
+Done (Engineer; awaiting Verifier).
+- **Fork patch** `third_party/rules_patches/ai_rules_dart/0003-ext-bdd-generator.patch`: `bdd_feature_test` / `bdd_step_index` / `bdd_suite_main`, generator, scaffold library, 15 fork tests. Rebased onto 0001+0002; `check` replays all 3 strictly (F-0027 fact 11).
+- **`tool/bazel/defs.bzl`** `mc_bdd_tests` (one `:bdd_test` per package; `setup` hook for fixture sets); `tool/bazel/BUILD.bazel` is new.
+- **`utility/mc_test_steps`** skeleton: `DataTable`, `the backend serves`, `I tap`, `I see`, `I don't see`, `I see the texts` (table), `:step_index`.
+- **`tool/bdd:scaffold`** (`tool/bazelw run //tool/bdd:scaffold -- //<pkg>`).
+- **`spike/bdd_sample`**: two tagged features over `mc_test_utils` / `initFlow` (3 scenarios), negative fixtures in `test/negative/` (manual).
+- **Overlay**: `bdd_widget_test: 3.0.5` in `tool/build_runner_overlay` (AC5 only).
+- Findings: [F-0027](../findings/F-0027-bdd-generator-under-bazel.md). Upstream: [U-D-bdd](../upstream/U-D-bdd/README.md).
+- Follow-ups (for `pending-work.md`): `docs/ext.md` section + e2e exemplar before filing upstream; P5-02 fills `mc_test_steps`; buildgen emits `mc_bdd_tests`; if R28 is ever used, the stock path needs `externalSteps` by `src/` path and a `DataTable` bridge (F-0027 fact 10); `tool/verify.sh` should run the T-0029 checks.
+
+## Merge (TL)
+- 2026-11-25: Verifier FAIL at `a4e984b` (fork code not `dart format`-clean; scaffolded data-table stubs failed `directives_ordering`) plus `/code-review` (scaffold vs `:step_index` disagreed on shared steps; 9 nits). Fixed in `4cb1d5a`; re-verify PASS `73ab4bd` (import-sort mutation caught by the AC3 check and the fork tests; 8 fork-side `// ignore: implementation_imports` accepted by the TL). The engineer merged `origin/main` (`1a25f26`): patch 0003 rebuilt on 0001+0002 without the fork `MODULE.bazel.lock` hunk, ext lock re-resolved (5 additions, no version moved, `build` 4.0.11), 0001/0002 byte-identical, retrofit and injectable outputs still equal build_runner's. The TL merged `--no-ff`; on the merge result `rules_fork.sh check` passed with 3 patches, 51/51 tests passed, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-061, P-062.
