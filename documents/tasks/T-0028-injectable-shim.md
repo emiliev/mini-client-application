@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-25 `54bf1fa`; Verifier PASS `871f90a`) |
 | Owner | crew: Engineer (Opus, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0028-injectable-shim` |
@@ -64,3 +64,7 @@ Follow-ups (for `pending-work.md`):
 - An annotated file missing from `srcs` is silently dropped from the config (no shard); buildgen's annotation scan must cover it.
 - `tool/build_runner_overlay/injectable_reference.sh` is hard-coded to the sample's first-party deps (`mc_di`); generalise it (as `spike_reference.sh` does) before using it on other packages.
 - Rebase patch 0002 onto T-0027's 0001 once T-0027 is merged (TL request), regenerate the ext lock with both, re-export, `check`.
+
+## Merge (TL)
+- 2026-11-25: Verifier PASS at `da8054f` (`ced0c05`), then `/code-review` found 4 evidence scripts that could false-pass (masked build, an always-"absent" query, unchecked fetch, a cache hit counted as a run). Fixed in `7d55ab2` with 4 more nits, F-0026 → F-0028; re-verify PASS `871f90a` (each fixed check broken on purpose). Rebased onto the merged queue by merging `origin/main` (`4b12f29`): patch 0001 byte-identical, 0002 on top, ext lock re-resolved (0001's lock + injectable 3.0.0, no version moved), retrofit output still equal to build_runner's. The TL merged `--no-ff`; on the merge result `rules_fork.sh check` passed with 2 patches, 49/49 tests passed, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-056 to P-060.
