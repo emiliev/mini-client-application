@@ -27,3 +27,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0026](T-0026/verification-report.md) | PASS (re-verified after review fixes) | Test harness: isolation probes, unmatched requests, fail/hold/release |
 | [T-0027](T-0027/verification-report.md) | PASS (re-verified after FAIL) | retrofit shim: byte identity incl. cross-package summaries, rerun scope, masked-build negative |
 | [T-0028](T-0028/verification-report.md) | PASS (re-verified after review fixes) | injectable shim: byte identity with tricky cases, negative control on the library-order fix, aggregate cache cutoff |
+| [T-0029](T-0029/verification-report.md) | PASS (re-verified after FAIL) | BDD generator: AC-tagged JUnit names, missing-step build failures, test closure without analyzer, deterministic outputs |

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-25 `3bd9372`; Verifier PASS `73ab4bd`) |
 | Owner | crew: Engineer (Opus, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0029-bdd-generator` |
@@ -60,3 +60,7 @@ Done (Engineer; awaiting Verifier).
 - **Overlay**: `bdd_widget_test: 3.0.5` in `tool/build_runner_overlay` (AC5 only).
 - Findings: [F-0027](../findings/F-0027-bdd-generator-under-bazel.md). Upstream: [U-D-bdd](../upstream/U-D-bdd/README.md).
 - Follow-ups (for `pending-work.md`): `docs/ext.md` section + e2e exemplar before filing upstream; P5-02 fills `mc_test_steps`; buildgen emits `mc_bdd_tests`; if R28 is ever used, the stock path needs `externalSteps` by `src/` path and a `DataTable` bridge (F-0027 fact 10); `tool/verify.sh` should run the T-0029 checks.
+
+## Merge (TL)
+- 2026-11-25: Verifier FAIL at `a4e984b` (fork code not `dart format`-clean; scaffolded data-table stubs failed `directives_ordering`) plus `/code-review` (scaffold vs `:step_index` disagreed on shared steps; 9 nits). Fixed in `4cb1d5a`; re-verify PASS `73ab4bd` (import-sort mutation caught by the AC3 check and the fork tests; 8 fork-side `// ignore: implementation_imports` accepted by the TL). The engineer merged `origin/main` (`1a25f26`): patch 0003 rebuilt on 0001+0002 without the fork `MODULE.bazel.lock` hunk, ext lock re-resolved (5 additions, no version moved, `build` 4.0.11), 0001/0002 byte-identical, retrofit and injectable outputs still equal build_runner's. The TL merged `--no-ff`; on the merge result `rules_fork.sh check` passed with 3 patches, 51/51 tests passed, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-061, P-062.
