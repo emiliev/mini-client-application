@@ -65,7 +65,11 @@ for s in out:
 EOF
 )
 agg=$(printf '%s\n' "$spawns" | grep -a '^DartAggregateCodegen' || true)
-shard_run=$(printf '%s\n' "$spawns" | grep -a "^DartCodegen.*greeting_repository_inj" || true)
+# The edited file's shard must really execute (not a cache hit), or the run
+# proves nothing about the cutoff.
+shard_run=$(printf '%s\n' "$spawns" | grep -a -E $'^DartCodegen\t[^\t]*greeting_repository_inj\tcacheHit=False\texitCode=0$' || true)
+# Every aggregate spawn (if any) must be a cache hit.
+agg_miss=$(printf '%s\n' "$spawns" | grep -a '^DartAggregateCodegen' | grep -av $'\tcacheHit=True\t' || true)
 inputs=$(bz aquery "mnemonic(DartAggregateCodegen, $TARGET)" --output=jsonproto 2>/dev/null | /usr/bin/python3 -I -c '
 import json, sys
 d = json.load(sys.stdin)
@@ -100,13 +104,15 @@ report "# T-0028-AC2: injectable early cutoff (H-DI-CUTOFF)" "" \
   "| greeting_repository.injectable.json sha256 | \`${shard0:0:16}\` | \`${shard1:0:16}\` |" \
   "| di_initializer.config.dart sha256 | \`${config0:0:16}\` | \`${config1:0:16}\` |" "" \
   "Spawns in the execution log after the edit:" "" '```' "$spawns" '```' "" \
-  "- shard action executed: ${shard_run:-NO}" \
+  "- edited file's shard executed (cacheHit=False): ${shard_run:-NO}" \
+  "- aggregate spawns that were not cache hits: ${agg_miss:-none}" \
   "- aggregate action spawns: ${agg:-none (action-cache hit)}" "" \
   "Package-local inputs of the aggregate action (aquery):" "" '```' "$inputs" '```'
 ok=1
 [[ "$shard0" == "$shard1" && "$config0" == "$config1" ]] || ok=0
 [[ -n "$shard_run" ]] || ok=0
-if [[ -n "$agg" ]] && ! grep -q 'cacheHit=True' <<< "$agg"; then ok=0; fi
+[[ -z "$agg_miss" ]] || ok=0
+[[ -n "$spawns" ]] || ok=0
 [[ $local_inputs_ok -eq 1 && -n "$inputs" ]] || ok=0
 restore
 bz build "$TARGET" > /dev/null 2>&1 || true
