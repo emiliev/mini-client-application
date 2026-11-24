@@ -1,6 +1,6 @@
 # T-0028-AC2: injectable early cutoff (H-DI-CUTOFF)
 
-Edit: method body of `spike/di_sample/lib/src/greeting_repository.dart` (`greeting()` string; token `cutoff-1795542513-47697`), then `build //spike/di_sample:di_config` with `--execution_log_json_file`.
+Edit: method body of `spike/di_sample/lib/src/greeting_repository.dart` (`greeting()` string; token `cutoff-1795560235-81890`), then `build //spike/di_sample:di_config` with `--execution_log_json_file`.
 
 | | before | after |
 |---|---|---|
