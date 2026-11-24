@@ -5,6 +5,8 @@ _Owned by Tech Lead. Last updated 2026-11-23._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0027](T-0027-retrofit-shim.md) | retrofit codegen shim on the rules_dart fork (P3-03) | **In Progress** | Engineer (Opus) | T-0024 | `fleet/T-0027-retrofit-shim` |
+| [T-0028](T-0028-injectable-shim.md) | injectable two-stage shim, vendored generator (P3-04) | **In Progress** | Engineer (Opus) | T-0024 | `fleet/T-0028-injectable-shim` |
 | [T-0026](T-0026-test-utils-harness.md) | `mc_test_utils` harness (P5-01) | **In Progress** | Engineer (Sonnet) | foundation | `fleet/T-0026-test-utils` |
 
 ## Done
