@@ -1,0 +1,13 @@
+== mc_paging
+package:mc_paging/src/page.dart: 18/18 100.0% missed=[]
+package:mc_paging/src/paged_state.dart: 0/0 0.0% missed=[]
+package:mc_paging/src/paging_controller.dart: 57/57 100.0% missed=[]
+package:mc_paging/src/query/debounced_query.dart: 20/20 100.0% missed=[]
+package:mc_paging/src/query/search_history.dart: 21/21 100.0% missed=[]
+TOTAL 116/116 100.0%
+exit=0
+== mc_media
+package:mc_media/src/api_image.dart: 14/14 100.0% missed=[]
+package:mc_media/src/media_scope.dart: 7/7 100.0% missed=[]
+TOTAL 21/21 100.0%
+exit=0

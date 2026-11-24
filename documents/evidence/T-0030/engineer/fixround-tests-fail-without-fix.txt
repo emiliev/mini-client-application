@@ -1,0 +1,13 @@
+T-0030-AC4: an unchanged trimmed query does not search again [E]
+T-0030-AC4: deleting text while a search is pending cancels it, no clear [E]
+T-0030-AC4: update after dispose does nothing [E]
+T-0030-AC2 disposed controller T-0030-AC2: every entry point does nothing after dispose [E]
+T-0030-AC3 errors and inputs T-0030-AC1: a limit of zero or less is an ArgumentError [E]
+T-0030-AC3 errors and inputs T-0030-AC1: later changes to the fetcher list do not change the state [E]
+T-0030-AC3 errors and inputs T-0030-AC3: an Error from the fetcher propagates and frees the controller [E]
+T-0030-AC5: a corrupt file loads as empty and add heals it [E]
+T-0030-AC5: load applies the cap to an oversized stored list [E]
+
+(Above: tests that FAIL when the pre-fix lib sources of 350e215 are restored, bazel test --nocache_test_results; the clear-ordering test was strengthened to await the add as well, then also fails.)
+Items 5 (stale run does not clear in-flight) and 12-regression guard passed against the old code too; they pin existing behaviour. Item 14: see mc_media mutation below.
+Item 14: with an extra pure-library file importing package:flutter/widgets.dart (lib/src/zz_probe.dart, removed afterwards), //utility/mc_media:purity_test FAILED.

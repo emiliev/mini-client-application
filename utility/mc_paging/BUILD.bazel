@@ -1,0 +1,90 @@
+# T-0030 (U19): the paging kit. Pure Dart (R15); freezed runs as a Bazel action
+# through the rules_dart shim (T-0027).
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_PKG = "mc_paging"
+
+_LANG = "3.13"
+
+dart_codegen(
+    name = "_paged_state_freezed",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "lib/src/paged_state.dart",
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    output_suffixes = [".freezed.dart"],
+    deps = [
+        "//utility/mc_api_errors",
+        "@pub_deps//:freezed_annotation",
+    ],
+)
+
+_DEPS = [
+    "//utility/mc_api_errors",
+    "//utility/mc_prelude",
+    "//utility/mc_storage",
+    "@pub_deps//:freezed_annotation",
+]
+
+dart_library(
+    name = "mc_paging",
+    package_name = _PKG,
+    srcs = glob(["lib/**/*.dart"]) + [":_paged_state_freezed"],
+    language_version = _LANG,
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_paging",
+    "@pub_deps//:fake_async",
+    "@pub_deps//:test",
+]
+
+dart_test(
+    name = "paging_controller_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/paging_controller_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
+    name = "debounced_query_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/debounced_query_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
+    name = "search_history_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/search_history_test.dart",
+    deps = _TEST_DEPS,
+)
+
+# AC7 (R15): lib imports no Flutter and declares no mixins.
+dart_test(
+    name = "purity_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/purity_test.dart",
+    deps = ["@pub_deps//:test"],
+)
+
+dart_test(
+    name = "paged_state_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/paged_state_test.dart",
+    deps = _TEST_DEPS,
+)

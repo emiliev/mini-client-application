@@ -5,6 +5,10 @@ package(default_visibility = ["//visibility:public"])
 
 _LANG = "3.13"
 
+_DEPS = [
+    "//utility/mc_media",
+]
+
 # The same files as test data, so a test can check that each asset exists.
 filegroup(
     name = "asset_files",
@@ -17,6 +21,7 @@ flutter_library(
     srcs = glob(["lib/**/*.dart"]),
     assets = [":asset_files"],
     language_version = _LANG,
+    deps = _DEPS,
 )
 
 flutter_test(
@@ -26,7 +31,19 @@ flutter_test(
     size = "small",
     data = [":asset_files"],
     main = "test/bundled_image_resolver_test.dart",
-    deps = [
+    deps = _DEPS + [
+        ":mc_fixtures_media",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+flutter_test(
+    name = "media_contract_test",
+    package_name = "mc_fixtures_media",
+    language_version = _LANG,
+    size = "small",
+    main = "test/media_contract_test.dart",
+    deps = _DEPS + [
         ":mc_fixtures_media",
         "@pub_deps//:flutter_test",
     ],

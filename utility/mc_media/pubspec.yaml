@@ -1,0 +1,19 @@
+name: mc_media
+description: ApiImage reference, McImageResolver interface and McMediaScope (T-0030).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  test: ^1.25.0

@@ -1,0 +1,19 @@
+name: mc_paging
+description: Pure Dart paging kit. PagedState, PagingController, DebouncedQuery and SearchHistory (T-0030).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  freezed_annotation: 3.1.0
+  mc_api_errors: any
+  mc_prelude: any
+  mc_storage: any
+
+dev_dependencies:
+  fake_async: ^1.3.3
+  mc_analysis: any
+  test: ^1.25.0

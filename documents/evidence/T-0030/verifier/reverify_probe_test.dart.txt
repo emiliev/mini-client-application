@@ -1,0 +1,125 @@
+// Verifier re-verification probes (T-0030). Temporary; not committed.
+import 'dart:async';
+import 'dart:io';
+
+import 'package:mc_api_errors/mc_api_errors.dart';
+import 'package:mc_paging/mc_paging.dart';
+import 'package:mc_prelude/mc_prelude.dart';
+import 'package:mc_storage/mc_storage.dart';
+import 'package:test/test.dart';
+
+Page<int> _page(PageRequest r, int total) => Page(
+  offset: r.offset,
+  limit: r.limit,
+  total: total,
+  results: [
+    for (var k = r.offset; k < (r.offset + r.limit).clamp(0, total); k++) k,
+  ],
+);
+
+void main() {
+  test('probe: state after an Error from loadMore', () async {
+    var throwNext = false;
+    final sut = PagingController<int>(
+      fetcher: (r) async {
+        if (throwNext) {
+          throwNext = false;
+          throw StateError('bug');
+        }
+        return success(_page(r, 45));
+      },
+      onState: (_) {},
+    );
+    await sut.loadFirst();
+    throwNext = true;
+    await expectLater(sut.loadMore(), throwsStateError);
+    print('isLoadingMore after Error: ${sut.state.isLoadingMore}');
+    await sut.loadMore();
+    print('items after next loadMore: ${sut.state.items.length}');
+  });
+
+  test(
+    'probe r2: a stale Error must not free the newer in-flight run',
+    () async {
+      final gates = <Completer<void>>[];
+      var call = 0;
+      final requests = <int>[];
+      final sut = PagingController<int>(
+        fetcher: (r) async {
+          requests.add(r.offset);
+          final n = call++;
+          final g = Completer<void>();
+          gates.add(g);
+          await g.future;
+          if (n == 0) {
+            throw StateError('stale bug');
+          }
+          return success(_page(r, 45));
+        },
+        onState: (_) {},
+      );
+      final a = sut.loadFirst();
+      final b = sut.refresh();
+      await Future<void>.delayed(Duration.zero);
+      gates[0].complete();
+      await expectLater(a, throwsStateError);
+      unawaited(sut.loadMore());
+      await Future<void>.delayed(Duration.zero);
+      print('requests while refresh still in flight: $requests');
+      expect(requests, [0, 0]);
+      gates[1].complete();
+      await b;
+    },
+  );
+
+  test('probe r4c: loadMore after dispose in a healthy state', () async {
+    final requests = <int>[];
+    final sut = PagingController<int>(
+      fetcher: (r) async {
+        requests.add(r.offset);
+        return success(_page(r, 45));
+      },
+      onState: (_) {},
+    );
+    await sut.loadFirst();
+    sut.dispose();
+    await sut.loadMore();
+    expect(requests, [0]);
+  });
+
+  test('probe: add returns at most cap items', () async {
+    final dir = Directory.systemTemp.createTempSync('probe_cap');
+    final sut = SearchHistory(FileStore(dir), cap: 3);
+    List<String>? last;
+    for (var i = 0; i < 5; i++) {
+      last = (await sut.add('q$i')).getOrNull();
+    }
+    expect(last, ['q4', 'q3', 'q2']);
+    dir.deleteSync(recursive: true);
+  });
+
+  test(
+    'probe: unreadable (directory in place of file) loads as empty',
+    () async {
+      final dir = Directory.systemTemp.createTempSync('probe_dir');
+      final hex = 'search_history'.codeUnits
+          .map((b) => b.toRadixString(16).padLeft(2, '0'))
+          .join();
+      Directory('${dir.path}/$hex.json').createSync(recursive: true);
+      final sut = SearchHistory(FileStore(dir));
+      print('load: ${(await sut.load()).getOrNull()}');
+      final added = await sut.add('x');
+      print('add over a directory: ok=${added.getOrNull()}');
+      dir.deleteSync(recursive: true);
+    },
+  );
+
+  test('probe: fetcher failure types still map', () async {
+    final sut = PagingController<int>(
+      fetcher: (r) async => throw const FormatException('x'),
+      onState: (_) {},
+    );
+    await sut.loadFirst();
+    expect(sut.state.failure, isA<ApiFailure>());
+  });
+}
