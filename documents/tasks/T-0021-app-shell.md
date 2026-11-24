@@ -31,6 +31,33 @@ The Tide "glue" app running on the iOS simulator: boot page, DI start-up from th
 
 ## Log
 - 2026-11-23: Created.
+- 2026-11-24 (Engineer): Implemented and rebased on `c9dc283` (T-0023), with `mc_api_client`'s `Dio` wired over the mocked backend. AC1, AC2, AC4, AC5 and AC6 pass. **AC3 is blocked on tooling:** iOS 26.2 answers `simctl openurl miniclient://…` with a system prompt, **Open in “Mini Client”?**, which simctl can't tap ([F-0020](../findings/F-0020-simctl-openurl-confirmation-prompt.md)). The screenshots show the prompt, not the route. Gates and the AC map: [evidence/T-0021/engineer/gates.md](../evidence/T-0021/engineer/gates.md).
 
 ## Outcome
-_Pending._
+**Engineer handoff (2026-11-24): AC1, AC2, AC4, AC5 and AC6 done; AC3 blocked (F-0020).**
+
+- **`app/wiring/app_core`**
+  - `BootBloc` (a `ChangeNotifier` until `McBloc` lands in T-0022). It has a 10 s timeout and Retry (fixes P-028). A failed run is discarded. Retry after a timeout waits for the still-running run instead of starting a second one, because `initializeDIContainer` runs one at a time, and a run that finished late is picked up by Retry.
+  - `BootPage` (DS `McLoading` / `McErrorView`).
+  - `PendingLinks` (R29).
+  - `McApp`: `MaterialApp(home: BootPage)` until ready, then one `GoRouter` with the held link and `overridePlatformDefaultLocation`.
+  - `McRouteProbe` (route-build and redirect counter for tests).
+  - Flutter error hooks into `Monitoring`.
+  - `rootInitializers`: config, monitoring, storage, mocked backend, `ApiClientDIInitializer` over `MockBackendHttpAdapter`, event bus, then the wirings.
+  - `appStorageDirectory()` (dart:io only), `AppLocations`.
+- **7 `*_wiring` skeletons:** an empty `<g>Routes` and a no-op `<G>WiringDIInitializer` each.
+- **`app/mini_client`**
+  - Typed routes (`/`, `/placeholder/:id`) through go_router_builder, with the F-0007 `sky_engine` workaround.
+  - Not-found page.
+  - The `app_config.json` asset, copied from `//tool/bazel/config:app_config`.
+  - Info.plist with the `miniclient` scheme and `FlutterDeepLinkingEnabled`.
+  - `flutter_ios_app` with bundle id `com.emiliev.miniclient`, `manual`.
+- **`mc_ds_theme`:** a `flutter_font_family(":inter")` on the library, so every app bundles `packages/mc_ds_theme/Inter` (fixes P-031).
+- **Root edits:** 9 `workspace:` members. The lock is unchanged.
+- **Findings:** F-0020 (openurl prompt), F-0021 (`pub get` rewrites Flutter packages' `analysis_options.yaml`, so the new packages have none).
+- **Follow-ups for the TL:**
+  - an XCUITest or Patrol tap for system alerts, to close AC3 (F-0020);
+  - port `BootBloc` onto `McBloc` after T-0022;
+  - `tool/ide_sync` for the pub-mode `app_config.json`;
+  - add the auth guard to the router's `redirect` with `mc_api_auth`;
+  - `tool/loc` on main isn't `dart format`-clean (seen while formatting; left untouched).

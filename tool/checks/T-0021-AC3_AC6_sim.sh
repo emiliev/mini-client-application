@@ -9,8 +9,11 @@
 #                        while the app runs → that route
 #   ac4-openurl-cold.png the app terminated, then `openurl …/placeholder/7`
 #                        (a cold-start link) → that route after boot
-# The simulator is always deleted.
-#   tool/checks/T-0021-AC3_AC6_sim.sh [--role engineer|verifier] [--out FILE]
+# On iOS 26.2 every `simctl openurl` of a custom scheme first shows the
+# system prompt "Open in “Mini Client”?" (F-0020), and simctl cannot tap it,
+# so the two openurl screenshots show that prompt and AC3 is not decided
+# here; the verdict covers AC6 only. The simulator is always deleted.
+#   [MC_OUTPUT_BASE=/tmp/mc-ob-…] tool/checks/T-0021-AC3_AC6_sim.sh [--role engineer|verifier] [--out FILE]
 # Screenshots go next to FILE, or into a temp dir whose path is printed.
 set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
@@ -30,6 +33,11 @@ cleanup() {
 }
 trap cleanup EXIT
 
+bz() {  # Bazel, in MC_OUTPUT_BASE if set (one output base per fleet agent)
+  if [[ -n "${MC_OUTPUT_BASE:-}" ]]; then "$BAZELW" --output_base="$MC_OUTPUT_BASE" "$@"
+  else "$BAZELW" "$@"; fi
+}
+
 shot() {  # shot <name>: screenshot, downscaled to at most 1200 px tall
   xcrun simctl io "$UDID" screenshot "$TMP/raw.png" >/dev/null 2>&1
   local h
@@ -43,13 +51,13 @@ running() {
   xcrun simctl spawn "$UDID" launchctl list 2>/dev/null | grep -c "$BUNDLE_ID" || true
 }
 
-"$BAZELW" build --config=sim "$TARGET" > "$TMP/build.log" 2>&1; rc_build=$?
+bz build --config=sim "$TARGET" > "$TMP/build.log" 2>&1; rc_build=$?
 built=$(plain "$TMP/build.log" | grep -a -E 'Build completed|ERROR' | tail -1)
 report "# T-0021-AC3 / AC6: simulator build, launch and deep links" "" \
   "- build \`--config=sim $TARGET\`: exit $rc_build ($built)"
 [[ $rc_build -eq 0 ]] || finish T-0021-AC3_AC6 1
 mkdir -p "$TMP/ipa"
-IPA="$("$BAZELW" info execution_root 2>/dev/null)/$("$BAZELW" cquery --config=sim --output=files "$TARGET" 2>/dev/null | grep '\.ipa$')"
+IPA="$(bz info execution_root 2>/dev/null)/$(bz cquery --config=sim --output=files "$TARGET" 2>/dev/null | grep '\.ipa$')"
 unzip -q "$IPA" -d "$TMP/ipa" || { report "- no ipa at \`$IPA\`"; finish T-0021-AC3_AC6 1; }
 APP=$(ls -d "$TMP"/ipa/Payload/*.app)
 
@@ -94,9 +102,10 @@ report "- simulator: \`$NAME\` ($UDID), iPhone 17 Pro, iOS 26.2; deleted on exit
   "- \`simctl launch\`: exit $rc_launch ($launch); launchctl entries 10 s later: $run_home" \
   "- \`simctl openurl\` warm (placeholder/42): exit $rc_warm" \
   "- \`simctl openurl\` cold (placeholder/7, app terminated first): exit $rc_cold; launchctl entries 10 s later: $run_cold" \
-  "" "The screenshots are the visual checkpoints: a reviewer must look at them."
+  "" "The screenshots are the visual checkpoints: a reviewer must look at them." \
+  "AC3 (openurl screenshots): expected to show the iOS \"Open in “Mini Client”?\" prompt (F-0020); not decided by this script."
 ok=0
 [[ $inter -eq 1 && "$inter_files" -eq 4 && -n "$config_env" && "$scheme" == miniclient && "$deeplink" == true \
-  && $rc_launch -eq 0 && "$run_home" -ge 1 && $rc_warm -eq 0 && $rc_cold -eq 0 && "$run_cold" -ge 1 \
+  && $rc_launch -eq 0 && "$run_home" -ge 1 && $rc_warm -eq 0 && $rc_cold -eq 0 \
   && -s "$SHOT_DIR/ac6-home.png" && -s "$SHOT_DIR/ac3-openurl-warm.png" && -s "$SHOT_DIR/ac4-openurl-cold.png" ]] && ok=1
-finish T-0021-AC3_AC6 $([[ $ok -eq 1 ]] && echo 0 || echo 1)
+finish T-0021-AC6 $([[ $ok -eq 1 ]] && echo 0 || echo 1)
