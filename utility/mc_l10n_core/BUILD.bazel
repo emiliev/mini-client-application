@@ -5,6 +5,9 @@ package(default_visibility = ["//visibility:public"])
 
 # Outputs land next to the ARBs (lib/src/l10n/mc_l10n_core_l10n*.dart). The
 # rule ignores l10n.yaml; these attributes mirror it (rules_flutter §6).
+# IDE / pub path: `flutter: generate: true` in pubspec.yaml plus l10n.yaml make
+# `fvm flutter pub get` write the same files into the source tree (gitignored,
+# excluded from `srcs` below), so the barrel resolves without Bazel (F-0023).
 flutter_gen_l10n(
     name = "_l10n",
     arbs = glob(["lib/src/l10n/*.arb"]),
@@ -13,6 +16,11 @@ flutter_gen_l10n(
     output_localization_file = "mc_l10n_core_l10n.dart",
     template_arb_file = "mc_l10n_core_en.arb",
     visibility = ["//visibility:private"],
+)
+
+filegroup(
+    name = "arbs",
+    srcs = glob(["lib/src/l10n/*.arb"]),
 )
 
 _DEPS = [

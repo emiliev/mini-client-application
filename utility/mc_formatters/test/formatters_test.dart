@@ -17,6 +17,16 @@ void main() {
     expect(formatMoney(const Money(500, Currency.jpy), 'en'), '¥500');
   });
 
+  test('T-0025-AC2 date-time follows the locale clock (en 12 h, de 24 h)', () {
+    final date = DateTime(2026, 11, 24, 15, 30);
+    final en = formatDateTime(date, 'en');
+    final de = formatDateTime(date, 'de');
+    expect(en, startsWith('11/24/2026'));
+    expect(en, contains('3:30'));
+    expect(en, contains('PM'));
+    expect(de, '24.11.2026 15:30');
+  });
+
   test('T-0025-AC2 dates and compact numbers are locale-aware', () {
     final date = DateTime(2026, 11, 24);
     expect(formatDate(date, 'en'), 'Nov 24, 2026');

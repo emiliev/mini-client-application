@@ -17,6 +17,23 @@ dart_binary(
     deps = [":l10n_check"],
 )
 
+# The gate over the real ARB sets. Every package that gets ARBs exports an
+# `arbs` filegroup and adds it here.
+dart_test(
+    name = "workspace_gate_test",
+    size = "small",
+    data = [
+        "//utility/mc_l10n_core:arbs",
+    ],
+    language_version = "3.13",
+    main = "test/workspace_gate_test.dart",
+    package_name = "l10n_check",
+    deps = [
+        ":l10n_check",
+        "@pub_deps//:test",
+    ],
+)
+
 dart_test(
     name = "l10n_check_test",
     size = "small",

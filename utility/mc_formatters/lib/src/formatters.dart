@@ -19,9 +19,10 @@ String formatMoney(Money money, String locale) => NumberFormat.simpleCurrency(
 String formatDate(DateTime date, String locale) =>
     DateFormat.yMMMd(locale).format(date);
 
-/// Formats [date] as a short date and time. Requires [initializeFormatters].
+/// Formats [date] as a short date and time in the locale's clock style (12 h
+/// in `en`, 24 h in `de`). Requires [initializeFormatters].
 String formatDateTime(DateTime date, String locale) =>
-    DateFormat.yMd(locale).add_Hm().format(date);
+    DateFormat.yMd(locale).add_jm().format(date);
 
 /// Compact number: `1.2K` in `en`.
 String formatCompact(num value, String locale) =>

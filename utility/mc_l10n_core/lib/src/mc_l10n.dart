@@ -25,5 +25,8 @@ const List<LocalizationsDelegate<Object?>> mcLocalizationsDelegates = [
 
 /// `supportedLocales` for a `MaterialApp`. The pseudo-locale is included only
 /// when [includePseudo] is set (tests).
+///
+/// Apps must use this, not the generated `McL10nCoreL10n.supportedLocales`,
+/// which lists `en_XA` too (R24).
 List<Locale> mcSupportedLocales({bool includePseudo = false}) =>
     includePseudo ? mcTestLocales : mcReleaseLocales;

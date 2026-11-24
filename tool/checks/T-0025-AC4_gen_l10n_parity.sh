@@ -1,7 +1,7 @@
 #!/bin/bash
 # T-0025-AC4: the `flutter_gen_l10n` rule's output for mc_l10n_core equals
 # `fvm flutter gen-l10n`'s for the same inputs in a throwaway copy. The CLI runs
-# `dart format` over its output and the rule does not (F-0022), so the Bazel
+# `dart format` over its output and the rule does not (F-0023), so the Bazel
 # output is compared raw (informational) and after `dart format` (the verdict).
 #   tool/checks/T-0025-AC4_gen_l10n_parity.sh [--out FILE]
 set -uo pipefail
@@ -14,11 +14,17 @@ trap 'rm -rf "$work"' EXIT
 "$BAZELW" build //$PKG:_l10n >/dev/null 2>&1 || finish T-0025-AC4 1
 bin="$("$BAZELW" info bazel-bin 2>/dev/null)/$PKG/lib/src/l10n"
 
-# Throwaway copy: out of the pub workspace, with the `flutter: generate` flag the CLI insists on.
+# Throwaway copy: out of the pub workspace (drop `resolution: workspace`), with
+# the repo's pinned Flutter (.fvmrc) and no generated files left from `pub get`.
 cp -R "$REPO/$PKG" "$work/pkg"
+cp "$REPO/.fvmrc" "$work/.fvmrc"
 sed -i '' '/^resolution: workspace/d' "$work/pkg/pubspec.yaml"
-printf '\nflutter:\n  generate: true\n' >> "$work/pkg/pubspec.yaml"
-(cd "$work/pkg" && fvm flutter gen-l10n >"$work/cli.log" 2>&1)
+rm -f "$work/pkg/lib/src/l10n/"*_l10n*.dart
+pinned="$(sed -n 's/.*"flutter": *"\([^"]*\)".*/\1/p' "$REPO/.fvmrc")"
+(cd "$work/pkg" && fvm flutter --version 2>/dev/null | grep -q "Flutter $pinned") || {
+  report "pinned Flutter $pinned is not what fvm resolves in the copy"; finish T-0025-AC4 1; }
+(cd "$work/pkg" && fvm flutter gen-l10n >"$work/cli.log" 2>&1 </dev/null) || {
+  report "fvm flutter gen-l10n failed:" '```' "$(cat "$work/cli.log")" '```'; finish T-0025-AC4 1; }
 
 mkdir "$work/bazel" "$work/bazel_fmt"
 cp "$bin"/*.dart "$work/bazel/" && chmod u+w "$work/bazel"/*

@@ -29,6 +29,7 @@ Localisation, which Tide's articles don't cover (D4b). Common strings and format
 ## Log
 - 2026-11-24: Created and dispatched.
 - 2026-11-24: Engineer implemented; handed to Verifier.
+- 2026-11-24: Review fixes: `l10n_check` no longer follows symlinks and skips `bazel-*`/`external`/caches (keyed by package path, `--locales=`, unknown flags rejected); `workspace_gate_test` runs it as a Bazel gate; parity script pins Flutter via `.fvmrc` and checks the exit code; pub/IDE path works (`flutter: generate: true`, F-0023); `formatDateTime` uses `add_jm()`; `mcSupportedLocales()` documented as the release-filtered list (R24); finding renumbered F-0023.
 
 ## Outcome
 Engineer handoff (branch `fleet/T-0025-l10n`).
@@ -43,7 +44,7 @@ Engineer handoff (branch `fleet/T-0025-l10n`).
 | AC1 | `//utility/mc_l10n_core:l10n_test` (4 tests, `T-0025-AC1 ...`) |
 | AC2 | `//utility/mc_formatters:formatters_test` (`T-0025-AC2 ...`) |
 | AC3 | `//tool/l10n_check:l10n_check_test` (`T-0025-AC3 ...`); repo run: `l10n_check: OK` |
-| AC4 | `tool/checks/T-0025-AC4_gen_l10n_parity.sh`: **identical after `dart format`, raw differs in whitespace only** (F-0022). AC wording needs TL/PO acceptance. |
+| AC4 | `tool/checks/T-0025-AC4_gen_l10n_parity.sh`: **identical after `dart format`, raw differs in whitespace only** (F-0023). AC wording needs TL/PO acceptance. |
 
 Gates: `test //...` 42/42, `build --config=lint //...`, `mc_arch_check`, `l10n_check` all PASS (`documents/evidence/T-0025/engineer/`). Deviations: de money uses U+00A0 between amount and symbol (intl's output); `formatDate` de is `24. Nov. 2026`.
 

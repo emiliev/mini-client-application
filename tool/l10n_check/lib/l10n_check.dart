@@ -14,6 +14,9 @@ const List<String> defaultRequiredLocales = ['en', 'de'];
 ///   `pkg: locale de is missing key foo` / `has unknown key foo`;
 /// - `@@locale` agrees with the file name.
 ///
+/// Symlinks are never followed, and Bazel's `bazel-*` links, `external/`,
+/// `.dart_tool`, `.fvm`, `.git` and `build` are skipped.
+///
 /// Returns one message per violation; empty means the check passed.
 List<String> checkL10n(
   String root, {
@@ -21,24 +24,7 @@ List<String> checkL10n(
 }) {
   final violations = <String>[];
   final sets = <String, List<File>>{};
-  for (final entity in Directory(root).listSync(recursive: true)) {
-    if (entity is! File || !entity.path.endsWith('.arb')) {
-      continue;
-    }
-    final parts = entity.uri.pathSegments;
-    final n = parts.length;
-    if (n < 5 ||
-        parts[n - 2] != 'l10n' ||
-        parts[n - 3] != 'src' ||
-        parts[n - 4] != 'lib') {
-      continue;
-    }
-    if (parts.contains('.dart_tool') || parts.contains('bazel-out')) {
-      continue;
-    }
-    sets.putIfAbsent(parts[n - 5], () => []).add(entity);
-  }
-
+  _collect(Directory(root), sets);
   for (final entry in sets.entries) {
     violations.addAll(_checkPackage(entry.key, entry.value, requiredLocales));
   }
@@ -46,11 +32,54 @@ List<String> checkL10n(
   return violations;
 }
 
+bool _skipDir(String name) =>
+    name.startsWith('bazel-') ||
+    name == 'external' ||
+    name == '.dart_tool' ||
+    name == '.fvm' ||
+    name == '.git' ||
+    name == 'build';
+
+void _collect(Directory dir, Map<String, List<File>> sets) {
+  final List<FileSystemEntity> entries;
+  try {
+    entries = dir.listSync(followLinks: false);
+  } on FileSystemException {
+    return;
+  }
+  for (final entity in entries) {
+    final name = entity.uri.pathSegments.lastWhere((s) => s.isNotEmpty);
+    if (entity is Directory) {
+      if (!_skipDir(name)) {
+        _collect(entity, sets);
+      }
+    } else if (name.endsWith('.arb') &&
+        (entity is File ||
+            // A symlinked *file* (Bazel runfiles) counts; symlinked
+            // directories are never followed.
+            (entity is Link && FileSystemEntity.isFileSync(entity.path)))) {
+      final file = File(entity.path);
+      final parts = file.uri.pathSegments;
+      final n = parts.length;
+      if (n >= 5 &&
+          parts[n - 2] == 'l10n' &&
+          parts[n - 3] == 'src' &&
+          parts[n - 4] == 'lib') {
+        // Keyed by the package directory (full path), not its name.
+        sets
+            .putIfAbsent(file.parent.parent.parent.parent.path, () => [])
+            .add(file);
+      }
+    }
+  }
+}
+
 List<String> _checkPackage(
-  String pkg,
+  String pkgDir,
   List<File> files,
   List<String> requiredLocales,
 ) {
+  final pkg = pkgDir.split('/').last;
   final out = <String>[];
   final byLocale = <String, Map<String, Object?>>{};
   for (final file in files) {
@@ -65,6 +94,9 @@ List<String> _checkPackage(
       decoded = jsonDecode(file.readAsStringSync());
     } on FormatException catch (e) {
       out.add('$pkg: $name is not valid JSON (${e.message})');
+      continue;
+    } on FileSystemException catch (e) {
+      out.add('$pkg: cannot read $name (${e.message})');
       continue;
     }
     if (decoded is! Map<String, Object?>) {

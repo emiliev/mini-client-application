@@ -56,6 +56,64 @@ void main() {
     expect(violations, ['mc_a: locale de is missing key bye']);
   });
 
+  test('T-0025-AC3 symlinked directories (bazel-*, external) are skipped', () {
+    final root = _workspace({
+      'mc_a': {
+        'en': {'hello': 'Hello'},
+        'de': {'hello': 'Hallo'},
+      },
+    });
+    // A broken package that is reachable only through symlinks.
+    final broken = _workspace({
+      'flutter_localizations': {
+        'en': {'x': 'x'},
+      },
+    });
+    Link('$root/bazel-out').createSync('$broken/utility');
+    Link('$root/bazel-mc').createSync('$broken/utility');
+    Link('$root/linked').createSync('$broken/utility');
+    Directory('$root/external/dep/utility/bad/lib/src/l10n')
+        .createSync(recursive: true);
+    File('$root/external/dep/utility/bad/lib/src/l10n/bad_en.arb')
+        .writeAsStringSync('{"@@locale": "en", "k": "v"}');
+    expect(checkL10n(root), isEmpty);
+  });
+
+  test('T-0025-AC3 a symlinked ARB file (runfiles) is still checked', () {
+    final root = _workspace({
+      'mc_a': {
+        'en': {'hello': 'Hello'},
+      },
+    });
+    final real = _workspace({
+      'mc_b': {
+        'en': {'hello': 'Hello'},
+        'de': {'hello': 'Hallo'},
+      },
+    });
+    Directory('$root/utility/mc_b/lib/src/l10n').createSync(recursive: true);
+    for (final f in Directory('$real/utility/mc_b/lib/src/l10n').listSync()) {
+      Link('$root/utility/mc_b/lib/src/l10n/${f.uri.pathSegments.last}')
+          .createSync(f.path);
+    }
+    // mc_a lacks de; mc_b (symlinked files) is complete.
+    expect(checkL10n(root), ['mc_a: missing locale de (expected mc_a_de.arb)']);
+  });
+
+  test('T-0025-AC3 same-named packages in different folders are separate', () {
+    final root = _workspace({
+      'mc_a': {
+        'en': {'hello': 'Hello'},
+        'de': {'hello': 'Hallo'},
+      },
+    });
+    final other = Directory('$root/feature/mc_a/lib/src/l10n')
+      ..createSync(recursive: true);
+    File('${other.path}/mc_a_en.arb')
+        .writeAsStringSync('{"@@locale": "en", "hello": "Hi"}');
+    expect(checkL10n(root), ['mc_a: missing locale de (expected mc_a_de.arb)']);
+  });
+
   test('T-0025-AC3 an unknown key and a pseudo-locale gap are reported', () {
     final root = _workspace({
       'mc_a': {
