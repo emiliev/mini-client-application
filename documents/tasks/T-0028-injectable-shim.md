@@ -34,6 +34,23 @@ One Engineer pass plus one fix round. Otherwise stop with a precise finding, and
 
 ## Log
 - 2026-11-24: Created and dispatched (codegen wave, Phase A3).
+- 2026-11-24: Engineer (resumed after the usage-limit stop; worktree re-created on the existing branch, fast-forwarded to `e630d67`). Fork patch **`0002-ext-injectable-two-stage.patch`** (`dart/ext/injectable/`: `shim_json`, `shim_config`, `defs.bzl` with `injectable_package`, Builder wrappers + unit test, vendored injectable_generator 3.1.3 without `lib/lean_builder/` with `VENDORED.md` provenance, `injectable 3.0.0` in the ext lock, `docs/ext.md`). Sample `spike/di_sample` (5 annotated classes + a comment-only file + `@InjectableInit` via `McDIInitializer`). First pass: byte-identical on the plain sample, but **not** once the barrel is staged or a class takes `Dio` (the shim's `Resolver.libraries` order, F-0026). Fix round: both shims use a build_runner-order resolver; byte-identical in all cases. R28 fallback not needed. Gates green (see Outcome).
 
 ## Outcome
-_Pending._
+**Done** (Engineer, awaiting a fresh Verifier). One pass plus one fix round, within R28.
+
+| AC | Evidence | Result |
+|---|---|---|
+| T-0028-AC1 | `tool/checks/T-0028-AC1_injectable_matches_build_runner.sh` → [ac1.md](../evidence/T-0028/engineer/ac1.md); `//spike/di_sample:di_sample_test` (`T-0028-AC1 …`) | PASS: `.config.dart` and 5 shards `EQUAL` (build_runner 2.16.1 + stock injectable_generator 3.1.3 with lean_builder, `tool/build_runner_overlay/injectable/`) |
+| T-0028-AC2 | `tool/checks/T-0028-AC2_di_cutoff.sh` → [ac2.md](../evidence/T-0028/engineer/ac2.md), [ac2-execlog.json](../evidence/T-0028/engineer/ac2-execlog.json) | PASS: body edit → 6 `DartCodegen` spawns, **no `DartAggregateCodegen` spawn**, shard + config sha256 unchanged; aggregate's package inputs = init file + 6 shards |
+| T-0028-AC3 | `tool/checks/T-0028-AC3_ext_lock.sh` → [ac3.md](../evidence/T-0028/engineer/ac3.md) | PASS: analyzer 14.5.0, injectable 3.0.0, no lean_builder; vendored `lib/` = pub.dev archive minus `lib/lean_builder/` |
+| T-0028-AC4 | `tool/checks/T-0028-AC4_empty_shard_and_failing_init.sh` → [ac4.md](../evidence/T-0028/engineer/ac4.md); `@rules_dart//dart/ext/injectable:injectable_shims_test` (`T-0028-AC4 …`) | PASS: `plain_helper` shard `[]`, config builds; no-`@InjectableInit` and unresolved-annotation targets fail, nothing written |
+| T-0028-AC5 | this log | PASS: `rules_fork.sh check ai_rules_dart` (1 patch applies strictly); `test //...` 48/48; `build --config=lint //...` clean; `mc_arch_check` OK; drafts `documents/upstream/U-D-injectable/`, `documents/upstream/U-X-injectable-lean_builder/` |
+
+Notes for the TL:
+- **Patch numbering:** exported as `0001`, renamed to `0002-ext-injectable-two-stage.patch` (content untouched). Checked that it applies with `git am` on top of T-0027's current fork WIP commit (`wip: retrofit shim`). Both patches touch `dart/ext/pubspec.yaml`, `dart/ext/pubspec.lock` and `docs/ext.md` in different hunks; after combining, regenerate the ext lock with both (`fvm dart pub get` in a copy of `dart/ext`) to confirm it is the union, then `rules_fork.sh check`.
+- **Root lock:** adds `injectable 3.0.0` (T-0027 may also touch `pubspec.lock` / `MODULE.bazel.lock`; regenerate on merge).
+- **Overlay split:** the injectable reference has its own pubspec/lock (`tool/build_runner_overlay/injectable/`) because lean_builder forces analyzer 14.1.0 (F-0026 §3).
+- No tests were deleted, skipped or weakened; no `// ignore:` added. `tool/verify.sh` does not exist yet; the equivalent gates above were run.
+
+Follow-ups (for `pending-work.md`): an `e2e/ext_exemplar/injectable/` exemplar and Gazelle support in the upstream PR; the general `Resolver.libraries` fix in `builder_shim.dart` (U-D-injectable follow-up issue); narrower shard deps in buildgen so an edit re-runs one shard, not all (F-0026 §5); micro-package `.module.dart` untested.
