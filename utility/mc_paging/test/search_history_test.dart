@@ -36,24 +36,30 @@ void main() {
     expect(loaded, [for (var i = 12; i >= 3; i--) 'q$i']);
   });
 
-  test('T-0030-AC5: the history survives a new instance on the same store', () async {
-    await SearchHistory(store).add('thor');
-    await SearchHistory(store).add('loki');
+  test(
+    'T-0030-AC5: the history survives a new instance on the same store',
+    () async {
+      await SearchHistory(store).add('thor');
+      await SearchHistory(store).add('loki');
 
-    final loaded = await SearchHistory(FileStore(dir)).load();
+      final loaded = await SearchHistory(FileStore(dir)).load();
 
-    expect(loaded.getOrNull(), ['loki', 'thor']);
-  });
+      expect(loaded.getOrNull(), ['loki', 'thor']);
+    },
+  );
 
-  test('T-0030-AC5: blank queries are ignored and the cap is configurable', () async {
-    final sut = SearchHistory(store, cap: 2);
-    await sut.add('a');
-    await sut.add('  ');
-    await sut.add(' b ');
-    await sut.add('c');
+  test(
+    'T-0030-AC5: blank queries are ignored and the cap is configurable',
+    () async {
+      final sut = SearchHistory(store, cap: 2);
+      await sut.add('a');
+      await sut.add('  ');
+      await sut.add(' b ');
+      await sut.add('c');
 
-    expect((await sut.load()).getOrNull(), ['c', 'b']);
-  });
+      expect((await sut.load()).getOrNull(), ['c', 'b']);
+    },
+  );
 
   test('T-0030-AC5: overlapping adds all land', () async {
     final sut = SearchHistory(store);

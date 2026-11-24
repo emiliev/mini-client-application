@@ -63,18 +63,21 @@ void main() {
     );
   });
 
-  test('T-0030-AC4: 5 characters in 200 ms fire one search with the final text', () {
-    for (final text in ['t', 'th', 'tho', 'thor', 'thor!']) {
-      sut.update(text);
-      clock.advance(const Duration(milliseconds: 40));
-    }
-    expect(searches, isEmpty);
+  test(
+    'T-0030-AC4: 5 characters in 200 ms fire one search with the final text',
+    () {
+      for (final text in ['t', 'th', 'tho', 'thor', 'thor!']) {
+        sut.update(text);
+        clock.advance(const Duration(milliseconds: 40));
+      }
+      expect(searches, isEmpty);
 
-    clock.advance(const Duration(milliseconds: 300));
+      clock.advance(const Duration(milliseconds: 300));
 
-    expect(searches, ['thor!']);
-    expect(clears, 0);
-  });
+      expect(searches, ['thor!']);
+      expect(clears, 0);
+    },
+  );
 
   test('T-0030-AC4: nothing fires before the delay has passed', () {
     sut.update('hulk');

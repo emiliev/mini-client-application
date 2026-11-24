@@ -49,23 +49,22 @@ void main() {
     expect(error.toString(), contains('McMediaScope'));
   });
 
-  testWidgets('T-0030-AC6: a new resolver rebuilds dependents', (tester) async {
+  testWidgets('T-0030-AC6: a new resolver rebuilds dependents only', (
+    tester,
+  ) async {
     final first = _FakeResolver();
     final second = _FakeResolver();
     final seen = <McImageResolver>[];
-    Widget app(McImageResolver r) => McMediaScope(
-      resolver: r,
-      child: Builder(
-        builder: (context) {
-          seen.add(McMediaScope.of(context));
-          return const SizedBox();
-        },
-      ),
+    final child = Builder(
+      builder: (context) {
+        seen.add(McMediaScope.of(context));
+        return const SizedBox();
+      },
     );
 
-    await tester.pumpWidget(app(first));
-    await tester.pumpWidget(app(first));
-    await tester.pumpWidget(app(second));
+    await tester.pumpWidget(McMediaScope(resolver: first, child: child));
+    await tester.pumpWidget(McMediaScope(resolver: first, child: child));
+    await tester.pumpWidget(McMediaScope(resolver: second, child: child));
 
     expect(seen, [same(first), same(second)]);
   });

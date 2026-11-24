@@ -4,8 +4,9 @@ import 'package:mc_paging/src/paged_state.dart';
 import 'package:mc_prelude/mc_prelude.dart';
 
 /// Loads one page. A thrown error is mapped with `ApiFailure.from`.
-typedef PageFetcher<T> =
-    Future<Result<Page<T>, ApiFailure>> Function(PageRequest request);
+typedef PageFetcher<T> = Future<Result<Page<T>, ApiFailure>> Function(
+  PageRequest request,
+);
 
 /// Drives a [PagedState] over a [PageFetcher]. A bloc owns one and forwards
 /// `onState` to `emit`; it is a plain helper, not a mixin (cutoff-critical
@@ -101,7 +102,9 @@ final class PagingController<T> {
 
     result.fold(
       (page) {
-        final items = replace ? page.results : [..._state.items, ...page.results];
+        final items = replace
+            ? page.results
+            : [..._state.items, ...page.results];
         final nextOffset = request.offset + page.results.length;
         _emit(
           _state.copyWith(

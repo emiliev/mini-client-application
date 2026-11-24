@@ -56,32 +56,38 @@ _make({int total = 45, int limit = 20}) {
 
 void main() {
   group('T-0030-AC1 loading pages', () {
-    test('T-0030-AC1: loadFirst then loadMore twice reads all 45 items', () async {
-      final (:sut, :backend, seen: _) = _make();
+    test(
+      'T-0030-AC1: loadFirst then loadMore twice reads all 45 items',
+      () async {
+        final (:sut, :backend, seen: _) = _make();
 
-      await sut.loadFirst();
-      await sut.loadMore();
-      await sut.loadMore();
+        await sut.loadFirst();
+        await sut.loadMore();
+        await sut.loadMore();
 
-      expect(backend.requests.map((r) => r.offset), [0, 20, 40]);
-      expect(backend.requests.map((r) => r.limit), [20, 20, 20]);
-      expect(sut.state.items, List.generate(45, (i) => i));
-      expect(sut.state.hasReachedEnd, isTrue);
-      expect(sut.state.total, 45);
-      expect(sut.state.isLoadingMore, isFalse);
-      expect(sut.state.failure, isNull);
-    });
+        expect(backend.requests.map((r) => r.offset), [0, 20, 40]);
+        expect(backend.requests.map((r) => r.limit), [20, 20, 20]);
+        expect(sut.state.items, List.generate(45, (i) => i));
+        expect(sut.state.hasReachedEnd, isTrue);
+        expect(sut.state.total, 45);
+        expect(sut.state.isLoadingMore, isFalse);
+        expect(sut.state.failure, isNull);
+      },
+    );
 
-    test('T-0030-AC1: the first request reports loading before items', () async {
-      final (:sut, backend: _, :seen) = _make();
+    test(
+      'T-0030-AC1: the first request reports loading before items',
+      () async {
+        final (:sut, backend: _, :seen) = _make();
 
-      await sut.loadFirst();
+        await sut.loadFirst();
 
-      expect(seen.first.items, isEmpty);
-      expect(seen[1].isLoadingMore, isTrue);
-      expect(seen.last.isLoadingMore, isFalse);
-      expect(seen.last.items, hasLength(20));
-    });
+        expect(seen.first.items, isEmpty);
+        expect(seen[1].isLoadingMore, isTrue);
+        expect(seen.last.isLoadingMore, isFalse);
+        expect(seen.last.items, hasLength(20));
+      },
+    );
 
     test('T-0030-AC1: an empty page ends the list', () async {
       final (:sut, :backend, seen: _) = _make(total: 0);
@@ -105,19 +111,22 @@ void main() {
       expect(sut.state.hasReachedEnd, isFalse);
     });
 
-    test('T-0030-AC1: refresh keeps items while loading, then replaces', () async {
-      final (:sut, :backend, :seen) = _make();
-      await sut.loadFirst();
-      await sut.loadMore();
-      seen.clear();
+    test(
+      'T-0030-AC1: refresh keeps items while loading, then replaces',
+      () async {
+        final (:sut, :backend, :seen) = _make();
+        await sut.loadFirst();
+        await sut.loadMore();
+        seen.clear();
 
-      await sut.refresh();
+        await sut.refresh();
 
-      expect(seen.first.items, hasLength(40));
-      expect(seen.first.isLoadingMore, isTrue);
-      expect(sut.state.items, List.generate(20, (i) => i));
-      expect(backend.requests.last.offset, 0);
-    });
+        expect(seen.first.items, hasLength(40));
+        expect(seen.first.isLoadingMore, isTrue);
+        expect(sut.state.items, List.generate(20, (i) => i));
+        expect(backend.requests.last.offset, 0);
+      },
+    );
   });
 
   group('T-0030-AC2 guards', () {
@@ -133,19 +142,22 @@ void main() {
       expect(backend.requests, hasLength(before));
     });
 
-    test('T-0030-AC2: loadMore while one is in flight makes no second request', () async {
-      final (:sut, :backend, seen: _) = _make();
-      await sut.loadFirst();
-      backend.gate = Completer<void>();
+    test(
+      'T-0030-AC2: loadMore while one is in flight makes no second request',
+      () async {
+        final (:sut, :backend, seen: _) = _make();
+        await sut.loadFirst();
+        backend.gate = Completer<void>();
 
-      final first = sut.loadMore();
-      final second = sut.loadMore();
-      backend.gate!.complete();
-      await Future.wait([first, second]);
+        final first = sut.loadMore();
+        final second = sut.loadMore();
+        backend.gate!.complete();
+        await Future.wait([first, second]);
 
-      expect(backend.requests.map((r) => r.offset), [0, 20]);
-      expect(sut.state.items, hasLength(40));
-    });
+        expect(backend.requests.map((r) => r.offset), [0, 20]);
+        expect(sut.state.items, hasLength(40));
+      },
+    );
 
     test('T-0030-AC2: retry while loading makes no second request', () async {
       final (:sut, :backend, seen: _) = _make();
@@ -176,18 +188,21 @@ void main() {
       expect(sut.state.hasReachedEnd, isFalse);
     });
 
-    test('T-0030-AC3: retry requests only the failed page and appends once', () async {
-      final (:sut, :backend, seen: _) = _make();
-      await sut.loadFirst();
-      backend.failOffsets.add(20);
-      await sut.loadMore();
+    test(
+      'T-0030-AC3: retry requests only the failed page and appends once',
+      () async {
+        final (:sut, :backend, seen: _) = _make();
+        await sut.loadFirst();
+        backend.failOffsets.add(20);
+        await sut.loadMore();
 
-      await sut.retry();
+        await sut.retry();
 
-      expect(backend.requests.map((r) => r.offset), [0, 20, 20]);
-      expect(sut.state.items, List.generate(40, (i) => i));
-      expect(sut.state.failure, isNull);
-    });
+        expect(backend.requests.map((r) => r.offset), [0, 20, 20]);
+        expect(sut.state.items, List.generate(40, (i) => i));
+        expect(sut.state.failure, isNull);
+      },
+    );
 
     test('T-0030-AC3: loadMore after a failure waits for retry', () async {
       final (:sut, :backend, seen: _) = _make();
@@ -209,33 +224,39 @@ void main() {
       expect(backend.requests, hasLength(1));
     });
 
-    test('T-0030-AC3: a failing first page leaves no items and retry loads it', () async {
-      final (:sut, :backend, seen: _) = _make();
-      backend.failOffsets.add(0);
+    test(
+      'T-0030-AC3: a failing first page leaves no items and retry loads it',
+      () async {
+        final (:sut, :backend, seen: _) = _make();
+        backend.failOffsets.add(0);
 
-      await sut.loadFirst();
-      expect(sut.state.items, isEmpty);
-      expect(sut.state.failure, isNotNull);
-      await sut.retry();
+        await sut.loadFirst();
+        expect(sut.state.items, isEmpty);
+        expect(sut.state.failure, isNotNull);
+        await sut.retry();
 
-      expect(sut.state.items, hasLength(20));
-      expect(backend.requests.map((r) => r.offset), [0, 0]);
-    });
+        expect(sut.state.items, hasLength(20));
+        expect(backend.requests.map((r) => r.offset), [0, 0]);
+      },
+    );
 
-    test('T-0030-AC3: a failing refresh keeps items and retry replaces them', () async {
-      final (:sut, :backend, seen: _) = _make();
-      await sut.loadFirst();
-      await sut.loadMore();
-      backend.failOffsets.add(0);
+    test(
+      'T-0030-AC3: a failing refresh keeps items and retry replaces them',
+      () async {
+        final (:sut, :backend, seen: _) = _make();
+        await sut.loadFirst();
+        await sut.loadMore();
+        backend.failOffsets.add(0);
 
-      await sut.refresh();
-      expect(sut.state.items, hasLength(40));
-      expect(sut.state.failure, isNotNull);
-      await sut.retry();
+        await sut.refresh();
+        expect(sut.state.items, hasLength(40));
+        expect(sut.state.failure, isNotNull);
+        await sut.retry();
 
-      expect(sut.state.items, List.generate(20, (i) => i));
-      expect(sut.state.failure, isNull);
-    });
+        expect(sut.state.items, List.generate(20, (i) => i));
+        expect(sut.state.failure, isNull);
+      },
+    );
 
     test('T-0030-AC3: a fetcher that throws becomes an ApiFailure', () async {
       final (:sut, :backend, seen: _) = _make();
