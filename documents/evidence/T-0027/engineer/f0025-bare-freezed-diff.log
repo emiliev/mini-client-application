@@ -1,54 +1,101 @@
-INFO: Invocation ID: a1c00915-32c0-44c9-93fa-7282189693a7
-Computing main repo mapping: 
-Loading: 
-Loading: 0 packages loaded
-Analyzing: target //spike/di_sample:di_config_unresolved_init (0 packages loaded, 0 targets configured)
-Analyzing: target //spike/di_sample:di_config_unresolved_init (0 packages loaded, 0 targets configured)
-
-INFO: Analyzed target //spike/di_sample:di_config_unresolved_init (0 packages loaded, 0 targets configured).
-ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a95ec7ad190c950c1/spike/di_sample/BUILD.bazel:93:18: DartAggregateCodegen @@//spike/di_sample:di_config_unresolved_init failed: (Exit 1): dart failed: error executing DartAggregateCodegen command (from dart_aggregate_codegen rule target //spike/di_sample:di_config_unresolved_init) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dart bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/ext/injectable/shim_config.dill ... (remaining 1 argument skipped)
-Builder failed for spike/di_sample/lib/src/di/di_initializer.dart: line 1, column 181 of package:di_sample/src/di/di_initializer.dart: Could not resolve annotation for `Future<void> _init(GetIt getIt, String? environment)`.
-  ╷
-1 │ @InjectableInit(initializerName: 'init')
-  │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  ╵
-#0      TypeChecker._computeConstantValue (package:source_gen/src/type_checker.dart:129:7)
-#1      TypeChecker._annotationsWhere (package:source_gen/src/type_checker.dart:160:23)
-#2      _SyncStarIterator.moveNext (dart:async-patch/async_patch.dart:594:16)
-#3      Iterable.isEmpty (dart:core/iterable.dart:560:33)
-#4      TypeChecker.firstAnnotationOf (package:source_gen/src/type_checker.dart:86:20)
-#5      LibraryReader.annotatedWith (package:source_gen/src/library.dart:55:34)
-#6      _SyncStarIterator.moveNext (dart:async-patch/async_patch.dart:594:16)
-#7      GeneratorForAnnotation.generate (package:source_gen/src/generator_for_annotation.dart:89:42)
-#8      _generate (package:source_gen/src/builder.dart:373:33)
-<asynchronous suspension>
-#9      Stream.toList.<anonymous closure> (dart:async/stream.dart:1417:7)
-<asynchronous suspension>
-#10     _Builder._generateForLibrary (package:source_gen/src/builder.dart:115:30)
-<asynchronous suspension>
-#11     _Builder.build (package:source_gen/src/builder.dart:108:5)
-<asynchronous suspension>
-#12     InjectableConfigBuilder.build (package:rules_dart_ext_injectable/injectable_shims.dart:89:5)
-<asynchronous suspension>
-#13     _runBuilderPipeline (package:rules_dart_ext/builder_shim.dart:945:7)
-<asynchronous suspension>
-#14     _runWithStaging (package:rules_dart_ext/builder_shim.dart:712:3)
-<asynchronous suspension>
-#15     runShim (package:rules_dart_ext/builder_shim.dart:417:7)
-<asynchronous suspension>
-#16     ShimWorkerLoop.performRequest.<anonymous closure> (package:rules_dart_ext/worker_entry.dart:69:11)
-<asynchronous suspension>
-#17     ShimWorkerLoop.performRequest (package:rules_dart_ext/worker_entry.dart:63:5)
-<asynchronous suspension>
-#18     AsyncWorkerLoop.run (package:bazel_worker/src/worker/async_worker_loop.dart:35:20)
-<asynchronous suspension>
-#19     runShimAsWorker (package:rules_dart_ext/worker_entry.dart:28:3)
-<asynchronous suspension>
-#20     shimMain (package:rules_dart_ext/worker_entry.dart:106:5)
-<asynchronous suspension>
-
-Target //spike/di_sample:di_config_unresolved_init failed to build
-Use --verbose_failures to see the command lines of failed build steps.
-INFO: Elapsed time: 0.512s, Critical Path: 0.32s
-INFO: 2 processes: 2 internal.
-ERROR: Build did NOT complete successfully
+# F-0025 negative run: character_dto.dart with a bare @freezed (tool/build_runner_overlay/spike_reference.sh spike/retrofit_api, 2026-11-24). Expected: DIFFER for the freezed and json outputs, EQUAL for the retrofit output.
+== 1. Bazel codegen for //spike/retrofit_api
+INFO: Build completed successfully, 9 total actions
+== 2. Overlay scratch tree .dart_tool/mc_overlay/retrofit_api
+   first-party path dep: api_envelope (spike/api_envelope)
+== 3. Resolve (hosted versions must equal the committed overlay lock)
+== 4. build_runner
+  Built with build_runner/aot in 14s; wrote 5 outputs.
+   dart analyze: no unresolved imports
+== 5. Compare with bazel-bin
+DIFFER  spike/retrofit_api/lib/src/character_dto.freezed.dart
+--- ./lib/src/character_dto.freezed.dart	2026-11-24 19:58:28
++++ /privatebazel-out/darwin_arm64-fastbuild/bin/spike/retrofit_api/lib/src/character_dto.freezed.dart	2026-11-24 19:58:11
+@@ -12,7 +12,6 @@
+ // GENERATED CODE - DO NOT MODIFY BY HAND
+ // dart format off
+ T _$identity<T>(T value) => value;
+-
+ /// @nodoc
+ mixin _$CharacterDto {
+ 
+@@ -23,8 +22,6 @@
+ @pragma('vm:prefer-inline')
+ $CharacterDtoCopyWith<CharacterDto> get copyWith => _$CharacterDtoCopyWithImpl<CharacterDto>(this as CharacterDto, _$identity);
+ 
+-  /// Serializes this CharacterDto to a JSON map.
+-  Map<String, dynamic> toJson();
+ 
+ 
+ @override
+@@ -33,7 +30,7 @@
+   return identical(this, other) || (other.runtimeType == runtimeType&&other is CharacterDto&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.description, _this.description) || other.description == _this.description)&&(identical(other.thumbnailUrl, _this.thumbnailUrl) || other.thumbnailUrl == _this.thumbnailUrl));
+ }
+ 
+-@JsonKey(includeFromJson: false, includeToJson: false)
++
+ @override
+ int get hashCode {
+   final _this = this as CharacterDto;
+@@ -215,11 +212,11 @@
+ }
+ 
+ /// @nodoc
+-@JsonSerializable()
+ 
++
+ class _CharacterDto implements CharacterDto {
+   const _CharacterDto({required this.id, required this.name, this.description = '', @JsonKey(name: 'thumbnail_url') this.thumbnailUrl});
+-  factory _CharacterDto.fromJson(Map<String, dynamic> json) => _$CharacterDtoFromJson(json);
++  
+ 
+ @override final  int id;
+ @override final  String name;
+@@ -232,17 +229,14 @@
+ @pragma('vm:prefer-inline')
+ _$CharacterDtoCopyWith<_CharacterDto> get copyWith => __$CharacterDtoCopyWithImpl<_CharacterDto>(this, _$identity);
+ 
+-@override
+-Map<String, dynamic> toJson() {
+-  return _$CharacterDtoToJson(this, );
+-}
+ 
++
+ @override
+ bool operator ==(Object other) {
+     return identical(this, other) || (other.runtimeType == runtimeType&&other is _CharacterDto&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.thumbnailUrl, thumbnailUrl) || other.thumbnailUrl == thumbnailUrl));
+ }
+ 
+-@JsonKey(includeFromJson: false, includeToJson: false)
++
+ @override
+ int get hashCode {
+     return Object.hash(runtimeType,id,name,description,thumbnailUrl);
+DIFFER  spike/retrofit_api/lib/src/character_dto.g.dart
+--- ./lib/src/character_dto.g.dart	2026-11-24 19:58:28
++++ /privatebazel-out/darwin_arm64-fastbuild/bin/spike/retrofit_api/lib/src/character_dto.g.dart	2026-11-24 19:58:11
+@@ -1,23 +1,3 @@
+ // GENERATED CODE - DO NOT MODIFY BY HAND
+ 
+ part of 'character_dto.dart';
+-
+-// **************************************************************************
+-// JsonSerializableGenerator
+-// **************************************************************************
+-
+-_CharacterDto _$CharacterDtoFromJson(Map<String, dynamic> json) =>
+-    _CharacterDto(
+-      id: (json['id'] as num).toInt(),
+-      name: json['name'] as String,
+-      description: json['description'] as String? ?? '',
+-      thumbnailUrl: json['thumbnail_url'] as String?,
+-    );
+-
+-Map<String, dynamic> _$CharacterDtoToJson(_CharacterDto instance) =>
+-    <String, dynamic>{
+-      'id': instance.id,
+-      'name': instance.name,
+-      'description': instance.description,
+-      'thumbnail_url': instance.thumbnailUrl,
+-    };
+EQUAL   spike/retrofit_api/lib/src/characters_api.g.dart

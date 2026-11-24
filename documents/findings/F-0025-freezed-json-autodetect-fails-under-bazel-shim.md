@@ -19,6 +19,7 @@ Nothing fails at codegen time. The first error is at kernel compile: `Method not
 - With `@Freezed(fromJson: true, toJson: true)`: all five files `EQUAL` ([T-0027-AC1](../evidence/T-0027/engineer/T-0027-AC1.md)).
 
 ## Implications / actions
+- **TL decision (2026-11-24): adopted.** Every freezed model with JSON uses `@Freezed(fromJson: true, toJson: true)`. The TL records the deviation in ADR-0007 and files the shim fix as an upstream candidate at merge.
 - **Templates and buildgen (P1-24, P2):** every freezed model with JSON must use `@Freezed(fromJson: true, toJson: true)`, never a bare `@freezed`. A lint or `buildgen --check` rule should flag a `fromJson` factory under a bare `@freezed`. This is a Tide deviation, so it must be recorded (Tide writes `@freezed`).
 - **Upstream candidates (TL decides):** (a) rules_dart: the shim could present sources with build_runner's `/<package>/lib/…` `fullName`, in line with its stated bug-compatibility with `build_resolvers`; (b) freezed: decide by library URI (`package:json_annotation/…`), not by path.
 - Until then, a freezed + json model that compiles under Bazel proves the flags are set, because without them the build fails at kernel compile.
