@@ -19,7 +19,10 @@ void main() {
       isNot(same(container<GreetingRepository>())),
     );
     expect(container<Greeter>(), same(container<Greeter>()));
-    expect(container<Greeter>().greet('Ann'), startsWith('Hello Ann from mini-client'));
+    expect(
+      container<Greeter>().greet('Ann'),
+      startsWith('Hello Ann from mini-client'),
+    );
     expect(container<Badge>(parameter: 'new').render(), startsWith('[new '));
   });
 
