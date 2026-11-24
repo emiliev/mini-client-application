@@ -1,0 +1,54 @@
+INFO: Invocation ID: a1c00915-32c0-44c9-93fa-7282189693a7
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //spike/di_sample:di_config_unresolved_init (0 packages loaded, 0 targets configured)
+Analyzing: target //spike/di_sample:di_config_unresolved_init (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //spike/di_sample:di_config_unresolved_init (0 packages loaded, 0 targets configured).
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a95ec7ad190c950c1/spike/di_sample/BUILD.bazel:93:18: DartAggregateCodegen @@//spike/di_sample:di_config_unresolved_init failed: (Exit 1): dart failed: error executing DartAggregateCodegen command (from dart_aggregate_codegen rule target //spike/di_sample:di_config_unresolved_init) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dart bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/ext/injectable/shim_config.dill ... (remaining 1 argument skipped)
+Builder failed for spike/di_sample/lib/src/di/di_initializer.dart: line 1, column 181 of package:di_sample/src/di/di_initializer.dart: Could not resolve annotation for `Future<void> _init(GetIt getIt, String? environment)`.
+  ╷
+1 │ @InjectableInit(initializerName: 'init')
+  │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ╵
+#0      TypeChecker._computeConstantValue (package:source_gen/src/type_checker.dart:129:7)
+#1      TypeChecker._annotationsWhere (package:source_gen/src/type_checker.dart:160:23)
+#2      _SyncStarIterator.moveNext (dart:async-patch/async_patch.dart:594:16)
+#3      Iterable.isEmpty (dart:core/iterable.dart:560:33)
+#4      TypeChecker.firstAnnotationOf (package:source_gen/src/type_checker.dart:86:20)
+#5      LibraryReader.annotatedWith (package:source_gen/src/library.dart:55:34)
+#6      _SyncStarIterator.moveNext (dart:async-patch/async_patch.dart:594:16)
+#7      GeneratorForAnnotation.generate (package:source_gen/src/generator_for_annotation.dart:89:42)
+#8      _generate (package:source_gen/src/builder.dart:373:33)
+<asynchronous suspension>
+#9      Stream.toList.<anonymous closure> (dart:async/stream.dart:1417:7)
+<asynchronous suspension>
+#10     _Builder._generateForLibrary (package:source_gen/src/builder.dart:115:30)
+<asynchronous suspension>
+#11     _Builder.build (package:source_gen/src/builder.dart:108:5)
+<asynchronous suspension>
+#12     InjectableConfigBuilder.build (package:rules_dart_ext_injectable/injectable_shims.dart:89:5)
+<asynchronous suspension>
+#13     _runBuilderPipeline (package:rules_dart_ext/builder_shim.dart:945:7)
+<asynchronous suspension>
+#14     _runWithStaging (package:rules_dart_ext/builder_shim.dart:712:3)
+<asynchronous suspension>
+#15     runShim (package:rules_dart_ext/builder_shim.dart:417:7)
+<asynchronous suspension>
+#16     ShimWorkerLoop.performRequest.<anonymous closure> (package:rules_dart_ext/worker_entry.dart:69:11)
+<asynchronous suspension>
+#17     ShimWorkerLoop.performRequest (package:rules_dart_ext/worker_entry.dart:63:5)
+<asynchronous suspension>
+#18     AsyncWorkerLoop.run (package:bazel_worker/src/worker/async_worker_loop.dart:35:20)
+<asynchronous suspension>
+#19     runShimAsWorker (package:rules_dart_ext/worker_entry.dart:28:3)
+<asynchronous suspension>
+#20     shimMain (package:rules_dart_ext/worker_entry.dart:106:5)
+<asynchronous suspension>
+
+Target //spike/di_sample:di_config_unresolved_init failed to build
+Use --verbose_failures to see the command lines of failed build steps.
+INFO: Elapsed time: 0.512s, Critical Path: 0.32s
+INFO: 2 processes: 2 internal.
+ERROR: Build did NOT complete successfully
