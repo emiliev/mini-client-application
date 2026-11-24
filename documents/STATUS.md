@@ -1,6 +1,6 @@
 # Project Status
 
-_Last updated: 2026-11-23 by Tech Lead_
+_Last updated: 2026-11-24 by Tech Lead_
 
 | | |
 |---|---|
@@ -10,10 +10,11 @@ _Last updated: 2026-11-23 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`): 24 packages (foundation utilities, design system, mocked backend and fixtures, API client, feature flow), 39 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7 |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | None (between waves) |
+| **Active crew** | Codegen wave: T-0027 retrofit shim, T-0028 injectable shim, T-0029 BDD generator (3 Opus engineers, resumed after a usage-limit stop) |
 
 ## Now
-- Foundation wave done: T-0017 to T-0023 and T-0021 merged.
+- Foundation wave done: T-0017 to T-0026 merged.
+- Codegen wave in progress (T-0027 to T-0029); next is the first feature, `characters_list` (P1-17).
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
