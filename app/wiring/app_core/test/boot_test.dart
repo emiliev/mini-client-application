@@ -16,7 +16,7 @@ import 'package:mc_storage/mc_storage.dart';
 
 const _config =
     '{"env":"e2e","backend":{"seed":7,"latencyMs":0,"scenario":"happy"},'
-    '"build":"1"}';
+    '"apiBaseUrl":"https://mock.mini-client.invalid","build":"1"}';
 
 /// A wiring initializer that throws on its first [failures] runs.
 McDIInitializer _flaky(int failures, void Function() onRun) {
@@ -202,13 +202,26 @@ void main() {
     expect(diContainer<FileStore>().directory.path, storage.path);
     expect(diContainer<MockBackend>().seed, 7);
     expect(diContainer<MockBackend>().latency, same(LatencyProfile.none));
-    expect(
-      diContainer<Dio>().httpClientAdapter,
-      same(diContainer<MockBackend>().adapter),
-    );
+    final dio = diContainer<Dio>();
+    expect(dio.options.baseUrl, 'https://mock.mini-client.invalid');
+    final adapter = dio.httpClientAdapter as MockBackendHttpAdapter;
+    expect(adapter.target, same(diContainer<MockBackend>().adapter));
     expect(diContainer.isRegistered<EventBus>(), isTrue);
-    await diContainer<Monitoring>().log('hi');
-    expect(sink.entries, hasLength(1));
+
+    // A request goes through mc_api_client's Dio to the mocked backend,
+    // which has no domains, so it answers 404 and records the traffic.
+    await expectLater(
+      dio.get<Object?>('/v1/nothing'),
+      throwsA(
+        isA<DioException>().having(
+          (e) => e.response?.statusCode,
+          'status',
+          404,
+        ),
+      ),
+    );
+    expect(diContainer<MockBackend>().recentTraffic, hasLength(1));
+    expect(sink.entries, isNotEmpty, reason: 'the API client logs requests');
   });
 
   test('a configured latency becomes a constant backend latency', () async {

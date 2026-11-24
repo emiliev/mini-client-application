@@ -20,7 +20,7 @@ import 'package:mini_client/src/router/app_routes.dart';
 
 const _config =
     '{"env":"e2e","backend":{"seed":42,"latencyMs":0,"scenario":"happy"},'
-    '"build":"1"}';
+    '"apiBaseUrl":"https://mock.mini-client.invalid","build":"1"}';
 
 /// What iOS sends for `simctl openurl` once the app runs.
 Future<void> _pushLink(WidgetTester tester, String location) =>

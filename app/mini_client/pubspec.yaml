@@ -29,7 +29,7 @@ dependencies:
   universe_wiring: any
 
 dev_dependencies:
-  dio: ^5.9.0
+  dio: ^5.11.0
   flutter_test:
     sdk: flutter
   mc_analysis: any

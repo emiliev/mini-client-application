@@ -6,6 +6,7 @@ package(default_visibility = ["//app:__subpackages__"])
 _LANG = "3.13"
 
 _DEPS = [
+    "//utility/mc_api_client",
     "//utility/mc_config",
     "//utility/mc_di",
     "//utility/mc_ds_feedback",

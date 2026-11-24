@@ -10,11 +10,12 @@ environment:
   flutter: ^3.47.7
 
 dependencies:
-  dio: ^5.9.0
+  dio: ^5.11.0
   flutter:
     sdk: flutter
   get_it: ^8.0.0
   go_router: 17.5.0
+  mc_api_client: any
   mc_config: any
   mc_di: any
   mc_ds_feedback: any
