@@ -2,12 +2,12 @@
 
 - **Verifier:** crew: Verifier (fresh agent, not the implementer)
 - **Date:** 2026-11-24
-- **Branch / commit verified:** `fleet/T-0022-feature-flow` @ **`cd30e2e`** (rebased onto main `c9dc283`; per-depth snapshot design for AC5), checked out as `fleet/T-0022-verify2`. This supersedes the first verification of `496e8bb` (FAIL on AC5), summarised at the end.
+- **Branch / commit verified:** `fleet/T-0022-feature-flow` @ **`4ca3702`** (rebased onto main `c9dc283`; per-depth snapshots, and `restore` now notifies `states`), checked out as `fleet/T-0022-verify3`. This supersedes the rounds at `496e8bb` and `cd30e2e` (both FAIL on AC5), summarised at the end.
 - **Simulator:** none. This is a utility task with no e2e journey, and Android is deferred (Q-009).
 - **Bazel output base:** `/tmp/mc-ob-T-0022-verifier` (the Verifier's own).
-- **Verdict:** **FAIL**. The flow *state* is now right in every back case. But after a swipe back the *page content* can show a state that no longer exists (Issue 1), so AC5 still fails. AC1 to AC4, AC6 and AC7 pass.
+- **Verdict:** **PASS**. Every AC passes.
 
-## Gates re-run independently (at `cd30e2e`)
+## Gates re-run independently (at `4ca3702`)
 | Gate | Command | Result |
 |---|---|---|
 | L1–L3 Tests | `tool/bazelw test --nocache_test_results //...` | **36 / 36 pass** |
@@ -15,50 +15,48 @@
 | Architecture | `tool/bazelw run //tool/mc_arch_check:bin` | `mc_arch_check: OK` |
 | L4 E2E | n/a (utility task) | — |
 
-Logs: [`verifier/gates.log`](verifier/gates.log). My probes: [`verifier/probes-cd30e2e.dart.txt`](verifier/probes-cd30e2e.dart.txt). I appended them to `feature_flow_test.dart` temporarily, with a dump of the visible `Text` widgets after each swipe; they were never committed.
+Logs: [`verifier/gates.log`](verifier/gates.log). My probes: [`verifier/probes-cd30e2e.dart.txt`](verifier/probes-cd30e2e.dart.txt), unchanged since the last round. I appended them to `feature_flow_test.dart` temporarily and never committed them.
 
 ## Acceptance criteria
 | AC | Scenario (short) | Mapped test(s) | Test really asserts the AC? | Result |
 |---|---|---|---|---|
 | T-0022-AC1 | no initializer → first page renders | `feature_flow_test` "T-0022-AC1 …" | Yes. It pumps a flow without a `flowInitializer` and finds `list page`. This is Tide's "never builds" defect, fixed. | PASS |
 | T-0022-AC2 | throwing initializer → error view, Retry, `recordError`; Retry re-runs | "T-0022-AC2 …" | Yes. It checks for `Retry` and the fixed message, that the raw error is not shown, and that there is exactly 1 `ErrorEntry`. After the Retry tap it asserts `attempts == 2` and that the first page renders. | PASS |
-| T-0022-AC3 | `complete(r)` → `onComplete(r)` exactly once | widget "T-0022-AC3 …"; `feature_flow_controller_test` (4) | Yes. `complete('done')` then `complete('again')` gives exactly `['done']`. A late `update`, `restore` or `complete` after `dispose` is a no-op: no throw, no state change, no emission, and `isCompleted` stays false. | PASS |
+| T-0022-AC3 | `complete(r)` → `onComplete(r)` exactly once | widget "T-0022-AC3 …"; `feature_flow_controller_test` | Yes. `complete('done')` then `complete('again')` gives exactly `['done']`. A late `update`, `restore` or `complete` after `dispose` is a no-op: no throw, no state change, no emission, and `isCompleted` stays false. | PASS |
 | T-0022-AC4 | two flows in an `IndexedStack` → own controllers | "T-0022-AC4 …" | Yes. Each flow resolves its controller through `context.di` from its own `FlowScope`. The controllers are distinct, with states `a` and `b`. | PASS |
-| T-0022-AC5 | iOS edge swipe → state reverts; the page has its declared `name` | "T-0022-AC5 …" ×4 (basic; in-place then swipe; filter then push then swipe; two levels) | The tests are genuine: a real drag from x=2 on iOS, the route name `detail` is asserted, and the state is asserted. **Full mutant** (per-depth fix removed, pre-`496e8bb` forwarding restored): "in-place update then edge swipe" and "two pushes then two edge swipes" **fail**, so the new tests guard the fix. **My own repros:** the state is correct in all of them, but in 2 of 4 the page shows stale content (Issue 1). | **FAIL** |
-| T-0022-AC6 | missing `RootImport<T>` names `T`; `debugResolveAll` names both types | widget "T-0022-AC6 …" ×2; `mc_di/test/recording_test.dart` (10) | Yes. Nothing changed since the first verification, and everything still passes. The stale `_Selection` comment is fixed. | PASS |
-| T-0022-AC7 | `mc_bloc_kit` has no Flutter and no mixins; gates; spike finding | `purity_test`, `mc_bloc_test` (3), gates, F-0018 | Yes. Unchanged, and the gates are green. | PASS |
+| T-0022-AC5 | iOS edge swipe → state reverts; the page has its declared `name` | "T-0022-AC5 …" ×4 in `feature_flow_test`; "T-0022-AC5 update and restore both notify states" in `feature_flow_controller_test` | Yes. Each test uses a real drag from x=2 on iOS, asserts the route name `detail`, and asserts both the state **and** the visible text after each swipe. **My probes** (state and visible content) all pass; see the next table. **Mutant 1** (broadcast removed from `restore`): content assertions in "a filter changed on the list …" (`list foo` not found) and "two pushes then two edge swipes …" (`detail b` not found) **fail**, as do the unit test (`[1, 0]` vs `[1]`) and my VPROBE2 and VPROBE3. **Mutant 2** (round 2, per-depth fix removed): two of the new tests fail. | PASS |
+| T-0022-AC6 | missing `RootImport<T>` names `T`; `debugResolveAll` names both types | widget "T-0022-AC6 …" ×2; `mc_di/test/recording_test.dart` (10) | Yes. The `StateError` names `_Dep`. `debugResolveAll` names `_Other` and `_Missing` (widget) and `_B` and `_A` (unit). Scoped registrations (`pushNewScope`, `popScope`, `dropScope`, `unregister`, `reset`) are tracked. `signalsReady` and `dependsOn` fail with "not ready" plus the type within the timeout. No change since round 1. | PASS |
+| T-0022-AC7 | `mc_bloc_kit` has no Flutter and no mixins; gates; spike finding | `purity_test`, `mc_bloc_test` (3), gates, F-0018 | Yes. The purity test scans `lib/**`, and a hand grep finds only the word "mixin" in a doc comment. The deps are `bloc` and `mc_monitoring` only. `McBloc` is an `abstract base class` that logs transitions and records failures. The gates are green and F-0018 is present. | PASS |
 
-### My AC5 repros at `cd30e2e` (state vs what is on screen after each swipe)
-| Probe | Steps | `controller.state` after the swipe | Visible | Result |
+### My AC5 probes at `4ca3702` (state and visible content after each swipe)
+| Probe | Steps | State after the swipe | Visible | Result |
 |---|---|---|---|---|
-| VPROBE1, my regression case | list filter `foo` → push detail `x` → swipe | `(foo, null)` ✓ | `vlist foo` ✓ | PASS |
-| VPROBE2, the reviewer's case | filter `foo` → push detail `x` → in place inside detail: detail `y`, filter `bar` → swipe | `(foo, null)` ✓ (pre-push) | **`vlist bar`** ✗ | **FAIL** |
-| VPROBE3, two levels | filter `foo` → push detail `a` → in place `b` → push sub `s` → in place sub `t`, detail `z` → swipe → swipe → filter `qux`, push `c`, swipe | 1st: `(foo, b, null)` ✓; 2nd: `(foo, null)` ✓; re-push and swipe: `(qux, null)` ✓ | 1st swipe: **`vdetail z`** ✗ (state says `b`) | **FAIL** |
-| VPROBE4, same-depth replace (extra) | push detail → replace it with `settings` (same depth) → swipe | `(none, null)` | `vlist none` | PASS (pages match state) |
-
-## Issue 1 (important, fails AC5): page content is not updated when a pop restores a snapshot
-`_onFlowChanged` restores the depth snapshot with `FeatureFlowController.restore(...)`, which by design does **not** emit on `states`. `_LivePage` builds page content from a `StreamBuilder` on `controller.states`, so after a pop it keeps the **last emitted** state. Any in-place change made on the popped page that also touches data shown by the revealed page (VPROBE2: the filter), or by a page below (VPROBE3: the detail), stays on screen while the controller holds the restored snapshot. The screen and the bloc-visible state then disagree, which is the class of bug AC5 exists to prevent.
-
-The Engineer's tests miss it by coincidence. In "filter then push" the last emission before the pop already carries `filter: foo`. In "two levels" the only in-place change at depth 2 happens before the push to depth 3.
-
-Diagnosis confirmed by an experiment, which is not a proposed fix. Replacing `restore(restored)` with `update((_) => restored)` makes all 4 probes and all 10 tests pass. That shortcut is wrong as shipped (`update` is ignored after `complete`, and it re-enters `_onControllerState`), but it shows that notifying the live pages is the missing piece. Suggested direction: drive `_LivePage` from a `ValueNotifier<T>` (or `setState`) owned by `_FeatureFlowState`, set in both `_onControllerState` and `_onFlowChanged`. Then add VPROBE2 and VPROBE3, with their visible-text assertions, as AC5 tests.
+| VPROBE1, filter case | list filter `foo` → push detail `x` → swipe | `(foo, null)` | `vlist foo`, no `vdetail` | PASS |
+| VPROBE2, reviewer's case | filter `foo` → push detail `x` → in place inside detail: detail `y`, filter `bar` → swipe | `(foo, null)` (pre-push) | `vlist foo`, no `vdetail` | PASS |
+| VPROBE3, two levels | filter `foo` → push detail `a` → in place `b` → push sub `s` → in place sub `t`, detail `z` → swipe → swipe → filter `qux`, push `c`, swipe | `(foo, b, null)`, then `(foo, null)`, then `(qux, null)` | `vdetail b` (no `vsub`), then `vlist foo`, then `vlist qux` | PASS |
+| VPROBE4, same-depth replace (extra) | push detail → replace it with `settings` → swipe | `(none, null)` | `vlist none` (pages match state) | PASS |
 
 ## Other checks
-- **F-0018 now matches the code for §5** (the switches are forwarded under the file-level ignore). **§8 is still slightly overstated:** "keeps `FeatureFlowController.state` authoritative … Page content follows in-place updates through a `StreamBuilder`" is true, but restored state never reaches the `StreamBuilder` (Issue 1). Update it with the fix.
-- **Engineer evidence** now shows `Executed 36 out of 36 tests`, so the partial-log issue from the first round is closed.
+- **F-0018** now matches the code. §5 says the switches are forwarded under the ignore. §8 says `restore` notifies `states` so the pages show the restored content, records the Verifier finding and the mutation results, and states a limit: a single pop that removes several pages is not handled.
+- **The `restore` contract changed.** It used to say "does not notify, so the host does not hear its own change". Now it notifies, and `FeatureFlow`'s own listener (`_onControllerState`) does receive it. I checked the code: after a pop the page names of the restored snapshot equal flow_builder's, so nothing is forwarded back. In the replace case (VPROBE4) the forward runs under `_forwarding`, so there is no feedback loop. All probes confirm this.
 - **Spike claim:** confirmed. `flutter.toolchain(flutter_version = "3.47.7")`, Dart 3.13.5, `flow_builder 0.1.0` in `pubspec.lock`, and `feature_flow_test` passes under Bazel `flutter_test`, including the real edge-swipe pop through flow_builder's `onPopPage`.
-- **Tide conformance:** unchanged from the first round. It matches the article (flow_builder `FlowBuilder` over `MaterialPage`s; the controller is registered in the flow's scope before the feature initializer; blocs navigate through `controller.update`; the flow is the feature's entry widget). The deviations are justified: R17/D-17 child `GetIt` per flow with `RootImport` and `context.di` (fixes tab shadowing, proven by AC4); D-16 `McBloc` as an `abstract base class` (one logging point, keeps the outline cutoff); D-18 hardening; `FeatureFlowController` in pure-Dart `mc_bloc_kit` (R15), bridged to flow_builder by `FeatureFlow`, which is where Issue 1 sits.
-- **Plan §4.5 scope gap (for the TL, not an AC):** `FeatureFlow<S, R>`, `provide`, `localizationsDelegates` and `name` are not implemented. They are outside this task's scope, so they belong in `pending-work.md` if not already tracked.
+- **Tide conformance:** it matches the article (flow_builder `FlowBuilder` over `MaterialPage`s; `FeatureFlowController<T>` is registered in the flow's scope before the feature initializer; blocs navigate through `controller.update`; back reverts the state; the flow is the feature's entry widget). The deviations are justified:
+  - **R17/D-17:** a child `GetIt` per flow, with `RootImport` and `context.di` instead of the global `pushNewScope`, `dropScope` and `diContainer<T>()`. This fixes Tide's tab shadowing, as AC4 proves.
+  - **D-16:** `McBloc` is an `abstract base class` rather than a per-bloc override or a mixin. It gives one logging point and keeps the outline cutoff.
+  - **D-18:** the hardening (builds without an initializer, Retry, named pages, `complete`/`onComplete`).
+  - **R15:** `FeatureFlowController` is pure Dart, bridged to flow_builder by `FeatureFlow`. It owns its state, and the per-depth snapshots fix flow_builder's history, which can't distinguish in-place updates.
 
 ## Test-integrity audit and hygiene
-- **Tests deleted, skipped or weakened:** none. Three AC5 tests were added and one comment was fixed. The `mc_di` tests are unchanged and pass.
-- **Lint suppressions:** only the TL-approved `// ignore_for_file: invalid_use_of_visible_for_testing_member` in `mc_di/lib/src/recording_get_it.dart`. In the first round, removing it produced exactly 4 warnings, all on the two forwarded get_it switches. The file is unchanged since, so the suppression is still limited to that purpose.
+- **Tests deleted, skipped or weakened:** none. In `4ca3702` one unit test was **renamed and its expectation changed**: "T-0022-AC3 update notifies states; restore does not" (`[1]`) became "T-0022-AC5 update and restore both notify states" (`[1, 0]`). This follows the intended contract change in `restore` and is declared in the commit message. Two AC5 widget tests gained in-place updates and absent-text assertions, which makes them stronger.
+- **Lint suppressions:** only the TL-approved `// ignore_for_file: invalid_use_of_visible_for_testing_member` in `mc_di/lib/src/recording_get_it.dart`. In round 1, removing it produced exactly 4 warnings, all on the two forwarded get_it switches. The file is unchanged since.
+- **`mc_di`:** the existing `di_container_test` is unchanged and passes.
 - **Root changes:** `pubspec.yaml` (+2 workspace members), `pubspec.lock` (+`bloc`, +`flow_builder`) and `MODULE.bazel.lock`, as listed.
-- **Worktree:** every mutant, probe and experiment was reverted with `git checkout`. The tree was clean before lint, arch_check and this commit.
+- **Worktree:** every mutant and probe was reverted with `git checkout`. The tree was clean before lint, arch_check and this commit.
 
-## First verification at `496e8bb` (superseded)
-FAIL on AC5. Only page-changing updates were forwarded to flow_builder, so a list-page in-place update made before a push was lost on back (state `'none'` instead of `'foo'`). The mutant with the history fix removed failed the then-new AC5 test as expected. Minor issues then: F-0018 §5 contradicted the code, a stale test comment, and the Engineer log showed 6 tests rather than 32. All three are fixed in `cd30e2e`.
+## Non-blocking notes for the Tech Lead
+1. **Multi-page pops** (for example `Navigator.popUntil` inside a flow's navigator) are not handled, as F-0018 §8 states. Edge-swipe and AppBar back pop one page at a time, which is what AC5 covers. Consider a `pending-work.md` entry.
+2. **Plan §4.5 items outside this task's scope:** `FeatureFlow<S, R>`, `provide`, `localizationsDelegates` and `name` are not implemented. They belong in `pending-work.md` if not already tracked.
 
-## Notes for the Tech Lead
-- Send T-0022 back for Issue 1. It is a small change: notify the live pages on restore. Add VPROBE2 and VPROBE3 (with visible-text assertions) as AC5 tests and update F-0018 §8.
-- Everything else is ready. AC1 to AC4, AC6, AC7, the gates, the spike, hygiene and Tide conformance all pass.
+## Earlier rounds (superseded)
+- **`496e8bb`: FAIL on AC5.** Only page-changing updates were forwarded to flow_builder, so a list-page in-place update made before a push was lost on back (state `'none'` instead of `'foo'`). The mutant with the history fix removed failed the then-new AC5 test as expected. Minor issues then (F-0018 §5 contradicting the code, a stale test comment, a 6-test Engineer log) were all fixed in `cd30e2e`.
+- **`cd30e2e`: FAIL on AC5.** The per-depth snapshots made the state correct in every case. But `restore` did not notify `states`, so after a pop the `_LivePage` content showed the last emitted state: VPROBE2 showed `vlist bar` where the state was `foo`, and VPROBE3 showed `vdetail z` where it was `b`. Fixed in `4ca3702`.
