@@ -10,7 +10,8 @@
 #   repro.sh [--compare] <rules_dart checkout with the patch applied> [WORKDIR]
 #
 # Needs: bazelisk or bazel (BAZEL, default `bazel`), and a Dart 3.13 SDK for
-# `pub get` and build_runner (DART, default `dart`). Nothing is installed.
+# `pub get` and build_runner (DART, default `dart`; a command such as
+# `fvm dart` works). Nothing is installed. The Bazel server is shut down at the end.
 # Exit: 0 tests pass (and, with --compare, every file is equal), 1 otherwise.
 set -euo pipefail
 
@@ -242,7 +243,8 @@ $DART pub get > /dev/null
 
 echo "== bazel test //..."
 status=0
-"$BAZEL" test //... || status=1
+# --nocache_test_results: the test result is always fresh, never a cache hit.
+"$BAZEL" test --nocache_test_results //... || status=1
 BIN="$("$BAZEL" info bazel-bin 2>/dev/null)"
 
 if [[ $compare -eq 1 ]]; then
@@ -272,4 +274,5 @@ EOF
     fi
   done
 fi
+"$BAZEL" shutdown > /dev/null 2>&1 || true
 exit $status

@@ -22,7 +22,6 @@ Over an `@RestApi` file that uses a freezed + json model and a
 the macro yet.
 
 Changelog: `retrofit_library` runs retrofit_generator for `@RestApi` dio clients
-
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 
 diff --git a/README.md b/README.md
@@ -91,17 +90,17 @@ index c989f2a4..d44155ed 100644
      dependency: transitive
      description:
 diff --git a/dart/ext/pubspec.yaml b/dart/ext/pubspec.yaml
-index 5c399a76..59723d50 100644
+index 5c399a76..a869fa22 100644
 --- a/dart/ext/pubspec.yaml
 +++ b/dart/ext/pubspec.yaml
-@@ -23,6 +23,7 @@ dependencies:
-   freezed: ^4.0.1
+@@ -24,6 +24,7 @@ dependencies:
    go_router_builder: ^4.3.0
    json_serializable: ^6.13.0
-+  retrofit_generator: ^10.3.3
    mockito: ^5.6.0
++  retrofit_generator: ^10.3.3
    stacked_generator: ^2.0.0
  dev_dependencies:
+   test: ^1.25.0
 diff --git a/dart/ext/retrofit/BUILD.bazel b/dart/ext/retrofit/BUILD.bazel
 new file mode 100644
 index 00000000..142a15e6

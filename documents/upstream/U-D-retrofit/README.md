@@ -32,7 +32,7 @@ feat(ext): add a retrofit_generator shim and `retrofit_library` macro
 > **Verified (on a downstream consumer, macOS arm64, Bazel 9.3.0, Dart 3.13.5 / Flutter 3.47.7's Dart):**
 > - Over an `@RestApi` file that returns `Envelope<List<Model>>` / `Envelope<Model>` (`genericArgumentFactories`) and takes a json `@Body`, the shim's `.g.dart` is **byte-identical to build_runner 2.16.2's**, through both `retrofit_library` and a hand-wired `dart_codegen` cascade. The cascade case had a freezed + json model and the envelope in another package, read through analyzer summaries.
 > - A body edit in the API file reruns only that file's retrofit and combine actions plus the library's compile and analysis actions. The shard itself is byte-identical.
-> - `//dart/ext/...`, `//docs/...` and `//dart/tests:all`: 631 of 633 tests pass. The two that fail to build (`//dart/tests/defines_fixture:*`, `DartKernel` exit 247) don't touch `dart/ext` and look like local resource limits.
+> - `//dart/ext/...`, `//docs/...` and `//dart/tests:all`: 631 of 633 tests pass. The two that fail to build (`//dart/tests/defines_fixture:modular_comma_defines_test` and `:test_defines_test`, `DartKernel` exit 247) have no `dart/ext` dependency. We did not investigate them, and we have not checked whether they also fail on the unpatched base.
 >
 > **Not in this PR (follow-ups):**
 > - Gazelle: no `RestApi` entry in `defaultBuilders()` / `macroKinds` / `macroLoadInfos()` yet. Not done because we couldn't run `//gazelle/...` (no Go toolchain locally), so the README says the macro is declared by hand for now.
@@ -54,7 +54,7 @@ git am /path/to/0001-feat-ext-add-a-retrofit_generator-shim-and-retrofit_.patch
 DART=dart BAZEL=bazelisk /path/to/repro.sh --compare "$PWD"
 ```
 
-Result on our machine ([log](../../evidence/T-0027/engineer/T-0027-AC4-repro.log)):
+Result on our machine, from a fresh workspace with `test --nocache_test_results` ([log](../../evidence/T-0027/engineer/T-0027-AC4-repro.log), written by `tool/checks/T-0027-AC4_upstream_draft.sh` with `MC_RULES_FORK` set):
 
 ```
 //:characters_api_test   PASSED
