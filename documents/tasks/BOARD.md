@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0030](T-0030-paging-and-media-kits.md) | `mc_paging` + `mc_media` kits for the LD archetype (P1-14 subset, U14, U19) | **In Progress** | Engineer (Sonnet) | T-0026 | `fleet/T-0030-paging-and-media` |
 | [T-0029](T-0029-bdd-generator.md) | BDD generator + `mc_bdd_tests` + `mc_test_steps` skeleton (P3-05) | **Verified**; rebase onto 0001+0002 | Engineer (Opus) | T-0024, T-0026 | `fleet/T-0029-bdd-generator` |
 | [T-0028](T-0028-injectable-shim.md) | injectable two-stage shim, vendored generator (P3-04) | **Verified**; rebase onto 0001 | Engineer (Opus) | T-0024 | `fleet/T-0028-injectable-shim` |
 
