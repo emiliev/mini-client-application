@@ -100,3 +100,16 @@ injectable_config(
     output = "lib/src/di/unresolved/di_initializer.config.dart",
     tags = ["manual"],
 )
+
+# T-0028-AC4, negative case 2: the init file has no @InjectableInit, so the
+# generator emits nothing; the shim fails naming the file (an unpatched shim
+# would write an empty .config.dart):
+#   tool/bazelw build //spike/di_sample:di_config_without_init   (expected to FAIL)
+injectable_config(
+    name = "di_config_without_init",
+    init = "testdata/di_without_init.dart",
+    shards = [],
+    package_name = _PKG,
+    language_version = _LANG,
+    tags = ["manual"],
+)
