@@ -6,7 +6,8 @@
 - **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0028-verifier` (own output base; shut down at the end). Builds used the pin + patch queue (no `.bazelrc.user` override), except the one fork negative control below.
 - **Fork dir:** my own, `~/.cache/mc-bazel/forks/agent-ae26614f3d08a857b-f7e9102263/ai_rules_dart`
 - **Simulator:** none (no UI, no e2e for this task)
-- **Verdict:** **PASS**
+- **Verdict:** **PASS** (first pass at `da8054f`). **Re-verification at `7d55ab2`: PASS** (see the last section).
+- **Finding numbers:** the injectable finding was F-0026 at `da8054f` and is F-0028 since the fix round. This report now uses F-0028 throughout, except where issue 6 describes the original collision.
 
 ## Gates re-run independently
 | Gate | Command | Result |
@@ -52,7 +53,7 @@ $ cmp <overlay>/lib/src/di/di_initializer.config.dart <bazel-bin>/…/di_initial
 ```
 Reference generator: `package_config.json` → `hosted/pub.dev/injectable_generator-3.1.3`, `lean_builder-1.2.2`, `build_runner-2.16.1`. The overlay lock's sha256 for injectable_generator is `24d525c6…`, the same archive I fetched in AC3.
 
-The tricky cases F-0026 names are all present and match:
+The tricky cases F-0028 names are all present and match:
 - **Staged barrel:** `aquery` of `_di_config_src_badge_inj` lists `spike/di_sample/lib/di_sample.dart` among the staged inputs. The config imports `package:di_sample/src/<file>.dart`, not the barrel.
 - **Constructor taking `Dio`:** `Badge(…, Dio)`. The shard carries `"otherImports":["package:dio/src/dio.dart"]`, the same as build_runner's.
 - **Comment-only file:** `plain_helper.dart` → shard `[]`, absent from the config.
@@ -64,7 +65,7 @@ The tricky cases F-0026 names are all present and match:
 | M1 | New `@lazySingleton class BadgePrinter(Clock, Dio)` in `badge.dart` | rc=0, all `EQUAL`; config sha `d3733247…` → **`bf970710…`**, badge shard → `9a6c6281…` |
 | M2 | `GreetingRepository` `@injectable` → `@LazySingleton()`; swapped `dio` / `appName` declaration order in `SampleModule`; new file `audit_log.dart` with `@Singleton(order: -1) AuditLog(Clock, Dio)`, added to `_INJECTABLE` | rc=0, all `EQUAL` (7 outputs); config → **`df240ae4…`**, `AuditLog` registered first |
 | M3 | As M2, but `audit_log.dart` **not** added to `_INJECTABLE` | rc=1: `DIFFER … config.dart` (`-    gh.singleton<_i1004.AuditLog>(`). The comparison catches it; the Bazel build itself is silent (issue 3) |
-| NC | Fork negative control: in my fork, `inner.build(BuildRunnerLibrariesStep(buildStep))` → `inner.build(buildStep)` in both builders, built via `--override_module` | rc=1: config `DIFFER` (`+import 'package:di_sample/di_sample.dart' as _i100;`, Badge registration moved) and all 5 shards `DIFFER`. This reproduces F-0026 §1 and shows the wrapper is what makes AC1 pass. The fork was reverted and the override removed |
+| NC | Fork negative control: in my fork, `inner.build(BuildRunnerLibrariesStep(buildStep))` → `inner.build(buildStep)` in both builders, built via `--override_module` | rc=1: config `DIFFER` (`+import 'package:di_sample/di_sample.dart' as _i100;`, Badge registration moved) and all 5 shards `DIFFER`. This reproduces F-0028 §1 and shows the wrapper is what makes AC1 pass. The fork was reverted and the override removed |
 
 ### AC2: early cutoff (re-derived by hand)
 Body-only edit in `badge.dart` (`render()` string, a different file from the Engineer's), then `build --remote_download_all --execution_log_json_file=… //spike/di_sample:di_config`:
@@ -79,7 +80,7 @@ DartCodegen ×6 cacheHit=False
 DartAggregateCodegen  //spike/di_sample:di_config  cacheHit=False  runner=worker  exit=0
 badge shard → 9a6c628163543a28 · config → bf970710067f9b96 (contains gh.lazySingleton<_i146.BadgePrinter>)
 ```
-The aggregate's package-local inputs (`aquery`) are the init file plus the 6 shards only; the hand-written `lib/src/*.dart` files are not among them. Every shard re-runs on any edit, because shards depend on `_stage` (F-0026 §5, a known follow-up). That doesn't affect the AC.
+The aggregate's package-local inputs (`aquery`) are the init file plus the 6 shards only; the hand-written `lib/src/*.dart` files are not among them. Every shard re-runs on any edit, because shards depend on `_stage` (F-0028 §5, a known follow-up). That doesn't affect the AC.
 
 ### AC3: ext lock and vendored generator (re-derived by hand)
 - Fetched `@ai_rules_dart+/dart/ext/pubspec.lock`: analyzer `14.5.0`, `_fe_analyzer_shared` `109.0.0`, injectable `3.0.0`, **no lean_builder**. The patch's lock hunk adds only `injectable`.
@@ -119,12 +120,46 @@ None. Every changed file belongs to the task:
 ## Issues found
 1. **(minor) The combined queue with T-0027 doesn't apply strictly as committed.** `git am` of T-0027's committed `0001-feat-ext-add-a-retrofit_generator-shim-and-retrofit_.patch` then T-0028's `0002` on the pin fails at `docs/ext.md:46`. T-0027 inserts `├── retrofit/` between `copy_with_extension_gen/` and `stacked/`, which is inside 0002's context. `dart/ext/pubspec.yaml`, `dart/ext/pubspec.lock` and everything else apply cleanly. With docs excluded, the combined ext lock passes `pub get --enforce-lockfile` unchanged, so it really is the union. The Engineer's note ("applies on T-0027's WIP fork commit") is stale against T-0027's final patch. Fix at merge: rebase 0002 onto 0001 in a fork (a one-line docs conflict), re-export, then `rules_fork.sh check`. (By F-0022, Bazel's fuzzy patcher might accept the drift, so don't rely on a green build.) `MODULE.bazel`'s `patches` list and the root `pubspec.yaml` workspace list will also conflict textually, trivially.
 2. **(minor) The AC3 script's lean_builder target check is vacuous.** `tool/checks/T-0028-AC3_ext_lock.sh:24` queries `@ext_pub_deps//:lean_builder`, but `@ext_pub_deps` isn't visible from the main repo. The query always errors, so the check always reports "absent". The canonical `@@ai_rules_dart++pub+ext_pub_deps//:all` query (which I ran) confirms it is absent, so the AC holds. Only the script is weak.
-3. **(minor) An annotated file that isn't listed is dropped silently.** `injectable_package`'s `srcs` (`spike/di_sample/BUILD.bazel:30-37`, `_INJECTABLE`) is hand-maintained. An `@injectable` file left out of it gets no shard, and its registration disappears from `.config.dart` without any build error (M3). build_runner would include it. This is buildgen's job (F-0026 implications), but it should be in `pending-work.md` explicitly, because it is a silent correctness gap.
+3. **(minor) An annotated file that isn't listed is dropped silently.** `injectable_package`'s `srcs` (`spike/di_sample/BUILD.bazel:30-37`, `_INJECTABLE`) is hand-maintained. An `@injectable` file left out of it gets no shard, and its registration disappears from `.config.dart` without any build error (M3). build_runner would include it. This is buildgen's job (F-0028 implications), but it should be in `pending-work.md` explicitly, because it is a silent correctness gap.
 4. **(minor) `VENDORED.md` says "LICENSE (unchanged)", but the vendored `LICENSE` gained a trailing newline** (upstream has no final newline: 1068 vs 1069 bytes). Patch: `dart/ext/injectable/third_party/injectable_generator/LICENSE`. Either say so under "Local changes" or keep the byte-exact file.
 5. **(minor) `injectable_reference.sh` enumerates shards from `bazel-bin`, which can hold stale outputs.** `tool/build_runner_overlay/injectable_reference.sh:98` uses `find "$BAZEL_BIN/$PKG_DIR/lib" -name '*.injectable.json'`. After a source is removed from `srcs`, its old shard is still compared. During M3 it gave a false `EQUAL audit_log.injectable.json`, and after NC a false `MISSING in build_runner`. The config comparison stayed correct. Better to enumerate shards from the build's declared outputs (`cquery --output=files`).
 6. **(minor) Finding-number collision.** T-0027's branch also adds `documents/findings/F-0026-retrofit-shim-spike-facts.md`. One of the two must be renumbered at merge. T-0028's number is also baked into upstream-bound fork code: patch line 342, `injectable_shims.dart` doc comment "`(F-0026)`". If you renumber, re-export the patch; better, drop the local finding ID from code meant for upstream.
 
 ## Notes for the Tech Lead
 - The vendored generator's `recase`, `code_builder`, `dart_style` and `source_gen` are only **transitive** in the ext lock (via other generators). If one of those generators is dropped, the vendored generator loses a dependency. Consider making them direct in `dart/ext/pubspec.yaml` upstream.
-- The shard stage re-runs all 6 shards on any edit (F-0026 §5). It's cheap here, but at 169 packages it is buildgen's narrowing job.
+- The shard stage re-runs all 6 shards on any edit (F-0028 §5). It's cheap here, but at 169 packages it is buildgen's narrowing job.
 - None of the issues blocks merging T-0028 on its own. Issue 1 must be handled when the two patches are combined.
+
+## Re-verification at 7d55ab2
+- **Commit verified:** `7d55ab2` (fix-round commits `fd50512..7d55ab2` on top of `ced0c05`). I verified it on my worktree branch, reset to `7d55ab2`.
+- **Same setup:** output base `/tmp/mc-ob-T-0028-verifier`, and a fresh fork checkout in my own fork dir.
+- **Clean-up:** every probe below was reverted, and the tree is clean afterwards.
+- **Verdict:** **PASS.** All 8 fix items hold, all gates are green, and all four AC checks pass.
+
+### Fix items
+| # | Item | How I checked it | Result |
+|---|---|---|---|
+| 1 | `injectable_reference.sh` exits 1 on a failed Bazel build and ignores stale bazel-bin shards | **Break:** set `tags = []` on the known-failing `:di_config_without_init` (`BUILD.bazel:124`), so the script's query includes it, then ran the script. **Stale:** planted `bazel-bin/…/lib/src/audit_log.injectable.json` containing `{"stale": true}`, then ran the script. **Bonus, M3 again:** added an annotated `audit_log.dart` that is not in `_INJECTABLE` | Break: `ERROR: … DartAggregateCodegen @@//spike/di_sample:di_config_without_init failed` → `FAIL: the Bazel build failed`, **rc=1** (the old script ignored this and went on). Stale: **rc=0**, the stale file is never mentioned, 1 config + 5 shards `EQUAL` + 1 `EMPTY`. M3: rc=1, `DIFFER … config.dart` and `MISSING in the Bazel targets: …/audit_log.injectable.json (shard)` | PASS |
+| 2 | AC3: canonical-name query with a positive control; fails on a failed query, fetch or download | Read the script: it requires `fetch_rc=0`, `hub_rc=0`, analyzer and injectable listed, and the archive comparison `equal*`. **Negative:** ran it with a fake `curl` that exits 6 placed first on `PATH` (an offline simulation) | Negative: the row shows `NOT CHECKED (download failed; this check needs network)` → `**FAIL T-0028-AC3**`, **rc=1**, while the query row shows `exit 0, analyzer+injectable listed: yes`. Normal run: PASS | PASS |
+| 3 | AC2 requires `cacheHit=False` for the edited shard and fails on any aggregate spawn without `cacheHit=True` | Ran the check's own predicates (lines 70 and 72, extracted verbatim) on 5 synthetic spawn lists. Real run: `edited file's shard executed (cacheHit=False): DartCodegen …greeting_repository_inj cacheHit=False exitCode=0`; `aggregate spawns that were not cache hits: none` | Shard executed + no aggregate: PASS. Shard executed + aggregate `cacheHit=True`: PASS. Aggregate executed: **FAIL**. Shard was a cache hit: **FAIL**. One hit + one miss aggregate: **FAIL**. All as intended | PASS |
+| 4 | F-0026 → F-0028 everywhere, fork comment included; patch re-exported | Searched the repo for `F-0026`. Did a fresh `rules_fork.sh checkout` + `export` and `cmp` against the committed `0002` | The only `F-0026` left is the task-log line recording the rename. Fork `injectable_shims.dart:26` reads `(F-0028)`. The export is **byte-identical** to the committed patch (sha256 `806703d79a9ea431…`). No collision: T-0027 has F-0026 and T-0029 has F-0027; no other branch has F-0028 | PASS |
+| 5 | Test rename | `di_sample_test.dart` diff | The test named `T-0028-AC4 a file whose shard is [] registers nothing` is now `a class in a file with no injectable annotation is not registered`; its body is unchanged. AC4 is still covered by the shell check and 3 `T-0028-AC4` cases in `injectable_shims_test`. This is a rename, not a weakening, and the task log records it | PASS |
+| 6 | `_token` collision detection | Added `lib/src/plain/helper.dart` to `_INJECTABLE` next to `lib/src/plain_helper.dart` | `Error in fail: injectable_shards(di_config): "lib/src/plain_helper.dart" and "lib/src/plain/helper.dart" map to the same target name suffix "src_plain_helper"; rename one of the files or split the call.` | PASS |
+| 7 | LICENSE: the patcher really appends the newline | `wc -c` on the pub.dev archive, my fork checkout (`git am`) and the Bazel-patched external repo | Archive **1068** bytes. Fork (`git am`) **1068**, `cmp` equal. Bazel `git_override` result **1069**. The patch carries `\ No newline at end of file`, so Bazel's patcher adds the newline, as `VENDORED.md` now says. The fetched `VENDORED.md` has the new text, which shows the external repo was refetched with the new patch | PASS |
+| 8 | `_stage` barrel comment | Checked each claim. `_stage` = `_HAND_WRITTEN` minus `_INIT`, so the barrel is staged and the init file isn't. No `lib/` file imports `package:di_sample/di_sample.dart` (searched). The barrel is in the shard inputs (`aquery`, first pass). AC1 is byte-identical with it staged | Accurate. One cosmetic nit: line 54 is 89 characters long; other lines in the file already exceed 80 | PASS |
+
+### Gates at 7d55ab2
+| Gate | Result |
+|---|---|
+| `tool/rules_fork.sh check` | `check ai_rules_dart: 1 patch(es) apply strictly on pin e7163aab8f91`; `ai_rules_flutter: queue empty, OK` |
+| `test //...` | `Executed 0 out of 48 tests: 48 tests pass.` (cached). Uncached `di_sample_test` + `@rules_dart//dart/ext/injectable:injectable_shims_test`: 2/2, 2 + 7 cases |
+| `build --config=lint //...` | `Build completed successfully` |
+| `run //tool/mc_arch_check:bin` | `mc_arch_check: OK` |
+| `fvm dart format --set-exit-if-changed` | `spike/di_sample`: 10 files, 0 changed. Fork `dart/ext/injectable/{lib,test,shim_*.dart}`: 4 files, 0 changed |
+| AC checks (`--role verifier`) | `PASS T-0028-AC1` (config `d373324740114210` `EQUAL`), `PASS T-0028-AC2`, `PASS T-0028-AC3` (archive equal; hub query exit 0 with the positive control), `PASS T-0028-AC4` |
+
+### Status of first-pass issues
+- **Fixed:** 2 (AC3 query), 4 (LICENSE note), 5 (stale shards), 6 (renumbered to F-0028).
+- **Partly mitigated:** 3. The reference check now flags an unlisted annotated file. The Bazel build itself still drops it silently, which is for buildgen to fix.
+- **Unchanged:** 1. The `docs/ext.md` conflict with T-0027's 0001 is a merge-time item for the TL, not a T-0028 defect.
+- **No new defects found.**
