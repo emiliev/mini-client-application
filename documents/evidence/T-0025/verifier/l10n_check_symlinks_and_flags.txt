@@ -1,0 +1,35 @@
+T-0025 re-verification @ 4ccf962: l10n_check symlink handling and CLI flags (Verifier)
+
+Probe tree (scratchpad, not committed):
+  linked_external -> <output_base>/external   (holds 347 flutter_localizations ARBs, plus rules_flutter fixtures)
+  vendor          -> <output_base>/external
+  utility/mc_x/lib/src/l10n/mc_x_{en,de}.arb -> symlinked FILES to the real mc_l10n_core ARBs
+  control/flutter_localizations/lib/src/l10n/material_en.arb  (a REAL copy, to prove the probe is sensitive)
+
+## with control (real dir copy of a flutter_localizations ARB)
+flutter_localizations: material_en.arb does not start with "flutter_localizations_"
+flutter_localizations: missing locale de (expected flutter_localizations_de.arb)
+flutter_localizations: missing template flutter_localizations_en.arb (locale en)
+exit=1
+## control removed: symlinked dirs only + symlinked ARB files
+l10n_check: OK
+exit=0
+## mc_x_de.arb link removed (symlinked en only)
+mc_x: missing locale de (expected mc_x_de.arb)
+exit=1
+
+Repo root after a build (bazel-agent-*, bazel-bin, bazel-out, bazel-testlogs, .dart_tool present):
+  tool/bazelw run //tool/l10n_check:bin            -> l10n_check: OK, exit 0
+  bazel-bin/tool/l10n_check/bin (cwd = root)       -> l10n_check: OK (.), exit 0
+
+CLI flags (bazel-bin/tool/l10n_check/bin):
+  --locales=en,de,fr .   -> mc_l10n_core: missing locale fr (expected mc_l10n_core_fr.arb), exit 1
+  --locales              -> l10n_check: --locales needs a value, e.g. en,de, exit 2
+  --locales=             -> l10n_check: --locales needs a value, e.g. en,de, exit 2
+  --bogus                -> l10n_check: unknown flag --bogus, exit 2
+  <broken tree> --locales en,de -> the same 5 violations as in round 1, exit 1
+
+Gate mutation: removing "errorServer" from mc_l10n_core_de.arb makes
+//tool/l10n_check:workspace_gate_test FAIL with
+  Actual: ['mc_l10n_core: locale de is missing key errorServer']
+(reverted).

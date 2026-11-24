@@ -24,3 +24,5 @@ coverage/
 # A future build_runner fallback (R28) adds explicit negations below.
 *.g.dart
 *.freezed.dart
+**/lib/src/l10n/*_l10n.dart
+**/lib/src/l10n/*_l10n_[a-z]*.dart

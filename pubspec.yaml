@@ -19,6 +19,7 @@ workspace:
   - app/wiring/universe_wiring
   - spike/greeting
   - spike/hello
+  - tool/l10n_check
   - tool/mc_arch_check
   - utility/mc_analysis
   - utility/mc_api_client
@@ -34,8 +35,10 @@ workspace:
   - utility/mc_ds_tokens
   - utility/mc_event_bus
   - utility/mc_feature_flow
+  - utility/mc_formatters
   - utility/mc_fixtures_characters
   - utility/mc_fixtures_media
+  - utility/mc_l10n_core
   - utility/mc_mocked_backend
   - utility/mc_monitoring
   - utility/mc_prelude
