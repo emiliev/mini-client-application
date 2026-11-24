@@ -13,6 +13,10 @@ class ThingsDomain implements MockDomain {
   @override
   void register(MockRouter router, MockDomainEnvironment environment) {
     router.get(
+      '/v1/things/:id',
+      (request, context) => MockResponse.ok({'id': context.params['id']}),
+    );
+    router.get(
       '/v1/things',
       (request, context) => const MockResponse.ok({
         'items': ['alpha', 'beta'],
@@ -21,7 +25,12 @@ class ThingsDomain implements MockDomain {
   }
 
   @override
-  Map<String, MockScenario> get scenarios => const {};
+  Map<String, MockScenario> get scenarios => const {
+    'things_down': MockScenario(
+      'things_down',
+      rules: [FailureRule('GET', '/v1/things', FailureKind.http(503))],
+    ),
+  };
 }
 
 const String thingsSet = 'things.basic';

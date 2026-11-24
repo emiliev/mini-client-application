@@ -98,6 +98,19 @@ class _Route {
       query.entries.every((e) => other.query[e.key] == e.value);
 }
 
+/// Mirrors one injected failure so the adapter knows which requests the
+/// harness's own rules answer (those are not "unmatched"). Counting follows
+/// the engine: only matching requests count, up to the first rule that fires.
+class _FailRule {
+  _FailRule(this.route, this.times);
+
+  final _Route route;
+  final int times;
+  int calls = 0;
+
+  bool get fires => times < 0 || calls <= times;
+}
+
 typedef _Hold = ({_Route route, Completer<void> gate});
 
 final Map<String, MockDomain Function()> _fixtureSets = {};
@@ -131,6 +144,7 @@ final class McBackendHarness {
   final List<RecordedRequest> _requests = [];
   final List<String> _unmatched = [];
   final List<_Hold> _holds = [];
+  final List<_FailRule> _failRules = [];
   final Set<String> _active = {};
 
   /// Every request so far (method, path, query, body), in order.
@@ -162,16 +176,15 @@ final class McBackendHarness {
   }
 
   /// Registers the routes of [domain] directly.
-  void useDomain(MockDomain domain) => domain.register(
-    backend.router,
-    MockDomainEnvironment(seed: backend.seed, clock: backend.clock),
-  );
+  /// Its scenarios become selectable with `backend.useScenario`.
+  void useDomain(MockDomain domain) => backend.addDomain(domain);
 
   /// Makes [route] (`GET /v1/characters?offset=20`) fail with [failure] for
   /// the next [times] matching requests, or every time when [times] is -1.
   /// A retry beyond [times] gets the normal answer.
   void fail(String route, BackendFailure failure, {int times = -1}) {
     final parsed = _Route.parse(route);
+    _failRules.add(_FailRule(parsed, times));
     backend.addFailure(
       FailureRule(
         parsed.method,
@@ -198,6 +211,28 @@ final class McBackendHarness {
     for (final hold in released) {
       _holds.remove(hold);
       hold.gate.complete();
+    }
+  }
+
+  void _checkMatched(String method, String path, Map<String, String> query) {
+    var failed = false;
+    for (final rule in _failRules) {
+      if (!failed && rule.route.matches(method, path, query)) {
+        rule.calls++;
+        failed = rule.fires;
+      }
+    }
+    if (failed) {
+      return;
+    }
+    final RouteMatch? match;
+    try {
+      match = backend.router.resolve(method, path);
+    } on FormatException {
+      return; // The engine answers 400.
+    }
+    if (match == null) {
+      _unmatched.add('$method $path');
     }
   }
 
@@ -237,6 +272,36 @@ final class McBackendHarness {
   void clearHolds() => _holds.clear();
 }
 
+/// Waits for [gate]; a cancelled request stops waiting, as on a network.
+Future<void> _awaitGate(
+  Completer<void> gate,
+  Future<void>? cancel,
+  RequestOptions options,
+) async {
+  final released = Completer<bool>();
+  unawaited(
+    gate.future.then((_) {
+      if (!released.isCompleted) {
+        released.complete(true);
+      }
+    }),
+  );
+  unawaited(
+    cancel?.then((_) {
+          if (!released.isCompleted) {
+            released.complete(false);
+          }
+        }, onError: (Object _) {}) ??
+        Future<void>.value(),
+  );
+  if (!await released.future) {
+    throw DioException.requestCancelled(
+      requestOptions: options,
+      reason: 'Cancelled while held by the test harness',
+    );
+  }
+}
+
 class _HarnessAdapter implements HttpClientAdapter {
   _HarnessAdapter(this._harness);
 
@@ -249,22 +314,29 @@ class _HarnessAdapter implements HttpClientAdapter {
     Future<void>? cancelFuture,
   ) async {
     final method = options.method.toUpperCase();
-    final uri = options.uri;
-    final query = uri.queryParameters;
+    var path = options.uri.path;
+    var query = const <String, String>{};
+    var malformed = false;
+    try {
+      query = options.uri.queryParameters;
+    } on FormatException {
+      // Forwarded: the engine answers 400, as a server would.
+      malformed = true;
+    }
     _harness._requests.add(
       RecordedRequest(
         method: method,
-        path: uri.path,
+        path: path,
         query: query,
         body: options.data,
       ),
     );
-    if (_harness.backend.router.resolve(method, uri.path) == null) {
-      _harness._unmatched.add('$method ${uri.path}');
+    if (!malformed) {
+      _harness._checkMatched(method, path, query);
     }
     for (final hold in List.of(_harness._holds)) {
-      if (hold.route.matches(method, uri.path, query)) {
-        await hold.gate.future;
+      if (hold.route.matches(method, path, query)) {
+        await _awaitGate(hold.gate, cancelFuture, options);
       }
     }
     return _harness.backend.adapter.fetch(options, requestStream, cancelFuture);

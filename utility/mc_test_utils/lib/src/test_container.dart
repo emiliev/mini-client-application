@@ -17,9 +17,24 @@ final class ExternalDouble<T extends Object> {
 
   final T instance;
 
-  McDIInitializer toInitializer() => McDIInitializer(
-    (GetIt getIt, String? _) => getIt.registerSingleton<T>(instance),
-  );
+  /// The registration is by [T], so write the type: `ExternalDouble<Clock>(x)`.
+  /// A type that the root list already registers (`Dio`, `Monitoring`, ...) is
+  /// rejected rather than overridden: the real root services stay real.
+  McDIInitializer toInitializer() => McDIInitializer((GetIt getIt, String? _) {
+    if (T == Object) {
+      throw StateError(
+        'ExternalDouble(${instance.runtimeType}) was registered as Object. '
+        'Give the type explicitly: ExternalDouble<${instance.runtimeType}>(...).',
+      );
+    }
+    if (getIt.isRegistered<T>()) {
+      throw StateError(
+        'ExternalDouble<$T> duplicates a type the root list already '
+        'registers. Externals are for things the root list does not own.',
+      );
+    }
+    getIt.registerSingleton<T>(instance);
+  });
 }
 
 /// The test root container (Tide's `TestContainer`, TD-02).
@@ -31,7 +46,7 @@ final class ExternalDouble<T extends Object> {
 /// config. The real `Dio` with its interceptors runs over the harness.
 ///
 /// A utility cannot import `app_core` (layering), so the list is repeated here;
-/// F-0022 records how drift is guarded.
+/// F-0024 records how drift is guarded.
 abstract final class McTestContainer {
   /// The `AppConfig` tests run on: seed 42, no latency, the happy scenario.
   static const AppConfig config = AppConfig(
@@ -79,10 +94,11 @@ abstract final class McTestContainer {
         'externals to the first initFlow or McTestContainer.initialize call.',
       );
     }
-    session.containerInitialized = true;
-    return await initializeDIContainer(
+    final container = await initializeDIContainer(
       initializers(session, wirings: wirings, externals: externals),
     );
+    session.containerInitialized = true;
+    return container;
   }
 
   /// The shared `Dio`, as a feature's repository gets it.

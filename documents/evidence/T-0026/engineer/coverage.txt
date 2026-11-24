@@ -1,8 +1,8 @@
-Merged LCOV (union over the 5 test targets) of lib/ files, bazel coverage //utility/mc_test_utils/...
-package:mc_test_utils/src/backend_harness.dart: 110/111 99.1% missed=[273]
+Merged LCOV (union over the test targets), lib/ files, bazel coverage //utility/mc_test_utils/... (after review fixes)
+package:mc_test_utils/src/backend_harness.dart: 131/133 98.5% missed=[294, 345]
 package:mc_test_utils/src/golden.dart: 63/68 92.6% missed=[59, 72, 73, 87, 88]
 package:mc_test_utils/src/init_flow.dart: 19/19 100.0% missed=[]
 package:mc_test_utils/src/mocks.dart: 7/7 100.0% missed=[]
-package:mc_test_utils/src/session.dart: 50/50 100.0% missed=[]
-package:mc_test_utils/src/test_container.dart: 23/23 100.0% missed=[]
-TOTAL 272/278 97.8%
+package:mc_test_utils/src/session.dart: 51/51 100.0% missed=[]
+package:mc_test_utils/src/test_container.dart: 29/29 100.0% missed=[]
+TOTAL 300/307 97.7%

@@ -67,8 +67,11 @@ void main() {
   mcTestWidgets('T-0026-AC2 isolation, second', _assertFreshThenDirty);
 
   tearDownAll(() {
-    expect(_dirtied, 2);
-    expect(_sawDirtyPredecessor, 1);
+    // Both ran (not a --test_filter subset): the second saw the first's mess
+    // gone.
+    if (_dirtied == 2) {
+      expect(_sawDirtyPredecessor, 1);
+    }
   });
 
   mcTestWidgets('container initialises once per test', (tester) async {
@@ -87,6 +90,49 @@ void main() {
       McTestContainer.dio.options.baseUrl,
       McTestContainer.config.apiBaseUrl,
     );
+  });
+
+  mcTestWidgets('T-0026-AC2 externals need an explicit, unclaimed type', (
+    tester,
+  ) async {
+    final session = McTestSession.current;
+    // Inferred as Object: rejected, and the failed init leaves no mark.
+    await expectLater(
+      McTestContainer.initialize(
+        session,
+        externals: [const ExternalDouble(_Clock('untyped'))],
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.message,
+          'message',
+          contains('ExternalDouble<_Clock>'),
+        ),
+      ),
+    );
+    expect(session.containerInitialized, isFalse);
+    // A type the root list owns is rejected, not silently replaced.
+    await expectLater(
+      McTestContainer.initialize(
+        session,
+        externals: [ExternalDouble<Dio>(Dio())],
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.message,
+          'message',
+          contains('duplicates a type the root list'),
+        ),
+      ),
+    );
+    expect(session.containerInitialized, isFalse);
+    // The retry works, since a failed init publishes nothing.
+    await McTestContainer.initialize(
+      session,
+      externals: [const ExternalDouble<_Clock>(_Clock('ok'))],
+    );
+    expect(session.containerInitialized, isTrue);
+    expect(diContainer<_Clock>().label, 'ok');
   });
 
   mcTestWidgets('every root service of the production list is present', (

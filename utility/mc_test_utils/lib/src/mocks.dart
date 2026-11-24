@@ -3,7 +3,7 @@ import 'package:mc_monitoring/mc_monitoring.dart';
 /// A [Monitoring] that records every call in memory (Tide's `MockMonitoring`).
 ///
 /// Hand-written rather than a mocktail `Mock`: `mocktail` is not in the root
-/// lock (F-0022), and recording is what feature tests assert on.
+/// lock (F-0024), and recording is what feature tests assert on.
 class MockMonitoring extends Monitoring {
   MockMonitoring._(this._sink) : super([_sink]);
 

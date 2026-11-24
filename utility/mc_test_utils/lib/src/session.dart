@@ -49,14 +49,14 @@ final class McTestSession {
   /// Set once `McTestContainer.initialize` has run.
   bool containerInitialized = false;
 
-  static Future<McTestSession> _start(WidgetTester tester) async {
+  Future<void> _setUp(WidgetTester tester) async {
+    _current = this;
     await mcLoadFonts();
     await resetDIContainer();
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     tester.view
       ..devicePixelRatio = 1
       ..physicalSize = mcReferenceSurface;
-    return _current = McTestSession._();
   }
 
   Future<void> _finish(WidgetTester tester) async {
@@ -80,12 +80,15 @@ final class McTestSession {
   Future<void> guard(Future<void> Function() body) async {
     try {
       await body();
-    } on Object catch (error) {
+    } on Object catch (error, stack) {
       if (backend.unmatched.isNotEmpty) {
         try {
           backend.verify();
         } on TestFailure catch (failure) {
-          throw TestFailure('${failure.message}\nThe test body failed: $error');
+          Error.throwWithStackTrace(
+            TestFailure('${failure.message}\nThe test body failed: $error'),
+            stack,
+          );
         }
       }
       rethrow;
@@ -130,8 +133,10 @@ void mcTestWidgets(
   testWidgets(
     name,
     (tester) async {
-      final session = await McTestSession._start(tester);
+      // Constructed first: nothing global is touched if it fails.
+      final session = McTestSession._();
       try {
+        await session._setUp(tester);
         await session.guard(() => body(tester));
       } finally {
         await session._finish(tester);

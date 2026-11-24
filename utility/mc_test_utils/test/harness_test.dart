@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -5,6 +6,18 @@ import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
 import 'support.dart';
+
+/// Dio needs the real event loop, which fake async only gives inside runAsync.
+Future<Response<Object?>> _get(WidgetTester tester, Dio dio, String path) =>
+    tester
+        .runAsync(
+          () => dio.get<Object?>(
+            path,
+            options: Options(validateStatus: (_) => true),
+          ),
+        )
+        // runAsync yields null only if its callback does.
+        .then((r) => r!);
 
 void main() {
   setUpAll(registerThingsSet);
@@ -163,6 +176,77 @@ void main() {
     );
     session.backend.clearHolds();
     await session.guard(() async {});
+  });
+
+  mcTestWidgets('T-0026-AC3 fixture-set scenarios are selectable', (
+    tester,
+  ) async {
+    final backend = McTestSession.current.backend..useFixtureSet(thingsSet);
+    expect(backend.backend.scenarioNames, contains('things_down'));
+    backend.backend.useScenario('things_down');
+    await initFlow(tester, thingsFlow);
+    await mcSettle(tester);
+    expect(find.text('error'), findsOneWidget);
+    // Every attempt (the request and both retries) got the injected 503.
+    expect(backend.backend.recentTraffic.map((t) => t.status), [503, 503, 503]);
+    expect(backend.unmatched, isEmpty);
+  });
+
+  mcTestWidgets(
+    'T-0026-AC1 malformed URLs reach the engine, which answers 400',
+    (tester) async {
+      final backend = McTestSession.current.backend..useFixtureSet(thingsSet);
+      await McTestContainer.initialize(McTestSession.current);
+      final dio = McTestContainer.dio;
+      for (final path in ['/v1/things/%FF', '/v1/things?q=%FF']) {
+        final response = await _get(tester, dio, path);
+        expect(response.statusCode, 400, reason: path);
+      }
+      expect(backend.unmatched, isEmpty);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0026-AC3 a failed unrouted path is answered, not unmatched',
+    (tester) async {
+      final backend = McTestSession.current.backend
+        ..fail('GET /v1/ghost', BackendFailure.serverError, times: 1);
+      await McTestContainer.initialize(McTestSession.current);
+      final dio = McTestContainer.dio;
+      final response = await _get(tester, dio, '/v1/ghost');
+      expect(response.statusCode, 500);
+      expect(backend.unmatched, isEmpty);
+      // The rule is spent: the next request has no route and no failure.
+      await _get(tester, dio, '/v1/ghost');
+      expect(backend.unmatched, ['GET /v1/ghost']);
+      backend.takeUnmatched();
+    },
+  );
+
+  mcTestWidgets('T-0026-AC3 a held request honours cancellation', (
+    tester,
+  ) async {
+    final backend = McTestSession.current.backend
+      ..useFixtureSet(thingsSet)
+      ..hold('GET /v1/things');
+    await McTestContainer.initialize(McTestSession.current);
+    final token = CancelToken();
+    final pending = McTestContainer.dio.get<Object?>(
+      '/v1/things',
+      cancelToken: token,
+    );
+    final outcome = pending.then<Object?>(
+      (_) => null,
+      onError: (Object e) => e,
+    );
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(backend.requests, hasLength(1));
+    token.cancel();
+    await tester.pump(const Duration(milliseconds: 100));
+    final error = await outcome;
+    expect(error, isA<DioException>());
+    expect((error! as DioException).type, DioExceptionType.cancel);
+    backend.clearHolds();
   });
 
   mcTestWidgets('MockMonitoring records; createMockMonitoring is fresh', (

@@ -1,4 +1,4 @@
-# F-0022: `mc_test_utils` harness: what differs from the plan and why
+# F-0024: `mc_test_utils` harness: what differs from the plan and why
 
 - **Date:** 2026-11-24
 - **Author:** crew: Engineer (T-0026)
@@ -20,3 +20,12 @@
 ## Implications
 - Feature tests call `McFixtureSets.register('<domain>.<set>', ...)` once (in `main()`), then `backend.useFixtureSet(...)` per test.
 - Golden-targets need `data = ["//utility/mc_ds_theme:fonts"]` for any `mcTestWidgets` test, because it loads the fonts for every test.
+
+## Review round (fixes after `/code-review`)
+11. **`ExternalDouble` needs an explicit type.** `ExternalDouble(x)` infers `Object`; `toInitializer` throws naming the type to write (`ExternalDouble<Clock>(x)`). An external whose type the root list already registers is **rejected** (not overridden) with a clear message.
+12. **Fixture-set scenarios** are registered: `MockBackend.addDomain(domain)` (new, small, TL-approved) shares the constructor's route and scenario registration, and `useDomain` uses it.
+13. **Malformed URLs** (`/v1/x/%FF`, `?q=%FF`) are forwarded; the engine answers 400. The harness does not mark them unmatched.
+14. **A failed unrouted path** is not unmatched while one of the harness's own `fail` rules fires for it (the adapter mirrors the engine's counting).
+15. **A held request honours cancellation**: the adapter waits on the gate or `cancelFuture` and throws `DioException.requestCancelled`.
+16. Under `fake_async`, a Dio call needs several event-loop turns: use `tester.pump(Duration(milliseconds: 100))` (zero-duration pumps were not enough for cancellation) or `tester.runAsync` (works for plain requests; a `CancelToken` cancelled inside it did not reach the adapter).
+17. `mc_test_utils` has no per-package `analysis_options.yaml` (F-0021: `pub get` rewrites it and it drops the root formatter setting), like the `mc_ds_*` packages.
