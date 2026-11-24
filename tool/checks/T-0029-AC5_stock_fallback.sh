@@ -81,7 +81,11 @@ import sys
 p, fp = sys.argv[1], sys.argv[2]
 names = [l.split("\t")[0] for l in fp.splitlines() if l.strip()]
 s = open(p).read()
-extra = "".join(f"  {n}: any\n" for n in names) + "  dio: any\n  flutter_test:\n    sdk: flutter\n"
+import re
+have = set(re.findall(r"^  ([a-z0-9_]+):", s.split("\ndependencies:\n", 1)[1].split("\n\n", 1)[0], re.M))
+extra = "".join(f"  {n}: any\n" for n in names + ["dio"] if n not in have)
+if "flutter_test" not in have:
+    extra += "  flutter_test:\n    sdk: flutter\n"
 s = s.replace("\ndependencies:\n", "\ndependencies:\n" + extra, 1)
 open(p, "w").write(s)
 PY

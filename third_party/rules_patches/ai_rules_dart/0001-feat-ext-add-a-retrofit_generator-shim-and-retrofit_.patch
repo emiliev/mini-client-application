@@ -1,0 +1,346 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Emil Iliev <emil_iliev1994@yahoo.com>
+Date: Tue, 24 Nov 2026 14:57:42 +0200
+Subject: [PATCH] feat(ext): add a retrofit_generator shim and
+ `retrofit_library` macro
+
+retrofit_generator is a SharedPartBuilder (`.retrofit.g.part`, combined
+into `.g.dart` by source_gen's combining builder under build_runner), so it
+fits the existing shared_part_library flow unchanged: one shim binary that
+wraps `retrofitBuilder`, plus a macro shaped like `json_serializable_library`.
+
+The ext lock gains retrofit_generator 10.3.3 (analyzer `>=8.4.1 <15.0.0`,
+build `>=4.0.2 <6.0.0`, so it resolves against the current analyzer 14.5.0 /
+build 4.0.11 line) and its runtime closure: retrofit 4.10.0, dio 5.11.1 and
+dio_web_adapter 2.2.2. Every other locked version is unchanged. dio and
+dio_web_adapter depend on each other, so the hub merges them into one SCC
+target.
+
+Over an `@RestApi` file that uses a freezed + json model and a
+`genericArgumentFactories` envelope from another package, the shim's
+`.g.dart` is byte-identical to build_runner 2.16.2's. Gazelle does not emit
+the macro yet.
+
+Changelog: `retrofit_library` runs retrofit_generator for `@RestApi` dio clients
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+diff --git a/README.md b/README.md
+index 69c76f77..b6d0a225 100644
+--- a/README.md
++++ b/README.md
+@@ -484,7 +484,9 @@ For first-party builders (`json_serializable`, `freezed`, `built_value`,
+ `mockito`, `go_router`, `copy_with_extension_gen`, `stacked`,
+ `drift`), each ships a convenience macro (`json_serializable_library`,
+ `freezed_library`, …) under `dart/ext/<builder>/defs.bzl`. Gazelle discovers
+-the matching annotations in sources and emits the macro automatically. See
++the matching annotations in sources and emits the macro automatically.
++`retrofit_generator` ships the `retrofit_library` macro too, but Gazelle does
++not emit it yet: declare it by hand for `@RestApi` sources. See
+ [`docs/ext.md`](./docs/ext.md) for the shim contract, worker behaviour, and
+ dual-build migration guide when coexisting with `build_runner`.
+ 
+diff --git a/dart/ext/pubspec.lock b/dart/ext/pubspec.lock
+index c989f2a4..d44155ed 100644
+--- a/dart/ext/pubspec.lock
++++ b/dart/ext/pubspec.lock
+@@ -217,6 +217,22 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "0.20.0"
++  dio:
++    dependency: transitive
++    description:
++      name: dio
++      sha256: "852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1"
++      url: "https://pub.dev"
++    source: hosted
++    version: "5.11.1"
++  dio_web_adapter:
++    dependency: transitive
++    description:
++      name: dio_web_adapter
++      sha256: "3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc"
++      url: "https://pub.dev"
++    source: hosted
++    version: "2.2.2"
+   drift:
+     dependency: transitive
+     description:
+@@ -497,6 +513,22 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "1.1.1"
++  retrofit:
++    dependency: transitive
++    description:
++      name: retrofit
++      sha256: d700c1e7599bc6327cbe19ec7a2c87b595f6063ce888e8015f30cab655972331
++      url: "https://pub.dev"
++    source: hosted
++    version: "4.10.0"
++  retrofit_generator:
++    dependency: "direct main"
++    description:
++      name: retrofit_generator
++      sha256: "756d252a6089e18209e5cf515f18784b80819b1a09abcc2ba3dcdafeb0246004"
++      url: "https://pub.dev"
++    source: hosted
++    version: "10.3.3"
+   shelf:
+     dependency: transitive
+     description:
+diff --git a/dart/ext/pubspec.yaml b/dart/ext/pubspec.yaml
+index 5c399a76..a869fa22 100644
+--- a/dart/ext/pubspec.yaml
++++ b/dart/ext/pubspec.yaml
+@@ -24,6 +24,7 @@ dependencies:
+   go_router_builder: ^4.3.0
+   json_serializable: ^6.13.0
+   mockito: ^5.6.0
++  retrofit_generator: ^10.3.3
+   stacked_generator: ^2.0.0
+ dev_dependencies:
+   test: ^1.25.0
+diff --git a/dart/ext/retrofit/BUILD.bazel b/dart/ext/retrofit/BUILD.bazel
+new file mode 100644
+index 00000000..142a15e6
+--- /dev/null
++++ b/dart/ext/retrofit/BUILD.bazel
+@@ -0,0 +1,32 @@
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++load("//dart:defs.bzl", "dart_binary")
++
++exports_files(
++    ["defs.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "defs",
++    srcs = ["defs.bzl"],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//dart/ext/_shared:defs",
++    ],
++)
++
++# Shim binary for the retrofit_generator Builder. SharedPartBuilder; produces
++# .retrofit.g.part shards (combining to .g.dart happens in a separate step).
++dart_binary(
++    name = "shim",
++    srcs = ["shim.dart"],
++    code_assets_from_deps = False,
++    compile_mode = "kernel",
++    launcher = True,
++    main = "shim.dart",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//dart/ext:builder_shim",
++        "@ext_pub_deps//:retrofit_generator",
++    ],
++)
+diff --git a/dart/ext/retrofit/defs.bzl b/dart/ext/retrofit/defs.bzl
+new file mode 100644
+index 00000000..f315e640
+--- /dev/null
++++ b/dart/ext/retrofit/defs.bzl
+@@ -0,0 +1,57 @@
++"""Convenience macro for the retrofit_generator builder."""
++
++load("@rules_dart//dart/ext/_shared:defs.bzl", "shared_part_library")
++
++visibility("public")
++
++def retrofit_library(
++        name,
++        srcs,
++        package_name = "",
++        language_version = "",
++        deps = [],
++        annotation_dep = "@pub_deps//:retrofit",
++        config = "",
++        **kwargs):
++    """Declares a `dart_library` completed by the `retrofit_generator` builder.
++
++    Generates one `.retrofit.g.part` shard per source, merges the shards into
++    `<src>.g.dart`, and wraps the sources and the merged output in a `dart_library`.
++
++    The generated client calls `package:dio` and the `fromJson` / `toJson` of every
++    model type a method takes or returns, so `deps` must reach `dio` and the model
++    libraries for the analyzer to resolve those types.
++
++    Args:
++      name: Name of the wrapping `dart_library` target; the per-source codegen targets
++        derive their names from it.
++      srcs: The `.dart` source files that carry `@RestApi` annotations. Each one gets
++        its own codegen action.
++      package_name: Dart package name, matching the consumer's `pubspec.yaml` `name:`.
++        Defaults to the last component of the Bazel package path.
++      language_version: Dart language version of the package in `<major>.<minor>` form.
++        Defaults to empty, which leaves the version unstated, as for a hand-written
++        `dart_library`.
++      deps: Additional `dart_library` targets the sources import, such as `dio` and
++        the model libraries. The annotation dependency is added automatically.
++        Defaults to none.
++      annotation_dep: Label of the runtime annotation library the sources import; it is
++        added to `deps`. Defaults to `@pub_deps//:retrofit`.
++      config: Builder options as a JSON string handed to the generator, standing in for
++        the `options:` of a `build.yaml`, for example `'{"format_output": false}'`.
++        Defaults to empty, which uses the builder's own defaults.
++      **kwargs: Further attributes forwarded to the wrapping `dart_library`, such as
++        `visibility` or `tags`.
++    """
++    shared_part_library(
++        name = name,
++        srcs = srcs,
++        package_name = package_name,
++        language_version = language_version,
++        shim = "@rules_dart//dart/ext/retrofit:shim",
++        part_suffix = ".retrofit.g.part",
++        annotation_dep = annotation_dep,
++        deps = deps,
++        config = config,
++        **kwargs
++    )
+diff --git a/dart/ext/retrofit/shim.dart b/dart/ext/retrofit/shim.dart
+new file mode 100644
+index 00000000..b35c5f47
+--- /dev/null
++++ b/dart/ext/retrofit/shim.dart
+@@ -0,0 +1,5 @@
++import 'package:retrofit_generator/retrofit_generator.dart'
++    show retrofitBuilder;
++import 'package:rules_dart_ext/worker_entry.dart';
++
++Future<void> main(List<String> args) => shimMain(args, retrofitBuilder);
+diff --git a/dart/tests/BUILD.bazel b/dart/tests/BUILD.bazel
+index c545677d..24dac4f6 100644
+--- a/dart/tests/BUILD.bazel
++++ b/dart/tests/BUILD.bazel
+@@ -66,6 +66,7 @@ load(":pinned_sources_test.bzl", "pinned_sources_test_suite")
+ load(":project_staging_test.bzl", "project_staging_test_suite")
+ load(":provider_shape_test.bzl", "provider_shape_probe")
+ load(":registry_test.bzl", "registry_test_suite")
++load(":retrofit_library_direct_test.bzl", "retrofit_library_direct_test_suite")
+ load(":ruleset_api_reexports_test.bzl", "ruleset_api_reexports_test_suite")
+ load(":shared_part_library_direct_test.bzl", "shared_part_library_direct_test_suite")
+ load(":snapshot_patch_test.bzl", "snapshot_patch_test_suite")
+@@ -250,6 +251,8 @@ library_builder_library_direct_test_suite(name = "library_builder_library_direct
+ 
+ mockito_library_direct_test_suite(name = "mockito_library_direct")
+ 
++retrofit_library_direct_test_suite(name = "retrofit_library_direct")
++
+ shared_part_library_direct_test_suite(name = "shared_part_library_direct")
+ 
+ stacked_bottomsheet_library_direct_test_suite(name = "stacked_bottomsheet_library_direct")
+diff --git a/dart/tests/lib/ext/retrofit.dart b/dart/tests/lib/ext/retrofit.dart
+new file mode 100644
+index 00000000..ce142a44
+--- /dev/null
++++ b/dart/tests/lib/ext/retrofit.dart
+@@ -0,0 +1,2 @@
++/// A source for the direct `retrofit_library` test.
++class Subject {}
+diff --git a/dart/tests/retrofit_library_direct_test.bzl b/dart/tests/retrofit_library_direct_test.bzl
+new file mode 100644
+index 00000000..a7461073
+--- /dev/null
++++ b/dart/tests/retrofit_library_direct_test.bzl
+@@ -0,0 +1,39 @@
++"""Direct `rules_testing` test for the `retrofit_library` macro.
++
++`retrofit_library` wraps a `dart_library` around two `dart_codegen` targets per source:
++one runs the retrofit_generator shim and emits the `.retrofit.g.part` shard, the other
++merges that shard into `<src>.g.dart`. The test pins the wrapping library's
++providers and both codegen targets' providers and actions.
++"""
++
++load("@rules_testing//lib:analysis_test.bzl", "analysis_test")
++load("//dart/ext/retrofit:defs.bzl", "retrofit_library")
++load(":ext_direct_helpers.bzl", "ANNOTATIONS", "LANGUAGE_VERSION", "PACKAGE", "expect_shared_part", "shared_part_targets", "source_of")
++
++visibility(["//dart/..."])
++
++def _retrofit_library_test(env, targets):
++    """Asserts the providers and the codegen actions `retrofit_library` declares."""
++    expect_shared_part(env, targets, "retrofit", ".retrofit.g.part", "*retrofit/shim*")
++
++def retrofit_library_direct_test_suite(name):
++    """Declares the direct test of `retrofit_library`.
++
++    Args:
++      name: Name of the generated `test_suite`.
++    """
++    retrofit_library(
++        name = name + "_subject",
++        srcs = [source_of("retrofit")],
++        annotation_dep = ANNOTATIONS,
++        language_version = LANGUAGE_VERSION,
++        package_name = PACKAGE,
++        tags = ["manual"],
++    )
++    analysis_test(
++        name = name + "_test",
++        attr_values = {"size": "small"},
++        impl = _retrofit_library_test,
++        targets = shared_part_targets(name, "retrofit"),
++    )
++    native.test_suite(name = name, tests = [":" + name + "_test"])
+diff --git a/docs/BUILD.bazel b/docs/BUILD.bazel
+index 2e7ed066..17a9e641 100644
+--- a/docs/BUILD.bazel
++++ b/docs/BUILD.bazel
+@@ -19,6 +19,7 @@ _DOC_EXTRACTS = [
+     ":go_router_defs.doc_extract",
+     ":json_serializable_defs.doc_extract",
+     ":mockito_defs.doc_extract",
++    ":retrofit_defs.doc_extract",
+     ":sqlite3_defs.doc_extract",
+     ":stacked_defs.doc_extract",
+     ":pub_defs.doc_extract",
+@@ -135,6 +136,12 @@ starlark_doc_extract(
+     deps = ["//dart/ext/mockito:defs"],
+ )
+ 
++starlark_doc_extract(
++    name = "retrofit_defs.doc_extract",
++    src = "//dart/ext/retrofit:defs.bzl",
++    deps = ["//dart/ext/retrofit:defs"],
++)
++
+ starlark_doc_extract(
+     name = "sqlite3_defs.doc_extract",
+     src = "//dart/ext/sqlite3:defs.bzl",
+@@ -214,8 +221,8 @@ _DECLARED_EXTRACTS = [
+ ]
+ 
+ _ = (
+-    None if len(_DECLARED_EXTRACTS) == 28 and sorted(_DECLARED_EXTRACTS) == sorted(_DOC_EXTRACTS) else fail(
+-        "expected 28 starlark_doc_extract targets matching _DOC_EXTRACTS, found {}".format(
++    None if len(_DECLARED_EXTRACTS) == 29 and sorted(_DECLARED_EXTRACTS) == sorted(_DOC_EXTRACTS) else fail(
++        "expected 29 starlark_doc_extract targets matching _DOC_EXTRACTS, found {}".format(
+             len(_DECLARED_EXTRACTS),
+         ),
+     )
+diff --git a/docs/ext.md b/docs/ext.md
+index d631c5d2..38df3bef 100644
+--- a/docs/ext.md
++++ b/docs/ext.md
+@@ -4,7 +4,7 @@
+ 
+ Run the `package:build` `Builder` ecosystem (`json_serializable`,
+ `freezed`, `built_value`, `mockito`, `go_router`, `copy_with_extension_gen`,
+-`stacked`, `drift`) under Bazel without `build_runner`.
++`retrofit`, `stacked`, `drift`) under Bazel without `build_runner`.
+ Users write Dart with `@JsonSerializable`, `@freezed`, `@DriftDatabase`,
+ `@StackedApp`, etc., and Bazel produces the generated code as regular
+ build outputs.
+@@ -44,6 +44,7 @@ dart/ext/
+ ├── mockito/
+ ├── go_router/
+ ├── copy_with_extension_gen/
++├── retrofit/                  SharedPart (`.retrofit.g.part`); `@RestApi` dio clients.
+ ├── stacked/                   Six independent LibraryBuilders.
+ ├── drift/                     Four-stage: prep + discover/analyzer/driftBuilder.
+ └── tools/

@@ -17,9 +17,12 @@ workspace:
   - app/wiring/library_wiring
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
+  - spike/api_envelope
   - spike/bdd_sample
+  - spike/di_sample
   - spike/greeting
   - spike/hello
+  - spike/retrofit_api
   - tool/l10n_check
   - tool/mc_arch_check
   - utility/mc_analysis

@@ -30,10 +30,10 @@ ext: generate bdd_widget_test widget tests from `.feature` files (`dart/ext/bdd`
   - `bdd_suite_main`: one entry file that runs every generated test of a package in a `group`, with an optional `setUpAll` hook.
 - `dart/ext/bdd/lib/scaffold.dart`: the non-hermetic stub writer, meant for a consumer's `bazel run` tool. It reads the same step indexes as the build, scans the top-level `.feature` files of a folder (what `glob(["test/feature/*.feature"])` gives), writes the stock stub format at the package's language version, and never touches existing files.
 - `dart/ext/bdd/test/bdd_generator_test.dart`: 15 tests covering tags, imports (and their order), data tables, missing, shadowed, duplicate and out-of-folder steps, `../` step folders, forbidden tags, rejected options and bad config or index JSON, stubs and the index format.
-- `MODULE.bazel.lock`: updated for the new ext lock entries.
+- `MODULE.bazel.lock`: to be regenerated for the PR (our queue patch carries no fork lock).
 
 **Testing.**
-- `bazel test //dart/ext/bdd:all` passes in the fork itself (its `.bazelrc`: `dart_analyze` and `dart_format` on), and `dart format --set-exit-if-changed dart/ext/bdd` is clean.
+- `bazel test --lockfile_mode=update //dart/ext/bdd:all` passes in the fork itself (its `.bazelrc`: `dart_analyze` and `dart_format` on), and `dart format --set-exit-if-changed dart/ext/bdd` is clean.
 - Downstream (mini-client), `//spike/bdd_sample:bdd_test` runs two features, one of them with a data table, in one `flutter_test`. Its JUnit names carry the scenario tags.
 - A negative fixture fails the build, naming 2 missing steps, and the source tree stays byte-identical.
 

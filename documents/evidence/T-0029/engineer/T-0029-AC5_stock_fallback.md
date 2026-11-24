@@ -1,6 +1,6 @@
 # T-0029-AC5: stock bdd_widget_test 3.0.5 fallback keeps AC IDs in test names
 
-- overlay resolve: bdd_widget_test 3.0.5; drift from the committed overlay lock: none
+- overlay resolve: bdd_widget_test 3.0.5; drift from the committed overlay lock: test_api: 0.7.15 -> 0.7.12
 ## Stock-generated `test/feature/greeting_browse_test.dart`
 ```dart
 // GENERATED CODE - DO NOT MODIFY BY HAND

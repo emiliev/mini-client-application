@@ -1,0 +1,5 @@
+ERROR: <fork>/dart/tests/defines_fixture/BUILD.bazel:80:10: Compiling Dart kernel @@//dart/tests/defines_fixture:test_defines_test failed: (Exit 247): dartvm failed: error executing DartKernel command (from dart_test rul
+ERROR: <fork>/dart/private/tools/BUILD.bazel:673:12: Compiling Dart kernel @@//dart/private/tools:compile_wrapper [for tool] failed: (Exit 247): dartvm failed: error executing DartKernel command (from dart_binary rule ta
+//dart/tests/defines_fixture:modular_comma_defines_test         FAILED TO BUILD
+//dart/tests/defines_fixture:test_defines_test                  FAILED TO BUILD
+Executed 618 out of 633 tests: 631 tests pass and 2 fail to build.

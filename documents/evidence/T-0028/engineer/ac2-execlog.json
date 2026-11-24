@@ -1,0 +1,74 @@
+[
+ {
+  "mnemonic": "DartCodegen",
+  "targetLabel": "//spike/di_sample:_di_config_src_badge_inj",
+  "cacheHit": false,
+  "remotable": true,
+  "exitCode": 0,
+  "status": "",
+  "runner": "worker",
+  "actualOutputs": [
+   "bazel-out/darwin_arm64-fastbuild/bin/spike/di_sample/lib/src/badge.injectable.json"
+  ]
+ },
+ {
+  "mnemonic": "DartCodegen",
+  "targetLabel": "//spike/di_sample:_di_config_src_clock_inj",
+  "cacheHit": false,
+  "remotable": true,
+  "exitCode": 0,
+  "status": "",
+  "runner": "worker",
+  "actualOutputs": [
+   "bazel-out/darwin_arm64-fastbuild/bin/spike/di_sample/lib/src/clock.injectable.json"
+  ]
+ },
+ {
+  "mnemonic": "DartCodegen",
+  "targetLabel": "//spike/di_sample:_di_config_src_greeter_inj",
+  "cacheHit": false,
+  "remotable": true,
+  "exitCode": 0,
+  "status": "",
+  "runner": "worker",
+  "actualOutputs": [
+   "bazel-out/darwin_arm64-fastbuild/bin/spike/di_sample/lib/src/greeter.injectable.json"
+  ]
+ },
+ {
+  "mnemonic": "DartCodegen",
+  "targetLabel": "//spike/di_sample:_di_config_src_greeting_repository_inj",
+  "cacheHit": false,
+  "remotable": true,
+  "exitCode": 0,
+  "status": "",
+  "runner": "worker",
+  "actualOutputs": [
+   "bazel-out/darwin_arm64-fastbuild/bin/spike/di_sample/lib/src/greeting_repository.injectable.json"
+  ]
+ },
+ {
+  "mnemonic": "DartCodegen",
+  "targetLabel": "//spike/di_sample:_di_config_src_plain_helper_inj",
+  "cacheHit": false,
+  "remotable": true,
+  "exitCode": 0,
+  "status": "",
+  "runner": "worker",
+  "actualOutputs": [
+   "bazel-out/darwin_arm64-fastbuild/bin/spike/di_sample/lib/src/plain_helper.injectable.json"
+  ]
+ },
+ {
+  "mnemonic": "DartCodegen",
+  "targetLabel": "//spike/di_sample:_di_config_src_sample_module_inj",
+  "cacheHit": false,
+  "remotable": true,
+  "exitCode": 0,
+  "status": "",
+  "runner": "worker",
+  "actualOutputs": [
+   "bazel-out/darwin_arm64-fastbuild/bin/spike/di_sample/lib/src/sample_module.injectable.json"
+  ]
+ }
+]
