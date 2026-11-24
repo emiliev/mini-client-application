@@ -1,0 +1,4566 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Emil Iliev <emil_iliev1994@yahoo.com>
+Date: Tue, 24 Nov 2026 14:55:47 +0200
+Subject: [PATCH] ext: injectable two-stage
+
+Adds `//dart/ext/injectable`: injectable (an aggregate builder) under
+rules_dart without build_runner.
+
+- Stage 1, `shim_json`: one `dart_codegen` per annotated library writes
+  `<file>.injectable.json`. A library with no injectable class gets `[]`
+  instead of the shim's empty declared output, which the config stage's
+  `jsonDecode` would reject.
+- Stage 2, `shim_config`: a `dart_aggregate_codegen` over the
+  `@InjectableInit` file reads the shards (`asset_deps`) through
+  `findAssets` and writes `<init>.config.dart`. It fails, naming the file,
+  instead of writing an empty `.config.dart` when nothing is generated,
+  and rejects a shard that is not a JSON list.
+- Both shims run the generator with a `Resolver.libraries` that follows
+  build_runner 2.16 (breadth-first over imports, then exports, SDK
+  libraries first). injectable records the first library exporting a type
+  as its import and hashes the others into the registration order, so the
+  shim's own order (staged files, then each package's main library) puts a
+  package barrel in the imports and reorders registrations that depend on
+  a third-party type.
+- `defs.bzl`: `injectable_shards`, `injectable_config` and
+  `injectable_package`.
+- The generator is injectable_generator 3.1.3 (MIT, upstream commit
+  0644204687dfb34e7318c11fe4abf9416ed2c549), vendored under
+  `dart/ext/injectable/third_party/injectable_generator/` without
+  `lib/lean_builder/`: its `lean_builder ^1.2.2` dependency needs
+  `_fe_analyzer_shared <106`, while the ext lock's analyzer 14.5.0 needs
+  ^109. The build_runner path imports only build and source_gen.
+- `dart/ext/pubspec.yaml` / `.lock`: adds `injectable` 3.0.0 (the
+  annotations the generator reads); nothing else in the lock moves.
+
+Output equals build_runner's (stock injectable_generator 3.1.3 with
+lean_builder) byte for byte on a 5-class sample with a module, a
+pre-resolved async dependency, a factory parameter, a named instance, a
+dispose method and a third-party (dio) type.
+
+diff --git a/dart/ext/injectable/BUILD.bazel b/dart/ext/injectable/BUILD.bazel
+new file mode 100644
+index 00000000..c975df42
+--- /dev/null
++++ b/dart/ext/injectable/BUILD.bazel
+@@ -0,0 +1,85 @@
++# injectable: two-stage shim over a vendored injectable_generator 3.1.3
++# (third_party/injectable_generator, without lib/lean_builder/; see VENDORED.md).
++#
++#   stage 1  shim_json    per-file `dart_codegen`        <src>.injectable.json
++#   stage 2  shim_config  `dart_aggregate_codegen` over  <init>.config.dart
++#                         the stage-1 shards (asset_deps)
++#
++# `injectable_package` in defs.bzl wires both stages.
++
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++load("//dart:defs.bzl", "dart_binary", "dart_library", "dart_test")
++
++exports_files(
++    ["defs.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "defs",
++    srcs = ["defs.bzl"],
++    visibility = ["//visibility:public"],
++    deps = ["//dart:defs"],
++)
++
++# The Builder wrappers both shims run (empty shard -> `[]`; a config stage
++# that generates nothing fails instead of writing an empty file).
++dart_library(
++    name = "injectable_shims",
++    package_name = "rules_dart_ext_injectable",
++    srcs = ["lib/injectable_shims.dart"],
++    language_version = "3.11",
++    deps = [
++        "@ext_pub_deps//:analyzer",
++        "@ext_pub_deps//:build",
++        "@ext_pub_deps//:crypto",
++        "@ext_pub_deps//:glob",
++        "@ext_pub_deps//:package_config",
++    ],
++)
++
++dart_binary(
++    name = "shim_json",
++    srcs = ["shim_json.dart"],
++    code_assets_from_deps = False,
++    compile_mode = "kernel",
++    launcher = True,
++    main = "shim_json.dart",
++    visibility = ["//visibility:public"],
++    deps = [
++        ":injectable_shims",
++        "//dart/ext:builder_shim",
++        "//dart/ext/injectable/third_party/injectable_generator",
++        "@ext_pub_deps//:build",
++    ],
++)
++
++dart_binary(
++    name = "shim_config",
++    srcs = ["shim_config.dart"],
++    code_assets_from_deps = False,
++    compile_mode = "kernel",
++    launcher = True,
++    main = "shim_config.dart",
++    visibility = ["//visibility:public"],
++    deps = [
++        ":injectable_shims",
++        "//dart/ext:builder_shim",
++        "//dart/ext/injectable/third_party/injectable_generator",
++        "@ext_pub_deps//:build",
++    ],
++)
++
++dart_test(
++    name = "injectable_shims_test",
++    size = "small",
++    package_name = "rules_dart_ext_injectable",
++    language_version = "3.11",
++    main = "test/injectable_shims_test.dart",
++    deps = [
++        ":injectable_shims",
++        "@ext_pub_deps//:build",
++        "@ext_pub_deps//:glob",
++        "@ext_pub_deps//:test",
++    ],
++)
+diff --git a/dart/ext/injectable/defs.bzl b/dart/ext/injectable/defs.bzl
+new file mode 100644
+index 00000000..0b3986c5
+--- /dev/null
++++ b/dart/ext/injectable/defs.bzl
+@@ -0,0 +1,173 @@
++"""Two-stage injectable code generation (an aggregate builder).
++
++injectable_generator runs in two stages under build_runner: a per-library
++Builder writes `<file>.injectable.json`, then the `@InjectableInit` file's
++Builder reads every shard with `findAssets` and writes `<init>.config.dart`.
++`injectable_package` maps that onto rules_dart:
++
++  1. one `dart_codegen` per annotated file (`shim_json`), deps = `shard_deps`;
++  2. one `dart_aggregate_codegen` over the init file (`shim_config`), with the
++     shards as `asset_deps` and deps = `annotation_deps` + `init_deps`.
++
++Keep `init_deps` to what the init file itself imports. `dart_aggregate_codegen`
++stages every same-package sibling it finds in `deps`, so a library holding
++the package's hand-written sources there would make each of them an input of
++the aggregate. With only the shards as package inputs, an edit that leaves
++every shard byte-identical (a method body, say) is a cache hit for the
++aggregate action.
++
++The generator is a vendored injectable_generator 3.1.3 without its optional
++lean_builder integration (`third_party/injectable_generator/VENDORED.md`).
++"""
++
++load("@rules_dart//dart:defs.bzl", "dart_aggregate_codegen", "dart_codegen")
++
++visibility("public")
++
++_SHIM_JSON = Label("//dart/ext/injectable:shim_json")
++_SHIM_CONFIG = Label("//dart/ext/injectable:shim_config")
++
++def _token(path):
++    t = path
++    if t.startswith("lib/"):
++        t = t[len("lib/"):]
++    if t.endswith(".dart"):
++        t = t[:-len(".dart")]
++    return t.replace("/", "_").replace(".", "_").replace("-", "_")
++
++def injectable_shards(
++        name,
++        srcs,
++        package_name = "",
++        language_version = "",
++        deps = [],
++        annotation_deps = ["@pub_deps//:injectable", "@pub_deps//:get_it"],
++        config = "",
++        **kwargs):
++    """Declares the stage-1 shard targets, one per source.
++
++    Args:
++      name: Prefix of the per-source targets (`_<name>_<token>_inj`).
++      srcs: `.dart` files that carry `@injectable`, `@singleton`,
++        `@lazySingleton`, `@module` or similar annotations.
++      package_name: Dart package name of the sources.
++      language_version: Dart language version of the package (`<major>.<minor>`).
++      deps: Libraries the sources import. Same-package siblings in them are
++        staged for the analyzer.
++      annotation_deps: The injectable and get_it libraries of the consumer's hub.
++      config: injectable_generator options as JSON (`auto_register`,
++        `class_name_pattern`, `file_name_pattern`).
++      **kwargs: Forwarded to every `dart_codegen` (for example `tags`).
++
++    Returns:
++      The labels of the shard targets, for `injectable_config`'s `shards`.
++    """
++    shards = []
++    for src in srcs:
++        target = "_{}_{}_inj".format(name, _token(src))
++        dart_codegen(
++            name = target,
++            src = src,
++            generator_bin = _SHIM_JSON,
++            output_suffixes = [".injectable.json"],
++            package_name = package_name,
++            language_version = language_version,
++            deps = deps + [d for d in annotation_deps if d not in deps],
++            config = config,
++            **kwargs
++        )
++        shards.append(":" + target)
++    return shards
++
++def injectable_config(
++        name,
++        init,
++        shards,
++        package_name = "",
++        language_version = "",
++        deps = [],
++        annotation_deps = ["@pub_deps//:injectable", "@pub_deps//:get_it"],
++        output = None,
++        **kwargs):
++    """Declares the stage-2 aggregate that writes `<init>.config.dart`.
++
++    Fails the build instead of writing an empty file when `init` holds no
++    resolvable `@InjectableInit`.
++
++    Args:
++      name: Target name; its default output is the `.config.dart`.
++      init: The `.dart` file with the `@InjectableInit` function.
++      shards: The stage-1 shard targets (`injectable_shards`).
++      package_name: Dart package name of `init`.
++      language_version: Dart language version of the package.
++      deps: Further libraries the init file imports. Never the package's own
++        hand-written library: that would make every source an input.
++      annotation_deps: The injectable and get_it libraries of the consumer's hub.
++      output: Output path; defaults to `init` with `.dart` -> `.config.dart`.
++      **kwargs: Forwarded to `dart_aggregate_codegen`.
++    """
++    if not init.endswith(".dart"):
++        fail("injectable_config: init must be a .dart file, got %r" % init)
++    dart_aggregate_codegen(
++        name = name,
++        srcs = [init],
++        asset_deps = shards,
++        generator_bin = _SHIM_CONFIG,
++        outputs = [output or init[:-len(".dart")] + ".config.dart"],
++        package_name = package_name,
++        language_version = language_version,
++        deps = annotation_deps + [d for d in deps if d not in annotation_deps],
++        **kwargs
++    )
++
++def injectable_package(
++        name,
++        srcs,
++        init,
++        package_name = "",
++        language_version = "",
++        shard_deps = [],
++        init_deps = [],
++        annotation_deps = ["@pub_deps//:injectable", "@pub_deps//:get_it"],
++        config = "",
++        output = None,
++        **kwargs):
++    """Both stages: shards for `srcs`, then the `.config.dart` for `init`.
++
++    `name` is the aggregate target; add it to the package library's `srcs`.
++
++    Args:
++      name: Target name of the `.config.dart` aggregate.
++      srcs: Annotated `.dart` files (one shard each).
++      init: The `@InjectableInit` file.
++      package_name: Dart package name.
++      language_version: Dart language version of the package.
++      shard_deps: Deps of the shard actions (usually a staging library of the
++        package's hand-written sources plus what they import).
++      init_deps: Further deps of the aggregate: only what `init` imports.
++      annotation_deps: The injectable and get_it libraries of the consumer's hub.
++      config: injectable_generator options as JSON, for the shard stage.
++      output: `.config.dart` path; defaults to beside `init`.
++      **kwargs: Forwarded to every generated target.
++    """
++    shards = injectable_shards(
++        name = name,
++        srcs = srcs,
++        package_name = package_name,
++        language_version = language_version,
++        deps = shard_deps,
++        annotation_deps = annotation_deps,
++        config = config,
++        **kwargs
++    )
++    injectable_config(
++        name = name,
++        init = init,
++        shards = shards,
++        package_name = package_name,
++        language_version = language_version,
++        deps = init_deps,
++        annotation_deps = annotation_deps,
++        output = output,
++        **kwargs
++    )
+diff --git a/dart/ext/injectable/lib/injectable_shims.dart b/dart/ext/injectable/lib/injectable_shims.dart
+new file mode 100644
+index 00000000..5ad6304c
+--- /dev/null
++++ b/dart/ext/injectable/lib/injectable_shims.dart
+@@ -0,0 +1,280 @@
++/// Wrappers that make injectable_generator's two Builders safe to run as
++/// rules_dart shims (`dart/ext/injectable/shim_json.dart`, `shim_config.dart`).
++///
++/// The shim writes every declared output, and writes it empty when the
++/// Builder emits nothing (`builder_shim.dart` `_routeDeclaredOutputs`). For
++/// injectable that is wrong in both stages:
++///
++/// - Stage 1 (`.injectable.json`): the generator returns `null` for a library
++///   with no injectable classes. An empty shard is not JSON, and the config
++///   stage's `jsonDecode` would throw on it. [InjectableShardBuilder] writes
++///   `[]` instead, which the config stage treats exactly like build_runner's
++///   missing shard.
++/// - Stage 2 (`.config.dart`): when `@InjectableInit` does not resolve (for
++///   example `package:injectable` is missing from `deps`), the generator emits
++///   nothing and the shim would write an empty `.config.dart`, which only
++///   fails later as an "undefined name" in the init file.
++///   [InjectableConfigBuilder] fails the action instead, naming the init file.
++///
++/// Both also run the generator against [BuildRunnerLibrariesStep], whose
++/// `resolver.libraries` yields libraries in build_runner's order. The shim's
++/// own `Resolver.libraries` yields the staged same-package files and then each
++/// package's `lib/<name>.dart`. injectable records the *first* library that
++/// exports a type as its import and the rest as `otherImports`, and the rest
++/// feed the hash that orders registrations, so under the shim's order a
++/// package barrel can become the import and a third-party type (`Dio`) loses
++/// its `otherImports`, which reorders `.config.dart` (F-0026).
++library;
++
++import 'dart:async';
++import 'dart:collection';
++import 'dart:convert';
++
++import 'package:analyzer/dart/ast/ast.dart';
++import 'package:analyzer/dart/element/element.dart';
++import 'package:build/build.dart';
++import 'package:crypto/crypto.dart';
++import 'package:glob/glob.dart';
++import 'package:package_config/package_config_types.dart';
++
++/// The JSON written for a library whose generator output is empty.
++const String emptyShard = '[]';
++
++/// Runs injectable_generator's per-library Builder and writes [emptyShard]
++/// to every allowed output the inner Builder did not write.
++class InjectableShardBuilder implements Builder {
++  /// Wraps [inner], normally `injectableBuilder(options)`.
++  InjectableShardBuilder(this.inner);
++
++  /// The wrapped Builder.
++  final Builder inner;
++
++  @override
++  Map<String, List<String>> get buildExtensions => inner.buildExtensions;
++
++  @override
++  Future<void> build(BuildStep buildStep) async {
++    await inner.build(BuildRunnerLibrariesStep(buildStep));
++    for (final AssetId output in buildStep.allowedOutputs) {
++      if (!await buildStep.canRead(output)) {
++        await buildStep.writeAsString(output, emptyShard);
++      }
++    }
++  }
++}
++
++/// Runs injectable_generator's config Builder. Fails when a staged shard is
++/// not a JSON list, and when the Builder writes no `.config.dart`.
++class InjectableConfigBuilder implements Builder {
++  /// Wraps [inner], normally `injectableConfigBuilder(options)`.
++  InjectableConfigBuilder(
++    this.inner, {
++    this.shardGlob = 'lib/**.injectable.json',
++  });
++
++  /// The wrapped Builder.
++  final Builder inner;
++
++  /// The shards checked before [inner] runs (injectable's default
++  /// `generateForDir: ['lib']`).
++  final String shardGlob;
++
++  @override
++  Map<String, List<String>> get buildExtensions => inner.buildExtensions;
++
++  @override
++  Future<void> build(BuildStep buildStep) async {
++    await for (final AssetId shard in buildStep.findAssets(Glob(shardGlob))) {
++      final String text = await buildStep.readAsString(shard);
++      Object? decoded;
++      try {
++        decoded = jsonDecode(text);
++      } on FormatException {
++        decoded = null;
++      }
++      if (decoded is! List) {
++        final String what = text.trim().isEmpty ? 'empty' : 'not a JSON list';
++        throw StateError(
++          'injectable config: shard ${shard.path} is $what. Shards must come '
++          'from @rules_dart//dart/ext/injectable:shim_json, which writes [] '
++          'for a library with no injectable classes.',
++        );
++      }
++    }
++    await inner.build(BuildRunnerLibrariesStep(buildStep));
++    final List<AssetId> missing = [
++      for (final AssetId output in buildStep.allowedOutputs)
++        if (output.path.endsWith('.config.dart') &&
++            !await buildStep.canRead(output))
++          output,
++    ];
++    if (missing.isNotEmpty) {
++      final String paths = missing.map((AssetId id) => id.path).join(', ');
++      throw StateError(
++        'injectable config: ${buildStep.inputId.path} generated nothing for '
++        '$paths. The file needs an annotation that resolves to '
++        "package:injectable's @InjectableInit; check that the injectable "
++        "annotation library is in the target's deps.",
++      );
++    }
++  }
++}
++
++/// A [BuildStep] that forwards everything to [delegate] except `resolver`,
++/// which is a [BuildRunnerLibrariesResolver].
++class BuildRunnerLibrariesStep implements BuildStep {
++  /// Wraps [delegate].
++  BuildRunnerLibrariesStep(this.delegate);
++
++  /// The shim's build step.
++  final BuildStep delegate;
++
++  @override
++  late final Resolver resolver = BuildRunnerLibrariesResolver(
++    delegate.resolver,
++    delegate.inputId,
++  );
++
++  @override
++  AssetId get inputId => delegate.inputId;
++
++  @override
++  Future<LibraryElement> get inputLibrary => delegate.inputLibrary;
++
++  @override
++  Iterable<AssetId> get allowedOutputs => delegate.allowedOutputs;
++
++  @override
++  Future<PackageConfig> get packageConfig => delegate.packageConfig;
++
++  @override
++  Future<bool> canRead(AssetId id) => delegate.canRead(id);
++
++  @override
++  Future<Digest> digest(AssetId id) => delegate.digest(id);
++
++  @override
++  Stream<AssetId> findAssets(Glob glob) => delegate.findAssets(glob);
++
++  @override
++  Future<List<int>> readAsBytes(AssetId id) => delegate.readAsBytes(id);
++
++  @override
++  Future<String> readAsString(AssetId id, {Encoding encoding = utf8}) =>
++      delegate.readAsString(id, encoding: encoding);
++
++  @override
++  Future<void> writeAsBytes(AssetId id, FutureOr<List<int>> bytes) =>
++      delegate.writeAsBytes(id, bytes);
++
++  @override
++  Future<void> writeAsString(
++    AssetId id,
++    FutureOr<String> contents, {
++    Encoding encoding = utf8,
++  }) => delegate.writeAsString(id, contents, encoding: encoding);
++
++  @override
++  Future<T> fetchResource<T>(Resource<T> resource) =>
++      delegate.fetchResource(resource);
++
++  @override
++  T trackStage<T>(
++    String label,
++    T Function() action, {
++    bool isExternal = false,
++  }) => delegate.trackStage(label, action, isExternal: isExternal);
++
++  @override
++  void reportUnusedAssets(Iterable<AssetId> ids) =>
++      delegate.reportUnusedAssets(ids);
++}
++
++/// A [Resolver] whose [libraries] follow build_runner 2.16's
++/// `BuildStepResolver.libraries`: a breadth-first walk from the input library
++/// over each library's imports, then exports (first fragment only), with SDK
++/// libraries yielded before the rest. Everything else is [delegate]'s.
++///
++/// One difference remains: build_runner yields *every* public SDK library
++/// first, in the SDK's order; this yields only the SDK libraries the walk
++/// reaches, in walk order. That matters only for an element that two SDK
++/// libraries export.
++class BuildRunnerLibrariesResolver implements Resolver {
++  /// Wraps [delegate]; the walk starts at [entryPoint].
++  BuildRunnerLibrariesResolver(this.delegate, this.entryPoint);
++
++  /// The shim's resolver.
++  final Resolver delegate;
++
++  /// The build step's input.
++  final AssetId entryPoint;
++
++  @override
++  Stream<LibraryElement> get libraries async* {
++    final List<LibraryElement> walk = await _walk();
++    yield* Stream.fromIterable(walk.where((l) => l.isInSdk));
++    yield* Stream.fromIterable(walk.where((l) => !l.isInSdk));
++  }
++
++  Future<List<LibraryElement>> _walk() async {
++    final result = <LibraryElement>[];
++    if (!await delegate.isLibrary(entryPoint)) return result;
++    final LibraryElement input = await delegate.libraryFor(
++      entryPoint,
++      allowSyntaxErrors: true,
++    );
++    final seen = <LibraryElement>{input};
++    final toVisit = Queue<LibraryElement>()..add(input);
++    while (toVisit.isNotEmpty) {
++      final LibraryElement current = toVisit.removeFirst();
++      result.add(current);
++      final Set<LibraryElement> toCrawl = current.firstFragment.libraryImports
++          .map((import) => import.importedLibrary)
++          .followedBy(
++            current.firstFragment.libraryExports.map(
++              (export) => export.exportedLibrary,
++            ),
++          )
++          .nonNulls
++          .where((library) => !seen.contains(library))
++          .toSet();
++      toVisit.addAll(toCrawl);
++      seen.addAll(toCrawl);
++    }
++    return result;
++  }
++
++  @override
++  Future<LibraryElement?> findLibraryByName(String libraryName) async {
++    await for (final LibraryElement library in libraries) {
++      if (library.name == libraryName) return library;
++    }
++    return null;
++  }
++
++  @override
++  Future<bool> isLibrary(AssetId assetId) => delegate.isLibrary(assetId);
++
++  @override
++  Future<AstNode?> astNodeFor(Fragment fragment, {bool resolve = false}) =>
++      delegate.astNodeFor(fragment, resolve: resolve);
++
++  @override
++  Future<CompilationUnit> compilationUnitFor(
++    AssetId assetId, {
++    bool allowSyntaxErrors = false,
++  }) => delegate.compilationUnitFor(
++    assetId,
++    allowSyntaxErrors: allowSyntaxErrors,
++  );
++
++  @override
++  Future<LibraryElement> libraryFor(
++    AssetId assetId, {
++    bool allowSyntaxErrors = false,
++  }) => delegate.libraryFor(assetId, allowSyntaxErrors: allowSyntaxErrors);
++
++  @override
++  Future<AssetId> assetIdForElement(Element element) =>
++      delegate.assetIdForElement(element);
++}
+diff --git a/dart/ext/injectable/shim_config.dart b/dart/ext/injectable/shim_config.dart
+new file mode 100644
+index 00000000..e6bbaa10
+--- /dev/null
++++ b/dart/ext/injectable/shim_config.dart
+@@ -0,0 +1,13 @@
++/// injectable stage 2: the `@InjectableInit` file's `.config.dart`, built
++/// from the stage-1 shards staged as `asset_deps`.
++library;
++
++import 'package:build/build.dart';
++import 'package:injectable_generator/builder.dart' show injectableConfigBuilder;
++import 'package:rules_dart_ext/worker_entry.dart';
++import 'package:rules_dart_ext_injectable/injectable_shims.dart';
++
++Builder _configBuilder(BuilderOptions options) =>
++    InjectableConfigBuilder(injectableConfigBuilder(options));
++
++Future<void> main(List<String> args) => shimMain(args, _configBuilder);
+diff --git a/dart/ext/injectable/shim_json.dart b/dart/ext/injectable/shim_json.dart
+new file mode 100644
+index 00000000..f8cbb2f6
+--- /dev/null
++++ b/dart/ext/injectable/shim_json.dart
+@@ -0,0 +1,12 @@
++/// injectable stage 1: one `.injectable.json` shard per annotated library.
++library;
++
++import 'package:build/build.dart';
++import 'package:injectable_generator/builder.dart' show injectableBuilder;
++import 'package:rules_dart_ext/worker_entry.dart';
++import 'package:rules_dart_ext_injectable/injectable_shims.dart';
++
++Builder _shardBuilder(BuilderOptions options) =>
++    InjectableShardBuilder(injectableBuilder(options));
++
++Future<void> main(List<String> args) => shimMain(args, _shardBuilder);
+diff --git a/dart/ext/injectable/test/injectable_shims_test.dart b/dart/ext/injectable/test/injectable_shims_test.dart
+new file mode 100644
+index 00000000..5c6c0443
+--- /dev/null
++++ b/dart/ext/injectable/test/injectable_shims_test.dart
+@@ -0,0 +1,147 @@
++import 'dart:async';
++import 'dart:convert';
++
++import 'package:build/build.dart';
++import 'package:glob/glob.dart';
++import 'package:rules_dart_ext_injectable/injectable_shims.dart';
++import 'package:test/test.dart';
++
++/// A BuildStep over an in-memory asset map; only what the wrappers use.
++class _FakeStep implements BuildStep {
++  _FakeStep(this.inputId, this.allowedOutputs, [Map<AssetId, String>? assets])
++    : assets = assets ?? {};
++
++  @override
++  final AssetId inputId;
++
++  @override
++  final Iterable<AssetId> allowedOutputs;
++
++  final Map<AssetId, String> assets;
++
++  @override
++  Future<bool> canRead(AssetId id) async => assets.containsKey(id);
++
++  @override
++  Future<String> readAsString(AssetId id, {Encoding encoding = utf8}) async =>
++      assets[id] ?? (throw AssetNotFoundException(id));
++
++  @override
++  Stream<AssetId> findAssets(Glob glob) =>
++      Stream.fromIterable(assets.keys.where((id) => glob.matches(id.path)));
++
++  @override
++  Future<void> writeAsString(
++    AssetId id,
++    FutureOr<String> contents, {
++    Encoding encoding = utf8,
++  }) async {
++    assets[id] = await contents;
++  }
++
++  @override
++  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
++}
++
++/// A Builder that writes [output] (or nothing, when null) to every allowed output.
++class _Inner implements Builder {
++  _Inner(this.output);
++
++  final String? output;
++  var runs = 0;
++
++  @override
++  Map<String, List<String>> get buildExtensions => const {
++    '.dart': ['.out'],
++  };
++
++  @override
++  Future<void> build(BuildStep buildStep) async {
++    runs++;
++    if (output == null) return;
++    for (final AssetId id in buildStep.allowedOutputs) {
++      await buildStep.writeAsString(id, output!);
++    }
++  }
++}
++
++void main() {
++  final input = AssetId('pkg', 'lib/src/a.dart');
++  final shard = AssetId('pkg', 'lib/src/a.injectable.json');
++  final init = AssetId('pkg', 'lib/di.dart');
++  final config = AssetId('pkg', 'lib/di.config.dart');
++
++  group('InjectableShardBuilder', () {
++    test('T-0028-AC4 writes [] when the generator returns nothing', () async {
++      final step = _FakeStep(input, [shard]);
++      await InjectableShardBuilder(_Inner(null)).build(step);
++      expect(step.assets[shard], '[]');
++      expect(jsonDecode(step.assets[shard]!), isEmpty);
++    });
++
++    test('keeps the generator output when there is one', () async {
++      final step = _FakeStep(input, [shard]);
++      await InjectableShardBuilder(_Inner('[{"type":1}]')).build(step);
++      expect(step.assets[shard], '[{"type":1}]');
++    });
++
++    test('forwards buildExtensions', () {
++      expect(InjectableShardBuilder(_Inner(null)).buildExtensions, {
++        '.dart': ['.out'],
++      });
++    });
++  });
++
++  group('InjectableConfigBuilder', () {
++    test('T-0028-AC4 accepts [] shards and writes the config', () async {
++      final step = _FakeStep(init, [config], {shard: '[]'});
++      await InjectableConfigBuilder(_Inner('// config')).build(step);
++      expect(step.assets[config], '// config');
++    });
++
++    test('T-0028-AC4 fails when the init file generates nothing', () async {
++      final step = _FakeStep(init, [config], {shard: '[]'});
++      await expectLater(
++        InjectableConfigBuilder(_Inner(null)).build(step),
++        throwsA(
++          isA<StateError>().having(
++            (e) => e.message,
++            'message',
++            allOf(contains('lib/di.dart'), contains('@InjectableInit')),
++          ),
++        ),
++      );
++      expect(step.assets.containsKey(config), isFalse);
++    });
++
++    test('fails naming an empty shard before running the generator', () async {
++      final inner = _Inner('// config');
++      final step = _FakeStep(init, [config], {shard: ''});
++      await expectLater(
++        InjectableConfigBuilder(inner).build(step),
++        throwsA(
++          isA<StateError>().having(
++            (e) => e.message,
++            'message',
++            allOf(contains(shard.path), contains('empty')),
++          ),
++        ),
++      );
++      expect(inner.runs, 0);
++    });
++
++    test('fails naming a shard that is not a JSON list', () async {
++      final step = _FakeStep(init, [config], {shard: '{"a":1}'});
++      await expectLater(
++        InjectableConfigBuilder(_Inner('// config')).build(step),
++        throwsA(
++          isA<StateError>().having(
++            (e) => e.message,
++            'message',
++            contains('not a JSON list'),
++          ),
++        ),
++      );
++    });
++  });
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/BUILD.bazel b/dart/ext/injectable/third_party/injectable_generator/BUILD.bazel
+new file mode 100644
+index 00000000..ddfac9b3
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/BUILD.bazel
+@@ -0,0 +1,32 @@
++# Vendored injectable_generator 3.1.3 without lib/lean_builder/ (see VENDORED.md).
++load("//dart:defs.bzl", "dart_library")
++
++licenses(["notice"])  # MIT
++
++exports_files(["LICENSE"])
++
++dart_library(
++    name = "injectable_generator",
++    package_name = "injectable_generator",
++    srcs = glob(["lib/**/*.dart"]),
++    language_version = "3.12",
++    # Upstream code: rules_dart's own lints don't apply to it.
++    tags = [
++        "no-dart-analyze",
++        "no-dart-format",
++    ],
++    visibility = ["//dart/ext/injectable:__subpackages__"],
++    deps = [
++        "@ext_pub_deps//:analyzer",
++        "@ext_pub_deps//:build",
++        "@ext_pub_deps//:code_builder",
++        "@ext_pub_deps//:collection",
++        "@ext_pub_deps//:dart_style",
++        "@ext_pub_deps//:glob",
++        "@ext_pub_deps//:injectable",
++        "@ext_pub_deps//:meta",
++        "@ext_pub_deps//:path",
++        "@ext_pub_deps//:recase",
++        "@ext_pub_deps//:source_gen",
++    ],
++)
+diff --git a/dart/ext/injectable/third_party/injectable_generator/CHANGELOG.md b/dart/ext/injectable/third_party/injectable_generator/CHANGELOG.md
+new file mode 100644
+index 00000000..35db4f79
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/CHANGELOG.md
+@@ -0,0 +1,262 @@
++# ChangeLog
++## [3.1.3]
++- Chore: update lean_builder to ^1.2.2
++## [3.1.2]
++- Chore: update analyzer constraint to ">=10.0.0 <15.0.0"
++- Chore: update lean_builder to ^1.2.1
++## [3.1.1]
++- Chore: decrease injectable_generator minimum analyzer constraint
++## [3.1.0]
++- Fix: avoid import alias collisions in HashedAllocator (#544) by @kmslab20
++- Feat: support private named parameters by @jkoenig134
++- Chore: update Dart SDK constraint to ">=3.12.0 <4.0.0"
++- Chore: update analyzer constraint to ">=10.0.0 <14.0.0"
++## [3.0.2]
++- Fix: update lean_builder to 0.1.9 to sync analyzer version
++## [3.0.1]
++- Fix: update lean_builder to 0.1.9 to sync analyzer version
++## [3.0.0]
++- Breaking: Removed `includeMicroPackages` option. Micro packages must now be explicitly registered using `externalPackageModulesBefore` and `externalPackageModulesAfter` in `@InjectableInit`.
++- Breaking: Removed deprecated `usesNullSafety` option. Null safety is now always assumed.
++- Feat: Add support for multiple registrations via `allowMultipleRegistrations` (#535, #531).
++- Fix: Treat external dependencies as non-blocking in environment sorting (#539, Fixes #532).
++## [2.12.1]
++- Chore: Update analyzer constrains to ">=9.0.0 <11.0.0"
++## [2.12.0]
++- Feat: Add optional support for lean_builder package for blazing fast builds
++## [2.11.1]
++- Feat: Add support for `generateAccessors` option to generate GetIt extension getters
++- Feat: Improve dependency sorting logic for more predictable registration order
++- Feat: Add comprehensive test coverage
++- Chore: Update injectable dependency to ^2.7.2
++## [2.11.0]
++- Feat: Add support to cached factories introduced in get_it 8.0.0
++## [2.10.0]
++- Chore: Update dependencies, analyzer (v9), glob (v2.1.3), code_builder (v4.11.0), dart_style (v3.1.3)
++
++## [2.9.0]
++- Chore: Update dependencies, source_gen (v4), build (v4), analyzer (v8)
++- Update dart constrains to ">=3.8.0 <4.0.0"
++## [2.8.1]
++- Fix: Fix @factoryMethod for factory class constructor
++## [2.8.0]
++- Chore: Update dependencies, source_gen (v3), build (v3), build_runner (v2.6)
++- Feat: Add generateForEnvironments option
++- Fix: fex dependency sort when dependencies have multiple environments
++## [2.7.0]
++- Chore: Update dependencies, source_gen (v2), analyzer (<8.0.0), dart_style (v3)
++## [2.6.2]
++- Feat: Improve Code Generation consistency using hash in alias imports
++- Fix: Fix @preResolve only works for methods warning
++## [2.6.1]
++Fix: make register order more predictable to avoid unnecessary code churns in source control by @Adam-Langley
++## [2.6.0]
++Feat: add @ignoreParam annotation to ignore optional parameters in factory methods
++## [2.5.1]
++Fix: Type Alias error on generation #437
++## [2.5.0]
++- Feat: add support for passing records as @factoryParam
++## [2.4.2]
++- Fix Postpone singleton initialisation to respect environment filters by @lrampazzo
++## [2.4.1]
++- Add option to pass instance callback function to the init function by @Adam-Langley
++## [2.4.0]
++- Added [rootDir] support for specifying the root directory for the generation process.
++## [2.3.0]
++- Revert: bumping up collection version to use 1.17.1
++- Refactor: the main scope init method will now always be generated even if it has no dependencies
++## [2.2.0]
++- Optimize injectable_generator async analysis by [https://github.com/Jjagg]
++- Update dart constrains to ">=3.0.0 <4.0.0"
++- Update analyzer constrains to include v6+
++## [2.1.6]
++- Fix const instances are not generated as consts
++- update dart constrains to ">=2.17.0 <4.0.0"
++- Upgrade some dependencies
++## [2.1.5]
++- Add coverage:ignore-file comment to generated config
++- Fix relative imports not working
++- Update dependencies (codeBuilder, source_gen)
++## [2.1.4]
++- Fix Scopes - class is registered more than once under the same environment #338
++- Fix Injectable unable to detect dependencies from micropackages #341
++## [2.1.3]
++- Fix name of MicroPackageModule contains "_" (is not pascal case) #332
++## [2.1.2]
++- Fix registration order
++## [2.1.1]
++- Fix barrel files related issue
++## [2.1.0]
++- Add support for micro package modules order [before,after]
++- Add support for micro package modules scopes
++## [2.0.1]
++- Fix registration order #324
++## [2.0.0] [Minor breaking changes]
++- Add support for micro packages
++- Add support for external package modules
++- Add support for manual dependencies ordering thanks to @casvanluijtelaar
++- Add support for GetIt scopes
++- Add @PostConstruct annotation to execute sync/async code after construction
++- Add preResolve to @FactoryMethod annotation
++- Add throwOnMissingDependencies flag to @InjectableInit annotation
++- Change asExtension default value to true [breaking change]
++- Change initializerName default value to 'init' [breaking change]
++## [1.5.5]
++- Bump up analyzer version
++## [1.5.4]
++- Bump up analyzer version
++## [1.5.3]
++- Sync injectable and injectable_generator with GetIt v7.2.0 to generate non-nullable @factoryParams
++- Migrate to analyzer 3.0.0
++## [1.5.2]
++Fix yet another registration order issue #244
++## [1.5.1]
++Fix auto-async factory bug #237
++Fix passing dispose function throws #240
++Fix initialization order doesn't respect environments #238
++Add generator prints warning when an injected dependency is not available under the same environment
++## [1.5.0]
++Use getAsync for async injected dependencies, fixes #230
++Add support for function factory params, fixes #224
++Update analyzer version #228
++Add ignore types in packages support
++Fix some readme typos
++## [1.4.1]
++- Bump up build_runner version to 2.0.3
++- Fix generator crash when using inline environments #205
++## [1.4.0]
++- Bump up get_it version to range to 7.0.0 <= 8.0.0
++- Bump up build_runner version to 2.0.2
++## [1.3.0]
++- Include merge that fixes #194
++- Bump up versions of build_runner -> 2.0.1, code_builder -> 4.0.0, analyzer -> 1.5.0
++## [1.2.2]
++- Fix generator crash after 1.2.1 update
++- Add option to ignore missing type warning for specified types
++## [1.2.1]
++- Bump up versions of build, build_runner, dart_style and source_gen
++- Fix named instances are ignored when sorting dependencies.
++- Clean up some code
++## [1.2.0]
++- push nullSafety version to the main section
++- Fix sorting by dependents ignores named instances
++## [1.2.0-nullsafety]
++- add null safety support
++## [1.1.2]
++- Add support for disposing of singletons.
++- change min version constraint of GetIt to 5.0.0
++- update readme file
++## [1.1.0]
++- Refactor code to support null-safety
++- Fix preResolved instances conditional registration
++- Add option to generate null-safety compatible code to injectableInit
++## [1.0.7]
++- Fix pre-resolved primitives naming issue #161
++- Fix some types in readme file
++- Fix environments is already registered issue.
++## [1.0.6]
++- Support build_runner v1.10.3
++## [1.0.5]
++- Add support for get_it ^5.0
++- Fix analyzer compatibility issues
++## [1.0.4]
++- Add option to customize the initializer function name
++- Add option to generate the initializer function as an extension
++- Change initializer functions returns the passed get_it instance instead of void
++- Add Advanced environment filter that can be extended and customized
++- Fix Injectable generator not handling multiple instances of generic types #107
++## [1.0.3]
++- Fix conflict when importing two different types with the same name.
++- Improve some warning messages
++
++## [1.0.2]
++- Fix relative imports issue when file has the same path as target
++## [1.0.1] Breaking Change
++- Fix relative imports issue in test folder
++- Change generateForDir property's default value to ['lib']
++## [1.0.0] Breaking Change
++- Add support for multi environments (annotation & inlined)
++- Add generation-time check for duplicate dependencies under the same environment
++- Fix 3rd party imports from src instead of library file issue
++- Change generated file extension to .config.dart
++- Change generated file applies to most of effective dart rules including preferring relative imports
++- Clean up some code
++
++## [0.4.1]
++
++- Fix stack overflow issue #78
++
++## [0.4.0] Breaking Changes!
++
++- Change Methods inside of register modules are treated as factory methods now,
++so all params are considered injected params unless annotated with @factoryParam.
++- Change registerModule is now replaced with @module
++- Change RegisterAs(Type) Annotation is now replaced with @Injectable(as:Type)
++- Change Singleton.Lazy() is replaced with @LazySingleton()
++- Add generateForDir property to @InjectableInt to specify what directories to generate for.
++- Fix imports issue when working with bin directory
++
++## [0.3.5]
++
++- Fix non-primitive factory params aren't imported
++
++## [0.3.4]
++
++- fix parameterized dependencies aren't resolved properly
++- minor fixes
++
++## [0.3.3]
++
++- fix duplicate var names issue when pre-resolving multiple instances of the same type
++
++## [0.3.2]
++
++- fix registered abstract dependencies are reported missing.
++- fix registering third party types as singleton throws an error.
++
++## [0.3.1]
++
++- fix resolve by instanceName is using positional var instead of named
++- fix part files are imported as stand alone
++- minor fixes
++
++## [0.3.0] Breaking Changes!
++
++- add support for GetIt 4.0.0
++- fix generic types are registered as dynamic
++- fix unresolved future when registering asynchronous dependencies
++- change asynchronous dependencies will be registered using async factory unless annotated with @preResolve
++
++## [0.2.4]
++
++- fix type arguments are not imported.
++- fix get with instanceName missing type.
++
++## [0.2.3]
++
++- improve support for custom initializers
++- fix src import issue
++
++## [0.2.2]
++
++- remove flutter dependency
++- add support for custom initializers in register Modules
++- minor fixes
++
++## [0.2.1]
++
++- fix typo in @Environment annotation
++- ignore abstract classes in auto mode.
++
++## [0.2.0] Breaking Changes!
++
++- You now need to pass in your getIt instance to @initGetIt() func
++- Rename @Bind to @RegisterAs to avoid confusion because,
++  now we're annotating the implementation not the abstract.
++- Add @factoryMethod annotation to mark named factories and static create methods.
++- Add @registerModule annotation to support registering third party types.
++- Fix eager singletons are registered before their dependencies.
++
++## [0.1.0]
++
++- initial release
+diff --git a/dart/ext/injectable/third_party/injectable_generator/LICENSE b/dart/ext/injectable/third_party/injectable_generator/LICENSE
+new file mode 100644
+index 00000000..9d041c6d
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/LICENSE
+@@ -0,0 +1,21 @@
++MIT License
++
++Copyright (c) 2020 Milad Akarie
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
+\ No newline at end of file
+diff --git a/dart/ext/injectable/third_party/injectable_generator/VENDORED.md b/dart/ext/injectable/third_party/injectable_generator/VENDORED.md
+new file mode 100644
+index 00000000..38823cc5
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/VENDORED.md
+@@ -0,0 +1,45 @@
++# Vendored: injectable_generator 3.1.3
++
++| | |
++|---|---|
++| Upstream | https://github.com/Milad-Akarie/injectable (`injectable_generator/`) |
++| Version | 3.1.3 (pub.dev) |
++| Upstream commit | `0644204687dfb34e7318c11fe4abf9416ed2c549` (tag `injectable_generator-3.1.3`) |
++| pub.dev archive | `injectable_generator-3.1.3.tar.gz`, sha256 `24d525c60ed9abf345c8749c3291ca1b3f1d21fd53344c0c644da820a92049df` |
++| Licence | MIT, `LICENSE` (unchanged) |
++
++## Why it is vendored
++
++injectable_generator 3.1.x depends on `lean_builder ^1.2.2`, and lean_builder 1.2.2
++requires `_fe_analyzer_shared >=98.0.0 <106.0.0`. This repository's ext lock
++(`dart/ext/pubspec.lock`) pins `analyzer 14.5.0`, which requires
++`_fe_analyzer_shared ^109.0.0`, so pub cannot resolve the generator into the lock.
++Every older injectable_generator caps analyzer below 10.
++
++The build_runner path (`lib/builder.dart`) imports only `package:build` and
++`package:source_gen`; `lean_builder` is used only by `lib/lean_builder/`, the
++optional lean_builder integration. Dropping that directory removes the dependency
++without touching the code the shims run.
++
++## Local changes (the only differences from the archive)
++
++1. `lib/lean_builder/` removed (5 files).
++2. `pubspec.yaml`: the `lean_builder` dependency is commented out.
++3. Not vendored: `test/`, `README.md`, `analysis_options.yaml`, `build.yaml`,
++   `run_coverage.sh` (the tests need `build_test` and lean_builder). `build.yaml`
++   is replaced by the two shims in `dart/ext/injectable/` (rules_dart never reads
++   `build.yaml`).
++
++No `.dart` file under `lib/` is modified. To check:
++
++```sh
++curl -sL https://pub.dev/api/archives/injectable_generator-3.1.3.tar.gz | tar xz -C /tmp/ig
++diff -r /tmp/ig/lib dart/ext/injectable/third_party/injectable_generator/lib   # only lean_builder/ differs
++```
++
++## Removing the vendored copy
++
++When upstream moves lean_builder into its own package (or lean_builder accepts
++`_fe_analyzer_shared` 109+), add `injectable_generator` to `dart/ext/pubspec.yaml`,
++relock, point `//dart/ext/injectable:*` at `@ext_pub_deps//:injectable_generator`
++and delete this directory.
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/builder.dart b/dart/ext/injectable/third_party/injectable_generator/lib/builder.dart
+new file mode 100644
+index 00000000..cc0e6fcb
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/builder.dart
+@@ -0,0 +1,27 @@
++// coverage:ignore-file
++import 'package:build/build.dart';
++import 'package:source_gen/source_gen.dart';
++
++import 'generators/injectable_config_generator.dart';
++import 'generators/injectable_generator.dart';
++
++/// Creates a builder that generates intermediate `.injectable.json` files
++/// containing serialized dependency configurations.
++Builder injectableBuilder(BuilderOptions options) {
++  return LibraryBuilder(
++    InjectableGenerator(options.config),
++    formatOutput: (generated, _) =>
++        generated.replaceAll(RegExp(r'//.*|\s'), ''),
++    generatedExtension: '.injectable.json',
++  );
++}
++
++/// Creates a builder that generates the final `.config.dart` file
++/// with dependency registration code.
++Builder injectableConfigBuilder(BuilderOptions options) {
++  return LibraryBuilder(
++    InjectableConfigGenerator(),
++    generatedExtension: '.config.dart',
++    additionalOutputExtensions: ['.module.dart'],
++  );
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/allocator.dart b/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/allocator.dart
+new file mode 100644
+index 00000000..8796edeb
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/allocator.dart
+@@ -0,0 +1,41 @@
++import 'package:code_builder/code_builder.dart';
++
++/// The reason to use this allocator is to avoid changing in the alias of the imports
++/// With this allocator, we can hash the url of the import and use it as an alias
++/// This will make sure that the alias is consistent across multiple runs avoiding conflicts
++class HashedAllocator implements Allocator {
++  static const _doNotPrefix = ['dart:core'];
++
++  /// Tracks used import URLs and their assigned aliases.
++  final _imports = <String, int>{};
++
++  /// Tracks used alias integers to avoid collisions.
++  final _usedAliases = <int>{};
++
++  String? _url;
++
++  /// Allocates a unique alias for the [reference]'s URL.
++  @override
++  String allocate(Reference reference) {
++    final symbol = reference.symbol;
++    _url = reference.url;
++    if (_url == null || _doNotPrefix.contains(_url)) {
++      return symbol!;
++    }
++
++    return '_i${_imports.putIfAbsent(_url!, _hashedUrl)}.$symbol';
++  }
++
++  int _hashedUrl() {
++    var alias = _url.hashCode / 1000000 ~/ 1;
++    while (!_usedAliases.add(alias)) {
++      alias++;
++    }
++
++    return alias;
++  }
++
++  @override
++  Iterable<Directive> get imports =>
++      _imports.keys.map((u) => Directive.import(u, as: '_i${_imports[u]}'));
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/builder_utils.dart b/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/builder_utils.dart
+new file mode 100644
+index 00000000..ad9c3b50
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/builder_utils.dart
+@@ -0,0 +1,268 @@
++import 'dart:collection';
++
++import 'package:code_builder/code_builder.dart';
++import 'package:collection/collection.dart';
++import 'package:injectable/injectable.dart';
++import 'package:injectable_generator/models/dependency_config.dart';
++import 'package:injectable_generator/models/importable_type.dart';
++import 'package:injectable_generator/models/injected_dependency.dart';
++import 'package:injectable_generator/resolvers/importable_type_resolver.dart';
++import 'package:meta/meta.dart';
++
++/// A utility class that provides methods for sorting dependencies and
++/// looking up dependencies based on their type and instance name.
++class DependencyList with IterableMixin<DependencyConfig> {
++  final List<DependencyConfig> _dependencies;
++
++  /// Creates a [DependencyList] from a list of [DependencyConfig]s, sorting them based on their dependencies and order position.
++  DependencyList({required List<DependencyConfig> dependencies})
++    : _dependencies = sortDependencies(dependencies);
++
++  /// Checks if a given [DependencyConfig] has any asynchronous dependencies.
++  bool hasAsyncDependency(DependencyConfig dep) {
++    _ensureAsyncDepsMapInitialized();
++    return _hasAsyncDeps![dep.id] ?? false;
++  }
++
++  /// Checks if a given [InjectedDependency] is asynchronous or has any asynchronous dependencies.
++  bool isAsyncOrHasAsyncDependency(InjectedDependency iDep) {
++    _ensureAsyncDepsMapInitialized();
++    return _isAsyncOrHasAsyncDeps![iDep.id] ?? false;
++  }
++
++  Map<_DependencyId, bool>? _hasAsyncDeps;
++  Map<_DependencyId, bool>? _isAsyncOrHasAsyncDeps;
++
++  void _ensureAsyncDepsMapInitialized() {
++    if (_hasAsyncDeps != null) {
++      return;
++    }
++
++    final hasAsyncDepsMap = <_DependencyId, bool>{};
++    final isAsyncOrHasAsyncDepsMap = <_DependencyId, bool>{};
++
++    for (final dep in _dependencies) {
++      final hasAsyncDeps = dep.dependencies.any((childDependency) {
++        final cid = childDependency.id;
++        return isAsyncOrHasAsyncDepsMap[cid] ?? false;
++      });
++
++      final did = dep.id;
++      hasAsyncDepsMap[did] = hasAsyncDeps;
++      isAsyncOrHasAsyncDepsMap[did] =
++          (dep.isAsync && !dep.preResolve) || hasAsyncDeps;
++    }
++
++    _hasAsyncDeps = hasAsyncDepsMap;
++    _isAsyncOrHasAsyncDeps = isAsyncOrHasAsyncDepsMap;
++  }
++
++  @override
++  Iterator<DependencyConfig> get iterator => _dependencies.iterator;
++}
++
++class _DependencyId {
++  final ImportableType type;
++  final String? instanceName;
++
++  const _DependencyId({required this.type, required this.instanceName});
++
++  @override
++  String toString() {
++    return 'DependencyId{type: $type, instanceName: $instanceName}';
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      (other is _DependencyId &&
++          runtimeType == other.runtimeType &&
++          type == other.type &&
++          instanceName == other.instanceName);
++
++  @override
++  int get hashCode => Object.hash(type, instanceName);
++}
++
++extension _DependencyConfigX on DependencyConfig {
++  _DependencyId get id => _DependencyId(type: type, instanceName: instanceName);
++}
++
++extension _InjectedDependencyX on InjectedDependency {
++  _DependencyId get id => _DependencyId(type: type, instanceName: instanceName);
++}
++
++/// A resolver that converts [DartType]s into [ImportableType]s, which include information about the type's name, nullability, and required imports. It also handles function types and parameterized types.
++@visibleForTesting
++List<DependencyConfig> sortDependencies(List<DependencyConfig> it) {
++  // sort dependencies alphabetically by all the various attributes that may make them unique
++  final deps = it.sortedBy<num>((e) => e.identityHash);
++  // sort dependencies by their register order
++  final List<DependencyConfig> sorted = [];
++  _sortByDependents(deps, sorted);
++  // sort dependencies by their orderPosition
++  return sorted.sortedBy<num>((e) => e.orderPosition);
++}
++
++void _sortByDependents(
++  List<DependencyConfig> unSorted,
++  List<DependencyConfig> sorted,
++) {
++  for (var dep in unSorted) {
++    if (dep.dependencies.every((iDep) {
++      if (iDep.isFactoryParam) {
++        return true;
++      }
++
++      /// special case for environments set
++      if (iDep.type.name == 'Set' &&
++          iDep.type.typeArguments.firstOrNull?.name == 'String' &&
++          iDep.instanceName == kEnvironmentsName) {
++        return true;
++      }
++
++      /// for empty environments we check to see if all the dependencies from
++      /// all the environments are already in sorted
++      if (dep.environments.isEmpty) {
++        final List<DependencyConfig> deps = unSorted
++            .where(
++              (d) => d.type == iDep.type && d.instanceName == iDep.instanceName,
++            )
++            .toList(growable: false);
++
++        if (deps.every(sorted.contains)) {
++          return true;
++        }
++      } else {
++        int foundForEnvs = 0;
++        for (final env in dep.environments) {
++          if (lookupDependencyWithNoEnvOrHasAny(iDep, sorted, [env]) != null ||
++              // External/unregistered deps are resolved by parent packages and
++              // should not block local sorting.
++              (lookupDependency(iDep, unSorted) == null &&
++                  lookupDependency(iDep, sorted) == null)) {
++            foundForEnvs++;
++            continue;
++          }
++          return false;
++        }
++        // if all deps for all environments are found we can proceed
++        if (foundForEnvs == dep.environments.length) {
++          return true;
++        }
++      }
++
++      // if dep is in unSorted we skip it in this iteration, if not we include it
++      return lookupDependencyWithNoEnvOrHasAny(
++            iDep,
++            unSorted,
++            dep.environments,
++          ) ==
++          null;
++    })) {
++      sorted.add(dep);
++    }
++  }
++  if (unSorted.isNotEmpty) {
++    var difference = unSorted
++        .where((element) => !sorted.contains(element))
++        .toList();
++    _sortByDependents(difference, sorted);
++  }
++}
++
++/// Resolves a [DartType] to an [ImportableType], which includes information about the type's name, nullability, and required imports.
++DependencyConfig? lookupDependency(
++  InjectedDependency iDep,
++  List<DependencyConfig> allDeps,
++) {
++  return allDeps.firstWhereOrNull(
++    (d) => d.type == iDep.type && d.instanceName == iDep.instanceName,
++  );
++}
++
++/// Resolves a [DartType] to an [ImportableType], which includes information about the type's name, nullability,
++/// and required imports. Optionally takes an [ExecutableElement] to provide additional context for resolving the function type.
++DependencyConfig? lookupDependencyWithNoEnvOrHasAny(
++  InjectedDependency iDep,
++  List<DependencyConfig> allDeps,
++  List<String> envs,
++) {
++  return allDeps.firstWhereOrNull(
++    (d) =>
++        d.type == iDep.type &&
++        d.instanceName == iDep.instanceName &&
++        (d.environments.isEmpty ||
++            envs.isEmpty ||
++            d.environments.any(envs.contains)),
++  );
++}
++
++/// A resolver that converts [DartType]s into [ImportableType]s, which include information about the type's name, nullability,
++/// and required imports. It also handles function types and parameterized types.
++Set<DependencyConfig> lookupPossibleDeps(
++  InjectedDependency iDep,
++  Iterable<DependencyConfig> allDeps,
++) {
++  return allDeps
++      .where((d) => d.type == iDep.type && d.instanceName == iDep.instanceName)
++      .toSet();
++}
++
++/// Checks if a given [DependencyConfig] has any asynchronous dependencies.
++bool hasPreResolvedDependencies(Iterable<DependencyConfig> deps) {
++  return deps.any((d) => d.isAsync && d.preResolve);
++}
++
++/// A resolver that converts [DartType]s into [ImportableType]s, which include information about the type's name,
++/// nullability, and required imports. It also handles function types and parameterized types.
++TypeReference nullableRefer(
++  String symbol, {
++  String? url,
++  bool nullable = false,
++}) => TypeReference(
++  (b) => b
++    ..symbol = symbol
++    ..url = url
++    ..isNullable = nullable,
++);
++
++/// A resolver that converts [DartType]s into [ImportableType]s, which include information about the type's name, nullability, and required imports. It also handles function types and parameterized types.
++Reference typeRefer(
++  ImportableType type, [
++  Uri? targetFile,
++  bool withNullabilitySuffix = true,
++]) {
++  final import = targetFile == null
++      ? ImportableTypeResolver.resolveAssetImport(type.import)
++      : ImportableTypeResolver.relative(type.import, targetFile);
++
++  if (type.isRecordType) {
++    return RecordType(
++      (b) => b
++        ..url = import
++        ..isNullable = type.isNullable
++        ..positionalFieldTypes.addAll(
++          type.typeArguments.where((e) => !e.isNamedRecordField).map(typeRefer),
++        )
++        ..namedFieldTypes.addAll({
++          for (final entry in [
++            ...type.typeArguments.where((e) => e.isNamedRecordField),
++          ])
++            entry.nameInRecord!: typeRefer(entry),
++        }),
++    );
++  }
++
++  return TypeReference((reference) {
++    reference
++      ..symbol = type.name
++      ..url = import
++      ..isNullable = withNullabilitySuffix && type.isNullable;
++    if (type.typeArguments.isNotEmpty) {
++      reference.types.addAll(
++        type.typeArguments.map((e) => typeRefer(e, targetFile)),
++      );
++    }
++  });
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/library_builder.dart b/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/library_builder.dart
+new file mode 100644
+index 00000000..684fe9dc
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/code_builder/library_builder.dart
+@@ -0,0 +1,881 @@
++import 'package:code_builder/code_builder.dart';
++import 'package:injectable_generator/code_builder/builder_utils.dart';
++import 'package:injectable_generator/models/dependency_config.dart';
++import 'package:injectable_generator/models/dispose_function_config.dart';
++import 'package:injectable_generator/models/external_module_config.dart';
++import 'package:injectable_generator/models/importable_type.dart';
++import 'package:injectable_generator/models/injected_dependency.dart';
++import 'package:injectable_generator/models/module_config.dart';
++import 'package:injectable_generator/utils.dart';
++import 'package:collection/collection.dart';
++import '../injectable_types.dart';
++
++const _injectableImport = 'package:injectable/injectable.dart';
++const _getItImport = 'package:get_it/get_it.dart';
++const _getItRefer = Reference('GetIt', _getItImport);
++const _ghRefer = Reference('GetItHelper', _injectableImport);
++const _ghLocalRefer = Reference('gh');
++
++/// A library that generates code for registering dependencies in GetIt based on a list of [DependencyConfig]s.
++/// It supports generating code for different scopes, handling asynchronous dependencies, and integrating with external modules.
++mixin SharedGeneratorCode {
++  /// A list of dependencies to be registered, wrapped in a [DependencyList] for additional functionality.
++  DependencyList get dependencies;
++
++  /// The target file URI for resolving imports, which can be used to generate relative import paths.
++  Uri? get targetFile;
++
++  /// A flag indicating whether to generate extension methods for registration or standalone functions.
++  bool get asExtension;
++
++  /// Builds an instance expression for the given dependency.
++  ///
++  /// Uses either positional or named parameters based on the dependency's
++  /// injected dependencies. Handles const constructors if [dep.canBeConst] is true.
++  Expression _buildInstance(
++    DependencyConfig dep, {
++    String? getAsyncMethodName,
++    String? getMethodName,
++  }) {
++    final positionalParams = dep.positionalDependencies.map(
++      (iDep) => _buildParamAssignment(
++        iDep,
++        getAsyncReferName: getAsyncMethodName,
++        getReferName: getMethodName,
++      ),
++    );
++
++    final namedParams = Map.fromEntries(
++      dep.namedDependencies.map(
++        (iDep) => MapEntry(
++          iDep.paramName,
++          _buildParamAssignment(
++            iDep,
++            getAsyncReferName: getAsyncMethodName,
++            getReferName: getMethodName,
++          ),
++        ),
++      ),
++    );
++
++    final ref = typeRefer(dep.typeImpl, targetFile);
++    if (dep.constructorName.isNotEmpty == true) {
++      final constructor = dep.canBeConst
++          ? ref.constInstanceNamed
++          : ref.newInstanceNamed;
++      return constructor(dep.constructorName, positionalParams, namedParams);
++    } else {
++      final constructor = dep.canBeConst ? ref.constInstance : ref.newInstance;
++      return constructor(positionalParams, namedParams);
++    }
++  }
++
++  /// Builds the parameter assignment expression for an injected dependency.
++  ///
++  /// Resolves to either a factory parameter reference or a GetIt async/sync
++  /// retrieval expression depending on the dependency configuration.
++  Expression _buildParamAssignment(
++    InjectedDependency iDep, {
++    String? getAsyncReferName,
++    String? getReferName,
++  }) {
++    if (iDep.isFactoryParam) {
++      return refer(iDep.paramName);
++    }
++    getAsyncReferName ??= asExtension ? 'getAsync' : 'gh.getAsync';
++    getReferName ??= 'gh';
++    final isAsync = dependencies.isAsyncOrHasAsyncDependency(iDep);
++    final expression = refer(isAsync ? getAsyncReferName : getReferName).call(
++      [],
++      {
++        if (iDep.instanceName != null)
++          'instanceName': literalString(iDep.instanceName!),
++      },
++      [typeRefer(iDep.type, targetFile, false)],
++    );
++    return isAsync ? expression.awaited : expression;
++  }
++}
++
++/// Generates the library code containing extension methods, accessor methods,
++/// initialization functions, and module implementations for a set of dependencies.
++class LibraryGenerator with SharedGeneratorCode {
++  @override
++  late DependencyList dependencies;
++  @override
++  final Uri? targetFile;
++  @override
++  final bool asExtension;
++
++  /// The name of the initializer method to generate for the root scope, which will be called to register dependencies in GetIt.
++  final bool usesConstructorCallback;
++
++  /// The name of the initializer method to generate for the root scope, which will be called to register dependencies in GetIt.
++  final String initializerName;
++
++  /// The name of the micro-package module being generated, if applicable. If null, this library is not a micro-package module.
++  final String? microPackageName;
++
++  /// The sets of external modules that should be initialized before and after registering the dependencies in this library,
++  ///  used for micro-package module chaining. The `microPackagesModulesBefore` set contains modules that should be initialized
++  /// before the dependencies in this library, while the `microPackagesModulesAfter` set contains modules that should be initialized after. These sets are used to generate the appropriate initialization code in the generated library.
++  final Set<ExternalModuleConfig> microPackagesModulesBefore,
++      microPackagesModulesAfter;
++
++  /// Creates an instance of [LibraryGenerator] with the provided configuration parameters, including the dependencies
++  /// to register, the initializer name, and micro-package module chaining information.
++  final bool generateAccessors;
++
++  /// Allows multiple registrations of the same type within this library, which can be useful for certain testing
++  /// scenarios or when using named instances. When true, it enables the `enableRegisteringMultipleInstancesOfOneType` flag on GetIt.
++  final bool allowMultipleRegistrations;
++
++  /// Default constructor
++  LibraryGenerator({
++    required List<DependencyConfig> dependencies,
++    required this.initializerName,
++    this.targetFile,
++    this.asExtension = false,
++    this.generateAccessors = false,
++    this.microPackageName,
++    this.microPackagesModulesBefore = const {},
++    this.microPackagesModulesAfter = const {},
++    this.usesConstructorCallback = false,
++    this.allowMultipleRegistrations = false,
++  }) : dependencies = DependencyList(dependencies: dependencies);
++
++  /// Generates the main library containing scopes, initializers, accessors, and modules.
++  Library generate() {
++    // all environment keys used
++    final environments = <String>{};
++    // all register modules
++    final modules = <ModuleConfig>{};
++    for (final dep in dependencies) {
++      environments.addAll(dep.environments);
++      if (dep.moduleConfig != null) {
++        modules.add(dep.moduleConfig!);
++      }
++    }
++
++    var scopedDeps = groupBy<DependencyConfig, String?>(
++      dependencies,
++      (d) => d.scope,
++    );
++    final scopedBeforeExternalModules = groupBy<ExternalModuleConfig, String?>(
++      microPackagesModulesBefore,
++      (d) => d.scope,
++    );
++    final scopedAfterExternalModules = groupBy<ExternalModuleConfig, String?>(
++      microPackagesModulesAfter,
++      (d) => d.scope,
++    );
++
++    final isMicroPackage = microPackageName != null;
++
++    if (isMicroPackage && scopedDeps.length > 1) {
++      throw 'Scopes are not supported in micro package modules!';
++    }
++
++    // make sure root scope is always generated even if empty
++    if (!scopedDeps.containsKey(null)) {
++      scopedDeps = {null: const [], ...scopedDeps};
++    }
++    final allScopeKeys = {
++      ...scopedDeps.keys,
++      ...scopedBeforeExternalModules.keys,
++      ...scopedAfterExternalModules.keys,
++    };
++    final extMethods = <Method>[];
++    for (final scope in allScopeKeys) {
++      final scopeDeps = scopedDeps[scope];
++      final isRootScope = scope == null;
++      extMethods.add(
++        InitMethodGenerator(
++          scopeDependencies: scopeDeps ?? [],
++          targetFile: targetFile,
++          allDependencies: dependencies,
++          initializerName: isRootScope
++              ? initializerName
++              : 'init${capitalize(scope)}Scope',
++          asExtension: asExtension,
++          scopeName: scope,
++          isMicroPackage: isMicroPackage,
++          microPackagesModulesBefore:
++              scopedBeforeExternalModules[scope]?.toSet() ?? const {},
++          microPackagesModulesAfter:
++              scopedAfterExternalModules[scope]?.toSet() ?? const {},
++          usesConstructorCallback: usesConstructorCallback,
++          allowMultipleRegistrations: allowMultipleRegistrations,
++        ).generate(),
++      );
++    }
++
++    generateAccessorMethods(extMethods);
++
++    return Library(
++      (b) => b
++        ..comments.addAll([
++          'ignore_for_file: type=lint',
++          'coverage:ignore-file',
++        ])
++        ..body.addAll([
++          ...environments.map(
++            (env) => Field(
++              (b) => b
++                ..name = '_$env'
++                ..type = refer('String')
++                ..assignment = literalString(env).code
++                ..modifier = FieldModifier.constant,
++            ),
++          ),
++          if (!isMicroPackage) ...[
++            if (asExtension)
++              Extension(
++                (b) => b
++                  ..name = 'GetItInjectableX'
++                  ..on = _getItRefer
++                  ..methods.addAll(extMethods),
++              )
++            else
++              ...extMethods,
++          ],
++
++          if (isMicroPackage)
++            Class(
++              (b) => b
++                ..name = '${capitalize(microPackageName!)}PackageModule'
++                ..extend = refer('MicroPackageModule', _injectableImport)
++                ..methods.add(extMethods.first),
++            ),
++
++          // build modules
++          ...modules.map(
++            (module) => _buildModule(
++              module,
++              dependencies.where((e) => e.moduleConfig == module),
++            ),
++          ),
++        ]),
++    );
++  }
++
++  /// Generates type-safe accessor methods for each dependency that is not from a module.
++  /// These accessors can be called directly on the GetIt instance.
++  void generateAccessorMethods(List<Method> extMethods) {
++    if (!generateAccessors) return;
++    final usedTypes = <ImportableType>{};
++    for (final dep in dependencies) {
++      if (dep.isFromModule || !usedTypes.add(dep.typeImpl)) {
++        continue;
++      }
++      final passesArgs =
++          dep.dependencies.any((d) => d.isFactoryParam) ||
++          dep.instanceName != null;
++      final isAsyncOrHasAsyncDep =
++          dep.isAsync ||
++          dep.dependencies.any(dependencies.isAsyncOrHasAsyncDependency);
++      final returns = isAsyncOrHasAsyncDep
++          ? TypeReference(
++              (b) => b
++                ..symbol = 'Future'
++                ..types.add(typeRefer(dep.typeImpl, targetFile)),
++            )
++          : typeRefer(dep.typeImpl, targetFile);
++      extMethods.add(
++        Method(
++          (b) {
++            b
++              ..name = toCamelCase(dep.typeImpl.name)
++              ..returns = returns
++              ..type = passesArgs ? null : MethodType.getter
++              ..lambda = true;
++            // add parameters for factory params
++            if (dep.instanceName != null) {
++              b.optionalParameters.add(
++                Parameter(
++                  (pb) => pb
++                    ..named = true
++                    ..name = 'instanceName'
++                    ..type = nullableRefer('String', nullable: true),
++                ),
++              );
++            }
++            for (final iDep in dep.dependencies.where(
++              (d) => d.isFactoryParam,
++            )) {
++              b.optionalParameters.add(
++                Parameter(
++                  (pb) => pb
++                    ..required = iDep.isRequired && !iDep.type.isNullable
++                    ..named = true
++                    ..name = iDep.paramName
++                    ..type = typeRefer(iDep.type, targetFile),
++                ),
++              );
++            }
++
++            int paramIndex = 0;
++            b.body =
++                refer(
++                      isAsyncOrHasAsyncDep ? 'getAsync' : 'get',
++                    )
++                    .call(
++                      [],
++                      {
++                        if (dep.instanceName != null)
++                          'instanceName': refer('instanceName'),
++                        for (final iDep in dep.dependencies.where(
++                          (d) => d.isFactoryParam,
++                        ))
++                          'param${++paramIndex}': refer(iDep.paramName),
++                      },
++                      [typeRefer(dep.typeImpl, targetFile)],
++                    )
++                    .code;
++          },
++        ),
++      );
++    }
++  }
++
++  /// Generates a private class that overrides abstract module methods to provide
++  /// concrete implementations using GetIt dependencies.
++  Class _buildModule(ModuleConfig module, Iterable<DependencyConfig> deps) {
++    final abstractDeps = deps.where((d) => d.moduleConfig!.isAbstract);
++    return Class((clazz) {
++      clazz
++        ..name = '_\$${module.type.name}'
++        ..extend = typeRefer(module.type, targetFile);
++      // check weather we should have a getIt field inside of our module
++      if (moduleHasOverrides(abstractDeps)) {
++        clazz.fields.add(
++          Field(
++            (b) => b
++              ..name = '_getIt'
++              ..type = _getItRefer
++              ..modifier = FieldModifier.final$,
++          ),
++        );
++        clazz.constructors.add(
++          Constructor(
++            (b) => b
++              ..requiredParameters.add(
++                Parameter(
++                  (b) => b
++                    ..name = '_getIt'
++                    ..toThis = true,
++                ),
++              ),
++          ),
++        );
++      }
++      clazz.methods.addAll(
++        abstractDeps.map(
++          (dep) => Method(
++            (b) => b
++              ..annotations.add(refer('override'))
++              ..name = dep.moduleConfig!.initializerName
++              ..returns = typeRefer(dep.typeImpl, targetFile)
++              ..type = dep.moduleConfig!.isMethod ? null : MethodType.getter
++              ..body = _buildInstance(
++                dep,
++                getAsyncMethodName: '_getIt.getAsync',
++                getMethodName: '_getIt',
++              ).code,
++          ),
++        ),
++      );
++    });
++  }
++}
++
++/// Generates the initialization method for a specific scope (or the root scope)
++/// to register all dependencies within that scope into GetIt.
++class InitMethodGenerator with SharedGeneratorCode {
++  @override
++  late DependencyList dependencies;
++  @override
++  final Uri? targetFile;
++  @override
++  final bool asExtension;
++
++  /// All dependencies across scopes, used for determining module overrides and async dependencies.
++  final DependencyList allDependencies;
++
++  /// The name of the initializer method to generate (e.g., `init
++  final String initializerName;
++
++  /// The name of the scope for which this initializer is being generated, or null for the root scope.
++  final String? scopeName;
++
++  /// Indicates whether this initializer is being generated for a micro-package module, which affects the return type and method signature.
++  final bool isMicroPackage;
++
++  /// Indicates whether to wrap instance creation with a constructor callback, allowing for custom logic to be applied to all instances after construction.
++  final bool usesConstructorCallback;
++
++  /// Allows multiple registrations of the same type within this scope, which can be useful for certain testing scenarios or when using named instances. When true, it enables the `enableRegisteringMultipleInstancesOfOneType` flag on GetIt.
++  final bool allowMultipleRegistrations;
++
++  /// The set of external modules that should be initialized before registering the dependencies in this scope, used for micro-package module chaining.
++  final Set<ExternalModuleConfig> microPackagesModulesBefore,
++      microPackagesModulesAfter;
++
++  /// Default constructor
++  InitMethodGenerator({
++    required List<DependencyConfig> scopeDependencies,
++    required this.allDependencies,
++    required this.initializerName,
++    this.targetFile,
++    this.asExtension = false,
++    this.scopeName,
++    this.isMicroPackage = false,
++    this.microPackagesModulesBefore = const {},
++    this.microPackagesModulesAfter = const {},
++    this.usesConstructorCallback = false,
++    this.allowMultipleRegistrations = false,
++  }) : assert(microPackagesModulesBefore.isEmpty || scopeName == null),
++       dependencies = DependencyList(dependencies: scopeDependencies);
++
++  /// Generates the initialization method AST node.
++  ///
++  /// Handles async modifiers, micro-package module chaining, and scope-specific
++  /// registration logic.
++  Method generate() {
++    // if true use an awaited initializer
++    final useAsyncModifier =
++        microPackagesModulesBefore.isNotEmpty ||
++        microPackagesModulesAfter.isNotEmpty ||
++        hasPreResolvedDependencies(dependencies);
++
++    // all register modules
++    final modules = <ModuleConfig>{};
++    for (var dep in dependencies) {
++      if (dep.moduleConfig != null) {
++        modules.add(dep.moduleConfig!);
++      }
++    }
++
++    final getInstanceRefer = refer(asExtension ? 'this' : 'getIt');
++
++    final ghStatements = [
++      for (final pckModule in microPackagesModulesBefore.map((e) => e.module))
++        refer(
++              pckModule.name,
++              pckModule.import,
++            )
++            .newInstance(const [])
++            .property('init')
++            .call([_ghLocalRefer])
++            .awaited
++            .statement,
++      ...modules.map(
++        (module) => declareFinal(toCamelCase(module.type.name))
++            .assign(
++              refer('_\$${module.type.name}').call([
++                if (moduleHasOverrides(
++                  allDependencies.where((e) => e.moduleConfig == module),
++                ))
++                  getInstanceRefer,
++              ]),
++            )
++            .statement,
++      ),
++      ...dependencies.map((dep) {
++        if (dep.injectableType == InjectableType.singleton) {
++          return buildSingletonRegisterFun(dep);
++        } else {
++          return buildLazyRegisterFun(dep);
++        }
++      }),
++      for (final pckModule in microPackagesModulesAfter.map((e) => e.module))
++        refer(
++              pckModule.name,
++              pckModule.import,
++            )
++            .newInstance(const [])
++            .property('init')
++            .call([_ghLocalRefer])
++            .awaited
++            .statement,
++    ];
++
++    final Reference returnRefer;
++    if (isMicroPackage) {
++      returnRefer = TypeReference(
++        (b) => b
++          ..symbol = 'FutureOr'
++          ..url = 'dart:async'
++          ..types.add(refer('void')),
++      );
++    } else {
++      returnRefer = useAsyncModifier
++          ? TypeReference(
++              (b) => b
++                ..symbol = 'Future'
++                ..types.add(_getItRefer),
++            )
++          : _getItRefer;
++    }
++
++    final ghBuilder = refer('GetItHelper', _injectableImport).newInstance([
++      getInstanceRefer,
++      refer('environment'),
++      refer('environmentFilter'),
++    ]);
++
++    return Method(
++      (b) => b
++        ..docs.add(
++          '\n// initializes the registration of ${scopeName ?? 'main'}-scope dependencies inside of GetIt',
++        )
++        ..modifier = useAsyncModifier ? MethodModifier.async : null
++        ..returns = returnRefer
++        ..name = initializerName
++        ..annotations.addAll([if (isMicroPackage) refer('override')])
++        ..requiredParameters.addAll([
++          if (!asExtension && !isMicroPackage)
++            Parameter(
++              (b) => b
++                ..name = 'getIt'
++                ..type = _getItRefer,
++            ),
++          if (isMicroPackage)
++            Parameter(
++              (b) => b
++                ..name = 'gh'
++                ..type = _ghRefer,
++            ),
++        ])
++        ..optionalParameters.addAll([
++          if (scopeName == null && !isMicroPackage) ...[
++            Parameter(
++              (b) => b
++                ..named = true
++                ..name = 'environment'
++                ..type = nullableRefer('String', nullable: true),
++            ),
++            Parameter(
++              (b) => b
++                ..named = true
++                ..name = 'environmentFilter'
++                ..type = nullableRefer(
++                  'EnvironmentFilter',
++                  url: _injectableImport,
++                  nullable: true,
++                ),
++            ),
++            if (usesConstructorCallback)
++              Parameter(
++                (b) => b
++                  ..named = true
++                  ..name = 'constructorCallback'
++                  ..type = nullableRefer('T Function<T>(T)', nullable: true),
++              ),
++          ] else if (!isMicroPackage)
++            Parameter(
++              (b) => b
++                ..named = true
++                ..name = 'dispose'
++                ..type = nullableRefer(
++                  'ScopeDisposeFunc',
++                  url: _getItImport,
++                  nullable: true,
++                ),
++            ),
++        ])
++        ..body = Block(
++          (b) => b.statements.addAll([
++            if (scopeName != null)
++              _ghRefer
++                  .newInstance([getInstanceRefer])
++                  .property('initScope${useAsyncModifier ? 'Async' : ''}')
++                  .call(
++                    [literalString(scopeName!)],
++                    {
++                      'dispose': refer('dispose'),
++                      'init': Method(
++                        (b) => b
++                          ..modifier = useAsyncModifier
++                              ? MethodModifier.async
++                              : null
++                          ..requiredParameters.add(
++                            Parameter(
++                              (b) => b
++                                ..name = 'gh'
++                                ..type = refer(
++                                  'GetItHelper',
++                                  _injectableImport,
++                                ),
++                            ),
++                          )
++                          ..body = Block(
++                            (b) => b.statements.addAll(ghStatements),
++                          ),
++                      ).closure,
++                    },
++                  )
++                  .returned
++                  .statement
++            else ...[
++              if (allowMultipleRegistrations && !isMicroPackage)
++                getInstanceRefer
++                    .property('enableRegisteringMultipleInstancesOfOneType')
++                    .call([])
++                    .statement,
++              if (!isMicroPackage)
++                if (dependencies.isNotEmpty ||
++                    microPackagesModulesAfter.isNotEmpty ||
++                    microPackagesModulesBefore.isNotEmpty)
++                  declareFinal('gh').assign(ghBuilder).statement
++                else
++                  ghBuilder.statement,
++              if (usesConstructorCallback)
++                declareFinal('ccb')
++                    .assign(
++                      refer(
++                        'constructorCallback',
++                      ).ifNullThen(CodeExpression(Code('<T>(_) => _'))),
++                    )
++                    .statement,
++              ...ghStatements,
++              if (!isMicroPackage) getInstanceRefer.returned.statement,
++            ],
++          ]),
++        ),
++    );
++  }
++
++  /// Builds the code expression for registering a lazy or factory dependency.
++  ///
++  /// Determines the appropriate registration function (e.g., `factory`, `factoryParam`,
++  /// `lazySingleton`) based on the dependency's injectable type, async state, and caching.
++  Code buildLazyRegisterFun(DependencyConfig dep) {
++    String? funcReferName;
++    Map<String, Reference> factoryParams = {};
++    final hasAsyncDep = dependencies.hasAsyncDependency(dep);
++    final isOrHasAsyncDep = dep.isAsync || hasAsyncDep;
++
++    if (dep.injectableType == InjectableType.factory) {
++      final hasFactoryParams = dep.dependencies.any((d) => d.isFactoryParam);
++      if (hasFactoryParams) {
++        funcReferName = switch ((isOrHasAsyncDep, dep.cache == true)) {
++          (true, true) => 'factoryCachedParamAsync',
++          (false, true) => 'factoryCachedParam',
++          (false, false) => 'factoryParam',
++          (true, false) => 'factoryParamAsync',
++        };
++
++        factoryParams.addAll(_resolveFactoryParams(dep));
++      } else {
++        funcReferName = switch ((isOrHasAsyncDep, dep.cache == true)) {
++          (true, true) => 'factoryCachedAsync',
++          (false, true) => 'factoryCached',
++          (false, false) => 'factory',
++          (true, false) => 'factoryAsync',
++        };
++      }
++    } else if (dep.injectableType == InjectableType.lazySingleton) {
++      funcReferName = isOrHasAsyncDep ? 'lazySingletonAsync' : 'lazySingleton';
++    }
++    if (funcReferName == null) {
++      throw 'Injectable type is not supported';
++    }
++
++    final instanceBuilder = dep.isFromModule
++        ? _buildInstanceForModule(dep)
++        : _buildInstance(dep);
++    final instanceBuilderCode = _buildInstanceBuilderCode(instanceBuilder, dep);
++    final registerExpression = _ghLocalRefer.property(funcReferName).call(
++      [
++        Method(
++          (b) => b
++            ..lambda = instanceBuilderCode is! Block
++            ..modifier = hasAsyncDep ? MethodModifier.async : null
++            ..requiredParameters.addAll(
++              factoryParams.keys.map((name) => Parameter((b) => b.name = name)),
++            )
++            ..body = instanceBuilderCode,
++        ).closure,
++      ],
++      {
++        if (dep.instanceName != null)
++          'instanceName': literalString(dep.instanceName!),
++        if (dep.environments.isNotEmpty == true)
++          'registerFor': literalSet(dep.environments.map((e) => refer('_$e'))),
++        if (dep.preResolve == true) 'preResolve': literalBool(true),
++        if (dep.disposeFunction != null)
++          'dispose': _getDisposeFunctionAssignment(dep.disposeFunction!),
++      },
++      [
++        typeRefer(dep.type, targetFile),
++        ...factoryParams.values.map((p) => p.type),
++      ],
++    );
++    return dep.preResolve
++        ? registerExpression.awaited.statement
++        : registerExpression.statement;
++  }
++
++  /// Wraps the instance builder code with constructor callbacks and post-construction
++  /// logic (e.g., `@postConstruct`) if configured for the dependency.
++  Code _buildInstanceBuilderCode(
++    Expression instanceBuilder,
++    DependencyConfig dep,
++  ) {
++    if (usesConstructorCallback) {
++      instanceBuilder = refer('ccb').call([instanceBuilder]);
++    }
++    var instanceBuilderCode = instanceBuilder.code;
++    if (dep.postConstruct != null) {
++      if (dep.postConstructReturnsSelf) {
++        instanceBuilderCode = instanceBuilder
++            .property(dep.postConstruct!)
++            .call(const [])
++            .code;
++      } else {
++        if (dep.isAsync) {
++          instanceBuilderCode = Block(
++            (b) => b
++              ..statements.addAll([
++                declareFinal('i').assign(instanceBuilder).statement,
++                refer('i')
++                    .property(dep.postConstruct!)
++                    .call(const [])
++                    .property('then')
++                    .call([
++                      Method(
++                        (b) => b
++                          ..lambda = true
++                          ..body = refer('i').code
++                          ..requiredParameters.add(
++                            Parameter((b) => b..name = '_'),
++                          ),
++                      ).closure,
++                    ])
++                    .returned
++                    .statement,
++              ]),
++          );
++        } else {
++          instanceBuilderCode = instanceBuilder
++              .cascade(dep.postConstruct!)
++              .call(const [])
++              .code;
++        }
++      }
++    }
++    return instanceBuilderCode;
++  }
++
++  /// Resolves the factory parameter names and their corresponding type references
++  /// for a dependency that requires factory parameters.
++  Map<String, Reference> _resolveFactoryParams(DependencyConfig dep) {
++    final params = <String, Reference>{};
++    dep.dependencies.where((d) => d.isFactoryParam).forEach((d) {
++      params[d.paramName] = typeRefer(d.type, targetFile);
++    });
++    if (params.length < 2) {
++      params['_'] = refer('dynamic');
++    }
++    return params;
++  }
++
++  /// Builds the code expression for registering a singleton dependency.
++  ///
++  /// Selects between regular, async, or dependency-aware singleton registration
++  /// functions based on the dependency's configuration.
++  Code buildSingletonRegisterFun(DependencyConfig dep) {
++    String funcReferName;
++    final hasAsyncDep = dependencies.hasAsyncDependency(dep);
++    if (dep.isAsync || hasAsyncDep) {
++      funcReferName = 'singletonAsync';
++    } else if (dep.dependsOn.isNotEmpty) {
++      funcReferName = 'singletonWithDependencies';
++    } else {
++      funcReferName = 'singleton';
++    }
++
++    final instanceBuilder = dep.isFromModule
++        ? _buildInstanceForModule(dep)
++        : _buildInstance(dep);
++    final instanceBuilderCode = _buildInstanceBuilderCode(instanceBuilder, dep);
++    final registerExpression = _ghLocalRefer.property(funcReferName).call(
++      [
++        Method(
++          (b) => b
++            ..lambda = instanceBuilderCode is! Block
++            ..modifier = hasAsyncDep ? MethodModifier.async : null
++            ..body = instanceBuilderCode,
++        ).closure,
++      ],
++      {
++        if (dep.instanceName != null)
++          'instanceName': literalString(dep.instanceName!),
++        if (dep.dependsOn.isNotEmpty)
++          'dependsOn': literalList(
++            dep.dependsOn.map((e) => typeRefer(e, targetFile)),
++          ),
++        if (dep.environments.isNotEmpty)
++          'registerFor': literalSet(dep.environments.map((e) => refer('_$e'))),
++        if (dep.signalsReady != null)
++          'signalsReady': literalBool(dep.signalsReady!),
++        if (dep.preResolve == true) 'preResolve': literalBool(true),
++        if (dep.disposeFunction != null)
++          'dispose': _getDisposeFunctionAssignment(dep.disposeFunction!),
++      },
++      [typeRefer(dep.type, targetFile)],
++    );
++
++    return dep.preResolve
++        ? registerExpression.awaited.statement
++        : registerExpression.statement;
++  }
++
++  /// Builds the instance expression for a dependency that is provided by a module.
++  ///
++  /// Differentiates between module properties (getters) and module methods (functions).
++  Expression _buildInstanceForModule(DependencyConfig dep) {
++    final module = dep.moduleConfig!;
++    if (!module.isMethod) {
++      return refer(
++        toCamelCase(module.type.name),
++      ).property(module.initializerName);
++    }
++
++    return refer(toCamelCase(module.type.name)).newInstanceNamed(
++      module.initializerName,
++      dep.positionalDependencies.map((iDep) => _buildParamAssignment(iDep)),
++      Map.fromEntries(
++        dep.namedDependencies.map(
++          (iDep) => MapEntry(iDep.paramName, _buildParamAssignment(iDep)),
++        ),
++      ),
++    );
++  }
++
++  /// Generates the disposal function expression for a dependency.
++  ///
++  /// Handles both instance method disposals and standalone disposal function references.
++  Expression _getDisposeFunctionAssignment(
++    DisposeFunctionConfig disposeFunction,
++  ) {
++    if (disposeFunction.isInstance) {
++      return Method(
++        (b) => b
++          ..requiredParameters.add(Parameter((b) => b.name = 'i'))
++          ..body = refer('i').property(disposeFunction.name).call([]).code,
++      ).closure;
++    } else {
++      return typeRefer(disposeFunction.importableType!, targetFile);
++    }
++  }
++}
++
++/// Checks if any dependency within a module requires GetIt overrides,
++/// indicating that the module needs a `_getIt` instance field.
++bool moduleHasOverrides(Iterable<DependencyConfig> deps) {
++  return deps
++      .where((d) => d.moduleConfig?.isAbstract == true)
++      .any((d) => d.dependencies.isNotEmpty == true);
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/generators/injectable_config_generator.dart b/dart/ext/injectable/third_party/injectable_generator/lib/generators/injectable_config_generator.dart
+new file mode 100644
+index 00000000..c5e30036
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/generators/injectable_config_generator.dart
+@@ -0,0 +1,238 @@
++import 'dart:convert';
++
++import 'package:analyzer/dart/element/element.dart';
++import 'package:build/build.dart';
++import 'package:code_builder/code_builder.dart';
++import 'package:collection/collection.dart';
++import 'package:dart_style/dart_style.dart';
++import 'package:glob/glob.dart';
++import 'package:injectable/injectable.dart';
++import 'package:injectable_generator/code_builder/allocator.dart';
++import 'package:injectable_generator/code_builder/library_builder.dart';
++import 'package:injectable_generator/models/dependency_config.dart';
++import 'package:injectable_generator/models/external_module_config.dart';
++import 'package:injectable_generator/resolver_utils.dart';
++import 'package:injectable_generator/resolvers/importable_type_resolver.dart';
++import 'package:recase/recase.dart';
++import 'package:source_gen/source_gen.dart';
++
++import '../resolvers/utils.dart' show throwIf;
++
++const _moduleChecker = TypeChecker.typeNamed(
++  MicroPackageModule,
++  inPackage: 'injectable',
++);
++
++/// Generates the final `.config.dart` file with dependency registration code.
++class InjectableConfigGenerator extends GeneratorForAnnotation<InjectableInit> {
++  @override
++  dynamic generateForAnnotatedElement(
++    Element element,
++    ConstantReader annotation,
++    BuildStep buildStep,
++  ) async {
++    final generateForDir = annotation
++        .read('generateForDir')
++        .listValue
++        .map((e) => e.toStringValue());
++
++    final isMicroPackage = annotation.read('_isMicroPackage').boolValue;
++    final usesConstructorCallback = annotation
++        .read('usesConstructorCallback')
++        .boolValue;
++    final throwOnMissingDependencies = annotation
++        .read('throwOnMissingDependencies')
++        .boolValue;
++    final targetFile = element.firstFragment.libraryFragment?.source.uri;
++    final preferRelativeImports = annotation
++        .read("preferRelativeImports")
++        .boolValue;
++    final generateForEnvironments = annotation
++        .read('generateForEnvironments')
++        .setValue
++        .map((e) => e.getField('name')?.toStringValue());
++
++    final generateAccessors = annotation.read("generateAccessors").boolValue;
++
++    final allowMultipleRegistrations = annotation
++        .read('allowMultipleRegistrations')
++        .boolValue;
++
++    final dirPattern = generateForDir.length > 1
++        ? '{${generateForDir.join(',')}}'
++        : '${generateForDir.first}';
++
++    final injectableConfigFiles = Glob("$dirPattern/**.injectable.json");
++
++    final jsonData = <Map>[];
++    await for (final id in buildStep.findAssets(injectableConfigFiles)) {
++      final json = jsonDecode(await buildStep.readAsString(id));
++      jsonData.addAll([...json]);
++    }
++
++    final deps = <DependencyConfig>[];
++    for (final json in jsonData) {
++      deps.add(DependencyConfig.fromJson(json));
++    }
++
++    final initializerName = annotation.read('initializerName').stringValue;
++    final asExtension = annotation.read('asExtension').boolValue;
++
++    final typeResolver = ImportableTypeResolverImpl(
++      await buildStep.resolver.libraries.toList(),
++    );
++
++    final ignoredTypes = annotation
++        .read('ignoreUnregisteredTypes')
++        .listValue
++        .map((e) => typeResolver.resolveType(e.toTypeValue()!));
++
++    final microPackageModulesBefore = _getMicroPackageModules(
++      annotation.peek('externalPackageModulesBefore'),
++      typeResolver,
++    );
++
++    // remove after deprecation period
++    if (microPackageModulesBefore.isEmpty) {
++      microPackageModulesBefore.addAll(
++        _getMicroPackageModulesMapped(
++          annotation.peek('externalPackageModules'),
++          typeResolver,
++        ),
++      );
++    }
++
++    final microPackageModulesAfter = _getMicroPackageModules(
++      annotation.peek('externalPackageModulesAfter'),
++      typeResolver,
++    );
++
++    final microPackagesModules = microPackageModulesBefore.union(
++      microPackageModulesAfter,
++    );
++
++    final ignoreTypesInPackages = annotation
++        .read('ignoreUnregisteredTypesInPackages')
++        .listValue
++        .map((e) => e.toStringValue())
++        .where((e) => e != null)
++        .cast<String>()
++        .toList();
++
++    // we want to ignore unregistered types in microPackages
++    // because the micro module should handle them
++    for (final pckModule in microPackagesModules) {
++      final packageName = Uri.parse(
++        pckModule.module.import!,
++      ).pathSegments.first;
++      ignoreTypesInPackages.add(packageName);
++    }
++
++    reportMissingDependencies(
++      deps,
++      ignoredTypes,
++      ignoreTypesInPackages,
++      targetFile,
++      throwOnMissingDependencies,
++    );
++    if (!allowMultipleRegistrations) {
++      validateDuplicateDependencies(deps);
++    }
++
++    /// don't allow registering of the same dependency with both async and sync factories
++    final groupedByType = deps.groupListsBy((d) => (d.type, d.instanceName));
++    for (final entry in groupedByType.entries) {
++      final first = entry.value.first;
++      final isAsync = first.isAsync && !first.preResolve;
++      throwIf(
++        entry.value.any((e) => (e.isAsync && !e.preResolve) != isAsync),
++        'Dependencies of type [${entry.key.$1}] must either all be async or all be sync\n',
++      );
++    }
++    final filteredDeps = generateForEnvironments.isEmpty
++        ? deps
++        : deps
++              .where(
++                (element) =>
++                    element.environments.isEmpty ||
++                    element.environments.any(
++                      (e) => generateForEnvironments.contains(e),
++                    ),
++              )
++              .toList();
++    final generator = LibraryGenerator(
++      dependencies: List.of(filteredDeps),
++      generateAccessors: generateAccessors,
++      targetFile: preferRelativeImports ? targetFile : null,
++      initializerName: initializerName,
++      asExtension: asExtension,
++      microPackageName: isMicroPackage
++          ? buildStep.inputId.package.pascalCase
++          : null,
++      microPackagesModulesBefore: microPackageModulesBefore,
++      microPackagesModulesAfter: microPackageModulesAfter,
++      usesConstructorCallback: usesConstructorCallback,
++      allowMultipleRegistrations: allowMultipleRegistrations,
++    );
++
++    final generatedLib = generator.generate();
++    final emitter = DartEmitter(
++      allocator: HashedAllocator(),
++      orderDirectives: true,
++      useNullSafetySyntax: true,
++    );
++
++    final output = DartFormatter(
++      languageVersion: DartFormatter.latestShortStyleLanguageVersion,
++    ).format(generatedLib.accept(emitter).toString());
++
++    if (isMicroPackage) {
++      final outputId = buildStep.inputId.changeExtension('.module.dart');
++      return buildStep.writeAsString(
++        outputId,
++        [defaultFileHeader, output].join('\n'),
++      );
++    }
++    return output;
++  }
++
++  Set<ExternalModuleConfig> _getMicroPackageModules(
++    ConstantReader? constList,
++    ImportableTypeResolverImpl typeResolver,
++  ) {
++    return constList?.listValue.map((e) {
++          final reader = ConstantReader(e);
++          final typeValue = reader.read('module').typeValue;
++          final scope = reader.peek('scope')?.stringValue;
++          throwIf(
++            typeValue.element is! ClassElement ||
++                !TypeChecker.typeNamed(
++                  MicroPackageModule,
++                  inPackage: 'injectable',
++                ).isSuperOf(typeValue.element!),
++            'ExternalPackageModule must be a class that extends MicroPackageModule',
++          );
++          return ExternalModuleConfig(
++            typeResolver.resolveType(typeValue),
++            scope,
++          );
++        }).toSet() ??
++        <ExternalModuleConfig>{};
++  }
++
++  Set<ExternalModuleConfig> _getMicroPackageModulesMapped(
++    ConstantReader? constList,
++    ImportableTypeResolverImpl typeResolver,
++  ) {
++    return constList?.listValue.map((e) {
++          final typeValue = e.toTypeValue()!;
++          throwIf(
++            typeValue.element is! ClassElement ||
++                !_moduleChecker.isSuperOf(typeValue.element!),
++            'ExternalPackageModule must be a class that extends MicroPackageModule',
++          );
++          return ExternalModuleConfig(typeResolver.resolveType(typeValue));
++        }).toSet() ??
++        <ExternalModuleConfig>{};
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/generators/injectable_generator.dart b/dart/ext/injectable/third_party/injectable_generator/lib/generators/injectable_generator.dart
+new file mode 100644
+index 00000000..3ca5caf9
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/generators/injectable_generator.dart
+@@ -0,0 +1,92 @@
++import 'dart:async';
++import 'dart:convert';
++
++import 'package:analyzer/dart/element/element.dart';
++import 'package:build/build.dart';
++import 'package:injectable/injectable.dart';
++import 'package:injectable_generator/models/dependency_config.dart';
++import 'package:injectable_generator/resolvers/dependency_resolver.dart';
++import 'package:injectable_generator/resolvers/importable_type_resolver.dart';
++import 'package:source_gen/source_gen.dart';
++
++import '../resolvers/utils.dart';
++
++const _typeChecker = TypeChecker.typeNamed(Injectable, inPackage: 'injectable');
++const _moduleChecker = TypeChecker.typeNamed(Module, inPackage: 'injectable');
++
++/// Generates intermediate `.injectable.json` files containing serialized dependency configurations.
++class InjectableGenerator implements Generator {
++  /// Pattern matcher for class names when auto-register is enabled.
++  RegExp? _classNameMatcher, _fileNameMatcher;
++
++  /// Whether auto-registration is enabled.
++  late bool _autoRegister;
++
++  /// Creates an [InjectableGenerator] with the given [options].
++  InjectableGenerator(Map options) {
++    _autoRegister = options['auto_register'] ?? false;
++    if (_autoRegister) {
++      if (options['class_name_pattern'] != null) {
++        _classNameMatcher = RegExp(options['class_name_pattern']);
++      }
++      if (options['file_name_pattern'] != null) {
++        _fileNameMatcher = RegExp(options['file_name_pattern']);
++      }
++    }
++  }
++
++  /// Generates JSON configuration for all injectable classes in [library].
++  @override
++  FutureOr<String?> generate(LibraryReader library, BuildStep buildStep) async {
++    final allDepsInStep = <DependencyConfig>[];
++    final libs = await buildStep.resolver.libraries.toList();
++    final resolver = getResolver(libs);
++    for (var clazz in library.classes) {
++      if (_moduleChecker.hasAnnotationOfExact(clazz)) {
++        throwIf(
++          !clazz.isAbstract,
++          '[${clazz.displayName}] must be an abstract class!',
++          element: clazz,
++        );
++        final executables = <ExecutableElement>[
++          ...clazz.getters,
++          ...clazz.methods,
++        ];
++        for (var element in executables) {
++          if (element.isPrivate) continue;
++          allDepsInStep.add(
++            DependencyResolver(resolver).resolveModuleMember(clazz, element),
++          );
++        }
++      } else if (_hasInjectable(clazz) ||
++          (_autoRegister && _hasConventionalMatch(clazz))) {
++        allDepsInStep.add(
++          DependencyResolver(resolver).resolve(clazz),
++        );
++      }
++    }
++    return allDepsInStep.isNotEmpty ? jsonEncode(allDepsInStep) : null;
++  }
++
++  /// Returns an [ImportableTypeResolverImpl] for the given libraries.
++  ImportableTypeResolver getResolver(List<LibraryElement> libs) {
++    return ImportableTypeResolverImpl(libs);
++  }
++
++  /// Checks if the given [element] has the @injectable annotation.
++  bool _hasInjectable(ClassElement element) {
++    return _typeChecker.hasAnnotationOf(element);
++  }
++
++  /// Checks if the given [clazz] matches the conventional naming pattern.
++  bool _hasConventionalMatch(ClassElement clazz) {
++    if (clazz.isAbstract) {
++      return false;
++    }
++    final fileName = clazz.firstFragment.libraryFragment.source.shortName
++        .replaceFirst('.dart', '');
++    return (_classNameMatcher != null &&
++            _classNameMatcher!.hasMatch(clazz.displayName)) ||
++        (_fileNameMatcher != null && _fileNameMatcher!.hasMatch(fileName));
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/injectable_types.dart b/dart/ext/injectable/third_party/injectable_generator/lib/injectable_types.dart
+new file mode 100644
+index 00000000..09e4910d
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/injectable_types.dart
+@@ -0,0 +1,14 @@
++// coverage:ignore-file
++/// Represents the different registration types for injectable dependencies.
++class InjectableType {
++  const InjectableType._();
++
++  /// Factory registration - creates a new instance each time.
++  static const factory = 0;
++
++  /// Singleton registration - creates one instance eagerly.
++  static const singleton = 1;
++
++  /// Lazy singleton registration - creates one instance on first access.
++  static const lazySingleton = 2;
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/models/dependency_config.dart b/dart/ext/injectable/third_party/injectable_generator/lib/models/dependency_config.dart
+new file mode 100644
+index 00000000..bb7348fb
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/models/dependency_config.dart
+@@ -0,0 +1,303 @@
++// holds extracted data from annotation & element
++// to be used later when generating the register function
++
++import 'dart:convert';
++
++import 'package:collection/collection.dart';
++import 'package:injectable_generator/models/module_config.dart';
++
++import '../injectable_types.dart';
++import 'dispose_function_config.dart';
++import 'importable_type.dart';
++import 'injected_dependency.dart';
++
++/// Configuration for a dependency extracted from annotations and elements.
++///
++/// This class holds all the information needed to generate registration code
++/// for a single injectable dependency.
++class DependencyConfig {
++  /// The abstract type that this dependency is registered as.
++  final ImportableType type;
++
++  /// The concrete implementation type.
++  final ImportableType typeImpl;
++
++  /// The registration type (factory, singleton, or lazy singleton).
++  final int injectableType;
++
++  /// The dependencies required by this dependency's constructor.
++  final List<InjectedDependency> dependencies;
++
++  /// The named instance identifier, or null for default registration.
++  final String? instanceName;
++
++  /// Whether this singleton signals when it's ready.
++  final bool? signalsReady;
++
++  /// The environment keys this dependency is registered for.
++  final List<String> environments;
++
++  /// The named constructor to use, or empty string for default.
++  final String constructorName;
++
++  /// The name of a post-construct method to call after instantiation.
++  final String? postConstruct;
++
++  /// Whether this dependency is registered asynchronously.
++  final bool isAsync;
++
++  /// Whether the post-construct method returns the instance itself.
++  final bool postConstructReturnsSelf;
++
++  /// Types that this singleton depends on for readiness signaling.
++  final List<ImportableType> dependsOn;
++
++  /// Whether to pre-resolve this dependency at initialization time.
++  final bool preResolve;
++
++  /// Whether this dependency can be created as a const expression.
++  final bool canBeConst;
++
++  /// Configuration for the module this dependency comes from, if any.
++  final ModuleConfig? moduleConfig;
++
++  /// Configuration for the dispose function, if any.
++  final DisposeFunctionConfig? disposeFunction;
++
++  /// The order position for registration sorting.
++  final int orderPosition;
++
++  /// The scope this dependency belongs to, or null for root scope.
++  final String? scope;
++
++  /// Whether this factory's result should be cached.
++  final bool cache;
++
++  /// Creates a [DependencyConfig] with the given parameters.
++  DependencyConfig({
++    required this.type,
++    required this.typeImpl,
++    this.injectableType = InjectableType.factory,
++    this.dependencies = const [],
++    this.instanceName,
++    this.signalsReady,
++    this.environments = const [],
++    this.constructorName = '',
++    this.isAsync = false,
++    this.dependsOn = const [],
++    this.preResolve = false,
++    this.canBeConst = false,
++    this.moduleConfig,
++    this.disposeFunction,
++    this.orderPosition = 0,
++    this.scope,
++    this.postConstructReturnsSelf = false,
++    this.postConstruct,
++    this.cache = false,
++  });
++
++  /// Creates a factory-type [DependencyConfig] for testing purposes.
++  factory DependencyConfig.factory(
++    String type, {
++    String? typeImpl,
++    List<String> deps = const [],
++    List<String> envs = const [],
++    int order = 0,
++    bool cache = false,
++  }) {
++    return DependencyConfig(
++      type: ImportableType(name: type),
++      typeImpl: ImportableType(name: typeImpl ?? type),
++      environments: envs,
++      orderPosition: order,
++      cache: cache,
++      dependencies: deps
++          .map(
++            (e) => InjectedDependency(
++              type: ImportableType(name: e),
++              paramName: e.toLowerCase(),
++            ),
++          )
++          .toList(),
++    );
++  }
++
++  /// Creates a singleton-type [DependencyConfig] for testing purposes.
++  factory DependencyConfig.singleton(
++    String type, {
++    String? typeImpl,
++    List<String> deps = const [],
++    List<String> envs = const [],
++    int order = 0,
++    bool lazy = false,
++  }) {
++    return DependencyConfig(
++      type: ImportableType(name: type),
++      typeImpl: ImportableType(name: typeImpl ?? type),
++      injectableType: lazy
++          ? InjectableType.lazySingleton
++          : InjectableType.singleton,
++      environments: envs,
++      orderPosition: order,
++      cache: false,
++      dependencies: deps
++          .map(
++            (e) => InjectedDependency(
++              type: ImportableType(name: e),
++              paramName: e.toLowerCase(),
++            ),
++          )
++          .toList(),
++    );
++  }
++
++  @override
++  String toString() {
++    final prettyJson = JsonEncoder.withIndent(' ').convert(toJson());
++    return 'DependencyConfig $prettyJson';
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      (other is DependencyConfig &&
++          runtimeType == other.runtimeType &&
++          type == other.type &&
++          typeImpl == other.typeImpl &&
++          ListEquality().equals(dependencies, other.dependencies) &&
++          injectableType == other.injectableType &&
++          instanceName == other.instanceName &&
++          signalsReady == other.signalsReady &&
++          ListEquality().equals(environments, other.environments) &&
++          constructorName == other.constructorName &&
++          isAsync == other.isAsync &&
++          ListEquality().equals(dependsOn, other.dependsOn) &&
++          preResolve == other.preResolve &&
++          canBeConst == other.canBeConst &&
++          disposeFunction == other.disposeFunction &&
++          scope == other.scope &&
++          moduleConfig == other.moduleConfig &&
++          cache == other.cache &&
++          postConstruct == other.postConstruct &&
++          postConstructReturnsSelf == other.postConstructReturnsSelf &&
++          orderPosition == other.orderPosition);
++
++  @override
++  int get hashCode =>
++      type.hashCode ^
++      typeImpl.hashCode ^
++      ListEquality().hash(dependencies) ^
++      injectableType.hashCode ^
++      instanceName.hashCode ^
++      signalsReady.hashCode ^
++      ListEquality().hash(environments) ^
++      constructorName.hashCode ^
++      isAsync.hashCode ^
++      ListEquality().hash(dependsOn) ^
++      preResolve.hashCode ^
++      disposeFunction.hashCode ^
++      moduleConfig.hashCode ^
++      canBeConst.hashCode ^
++      orderPosition.hashCode ^
++      postConstruct.hashCode ^
++      cache.hashCode ^
++      postConstructReturnsSelf.hashCode ^
++      scope.hashCode;
++
++  /// Returns a hash code based on fields that identify this dependency uniquely.
++  late final int identityHash =
++      type.identity.hashCode ^
++      typeImpl.identity.hashCode ^
++      injectableType.hashCode ^
++      instanceName.hashCode ^
++      orderPosition.hashCode ^
++      scope.hashCode ^
++      const ListEquality().hash(dependencies) ^
++      const ListEquality().hash(dependsOn) ^
++      const ListEquality().hash(environments);
++
++  /// Creates a [DependencyConfig] from a JSON map.
++  factory DependencyConfig.fromJson(Map<dynamic, dynamic> json) {
++    ModuleConfig? moduleConfig;
++    DisposeFunctionConfig? disposeFunction;
++
++    List<ImportableType> dependsOn = [];
++    List<InjectedDependency> dependencies = [];
++
++    if (json['moduleConfig'] != null) {
++      moduleConfig = ModuleConfig.fromJson(json['moduleConfig']);
++    }
++
++    if (json['disposeFunction'] != null) {
++      disposeFunction = DisposeFunctionConfig.fromJson(json['disposeFunction']);
++    }
++
++    if (json['dependencies'] != null) {
++      json['dependencies'].forEach((v) {
++        dependencies.add(InjectedDependency.fromJson(v));
++      });
++    }
++
++    if (json['dependsOn'] != null) {
++      json['dependsOn'].forEach((v) {
++        dependsOn.add(ImportableType.fromJson(v));
++      });
++    }
++
++    return DependencyConfig(
++      type: ImportableType.fromJson(json['type']),
++      typeImpl: ImportableType.fromJson(json['typeImpl']),
++      dependencies: dependencies,
++      injectableType: json['injectableType'],
++      instanceName: json['instanceName'],
++      signalsReady: json['signalsReady'],
++      cache: (json['cache'] as bool?) ?? false,
++      environments: json['environments']?.cast<String>(),
++      constructorName: json['constructorName'],
++      postConstruct: json['postConstruct'],
++      isAsync: json['isAsync'] as bool,
++      canBeConst: json['canBeConst'] as bool,
++      dependsOn: dependsOn,
++      preResolve: json['preResolve'] as bool,
++      postConstructReturnsSelf: json['postConstructReturnsSelf'] as bool,
++      moduleConfig: moduleConfig,
++      disposeFunction: disposeFunction,
++      orderPosition: json['orderPosition'] as int,
++      scope: json['scope'] as String?,
++    );
++  }
++
++  /// Converts this [DependencyConfig] to a JSON map.
++  Map<String, dynamic> toJson() => {
++    'type': type.toJson(),
++    'typeImpl': typeImpl.toJson(),
++    "isAsync": isAsync,
++    "postConstructReturnsSelf": postConstructReturnsSelf,
++    "preResolve": preResolve,
++    "canBeConst": canBeConst,
++    "injectableType": injectableType,
++    if (moduleConfig != null) 'moduleConfig': moduleConfig!.toJson(),
++    if (disposeFunction != null) 'disposeFunction': disposeFunction!.toJson(),
++    "dependsOn": dependsOn.map((v) => v.toJson()).toList(),
++    "environments": environments,
++    "dependencies": dependencies.map((v) => v.toJson()).toList(),
++    if (instanceName != null) "instanceName": instanceName,
++    "cache": cache,
++    if (signalsReady != null) "signalsReady": signalsReady,
++    "constructorName": constructorName,
++    if (postConstruct != null) "postConstruct": postConstruct,
++    "orderPosition": orderPosition,
++    if (scope != null) "scope": scope,
++  };
++
++  /// Whether this dependency comes from a module.
++  bool get isFromModule => moduleConfig != null;
++
++  /// Returns positional dependencies (non-named parameters).
++  List<InjectedDependency> get positionalDependencies =>
++      dependencies.where((d) => d.isPositional).toList();
++
++  /// Returns named dependencies (named parameters).
++  List<InjectedDependency> get namedDependencies =>
++      dependencies.where((d) => !d.isPositional).toList();
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/models/dispose_function_config.dart b/dart/ext/injectable/third_party/injectable_generator/lib/models/dispose_function_config.dart
+new file mode 100644
+index 00000000..e8d97636
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/models/dispose_function_config.dart
+@@ -0,0 +1,81 @@
++import 'importable_type.dart';
++
++/// Configuration for a dispose function on a singleton.
++class DisposeFunctionConfig {
++  /// Whether the dispose function is an instance method.
++  final bool isInstance;
++
++  /// The name of the dispose function.
++  final String name;
++
++  /// The importable type for external dispose functions, if applicable.
++  final ImportableType? importableType;
++
++  /// Creates a [DisposeFunctionConfig] with the given parameters.
++  const DisposeFunctionConfig({
++    this.isInstance = false,
++    required this.name,
++    this.importableType,
++  });
++
++  /// Creates a copy of this [DisposeFunctionConfig] with the given fields replaced.
++  DisposeFunctionConfig copyWith({
++    bool? isInstance,
++    String? name,
++    ImportableType? importableType,
++  }) {
++    if ((isInstance == null || identical(isInstance, this.isInstance)) &&
++        (name == null || identical(name, this.name)) &&
++        (importableType == null ||
++            identical(importableType, this.importableType))) {
++      return this;
++    }
++
++    return DisposeFunctionConfig(
++      isInstance: isInstance ?? this.isInstance,
++      name: name ?? this.name,
++      importableType: importableType ?? this.importableType,
++    );
++  }
++
++  @override
++  String toString() {
++    return 'DisposeFunctionConfig{isInstance: $isInstance, name: $name, importableType: $importableType}';
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      (other is DisposeFunctionConfig &&
++          runtimeType == other.runtimeType &&
++          isInstance == other.isInstance &&
++          name == other.name &&
++          importableType == other.importableType);
++
++  @override
++  int get hashCode =>
++      isInstance.hashCode ^ name.hashCode ^ importableType.hashCode;
++
++  /// Creates a [DisposeFunctionConfig] from a JSON map.
++  factory DisposeFunctionConfig.fromJson(Map<String, dynamic> json) {
++    ImportableType? disposeFunction;
++
++    if (json['importableType'] != null) {
++      disposeFunction = ImportableType.fromJson(json['importableType']);
++    }
++    return DisposeFunctionConfig(
++      isInstance: json['isInstance'] as bool,
++      name: json['name'] as String,
++      importableType: disposeFunction,
++    );
++  }
++
++  /// Converts this [DisposeFunctionConfig] to a JSON map.
++  Map<String, dynamic> toJson() {
++    return <String, dynamic>{
++      'isInstance': isInstance,
++      'name': name,
++      if (importableType != null) 'importableType': importableType!.toJson(),
++    };
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/models/external_module_config.dart b/dart/ext/injectable/third_party/injectable_generator/lib/models/external_module_config.dart
+new file mode 100644
+index 00000000..7cfa4c53
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/models/external_module_config.dart
+@@ -0,0 +1,24 @@
++import 'package:injectable_generator/models/importable_type.dart';
++
++/// Configuration for an external package module.
++class ExternalModuleConfig {
++  /// The module type.
++  final ImportableType module;
++
++  /// The scope for this module, if applicable.
++  final String? scope;
++
++  /// Creates an [ExternalModuleConfig] with the given parameters.
++  const ExternalModuleConfig(this.module, [this.scope]);
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      other is ExternalModuleConfig &&
++          runtimeType == other.runtimeType &&
++          module == other.module &&
++          scope == other.scope;
++
++  @override
++  int get hashCode => module.hashCode ^ scope.hashCode;
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/models/importable_type.dart b/dart/ext/injectable/third_party/injectable_generator/lib/models/importable_type.dart
+new file mode 100644
+index 00000000..5e69d901
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/models/importable_type.dart
+@@ -0,0 +1,134 @@
++import 'package:collection/collection.dart';
++
++/// Represents a type that can be imported, including its import path,
++/// name, nullability, and generic type arguments.
++class ImportableType {
++  /// The import path for this type, or null for core types.
++  final String? import;
++
++  /// The name of the type.
++  final String name;
++
++  /// Whether this type is nullable.
++  final bool isNullable;
++
++  /// Generic type arguments for this type.
++  final List<ImportableType> typeArguments;
++
++  /// Additional import paths where this type is available.
++  final Set<String>? otherImports;
++
++  /// A unique identifier combining import path and type name.
++  String get identity => "$import#$name";
++
++  final bool _isRecordType;
++
++  /// Whether this type is a Dart record type.
++  bool get isRecordType => _isRecordType;
++
++  /// The name of the field in a record type, if applicable.
++  final String? nameInRecord;
++
++  /// Whether this type represents a named field in a record.
++  bool get isNamedRecordField => nameInRecord != null;
++
++  /// Creates an [ImportableType] with the given parameters.
++  const ImportableType({
++    required this.name,
++    this.import,
++    this.isNullable = false,
++    this.typeArguments = const [],
++    this.otherImports,
++    this.nameInRecord,
++  }) : _isRecordType = false;
++
++  /// Private constructor for internal use.
++  const ImportableType._({
++    required this.name,
++    this.import,
++    this.typeArguments = const [],
++    this.isNullable = false,
++    required this._isRecordType,
++    this.otherImports,
++    this.nameInRecord,
++  });
++
++  /// Creates an [ImportableType] representing a Dart record type.
++  const ImportableType.record({
++    required this.name,
++    this.import,
++    this.isNullable = false,
++    this.typeArguments = const [],
++    this.nameInRecord,
++    this.otherImports,
++  }) : _isRecordType = true;
++
++  /// Returns all import paths where this type is available.
++  Set<String?> get allImports => {import, ...?otherImports};
++
++  @override
++  String toString() {
++    if (typeArguments.isNotEmpty) {
++      return '$name<${typeArguments.map((e) => e.toString())}>';
++    } else {
++      return name;
++    }
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      (other is ImportableType &&
++          runtimeType == other.runtimeType &&
++          allImports.intersection(other.allImports).isNotEmpty &&
++          name == other.name &&
++          isNullable == other.isNullable &&
++          nameInRecord == other.nameInRecord &&
++          _isRecordType == other._isRecordType &&
++          ListEquality().equals(typeArguments, other.typeArguments));
++
++  @override
++  int get hashCode =>
++      SetEquality().hash(allImports) ^
++      name.hashCode ^
++      isNullable.hashCode ^
++      ListEquality().hash(typeArguments) ^
++      _isRecordType.hashCode ^
++      nameInRecord.hashCode;
++
++  /// Creates an [ImportableType] from a JSON map.
++  factory ImportableType.fromJson(Map<String, dynamic> json) {
++    List<ImportableType> typeArguments = [];
++    if (json['typeArguments'] != null) {
++      json['typeArguments'].forEach((v) {
++        typeArguments.add(ImportableType.fromJson(v));
++      });
++    }
++    return ImportableType._(
++      import: json['import'],
++      name: json['name'],
++      isNullable: json['isNullable'],
++      otherImports: (json['otherImports'] as List<dynamic>?)
++          ?.toSet()
++          .cast<String>(),
++      typeArguments: typeArguments,
++      isRecordType: json['isRecordType'],
++      nameInRecord: json['nameInRecord'],
++    );
++  }
++
++  /// Converts this [ImportableType] to a JSON map.
++  Map<String, dynamic> toJson() {
++    return <String, dynamic>{
++      'import': import,
++      'name': name,
++      'isNullable': isNullable,
++      'isRecordType': _isRecordType,
++      'nameInRecord': nameInRecord,
++      if (typeArguments.isNotEmpty)
++        "typeArguments": typeArguments.map((v) => v.toJson()).toList(),
++      if (otherImports?.isNotEmpty == true)
++        "otherImports": otherImports?.toList(),
++    };
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/models/injected_dependency.dart b/dart/ext/injectable/third_party/injectable_generator/lib/models/injected_dependency.dart
+new file mode 100644
+index 00000000..b91566cb
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/models/injected_dependency.dart
+@@ -0,0 +1,82 @@
++import 'importable_type.dart';
++
++/// Represents a dependency that is injected into a constructor or method.
++class InjectedDependency {
++  /// The type of the dependency.
++  ImportableType type;
++
++  /// The named instance to resolve, or null for default instance.
++  String? instanceName;
++
++  /// The parameter name in the constructor or method.
++  String paramName;
++
++  /// Whether this dependency is a factory parameter.
++  bool isFactoryParam;
++
++  /// Whether this dependency is passed as a positional parameter.
++  bool isPositional;
++
++  /// Whether this dependency is required.
++  bool isRequired;
++
++  /// Creates an [InjectedDependency] with the given parameters.
++  InjectedDependency({
++    required this.type,
++    required this.paramName,
++    this.instanceName,
++    this.isFactoryParam = false,
++    this.isPositional = true,
++    this.isRequired = true,
++  });
++
++  @override
++  String toString() {
++    return 'InjectedDependency{type: $type, instanceName: $instanceName, paramName: $paramName, isFactoryParam: $isFactoryParam, isPositional: $isPositional}, isRequired: $isRequired';
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      (other is InjectedDependency &&
++          runtimeType == other.runtimeType &&
++          type == other.type &&
++          instanceName == other.instanceName &&
++          paramName == other.paramName &&
++          isFactoryParam == other.isFactoryParam &&
++          isRequired == other.isRequired &&
++          isPositional == other.isPositional);
++
++  @override
++  int get hashCode =>
++      type.hashCode ^
++      instanceName.hashCode ^
++      paramName.hashCode ^
++      isRequired.hashCode ^
++      isFactoryParam.hashCode ^
++      isPositional.hashCode;
++
++  /// Creates an [InjectedDependency] from a JSON map.
++  factory InjectedDependency.fromJson(Map<String, dynamic> json) {
++    return InjectedDependency(
++      type: ImportableType.fromJson(json['type']),
++      instanceName: json['instanceName'],
++      paramName: json['paramName'],
++      isFactoryParam: json['isFactoryParam'],
++      isPositional: json['isPositional'],
++      isRequired: json['isRequired'] ?? false,
++    );
++  }
++
++  /// Converts this [InjectedDependency] to a JSON map.
++  Map<String, dynamic> toJson() {
++    return <String, dynamic>{
++      'type': type.toJson(),
++      'instanceName': instanceName,
++      'paramName': paramName,
++      'isFactoryParam': isFactoryParam,
++      'isPositional': isPositional,
++      'isRequired': isRequired,
++    };
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/models/module_config.dart b/dart/ext/injectable/third_party/injectable_generator/lib/models/module_config.dart
+new file mode 100644
+index 00000000..4e6939a5
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/models/module_config.dart
+@@ -0,0 +1,82 @@
++import 'importable_type.dart';
++
++/// Configuration for a module containing abstract dependency registrations.
++class ModuleConfig {
++  /// Whether the module is abstract.
++  final bool isAbstract;
++
++  /// Whether the module member is a method rather than a getter.
++  final bool isMethod;
++
++  /// The type of the module.
++  final ImportableType type;
++
++  /// The name of the initializer method.
++  final String initializerName;
++
++  /// Creates a [ModuleConfig] with the given parameters.
++  const ModuleConfig({
++    required this.isAbstract,
++    required this.isMethod,
++    required this.type,
++    required this.initializerName,
++  });
++
++  /// Creates a copy of this [ModuleConfig] with the given fields replaced.
++  ModuleConfig copyWith({
++    bool? isAbstract,
++    bool? isModuleMethod,
++    ImportableType? module,
++    String? initializerName,
++  }) {
++    if ((isAbstract == null || identical(isAbstract, this.isAbstract)) &&
++        (isModuleMethod == null || identical(isModuleMethod, isMethod)) &&
++        (module == null || identical(module, type)) &&
++        (initializerName == null ||
++            identical(initializerName, this.initializerName))) {
++      return this;
++    }
++
++    return ModuleConfig(
++      isAbstract: isAbstract ?? this.isAbstract,
++      isMethod: isModuleMethod ?? isMethod,
++      type: module ?? type,
++      initializerName: initializerName ?? this.initializerName,
++    );
++  }
++
++  @override
++  String toString() {
++    return 'ModuleConfig{isAbstract: $isAbstract, isModuleMethod: $isMethod, module: $type, initializerName: $initializerName}';
++  }
++
++  @override
++  bool operator ==(Object other) =>
++      identical(this, other) ||
++      (other is ModuleConfig &&
++          runtimeType == other.runtimeType &&
++          type == other.type);
++
++  @override
++  int get hashCode => type.hashCode;
++
++  /// Creates a [ModuleConfig] from a JSON map.
++  factory ModuleConfig.fromJson(Map<String, dynamic> json) {
++    return ModuleConfig(
++      isAbstract: json['isAbstract'] as bool,
++      isMethod: json['isMethod'] as bool,
++      type: ImportableType.fromJson(json['type']),
++      initializerName: json['initializerName'] as String,
++    );
++  }
++
++  /// Converts this [ModuleConfig] to a JSON map.
++  Map<String, dynamic> toJson() {
++    return <String, dynamic>{
++      'isAbstract': isAbstract,
++      'isMethod': isMethod,
++      'type': type.toJson(),
++      'initializerName': initializerName,
++    };
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/resolver_utils.dart b/dart/ext/injectable/third_party/injectable_generator/lib/resolver_utils.dart
+new file mode 100644
+index 00000000..d6e573b1
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/resolver_utils.dart
+@@ -0,0 +1,97 @@
++import 'package:injectable/injectable.dart';
++import 'package:injectable_generator/utils.dart';
++
++import 'code_builder/builder_utils.dart';
++import 'models/dependency_config.dart';
++import 'models/importable_type.dart';
++
++/// Validates that there are no duplicate dependencies in the list of [DependencyConfig]s.
++void validateDuplicateDependencies(List<DependencyConfig> deps) {
++  final validatedDeps = <DependencyConfig>[];
++  for (var dep in deps) {
++    var registered = validatedDeps.where(
++      (elm) =>
++          elm.type == dep.type &&
++          elm.instanceName == dep.instanceName &&
++          elm.scope == dep.scope,
++    );
++
++    if (registered.isEmpty) {
++      validatedDeps.add(dep);
++    } else {
++      Set<String> registeredEnvironments = registered.fold(
++        <String>{},
++        (prev, elm) => prev..addAll(elm.environments),
++      );
++
++      if (registeredEnvironments.isEmpty ||
++          dep.environments.any(
++            (env) => registeredEnvironments.contains(env),
++          )) {
++        throwBoxed(
++          '${dep.typeImpl} [${dep.type}] envs: ${dep.environments}  scope: ${dep.scope} \nis registered more than once under the same environment or in the same scope',
++        );
++      }
++    }
++  }
++}
++
++/// Validates that all dependencies in the list of [DependencyConfig]s are registered and available under the correct environment keys.
++void reportMissingDependencies(
++  List<DependencyConfig> deps,
++  Iterable<ImportableType> ignoredTypes,
++  Iterable<String> ignoredTypesInPackages,
++  Uri? targetFile,
++  bool throwOnMissingDependencies,
++) {
++  final messages = [];
++  for (final dep in deps) {
++    for (var iDep in dep.dependencies.where(
++      (d) => !d.isFactoryParam && d.instanceName != kEnvironmentsName,
++    )) {
++      if ((ignoredTypes.contains(iDep.type) ||
++          (iDep.type.import == null ||
++              ignoredTypesInPackages.any(
++                (type) => iDep.type.import!.startsWith('package:$type'),
++              )))) {
++        continue;
++      }
++
++      final possibleDeps = lookupPossibleDeps(iDep, deps);
++
++      if (possibleDeps.isEmpty) {
++        messages.add(
++          "[${dep.typeImpl}] depends on unregistered type [${iDep.type}] ${iDep.instanceName == null ? '' : '@Named(${iDep.instanceName})'}, ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'}",
++        );
++      } else {
++        final availableEnvs = possibleDeps
++            .map((e) => e.environments)
++            .reduce((a, b) => a + b)
++            .toSet();
++        if (availableEnvs.isNotEmpty) {
++          final missingEnvs = dep.environments.toSet().difference(
++            availableEnvs,
++          );
++          if (missingEnvs.isNotEmpty) {
++            messages.add(
++              '[${dep.typeImpl}] ${dep.environments.toSet()} depends on Type [${iDep.type}]  ${iDep.type.import == null ? '' : 'from ${iDep.type.import}'} \n which is not available under environment keys $missingEnvs',
++            );
++          }
++        }
++      }
++    }
++  }
++
++  if (messages.isNotEmpty) {
++    messages.add(
++      '\nDid you forget to annotate the above class(s) or their implementation with @injectable? \nor add the right environment keys?',
++    );
++    if (throwOnMissingDependencies) {
++      throw messages.join('\n');
++    }
++    printBoxed(
++      messages.join('\n'),
++      header: "Missing dependencies in ${targetFile?.path}\n",
++    );
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/dependency_resolver.dart b/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/dependency_resolver.dart
+new file mode 100644
+index 00000000..22a6ce24
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/dependency_resolver.dart
+@@ -0,0 +1,544 @@
++import 'package:analyzer/dart/element/element.dart';
++import 'package:analyzer/dart/element/type.dart';
++import 'package:injectable/injectable.dart';
++import 'package:injectable_generator/models/dependency_config.dart';
++import 'package:injectable_generator/models/dispose_function_config.dart';
++import 'package:injectable_generator/models/importable_type.dart';
++import 'package:injectable_generator/models/injected_dependency.dart';
++import 'package:injectable_generator/models/module_config.dart';
++import 'package:injectable_generator/resolvers/utils.dart';
++import 'package:injectable_generator/utils.dart';
++import 'package:source_gen/source_gen.dart';
++
++import '../injectable_types.dart';
++import 'importable_type_resolver.dart';
++
++const _injectableChecker = TypeChecker.typeNamed(
++  Injectable,
++  inPackage: 'injectable',
++);
++const _lazySingletonChecker = TypeChecker.typeNamed(
++  LazySingleton,
++  inPackage: 'injectable',
++);
++const _singletonChecker = TypeChecker.typeNamed(
++  Singleton,
++  inPackage: 'injectable',
++);
++
++const _namedChecker = TypeChecker.typeNamed(Named, inPackage: 'injectable');
++const _ignoredChecker = TypeChecker.typeNamed(
++  IgnoreParam,
++  inPackage: 'injectable',
++);
++const _envChecker = TypeChecker.typeNamed(Environment, inPackage: 'injectable');
++const _preResolveChecker = TypeChecker.typeNamed(
++  PreResolve,
++  inPackage: 'injectable',
++);
++const _factoryParamChecker = TypeChecker.typeNamed(
++  FactoryParam,
++  inPackage: 'injectable',
++);
++const _scopeChecker = TypeChecker.typeNamed(Scope, inPackage: 'injectable');
++const _factoryMethodChecker = TypeChecker.typeNamed(
++  FactoryMethod,
++  inPackage: 'injectable',
++);
++const _disposeMethodChecker = TypeChecker.typeNamed(
++  DisposeMethod,
++  inPackage: 'injectable',
++);
++const _postConstructChecker = TypeChecker.typeNamed(
++  PostConstruct,
++  inPackage: 'injectable',
++);
++const _orderChecker = TypeChecker.typeNamed(Order, inPackage: 'injectable');
++
++/// Resolves a [DependencyConfig] from a given [ClassElement] or a module member [ExecutableElement]
++/// by reading the annotations and parameters of the element.
++class DependencyResolver {
++  final ImportableTypeResolver _typeResolver;
++
++  late ImportableType _type;
++  late ImportableType _typeImpl;
++  int _injectableType = InjectableType.factory;
++  bool? _signalsReady;
++  bool _preResolve = false;
++  final List<ImportableType> _dependsOn = [];
++  List<String> _environments = [];
++  String? _instanceName;
++  bool _isAsync = false;
++  bool _canBeConst = false;
++  String _constructorName = '';
++  final List<InjectedDependency> _dependencies = [];
++  ModuleConfig? _moduleConfig;
++  DisposeFunctionConfig? _disposeFunctionConfig;
++  int? _order;
++  String? _scope;
++  bool _cache = false;
++
++  /// Creates a new instance of [DependencyResolver] with the given [ImportableTypeResolver].
++  DependencyResolver(this._typeResolver);
++
++  /// Resolves a [DependencyConfig] from the given [ClassElement] by reading its annotations and parameters.
++  DependencyConfig resolve(ClassElement element) {
++    _type = _typeResolver.resolveType(element.thisType);
++    return _resolveActualType(element);
++  }
++
++  /// Resolves a [DependencyConfig] from the given module member [ExecutableElement] by reading its annotations and parameters.
++  /// The [moduleClazz] parameter is used to resolve the type of the module that contains the member.
++  DependencyConfig resolveModuleMember(
++    ClassElement moduleClazz,
++    ExecutableElement executableElement,
++  ) {
++    var moduleType = _typeResolver.resolveType(moduleClazz.thisType);
++    var initializerName = executableElement.displayName;
++    var isAbstract = false;
++
++    final returnType = executableElement.returnType;
++    throwIf(
++      returnType.element is! ClassElement,
++      '${returnType.nameWithoutSuffix} is not a class element',
++      element: returnType.element,
++    );
++
++    Element? clazz;
++    var type = returnType;
++    if (executableElement.isAbstract) {
++      clazz = returnType.element;
++      isAbstract = true;
++      throwIf(
++        executableElement.formalParameters.isNotEmpty,
++        'Abstract methods can not have injectable or factory parameters',
++        element: executableElement,
++      );
++    } else {
++      if (returnType.isDartAsyncFuture) {
++        final typeArg = returnType as ParameterizedType;
++        clazz = typeArg.typeArguments.first.element;
++        type = typeArg.typeArguments.first;
++      } else {
++        clazz = returnType.element;
++      }
++    }
++    _moduleConfig = ModuleConfig(
++      isAbstract: isAbstract,
++      isMethod: executableElement is MethodElement,
++      type: moduleType,
++      initializerName: initializerName,
++    );
++    _type = _typeResolver.resolveType(type);
++    return _resolveActualType(clazz as ClassElement, executableElement);
++  }
++
++  DependencyConfig _resolveActualType(
++    ClassElement clazz, [
++    ExecutableElement? excModuleMember,
++  ]) {
++    final annotatedElement = excModuleMember ?? clazz;
++    _typeImpl = _type;
++    var injectableAnnotation = _injectableChecker.firstAnnotationOf(
++      annotatedElement,
++      throwOnUnresolved: false,
++    );
++    DartType? abstractType;
++    ExecutableElement? disposeFuncFromAnnotation;
++    List<String>? inlineEnv;
++    if (injectableAnnotation != null) {
++      final injectable = ConstantReader(injectableAnnotation);
++      _cache = injectable.peek('cache')?.boolValue == true;
++
++      if (injectable.instanceOf(_lazySingletonChecker)) {
++        _injectableType = InjectableType.lazySingleton;
++        disposeFuncFromAnnotation = injectable
++            .peek('dispose')
++            ?.objectValue
++            .toFunctionValue();
++      } else if (injectable.instanceOf(_singletonChecker)) {
++        _injectableType = InjectableType.singleton;
++        _signalsReady = injectable.peek('signalsReady')?.boolValue;
++        disposeFuncFromAnnotation = injectable
++            .peek('dispose')
++            ?.objectValue
++            .toFunctionValue();
++        var dependsOn = injectable
++            .peek('dependsOn')
++            ?.listValue
++            .map((type) => type.toTypeValue())
++            .where((v) => v != null)
++            .map<ImportableType>(
++              (dartType) => _typeResolver.resolveType(dartType!),
++            )
++            .toList();
++        if (dependsOn != null) {
++          _dependsOn.addAll(dependsOn);
++        }
++      }
++      abstractType = injectable.peek('as')?.typeValue;
++      inlineEnv = injectable
++          .peek('env')
++          ?.listValue
++          .map((e) => e.toStringValue()!)
++          .toList();
++      _scope = injectable.peek('scope')?.stringValue;
++      _order = injectable.peek('order')?.intValue;
++    }
++    if (abstractType != null) {
++      final abstractChecker = TypeChecker.fromStatic(abstractType);
++      var abstractSubtype = clazz.allSupertypes.firstWhereOrNull(
++        (type) => abstractChecker.isExactly(type.element),
++      );
++
++      throwIf(
++        abstractSubtype == null,
++        '[${clazz.displayName}] is not a subtype of [${abstractType.nameWithoutSuffix}]',
++        element: clazz,
++      );
++      _type = _typeResolver.resolveType(abstractSubtype!);
++    }
++
++    throwIf(
++      _cache == true && _injectableType != InjectableType.factory,
++      'Only factory types can be cached',
++      element: clazz,
++    );
++
++    _environments =
++        inlineEnv ??
++        _envChecker
++            .annotationsOf(annotatedElement, throwOnUnresolved: false)
++            .map<String>((e) => e.getField('name')!.toStringValue()!)
++            .toList();
++    _scope ??= _scopeChecker
++        .firstAnnotationOfExact(annotatedElement, throwOnUnresolved: false)
++        ?.getField('name')
++        ?.toStringValue();
++    _preResolve = _preResolveChecker.hasAnnotationOfExact(
++      annotatedElement,
++      throwOnUnresolved: false,
++    );
++    _order ??=
++        _orderChecker
++            .firstAnnotationOfExact(annotatedElement, throwOnUnresolved: false)
++            ?.getField('position')
++            ?.toIntValue() ??
++        0;
++
++    final name = _namedChecker
++        .firstAnnotationOfExact(annotatedElement, throwOnUnresolved: false)
++        ?.getField('name')
++        ?.toStringValue();
++    if (name != null) {
++      if (name.isNotEmpty) {
++        _instanceName = name;
++      } else {
++        _instanceName = clazz.displayName;
++      }
++    }
++
++    var disposeMethod = clazz.methods.firstWhereOrNull(
++      (m) => _disposeMethodChecker.hasAnnotationOfExact(m),
++    );
++    if (disposeMethod != null) {
++      throwIf(
++        _injectableType == InjectableType.factory,
++        'Factory types can not have a dispose method',
++        element: clazz,
++      );
++      throwIf(
++        disposeMethod.formalParameters.any(
++          (p) => p.isRequiredNamed || p.isRequiredPositional || p.isRequired,
++        ),
++        'Dispose method must not take any required arguments',
++        element: disposeMethod,
++      );
++      _disposeFunctionConfig = DisposeFunctionConfig(
++        isInstance: true,
++        name: disposeMethod.displayName,
++      );
++    } else if (disposeFuncFromAnnotation != null) {
++      final params = disposeFuncFromAnnotation.formalParameters;
++      throwIf(
++        params.length != 1 ||
++            _typeResolver.resolveType(params.first.type) != _type,
++        'Dispose function for $_type must have the same signature as FutureOr Function($_type instance)',
++        element: disposeFuncFromAnnotation,
++      );
++      _disposeFunctionConfig = DisposeFunctionConfig(
++        name: disposeFuncFromAnnotation.displayName,
++        importableType: _typeResolver.resolveFunctionType(
++          disposeFuncFromAnnotation.type,
++          disposeFuncFromAnnotation,
++        ),
++      );
++    }
++
++    late ExecutableElement executableInitializer;
++    if (excModuleMember != null && !excModuleMember.isAbstract) {
++      executableInitializer = excModuleMember;
++    } else {
++      final possibleFactories = <ExecutableElement>[
++        ...clazz.methods.where((m) => m.isStatic),
++        ...clazz.constructors,
++      ];
++
++      executableInitializer = possibleFactories.firstWhere(
++        (m) {
++          final annotation = _factoryMethodChecker.firstAnnotationOf(m);
++          if (annotation != null) {
++            _preResolve |=
++                annotation.getField('preResolve')!.toBoolValue() ?? false;
++            return true;
++          }
++          return false;
++        },
++        orElse: () {
++          final constructor =
++              clazz.unnamedConstructor ??
++              clazz.constructors.firstWhereOrNull(
++                (element) => element.lookupName?.startsWith('_') == false,
++              );
++          throwIf(
++            clazz.isAbstract || constructor == null,
++            '''[${clazz.displayName}] is abstract and can not be registered directly! \nif it has a factory or a create method annotate it with @factoryMethod''',
++            element: clazz,
++          );
++          if (clazz.unnamedConstructor == null &&
++              constructor!.lookupName != 'new') {
++            print(
++              '''[${clazz.displayName}] has no constructor annotated with @factoryMethod we wil use the first available constructor [${constructor.displayName}]''',
++            );
++          }
++          return constructor!;
++        },
++      );
++    }
++    _preResolve |= _preResolveChecker.hasAnnotationOf(executableInitializer);
++
++    _isAsync = executableInitializer.returnType.isDartAsyncFuture;
++
++    // named factory or named constructor
++    if (executableInitializer.lookupName != "new") {
++      _constructorName = executableInitializer.lookupName ?? '';
++    } else {
++      _constructorName = '';
++    }
++    for (FormalParameterElement param
++        in executableInitializer.formalParameters) {
++      final ignoredAnnotation = _ignoredChecker.firstAnnotationOf(
++        param,
++        throwOnUnresolved: false,
++      );
++
++      if (ignoredAnnotation != null) {
++        throwIf(
++          !param.isOptional,
++          'Params annotated with @ignoreParam must be optional',
++          element: param,
++        );
++        continue;
++      }
++      final namedAnnotation = _namedChecker.firstAnnotationOf(
++        param,
++        throwOnUnresolved: false,
++      );
++      final instanceName =
++          namedAnnotation?.getField('type')?.toTypeValue()?.nameWithoutSuffix ??
++          namedAnnotation?.getField('name')?.toStringValue();
++
++      var paramType = param.type;
++      // Dart 3.9 private named formal parameters ("this._x" / "super._x")
++      // can leave [param.type] as `dynamic` when the analyzer can't reach the
++      // linked field / super parameter (cross-file generic supertypes are a
++      // known case). Fall back to walking the link manually.
++      if (paramType is DynamicType) {
++        if (param is FieldFormalParameterElement) {
++          paramType = param.field?.type ?? paramType;
++        } else if (param is SuperFormalParameterElement) {
++          paramType = _resolveSuperFormalType(param) ?? paramType;
++        }
++      }
++
++      final resolvedType = paramType is FunctionType
++          ? _typeResolver.resolveFunctionType(paramType)
++          : _typeResolver.resolveType(paramType);
++
++      final isFactoryParam = _factoryParamChecker.hasAnnotationOfExact(
++        param,
++        throwOnUnresolved: false,
++      );
++
++      throwIf(
++        isFactoryParam && !resolvedType.isNullable && _isAsync,
++        'Async factory params must be nullable',
++        element: param,
++      );
++
++      _dependencies.add(
++        InjectedDependency(
++          type: resolvedType,
++          instanceName: instanceName,
++          isFactoryParam: isFactoryParam,
++          paramName: _publicParamName(param),
++          isPositional: param.isPositional,
++          isRequired: param.isRequired,
++        ),
++      );
++    }
++
++    _canBeConst =
++        (executableInitializer is ConstructorElement &&
++            executableInitializer.isConst) &&
++        _dependencies.isEmpty;
++    final factoryParamsCount = _dependencies
++        .where((d) => d.isFactoryParam)
++        .length;
++
++    throwIf(
++      _preResolve && factoryParamsCount != 0,
++      'Factories with params can not be pre-resolved',
++      element: clazz,
++    );
++
++    throwIf(
++      _moduleConfig?.isAbstract == true && factoryParamsCount != 0,
++      'Module dependencies with factory params must have custom initializers',
++      element: clazz,
++    );
++
++    throwIf(
++      _injectableType != InjectableType.factory && factoryParamsCount != 0,
++      'only factories can have parameters',
++      element: clazz,
++    );
++    throwIf(
++      factoryParamsCount > 2,
++      'Max number of factory params supported by get_it is 2',
++      element: clazz,
++    );
++
++    String? postConstruct;
++    bool postConstructReturnsSelf = false;
++    for (final method in clazz.methods) {
++      final postConstructAnnotation = _postConstructChecker.firstAnnotationOf(
++        method,
++      );
++      if (postConstructAnnotation != null) {
++        throwIf(
++          method.isStatic,
++          'PostConstruct method can not be static',
++          element: method,
++        );
++        throwIf(
++          method.isPrivate,
++          'PostConstruct method can not be private',
++          element: method,
++        );
++        throwIf(
++          method.formalParameters.any(
++            (e) => e.isRequiredNamed || e.isRequiredPositional,
++          ),
++          'PostConstruct method can not have required parameters',
++          element: method,
++        );
++        throwIf(
++          method.formalParameters.any(
++            (e) => e.isRequiredNamed || e.isRequiredPositional,
++          ),
++          'PostConstruct method can not have required parameters',
++          element: method,
++        );
++        postConstruct = method.displayName;
++        _isAsync = method.returnType.isDartAsyncFuture;
++        _preResolve = ConstantReader(
++          postConstructAnnotation,
++        ).read('preResolve').boolValue;
++        final returnType = _typeResolver.resolveType(
++          _isAsync
++              ? (method.returnType as ParameterizedType).typeArguments.first
++              : method.returnType,
++        );
++
++        postConstructReturnsSelf =
++            returnType == _type || returnType == _typeImpl;
++        break;
++      }
++    }
++
++    return DependencyConfig(
++      type: _type,
++      typeImpl: _typeImpl,
++      injectableType: _injectableType,
++      dependencies: _dependencies,
++      dependsOn: _dependsOn,
++      environments: _environments,
++      signalsReady: _signalsReady,
++      preResolve: _preResolve,
++      instanceName: _instanceName,
++      moduleConfig: _moduleConfig,
++      constructorName: _constructorName,
++      isAsync: _isAsync,
++      disposeFunction: _disposeFunctionConfig,
++      orderPosition: _order!,
++      canBeConst: _canBeConst,
++      scope: _scope,
++      postConstruct: postConstruct,
++      postConstructReturnsSelf: postConstructReturnsSelf,
++      cache: _cache,
++    );
++  }
++}
++
++// For Dart 3.9 private named formal parameters (`this._x` / `super._x`) the
++// callsite must use the public name (stripped underscore). Newer analyzers
++// already normalize [name] to the public form, but on older toolchains
++// [displayName] still returns the underscored name — strip it explicitly so
++// generated code is valid in either case.
++String _publicParamName(FormalParameterElement param) {
++  final name = param.displayName;
++  if (param.isNamed && name.startsWith('_') && name.length > 1) {
++    return name.substring(1);
++  }
++  return name;
++}
++
++// Walk the supertype constructor manually to recover a super-formal's type.
++// Analyzer can leave [SuperFormalParameterElement.superConstructorParameter]
++// `null` when the super constructor uses private named field-formals across
++// library boundaries, even though the link is syntactically valid.
++DartType? _resolveSuperFormalType(SuperFormalParameterElement param) {
++  final enclosing = param.enclosingElement;
++  if (enclosing is! ConstructorElement) return null;
++  final publicName = _publicParamName(param);
++
++  // Walk the supertype chain. Super-formals forward by name, so we keep the
++  // same [publicName] while walking up until we find a non-dynamic type or
++  // run out of supertypes.
++  var currentClass = enclosing.enclosingElement;
++  var invokedSuperName = enclosing.superConstructor?.name ?? 'new';
++
++  while (true) {
++    final superType = currentClass.supertype;
++    if (superType == null) return null;
++    final substitutedSuperCtor = superType.constructors.firstWhereOrNull(
++      (c) => (c.name ?? 'new') == invokedSuperName,
++    );
++    if (substitutedSuperCtor == null) return null;
++
++    final match = substitutedSuperCtor.formalParameters.firstWhereOrNull(
++      (p) => _publicParamName(p) == publicName,
++    );
++    if (match == null) return null;
++    if (match.type is! DynamicType) return match.type;
++
++    // The intermediate class's parameter also resolved to `dynamic` — most
++    // likely because it is itself a super-formal forwarding further up the
++    // chain. Continue walking with the unnamed super constructor of the next
++    // level (super-formals always invoke the default constructor of their
++    // immediate supertype).
++    currentClass = superType.element;
++    invokedSuperName = 'new';
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/importable_type_resolver.dart b/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/importable_type_resolver.dart
+new file mode 100644
+index 00000000..0fbe3793
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/importable_type_resolver.dart
+@@ -0,0 +1,201 @@
++import 'package:analyzer/dart/element/element.dart';
++import 'package:analyzer/dart/element/nullability_suffix.dart';
++import 'package:analyzer/dart/element/type.dart';
++import 'package:collection/collection.dart';
++import 'package:injectable_generator/models/importable_type.dart';
++import 'package:injectable_generator/resolvers/utils.dart';
++import 'package:path/path.dart' as p;
++
++/// A resolver for determining the import paths and type information for Dart types.
++abstract class ImportableTypeResolver {
++  /// Resolves the import paths for the given element.
++  Set<String> resolveImports(Element element);
++
++  /// Resolves a [DartType] to an [ImportableType].
++  ImportableType resolveType(DartType type);
++
++  /// Resolves a function type to an [ImportableType].
++  ImportableType resolveFunctionType(
++    FunctionType function, [
++    ExecutableElement? executableElement,
++  ]);
++
++  /// Returns the relative path from [to] to [path], or null if not applicable.
++  static String? relative(String? path, Uri? to) {
++    if (path == null || to == null) {
++      return null;
++    }
++    var fileUri = Uri.parse(path);
++    var libName = to.pathSegments.first;
++    if ((to.scheme == 'package' &&
++            fileUri.scheme == 'package' &&
++            fileUri.pathSegments.first == libName) ||
++        (to.scheme == 'asset' && fileUri.scheme != 'package')) {
++      if (fileUri.path == to.path) {
++        return fileUri.pathSegments.last;
++      } else {
++        return p.posix
++            .relative(fileUri.path, from: to.path)
++            .replaceFirst('../', '');
++      }
++    } else {
++      return path;
++    }
++  }
++
++  /// Converts an asset URI to a package URI string.
++  static String? resolveAssetImport(String? path) {
++    if (path == null) {
++      return null;
++    }
++    var fileUri = Uri.parse(path);
++    if (fileUri.scheme == "asset") {
++      return "/${fileUri.path}";
++    }
++    return path;
++  }
++}
++
++/// Implementation of [ImportableTypeResolver] using the analyzer package.
++class ImportableTypeResolverImpl extends ImportableTypeResolver {
++  /// The library elements to search for element imports.
++  final List<LibraryElement> libs;
++
++  /// Creates an [ImportableTypeResolverImpl] with the given libraries.
++  ImportableTypeResolverImpl(this.libs);
++
++  @override
++  Set<String> resolveImports(Element? element) {
++    final imports = <String>{};
++    // return early if source is null or element is a core type
++    if (element?.firstFragment.libraryFragment == null ||
++        _isCoreDartType(element)) {
++      return imports;
++    }
++    libs.where((e) => e.exportNamespace.definedNames2.values.contains(element));
++    for (var lib in libs) {
++      if (!_isCoreDartType(lib) &&
++          lib.exportNamespace.definedNames2.values.contains(element)) {
++        imports.add(lib.uri.toString());
++      }
++    }
++    return imports;
++  }
++
++  bool _isCoreDartType(Element? element) {
++    return element?.firstFragment.libraryFragment?.source.fullName ==
++        'dart:core';
++  }
++
++  @override
++  ImportableType resolveFunctionType(
++    FunctionType function, [
++    ExecutableElement? executableElement,
++  ]) {
++    final functionElement =
++        executableElement ?? function.element ?? function.alias?.element;
++    if (functionElement == null) {
++      throw 'Can not resolve function type \nTry using an alias e.g typedef MyFunction = ${function.nameWithoutSuffix};';
++    }
++    final displayName = functionElement.displayName;
++    var functionName = displayName;
++
++    Element elementToImport = functionElement;
++    var enclosingElement = functionElement.enclosingElement;
++
++    if (enclosingElement != null && enclosingElement is ClassElement) {
++      functionName = '${enclosingElement.displayName}.$displayName';
++      elementToImport = enclosingElement;
++    }
++    final imports = resolveImports(elementToImport);
++    return ImportableType(
++      name: functionName,
++      import: imports.firstOrNull,
++      otherImports: imports.skip(1).toSet(),
++      isNullable: function.nullabilitySuffix == NullabilitySuffix.question,
++    );
++  }
++
++  List<ImportableType> _resolveTypeArguments(DartType typeToCheck) {
++    final importableTypes = <ImportableType>[];
++    if (typeToCheck is RecordType && typeToCheck.alias == null) {
++      for (final recordField in [
++        ...typeToCheck.positionalFields,
++        ...typeToCheck.namedFields,
++      ]) {
++        final imports = resolveImports(recordField.type.element);
++        importableTypes.add(
++          ImportableType(
++            name: recordField.type.element?.displayName ?? 'void',
++            import: imports.firstOrNull,
++            otherImports: imports.skip(1).toSet(),
++            isNullable:
++                recordField.type.nullabilitySuffix ==
++                NullabilitySuffix.question,
++            typeArguments: _resolveTypeArguments(recordField.type),
++            nameInRecord: recordField is RecordTypeNamedField
++                ? recordField.name
++                : null,
++          ),
++        );
++      }
++    } else if (typeToCheck is ParameterizedType || typeToCheck.alias != null) {
++      final typeArguments = [
++        if (typeToCheck.alias != null)
++          ...typeToCheck.alias!.typeArguments
++        else if (typeToCheck is ParameterizedType)
++          ...typeToCheck.typeArguments,
++      ];
++      for (DartType type in typeArguments) {
++        final imports = resolveImports(type.element);
++        if (type is RecordType) {
++          final effectiveElement = type.alias?.element ?? type.element;
++          importableTypes.add(
++            ImportableType.record(
++              name: effectiveElement?.displayName ?? '',
++              import: imports.firstOrNull,
++              otherImports: imports.skip(1).toSet(),
++              isNullable: type.nullabilitySuffix == NullabilitySuffix.question,
++              typeArguments: _resolveTypeArguments(type),
++            ),
++          );
++        } else if (type.element is TypeParameterElement) {
++          importableTypes.add(ImportableType(name: 'dynamic'));
++        } else {
++          importableTypes.add(
++            ImportableType(
++              name: type.element?.displayName ?? type.nameWithoutSuffix,
++              import: imports.firstOrNull,
++              otherImports: imports.skip(1).toSet(),
++              isNullable: type.nullabilitySuffix == NullabilitySuffix.question,
++              typeArguments: _resolveTypeArguments(type),
++            ),
++          );
++        }
++      }
++    }
++    return importableTypes;
++  }
++
++  @override
++  ImportableType resolveType(DartType type) {
++    final effectiveElement = type.alias?.element ?? type.element;
++    final imports = resolveImports(effectiveElement);
++    if (type is RecordType && type.alias == null) {
++      return ImportableType.record(
++        name: effectiveElement?.displayName ?? '',
++        import: imports.firstOrNull,
++        otherImports: imports.skip(1).toSet(),
++        isNullable: type.nullabilitySuffix == NullabilitySuffix.question,
++        typeArguments: _resolveTypeArguments(type),
++      );
++    }
++    return ImportableType(
++      name: effectiveElement?.displayName ?? type.nameWithoutSuffix,
++      isNullable: type.nullabilitySuffix == NullabilitySuffix.question,
++      import: imports.firstOrNull,
++      otherImports: imports.skip(1).toSet(),
++      typeArguments: _resolveTypeArguments(type),
++    );
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/utils.dart b/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/utils.dart
+new file mode 100644
+index 00000000..6c658a89
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/resolvers/utils.dart
+@@ -0,0 +1,26 @@
++// general utils
++import 'package:analyzer/dart/element/element.dart';
++import 'package:analyzer/dart/element/type.dart';
++import 'package:source_gen/source_gen.dart';
++
++/// Throws an [InvalidGenerationSourceError] with the given message and element.
++void throwError(String message, {Element? element}) {
++  throw InvalidGenerationSourceError(message, element: element);
++}
++
++/// Throws an [InvalidGenerationSourceError] if the given condition is true.
++void throwIf(bool condition, String message, {Element? element}) {
++  if (condition) {
++    throw InvalidGenerationSourceError(message, element: element);
++  }
++}
++
++/// Extension helpers for [DartType]
++extension DartTypeX on DartType {
++  /// Returns the display string of this type
++  /// without nullability suffix
++  String get nameWithoutSuffix {
++    final name = getDisplayString();
++    return name.endsWith('?') ? name.substring(0, name.length - 1) : name;
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/lib/utils.dart b/dart/ext/injectable/third_party/injectable_generator/lib/utils.dart
+new file mode 100644
+index 00000000..22dba2d4
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/lib/utils.dart
+@@ -0,0 +1,51 @@
++// general utils
++
++/// Capitalizes the first character of a string.
++String capitalize(String s) {
++  if (s.length < 2) {
++    return s.toUpperCase();
++  }
++  return s[0].toUpperCase() + s.substring(1);
++}
++
++/// Converts a string to camelCase format.
++String toCamelCase(String s) {
++  if (s.length < 2) {
++    return s.toLowerCase();
++  }
++  return s[0].toLowerCase() + s.substring(1);
++}
++
++/// Throws a formatted error message with box styling.
++void throwBoxed(String message) {
++  final pre = 'Injectable Generator ';
++  throw ("\n${pre.padRight(72, '-')}\n$message\n${''.padRight(72, '-')} \n");
++}
++
++/// Throws a formatted source error message with box styling.
++void throwSourceError(String message) {
++  final pre = 'Injectable Generator ';
++  throw ("\n${pre.padRight(72, '-')}\n$message\n${''.padRight(72, '-')} \n");
++}
++
++/// Prints a formatted message with box styling.
++void printBoxed(
++  String message, {
++  String header = '--------------------------',
++}) {
++  final pre = header;
++  print("$pre\n$message\n${''.padRight(72, '-')} \n");
++}
++
++/// Extension on [Iterable] providing a `firstWhereOrNull` method.
++extension IterableExtenstion<E> on Iterable<E> {
++  /// Returns the first element that satisfies [test], or null if none do.
++  E? firstWhereOrNull(bool Function(E element) test) {
++    for (var e in this) {
++      if (test(e)) {
++        return e;
++      }
++    }
++    return null;
++  }
++}
+diff --git a/dart/ext/injectable/third_party/injectable_generator/pubspec.yaml b/dart/ext/injectable/third_party/injectable_generator/pubspec.yaml
+new file mode 100644
+index 00000000..99be3c88
+--- /dev/null
++++ b/dart/ext/injectable/third_party/injectable_generator/pubspec.yaml
+@@ -0,0 +1,30 @@
++name: injectable_generator
++description: Injectable is a convenient code generator for get_it. Inspired by Angular DI, Guice DI and inject.dart.
++version: 3.1.3
++homepage: https://github.com/Milad-Akarie/injectable
++
++environment:
++  sdk: ">=3.12.0<4.0.0"
++
++dependencies:
++  build: ^4.0.4
++  source_gen: ^4.1.1
++  path: ^1.9.0
++  glob: ^2.1.3
++  analyzer: ">=10.0.0 <15.0.0"
++  code_builder: ^4.11.0
++  dart_style: ^3.1.4
++  # lean_builder: ^1.2.2  (removed when vendored into rules_dart; see VENDORED.md)
++   
++  injectable: ^3.0.0
++    #  path: ../injectable
++  collection: ^1.18.0
++  recase: ^4.1.0
++  meta: ^1.16.0
++
++dev_dependencies:
++  build_runner: ^2.10.4
++  build_test: ^3.5.4
++  test: ^1.28.0
++  lints: ^6.0.0
++  coverage: ^1.15.0
+diff --git a/dart/ext/pubspec.lock b/dart/ext/pubspec.lock
+index c989f2a4..b8b3157b 100644
+--- a/dart/ext/pubspec.lock
++++ b/dart/ext/pubspec.lock
+@@ -329,6 +329,14 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "4.1.2"
++  injectable:
++    dependency: "direct main"
++    description:
++      name: injectable
++      sha256: "1da6399509e44ddb0d8a4a35291d7122c4efb5c625a9d733bf5e48d4a72e379e"
++      url: "https://pub.dev"
++    source: hosted
++    version: "3.0.0"
+   io:
+     dependency: transitive
+     description:
+diff --git a/dart/ext/pubspec.yaml b/dart/ext/pubspec.yaml
+index 5c399a76..a4ec5414 100644
+--- a/dart/ext/pubspec.yaml
++++ b/dart/ext/pubspec.yaml
+@@ -17,6 +17,9 @@ dependencies:
+   logging: ^1.3.0
+   package_config: ^3.0.0
+   path: ^1.9.0
++  # Runtime annotations for the vendored injectable_generator 3.1.3
++  # (dart/ext/injectable/third_party/injectable_generator; no lean_builder).
++  injectable: ^3.0.0
+   built_value_generator: ^8.12.0
+   copy_with_extension_gen: ^18.0.0
+   drift_dev: ^2.32.0
+diff --git a/docs/ext.md b/docs/ext.md
+index d631c5d2..43169d79 100644
+--- a/docs/ext.md
++++ b/docs/ext.md
+@@ -46,6 +46,9 @@ dart/ext/
+ ├── copy_with_extension_gen/
+ ├── stacked/                   Six independent LibraryBuilders.
+ ├── drift/                     Four-stage: prep + discover/analyzer/driftBuilder.
++├── injectable/                Two-stage: per-file .injectable.json shards, then an
++│                              aggregate .config.dart. Vendored injectable_generator
++│                              3.1.3 without lean_builder (see its VENDORED.md).
+ └── tools/
+     └── check_dual_build_collisions
+                                Walks a source tree for committed `build_runner`
+@@ -459,6 +462,17 @@ configuration.
+ | `drift` / `drift_dev`                            | `e2e/ext_exemplar/drift/`             | `@DriftDatabase(include: {'…drift'})`, Dart-only tables with FK, `@DriftAccessor` DAO, `TypeConverter`, multi-table joins via both Dart DSL and `.drift` named queries |
+ | `stacked` / `stacked_generator` (6 sub-builders) | `e2e/ext_exemplar/stacked/`           | `@StackedApp` → locator (behavioral) + router/dialog/bottomsheet/logger (structural); `@FormView` → form (structural)                                                  |
+ 
++`injectable` / `injectable_generator` has no exemplar yet. `dart/ext/injectable/defs.bzl`
++documents the wiring: `injectable_package(name, srcs, init, shard_deps, init_deps)` declares
++one `dart_codegen` per annotated file (`shim_json`, writes `[]` for a file with no injectable
++class) and one `dart_aggregate_codegen` over the `@InjectableInit` file (`shim_config`, the
++shards as `asset_deps`; it fails instead of writing an empty `.config.dart`). Keep the
++aggregate's `deps` to what the init file imports, so an edit that leaves every shard
++byte-identical is an action-cache hit for it. Both shims give the generator a
++`Resolver.libraries` in build_runner's order (a breadth-first walk over imports and exports
++from the input), because injectable picks the first exporting library as a type's import and
++hashes the rest into its registration order.
++
+ Cross-cutting scenarios that aren't tied to a single builder:
+ 
+ | Exemplar                                  | What it demonstrates                                                                                          |

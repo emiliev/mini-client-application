@@ -19,6 +19,8 @@ git_override(
     patch_strip = 1,
     patches = [
         # tool/rules_fork.sh export prints the lines to paste here.
+        # 0001 is reserved for T-0027 (retrofit); the TL renumbers at merge.
+        "//third_party/rules_patches/ai_rules_dart:0002-ext-injectable-two-stage.patch",
     ],
 )
 
