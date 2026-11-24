@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites>
+  <testsuite name="test/feature/fallback_all_test.dart" tests="2" failures="0">
+    <testcase name="greeting_browse Greeting The greeting is shown [T-0001-AC1]" classname="test/feature/fallback_all_test.dart"></testcase>
+    <testcase name="greeting_browse Greeting Tapping the button says goodbye [T-0029-AC1]" classname="test/feature/fallback_all_test.dart"></testcase>
+  </testsuite>
+</testsuites>

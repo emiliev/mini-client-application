@@ -4,19 +4,3756 @@ Date: Tue, 24 Nov 2026 14:53:41 +0200
 Subject: [PATCH] ext: hermetic bdd_widget_test generator (dart/ext/bdd)
 
 
+diff --git a/MODULE.bazel.lock b/MODULE.bazel.lock
+index d021f544..9d17f160 100644
+--- a/MODULE.bazel.lock
++++ b/MODULE.bazel.lock
+@@ -243,8 +243,8 @@
+         "usagesDigest": "VG67ZXrl5ZRuGcGn/3gQDp1P7uiiUm/QuTK7Qm/7Gt0=",
+         "recordedInputs": [
+           "REPO_MAPPING:,dart_pub_scanner +dart+dart_pub_scanner",
+-          "FILE:@@//dart/ext/pubspec.lock ae866f3a1d4ebad9a74f9b9efab33c74dfbf904ae0d69dfe94192029d4955188",
+-          "REPO_MAPPING:,dart_linux-x64 +dart+dart_linux-x64"
++          "FILE:@@//dart/ext/pubspec.lock 79c18ae7039149cfc82849876be122a79009e95ed104f72aed825d58b015697f",
++          "REPO_MAPPING:,dart_macos-arm64 +dart+dart_macos-arm64"
+         ],
+         "generatedRepoSpecs": {
+           "ext_pub_deps___fe_analyzer_shared": {
+@@ -262,12 +262,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -281,8 +283,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -378,12 +383,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -397,8 +404,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -505,12 +515,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -524,8 +536,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -625,12 +640,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -644,8 +661,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -739,12 +759,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -758,8 +780,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -856,12 +881,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -875,8 +902,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -958,6 +988,138 @@
+               ]
+             }
+           },
++          "ext_pub_deps__bdd_widget_test": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "bdd_widget_test",
++              "version": "3.0.5",
++              "sha256": "0d78497fc8a2fa8cf5ee59cf655a89d0b003c767f93a7322b83b7de8b7068a85",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "bdd_widget_test",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "characters",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
++                "dart_style",
++                "data_assets",
++                "diacritic",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {},
++              "planned_deps": [
++                "build",
++                "characters",
++                "collection",
++                "cucumber_gherkin",
++                "cucumber_messages",
++                "dart_style",
++                "diacritic",
++                "file",
++                "meta",
++                "package_config",
++                "path",
++                "yaml"
++              ],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
+           "ext_pub_deps__boolean_selector": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+@@ -973,12 +1135,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -992,8 +1156,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1090,12 +1257,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1109,8 +1278,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1211,12 +1383,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1230,8 +1404,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1315,12 +1492,501 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__built_collection": {
++          "ext_pub_deps__built_collection": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "built_collection",
++              "version": "5.1.2",
++              "sha256": "44922ecebd8e3d0cef743dadd3b54df4e87e2a4c52a29465a1872aa9e192caa8",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "bdd_widget_test",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "characters",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
++                "dart_style",
++                "data_assets",
++                "diacritic",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {},
++              "planned_deps": [],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
++          "ext_pub_deps__built_value": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "built_value",
++              "version": "8.13.0",
++              "sha256": "f87ea98192116f7093cb214551ce1929caae0681fdba282b3d8b4462adee7bb7",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "bdd_widget_test",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "characters",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
++                "dart_style",
++                "data_assets",
++                "diacritic",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {},
++              "planned_deps": [
++                "built_collection",
++                "collection",
++                "fixnum",
++                "meta"
++              ],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
++          "ext_pub_deps__built_value_generator": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "built_value_generator",
++              "version": "8.13.0",
++              "sha256": "68af3b1a6829c760f1c039c4302be60f35a65af5f93a9cfed5d65f681eca3757",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "bdd_widget_test",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "characters",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
++                "dart_style",
++                "data_assets",
++                "diacritic",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {},
++              "planned_deps": [
++                "analyzer",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "collection",
++                "source_gen"
++              ],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
++          "ext_pub_deps__characters": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "characters",
++              "version": "1.4.1",
++              "sha256": "faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "bdd_widget_test",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "characters",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
++                "dart_style",
++                "data_assets",
++                "diacritic",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {},
++              "planned_deps": [],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
++          "ext_pub_deps__charcode": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "built_collection",
+-              "version": "5.1.2",
+-              "sha256": "44922ecebd8e3d0cef743dadd3b54df4e87e2a4c52a29465a1872aa9e192caa8",
++              "package_name": "charcode",
++              "version": "1.4.0",
++              "sha256": "fb0f1107cac15a5ea6ef0a6ef71a807b9e4267c713bb93e00e92d737cc8dbd8a",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -1330,12 +1996,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1349,8 +2017,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1429,12 +2100,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__built_value": {
++          "ext_pub_deps__checked_yaml": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "built_value",
+-              "version": "8.13.0",
+-              "sha256": "f87ea98192116f7093cb214551ce1929caae0681fdba282b3d8b4462adee7bb7",
++              "package_name": "checked_yaml",
++              "version": "2.0.4",
++              "sha256": "959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -1444,12 +2115,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1463,8 +2136,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1536,10 +2212,9 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "built_collection",
+-                "collection",
+-                "fixnum",
+-                "meta"
++                "json_annotation",
++                "source_span",
++                "yaml"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -1548,12 +2223,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__built_value_generator": {
++          "ext_pub_deps__cli_config": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "built_value_generator",
+-              "version": "8.13.0",
+-              "sha256": "68af3b1a6829c760f1c039c4302be60f35a65af5f93a9cfed5d65f681eca3757",
++              "package_name": "cli_config",
++              "version": "0.2.0",
++              "sha256": "ac20a183a07002b700f0c25e61b7ee46b23c309d76ab7b7640a028f18e4d99ec",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -1563,12 +2238,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1582,8 +2259,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1655,13 +2335,8 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "analyzer",
+-                "build",
+-                "build_config",
+-                "built_collection",
+-                "built_value",
+-                "collection",
+-                "source_gen"
++                "args",
++                "yaml"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -1670,12 +2345,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__charcode": {
++          "ext_pub_deps__cli_util": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "charcode",
+-              "version": "1.4.0",
+-              "sha256": "fb0f1107cac15a5ea6ef0a6ef71a807b9e4267c713bb93e00e92d737cc8dbd8a",
++              "package_name": "cli_util",
++              "version": "0.6.0",
++              "sha256": "89b8801ba49f8b593fbf2d3e59efd0f566c46cd4ba6837ae2610c72b52a0f899",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -1685,12 +2360,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1704,8 +2381,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1776,7 +2456,11 @@
+               "code_assets": [],
+               "ignore_hook": false,
+               "scc_targets": {},
+-              "planned_deps": [],
++              "planned_deps": [
++                "ffi",
++                "meta",
++                "path"
++              ],
+               "plan_covers_package": true,
+               "package_files": [
+                 "pubspec.yaml",
+@@ -1784,12 +2468,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__checked_yaml": {
++          "ext_pub_deps__clock": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "checked_yaml",
+-              "version": "2.0.4",
+-              "sha256": "959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f",
++              "package_name": "clock",
++              "version": "1.1.3",
++              "sha256": "e51d50bca3217c9a9fa2b41a30e4a38971133f5f9ec7a3d57bae095007f1d28e",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -1799,12 +2483,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1818,8 +2504,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1890,11 +2579,7 @@
+               "code_assets": [],
+               "ignore_hook": false,
+               "scc_targets": {},
+-              "planned_deps": [
+-                "json_annotation",
+-                "source_span",
+-                "yaml"
+-              ],
++              "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+                 "pubspec.yaml",
+@@ -1902,12 +2587,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__cli_config": {
++          "ext_pub_deps__code_assets": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "cli_config",
+-              "version": "0.2.0",
+-              "sha256": "ac20a183a07002b700f0c25e61b7ee46b23c309d76ab7b7640a028f18e4d99ec",
++              "package_name": "code_assets",
++              "version": "2.1.0",
++              "sha256": "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -1917,12 +2602,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -1936,8 +2623,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2009,8 +2699,9 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "args",
+-                "yaml"
++                "collection",
++                "hooks",
++                "logging"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2019,12 +2710,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__cli_util": {
++          "ext_pub_deps__code_builder": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "cli_util",
+-              "version": "0.6.0",
+-              "sha256": "89b8801ba49f8b593fbf2d3e59efd0f566c46cd4ba6837ae2610c72b52a0f899",
++              "package_name": "code_builder",
++              "version": "4.13.0",
++              "sha256": "811709c1badd02fc054039a13f66e0db1961865f9a314175f68c3eaeebec786f",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2034,12 +2725,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2053,8 +2746,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2126,9 +2822,11 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "ffi",
+-                "meta",
+-                "path"
++                "built_collection",
++                "built_value",
++                "collection",
++                "matcher",
++                "meta"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2137,12 +2835,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__clock": {
++          "ext_pub_deps__collection": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "clock",
+-              "version": "1.1.3",
+-              "sha256": "e51d50bca3217c9a9fa2b41a30e4a38971133f5f9ec7a3d57bae095007f1d28e",
++              "package_name": "collection",
++              "version": "1.19.1",
++              "sha256": "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2152,12 +2850,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2171,8 +2871,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2251,12 +2954,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__code_assets": {
++          "ext_pub_deps__convert": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "code_assets",
+-              "version": "2.1.0",
+-              "sha256": "828110d598123b5ea96c00c9f3c72105bf79f8ee36c20a39b26209ade421ec57",
++              "package_name": "convert",
++              "version": "3.1.2",
++              "sha256": "b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2266,12 +2969,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2285,8 +2990,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2358,9 +3066,7 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "collection",
+-                "hooks",
+-                "logging"
++                "typed_data"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2369,12 +3075,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__code_builder": {
++          "ext_pub_deps__copy_with_extension": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "code_builder",
+-              "version": "4.13.0",
+-              "sha256": "811709c1badd02fc054039a13f66e0db1961865f9a314175f68c3eaeebec786f",
++              "package_name": "copy_with_extension",
++              "version": "18.0.0",
++              "sha256": "9a832fe40e5a5fcbe58e094d2c857ac6b185f34ec200241051daebe48b1b0403",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2384,12 +3090,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2403,8 +3111,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2476,10 +3187,6 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "built_collection",
+-                "built_value",
+-                "collection",
+-                "matcher",
+                 "meta"
+               ],
+               "plan_covers_package": true,
+@@ -2489,12 +3196,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__collection": {
++          "ext_pub_deps__copy_with_extension_gen": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "collection",
+-              "version": "1.19.1",
+-              "sha256": "2f5709ae4d3d59dd8f7cd309b4e023046b57d8a6c82130785d2b0e5868084e76",
++              "package_name": "copy_with_extension_gen",
++              "version": "18.0.0",
++              "sha256": "4475dfeaa67d41760e7f8b690cbbbbc0d71efb34797997478ae869c0933a5fe1",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2504,12 +3211,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2523,8 +3232,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2595,7 +3307,13 @@
+               "code_assets": [],
+               "ignore_hook": false,
+               "scc_targets": {},
+-              "planned_deps": [],
++              "planned_deps": [
++                "analyzer",
++                "build",
++                "copy_with_extension",
++                "meta",
++                "source_gen"
++              ],
+               "plan_covers_package": true,
+               "package_files": [
+                 "pubspec.yaml",
+@@ -2603,12 +3321,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__convert": {
++          "ext_pub_deps__coverage": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "convert",
+-              "version": "3.1.2",
+-              "sha256": "b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68",
++              "package_name": "coverage",
++              "version": "1.16.0",
++              "sha256": "ff89e37c19355194e279d26dafe8e4bece46c9ea63a30be4dc68214f5bc290d3",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2618,12 +3336,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2637,8 +3357,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2710,7 +3433,18 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "typed_data"
++                "args",
++                "cli_config",
++                "cli_util",
++                "glob",
++                "logging",
++                "meta",
++                "package_config",
++                "path",
++                "source_maps",
++                "stack_trace",
++                "vm_service",
++                "yaml"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2719,12 +3453,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__copy_with_extension": {
++          "ext_pub_deps__crypto": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "copy_with_extension",
+-              "version": "18.0.0",
+-              "sha256": "9a832fe40e5a5fcbe58e094d2c857ac6b185f34ec200241051daebe48b1b0403",
++              "package_name": "crypto",
++              "version": "3.0.7",
++              "sha256": "c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2734,12 +3468,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2753,8 +3489,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2826,7 +3565,7 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "meta"
++                "typed_data"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2835,12 +3574,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__copy_with_extension_gen": {
++          "ext_pub_deps__cucumber_gherkin": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "copy_with_extension_gen",
+-              "version": "18.0.0",
+-              "sha256": "4475dfeaa67d41760e7f8b690cbbbbc0d71efb34797997478ae869c0933a5fe1",
++              "package_name": "cucumber_gherkin",
++              "version": "42.0.1",
++              "sha256": "64d7801d0b25ddb5b9129434dff2290d92b8c31a3809e50c6c7bfe8da8a37af4",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2850,12 +3589,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2869,8 +3610,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2942,11 +3686,7 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "analyzer",
+-                "build",
+-                "copy_with_extension",
+-                "meta",
+-                "source_gen"
++                "cucumber_messages"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2955,12 +3695,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__coverage": {
++          "ext_pub_deps__cucumber_messages": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "coverage",
+-              "version": "1.16.0",
+-              "sha256": "ff89e37c19355194e279d26dafe8e4bece46c9ea63a30be4dc68214f5bc290d3",
++              "package_name": "cucumber_messages",
++              "version": "34.2.1",
++              "sha256": "d4ee7dfe53da26d5748d08dd64c28e234ad1f6a6833ffa99dd4c7a847e77e196",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -2970,12 +3710,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -2989,8 +3731,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3061,20 +3806,7 @@
+               "code_assets": [],
+               "ignore_hook": false,
+               "scc_targets": {},
+-              "planned_deps": [
+-                "args",
+-                "cli_config",
+-                "cli_util",
+-                "glob",
+-                "logging",
+-                "meta",
+-                "package_config",
+-                "path",
+-                "source_maps",
+-                "stack_trace",
+-                "vm_service",
+-                "yaml"
+-              ],
++              "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+                 "pubspec.yaml",
+@@ -3082,12 +3814,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__crypto": {
++          "ext_pub_deps__dart_style": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "crypto",
+-              "version": "3.0.7",
+-              "sha256": "c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf",
++              "package_name": "dart_style",
++              "version": "3.1.14",
++              "sha256": "a0e4f65339b31eb6a9e6a12e14b4682a48d46fbc54a82f4a702396fbdbac63a7",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -3097,12 +3829,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3116,8 +3850,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3189,7 +3926,14 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "typed_data"
++                "analyzer",
++                "args",
++                "collection",
++                "package_config",
++                "path",
++                "pub_semver",
++                "source_span",
++                "yaml"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -3198,12 +3942,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__dart_style": {
++          "ext_pub_deps__data_assets": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "dart_style",
+-              "version": "3.1.14",
+-              "sha256": "a0e4f65339b31eb6a9e6a12e14b4682a48d46fbc54a82f4a702396fbdbac63a7",
++              "package_name": "data_assets",
++              "version": "0.20.0",
++              "sha256": "8bfdbf25ec8a0f4b5a3c993042c4ab9996ba354f0b03d40f4e360f3730d71cae",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -3213,12 +3957,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3232,8 +3978,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3305,14 +4054,7 @@
+               "ignore_hook": false,
+               "scc_targets": {},
+               "planned_deps": [
+-                "analyzer",
+-                "args",
+-                "collection",
+-                "package_config",
+-                "path",
+-                "pub_semver",
+-                "source_span",
+-                "yaml"
++                "hooks"
+               ],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -3321,12 +4063,12 @@
+               ]
+             }
+           },
+-          "ext_pub_deps__data_assets": {
++          "ext_pub_deps__diacritic": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+-              "package_name": "data_assets",
+-              "version": "0.20.0",
+-              "sha256": "8bfdbf25ec8a0f4b5a3c993042c4ab9996ba354f0b03d40f4e360f3730d71cae",
++              "package_name": "diacritic",
++              "version": "0.1.6",
++              "sha256": "12981945ec38931748836cd76f2b38773118d0baef3c68404bdfde9566147876",
+               "base_url": "https://pub.dev",
+               "hub_name": "ext_pub_deps",
+               "lock_packages": [
+@@ -3336,12 +4078,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3355,8 +4099,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3427,9 +4174,7 @@
+               "code_assets": [],
+               "ignore_hook": false,
+               "scc_targets": {},
+-              "planned_deps": [
+-                "hooks"
+-              ],
++              "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+                 "pubspec.yaml",
+@@ -3452,12 +4197,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3471,8 +4218,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3576,12 +4326,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3595,8 +4347,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3716,12 +4471,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3735,8 +4492,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3830,12 +4590,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3849,8 +4611,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3947,12 +4712,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -3966,8 +4733,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4061,12 +4831,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4080,8 +4852,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4187,12 +4962,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4206,8 +4983,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4305,12 +5085,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4324,8 +5106,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4423,12 +5208,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4442,8 +5229,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4541,12 +5331,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4560,8 +5352,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4661,12 +5456,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4680,8 +5477,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4785,12 +5585,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4804,8 +5606,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4906,12 +5711,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -4925,8 +5732,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5022,12 +5832,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5041,8 +5853,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5141,12 +5956,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5160,8 +5977,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5259,12 +6079,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5278,8 +6100,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5375,12 +6200,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5394,8 +6221,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5502,12 +6332,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5521,8 +6353,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5619,12 +6454,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5638,8 +6475,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5733,12 +6573,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5752,8 +6594,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5853,12 +6698,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5872,8 +6719,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5967,12 +6817,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -5986,8 +6838,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6081,12 +6936,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6100,8 +6957,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6206,12 +7066,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6225,8 +7087,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6329,12 +7194,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6348,8 +7215,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6443,12 +7313,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6462,8 +7334,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6559,12 +7434,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6578,8 +7455,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6673,12 +7553,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6692,8 +7574,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6789,12 +7674,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6808,8 +7695,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6906,12 +7796,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -6925,8 +7817,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7024,12 +7919,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7043,8 +7940,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7142,12 +8042,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7161,8 +8063,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7258,12 +8163,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7277,8 +8184,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7378,12 +8288,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7397,8 +8309,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7492,12 +8407,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7511,8 +8428,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7610,12 +8530,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7629,8 +8551,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7731,12 +8656,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7750,8 +8677,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7849,12 +8779,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7868,8 +8800,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7969,12 +8904,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -7988,8 +8925,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8087,12 +9027,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8106,8 +9048,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8211,12 +9156,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8230,8 +9177,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8328,12 +9278,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8347,8 +9299,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8446,12 +9401,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8465,8 +9422,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8562,12 +9522,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8581,8 +9543,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8680,12 +9645,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8699,8 +9666,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8807,12 +9777,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8826,8 +9798,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8926,12 +9901,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -8945,8 +9922,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9042,12 +10022,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9061,8 +10043,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9170,12 +10155,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9189,8 +10176,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9286,12 +10276,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9305,8 +10297,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9402,12 +10397,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9421,8 +10418,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9516,12 +10516,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9535,8 +10537,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9632,12 +10637,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9651,8 +10658,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9746,12 +10756,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9765,8 +10777,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9886,12 +10901,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -9905,8 +10922,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10010,12 +11030,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10029,8 +11051,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10146,12 +11171,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10165,8 +11192,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10262,12 +11292,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10281,8 +11313,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10376,12 +11411,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10395,8 +11432,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10493,12 +11533,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10512,8 +11554,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10607,12 +11652,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10626,8 +11673,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10723,12 +11773,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10742,8 +11794,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10843,12 +11898,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10862,8 +11919,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10959,12 +12019,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -10978,8 +12040,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -11077,12 +12142,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -11096,8 +12163,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -11193,12 +12263,14 @@
+                 "args",
+                 "async",
+                 "bazel_worker",
++                "bdd_widget_test",
+                 "boolean_selector",
+                 "build",
+                 "build_config",
+                 "built_collection",
+                 "built_value",
+                 "built_value_generator",
++                "characters",
+                 "charcode",
+                 "checked_yaml",
+                 "cli_config",
+@@ -11212,8 +12284,11 @@
+                 "copy_with_extension_gen",
+                 "coverage",
+                 "crypto",
++                "cucumber_gherkin",
++                "cucumber_messages",
+                 "dart_style",
+                 "data_assets",
++                "diacritic",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -11608,6 +12683,20 @@
+         "async",
+         "protobuf"
+       ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/bdd_widget_test/3.0.5/0d78497fc8a2fa8cf5ee59cf655a89d0b003c767f93a7322b83b7de8b7068a85": [
++        "build",
++        "characters",
++        "collection",
++        "cucumber_gherkin",
++        "cucumber_messages",
++        "dart_style",
++        "diacritic",
++        "file",
++        "meta",
++        "package_config",
++        "path",
++        "yaml"
++      ],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/boolean_selector/2.1.2/8aab1771e1243a5063b8b0ff68042d67334e3feab9e95b9490f9a6ebf73b42ea": [
+         "source_span",
+         "string_scanner"
+@@ -11642,6 +12731,7 @@
+         "collection",
+         "source_gen"
+       ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/characters/1.4.1/faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b": [],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/charcode/1.4.0/fb0f1107cac15a5ea6ef0a6ef71a807b9e4267c713bb93e00e92d737cc8dbd8a": [],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/checked_yaml/2.0.4/959525d3162f249993882720d52b7e0c833978df229be20702b33d48d91de70f": [
+         "json_annotation",
+@@ -11701,6 +12791,10 @@
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/crypto/3.0.7/c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf": [
+         "typed_data"
+       ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/cucumber_gherkin/42.0.1/64d7801d0b25ddb5b9129434dff2290d92b8c31a3809e50c6c7bfe8da8a37af4": [
++        "cucumber_messages"
++      ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/cucumber_messages/34.2.1/d4ee7dfe53da26d5748d08dd64c28e234ad1f6a6833ffa99dd4c7a847e77e196": [],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/dart_style/3.1.14/a0e4f65339b31eb6a9e6a12e14b4682a48d46fbc54a82f4a702396fbdbac63a7": [
+         "analyzer",
+         "args",
+@@ -11714,6 +12808,7 @@
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/data_assets/0.20.0/8bfdbf25ec8a0f4b5a3c993042c4ab9996ba354f0b03d40f4e360f3730d71cae": [
+         "hooks"
+       ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/diacritic/0.1.6/12981945ec38931748836cd76f2b38773118d0baef3c68404bdfde9566147876": [],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/drift/2.35.2/ef9598e1785c18db37209e8554fc79aff94632209d384ec98984b9e3184af0f7": [
+         "async",
+         "collection",
 diff --git a/dart/ext/bdd/BUILD.bazel b/dart/ext/bdd/BUILD.bazel
 new file mode 100644
-index 00000000..e53ac8b5
+index 00000000..811d33b8
 --- /dev/null
 +++ b/dart/ext/bdd/BUILD.bazel
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,69 @@
 +# dart/ext/bdd: `.feature` -> `_test.dart` for bdd_widget_test-style BDD
 +# widget tests, generated hermetically (docs/ext.md "bdd_widget_test").
 +#
 +# Not a builder shim: bdd_widget_test's Builder writes step and hook files
 +# outside its declared outputs, so the generator reuses its parser and
-+# emitter (pinned at 3.0.5) and speaks the shim CLI contract itself. No
-+# analyzer and no package:build in the generator's closure.
++# emitter (pinned at 3.0.5) and speaks the shim CLI contract itself. It never
++# runs a Builder or the analyzer, but both `package:analyzer` (through
++# dart_style) and `package:build` (a bdd_widget_test dependency) are in the
++# generator's exec closure. Tests built from its output depend on neither.
 +
 +load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 +load("//dart:defs.bzl", "dart_binary", "dart_library", "dart_test")
@@ -79,26 +3816,27 @@ index 00000000..e53ac8b5
 +)
 diff --git a/dart/ext/bdd/bin/generator.dart b/dart/ext/bdd/bin/generator.dart
 new file mode 100644
-index 00000000..d4cb77f5
+index 00000000..7dda6796
 --- /dev/null
 +++ b/dart/ext/bdd/bin/generator.dart
-@@ -0,0 +1,145 @@
+@@ -0,0 +1,139 @@
 +/// BDD generator binary: the rules_dart shim CLI contract (`docs/ext.md`),
 +/// driven by `dart_sqlcodegen` (one action per `.feature`), without
 +/// `package:build` or the analyzer.
 +///
-+///   --input <exec path of the .feature>   --input-asset <path in package>
-+///   --output <exec path of the _test.dart> --package <name>
-+///   --root-language-version <x.y>          --config <json>
-+///   --dep <exec path>|<asset>              repeatable: step files and
-+///                                          `*.bdd_steps.json` step indexes
++/// ```text
++/// --input <exec path of the .feature>   --input-asset <path in package>
++/// --output <exec path of the _test.dart> --package <name>
++/// --root-language-version <x.y>          --config <json>
++/// --dep <exec path>|<asset>              repeatable: local step files
++/// --part <exec path>                     repeatable: `*.bdd_steps.json`
++/// ```
 +///
 +/// Other contract flags (`--package-config`, `--sdk-path`, `--summary`, ...)
 +/// are accepted and ignored. `--persistent_worker` runs the proto worker loop.
 +library;
 +
 +import 'dart:async';
-+import 'dart:convert';
 +import 'dart:io';
 +
 +import 'package:bazel_worker/bazel_worker.dart';
@@ -110,7 +3848,7 @@ index 00000000..d4cb77f5
 +    return;
 +  }
 +  final out = StringBuffer();
-+  final code = _runOnce(_expandFlagFiles(argv), out);
++  final int code = _runOnce(_expandFlagFiles(argv), out);
 +  if (out.isNotEmpty) {
 +    stderr.write(out);
 +  }
@@ -121,7 +3859,7 @@ index 00000000..d4cb77f5
 +  @override
 +  Future<WorkResponse> performRequest(WorkRequest request) async {
 +    final out = StringBuffer();
-+    final code = _runOnce(_expandFlagFiles(request.arguments), out);
++    final int code = _runOnce(_expandFlagFiles(request.arguments), out);
 +    return WorkResponse()
 +      ..exitCode = code
 +      ..output = out.toString();
@@ -131,24 +3869,25 @@ index 00000000..d4cb77f5
 +List<String> _expandFlagFiles(List<String> argv) => [
 +  for (final a in argv)
 +    if (a.startsWith('@') && File(a.substring(1)).existsSync())
-+      ...File(a.substring(1))
-+          .readAsLinesSync()
-+          .where((l) => l.isNotEmpty)
++      ...File(a.substring(1)).readAsLinesSync().where((l) => l.isNotEmpty)
 +    else
 +      a,
 +];
 +
 +int _runOnce(List<String> argv, StringBuffer out) {
-+  String? input, inputAsset, output, package;
++  String? input;
++  String? inputAsset;
++  String? output;
++  String? package;
 +  var languageVersion = '3.0';
-+  var config = <String, Object?>{};
++  var configJson = '';
 +  final deps = <({String execPath, String asset})>[];
 +  for (var i = 0; i < argv.length; i++) {
-+    final flag = argv[i];
++    final String flag = argv[i];
 +    if (!flag.startsWith('--') || flag == '--persistent_worker') {
 +      continue;
 +    }
-+    final value = i + 1 < argv.length ? argv[++i] : '';
++    final String value = i + 1 < argv.length ? argv[++i] : '';
 +    switch (flag) {
 +      case '--input':
 +        input = value;
@@ -165,11 +3904,9 @@ index 00000000..d4cb77f5
 +      case '--root-language-version':
 +        languageVersion = value;
 +      case '--config':
-+        if (value.isNotEmpty) {
-+          config = (jsonDecode(value) as Map).cast<String, Object?>();
-+        }
++        configJson = value;
 +      case '--dep':
-+        final bar = value.indexOf('|');
++        final int bar = value.indexOf('|');
 +        if (bar > 0) {
 +          deps.add((
 +            execPath: value.substring(0, bar),
@@ -183,7 +3920,10 @@ index 00000000..d4cb77f5
 +        break; // Other shim-contract flags take a value we do not need.
 +    }
 +  }
-+  if (input == null || inputAsset == null || output == null || package == null) {
++  if (input == null ||
++      inputAsset == null ||
++      output == null ||
++      package == null) {
 +    out.writeln(
 +      'bdd generator: --input, --input-asset, --output and --package are '
 +      'required.',
@@ -191,28 +3931,19 @@ index 00000000..d4cb77f5
 +    return 2;
 +  }
 +  try {
-+    final shared = <String, String>{};
-+    final local = <String>[];
-+    for (final dep in deps) {
-+      if (dep.asset.endsWith(stepIndexSuffix)) {
-+        final index = parseStepIndex(
-+          File(dep.execPath).readAsStringSync(),
-+          dep.asset,
-+        );
-+        for (final e in index.entries) {
-+          final previous = shared[e.key];
-+          if (previous != null && previous != e.value) {
-+            throw BddGenerationError(
-+              'step ${e.key} is in two step indexes: $previous and ${e.value}',
-+            );
-+          }
-+          shared[e.key] = e.value;
-+        }
-+      } else {
-+        local.add(dep.asset);
-+      }
-+    }
-+    final dart = generateFeatureTest(
++    final Map<String, Object?> config = configJson.isEmpty
++        ? const <String, Object?>{}
++        : decodeConfig(configJson);
++    final Map<String, String> shared = mergeStepIndexes({
++      for (final dep in deps)
++        if (dep.asset.endsWith(stepIndexSuffix))
++          dep.asset: File(dep.execPath).readAsStringSync(),
++    });
++    final List<String> local = [
++      for (final dep in deps)
++        if (!dep.asset.endsWith(stepIndexSuffix)) dep.asset,
++    ];
++    final String dart = generateFeatureTest(
 +      input: File(input).readAsStringSync(),
 +      inputAsset: inputAsset,
 +      package: package,
@@ -381,10 +4112,10 @@ index 00000000..cf17bd12
 +)
 diff --git a/dart/ext/bdd/lib/bdd_generator.dart b/dart/ext/bdd/lib/bdd_generator.dart
 new file mode 100644
-index 00000000..ec5ed617
+index 00000000..c17dbbf2
 --- /dev/null
 +++ b/dart/ext/bdd/lib/bdd_generator.dart
-@@ -0,0 +1,372 @@
+@@ -0,0 +1,535 @@
 +/// Hermetic `.feature` -> `_test.dart` generation over bdd_widget_test 3.0.5's
 +/// parser and emitter (not its `Builder`).
 +///
@@ -409,13 +4140,21 @@ index 00000000..ec5ed617
 +
 +import 'dart:convert';
 +
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/feature_generator.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/feature_model.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/feature_parser.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/generator_options.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/step_file.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/step_generator.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/util/common.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
 +import 'package:bdd_widget_test/src/util/constants.dart';
 +import 'package:dart_style/dart_style.dart';
 +import 'package:path/path.dart' as p;
@@ -443,8 +4182,10 @@ index 00000000..ec5ed617
 +
 +/// A generation failure meant for the user: the action prints it and fails.
 +class BddGenerationError implements Exception {
++  /// A failure with the user-facing [message].
 +  BddGenerationError(this.message);
 +
++  /// What went wrong and how to fix it; printed as is.
 +  final String message;
 +
 +  @override
@@ -457,16 +4198,127 @@ index 00000000..ec5ed617
 +/// Reads a step index (`{"import": "...", "steps": ["a.dart", ...]}`) into
 +/// file name -> import URI.
 +Map<String, String> parseStepIndex(String json, String origin) {
-+  final decoded = jsonDecode(json);
++  final Object? decoded;
++  try {
++    decoded = jsonDecode(json);
++  } on FormatException catch (e) {
++    throw BddGenerationError('$origin: not JSON (${e.message}).');
++  }
 +  if (decoded is! Map ||
 +      decoded['import'] is! String ||
-+      decoded['steps'] is! List) {
++      decoded['steps'] is! List ||
++      (decoded['steps'] as List).any((s) => s is! String)) {
 +    throw BddGenerationError(
-+      '$origin: a step index needs "import" (string) and "steps" (list).',
++      '$origin: a step index needs "import" (a string) and "steps" (a list '
++      'of file names).',
 +    );
 +  }
 +  final uri = decoded['import'] as String;
-+  return {for (final s in (decoded['steps'] as List).cast<String>()) s: uri};
++  return {for (final s in (decoded['steps'] as List)) s as String: uri};
++}
++
++/// Merges step indexes (origin -> JSON text) into file name -> import URI.
++/// A step file listed by two indexes with different URIs is an error.
++Map<String, String> mergeStepIndexes(Map<String, String> indexes) {
++  final shared = <String, String>{};
++  for (final MapEntry<String, String> index in indexes.entries) {
++    for (final MapEntry<String, String> e in parseStepIndex(
++      index.value,
++      index.key,
++    ).entries) {
++      final String? previous = shared[e.key];
++      if (previous != null && previous != e.value) {
++        throw BddGenerationError(
++          'step ${e.key} is in two step indexes: $previous and ${e.value}',
++        );
++      }
++      shared[e.key] = e.value;
++    }
++  }
++  return shared;
++}
++
++/// Decodes the `--config` JSON object.
++Map<String, Object?> decodeConfig(String json) {
++  final Object? decoded;
++  try {
++    decoded = jsonDecode(json);
++  } on FormatException catch (e) {
++    throw BddGenerationError('--config is not JSON (${e.message}).');
++  }
++  if (decoded is! Map) {
++    throw BddGenerationError('--config must be a JSON object.');
++  }
++  return decoded.cast<String, Object?>();
++}
++
++/// Checks [config] and returns bdd_widget_test's options for it. Shared by
++/// the generator and the scaffold, so both accept the same keys.
++GeneratorOptions optionsFromConfig(Map<String, Object?> config, String origin) {
++  final Iterable<String> unknown = config.keys.where(
++    (k) => !_allowedConfigKeys.contains(k),
++  );
++  if (unknown.isNotEmpty) {
++    throw BddGenerationError(
++      '$origin: unsupported bdd config key(s) ${unknown.join(', ')}. '
++      'Hooks, includes and externalSteps need files outside the declared '
++      'inputs and outputs; supported: ${_allowedConfigKeys.join(', ')}.',
++    );
++  }
++  for (final MapEntry<String, Object?>(:String key, :Object? value)
++      in config.entries) {
++    final bool ok = switch (key) {
++      'literalParameters' => value is bool?,
++      'customHeaders' || 'forbiddenTags' =>
++        value == null || value is List && value.every((v) => v is String),
++      _ => value is String?,
++    };
++    if (!ok) {
++      throw BddGenerationError(
++        '$origin: bdd config "$key" has the wrong type '
++        '(${value.runtimeType}).',
++      );
++    }
++  }
++  final options = GeneratorOptions.fromMap({...config});
++  final String folder = options.stepFolder;
++  if (!folder.startsWith('./') && !folder.startsWith('../')) {
++    throw BddGenerationError(
++      '$origin: stepFolderName must be relative to the feature file '
++      '("./step", "../step"); a folder relative to test/ is not supported.',
++    );
++  }
++  return options;
++}
++
++/// Step files under [stepDir]: file name -> directory relative to
++/// [featureDir], as bdd_widget_test's `getExistingStepSubfolders` reports
++/// it. Two files with one name in different subfolders are an error (the
++/// stock generator would silently pick one).
++Map<String, String> localStepMap(
++  Iterable<String> assets,
++  String stepDir,
++  String featureDir,
++  String origin,
++) {
++  final local = <String, String>{};
++  final where = <String, String>{};
++  for (final asset in assets) {
++    if (!p.posix.isWithin(stepDir, asset) || !asset.endsWith('.dart')) {
++      continue;
++    }
++    final String name = p.posix.basename(asset);
++    final String? previous = where[name];
++    if (previous != null && previous != asset) {
++      throw BddGenerationError(
++        '$origin: two step files named $name: $previous and $asset. A step '
++        'resolves by file name, so rename one.',
++      );
++    }
++    where[name] = asset;
++    local[name] = p.posix.relative(p.posix.dirname(asset), from: featureDir);
++  }
++  return local;
 +}
 +
 +/// Generates the `_test.dart` for the feature at [inputAsset] (path inside
@@ -484,21 +4336,8 @@ index 00000000..ec5ed617
 +  Map<String, Object?> config = const {},
 +  String languageVersion = '3.0',
 +}) {
-+  final unknown = config.keys.where((k) => !_allowedConfigKeys.contains(k));
-+  if (unknown.isNotEmpty) {
-+    throw BddGenerationError(
-+      '$inputAsset: unsupported bdd config key(s) ${unknown.join(', ')}. '
-+      'Hooks, includes and externalSteps need files outside the declared '
-+      'inputs and outputs; supported: ${_allowedConfigKeys.join(', ')}.',
-+    );
-+  }
-+  final options = GeneratorOptions.fromMap({...config});
-+  if (!options.stepFolder.startsWith('./')) {
-+    throw BddGenerationError(
-+      '$inputAsset: stepFolderName must be relative to the feature (./...).',
-+    );
-+  }
-+  final forbidden = {
++  final GeneratorOptions options = optionsFromConfig(config, inputAsset);
++  final Set<String> forbidden = {
 +    for (final t in (config['forbiddenTags'] as List?) ?? const ['skip', 'wip'])
 +      '@$t',
 +  };
@@ -513,9 +4352,11 @@ index 00000000..ec5ed617
 +  } on FormatException catch (e) {
 +    throw BddGenerationError('$inputAsset: ${e.message}');
 +  }
-+  final model = _moveFeatureTagsOntoScenarios(parsed);
++  final FeatureFileModel model = _moveFeatureTagsOntoScenarios(parsed);
 +
-+  final badTags = model.allTagLines.where(forbidden.contains).toSet();
++  final Set<String> badTags = model.allTagLines
++      .where(forbidden.contains)
++      .toSet();
 +  if (badTags.isNotEmpty) {
 +    throw BddGenerationError(
 +      '$inputAsset: forbidden tag(s) ${badTags.join(', ')}: a scenario is '
@@ -523,22 +4364,19 @@ index 00000000..ec5ed617
 +    );
 +  }
 +
-+  final featureDir = p.posix.dirname(inputAsset);
-+  final stepDir = p.posix.normalize(
++  final String featureDir = p.posix.dirname(inputAsset);
++  final String stepDir = p.posix.normalize(
 +    p.posix.join(featureDir, options.stepFolder),
 +  );
-+  // file name -> directory relative to the feature, as bdd_widget_test's
-+  // `getExistingStepSubfolders` reports it.
-+  final local = <String, String>{
-+    for (final asset in localSteps)
-+      if (p.posix.isWithin(stepDir, asset) && asset.endsWith('.dart'))
-+        p.posix.basename(asset): p.posix.relative(
-+          p.posix.dirname(asset),
-+          from: featureDir,
-+        ),
-+  };
++  final Map<String, String> local = localStepMap(
++    localSteps,
++    stepDir,
++    featureDir,
++    inputAsset,
++  );
 +
-+  final shadowed = local.keys.where(sharedSteps.containsKey).toList()..sort();
++  final List<String> shadowed =
++      local.keys.where(sharedSteps.containsKey).toList()..sort();
 +  if (shadowed.isNotEmpty) {
 +    throw BddGenerationError(
 +      '$inputAsset: local step(s) shadow shared steps of the same name:\n'
@@ -547,12 +4385,12 @@ index 00000000..ec5ed617
 +    );
 +  }
 +
-+  final testerType = parseCustomTagValue(
++  final String testerType = parseCustomTagValue(
 +    model.allTagLines,
 +    options.testerType,
 +    testerTypeTag,
 +  );
-+  final testerName = parseCustomTagValue(
++  final String testerName = parseCustomTagValue(
 +    model.allTagLines,
 +    options.testerName,
 +    testerNameTag,
@@ -560,10 +4398,10 @@ index 00000000..ec5ed617
 +
 +  final stepFiles = <StepFile>[];
 +  final missing = <String, String>{}; // file -> step text
-+  for (final step in model.allSteps) {
++  for (final Step step in model.allSteps) {
 +    final file = '${getStepFilename(step.text)}.dart';
-+    final isLocal = local.containsKey(file);
-+    final shared = sharedSteps[file];
++    final bool isLocal = local.containsKey(file);
++    final String? shared = sharedSteps[file];
 +    if (!isLocal && shared == null) {
 +      missing.putIfAbsent(file, () => step.text);
 +      continue;
@@ -587,7 +4425,7 @@ index 00000000..ec5ed617
 +    );
 +  }
 +  if (missing.isNotEmpty) {
-+    final names = missing.keys.toList()..sort();
++    final List<String> names = missing.keys.toList()..sort();
 +    throw BddGenerationError(
 +      '$inputAsset: ${names.length} step(s) have no definition:\n'
 +      '${names.map((f) => '  "${missing[f]}" -> ${p.posix.join(stepDir, f)} '
@@ -601,7 +4439,7 @@ index 00000000..ec5ed617
 +    throw BddGenerationError('$inputAsset: unresolved step files.');
 +  }
 +
-+  var dart = generateFeatureDart(
++  String dart = generateFeatureDart(
 +    model,
 +    stepFiles,
 +    options.testMethodName,
@@ -615,9 +4453,7 @@ index 00000000..ec5ed617
 +  dart = _rewriteImports(dart, sharedSteps, config['dataTableImport']);
 +
 +  try {
-+    return DartFormatter(
-+      languageVersion: Version.parse('$languageVersion.0'),
-+    ).format(dart);
++    return _format(dart, languageVersion);
 +  } on FormatterException catch (e) {
 +    throw BddGenerationError(
 +      '$inputAsset: the generated test does not parse '
@@ -633,31 +4469,77 @@ index 00000000..ec5ed617
 +  Map<String, String> sharedSteps,
 +  Object? dataTableImport,
 +) {
-+  final seen = <String>{};
++  final imports = <String>{};
 +  final out = <String>[];
-+  for (final line in const LineSplitter().convert(dart)) {
++  int? at;
++  for (final String line in const LineSplitter().convert(dart)) {
 +    var l = line;
 +    if (l.startsWith("import '$_sharedPrefix")) {
-+      final file = l.substring("import '$_sharedPrefix".length, l.length - 2);
++      final String file = l.substring(
++        "import '$_sharedPrefix".length,
++        l.length - 2,
++      );
 +      l = "import '${sharedSteps[file]}';";
 +    }
 +    if (dataTableImport is String &&
 +        l == "import 'package:bdd_widget_test/data_table.dart' as bdd;") {
 +      l = "import '$dataTableImport' as bdd;";
 +    }
-+    if (l.startsWith('import ') && !seen.add(l)) {
++    if (l.startsWith('import ')) {
++      at ??= out.length;
++      imports.add(l);
++      continue;
++    }
++    // Blank lines between the stock import groups go; the sorted block
++    // brings its own.
++    if (l.isEmpty && at != null && out.length == at) {
 +      continue;
 +    }
 +    out.add(l);
 +  }
++  if (at != null) {
++    out.insertAll(at, [..._sortedImports(imports), '']);
++  }
 +  return '${out.join('\n')}\n';
++}
++
++/// [imports] in `directives_ordering` order: `dart:`, then `package:`, then
++/// relative, each sorted by URI, with a blank line between the groups.
++List<String> _sortedImports(Iterable<String> imports) {
++  String uri(String line) => line.substring(8, line.indexOf("'", 8));
++  int group(String line) {
++    final String u = uri(line);
++    return u.startsWith('dart:')
++        ? 0
++        : u.startsWith('package:')
++        ? 1
++        : 2;
++  }
++
++  final List<String> sorted = imports.toList()
++    ..sort((a, b) {
++      final int g = group(a).compareTo(group(b));
++      if (g != 0) return g;
++      final int u = uri(a).compareTo(uri(b));
++      return u != 0 ? u : a.compareTo(b);
++    });
++  final out = <String>[];
++  for (var i = 0; i < sorted.length; i++) {
++    if (i > 0 && group(sorted[i]) != group(sorted[i - 1])) {
++      out.add('');
++    }
++    out.add(sorted[i]);
++  }
++  return out;
 +}
 +
 +/// The tag pre-pass: file-level tags (except bdd_widget_test's own
 +/// `@name: value` tags) are added to every scenario, rules included.
 +FeatureFileModel _moveFeatureTagsOntoScenarios(FeatureFileModel model) {
 +  bool isOption(String t) => t.contains(':');
-+  final fileTags = model.tagLines.where((t) => !isOption(t)).toList();
++  final List<String> fileTags = model.tagLines
++      .where((t) => !isOption(t))
++      .toList();
 +  if (fileTags.isEmpty) {
 +    return model;
 +  }
@@ -699,47 +4581,51 @@ index 00000000..ec5ed617
 +  required Iterable<String> localSteps,
 +  required Map<String, String> sharedSteps,
 +  Map<String, Object?> config = const {},
++  String languageVersion = '3.0',
 +}) {
++  optionsFromConfig(config, inputAsset);
 +  // A stub imports only flutter_test (and the DataTable), never the test
 +  // file's custom headers.
-+  final options = GeneratorOptions.fromMap({...config}
-+    ..remove('dataTableImport')
-+    ..remove('forbiddenTags')
-+    ..remove('customHeaders'));
-+  final model = parseFeatureFile(
++  final options = GeneratorOptions.fromMap(
++    {...config}
++      ..remove('dataTableImport')
++      ..remove('forbiddenTags')
++      ..remove('customHeaders'),
++  );
++  final FeatureFileModel model = parseFeatureFile(
 +    input,
 +    uri: inputAsset,
 +    literalParameters: options.literalParameters,
 +  );
-+  final featureDir = p.posix.dirname(inputAsset);
-+  final stepDir = p.posix.normalize(
++  final String featureDir = p.posix.dirname(inputAsset);
++  final String stepDir = p.posix.normalize(
 +    p.posix.join(featureDir, options.stepFolder),
 +  );
-+  final have = {
-+    for (final a in localSteps)
-+      if (p.posix.isWithin(stepDir, a)) p.posix.basename(a),
-+  };
-+  final testerType = parseCustomTagValue(
++  final Set<String> have = localStepMap(
++    localSteps,
++    stepDir,
++    featureDir,
++    inputAsset,
++  ).keys.toSet();
++  final String testerType = parseCustomTagValue(
 +    model.allTagLines,
 +    options.testerType,
 +    testerTypeTag,
 +  );
-+  final testerName = parseCustomTagValue(
++  final String testerName = parseCustomTagValue(
 +    model.allTagLines,
 +    options.testerName,
 +    testerNameTag,
 +  );
 +  final stubs = <String, String>{};
-+  for (final step in model.allSteps) {
++  for (final Step step in model.allSteps) {
 +    final file = '${getStepFilename(step.text)}.dart';
 +    if (have.contains(file) || sharedSteps.containsKey(file)) {
 +      continue;
 +    }
 +    stubs.putIfAbsent(
 +      p.posix.join(stepDir, file),
-+      () => DartFormatter(
-+        languageVersion: DartFormatter.latestLanguageVersion,
-+      ).format(
++      () => _format(
 +        _rewriteImports(
 +          generateStepDart(
 +            package,
@@ -752,17 +4638,25 @@ index 00000000..ec5ed617
 +          const {},
 +          config['dataTableImport'],
 +        ),
++        languageVersion,
 +      ),
 +    );
 +  }
 +  return [for (final e in stubs.entries) (asset: e.key, content: e.value)];
 +}
++
++String _format(String dart, String languageVersion) {
++  final formatter = DartFormatter(
++    languageVersion: Version.parse('$languageVersion.0'),
++  );
++  return formatter.format(dart);
++}
 diff --git a/dart/ext/bdd/lib/scaffold.dart b/dart/ext/bdd/lib/scaffold.dart
 new file mode 100644
-index 00000000..4db6d158
+index 00000000..c9cef97f
 --- /dev/null
 +++ b/dart/ext/bdd/lib/scaffold.dart
-@@ -0,0 +1,66 @@
+@@ -0,0 +1,77 @@
 +/// The non-hermetic half of the BDD support: writes stubs for steps that no
 +/// file defines, the way stock bdd_widget_test does on `build_runner build`.
 +/// Never part of a build: run it with `bazel run`, which sets
@@ -774,17 +4668,20 @@ index 00000000..4db6d158
 +import 'package:path/path.dart' as p;
 +import 'package:rules_dart_ext_bdd/bdd_generator.dart';
 +
-+/// Shared step file names found under [sharedStepDirs] (workspace-relative
-+/// directories of the step library, scanned recursively).
-+Map<String, String> scanSharedSteps(String workspace, List<String> dirs) => {
-+  for (final dir in dirs)
-+    if (Directory(p.join(workspace, dir)).existsSync())
-+      for (final f in Directory(p.join(workspace, dir)).listSync(recursive: true))
-+        if (f is File && f.path.endsWith('.dart')) p.basename(f.path): dir,
-+};
++/// Reads `bdd_step_index` files (the same ones `bdd_feature_test` gets), so
++/// the scaffold and the build agree on which steps are shared.
++Map<String, String> readStepIndexes(Iterable<String> paths) =>
++    mergeStepIndexes({for (final f in paths) f: File(f).readAsStringSync()});
 +
-+/// Writes a stub for every missing step of every `.feature` under
-+/// `<packageDir>/<featureDir>` and returns the workspace-relative paths
++/// The `<major>.<minor>` of the `sdk:` lower bound in [pubspec], or null.
++String? languageVersionOf(String pubspec) => RegExp(
++  r'''^\s+sdk:\s*['"]?(?:\^|>=)?\s*(\d+\.\d+)''',
++  multiLine: true,
++).firstMatch(pubspec)?.group(1);
++
++/// Writes a stub for every missing step of every `.feature` directly in
++/// `<packageDir>/<featureDir>` (the files `glob(["<featureDir>/*.feature"])`
++/// gives a BDD test target) and returns the workspace-relative paths
 +/// written. Existing files are never touched.
 +List<String> scaffoldPackage({
 +  required String workspace,
@@ -793,28 +4690,36 @@ index 00000000..4db6d158
 +  required Map<String, String> sharedSteps,
 +  String featureDir = 'test/feature',
 +  Map<String, Object?> config = const {},
++  String languageVersion = '3.0',
 +}) {
-+  final root = p.join(workspace, packageDir);
++  final String root = p.join(workspace, packageDir);
 +  final features = Directory(p.join(root, featureDir));
 +  if (!features.existsSync()) {
 +    throw BddGenerationError('no $featureDir in $packageDir');
 +  }
-+  final assets = [
-+    for (final f in features.listSync(recursive: true))
-+      if (f is File) p.posix.joinAll(p.split(p.relative(f.path, from: root))),
++  String asset(FileSystemEntity f) =>
++      p.posix.joinAll(p.split(p.relative(f.path, from: root)));
++  final List<String> featureFiles = [
++    for (final f in features.listSync())
++      if (f is File && f.path.endsWith('.feature')) asset(f),
 +  ]..sort();
++  final List<String> dartFiles = [
++    for (final f in features.listSync(recursive: true))
++      if (f is File && f.path.endsWith('.dart')) asset(f),
++  ];
 +  final written = <String>[];
-+  for (final feature in assets.where((a) => a.endsWith('.feature'))) {
-+    final stubs = missingStepStubs(
++  for (final feature in featureFiles) {
++    final List<({String asset, String content})> stubs = missingStepStubs(
 +      input: File(p.join(root, feature)).readAsStringSync(),
 +      inputAsset: feature,
 +      package: package,
 +      localSteps: [
-+        ...assets.where((a) => a.endsWith('.dart')),
++        ...dartFiles,
 +        ...written.map((w) => p.posix.relative(w, from: packageDir)),
 +      ],
 +      sharedSteps: sharedSteps,
 +      config: config,
++      languageVersion: languageVersion,
 +    );
 +    for (final stub in stubs) {
 +      final file = File(p.join(root, stub.asset));
@@ -831,10 +4736,10 @@ index 00000000..4db6d158
 +}
 diff --git a/dart/ext/bdd/test/bdd_generator_test.dart b/dart/ext/bdd/test/bdd_generator_test.dart
 new file mode 100644
-index 00000000..749dcbc4
+index 00000000..ccaaa3ed
 --- /dev/null
 +++ b/dart/ext/bdd/test/bdd_generator_test.dart
-@@ -0,0 +1,157 @@
+@@ -0,0 +1,258 @@
 +import 'package:rules_dart_ext_bdd/bdd_generator.dart';
 +import 'package:test/test.dart';
 +
@@ -882,7 +4787,7 @@ index 00000000..749dcbc4
 +
 +void main() {
 +  test('scenario tags and feature tags reach the test method as tags', () {
-+    final dart = _generate();
++    final String dart = _generate();
 +    expect(dart, contains("mcTestWidgets('''It counts'''"));
 +    expect(dart, contains("tags: ['T-0001-AC9', 'T-0001-AC1', 'smoke']"));
 +    expect(dart, contains("tags: ['T-0001-AC9']"));
@@ -890,7 +4795,7 @@ index 00000000..749dcbc4
 +  });
 +
 +  test('local steps import relatively, shared steps once by URI', () {
-+    final dart = _generate();
++    final String dart = _generate();
 +    expect(dart, contains("import './step/the_app_is_ready.dart';"));
 +    expect(
 +      RegExp("import 'package:steps/steps.dart';").allMatches(dart),
@@ -900,10 +4805,10 @@ index 00000000..749dcbc4
 +  });
 +
 +  test('a data table uses the configured DataTable library', () {
-+    final dart = _generate();
++    final String dart = _generate();
 +    expect(dart, isNot(contains('package:bdd_widget_test')));
 +    expect(dart, contains("import 'package:steps/steps.dart' as bdd;"));
-+    expect(dart, contains("const bdd.DataTable(["));
++    expect(dart, contains('const bdd.DataTable(['));
 +  });
 +
 +  test('missing steps fail naming each of them', () {
@@ -915,7 +4820,9 @@ index 00000000..749dcbc4
 +          'message',
 +          allOf(
 +            contains('4 step(s) have no definition'),
-+            contains('"the app is ready" -> test/feature/step/the_app_is_ready.dart'),
++            contains(
++              '"the app is ready" -> test/feature/step/the_app_is_ready.dart',
++            ),
 +            contains('i_tap.dart (iTap)'),
 +          ),
 +        ),
@@ -942,7 +4849,9 @@ index 00000000..749dcbc4
 +        isA<BddGenerationError>().having(
 +          (e) => e.message,
 +          'message',
-+          contains('test/feature/step/i_see.dart shadows package:steps/steps.dart'),
++          contains(
++            'test/feature/step/i_see.dart shadows package:steps/steps.dart',
++          ),
 +        ),
 +      ),
 +    );
@@ -966,7 +4875,7 @@ index 00000000..749dcbc4
 +  });
 +
 +  test('stubs are only made for missing steps', () {
-+    final stubs = missingStepStubs(
++    final List<({String asset, String content})> stubs = missingStepStubs(
 +      input: _feature,
 +      inputAsset: 'test/feature/counter.feature',
 +      package: 'counter',
@@ -981,12 +4890,109 @@ index 00000000..749dcbc4
 +    ]);
 +    expect(stubs.first.content, contains('/// Usage: the app is ready'));
 +    expect(stubs.first.content, contains('Future<void> theAppIsReady('));
-+    expect(stubs.last.content, contains("import 'package:steps/steps.dart' as bdd;"));
++    expect(
++      stubs.last.content,
++      contains("import 'package:steps/steps.dart' as bdd;"),
++    );
++  });
++
++  test('imports are sorted for directives_ordering', () {
++    final String dart = _generate();
++    final List<String> imports = RegExp(
++      "^import '([^']+)'",
++      multiLine: true,
++    ).allMatches(dart).map((m) => m.group(1)!).toList();
++    expect(imports, [
++      'package:flutter_test/flutter_test.dart',
++      'package:steps/steps.dart',
++      'package:steps/steps.dart',
++      './step/the_app_is_ready.dart',
++    ]);
++  });
++
++  test('a data-table stub sorts its DataTable import', () {
++    final ({String asset, String content}) stub = missingStepStubs(
++      input: _feature,
++      inputAsset: 'test/feature/counter.feature',
++      package: 'counter',
++      localSteps: const ['test/feature/step/the_app_is_ready.dart'],
++      sharedSteps: const {
++        'i_tap.dart': 'package:steps/steps.dart',
++        'i_see.dart': 'package:steps/steps.dart',
++      },
++      config: const {'dataTableImport': 'package:steps/steps.dart'},
++      languageVersion: '3.13',
++    ).single;
++    expect(
++      stub.content,
++      startsWith(
++        "import 'package:flutter_test/flutter_test.dart';\n"
++        "import 'package:steps/steps.dart' as bdd;\n",
++      ),
++    );
++  });
++
++  test('two local steps with one file name fail', () {
++    expect(
++      () => _generate(
++        local: const [
++          'test/feature/step/the_app_is_ready.dart',
++          'test/feature/step/sub/the_app_is_ready.dart',
++        ],
++      ),
++      throwsA(
++        isA<BddGenerationError>().having(
++          (e) => e.message,
++          'message',
++          contains('two step files named the_app_is_ready.dart'),
++        ),
++      ),
++    );
++  });
++
++  test('a step folder above the feature is accepted', () {
++    final String dart = _generate(
++      local: const ['test/step/the_app_is_ready.dart'],
++      config: const {
++        'stepFolderName': '../step',
++        'dataTableImport': 'package:steps/steps.dart',
++      },
++    );
++    // As stock bdd_widget_test writes it: `p.join('.', '../step', file)`.
++    expect(dart, contains("import './../step/the_app_is_ready.dart';"));
++    expect(
++      () => _generate(config: const {'stepFolderName': 'step'}),
++      throwsA(isA<BddGenerationError>()),
++    );
++  });
++
++  test('bad config and bad indexes are reported, not thrown raw', () {
++    expect(() => decodeConfig('{'), throwsA(isA<BddGenerationError>()));
++    expect(() => decodeConfig('[]'), throwsA(isA<BddGenerationError>()));
++    expect(
++      () => _generate(config: const {'testMethodName': 3}),
++      throwsA(isA<BddGenerationError>()),
++    );
++    expect(
++      () => parseStepIndex('{"import": "x", "steps": [1]}', 'x'),
++      throwsA(isA<BddGenerationError>()),
++    );
++    expect(() => parseStepIndex('{', 'x'), throwsA(isA<BddGenerationError>()));
++    expect(
++      () => mergeStepIndexes({
++        'a': '{"import": "package:a/a.dart", "steps": ["s.dart"]}',
++        'b': '{"import": "package:b/b.dart", "steps": ["s.dart"]}',
++      }),
++      throwsA(isA<BddGenerationError>()),
++    );
 +  });
 +
 +  test('parseStepIndex maps file names to the import', () {
 +    expect(
-+      parseStepIndex('{"import": "package:s/s.dart", "steps": ["a.dart"]}', 'x'),
++      parseStepIndex(
++        '{"import": "package:s/s.dart", "steps": ["a.dart"]}',
++        'x',
++      ),
 +      {'a.dart': 'package:s/s.dart'},
 +    );
 +    expect(() => parseStepIndex('[]', 'x'), throwsA(isA<BddGenerationError>()));

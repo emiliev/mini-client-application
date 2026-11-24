@@ -58,6 +58,8 @@ PY
   while IFS=$'\t' read -r dep dir; do
     mkdir -p "$SCRATCH/_deps/$dep"
     cp -R "$dir/lib" "$SCRATCH/_deps/$dep/lib"
+    # The kept `flutter:` section may declare assets (mc_ds_theme's fonts).
+    [[ -d "$dir/assets" ]] && cp -R "$dir/assets" "$SCRATCH/_deps/$dep/assets"
     # Drop `resolution: workspace` and the dev_dependencies block only (a
     # later top-level section such as `flutter:` stays).
     /usr/bin/python3 -I - "$dir/pubspec.yaml" > "$SCRATCH/_deps/$dep/pubspec.yaml" <<'PY'

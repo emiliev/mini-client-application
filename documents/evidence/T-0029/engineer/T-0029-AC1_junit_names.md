@@ -2,7 +2,7 @@
 
 `tool/bazelw test --nocache_test_results //spike/bdd_sample:bdd_test`: exit 0
 ```
-//spike/bdd_sample:bdd_test                                              PASSED in 0.6s
+//spike/bdd_sample:bdd_test                                              PASSED in 0.7s
 Executed 1 out of 1 test: 1 test passes.
 ```
 ## JUnit case names (`//spike/bdd_sample:bdd_test` test.xml)

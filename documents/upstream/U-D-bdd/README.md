@@ -28,11 +28,12 @@ ext: generate bdd_widget_test widget tests from `.feature` files (`dart/ext/bdd`
   - `bdd_step_index`: the step files of a shared library and the URI that exports them;
   - `bdd_feature_test`: one `dart_sqlcodegen` per `.feature`, writing `<stem>_test.dart`;
   - `bdd_suite_main`: one entry file that runs every generated test of a package in a `group`, with an optional `setUpAll` hook.
-- `dart/ext/bdd/lib/scaffold.dart`: the non-hermetic stub writer, meant for a consumer's `bazel run` tool. It writes the stock stub format and never touches existing files.
-- `dart/ext/bdd/test/bdd_generator_test.dart`: 10 tests covering tags, imports, data tables, missing, shadowed and out-of-folder steps, forbidden tags, rejected options, stubs and the index format.
+- `dart/ext/bdd/lib/scaffold.dart`: the non-hermetic stub writer, meant for a consumer's `bazel run` tool. It reads the same step indexes as the build, scans the top-level `.feature` files of a folder (what `glob(["test/feature/*.feature"])` gives), writes the stock stub format at the package's language version, and never touches existing files.
+- `dart/ext/bdd/test/bdd_generator_test.dart`: 15 tests covering tags, imports (and their order), data tables, missing, shadowed, duplicate and out-of-folder steps, `../` step folders, forbidden tags, rejected options and bad config or index JSON, stubs and the index format.
+- `MODULE.bazel.lock`: updated for the new ext lock entries.
 
 **Testing.**
-- `bazel test //dart/ext/bdd:all` passes.
+- `bazel test //dart/ext/bdd:all` passes in the fork itself (its `.bazelrc`: `dart_analyze` and `dart_format` on), and `dart format --set-exit-if-changed dart/ext/bdd` is clean.
 - Downstream (mini-client), `//spike/bdd_sample:bdd_test` runs two features, one of them with a data table, in one `flutter_test`. Its JUnit names carry the scenario tags.
 - A negative fixture fails the build, naming 2 missing steps, and the source tree stays byte-identical.
 
@@ -44,4 +45,4 @@ ext: generate bdd_widget_test widget tests from `.feature` files (`dart/ext/bdd`
 ## Before filing
 - Add a `docs/ext.md` section; it was left out of the patch to avoid conflicts with the retrofit and injectable patches in the same queue.
 - Add an `e2e/` exemplar with a `flutter_test` over a generated suite. Upstream e2e may need a Flutter-free variant (`testMethodName: test`).
-- Rebase onto upstream `main`, regenerate `dart/ext/pubspec.lock`, and resolve the lock conflict described in F-0027 fact 11 if 0001/0002 land first.
+- Rebase onto upstream `main` and regenerate `dart/ext/pubspec.lock` and `MODULE.bazel.lock`. In our queue, 0003 is rebased onto 0001+0002 at merge time (F-0027 fact 11).

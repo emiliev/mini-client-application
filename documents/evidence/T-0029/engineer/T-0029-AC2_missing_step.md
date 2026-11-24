@@ -8,7 +8,7 @@ BDD generation failed: missing_step.feature: 2 step(s) have no definition:
 Write them, or run the scaffold tool to create stubs; the build never writes into the source tree.
 Target //spike/bdd_sample/test/negative:missing_step failed to build
 Use --verbose_failures to see the command lines of failed build steps.
-INFO: Elapsed time: 9.405s, Critical Path: 9.16s
+INFO: Elapsed time: 9.849s, Critical Path: 9.59s
 INFO: 60 processes: 19 internal, 8 darwin-sandbox, 33 worker.
 ERROR: Build did NOT complete successfully
 ```
@@ -22,7 +22,7 @@ BDD generation failed: shadowed_step.feature: local step(s) shadow shared steps 
 Delete the local step or rename it.
 Target //spike/bdd_sample/test/negative:shadowed_step failed to build
 Use --verbose_failures to see the command lines of failed build steps.
-INFO: Elapsed time: 0.109s, Critical Path: 0.02s
+INFO: Elapsed time: 0.105s, Critical Path: 0.02s
 INFO: 2 processes: 2 internal.
 ERROR: Build did NOT complete successfully
 ```

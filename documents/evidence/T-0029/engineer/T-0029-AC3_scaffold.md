@@ -16,8 +16,8 @@ Future<void> iWaveTimes(WidgetTester tester, num param1) async {
 ```
 ### test/feature/step/the_greeting_rows_are.dart
 ```dart
-import 'package:mc_test_steps/mc_test_steps.dart' as bdd;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_steps/mc_test_steps.dart' as bdd;
 
 /// Usage: the greeting rows are
 Future<void> theGreetingRowsAre(
@@ -30,5 +30,10 @@ Future<void> theGreetingRowsAre(
 - exactly 3 step files: the existing one and the 2 stubs (no stub for shared steps)
 - the existing step is unchanged
 - a second run writes nothing
+
+## The stubs build under `--config=lint`
+Scaffolded into the real tree for a probe feature: spike/bdd_sample/test/feature/step/i_wave_times.dart spike/bdd_sample/test/feature/step/the_greeting_rows_are.dart
+`tool/bazelw build --config=lint //spike/bdd_sample:bdd_test` (dart_analyze + dart_format on the stubs): exit 0
+- probe feature and stubs removed; spike/bdd_sample is as before
 
 **PASS T-0029-AC3**
