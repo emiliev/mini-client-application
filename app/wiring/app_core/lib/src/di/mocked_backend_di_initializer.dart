@@ -6,6 +6,9 @@ import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
+/// The scenario name for "no injected failures" (`backend.scenario`).
+const String happyScenario = 'happy';
+
 /// The adapter `ApiClientDIInitializer` gets in the root list. The backend
 /// is built from `AppConfig` during boot, after the list is created, so this
 /// forwards to whichever [MockBackend] the current boot attempt built.
@@ -60,8 +63,18 @@ class MockedBackendDIInitializer extends McDIInitializer {
             ),
       domains: domains,
     );
-    // "happy" (and any name no domain declares) means no scenario.
-    if (backend.scenarioNames.contains(config.scenario)) {
+    // "happy" means no scenario; any other name must be one a domain declares.
+    if (config.scenario != happyScenario) {
+      if (!backend.scenarioNames.contains(config.scenario)) {
+        final known = [
+          happyScenario,
+          ...backend.scenarioNames.toList()..sort(),
+        ];
+        throw StateError(
+          'Unknown backend.scenario "${config.scenario}" in app_config.json. '
+          'Known: ${known.join(', ')}.',
+        );
+      }
       backend.useScenario(config.scenario);
     }
     getIt.registerSingleton<MockBackend>(backend);

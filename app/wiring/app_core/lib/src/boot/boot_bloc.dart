@@ -47,21 +47,26 @@ final class _BootTimeoutElapsed extends BootEvent {
 
 /// Boot with an error state, a timeout and Retry (D-21, fixes P-028).
 ///
-/// - [BootStarted] runs the task and moves to [BootReady] or [BootFailed]
-///   (which [McBloc] records to monitoring). If the task has not finished
-///   after [timeout], the state becomes [BootTimedOut].
-/// - [BootRetried] after a failure runs the task again. After a timeout it
-///   waits for the same, still-running task with a fresh timeout, because the
-///   root container accepts one initialisation at a time; a task that
-///   finished while the timeout screen showed is picked up at once.
-/// - A result for an attempt that is no longer current (it timed out) does
-///   not change the state by itself (attempt counter).
+/// Each attempt runs the task once:
+/// - success → [BootReady], also when it arrives after the timeout screen
+///   showed;
+/// - failure → [BootFailed] (recorded to monitoring by [McBloc]), also after
+///   the timeout screen;
+/// - no result within [timeout] → [BootTimedOut]; the attempt stays live.
+///
+/// [BootRetried] from [BootFailed] starts a fresh attempt. From
+/// [BootTimedOut] it first calls [abandon] (for the real app,
+/// `abandonDIContainerInitialization`, which releases `mc_di`'s in-flight
+/// guard and makes the stuck run discard its staged container), then starts
+/// a fresh attempt. Results of an abandoned attempt are ignored.
 final class BootBloc extends McBloc<BootEvent, BootState> {
   BootBloc({
     required BootTask task,
     required super.monitoring,
+    void Function()? abandon,
     this.timeout = defaultBootTimeout,
   }) : _task = task,
+       _abandon = abandon ?? _noop,
        super(const BootBooting(0)) {
     on<BootStarted>((event, emit) {
       if (_attempt == 0) {
@@ -69,70 +74,64 @@ final class BootBloc extends McBloc<BootEvent, BootState> {
       }
     });
     on<BootRetried>((event, emit) {
-      if (state is BootFailed || state is BootTimedOut) {
-        _begin(emit);
+      switch (state) {
+        case BootFailed():
+          _begin(emit);
+        case BootTimedOut():
+          _abandon();
+          _begin(emit);
+        case BootBooting() || BootReady():
+          break;
       }
     });
     on<_BootSucceeded>((event, emit) {
-      if (_isCurrent(event.attempt)) {
+      if (_isLive(event.attempt)) {
         _timer?.cancel();
         emit(const BootReady());
       }
     });
     on<_BootThrew>((event, emit) {
-      if (_isCurrent(event.attempt)) {
+      if (_isLive(event.attempt)) {
         _timer?.cancel();
         emit(BootFailed(event.attempt, event.error, event.stackTrace));
       }
     });
     on<_BootTimeoutElapsed>((event, emit) {
-      if (_isCurrent(event.attempt)) {
+      if (event.attempt == _attempt && state is BootBooting) {
         emit(BootTimedOut(event.attempt, timeout));
       }
     });
   }
 
+  static void _noop() {}
+
   final BootTask _task;
+  final void Function() _abandon;
   final Duration timeout;
 
   int _attempt = 0;
-  Future<void>? _run;
   Timer? _timer;
 
-  /// How many times the task was started (a retry after a timeout reuses the
-  /// running task, so it does not count).
+  /// How many times the task was started (once per attempt).
   int get taskRuns => _taskRuns;
   int _taskRuns = 0;
 
   void _begin(Emitter<BootState> emit) {
     final attempt = ++_attempt;
     emit(BootBooting(attempt));
-    final run = _run ??= _startRun();
     _timer?.cancel();
     _timer = Timer(timeout, () => _send(_BootTimeoutElapsed(attempt)));
-    run.then(
+    _taskRuns++;
+    Future<void>.sync(_task).then(
       (_) => _send(_BootSucceeded(attempt)),
       onError: (Object error, StackTrace stackTrace) =>
           _send(_BootThrew(attempt, error, stackTrace)),
     );
   }
 
-  Future<void> _startRun() {
-    _taskRuns++;
-    final run = Future<void>.sync(_task);
-    // A failed run is discarded, so the next attempt starts a fresh one.
-    run.then<void>(
-      (_) {},
-      onError: (Object _) {
-        if (identical(_run, run)) {
-          _run = null;
-        }
-      },
-    );
-    return run;
-  }
-
-  bool _isCurrent(int attempt) => attempt == _attempt && state is BootBooting;
+  /// The attempt is the current one and still waiting for its result.
+  bool _isLive(int attempt) =>
+      attempt == _attempt && (state is BootBooting || state is BootTimedOut);
 
   void _send(BootEvent event) {
     if (!isClosed) {

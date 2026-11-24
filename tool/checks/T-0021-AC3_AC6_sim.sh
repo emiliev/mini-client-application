@@ -8,7 +8,7 @@
 #   ac3-e2e-link.png     the app terminated, `miniclient://app/placeholder/42`
 #                        written to <data>/tmp/mc_e2e_link, launched → that
 #                        route via PendingLinks → GoRouter (AC3 as amended)
-#   ac3-openurl-warm.png `simctl openurl <udid> miniclient://app/placeholder/42`
+#   ac3-openurl-warm.png `simctl openurl <udid> miniclient://app/placeholder/43`
 #                        while the app runs → that route
 #   ac4-openurl-cold.png the app terminated, then `openurl …/placeholder/7`
 #                        (a cold-start link) → that route after boot
@@ -106,7 +106,7 @@ shot ac3-e2e-link.png
 report "- e2e start link written: $link_written; relaunch exit $rc_link; file consumed by the app: $link_consumed"
 
 rc_warm=0
-xcrun simctl openurl "$UDID" "miniclient://app/placeholder/42" || rc_warm=$?
+xcrun simctl openurl "$UDID" "miniclient://app/placeholder/43" || rc_warm=$?
 sleep 5
 shot ac3-openurl-warm.png
 

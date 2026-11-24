@@ -8,8 +8,9 @@ import 'package:flutter/widgets.dart';
 /// and no other observer, such as the boot `MaterialApp`'s navigator, sees
 /// the link. It records the cold-start link from
 /// `PlatformDispatcher.defaultRouteName` too. On `ready`, `McApp` calls
-/// [take] once for the router's `initialLocation` and then [detach]es it, so
-/// later links go to go_router.
+/// [take] once for the router's `initialLocation`; after the router's first
+/// frame it [drain]s a link caught in between and [detach]es, so later links
+/// go to go_router.
 class PendingLinks extends WidgetsBindingObserver {
   PendingLinks._(this._binding, String? coldStart)
     : _latest = coldStart == null ? null : normalise(coldStart);
@@ -64,6 +65,13 @@ class PendingLinks extends WidgetsBindingObserver {
     return location;
   }
 
+  /// The held location, or null, and clears it (not counted in [takes]).
+  String? drain() {
+    final location = _latest;
+    _latest = null;
+    return location;
+  }
+
   /// Stops holding links. Safe to call more than once.
   void detach() {
     if (_attached) {
@@ -78,10 +86,12 @@ class PendingLinks extends WidgetsBindingObserver {
   }
 
   /// `miniclient://app/placeholder/7?x=1` → `/placeholder/7?x=1`; a plain
-  /// path is kept. The host (`app`) only marks the app's own links.
+  /// path is kept. A link with any other scheme or host than
+  /// `miniclient://app` is not the app's and becomes `/`.
   static String normalise(String link) {
     final uri = Uri.tryParse(link);
-    if (uri == null) {
+    if (uri == null ||
+        (uri.hasScheme && (uri.scheme != 'miniclient' || uri.host != 'app'))) {
       return '/';
     }
     final path = uri.path.isEmpty ? '/' : uri.path;

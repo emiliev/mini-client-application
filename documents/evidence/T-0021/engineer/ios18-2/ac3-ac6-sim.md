@@ -9,9 +9,9 @@
 - e2e start link written: 1; relaunch exit 0; file consumed by the app: 1
 - screenshot `ac3-openurl-warm.png` (original height 1334 px)
 - screenshot `ac4-openurl-cold.png` (original height 1334 px)
-- simulator: `mc-T-0021-engineer-iOS-18-2-93954` (0C17506C-6863-4865-BFBA-2E9C6416A0E3), iPhone SE (3rd generation), `com.apple.CoreSimulator.SimRuntime.iOS-18-2`; deleted on exit
+- simulator: `mc-T-0021-engineer-iOS-18-2-359` (E188F943-85B5-4AFE-BC33-8307921ADC75), iPhone SE (3rd generation), `com.apple.CoreSimulator.SimRuntime.iOS-18-2`; deleted on exit
 - app: mini_client_ios.app, bundle id `com.emiliev.miniclient`
-- `simctl launch`: exit 0 (com.emiliev.miniclient: 94294); launchctl entries 10 s later: 1
+- `simctl launch`: exit 0 (com.emiliev.miniclient: 1172); launchctl entries 10 s later: 1
 - `simctl openurl` warm (placeholder/42): exit 0
 - `simctl openurl` cold (placeholder/7, app terminated first): exit 0; launchctl entries 10 s later: 0
 

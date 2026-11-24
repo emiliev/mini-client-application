@@ -25,9 +25,9 @@ final class BootFailed extends BootState implements McFailureState {
   final StackTrace stackTrace;
 }
 
-/// The attempt took longer than the boot timeout. Retry waits for the
-/// still-running initialisation again (it never starts a second one, so no
-/// type is registered twice).
+/// The attempt took longer than the boot timeout. A late result still
+/// counts (ready or failed). Retry abandons the attempt and starts a fresh
+/// one (`abandonDIContainerInitialization`), so no type is registered twice.
 final class BootTimedOut extends BootState {
   const BootTimedOut(this.attempt, this.timeout);
 

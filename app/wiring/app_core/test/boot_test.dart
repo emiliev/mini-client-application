@@ -92,19 +92,20 @@ void main() {
   );
 
   testWidgets(
-    'T-0021-AC2 boot taking longer than 10 s shows the timeout state with '
-    'Retry',
+    'T-0021-AC2 boot taking longer than 10 s shows the timeout state, and '
+    'Retry abandons the attempt and starts a fresh one',
     (tester) async {
       final links = PendingLinks.install(tester.binding);
       addTearDown(links.detach);
-      final held = Completer<void>();
-      var taskRuns = 0;
+      final attempts = <Completer<void>>[];
+      var abandons = 0;
       await tester.pumpWidget(
         McApp(
           boot: () {
-            taskRuns++;
-            return held.future;
+            attempts.add(Completer<void>());
+            return attempts.last.future;
           },
+          abandonBoot: () => abandons++,
           router: _router,
           links: links,
         ),
@@ -120,21 +121,61 @@ void main() {
       expect(find.text('Start-up did not finish within 10 s.'), findsOneWidget);
       expect(find.text('Retry'), findsOneWidget);
 
-      // Retry waits for the same initialisation; it never starts a second.
       await tester.tap(find.text('Retry'));
       await tester.pump();
+      expect(abandons, 1);
+      expect(attempts, hasLength(2));
       expect(find.byKey(BootPage.loadingKey), findsOneWidget);
-      held.complete();
+
+      // The abandoned attempt's late result is ignored; the fresh one counts.
+      attempts.first.completeError(StateError('stale'));
+      await tester.pump();
+      expect(find.byKey(BootPage.loadingKey), findsOneWidget);
+      attempts.last.complete();
       await tester.pump();
       await tester.pump();
       expect(find.text('home'), findsOneWidget);
-      expect(taskRuns, 1);
     },
   );
 
   testWidgets(
-    'T-0021-AC2 a boot that finishes while the timeout shows is picked up '
-    'by Retry',
+    'T-0021-AC2 Retry escapes a never-completing root initializer: the hung '
+    'mc_di run is abandoned and a fresh one boots (P-028)',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      var runs = 0;
+      final hang = Completer<void>(); // never completed
+      final initializers = roots([
+        McDIInitializer((GetIt getIt, String? environment) {
+          if (runs++ == 0) {
+            return hang.future;
+          }
+        }),
+      ]);
+      await tester.pumpWidget(
+        McApp(
+          boot: () => initializeDIContainer(initializers),
+          router: _router,
+          links: links,
+        ),
+      );
+      await tester.pump(const Duration(seconds: 11));
+      expect(find.byKey(BootPage.timedOutKey), findsOneWidget);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(runs, 2);
+      expect(find.text('home'), findsOneWidget);
+      expect(diContainer.isRegistered<AppConfig>(), isTrue);
+    },
+  );
+
+  testWidgets(
+    'T-0021-AC2 a boot that succeeds after the timeout showed goes to ready',
     (tester) async {
       final links = PendingLinks.install(tester.binding);
       addTearDown(links.detach);
@@ -145,15 +186,40 @@ void main() {
       await tester.pump(const Duration(seconds: 11));
       expect(find.byKey(BootPage.timedOutKey), findsOneWidget);
 
-      // The late result alone does not leave the timeout screen.
       held.complete();
-      await tester.pump();
-      expect(find.byKey(BootPage.timedOutKey), findsOneWidget);
-
-      await tester.tap(find.text('Retry'));
       await tester.pump();
       await tester.pump();
       expect(find.text('home'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'T-0021-AC1 a boot that fails after the timeout showed shows the error '
+    'and records it to monitoring',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      final held = Completer<void>();
+      final sink = InMemorySink();
+      await tester.pumpWidget(
+        McApp(
+          boot: () => held.future,
+          router: _router,
+          links: links,
+          bootMonitoring: Monitoring([sink]),
+        ),
+      );
+      await tester.pump(const Duration(seconds: 11));
+      expect(find.byKey(BootPage.timedOutKey), findsOneWidget);
+
+      held.completeError(StateError('late failure'));
+      await tester.pump();
+      await tester.pump();
+      expect(find.byKey(BootPage.failedKey), findsOneWidget);
+      expect(find.textContaining('late failure'), findsOneWidget);
+      final errors = sink.entries.whereType<ErrorEntry>().toList();
+      expect(errors, hasLength(1));
+      expect(errors.single.error.toString(), contains('late failure'));
     },
   );
 
@@ -228,6 +294,27 @@ void main() {
     );
     expect(diContainer<MockBackend>().recentTraffic, hasLength(1));
     expect(sink.entries, isNotEmpty, reason: 'the API client logs requests');
+  });
+
+  test('T-0021-AC1 an unknown backend.scenario fails boot with a clear '
+      'error', () async {
+    await expectLater(
+      initializeDIContainer(
+        rootInitializers(
+          config: () async =>
+              _config.replaceFirst('"scenario":"happy"', '"scenario":"hapy"'),
+          storageDirectory: storage,
+        ),
+      ),
+      throwsA(
+        isA<StateError>().having(
+          (e) => e.message,
+          'message',
+          allOf(contains('Unknown backend.scenario "hapy"'), contains('happy')),
+        ),
+      ),
+    );
+    expect(diContainer.isRegistered<AppConfig>(), isFalse);
   });
 
   test('a configured latency becomes a constant backend latency', () async {

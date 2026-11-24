@@ -1,6 +1,6 @@
 # T-0021-AC3 / AC6: simulator build, launch and deep links
 
-- build `--config=sim //app/mini_client:mini_client_ios`: exit 0 (INFO: Build completed successfully, 1510 total actions)
+- build `--config=sim //app/mini_client:mini_client_ios`: exit 0 (INFO: Build completed successfully, 1 total action)
 - FontManifest has `packages/mc_ds_theme/Inter`: 1; Inter .ttf files bundled: 4
 - bundled `assets/app_config.json` env: `dev`
 - Info.plist: URL scheme `miniclient`, FlutterDeepLinkingEnabled `true`
@@ -9,9 +9,9 @@
 - e2e start link written: 1; relaunch exit 0; file consumed by the app: 1
 - screenshot `ac3-openurl-warm.png` (original height 2622 px)
 - screenshot `ac4-openurl-cold.png` (original height 2622 px)
-- simulator: `mc-T-0021-engineer-iOS-26-2-93444` (A22312CC-3A3D-462C-9937-DB9592E8A2A2), iPhone 17 Pro, `com.apple.CoreSimulator.SimRuntime.iOS-26-2`; deleted on exit
+- simulator: `mc-T-0021-engineer-iOS-26-2-99518` (1D328A20-9FB2-4A03-8F2C-F62CBB1729F1), iPhone 17 Pro, `com.apple.CoreSimulator.SimRuntime.iOS-26-2`; deleted on exit
 - app: mini_client_ios.app, bundle id `com.emiliev.miniclient`
-- `simctl launch`: exit 0 (com.emiliev.miniclient: 93847); launchctl entries 10 s later: 1
+- `simctl launch`: exit 0 (com.emiliev.miniclient: 99977); launchctl entries 10 s later: 1
 - `simctl openurl` warm (placeholder/42): exit 0
 - `simctl openurl` cold (placeholder/7, app terminated first): exit 0; launchctl entries 10 s later: 0
 

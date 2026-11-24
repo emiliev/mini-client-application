@@ -30,6 +30,11 @@ GoRouter buildAppRouter({required String initialLocation}) => GoRouter(
   // The auth guard (P1-16 AC4) joins here with mc_api_auth.
   redirect: (context, state) {
     McRouteProbe.recordRedirect(context, state.uri);
+    // Only miniclient://app/… links are the app's (as PendingLinks.normalise).
+    final uri = state.uri;
+    if (uri.hasScheme && (uri.scheme != 'miniclient' || uri.host != 'app')) {
+      return AppLocations.home;
+    }
     return null;
   },
   errorBuilder: (context, state) =>

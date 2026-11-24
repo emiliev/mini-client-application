@@ -8,6 +8,7 @@ import 'package:app_core/src/shell/route_probe.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 
@@ -20,8 +21,10 @@ typedef McRouterFactory = GoRouter Function(String initialLocation);
 /// While boot is not ready it renders `MaterialApp` with [BootPage] only: no
 /// `GoRouter` exists, so no route builder, `redirect` or navigator runs. On
 /// `ready` it creates the router once, with the link [links] held as
-/// `initialLocation`, detaches [links] (later links go to go_router), and
-/// switches to `MaterialApp.router`.
+/// `initialLocation`, and switches to `MaterialApp.router`. [links] stays
+/// attached until that frame has built the router (so a link arriving in
+/// between never reaches the dying boot navigator); then it detaches, later
+/// links go to go_router, and a link caught in the gap is forwarded.
 class McApp extends StatefulWidget {
   const McApp({
     required this.boot,
@@ -32,6 +35,7 @@ class McApp extends StatefulWidget {
     this.title = 'Mini Client',
     this.probe,
     this.bootMonitoring,
+    this.abandonBoot = abandonDIContainerInitialization,
     super.key,
   });
 
@@ -53,6 +57,9 @@ class McApp extends StatefulWidget {
   /// console-only instance.
   final Monitoring? bootMonitoring;
 
+  /// Gives up a boot that timed out, before Retry starts a fresh one.
+  final void Function() abandonBoot;
+
   @override
   State<McApp> createState() => _McAppState();
 }
@@ -61,6 +68,7 @@ class _McAppState extends State<McApp> {
   late final BootBloc _boot = BootBloc(
     task: widget.boot,
     timeout: widget.bootTimeout,
+    abandon: widget.abandonBoot,
     monitoring: widget.bootMonitoring ?? Monitoring([ConsoleSink()]),
   );
   StreamSubscription<BootState>? _bootStates;
@@ -79,8 +87,15 @@ class _McAppState extends State<McApp> {
     if (state is BootReady && _router == null && mounted) {
       widget.probe?.markReady();
       final router = widget.router(widget.links.take());
-      widget.links.detach();
       setState(() => _router = router);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        // MaterialApp.router has built and go_router observes links now.
+        final late = widget.links.drain();
+        widget.links.detach();
+        if (late != null && mounted) {
+          router.go(late);
+        }
+      });
     }
   }
 

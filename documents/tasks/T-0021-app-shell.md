@@ -37,15 +37,25 @@ The Tide "glue" app running on the iOS simulator: boot page, DI start-up from th
   - Rebased on `61373cc` (T-0022). `BootBloc` is now a `McBloc` (events `BootStarted` / `BootRetried`; `BootFailed` is a `McFailureState`, so boot failures reach monitoring).
   - analysis_options: the Flutter packages have none, the same convention as `mc_ds_*`, `mc_fixtures_*` and `spike/hello` (8 of the 9 Flutter packages on main). The root file applies, including its formatter setting; `mc_feature_flow`'s rewritten file is the exception (F-0021).
   - All gates are green; see [evidence/T-0021/engineer/gates.md](../evidence/T-0021/engineer/gates.md).
+- 2026-11-24 (Engineer, round 3, `/code-review` fixes):
+  1. **Link gap:** `PendingLinks` stays attached until the router's first frame. A post-frame callback then `drain()`s a link caught in between, detaches, and `router.go()`es it. Test T-0021-AC4 (mutation-checked: it fails with the old detach).
+  2. **Failure after the timeout** now emits `BootFailed`, which is recorded to monitoring. Test T-0021-AC1.
+  3. **Hung boot:** `mc_di` gains `abandonDIContainerInitialization()`. It releases the in-flight guard; the abandoned run never publishes, disposes its staged container when (if ever) its initializer returns, and throws `DIInitializationAbandoned`. Retry from `BootTimedOut` calls it (`McApp.abandonBoot`) and starts a fresh attempt. P-028 is fixed: tests T-0021-AC2 in `boot_test` and `mc_di`. Limit: the stuck initializer's own work can't be cancelled, only discarded.
+  4. **Success after the timeout** emits `BootReady`.
+  - Nits:
+    - `normalise` requires `miniclient://app`, and the router `redirect` sends other schemes and hosts to home;
+    - an unknown `backend.scenario` fails boot naming the known ones;
+    - `readE2eStartLink` swallows file errors;
+    - the warm `openurl` check uses placeholder/43.
 
 ## Outcome
 **Engineer handoff (2026-11-24, round 2): all six ACs done, AC3 as amended by the TL (F-0020). Real `openurl` e2e → P-042.**
 
 - **`app/wiring/app_core`**
-  - `BootBloc`, a `McBloc` from `mc_bloc_kit`. It has a 10 s timeout and Retry (fixes P-028); `McApp` gives it a console `Monitoring` until the root one exists. A failed run is discarded. Retry after a timeout waits for the still-running run instead of starting a second one, because `initializeDIContainer` runs one at a time, and a run that finished late is picked up by Retry.
+  - `BootBloc`, a `McBloc` from `mc_bloc_kit`, with a 10 s timeout and Retry (fixes P-028). A late result after the timeout still counts. Retry after a timeout abandons the stuck `mc_di` run and starts a fresh one. `McApp` gives the bloc a console `Monitoring` until the root one exists. A failed run is discarded. Retry after a timeout waits for the still-running run instead of starting a second one, because `initializeDIContainer` runs one at a time, and a run that finished late is picked up by Retry.
   - `BootPage` (DS `McLoading` / `McErrorView`).
   - `PendingLinks` (R29), with `offer()` for the e2e start link (`readE2eStartLink`).
-  - `McApp`: `MaterialApp(home: BootPage)` until ready, then one `GoRouter` with the held link and `overridePlatformDefaultLocation`.
+  - `McApp`: `MaterialApp(home: BootPage)` until ready, then one `GoRouter` with the held link and `overridePlatformDefaultLocation`; `PendingLinks` detaches only after the router's first frame.
   - `McRouteProbe` (route-build and redirect counter for tests).
   - Flutter error hooks into `Monitoring`.
   - `rootInitializers`: config, monitoring, storage, mocked backend, `ApiClientDIInitializer` over `MockBackendHttpAdapter`, event bus, then the wirings.
@@ -57,6 +67,7 @@ The Tide "glue" app running on the iOS simulator: boot page, DI start-up from th
   - The `app_config.json` asset, copied from `//tool/bazel/config:app_config`.
   - Info.plist with the `miniclient` scheme and `FlutterDeepLinkingEnabled`.
   - `flutter_ios_app` with bundle id `com.emiliev.miniclient`, `manual`.
+- **`mc_di`:** `abandonDIContainerInitialization()` and `DIInitializationAbandoned` (round 3).
 - **`mc_ds_theme`:** a `flutter_font_family(":inter")` on the library, so every app bundles `packages/mc_ds_theme/Inter` (fixes P-031).
 - **Root edits:** 9 `workspace:` members. The lock is unchanged.
 - **Findings:** F-0020 (openurl prompt), F-0021 (`pub get` rewrites Flutter packages' `analysis_options.yaml`, so the new packages have none).

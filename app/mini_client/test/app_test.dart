@@ -257,6 +257,52 @@ void main() {
     },
   );
 
+  testWidgets(
+    'T-0021-AC4 a link delivered between BootReady and the router\'s first '
+    'frame is held and forwarded to go_router, not lost',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      await tester.pumpWidget(
+        MiniClientApp(
+          links: links,
+          initializers: roots(),
+          router: (initialLocation) {
+            // Ready, but MaterialApp.router has not built yet.
+            unawaited(_pushLink(tester, 'miniclient://app/placeholder/99'));
+            return buildAppRouter(initialLocation: initialLocation);
+          },
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(links.received, 1, reason: 'held, not seen by the boot navigator');
+      expect(links.isAttached, isFalse);
+      expect(find.text('Placeholder detail 99'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
+    'T-0021-AC3 a link for another host or scheme shows home, not its path',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      await tester.pumpWidget(
+        MiniClientApp(links: links, initializers: roots()),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      await _pushLink(tester, 'miniclient://evil/placeholder/5');
+      await tester.pumpAndSettle();
+      expect(find.text('Placeholder detail 5'), findsNothing);
+      expect(find.text('Marvel universe'), findsOneWidget);
+    },
+  );
+
   testWidgets('the home placeholder shows the bundled config env', (
     tester,
   ) async {

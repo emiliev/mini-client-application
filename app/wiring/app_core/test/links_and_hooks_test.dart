@@ -20,6 +20,12 @@ void main() {
     expect(PendingLinks.normalise('/placeholder/3'), '/placeholder/3');
   });
 
+  test('T-0021-AC4 normalise sends links for another host or scheme to /', () {
+    expect(PendingLinks.normalise('miniclient://evil/placeholder/7'), '/');
+    expect(PendingLinks.normalise('https://app/placeholder/7'), '/');
+    expect(PendingLinks.normalise('otherapp://app/placeholder/7'), '/');
+  });
+
   testWidgets('while attached it consumes pushed links, newest wins', (
     tester,
   ) async {
@@ -79,6 +85,17 @@ void main() {
       ..detach()
       ..offer('/placeholder/1');
     expect(links.pending, isNull, reason: 'ignored once detached');
+  });
+
+  test('T-0021-AC3 an unreadable e2e start link file is ignored', () {
+    final tmp = Directory.systemTemp.createTempSync('e2e_link_bad');
+    addTearDown(() => tmp.deleteSync(recursive: true));
+    final file = File('${tmp.path}/$e2eStartLinkFile')
+      ..writeAsStringSync('miniclient://app/placeholder/1');
+    // No read permission: readAsStringSync throws a FileSystemException.
+    expect(Process.runSync('chmod', ['000', file.path]).exitCode, 0);
+    addTearDown(() => Process.runSync('chmod', ['600', file.path]));
+    expect(readE2eStartLink(tmp: tmp), isNull);
   });
 
   group('error hooks', () {
