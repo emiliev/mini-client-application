@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0030-paging-and-media` |
@@ -45,3 +45,34 @@ The two utility kits that the list-detail archetype (LD) needs before the first 
 
 ## Log
 - 2026-11-25: Created and dispatched (TL).
+- 2026-11-25: Engineer: `mc_media` (pure `:mc_media` + Flutter `:mc_media_scope`), `mc_paging` (freezed `PagedState`, `PagingController`, `DebouncedQuery`, `SearchHistory`), `mc_fixtures_media` implements `McImageResolver`. First cut with one Flutter `mc_media` library broke `//utility/mc_api_client:api_client_test` (pure test reaching Flutter through the fixtures chain), so it was split (F-0029). Handoff.
+
+## Outcome
+**Handed off** for verification on `fleet/T-0030-paging-and-media`. Evidence: `documents/evidence/T-0030/engineer/`.
+
+### AC to test map
+| AC | Tests (name contains the ID) |
+|---|---|
+| AC1 | `//utility/mc_paging:paging_controller_test` (group "T-0030-AC1 loading pages"), `paged_state_test` (Page, PageRequest) |
+| AC2 | `paging_controller_test` (guards, stale responses), `paged_state_test` (defaults, equality) |
+| AC3 | `paging_controller_test` (group "T-0030-AC3 failures": keeps page one, retry appends once, first-page and refresh failure, throwing fetcher) |
+| AC4 | `//utility/mc_paging:debounced_query_test` (fake clock, no real timers; one test uses the default real `Timer` for 1 ms to cover the default factory) |
+| AC5 | `//utility/mc_paging:search_history_test` (temp-dir `FileStore`) |
+| AC6 | `//utility/mc_media:media_scope_test`, `api_image_test`, `//utility/mc_fixtures_media:media_contract_test`. Unchanged and passing: `mc_fixtures_media:bundled_image_resolver_test`, `mc_fixtures_characters:characters_test`, `provider_contract_test`, `mc_api_client:api_client_test` |
+| AC7 | `//utility/mc_paging:purity_test`, `//utility/mc_media:purity_test`, `tool/checks/T-0030-AC7_closure.sh` ([report](../evidence/T-0030/engineer/AC7_closure.md), [negative control](../evidence/T-0030/engineer/AC7_negative_control.md)), gates below |
+
+### Gates (logs in the evidence directory)
+`test //...` 57/57 pass (`gate-test.log`); `build --config=lint //...` green (`gate-lint.log`); `mc_arch_check` OK (`gate-arch.log`); `rules_fork.sh check` OK (`gate-rules-fork.log`); `dart format` clean. Coverage (union of per-target LCOV, `merge_lcov.py`, `coverage.txt`): `mc_paging` 98/98 = 100 %, `mc_media` 21/21 = 100 %.
+
+### Root changes
+`pubspec.yaml` workspace: `utility/mc_media`, `utility/mc_paging`. `pubspec.lock` re-resolved with `fvm dart pub get` (no new third-party packages; `freezed_annotation 3.1.0` was already locked). `MODULE.bazel.lock` unchanged.
+
+### Deviations and decisions for the TL
+1. **`mc_media` has two Bazel libraries and two barrels** (`mc_media.dart` pure, `mc_media_scope.dart` Flutter), see [F-0029](../findings/F-0029-mc-media-split-pure-and-flutter.md). `McMediaScope` is imported from `package:mc_media/mc_media_scope.dart`.
+2. **`ResolvedImage` has no `ImageProvider`** (it would make the pure library Flutter). `BundledImageResolver` implements `McImageResolver`; `BundledImage` implements `ResolvedImage` and keeps `assetKey`. P1-12 `McImage` decides the provider.
+3. **`mc_paging` does not depend on `mc_bloc_kit`** (nothing to import; the controller takes an `onState` callback). Fetcher type is `Future<Result<Page<T>, ApiFailure>>` (the task's "McFailure" is `ApiFailure`; `Result` takes two type parameters).
+4. **Generated `mixin _$PagedState`** comes from freezed (F-0029 item 5). `purity_test` checks hand-written sources only.
+5. No tests deleted, skipped or weakened; no `// ignore:`. `mc_fixtures_media` gained one test file and `BundledImageResolver` / `BundledImage` gained `implements` plus `@override` only. `mc_fixtures_media` coverage was not measured (flutter_test coverage emits no lib entries for it; it is outside the 90 % scope of this task).
+
+### Follow-ups
+P1-12: `McImage` and a `ResolvedImage` to `ImageProvider` bridge; `McPagedList` / `McPagedGrid` over `PagedState`; DI initializer for `mc_paging` if the plan's `McPagingDIInitializer` is still wanted (nothing registers yet, so none was added).
