@@ -48,10 +48,10 @@ _RUNTIME_DEPS = [
 #
 # The barrel (lib/di_sample.dart) is staged on purpose, but the init file it
 # exports is not (that file imports the generated .config.dart, which doesn't
-# exist at shard time). The dangling export is harmless: the analyzer resolves
-# it to an empty library, so the build_runner-order walk in the shim
-# (BuildRunnerLibrariesResolver, F-0028) reaches nothing extra through it, and
-# an annotated file never imports the barrel. Proved by T-0028-AC1: with this
+# exist at shard time). The dangling export is harmless: the shim gives the
+# generator the libraries reachable from the annotated file through imports and
+# exports (BuildRunnerLibrariesResolver, F-0028), and no annotated file imports
+# the barrel, so the walk never visits it or its exports. Proved by T-0028-AC1: with this
 # _stage, .config.dart and all shards equal build_runner's, and every import
 # is package:di_sample/src/<file>.dart, not the barrel.
 dart_library(
