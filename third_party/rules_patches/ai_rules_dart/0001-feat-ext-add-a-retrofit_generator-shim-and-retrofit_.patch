@@ -1,0 +1,3577 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Emil Iliev <emil_iliev1994@yahoo.com>
+Date: Tue, 24 Nov 2026 14:57:42 +0200
+Subject: [PATCH] feat(ext): add a retrofit_generator shim and
+ `retrofit_library` macro
+
+retrofit_generator is a SharedPartBuilder (`.retrofit.g.part`, combined
+into `.g.dart` by source_gen's combining builder under build_runner), so it
+fits the existing shared_part_library flow unchanged: one shim binary that
+wraps `retrofitBuilder`, plus a macro shaped like `json_serializable_library`.
+
+The ext lock gains retrofit_generator 10.3.3 (analyzer `>=8.4.1 <15.0.0`,
+build `>=4.0.2 <6.0.0`, so it resolves against the current analyzer 14.5.0 /
+build 4.0.11 line) and its runtime closure: retrofit 4.10.0, dio 5.11.1 and
+dio_web_adapter 2.2.2. Every other locked version is unchanged. dio and
+dio_web_adapter depend on each other, so the hub merges them into one SCC
+target.
+
+Over an `@RestApi` file that uses a freezed + json model and a
+`genericArgumentFactories` envelope from another package, the shim's
+`.g.dart` is byte-identical to build_runner 2.16.2's. Gazelle does not emit
+the macro yet.
+
+Changelog: `retrofit_library` runs retrofit_generator for `@RestApi` dio clients
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+
+diff --git a/MODULE.bazel.lock b/MODULE.bazel.lock
+index d021f544..4578a228 100644
+--- a/MODULE.bazel.lock
++++ b/MODULE.bazel.lock
+@@ -243,8 +243,8 @@
+         "usagesDigest": "VG67ZXrl5ZRuGcGn/3gQDp1P7uiiUm/QuTK7Qm/7Gt0=",
+         "recordedInputs": [
+           "REPO_MAPPING:,dart_pub_scanner +dart+dart_pub_scanner",
+-          "FILE:@@//dart/ext/pubspec.lock ae866f3a1d4ebad9a74f9b9efab33c74dfbf904ae0d69dfe94192029d4955188",
+-          "REPO_MAPPING:,dart_linux-x64 +dart+dart_linux-x64"
++          "FILE:@@//dart/ext/pubspec.lock 3e9248d74c99594df524e2dd01118bdf905afa1eb885d89607a2c90080d2ec40",
++          "REPO_MAPPING:,dart_macos-arm64 +dart+dart_macos-arm64"
+         ],
+         "generatedRepoSpecs": {
+           "ext_pub_deps___fe_analyzer_shared": {
+@@ -283,6 +283,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -318,6 +320,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -352,7 +356,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta"
+               ],
+@@ -399,6 +406,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -434,6 +443,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -468,7 +479,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "_fe_analyzer_shared",
+                 "collection",
+@@ -526,6 +540,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -561,6 +577,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -595,7 +613,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "collection",
+@@ -646,6 +667,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -681,6 +704,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -715,7 +740,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -760,6 +788,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -795,6 +825,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -829,7 +861,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "meta"
+@@ -877,6 +912,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -912,6 +949,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -946,7 +985,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "protobuf"
+@@ -994,6 +1036,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1029,6 +1073,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1063,7 +1109,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "source_span",
+                 "string_scanner"
+@@ -1111,6 +1160,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1146,6 +1197,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1180,7 +1233,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "crypto",
+@@ -1232,6 +1288,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1267,6 +1325,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1301,7 +1361,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "checked_yaml",
+                 "json_annotation",
+@@ -1351,6 +1414,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1386,6 +1451,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1420,7 +1487,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -1465,6 +1535,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1500,6 +1572,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1534,7 +1608,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "built_collection",
+                 "collection",
+@@ -1584,6 +1661,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1619,6 +1698,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1653,7 +1734,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "build",
+@@ -1706,6 +1790,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1741,6 +1827,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1775,7 +1863,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -1820,6 +1911,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1855,6 +1948,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -1889,7 +1984,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "json_annotation",
+                 "source_span",
+@@ -1938,6 +2036,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -1973,6 +2073,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2007,7 +2109,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "args",
+                 "yaml"
+@@ -2055,6 +2160,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2090,6 +2197,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2124,7 +2233,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "ffi",
+                 "meta",
+@@ -2173,6 +2285,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2208,6 +2322,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2242,7 +2358,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2287,6 +2406,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2322,6 +2443,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2356,7 +2479,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "hooks",
+@@ -2405,6 +2531,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2440,6 +2568,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2474,7 +2604,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "built_collection",
+                 "built_value",
+@@ -2525,6 +2658,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2560,6 +2695,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2594,7 +2731,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -2639,6 +2779,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2674,6 +2816,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2708,7 +2852,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "typed_data"
+               ],
+@@ -2755,6 +2902,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2790,6 +2939,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2824,7 +2975,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta"
+               ],
+@@ -2871,6 +3025,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -2906,6 +3062,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -2940,7 +3098,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "build",
+@@ -2991,6 +3152,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3026,6 +3189,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3060,7 +3225,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "args",
+                 "cli_config",
+@@ -3118,6 +3286,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3153,6 +3323,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3187,7 +3359,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "typed_data"
+               ],
+@@ -3234,6 +3409,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3269,6 +3446,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3303,7 +3482,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "args",
+@@ -3357,6 +3539,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3392,6 +3576,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3426,7 +3612,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "hooks"
+               ],
+@@ -3473,6 +3662,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3508,6 +3699,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3542,7 +3735,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "collection",
+@@ -3597,6 +3793,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3632,6 +3830,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3666,7 +3866,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "args",
+@@ -3737,6 +3940,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3772,6 +3977,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3806,7 +4013,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -3851,6 +4061,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -3886,6 +4098,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -3920,7 +4134,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta",
+                 "path"
+@@ -3968,6 +4185,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4003,6 +4222,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4037,7 +4258,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -4082,6 +4306,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4117,6 +4343,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4151,7 +4379,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "analyzer_buffer",
+@@ -4208,6 +4439,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4243,6 +4476,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4277,7 +4512,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "json_annotation",
+@@ -4326,6 +4564,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4361,6 +4601,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4395,7 +4637,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "package_config",
+@@ -4444,6 +4689,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4479,6 +4726,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4513,7 +4762,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "collection",
+@@ -4562,6 +4814,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4597,6 +4851,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4631,7 +4887,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "collection",
+@@ -4682,6 +4941,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4717,6 +4978,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4751,7 +5014,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "async",
+@@ -4806,6 +5072,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4841,6 +5109,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4875,7 +5145,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "crypto",
+@@ -4927,6 +5200,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -4962,6 +5237,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -4996,7 +5273,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async"
+               ],
+@@ -5043,6 +5323,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5078,6 +5360,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5112,7 +5396,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "source_span",
+@@ -5162,6 +5449,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5197,6 +5486,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5231,7 +5522,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta",
+                 "path",
+@@ -5280,6 +5574,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5315,6 +5611,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5349,7 +5647,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta"
+               ],
+@@ -5396,6 +5697,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5431,6 +5734,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5465,7 +5770,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "async",
+@@ -5523,6 +5831,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5558,6 +5868,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5592,7 +5904,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "clock",
+                 "meta"
+@@ -5640,6 +5955,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5675,6 +5992,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5709,7 +6028,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -5754,6 +6076,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5789,6 +6113,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5823,7 +6149,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "meta",
+@@ -5874,6 +6203,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -5909,6 +6240,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -5943,7 +6276,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -5988,6 +6324,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6023,6 +6361,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6057,7 +6397,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -6102,6 +6445,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6137,6 +6482,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6171,7 +6518,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "build",
+@@ -6227,6 +6577,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6262,6 +6614,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6296,7 +6650,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "code_assets",
+                 "file",
+@@ -6350,6 +6707,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6385,6 +6744,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6419,7 +6780,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -6464,6 +6828,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6499,6 +6865,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6533,7 +6901,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta"
+               ],
+@@ -6580,6 +6951,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6615,6 +6988,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6649,7 +7024,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -6694,6 +7072,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6729,6 +7109,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6763,7 +7145,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "meta"
+               ],
+@@ -6810,6 +7195,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6845,6 +7232,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6879,7 +7268,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "stack_trace"
+@@ -6927,6 +7319,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -6962,6 +7356,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -6996,7 +7392,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "file",
+                 "path",
+@@ -7045,6 +7444,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7080,6 +7481,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7114,7 +7517,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "fixnum",
+@@ -7163,6 +7569,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7198,6 +7606,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7232,7 +7642,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection"
+               ],
+@@ -7279,6 +7692,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7314,6 +7729,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7348,7 +7765,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "checked_yaml",
+                 "collection",
+@@ -7399,6 +7819,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7434,6 +7856,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7468,7 +7892,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -7513,6 +7940,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7548,6 +7977,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7582,7 +8013,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "meta",
+@@ -7595,6 +8029,261 @@
+               ]
+             }
+           },
++          "ext_pub_deps__retrofit": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "retrofit",
++              "version": "4.10.0",
++              "sha256": "d700c1e7599bc6327cbe19ec7a2c87b595f6063ce888e8015f30cab655972331",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "dart_style",
++                "data_assets",
++                "dio",
++                "dio_web_adapter",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "retrofit",
++                "retrofit_generator",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
++              "planned_deps": [
++                "dio",
++                "meta"
++              ],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
++          "ext_pub_deps__retrofit_generator": {
++            "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
++            "attributes": {
++              "package_name": "retrofit_generator",
++              "version": "10.3.3",
++              "sha256": "756d252a6089e18209e5cf515f18784b80819b1a09abcc2ba3dcdafeb0246004",
++              "base_url": "https://pub.dev",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "dart_style",
++                "data_assets",
++                "dio",
++                "dio_web_adapter",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "retrofit",
++                "retrofit_generator",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "code_assets": [],
++              "ignore_hook": false,
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
++              "planned_deps": [
++                "analyzer",
++                "build",
++                "built_collection",
++                "code_builder",
++                "dart_style",
++                "dio",
++                "protobuf",
++                "retrofit",
++                "source_gen"
++              ],
++              "plan_covers_package": true,
++              "package_files": [
++                "pubspec.yaml",
++                "LICENSE*"
++              ]
++            }
++          },
+           "ext_pub_deps__shelf": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_package.bzl%pub_lock_package",
+             "attributes": {
+@@ -7631,6 +8320,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7666,6 +8357,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7700,7 +8393,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "collection",
+@@ -7752,6 +8448,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7787,6 +8485,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7821,7 +8521,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "path",
+                 "shelf",
+@@ -7870,6 +8573,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -7905,6 +8610,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -7939,7 +8646,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "convert",
+                 "http_parser",
+@@ -7990,6 +8700,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8025,6 +8737,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8059,7 +8773,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "shelf",
+                 "stream_channel",
+@@ -8108,6 +8825,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8143,6 +8862,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8177,7 +8898,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "async",
+@@ -8232,6 +8956,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8267,6 +8993,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8301,7 +9029,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "source_gen"
+@@ -8349,6 +9080,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8384,6 +9117,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8418,7 +9153,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "path",
+                 "source_maps",
+@@ -8467,6 +9205,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8502,6 +9242,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8536,7 +9278,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "source_span"
+               ],
+@@ -8583,6 +9328,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8618,6 +9365,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8652,7 +9401,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "path",
+@@ -8701,6 +9453,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8736,6 +9490,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8772,7 +9528,10 @@
+                 "@rules_dart//dart/ext/sqlite3:code_asset"
+               ],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "code_assets",
+                 "collection",
+@@ -8828,6 +9587,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8863,6 +9624,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -8897,7 +9660,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "charcode",
+                 "collection",
+@@ -8947,6 +9713,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -8982,6 +9750,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9016,7 +9786,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "path"
+               ],
+@@ -9063,6 +9836,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9098,6 +9873,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9132,7 +9909,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "build",
+@@ -9191,6 +9971,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9226,6 +10008,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9260,7 +10044,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "get_it"
+               ],
+@@ -9307,6 +10094,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9342,6 +10131,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9376,7 +10167,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async"
+               ],
+@@ -9423,6 +10217,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9458,6 +10254,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9492,7 +10290,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -9537,6 +10338,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9572,6 +10375,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9606,7 +10411,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "source_span"
+               ],
+@@ -9653,6 +10461,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9688,6 +10498,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9722,7 +10534,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -9767,6 +10582,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9802,6 +10619,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9836,7 +10655,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "async",
+@@ -9907,6 +10729,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -9942,6 +10766,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -9976,7 +10802,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "boolean_selector",
+@@ -10031,6 +10860,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10066,6 +10897,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10100,7 +10933,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "analyzer",
+                 "args",
+@@ -10167,6 +11003,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10202,6 +11040,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10236,7 +11076,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection"
+               ],
+@@ -10283,6 +11126,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10318,6 +11163,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10352,7 +11199,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -10397,6 +11247,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10432,6 +11284,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10466,7 +11320,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "path"
+@@ -10514,6 +11371,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10549,6 +11408,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10583,7 +11444,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [],
+               "plan_covers_package": true,
+               "package_files": [
+@@ -10628,6 +11492,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10663,6 +11529,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10697,7 +11565,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "web"
+               ],
+@@ -10744,6 +11615,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10779,6 +11652,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10813,7 +11688,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "async",
+                 "crypto",
+@@ -10864,6 +11742,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -10899,6 +11779,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -10933,7 +11815,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "logging"
+               ],
+@@ -10980,6 +11865,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -11015,6 +11902,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -11049,7 +11938,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "source_span",
+@@ -11098,6 +11990,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -11133,6 +12027,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -11167,7 +12063,10 @@
+               "explicit_packages": [],
+               "code_assets": [],
+               "ignore_hook": false,
+-              "scc_targets": {},
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
+               "planned_deps": [
+                 "collection",
+                 "meta",
+@@ -11181,6 +12080,118 @@
+               ]
+             }
+           },
++          "ext_pub_deps__scc__dio__dio_web_adapter": {
++            "repoRuleId": "@@//dart/pub:pub_lock_scc.bzl%pub_lock_scc_package",
++            "attributes": {
++              "repo_name": "ext_pub_deps__scc__dio__dio_web_adapter",
++              "members_json": "[{\"code_assets\":[],\"name\":\"dio\",\"package_files\":[\"pubspec.yaml\",\"LICENSE*\"],\"planned_deps\":[\"async\",\"collection\",\"dio_web_adapter\",\"http_parser\",\"meta\",\"mime\",\"path\"],\"sha256\":\"852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1\",\"source\":\"hosted\",\"url\":\"https://pub.dev\",\"version\":\"5.11.1\"},{\"code_assets\":[],\"name\":\"dio_web_adapter\",\"package_files\":[\"pubspec.yaml\",\"LICENSE*\"],\"planned_deps\":[\"dio\",\"http_parser\",\"meta\",\"web\"],\"sha256\":\"3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc\",\"source\":\"hosted\",\"url\":\"https://pub.dev\",\"version\":\"2.2.2\"}]",
++              "hub_name": "ext_pub_deps",
++              "lock_packages": [
++                "_fe_analyzer_shared",
++                "analyzer",
++                "analyzer_buffer",
++                "args",
++                "async",
++                "bazel_worker",
++                "boolean_selector",
++                "build",
++                "build_config",
++                "built_collection",
++                "built_value",
++                "built_value_generator",
++                "charcode",
++                "checked_yaml",
++                "cli_config",
++                "cli_util",
++                "clock",
++                "code_assets",
++                "code_builder",
++                "collection",
++                "convert",
++                "copy_with_extension",
++                "copy_with_extension_gen",
++                "coverage",
++                "crypto",
++                "dart_style",
++                "data_assets",
++                "dio",
++                "dio_web_adapter",
++                "drift",
++                "drift_dev",
++                "ffi",
++                "file",
++                "fixnum",
++                "freezed",
++                "freezed_annotation",
++                "frontend_server_client",
++                "get_it",
++                "glob",
++                "go_router_builder",
++                "hooks",
++                "http_multi_server",
++                "http_parser",
++                "io",
++                "json_annotation",
++                "json_serializable",
++                "logger",
++                "logging",
++                "matcher",
++                "meta",
++                "mime",
++                "mockito",
++                "native_toolchain_c",
++                "node_preamble",
++                "package_config",
++                "path",
++                "platform",
++                "pool",
++                "process",
++                "protobuf",
++                "pub_semver",
++                "pubspec_parse",
++                "recase",
++                "record_use",
++                "retrofit",
++                "retrofit_generator",
++                "shelf",
++                "shelf_packages_handler",
++                "shelf_static",
++                "shelf_web_socket",
++                "source_gen",
++                "source_helper",
++                "source_map_stack_trace",
++                "source_maps",
++                "source_span",
++                "sqlite3",
++                "sqlparser",
++                "stack_trace",
++                "stacked_generator",
++                "stacked_shared",
++                "stream_channel",
++                "stream_transform",
++                "string_scanner",
++                "term_glyph",
++                "test",
++                "test_api",
++                "test_core",
++                "typed_data",
++                "vm_service",
++                "watcher",
++                "web",
++                "web_socket",
++                "web_socket_channel",
++                "webkit_inspection_protocol",
++                "yaml",
++                "yaml_edit"
++              ],
++              "explicit_packages": [],
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              },
++              "ignore_hooks": []
++            }
++          },
+           "ext_pub_deps": {
+             "repoRuleId": "@@//dart/pub/private:pub_lock_hub.bzl%pub_lock_hub",
+             "attributes": {
+@@ -11214,6 +12225,8 @@
+                 "crypto",
+                 "dart_style",
+                 "data_assets",
++                "dio",
++                "dio_web_adapter",
+                 "drift",
+                 "drift_dev",
+                 "ffi",
+@@ -11249,6 +12262,8 @@
+                 "pubspec_parse",
+                 "recase",
+                 "record_use",
++                "retrofit",
++                "retrofit_generator",
+                 "shelf",
+                 "shelf_packages_handler",
+                 "shelf_static",
+@@ -11281,7 +12296,10 @@
+                 "yaml_edit"
+               ],
+               "explicit_packages": [],
+-              "scc_targets": {}
++              "scc_targets": {
++                "dio": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio",
++                "dio_web_adapter": "@ext_pub_deps__scc__dio__dio_web_adapter//:dio_web_adapter"
++              }
+             }
+           }
+         },
+@@ -11714,6 +12732,21 @@
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/data_assets/0.20.0/8bfdbf25ec8a0f4b5a3c993042c4ab9996ba354f0b03d40f4e360f3730d71cae": [
+         "hooks"
+       ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/dio/5.11.1/852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1": [
++        "async",
++        "collection",
++        "dio_web_adapter",
++        "http_parser",
++        "meta",
++        "mime",
++        "path"
++      ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/dio_web_adapter/2.2.2/3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc": [
++        "dio",
++        "http_parser",
++        "meta",
++        "web"
++      ],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/drift/2.35.2/ef9598e1785c18db37209e8554fc79aff94632209d384ec98984b9e3184af0f7": [
+         "async",
+         "collection",
+@@ -11917,6 +12950,21 @@
+         "meta",
+         "pub_semver"
+       ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/retrofit/4.10.0/d700c1e7599bc6327cbe19ec7a2c87b595f6063ce888e8015f30cab655972331": [
++        "dio",
++        "meta"
++      ],
++      "pub.scc.v2.af2853485ad99a880004d13d/hosted/retrofit_generator/10.3.3/756d252a6089e18209e5cf515f18784b80819b1a09abcc2ba3dcdafeb0246004": [
++        "analyzer",
++        "build",
++        "built_collection",
++        "code_builder",
++        "dart_style",
++        "dio",
++        "protobuf",
++        "retrofit",
++        "source_gen"
++      ],
+       "pub.scc.v2.af2853485ad99a880004d13d/hosted/shelf/1.4.2/e7dd780a7ffb623c57850b33f43309312fc863fb6aa3d276a754bb299839ef12": [
+         "async",
+         "collection",
+diff --git a/README.md b/README.md
+index 69c76f77..b6d0a225 100644
+--- a/README.md
++++ b/README.md
+@@ -484,7 +484,9 @@ For first-party builders (`json_serializable`, `freezed`, `built_value`,
+ `mockito`, `go_router`, `copy_with_extension_gen`, `stacked`,
+ `drift`), each ships a convenience macro (`json_serializable_library`,
+ `freezed_library`, …) under `dart/ext/<builder>/defs.bzl`. Gazelle discovers
+-the matching annotations in sources and emits the macro automatically. See
++the matching annotations in sources and emits the macro automatically.
++`retrofit_generator` ships the `retrofit_library` macro too, but Gazelle does
++not emit it yet: declare it by hand for `@RestApi` sources. See
+ [`docs/ext.md`](./docs/ext.md) for the shim contract, worker behaviour, and
+ dual-build migration guide when coexisting with `build_runner`.
+ 
+diff --git a/dart/ext/pubspec.lock b/dart/ext/pubspec.lock
+index c989f2a4..d44155ed 100644
+--- a/dart/ext/pubspec.lock
++++ b/dart/ext/pubspec.lock
+@@ -217,6 +217,22 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "0.20.0"
++  dio:
++    dependency: transitive
++    description:
++      name: dio
++      sha256: "852ec3b48cc431ac04fff978413c541502b67ffc3e26921e74e3d994694192c1"
++      url: "https://pub.dev"
++    source: hosted
++    version: "5.11.1"
++  dio_web_adapter:
++    dependency: transitive
++    description:
++      name: dio_web_adapter
++      sha256: "3a1b2cd7be71086f38504956e3ebcd2837288d231ff454bafa78021244102bfc"
++      url: "https://pub.dev"
++    source: hosted
++    version: "2.2.2"
+   drift:
+     dependency: transitive
+     description:
+@@ -497,6 +513,22 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "1.1.1"
++  retrofit:
++    dependency: transitive
++    description:
++      name: retrofit
++      sha256: d700c1e7599bc6327cbe19ec7a2c87b595f6063ce888e8015f30cab655972331
++      url: "https://pub.dev"
++    source: hosted
++    version: "4.10.0"
++  retrofit_generator:
++    dependency: "direct main"
++    description:
++      name: retrofit_generator
++      sha256: "756d252a6089e18209e5cf515f18784b80819b1a09abcc2ba3dcdafeb0246004"
++      url: "https://pub.dev"
++    source: hosted
++    version: "10.3.3"
+   shelf:
+     dependency: transitive
+     description:
+diff --git a/dart/ext/pubspec.yaml b/dart/ext/pubspec.yaml
+index 5c399a76..59723d50 100644
+--- a/dart/ext/pubspec.yaml
++++ b/dart/ext/pubspec.yaml
+@@ -23,6 +23,7 @@ dependencies:
+   freezed: ^4.0.1
+   go_router_builder: ^4.3.0
+   json_serializable: ^6.13.0
++  retrofit_generator: ^10.3.3
+   mockito: ^5.6.0
+   stacked_generator: ^2.0.0
+ dev_dependencies:
+diff --git a/dart/ext/retrofit/BUILD.bazel b/dart/ext/retrofit/BUILD.bazel
+new file mode 100644
+index 00000000..142a15e6
+--- /dev/null
++++ b/dart/ext/retrofit/BUILD.bazel
+@@ -0,0 +1,32 @@
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++load("//dart:defs.bzl", "dart_binary")
++
++exports_files(
++    ["defs.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "defs",
++    srcs = ["defs.bzl"],
++    visibility = ["//visibility:public"],
++    deps = [
++        "//dart/ext/_shared:defs",
++    ],
++)
++
++# Shim binary for the retrofit_generator Builder. SharedPartBuilder; produces
++# .retrofit.g.part shards (combining to .g.dart happens in a separate step).
++dart_binary(
++    name = "shim",
++    srcs = ["shim.dart"],
++    code_assets_from_deps = False,
++    compile_mode = "kernel",
++    launcher = True,
++    main = "shim.dart",
++    visibility = ["//visibility:public"],
++    deps = [
++        "//dart/ext:builder_shim",
++        "@ext_pub_deps//:retrofit_generator",
++    ],
++)
+diff --git a/dart/ext/retrofit/defs.bzl b/dart/ext/retrofit/defs.bzl
+new file mode 100644
+index 00000000..f315e640
+--- /dev/null
++++ b/dart/ext/retrofit/defs.bzl
+@@ -0,0 +1,57 @@
++"""Convenience macro for the retrofit_generator builder."""
++
++load("@rules_dart//dart/ext/_shared:defs.bzl", "shared_part_library")
++
++visibility("public")
++
++def retrofit_library(
++        name,
++        srcs,
++        package_name = "",
++        language_version = "",
++        deps = [],
++        annotation_dep = "@pub_deps//:retrofit",
++        config = "",
++        **kwargs):
++    """Declares a `dart_library` completed by the `retrofit_generator` builder.
++
++    Generates one `.retrofit.g.part` shard per source, merges the shards into
++    `<src>.g.dart`, and wraps the sources and the merged output in a `dart_library`.
++
++    The generated client calls `package:dio` and the `fromJson` / `toJson` of every
++    model type a method takes or returns, so `deps` must reach `dio` and the model
++    libraries for the analyzer to resolve those types.
++
++    Args:
++      name: Name of the wrapping `dart_library` target; the per-source codegen targets
++        derive their names from it.
++      srcs: The `.dart` source files that carry `@RestApi` annotations. Each one gets
++        its own codegen action.
++      package_name: Dart package name, matching the consumer's `pubspec.yaml` `name:`.
++        Defaults to the last component of the Bazel package path.
++      language_version: Dart language version of the package in `<major>.<minor>` form.
++        Defaults to empty, which leaves the version unstated, as for a hand-written
++        `dart_library`.
++      deps: Additional `dart_library` targets the sources import, such as `dio` and
++        the model libraries. The annotation dependency is added automatically.
++        Defaults to none.
++      annotation_dep: Label of the runtime annotation library the sources import; it is
++        added to `deps`. Defaults to `@pub_deps//:retrofit`.
++      config: Builder options as a JSON string handed to the generator, standing in for
++        the `options:` of a `build.yaml`, for example `'{"format_output": false}'`.
++        Defaults to empty, which uses the builder's own defaults.
++      **kwargs: Further attributes forwarded to the wrapping `dart_library`, such as
++        `visibility` or `tags`.
++    """
++    shared_part_library(
++        name = name,
++        srcs = srcs,
++        package_name = package_name,
++        language_version = language_version,
++        shim = "@rules_dart//dart/ext/retrofit:shim",
++        part_suffix = ".retrofit.g.part",
++        annotation_dep = annotation_dep,
++        deps = deps,
++        config = config,
++        **kwargs
++    )
+diff --git a/dart/ext/retrofit/shim.dart b/dart/ext/retrofit/shim.dart
+new file mode 100644
+index 00000000..b35c5f47
+--- /dev/null
++++ b/dart/ext/retrofit/shim.dart
+@@ -0,0 +1,5 @@
++import 'package:retrofit_generator/retrofit_generator.dart'
++    show retrofitBuilder;
++import 'package:rules_dart_ext/worker_entry.dart';
++
++Future<void> main(List<String> args) => shimMain(args, retrofitBuilder);
+diff --git a/dart/tests/BUILD.bazel b/dart/tests/BUILD.bazel
+index c545677d..24dac4f6 100644
+--- a/dart/tests/BUILD.bazel
++++ b/dart/tests/BUILD.bazel
+@@ -66,6 +66,7 @@ load(":pinned_sources_test.bzl", "pinned_sources_test_suite")
+ load(":project_staging_test.bzl", "project_staging_test_suite")
+ load(":provider_shape_test.bzl", "provider_shape_probe")
+ load(":registry_test.bzl", "registry_test_suite")
++load(":retrofit_library_direct_test.bzl", "retrofit_library_direct_test_suite")
+ load(":ruleset_api_reexports_test.bzl", "ruleset_api_reexports_test_suite")
+ load(":shared_part_library_direct_test.bzl", "shared_part_library_direct_test_suite")
+ load(":snapshot_patch_test.bzl", "snapshot_patch_test_suite")
+@@ -250,6 +251,8 @@ library_builder_library_direct_test_suite(name = "library_builder_library_direct
+ 
+ mockito_library_direct_test_suite(name = "mockito_library_direct")
+ 
++retrofit_library_direct_test_suite(name = "retrofit_library_direct")
++
+ shared_part_library_direct_test_suite(name = "shared_part_library_direct")
+ 
+ stacked_bottomsheet_library_direct_test_suite(name = "stacked_bottomsheet_library_direct")
+diff --git a/dart/tests/lib/ext/retrofit.dart b/dart/tests/lib/ext/retrofit.dart
+new file mode 100644
+index 00000000..ce142a44
+--- /dev/null
++++ b/dart/tests/lib/ext/retrofit.dart
+@@ -0,0 +1,2 @@
++/// A source for the direct `retrofit_library` test.
++class Subject {}
+diff --git a/dart/tests/retrofit_library_direct_test.bzl b/dart/tests/retrofit_library_direct_test.bzl
+new file mode 100644
+index 00000000..a7461073
+--- /dev/null
++++ b/dart/tests/retrofit_library_direct_test.bzl
+@@ -0,0 +1,39 @@
++"""Direct `rules_testing` test for the `retrofit_library` macro.
++
++`retrofit_library` wraps a `dart_library` around two `dart_codegen` targets per source:
++one runs the retrofit_generator shim and emits the `.retrofit.g.part` shard, the other
++merges that shard into `<src>.g.dart`. The test pins the wrapping library's
++providers and both codegen targets' providers and actions.
++"""
++
++load("@rules_testing//lib:analysis_test.bzl", "analysis_test")
++load("//dart/ext/retrofit:defs.bzl", "retrofit_library")
++load(":ext_direct_helpers.bzl", "ANNOTATIONS", "LANGUAGE_VERSION", "PACKAGE", "expect_shared_part", "shared_part_targets", "source_of")
++
++visibility(["//dart/..."])
++
++def _retrofit_library_test(env, targets):
++    """Asserts the providers and the codegen actions `retrofit_library` declares."""
++    expect_shared_part(env, targets, "retrofit", ".retrofit.g.part", "*retrofit/shim*")
++
++def retrofit_library_direct_test_suite(name):
++    """Declares the direct test of `retrofit_library`.
++
++    Args:
++      name: Name of the generated `test_suite`.
++    """
++    retrofit_library(
++        name = name + "_subject",
++        srcs = [source_of("retrofit")],
++        annotation_dep = ANNOTATIONS,
++        language_version = LANGUAGE_VERSION,
++        package_name = PACKAGE,
++        tags = ["manual"],
++    )
++    analysis_test(
++        name = name + "_test",
++        attr_values = {"size": "small"},
++        impl = _retrofit_library_test,
++        targets = shared_part_targets(name, "retrofit"),
++    )
++    native.test_suite(name = name, tests = [":" + name + "_test"])
+diff --git a/docs/BUILD.bazel b/docs/BUILD.bazel
+index 2e7ed066..17a9e641 100644
+--- a/docs/BUILD.bazel
++++ b/docs/BUILD.bazel
+@@ -19,6 +19,7 @@ _DOC_EXTRACTS = [
+     ":go_router_defs.doc_extract",
+     ":json_serializable_defs.doc_extract",
+     ":mockito_defs.doc_extract",
++    ":retrofit_defs.doc_extract",
+     ":sqlite3_defs.doc_extract",
+     ":stacked_defs.doc_extract",
+     ":pub_defs.doc_extract",
+@@ -135,6 +136,12 @@ starlark_doc_extract(
+     deps = ["//dart/ext/mockito:defs"],
+ )
+ 
++starlark_doc_extract(
++    name = "retrofit_defs.doc_extract",
++    src = "//dart/ext/retrofit:defs.bzl",
++    deps = ["//dart/ext/retrofit:defs"],
++)
++
+ starlark_doc_extract(
+     name = "sqlite3_defs.doc_extract",
+     src = "//dart/ext/sqlite3:defs.bzl",
+@@ -214,8 +221,8 @@ _DECLARED_EXTRACTS = [
+ ]
+ 
+ _ = (
+-    None if len(_DECLARED_EXTRACTS) == 28 and sorted(_DECLARED_EXTRACTS) == sorted(_DOC_EXTRACTS) else fail(
+-        "expected 28 starlark_doc_extract targets matching _DOC_EXTRACTS, found {}".format(
++    None if len(_DECLARED_EXTRACTS) == 29 and sorted(_DECLARED_EXTRACTS) == sorted(_DOC_EXTRACTS) else fail(
++        "expected 29 starlark_doc_extract targets matching _DOC_EXTRACTS, found {}".format(
+             len(_DECLARED_EXTRACTS),
+         ),
+     )
+diff --git a/docs/ext.md b/docs/ext.md
+index d631c5d2..38df3bef 100644
+--- a/docs/ext.md
++++ b/docs/ext.md
+@@ -4,7 +4,7 @@
+ 
+ Run the `package:build` `Builder` ecosystem (`json_serializable`,
+ `freezed`, `built_value`, `mockito`, `go_router`, `copy_with_extension_gen`,
+-`stacked`, `drift`) under Bazel without `build_runner`.
++`retrofit`, `stacked`, `drift`) under Bazel without `build_runner`.
+ Users write Dart with `@JsonSerializable`, `@freezed`, `@DriftDatabase`,
+ `@StackedApp`, etc., and Bazel produces the generated code as regular
+ build outputs.
+@@ -44,6 +44,7 @@ dart/ext/
+ ├── mockito/
+ ├── go_router/
+ ├── copy_with_extension_gen/
++├── retrofit/                  SharedPart (`.retrofit.g.part`); `@RestApi` dio clients.
+ ├── stacked/                   Six independent LibraryBuilders.
+ ├── drift/                     Four-stage: prep + discover/analyzer/driftBuilder.
+ └── tools/
