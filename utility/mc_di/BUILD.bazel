@@ -21,3 +21,16 @@ dart_test(
         "@pub_deps//:test",
     ],
 )
+
+dart_test(
+    name = "recording_test",
+    size = "small",
+    package_name = "mc_di",
+    language_version = "3.13",
+    main = "test/recording_test.dart",
+    deps = [
+        ":mc_di",
+        "@pub_deps//:get_it",
+        "@pub_deps//:test",
+    ],
+)

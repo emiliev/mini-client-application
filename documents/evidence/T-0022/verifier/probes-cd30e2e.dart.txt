@@ -1,0 +1,153 @@
+
+  // ---- Verifier probes (temporary, never committed) ----
+  Future<FeatureFlowController<_V>> pumpV(WidgetTester tester) async {
+    late FeatureFlowController<_V> controller;
+    await tester.pumpWidget(
+      _app(
+        FeatureFlow<_V>(
+          state: const _V(),
+          onGeneratePages: (s) => [
+            McFlowPage(
+              name: 'list',
+              child: Builder(
+                builder: (context) {
+                  controller = context.di<FeatureFlowController<_V>>();
+                  return Text('vlist ${s.filter}');
+                },
+              ),
+            ),
+            if (s.detail != null)
+              McFlowPage(name: 'detail', child: Text('vdetail ${s.detail}')),
+            if (s.settings)
+              McFlowPage(name: 'settings', child: const Text('vsettings')),
+            if (s.sub != null)
+              McFlowPage(name: 'sub', child: Text('vsub ${s.sub}')),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    return controller;
+  }
+
+  Future<void> vSwipe(WidgetTester tester) async {
+    final gesture = await tester.startGesture(const Offset(2, 300));
+    await gesture.moveBy(const Offset(400, 0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> vUpdate(
+    WidgetTester tester,
+    FeatureFlowController<_V> c,
+    _V Function(_V) f,
+  ) async {
+    c.update(f);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('VPROBE1 list filter foo, push, swipe back keeps foo', (
+    tester,
+  ) async {
+    final c = await pumpV(tester);
+    await vUpdate(tester, c, (s) => s.copy(filter: 'foo'));
+    expect(find.text('vlist foo'), findsOneWidget);
+    await vUpdate(tester, c, (s) => s.copy(detail: 'x'));
+    expect(find.text('vdetail x'), findsOneWidget);
+    await vSwipe(tester);
+    expect(c.state.filter, 'foo');
+    expect(c.state.detail, isNull);
+    expect(find.text('vlist foo'), findsOneWidget);
+    expect(find.textContaining('vdetail'), findsNothing);
+  });
+
+  testWidgets('VPROBE2 in-place change inside detail, back gives pre-push', (
+    tester,
+  ) async {
+    final c = await pumpV(tester);
+    await vUpdate(tester, c, (s) => s.copy(filter: 'foo'));
+    await vUpdate(tester, c, (s) => s.copy(detail: 'x'));
+    // In place on the detail page: new detail data and a filter change.
+    await vUpdate(tester, c, (s) => s.copy(detail: 'y', filter: 'bar'));
+    expect(find.text('vdetail y'), findsOneWidget);
+    await vSwipe(tester);
+    expect(c.state.detail, isNull);
+    expect(c.state.filter, 'foo');
+    expect(find.text('vlist foo'), findsOneWidget);
+    expect(find.textContaining('vdetail'), findsNothing);
+  });
+
+  testWidgets('VPROBE3 push push back back restores each level, re-push ok', (
+    tester,
+  ) async {
+    final c = await pumpV(tester);
+    await vUpdate(tester, c, (s) => s.copy(filter: 'foo'));
+    await vUpdate(tester, c, (s) => s.copy(detail: 'a'));
+    await vUpdate(tester, c, (s) => s.copy(detail: 'b'));
+    await vUpdate(tester, c, (s) => s.copy(sub: 's'));
+    await vUpdate(tester, c, (s) => s.copy(sub: 't', detail: 'z'));
+    expect(find.text('vsub t'), findsOneWidget);
+
+    await vSwipe(tester);
+    expect(c.state.sub, isNull);
+    expect(c.state.detail, 'b');
+    expect(c.state.filter, 'foo');
+    expect(find.text('vdetail b'), findsOneWidget);
+    expect(find.textContaining('vsub'), findsNothing);
+
+    await vSwipe(tester);
+    expect(c.state.detail, isNull);
+    expect(c.state.filter, 'foo');
+    expect(find.text('vlist foo'), findsOneWidget);
+    expect(find.textContaining('vdetail'), findsNothing);
+
+    // The flow is still usable after the pops.
+    await vUpdate(tester, c, (s) => s.copy(filter: 'qux'));
+    await vUpdate(tester, c, (s) => s.copy(detail: 'c'));
+    expect(find.text('vdetail c'), findsOneWidget);
+    await vSwipe(tester);
+    expect(c.state.detail, isNull);
+    expect(c.state.filter, 'qux');
+    expect(find.text('vlist qux'), findsOneWidget);
+  });
+
+  testWidgets('VPROBE4 same-depth page replace, then swipe: pages match state', (
+    tester,
+  ) async {
+    final c = await pumpV(tester);
+    await vUpdate(tester, c, (s) => s.copy(detail: 'x'));
+    // Replace the top page: [list, detail] -> [list, settings].
+    await vUpdate(tester, c, (s) => _V(filter: s.filter, settings: true));
+    expect(find.text('vsettings'), findsOneWidget);
+    await vSwipe(tester);
+    final names = [
+      'list',
+      if (c.state.detail != null) 'detail',
+      if (c.state.settings) 'settings',
+    ];
+    final shown = [
+      'list',
+      if (find.textContaining('vdetail').evaluate().isNotEmpty) 'detail',
+      if (find.text('vsettings').evaluate().isNotEmpty) 'settings',
+    ];
+    expect(shown, names, reason: 'state ${c.state} vs shown pages');
+  });
+}
+
+class _V {
+  const _V({this.filter = 'none', this.detail, this.sub, this.settings = false});
+  final String filter;
+  final String? detail;
+  final String? sub;
+  final bool settings;
+
+  _V copy({String? filter, String? detail, String? sub}) => _V(
+    filter: filter ?? this.filter,
+    detail: detail ?? this.detail,
+    sub: sub ?? this.sub,
+    settings: settings,
+  );
+
+  @override
+  String toString() => '_V($filter, $detail, $sub, $settings)';
+}

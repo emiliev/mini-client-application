@@ -14,6 +14,7 @@ workspace:
   - utility/mc_analysis
   - utility/mc_api_client
   - utility/mc_api_errors
+  - utility/mc_bloc_kit
   - utility/mc_config
   - utility/mc_di
   - utility/mc_ds_buttons
@@ -23,6 +24,7 @@ workspace:
   - utility/mc_ds_theme
   - utility/mc_ds_tokens
   - utility/mc_event_bus
+  - utility/mc_feature_flow
   - utility/mc_fixtures_characters
   - utility/mc_fixtures_media
   - utility/mc_mocked_backend

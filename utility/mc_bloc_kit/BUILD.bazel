@@ -1,0 +1,50 @@
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_bloc_kit",
+    package_name = "mc_bloc_kit",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = [
+        "//utility/mc_monitoring",
+        "@pub_deps//:bloc",
+    ],
+)
+
+dart_test(
+    name = "mc_bloc_test",
+    size = "small",
+    package_name = "mc_bloc_kit",
+    language_version = "3.13",
+    main = "test/mc_bloc_test.dart",
+    deps = [
+        ":mc_bloc_kit",
+        "//utility/mc_monitoring",
+        "@pub_deps//:bloc",
+        "@pub_deps//:test",
+    ],
+)
+
+dart_test(
+    name = "feature_flow_controller_test",
+    size = "small",
+    package_name = "mc_bloc_kit",
+    language_version = "3.13",
+    main = "test/feature_flow_controller_test.dart",
+    deps = [
+        ":mc_bloc_kit",
+        "@pub_deps//:test",
+    ],
+)
+
+# AC7 (R15): lib imports no Flutter and declares no mixins.
+dart_test(
+    name = "purity_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_bloc_kit",
+    language_version = "3.13",
+    main = "test/purity_test.dart",
+    deps = ["@pub_deps//:test"],
+)

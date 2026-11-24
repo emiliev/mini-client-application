@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get_it/get_it.dart';
 import 'package:mc_di/src/di_initializer.dart';
+import 'package:mc_di/src/recording_get_it.dart';
 
 /// Resolves registered types. `call` maps to get_it's `get`, so only one
 /// factory parameter is exposed (as in Tide's `DIContainer`).
@@ -106,9 +109,10 @@ class RootImport<T extends Object> {
 /// what its [RootImport]s forward from the root. Types registered here are
 /// invisible to the root and to other child containers.
 class ChildDIContainer implements DIContainer {
-  ChildDIContainer._(this._getIt);
+  ChildDIContainer._(this._getIt, this._recorded);
 
   final GetIt _getIt;
+  final List<RecordedRegistration> _recorded;
 
   @override
   T call<T extends Object>({dynamic parameter, String? name}) =>
@@ -117,6 +121,39 @@ class ChildDIContainer implements DIContainer {
   @override
   bool isRegistered<T extends Object>({String? name}) =>
       _getIt.isRegistered<T>(instanceName: name);
+
+  /// Resolves every registration the initializers made (plan 01 §4.5), so a
+  /// missing dependency fails here instead of at first use. Factories that
+  /// take parameters are skipped. Async, `signalsReady` and `dependsOn`
+  /// registrations are awaited for up to [timeout]. Throws a [StateError] naming the registered
+  /// type and the underlying error, which names the missing dependency.
+  Future<void> debugResolveAll({
+    Duration timeout = const Duration(seconds: 5),
+  }) async {
+    for (final registration in List.of(_recorded)) {
+      final resolve = registration.resolve;
+      if (resolve == null) {
+        continue;
+      }
+      try {
+        await resolve().timeout(timeout);
+      } on TimeoutException catch (_, stack) {
+        Error.throwWithStackTrace(
+          StateError(
+            'debugResolveAll: $registration was not ready after '
+            '${timeout.inMilliseconds} ms (waiting for signalReady or for '
+            'its dependsOn types).',
+          ),
+          stack,
+        );
+      } on Object catch (error, stack) {
+        Error.throwWithStackTrace(
+          StateError('debugResolveAll: resolving $registration failed: $error'),
+          stack,
+        );
+      }
+    }
+  }
 
   /// Disposes what this container registered. The root is untouched.
   Future<void> dispose() => _getIt.reset();
@@ -131,18 +168,19 @@ Future<ChildDIContainer> createChildContainer({
   List<McDIInitializer> initializers = const <McDIInitializer>[],
 }) async {
   final child = GetIt.asNewInstance();
+  final recording = RecordingGetIt(child);
   try {
     for (final import in rootImports) {
       import._forward(_root, child);
     }
     for (final initializer in initializers) {
-      await initializer.init(child);
+      await initializer.init(recording);
     }
   } catch (_) {
     await child.reset();
     rethrow;
   }
-  return ChildDIContainer._(child);
+  return ChildDIContainer._(child, recording.recorded);
 }
 
 class _GetItContainer implements DIContainer {

@@ -1,0 +1,16 @@
+name: mc_bloc_kit
+description: Pure Dart bloc kit. McBloc with central monitoring and FeatureFlowController.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  bloc: ^9.0.0
+  mc_monitoring: any
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0
