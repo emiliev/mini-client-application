@@ -131,10 +131,10 @@ index 00000000..c975df42
 +)
 diff --git a/dart/ext/injectable/defs.bzl b/dart/ext/injectable/defs.bzl
 new file mode 100644
-index 00000000..0b3986c5
+index 00000000..e1d0586b
 --- /dev/null
 +++ b/dart/ext/injectable/defs.bzl
-@@ -0,0 +1,173 @@
+@@ -0,0 +1,179 @@
 +"""Two-stage injectable code generation (an aggregate builder).
 +
 +injectable_generator runs in two stages under build_runner: a per-library
@@ -200,8 +200,14 @@ index 00000000..0b3986c5
 +      The labels of the shard targets, for `injectable_config`'s `shards`.
 +    """
 +    shards = []
++    by_token = {}
 +    for src in srcs:
-+        target = "_{}_{}_inj".format(name, _token(src))
++        token = _token(src)
++        if token in by_token:
++            fail("injectable_shards(%s): %r and %r map to the same target name " % (name, by_token[token], src) +
++                 "suffix %r; rename one of the files or split the call." % token)
++        by_token[token] = src
++        target = "_{}_{}_inj".format(name, token)
 +        dart_codegen(
 +            name = target,
 +            src = src,
@@ -310,7 +316,7 @@ index 00000000..0b3986c5
 +    )
 diff --git a/dart/ext/injectable/lib/injectable_shims.dart b/dart/ext/injectable/lib/injectable_shims.dart
 new file mode 100644
-index 00000000..5ad6304c
+index 00000000..c418d026
 --- /dev/null
 +++ b/dart/ext/injectable/lib/injectable_shims.dart
 @@ -0,0 +1,280 @@
@@ -339,7 +345,7 @@ index 00000000..5ad6304c
 +/// exports a type as its import and the rest as `otherImports`, and the rest
 +/// feed the hash that orders registrations, so under the shim's order a
 +/// package barrel can become the import and a third-party type (`Dio`) loses
-+/// its `otherImports`, which reorders `.config.dart` (F-0026).
++/// its `otherImports`, which reorders `.config.dart` (F-0028).
 +library;
 +
 +import 'dart:async';
@@ -1120,10 +1126,10 @@ index 00000000..9d041c6d
 \ No newline at end of file
 diff --git a/dart/ext/injectable/third_party/injectable_generator/VENDORED.md b/dart/ext/injectable/third_party/injectable_generator/VENDORED.md
 new file mode 100644
-index 00000000..38823cc5
+index 00000000..d855317f
 --- /dev/null
 +++ b/dart/ext/injectable/third_party/injectable_generator/VENDORED.md
-@@ -0,0 +1,45 @@
+@@ -0,0 +1,52 @@
 +# Vendored: injectable_generator 3.1.3
 +
 +| | |
@@ -1132,7 +1138,7 @@ index 00000000..38823cc5
 +| Version | 3.1.3 (pub.dev) |
 +| Upstream commit | `0644204687dfb34e7318c11fe4abf9416ed2c549` (tag `injectable_generator-3.1.3`) |
 +| pub.dev archive | `injectable_generator-3.1.3.tar.gz`, sha256 `24d525c60ed9abf345c8749c3291ca1b3f1d21fd53344c0c644da820a92049df` |
-+| Licence | MIT, `LICENSE` (unchanged) |
++| Licence | MIT, `LICENSE` (byte-identical to the archive; see the note below) |
 +
 +## Why it is vendored
 +
@@ -1156,7 +1162,14 @@ index 00000000..38823cc5
 +   is replaced by the two shims in `dart/ext/injectable/` (rules_dart never reads
 +   `build.yaml`).
 +
-+No `.dart` file under `lib/` is modified. To check:
++No `.dart` file under `lib/` is modified.
++
++**LICENSE note:** the archive's `LICENSE` has no final newline, and this copy keeps it so
++(`git am` / a git checkout give the exact bytes). A consumer that applies this change as a
++patch with Bazel's `git_override(patches = ...)` gets one extra trailing newline: Bazel's
++patcher ignores the `\ No newline at end of file` marker. The licence text is unchanged.
++
++To check:
 +
 +```sh
 +curl -sL https://pub.dev/api/archives/injectable_generator-3.1.3.tar.gz | tar xz -C /tmp/ig
