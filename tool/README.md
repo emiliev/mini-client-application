@@ -87,3 +87,17 @@ Regression tests for the code-review findings, each named after the AC it protec
 | `test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails` | a failing or garbage `xcrun simctl list` (fake `xcrun` on PATH) gives exit 3, not "nothing to delete" | about 1 s |
 
 The whole suite takes about 7 to 8 minutes.
+
+## `rules_fork.sh`: patch queue for the rules forks
+
+Develops fixes and shims for `ai_rules_dart` / `ai_rules_flutter` in a local clone and exports them as numbered patches in `third_party/rules_patches/<repo>/` ([T-0024](../documents/tasks/T-0024-rules-patch-queue.md), plan 03 KD2). Conventions and the full workflow: [third_party/rules_patches/README.md](../third_party/rules_patches/README.md).
+
+```sh
+tool/rules_fork.sh checkout ai_rules_dart   # clone pin, apply queue, write .bazelrc.user (absolute --override_module)
+tool/rules_fork.sh export ai_rules_dart     # fork commits (pin..HEAD) -> NNNN-slug.patch; refuses binary hunks
+tool/rules_fork.sh status
+```
+
+Test: `tool/test/rules_fork_test.sh` (local fake upstream, real Bazel, no network).
+
+**`check` must run before merging any queue change.** `tool/rules_fork.sh check [<repo>]` replays every queued patch on the pinned commit with `git am` (strict, no fuzz) and exits non-zero naming the first bad patch. Bazel's own patcher is lenient and can silently drop a stale hunk (F-0022), so a green build proves nothing about the queue. It uses the fork dir or a pin cache (`~/.cache/mc-bazel/pins`, `MC_PIN_CACHE`) and fetches the pin only when neither has it. The TL wires it into the verify gate.

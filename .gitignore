@@ -26,3 +26,4 @@ coverage/
 *.freezed.dart
 **/lib/src/l10n/*_l10n.dart
 **/lib/src/l10n/*_l10n_[a-z]*.dart
+.bazelrc.user.tmp

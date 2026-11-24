@@ -1,0 +1,2 @@
+rules_fork: refusing to export, binary change(s) cannot go in a text patch queue:
+  dart/icon.bin

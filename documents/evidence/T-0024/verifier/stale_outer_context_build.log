@@ -1,0 +1,16 @@
+INFO: Invocation ID: 6a0db02b-56d6-40c5-bd77-339106c36924
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: 7 targets (7 packages loaded, 6 targets configured)
+Analyzing: 7 targets (7 packages loaded, 6 targets configured)
+
+Analyzing: 7 targets (194 packages loaded, 9408 targets configured, 300 aspect applications)
+[2,247 / 2,247] no actions running
+INFO: Analyzed 7 targets (203 packages loaded, 9571 targets configured, 375 aspect applications).
+INFO: Found 7 targets...
+INFO: Elapsed time: 5.096s, Critical Path: 0.06s
+INFO: 1 process: 3897 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action

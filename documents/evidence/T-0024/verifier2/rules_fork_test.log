@@ -1,0 +1,22 @@
+PASS T-0024-AC3_checkout_writes_absolute_override
+PASS T-0024-AC3_checkout_preserves_user_bazelrc_lines
+PASS T-0024-AC3_bazelrc_user_is_gitignored
+PASS T-0024-AC1_export_writes_one_patch_per_commit
+PASS T-0024-AC1_git_override_patches_build_same_as_override_module
+PASS T-0024-AC2_unappliable_patch_fails_naming_it
+PASS T-0024-AC2_checkout_rejects_unappliable_queued_patch
+PASS T-0024-AC3_export_refuses_binary_hunk_naming_file
+PASS T-0024-AC3_export_refuses_binary_added_then_removed
+PASS T-0024-AC1_export_refuses_merge_commits
+PASS T-0024-AC2_export_refuses_after_failed_checkout
+PASS T-0024-AC1_export_refuses_detached_head
+PASS T-0024-AC1_export_refuses_dropping_patches_without_force
+PASS T-0024-AC2_check_accepts_good_queue
+PASS T-0024-AC2_check_rejects_wrong_context_line_at_eof
+PASS T-0024-AC2_check_rejects_wrong_removed_line_at_eof
+PASS T-0024-AC2_check_fetches_pin_without_fork_dir
+PASS T-0024-AC4_status_ignores_commented_override
+PASS T-0024-AC4_status_detects_order_mismatch
+PASS T-0024-AC4_status_accepts_matching_order
+PASS T-0024-AC4_committed_queue_matches_module_bazel
+rules_fork_test: 21 passed, 0 failed

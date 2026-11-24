@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Ready for Verifier |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0024-patch-queue` |
@@ -32,6 +32,29 @@ The mechanism every rules fix and every new codegen shim (retrofit, injectable, 
 
 ## Log
 - 2026-11-24: Created and dispatched.
+- 2026-11-24: Engineer: implemented `tool/rules_fork.sh`, `third_party/rules_patches/`, `MODULE.bazel` wiring (empty queue, `patch_strip = 1`), `tool/test/rules_fork_test.sh`, F-0022. Also proven by hand on the real `ai_rules_dart` pin with a 2-commit demo (override and patches built `//...` with identical `query //...`, 125 targets); the demo was removed, the queue ships empty.
 
 ## Outcome
-_Pending._
+Evidence: `documents/evidence/T-0024/engineer/` (test, lint, arch, rules_fork_test logs).
+
+| AC | Test (`tool/test/rules_fork_test.sh`) |
+|---|---|
+| AC1 | `T-0024-AC1_export_writes_one_patch_per_commit`, `T-0024-AC1_git_override_patches_build_same_as_override_module` |
+| AC2 | `T-0024-AC2_unappliable_patch_fails_naming_it`, `T-0024-AC2_checkout_rejects_unappliable_queued_patch` |
+| AC3 | `T-0024-AC3_export_refuses_binary_hunk_naming_file`, `T-0024-AC3_checkout_writes_absolute_override`, `T-0024-AC3_bazelrc_user_is_gitignored` |
+| AC4 | the script itself, plus `T-0024-AC4_committed_queue_matches_module_bazel`; `test //...` 39/39, lint and `mc_arch_check` green with the empty queue |
+
+Notes for the Verifier and TL:
+- The test uses a local fake upstream module and a throwaway workspace and output base, so it needs no network.
+- F-0022: Bazel's patcher ignores context lines and offsets. AC2 is exercised with a patch whose target file is missing; `checkout` (git am) is the strict check.
+- Fork dirs default to `~/.cache/mc-bazel/forks/<worktree>/<repo>`, outside the repo so their BUILD files stay out of `//...`.
+- Follow-ups: a CI check that every `*.patch` is listed in `MODULE.bazel` (only `status` and the AC4 test compare today); P3-03 should start from `checkout`.
+
+### Review fixes (code-review, 4 important + nits)
+`tool/rules_fork.sh` now: (1) rewrites only the `# >>> / <<< rules_fork.sh` block of `.bazelrc.user` (test `AC3_checkout_preserves_user_bazelrc_lines`); (2) checks binaries per commit via `git log --numstat` and `--no-binary` (`AC3_export_refuses_binary_hunk_naming_file` with a pre-seeded patch that must survive, `AC3_export_refuses_binary_added_then_removed`); (3) `export` refuses an open `git am`/rebase, a HEAD off branch `fork`, and fewer commits than queued patches unless `--force` (`AC2_export_refuses_after_failed_checkout`, `AC1_export_refuses_detached_head`, `AC1_export_refuses_dropping_patches_without_force`); (4) refuses merge commits (`AC1_export_refuses_merge_commits`). Nits: glob arrays for patch paths, fork dir keyed on basename plus a hash of the absolute root, `status` compares names and order and exits non-zero on mismatch (`AC4_status_detects_order_mismatch`, `AC4_status_accepts_matching_order`), ACTIVE only for uncommented lines (`AC4_status_ignores_commented_override`), test has no BSD-only `sed -i ''`. Re-run: `rules_fork_test.sh` 17/17, `bazelw_test.sh` 8/8, `test //...` 39/39, lint and `mc_arch_check` green.
+
+### Verifier FAIL follow-up (3fb08ff)
+The AC3 net-diff finding was already fixed in 3f04d95. New: `tool/rules_fork.sh check [<repo>]` replays each queued patch with `git am` (strict) on the pin, using the fork dir or a pin cache (`MC_PIN_CACHE`), fetching only if needed; it exits non-zero naming the first bad patch. Bazel patcher silently drops a stale end-of-file hunk and crashes unnamed on a wrong removed line at EOF, so the build cannot be trusted (F-0022, table corrected from the Verifier report). Tests: `AC2_check_accepts_good_queue`, `AC2_check_rejects_wrong_context_line_at_eof`, `AC2_check_rejects_wrong_removed_line_at_eof`, `AC2_check_fetches_pin_without_fork_dir`. `tool/README.md` says `check` must run before merging any queue change; the TL wires it into the verify gate. Re-run: rules_fork_test 21/21, bazelw_test 8/8, gates green.
+
+### Verifier FAIL follow-up (7fd9b02)
+Open-am guard used a relative path and checked the wrong dir from the repo root; now `--path-format=absolute`. The test runs from the repo root and asserts the exact "unfinished git am/rebase in" message (confirmed it fails without the fix). `.bazelrc.user.tmp` is git-ignored. Suites 21/21 and 8/8, gates green.

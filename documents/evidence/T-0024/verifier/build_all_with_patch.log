@@ -1,0 +1,12 @@
+INFO: Invocation ID: 6a2826c8-17be-4dd3-ae50-59f207a2707e
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 90 targets (0 packages loaded, 0 targets configured)
+Analyzing: 90 targets (0 packages loaded, 1 target configured)
+
+INFO: Analyzed 90 targets (47 packages loaded, 8696 targets configured, 852 aspect applications).
+INFO: Found 90 targets...
+INFO: Elapsed time: 1.187s, Critical Path: 0.05s
+INFO: 1 process: 5939 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action

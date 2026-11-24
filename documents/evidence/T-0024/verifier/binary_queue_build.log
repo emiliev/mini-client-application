@@ -1,0 +1,13 @@
+INFO: Invocation ID: bfc0120f-c165-4632-b281-c12080d9d362
+Computing main repo mapping: 
+Computing main repo mapping: 
+Computing main repo mapping: 
+INFO: Repo ai_rules_dart+ defined by rule git_repository in @@bazel_tools//tools/build_defs/repo:git.bzl
+ERROR: /private/tmp/mc-ob-T-0024-verifier/external/bazel_tools/tools/build_defs/repo/utils.bzl:257:22: An error occurred during the fetch of repository 'ai_rules_dart+':
+   Traceback (most recent call last):
+	File "/private/tmp/mc-ob-T-0024-verifier/external/bazel_tools/tools/build_defs/repo/git.bzl", line 222, column 10, in _git_repository_implementation
+		patch(ctx)
+	File "/private/tmp/mc-ob-T-0024-verifier/external/bazel_tools/tools/build_defs/repo/utils.bzl", line 257, column 22, in patch
+		ctx.patch(patchfile, strip, directory = patch_directory or "")
+Error in patch: Error applying patch /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-ad69b6af6d5e7192e/third_party/rules_patches/ai_rules_dart/0002-Add-binary-icon.patch: Cannot find file to patch (near line 10), old file name (dart/icon.bin) doesn't exist, new file name (dart/icon.bin) doesn't exist.
+ERROR: Error computing the main repository mapping: error during computation of main repo mapping: Error applying patch /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-ad69b6af6d5e7192e/third_party/rules_patches/ai_rules_dart/0002-Add-binary-icon.patch: Cannot find file to patch (near line 10), old file name (dart/icon.bin) doesn't exist, new file name (dart/icon.bin) doesn't exist.
