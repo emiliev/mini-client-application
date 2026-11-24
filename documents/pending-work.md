@@ -49,4 +49,5 @@ Known work that isn't yet a scoped task: ideas, deferred items, tech debt, follo
 | P-044 | `tool/ide_sync` so pub/IDE mode gets `app_config.json`; auth guard in the router `redirect` (P1-16 AC4) | Feature | T-0021 | With P3-10 / P1-05 auth | — |
 | P-045 | Update plan 01 text: actual DI initializer order and not-found page location | Docs | T-0021 Verifier | Next plan touch | — |
 | P-046 | **Upstream candidate:** `flutter_gen_l10n` has no format step, so output differs from `flutter gen-l10n` in whitespace only (F-0022). T-0025 AC4 is amended to byte-identical after `dart format` | Upstream | T-0025 | With P3-13 drafts | — |
+| P-047 | l10n: the generated `supportedLocales` still lists `en_XA` (apps must use `mcSupportedLocales()`); the workspace gate skips packages not listed in its data, so make registration automatic (buildgen) | Hygiene | T-0025 Verifier | With P2-08 | — |
 | P-014 | Re-enable Android: toolchain (Q-009 options a/b/c), CI APK build, emulator e2e | Quality | ADR-0006 §7, Q-009 | When the PO re-enables Android; before any Android release | — |

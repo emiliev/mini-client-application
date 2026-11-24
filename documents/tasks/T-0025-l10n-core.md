@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready for Verification |
+| Status | Done (merged 2026-11-24; Verifier PASS `bd505d6`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0025-l10n` |
@@ -48,3 +48,6 @@ Engineer handoff (branch `fleet/T-0025-l10n`).
 
 Gates: `test //...` 42/42, `build --config=lint //...`, `mc_arch_check`, `l10n_check` all PASS (`documents/evidence/T-0025/engineer/`). Deviations: de money uses U+00A0 between amount and symbol (intl's output); `formatDate` de is `24. Nov. 2026`.
 
+## Merge (TL)
+- 2026-11-24: **AC4 amended by the TL:** parity is byte-identical after `dart format` (F-0023, upstream P-046). Verifier PASS `7b8e3b1`. `/code-review` found 4 important issues (`l10n_check` following symlinks into the execroot, the parity script not pinning Flutter, the IDE/pub path broken, `formatDateTime` 24h-only), fixed in `4ccf962` along with the Verifier minors (`mcSupportedLocales()` release-filtered; `//tool/l10n_check:workspace_gate_test`). Re-verify PASS `bd505d6`. The TL merged `--no-ff`; on the merge result tests passed 43/43, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-047 (hide or rename the generated `supportedLocales` that includes `en_XA`; the workspace gate skips packages not listed in its data).
