@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mc_ds_testing/mc_ds_testing.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
 
 void main() {
   test('T-0019-AC1 fonts: harness registers the name the app resolves', () {

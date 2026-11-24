@@ -1,0 +1,30 @@
+#!/bin/bash
+# Verifier round-2 mutation runs at 608796a. Each mutant is applied with sed, tested, then reverted with git checkout.
+cd /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7ff0e9e511f2f178 || exit 2
+OUT=documents/evidence/T-0026/verifier2/mutation.log
+: > "$OUT"
+B=utility/mc_test_utils/lib/src/backend_harness.dart
+C=utility/mc_test_utils/lib/src/test_container.dart
+
+run() { # name file sed-expr targets...
+  local name=$1 file=$2 expr=$3; shift 3
+  sed -i '' -e "$expr" "$file"
+  echo "=== mutant: $name" >> "$OUT"
+  git diff -U0 -- "$file" | grep '^[-+][^-+]' >> "$OUT"
+  tool/bazelw --output_base=/tmp/mc-ob-T-0026-verifier test --nocache_test_results "$@" > /tmp/mc-ob-T-0026-mut.log 2>&1
+  echo "bazel exit=$?" >> "$OUT"
+  for t in "$@"; do
+    log=bazel-testlogs/utility/mc_test_utils/${t#*:}/test.log
+    echo "  $t:" >> "$OUT"
+    grep -E '^  FAIL |^[0-9]+ passed|failed$' "$log" | sed 's/^/    /' >> "$OUT"
+  done
+  git checkout -- "$file"
+  git diff --quiet -- "$file" && echo "  reverted: yes" >> "$OUT"
+}
+
+H=(//utility/mc_test_utils:harness_test //utility/mc_test_utils:isolation_test //utility/mc_test_utils:verifier2_probe_test)
+run "fail() not mirrored" $B 's/    _failRules.add(_FailRule(parsed, times));/    \/\/ MUTANT/' "${H[@]}"
+run "held request ignores cancellation" $B 's/await _awaitGate(hold.gate, cancelFuture, options);/await hold.gate.future;/' "${H[@]}"
+run "untyped ExternalDouble accepted" $C 's/    if (T == Object) {/    if (T == Never) {/' "${H[@]}"
+run "useDomain skips scenarios (old register)" $B 's/  void useDomain(MockDomain domain) => backend.addDomain(domain);/  void useDomain(MockDomain domain) => domain.register(backend.router, MockDomainEnvironment(seed: backend.seed, clock: backend.clock));/' "${H[@]}"
+cat "$OUT"

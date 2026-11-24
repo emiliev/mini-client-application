@@ -1,0 +1,204 @@
+// Verifier probes for T-0026 AC2, AC3, AC4 (all expected to PASS). Imports only
+// the mc_test_utils barrel, never src/.
+import 'dart:io';
+
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import 'verifier_flow.dart';
+
+const _set = 'verifier.basic';
+const _route = 'GET /v1/verifier/items';
+
+class _Marker {
+  const _Marker(this.v);
+  final String v;
+}
+
+Finder get _text => find.byKey(const ValueKey('verifier.text'));
+String _shown(WidgetTester t) => t.widget<Text>(_text).data!;
+
+// ---- AC2 ------------------------------------------------------------------
+int _ran = 0;
+int _sawDirty = 0;
+McTestSession? _previous;
+Directory? _previousDir;
+
+Future<void> _freshThenDirty(WidgetTester tester) async {
+  final s = McTestSession.current;
+  if (_ran > 0) {
+    _sawDirty++;
+  }
+
+  // Fresh session object; the previous one's temp storage is gone.
+  expect(identical(s, _previous), isFalse);
+  if (_previousDir != null) {
+    expect(_previousDir!.existsSync(), isFalse);
+  }
+  expect(s.storageDirectory.existsSync(), isTrue);
+  expect(s.storageDirectory.listSync(), isEmpty);
+  // Fresh DI.
+  expect(diContainer.isRegistered<_Marker>(), isFalse);
+  expect(diContainer.isRegistered<Dio>(), isFalse);
+  expect(diContainer.isRegistered<Monitoring>(), isFalse);
+  // Fresh backend.
+  expect(s.backend.backend.router.routes, isEmpty);
+  expect(s.backend.requests, isEmpty);
+  expect(s.backend.unmatched, isEmpty);
+  expect(s.backend.hasHolds, isFalse);
+  expect(s.backend.activeFixtureSets, isEmpty);
+  expect(s.monitoring.entries, isEmpty);
+  // Fresh platform, surface, text scale, locale, theme.
+  expect(defaultTargetPlatform, TargetPlatform.iOS);
+  expect(tester.view.physicalSize, const Size(402, 874));
+  expect(tester.view.devicePixelRatio, 1);
+  expect(s.textScale, 1.0);
+  expect(s.locale, const Locale('en'));
+  expect(s.themeVariant, McThemeVariant.light);
+
+  // Use it: the predecessor's always-failing rule must not leak in.
+  late double scale;
+  s.backend.useFixtureSet(_set);
+  await initFlow(
+    tester,
+    () => verifierFlow(
+      '/v1/verifier/items',
+      onBuild: (c) => scale = MediaQuery.textScalerOf(c).scale(1),
+    ),
+    externals: [const ExternalDouble<_Marker>(_Marker('dirty'))],
+  );
+  await mcSettle(tester);
+  expect(_shown(tester), 'ok:7');
+  expect(scale, 1.0);
+  expect(diContainer<_Marker>().v, 'dirty');
+
+  // Dirty everything.
+  s.backend.fail(_route, BackendFailure.serverError);
+  await tester.tap(find.byKey(const ValueKey('verifier.retry')));
+  await mcSettle(tester);
+  expect(_shown(tester), 'failed:500');
+  await s.monitoring.trackEvent('dirty');
+  File('${s.storageDirectory.path}/dirt').writeAsStringSync('x');
+  s
+    ..textScale = 3
+    ..locale = const Locale('fr')
+    ..themeVariant = McThemeVariant.highContrastDark;
+  debugDefaultTargetPlatformOverride = TargetPlatform.android;
+  tester.view
+    ..devicePixelRatio = 3
+    ..physicalSize = const Size(10, 20);
+
+  _previous = s;
+  _previousDir = s.storageDirectory;
+  _ran++;
+}
+
+void main() {
+  setUpAll(() => McFixtureSets.register(_set, VerifierDomain.new));
+
+  group('VPROBE-AC2', () {
+    mcTestWidgets('VPROBE-AC2 A', _freshThenDirty);
+    mcTestWidgets('VPROBE-AC2 B', _freshThenDirty);
+    mcTestWidgets('VPROBE-AC2 C', _freshThenDirty);
+    tearDownAll(() {
+      expect(_ran, 3);
+      expect(_sawDirty, 2);
+    });
+  });
+
+  // ---- AC3 ----------------------------------------------------------------
+  mcTestWidgets('VPROBE-AC3 fail once under a hold: loading, then retry ok', (
+    tester,
+  ) async {
+    final b = McTestSession.current.backend
+      ..useFixtureSet(_set)
+      ..fail(_route, BackendFailure.serverError, times: 1)
+      ..hold(_route);
+    await initFlow(tester, () => verifierFlow('/v1/verifier/items'));
+    await mcSettle(tester);
+    expect(_shown(tester), 'loading');
+    // Five minutes of fake time: no timer (retry delay, Dio timeout, latency)
+    // ends the hold; only release does.
+    await tester.pump(const Duration(minutes: 5));
+    expect(_shown(tester), 'loading');
+    expect(b.requests, hasLength(1));
+    expect(b.backend.recentTraffic, isEmpty);
+
+    await b.release(_route);
+    await mcSettle(tester);
+    expect(_shown(tester), 'ok:7');
+    expect(b.backend.recentTraffic.map((t) => t.status), [500, 200]);
+    expect(b.requests, hasLength(2));
+  });
+
+  mcTestWidgets('VPROBE-AC3 times counts requests; a user retry succeeds', (
+    tester,
+  ) async {
+    // Initial + 2 automatic retries all fail; the user's retry succeeds.
+    final b = McTestSession.current.backend
+      ..useFixtureSet(_set)
+      ..fail(_route, BackendFailure.serverError, times: 3);
+    await initFlow(tester, () => verifierFlow('/v1/verifier/items'));
+    await mcSettle(tester);
+    expect(_shown(tester), 'failed:500');
+    expect(b.requests, hasLength(3));
+    await tester.tap(find.byKey(const ValueKey('verifier.retry')));
+    await mcSettle(tester);
+    expect(_shown(tester), 'ok:7');
+    expect(b.backend.recentTraffic.map((t) => t.status), [500, 500, 500, 200]);
+  });
+
+  // ---- AC4 ----------------------------------------------------------------
+  mcTestWidgets('VPROBE-AC4 initFlow: DS theme, en, iOS; exports', (
+    tester,
+  ) async {
+    final s = McTestSession.current..backend.useFixtureSet(_set);
+    late ThemeData theme;
+    late Locale locale;
+    late TargetPlatform platform;
+    await initFlow(
+      tester,
+      () => verifierFlow(
+        '/v1/verifier/items',
+        onBuild: (c) {
+          theme = Theme.of(c);
+          locale = Localizations.localeOf(c);
+          platform = defaultTargetPlatform;
+        },
+      ),
+    );
+    await mcSettle(tester);
+    // Theme.of localizes the text geometry, so compare the DS-owned parts.
+    final ds = McTheme.light;
+    expect(theme.colorScheme, ds.colorScheme);
+    expect(theme.scaffoldBackgroundColor, ds.scaffoldBackgroundColor);
+    expect(
+      theme.textTheme.bodyMedium!.fontFamily,
+      ds.textTheme.bodyMedium!.fontFamily,
+    );
+    final ext = theme.extension<McThemeExtension>()!;
+    expect(ext.variant, McThemeVariant.light);
+    expect(
+      ext.palette.background,
+      ds.extension<McThemeExtension>()!.palette.background,
+    );
+    expect(locale, const Locale('en'));
+    expect(platform, TargetPlatform.iOS);
+    expect(theme.platform, TargetPlatform.iOS);
+    // Exports: MockMonitoring is the root Monitoring; McTestContainer is usable.
+    final MockMonitoring m = s.monitoring;
+    expect(identical(diContainer<Monitoring>(), m), isTrue);
+    expect(
+      McTestContainer.dio.options.baseUrl,
+      McTestContainer.config.apiBaseUrl,
+    );
+    expect(createMockMonitoring(), isA<MockMonitoring>());
+  });
+}

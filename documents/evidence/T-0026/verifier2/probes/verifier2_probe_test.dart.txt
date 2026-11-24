@@ -1,0 +1,295 @@
+// Verifier round-2 probes for T-0026 review fixes at 608796a (expected to
+// PASS). Imports only the mc_test_utils barrel, never src/.
+import 'package:dio/dio.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_config/mc_config.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import 'verifier_flow.dart';
+
+class _Marker {
+  const _Marker(this.v);
+  final String v;
+}
+
+/// Same route as VerifierDomain, plus two scenarios.
+class _ScenarioDomain implements MockDomain {
+  @override
+  String get name => 'verifier_scen';
+
+  @override
+  void register(MockRouter router, MockDomainEnvironment environment) =>
+      VerifierDomain().register(router, environment);
+
+  @override
+  Map<String, MockScenario> get scenarios => const {
+    'v_once': MockScenario(
+      'v_once',
+      rules: [
+        FailureRule(
+          'GET',
+          '/v1/verifier/items',
+          FailureKind.http(500),
+          FailureTrigger.once,
+        ),
+      ],
+    ),
+    'v_down': MockScenario(
+      'v_down',
+      rules: [
+        FailureRule('GET', '/v1/verifier/items', FailureKind.http(503)),
+      ],
+    ),
+  };
+}
+
+/// `GET /v1/verifier/p/:id`.
+class _ParamDomain implements MockDomain {
+  @override
+  String get name => 'verifier_param';
+
+  @override
+  void register(MockRouter router, MockDomainEnvironment environment) =>
+      router.get(
+        '/v1/verifier/p/:id',
+        (request, context) => const MockResponse.ok({'n': 1}),
+      );
+
+  @override
+  Map<String, MockScenario> get scenarios => const {};
+}
+
+Finder get _text => find.byKey(const ValueKey('verifier.text'));
+String _shown(WidgetTester t) => t.widget<Text>(_text).data!;
+Future<void> _tapRetry(WidgetTester t) async {
+  await t.tap(find.byKey(const ValueKey('verifier.retry')));
+  await mcSettle(t);
+}
+
+Matcher _stateError(String text) => throwsA(
+  isA<StateError>().having((e) => e.message, 'message', contains(text)),
+);
+
+void main() {
+  setUpAll(() {
+    McFixtureSets.register('verifier.scen', _ScenarioDomain.new);
+    McFixtureSets.register('verifier.basic', VerifierDomain.new);
+  });
+
+  // ---- 1. ExternalDouble typing and root duplicates -------------------------
+  mcTestWidgets('V2-1 untyped and duplicate externals are rejected', (
+    tester,
+  ) async {
+    final s = McTestSession.current..backend.useFixtureSet('verifier.basic');
+    Widget flow() => verifierFlow('/v1/verifier/items');
+
+    await expectLater(
+      initFlow(tester, flow, externals: [const ExternalDouble(_Marker('u'))]),
+      _stateError('ExternalDouble<_Marker>'),
+    );
+    final Object asObject = const _Marker('o');
+    for (final bad in <ExternalDouble<Object>>[
+      ExternalDouble<Object>(asObject),
+      ExternalDouble<Monitoring>(createMockMonitoring()),
+      const ExternalDouble<AppConfig>(McTestContainer.config),
+      ExternalDouble<Dio>(Dio()),
+      ExternalDouble<MockBackend>(MockBackend()),
+    ]) {
+      await expectLater(
+        McTestContainer.initialize(s, externals: [bad]),
+        throwsStateError,
+        reason: '$bad',
+      );
+      expect(s.containerInitialized, isFalse);
+      expect(diContainer.isRegistered<Dio>(), isFalse);
+    }
+    // Two externals of the same type: the second is rejected.
+    await expectLater(
+      McTestContainer.initialize(
+        s,
+        externals: const [
+          ExternalDouble<_Marker>(_Marker('a')),
+          ExternalDouble<_Marker>(_Marker('b')),
+        ],
+      ),
+      _stateError('ExternalDouble<_Marker> duplicates'),
+    );
+    expect(s.containerInitialized, isFalse);
+
+    // A correctly typed external then works, and the flow runs.
+    await initFlow(
+      tester,
+      flow,
+      externals: const [ExternalDouble<_Marker>(_Marker('ok'))],
+    );
+    await mcSettle(tester);
+    expect(s.containerInitialized, isTrue);
+    expect(diContainer<_Marker>().v, 'ok');
+    expect(_shown(tester), 'ok:7');
+  });
+
+  mcTestWidgets('V2-6 a throwing wiring leaves containerInitialized false', (
+    tester,
+  ) async {
+    final s = McTestSession.current;
+    await expectLater(
+      McTestContainer.initialize(
+        s,
+        wirings: [McDIInitializer((_, _) => throw StateError('wiring boom'))],
+      ),
+      _stateError('wiring boom'),
+    );
+    expect(s.containerInitialized, isFalse);
+    await McTestContainer.initialize(s);
+    expect(s.containerInitialized, isTrue);
+  });
+
+  // ---- 2. Fixture-set scenarios through MockBackend.addDomain ---------------
+  mcTestWidgets('V2-2 fixture-set scenarios are registered and work', (
+    tester,
+  ) async {
+    final b = McTestSession.current.backend..useFixtureSet('verifier.scen');
+    expect(b.backend.scenarioNames, containsAll(<String>['v_once', 'v_down']));
+    expect(() => b.backend.useScenario('nope'), throwsArgumentError);
+    b.backend.useScenario('v_once');
+    await initFlow(tester, () => verifierFlow('/v1/verifier/items'));
+    await mcSettle(tester);
+    // once: the first attempt 500, the automatic retry 200.
+    expect(_shown(tester), 'ok:7');
+    expect(b.backend.recentTraffic.map((t) => t.status), [500, 200]);
+
+    b.backend.useScenario('v_down');
+    await _tapRetry(tester);
+    expect(_shown(tester), 'failed:503');
+    b.backend.useScenario(null);
+    await _tapRetry(tester);
+    expect(_shown(tester), 'ok:7');
+    expect(b.unmatched, isEmpty);
+  });
+
+  mcTestWidgets('V2-2 useDomain also registers scenarios', (tester) async {
+    final b = McTestSession.current.backend..useDomain(_ScenarioDomain());
+    expect(b.backend.scenarioNames, contains('v_down'));
+  });
+
+  // ---- 3. Malformed URLs answer 400 -----------------------------------------
+  // A malformed :param segment or query is a 400 and not unmatched. A
+  // malformed segment that no route pattern could take is a plain 404 (the
+  // engine only decodes :param segments), flagged unmatched like any other.
+  for (final (path, status, unmatched) in [
+    ('/v1/verifier/p/%FF', 400, false),
+    ('/v1/verifier/items?q=%FF', 400, false),
+    ('/v1/nowhere?q=%E0%A4%A', 400, false),
+    ('/v1/verifier/items/%FF', 404, true),
+    ('/v1/nowhere/%FF', 404, true),
+  ]) {
+    mcTestWidgets('V2-3 malformed $path gives $status', (tester) async {
+      final b = McTestSession.current.backend
+        ..useFixtureSet('verifier.basic')
+        ..useDomain(_ParamDomain());
+      await initFlow(tester, () => verifierFlow(path));
+      await mcSettle(tester);
+      expect(_shown(tester), 'failed:$status');
+      expect(b.backend.recentTraffic.single.status, status);
+      expect(
+        b.unmatched,
+        unmatched ? ['GET ${path.split('?').first}'] : <String>[],
+      );
+      expect(tester.takeException(), isNull);
+      b.takeUnmatched();
+    });
+  }
+
+  // ---- 4. fail() on an unrouted path ----------------------------------------
+  mcTestWidgets('V2-4 unrouted fail: not unmatched while active', (
+    tester,
+  ) async {
+    // times: 3 covers the request and both automatic retries.
+    final b = McTestSession.current.backend
+      ..fail('GET /v1/verifier/ghost', BackendFailure.serverError, times: 3);
+    await initFlow(tester, () => verifierFlow('/v1/verifier/ghost'));
+    await mcSettle(tester);
+    expect(_shown(tester), 'failed:500');
+    expect(b.backend.recentTraffic.map((t) => t.status), [500, 500, 500]);
+    expect(b.unmatched, isEmpty);
+    // Spent: the user's retry reaches no route and is flagged.
+    await _tapRetry(tester);
+    expect(_shown(tester), 'failed:404');
+    expect(b.unmatched, ['GET /v1/verifier/ghost']);
+    b.takeUnmatched();
+  });
+
+  mcTestWidgets('V2-4 two stacked once-rules mirror the engine', (
+    tester,
+  ) async {
+    final b = McTestSession.current.backend
+      ..fail('GET /v1/verifier/ghost', BackendFailure.serverError, times: 1)
+      ..fail('GET /v1/verifier/ghost', BackendFailure.serverError, times: 1);
+    await initFlow(tester, () => verifierFlow('/v1/verifier/ghost'));
+    await mcSettle(tester);
+    // Engine: rule 1 fails call 1, rule 2 call 2, call 3 has no route.
+    expect(b.backend.recentTraffic.map((t) => t.status), [500, 500, 404]);
+    expect(b.unmatched, ['GET /v1/verifier/ghost']);
+    b.takeUnmatched();
+  });
+
+  mcTestWidgets('V2-4 always-failing unrouted path is never unmatched', (
+    tester,
+  ) async {
+    final b = McTestSession.current.backend
+      ..fail('GET /v1/verifier/ghost', BackendFailure.serverError);
+    await initFlow(tester, () => verifierFlow('/v1/verifier/ghost'));
+    await mcSettle(tester);
+    await _tapRetry(tester);
+    expect(b.backend.recentTraffic, hasLength(6));
+    expect(b.unmatched, isEmpty);
+  });
+
+  mcTestWidgets('V2-4 a query-subset rule does not cover other queries', (
+    tester,
+  ) async {
+    final b = McTestSession.current.backend
+      ..fail('GET /v1/verifier/ghost?a=1', BackendFailure.serverError);
+    await initFlow(tester, () => verifierFlow('/v1/verifier/ghost?a=2'));
+    await mcSettle(tester);
+    expect(_shown(tester), 'failed:404');
+    expect(b.unmatched, ['GET /v1/verifier/ghost']);
+    b.takeUnmatched();
+  });
+
+  // ---- 5. A held, then cancelled request -----------------------------------
+  mcTestWidgets('V2-5 held then cancelled throws requestCancelled', (
+    tester,
+  ) async {
+    final b = McTestSession.current.backend
+      ..useFixtureSet('verifier.basic')
+      ..hold('GET /v1/verifier/items');
+    await McTestContainer.initialize(McTestSession.current);
+    final dio = McTestContainer.dio;
+    Future<Object?> outcome(Future<Response<Object?>> f) =>
+        f.then<Object?>((r) => r.statusCode, onError: (Object e) => e);
+
+    final token = CancelToken();
+    final cancelled = outcome(
+      dio.get<Object?>('/v1/verifier/items', cancelToken: token),
+    );
+    final kept = outcome(dio.get<Object?>('/v1/verifier/items'));
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(b.requests, hasLength(2));
+    token.cancel('user left');
+    await tester.pump(const Duration(milliseconds: 100));
+    final error = await cancelled;
+    expect(error, isA<DioException>());
+    expect((error! as DioException).type, DioExceptionType.cancel);
+    // The cancelled request never reached the engine; the other still waits.
+    expect(b.backend.recentTraffic, isEmpty);
+    await b.release('GET /v1/verifier/items');
+    await tester.pump(const Duration(milliseconds: 100));
+    expect(await kept, 200);
+    expect(b.backend.recentTraffic.map((t) => t.status), [200]);
+  });
+}

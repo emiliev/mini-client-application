@@ -1,0 +1,65 @@
+# T-0026 (P5-01): the test harness. Test-only: production packages never
+# depend on it.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_api_client",
+    "//utility/mc_config",
+    "//utility/mc_di",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "//utility/mc_event_bus",
+    "//utility/mc_mocked_backend",
+    "//utility/mc_monitoring",
+    "//utility/mc_storage",
+    "@pub_deps//:dio",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_test",
+    "@pub_deps//:get_it",
+]
+
+flutter_library(
+    name = "mc_test_utils",
+    testonly = True,
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "mc_test_utils",
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_test_utils",
+    "//utility/mc_feature_flow",
+]
+
+[flutter_test(
+    name = t,
+    size = "small",
+    srcs = ["test/support.dart"],
+    data = ["//utility/mc_ds_theme:fonts"],
+    language_version = _LANG,
+    main = "test/%s.dart" % t,
+    package_name = "mc_test_utils",
+    deps = _TEST_DEPS,
+) for t in [
+    "fonts_test",
+    "harness_test",
+    "isolation_test",
+    "init_flow_test",
+]]
+
+flutter_test(
+    name = "golden_test",
+    size = "small",
+    data = ["//utility/mc_ds_theme:fonts"] + glob(["test/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden_test.dart",
+    package_name = "mc_test_utils",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS,
+)

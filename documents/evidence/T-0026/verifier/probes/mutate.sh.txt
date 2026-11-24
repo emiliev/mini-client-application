@@ -1,0 +1,36 @@
+#!/bin/bash
+# Verifier mutation runs. Each mutant is applied with sed, tested, then reverted with git checkout.
+cd /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7ff0e9e511f2f178 || exit 2
+OUT=documents/evidence/T-0026/verifier/mutation.log
+: > "$OUT"
+S=utility/mc_test_utils/lib/src/session.dart
+B=utility/mc_test_utils/lib/src/backend_harness.dart
+
+run() { # name file sed-expr targets...
+  local name=$1 file=$2 expr=$3; shift 3
+  sed -i '' -e "$expr" "$file"
+  echo "=== mutant: $name" >> "$OUT"
+  git diff --stat -- "$file" | head -1 >> "$OUT"
+  git diff -U0 -- "$file" | grep '^[-+][^-+]' >> "$OUT"
+  tool/bazelw --output_base=/tmp/mc-ob-T-0026-verifier test --nocache_test_results "$@" > /tmp/mc-ob-T-0026-mut.log 2>&1
+  echo "bazel exit=$?" >> "$OUT"
+  for t in "$@"; do
+    log=bazel-testlogs/utility/mc_test_utils/${t#*:}/test.log
+    echo "  $t:" >> "$OUT"
+    grep -E '^  (PASS|FAIL) |^[0-9]+ passed|failed$' "$log" | sed 's/^/    /' >> "$OUT"
+  done
+  git checkout -- "$file"
+  git diff --quiet -- "$file" && echo "  reverted: yes" >> "$OUT"
+}
+
+T_ISO="//utility/mc_test_utils:isolation_test //utility/mc_test_utils:verifier_probe_test"
+# shellcheck disable=SC2086
+run "skip resetDIContainer in _start and _finish" $S 's/^\( *\)await resetDIContainer();/\1\/\/ MUTANT await resetDIContainer();/' $T_ISO
+# shellcheck disable=SC2086
+run "skip resetDIContainer in _start only" $S 's/^    await resetDIContainer();/    \/\/ MUTANT await resetDIContainer();/' $T_ISO
+# shellcheck disable=SC2086
+run "skip resetDIContainer in _finish only" $S 's/^      await resetDIContainer();/      \/\/ MUTANT await resetDIContainer();/' $T_ISO
+run "unmatched requests never recorded" $B "s/_harness._unmatched.add('\$method \${uri.path}');/\/\/ MUTANT/" //utility/mc_test_utils:harness_test
+run "fail() ignores times (always)" $B 's/times < 0 ? FailureTrigger.always : FailureTrigger.times(times)/FailureTrigger.always/' //utility/mc_test_utils:harness_test //utility/mc_test_utils:verifier_probe_test
+run "hold does not block" $B 's/await hold.gate.future;/\/\/ MUTANT/' //utility/mc_test_utils:harness_test //utility/mc_test_utils:verifier_probe_test
+cat "$OUT"

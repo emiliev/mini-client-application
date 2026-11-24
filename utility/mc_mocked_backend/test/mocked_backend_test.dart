@@ -391,9 +391,7 @@ void main() {
       'T-0018-AC5: the stream emits method, path, status and duration',
       () async {
         final backend = _backend(
-          latency: const LatencyProfile.slow(
-            Duration(milliseconds: 5),
-          ),
+          latency: const LatencyProfile.slow(Duration(milliseconds: 5)),
         );
         final dio = backend.createDio();
         final seen = <TrafficEntry>[];
@@ -421,10 +419,7 @@ void main() {
     );
 
     test('T-0018-AC5: the ring buffer keeps the last N requests', () async {
-      final backend = MockBackend(
-        domains: [_EchoDomain()],
-        trafficCapacity: 3,
-      );
+      final backend = MockBackend(domains: [_EchoDomain()], trafficCapacity: 3);
       final dio = backend.createDio();
       for (var i = 0; i < 5; i++) {
         await dio.get<Object?>('/v1/items/$i');

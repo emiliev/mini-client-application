@@ -1,0 +1,41 @@
+// Verifier probe, EXPECTED TO FAIL: each test hits an endpoint no fixture set
+// answers and does not acknowledge it. The harness must fail the test and name
+// the route.
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import 'verifier_flow.dart';
+
+void main() {
+  setUpAll(() => McFixtureSets.register('verifier.basic', VerifierDomain.new));
+
+  // Body passes: only the harness's teardown check can fail it.
+  mcTestWidgets('VPROBE-AC1-a no fixture set at all', (tester) async {
+    await initFlow(tester, () => verifierFlow('/v1/verifier/unfixtured'));
+    await mcSettle(tester);
+    expect(find.byKey(const ValueKey('verifier.text')), findsOneWidget);
+  });
+
+  // A fixture set is active but does not have the route.
+  mcTestWidgets('VPROBE-AC1-b wrong fixture set', (tester) async {
+    McTestSession.current.backend.useFixtureSet('verifier.basic');
+    await initFlow(tester, () => verifierFlow('/v1/verifier/missing'));
+    await mcSettle(tester);
+  });
+
+  // The body itself fails first (it expects data the 404 never delivered).
+  mcTestWidgets('VPROBE-AC1-c body fails first', (tester) async {
+    await initFlow(tester, () => verifierFlow('/v1/verifier/elsewhere'));
+    await mcSettle(tester);
+    expect(find.text('ok:7'), findsOneWidget);
+  });
+
+  // Control: the same flow with the route fixtured passes.
+  mcTestWidgets('VPROBE-AC1-control fixtured route passes', (tester) async {
+    McTestSession.current.backend.useFixtureSet('verifier.basic');
+    await initFlow(tester, () => verifierFlow('/v1/verifier/items'));
+    await mcSettle(tester);
+    expect(find.text('ok:7'), findsOneWidget);
+  });
+}

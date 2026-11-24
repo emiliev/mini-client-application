@@ -43,3 +43,4 @@ workspace:
   - utility/mc_monitoring
   - utility/mc_prelude
   - utility/mc_storage
+  - utility/mc_test_utils

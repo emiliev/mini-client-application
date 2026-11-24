@@ -76,15 +76,8 @@ final class MockBackend {
        _initialFailures = List.unmodifiable(failures),
        _domains = List.unmodifiable(domains),
        _root = SplitMix64(seed) {
-    final environment = MockDomainEnvironment(seed: seed, clock: this.clock);
     for (final domain in _domains) {
-      domain.register(router, environment);
-      for (final scenario in domain.scenarios.values) {
-        if (_scenarios.containsKey(scenario.name)) {
-          throw StateError('Duplicate scenario: ${scenario.name}');
-        }
-        _scenarios[scenario.name] = scenario;
-      }
+      _register(domain);
     }
     _resetRules();
   }
@@ -97,6 +90,22 @@ final class MockBackend {
   final Duration timeout;
 
   final MockRouter router = MockRouter();
+
+  void _register(MockDomain domain) {
+    domain.register(router, MockDomainEnvironment(seed: seed, clock: clock));
+    for (final scenario in domain.scenarios.values) {
+      if (_scenarios.containsKey(scenario.name)) {
+        throw StateError('Duplicate scenario: ${scenario.name}');
+      }
+      _scenarios[scenario.name] = scenario;
+    }
+  }
+
+  /// Registers [domain]'s routes and scenarios after construction (the test
+  /// harness switches fixture sets on per test).
+  void addDomain(MockDomain domain) {
+    _register(domain);
+  }
 
   final LatencyProfile _initialLatency;
   final List<FailureRule> _initialFailures;

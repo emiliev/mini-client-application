@@ -1,0 +1,4 @@
+Executing tests from //utility/mc_test_utils:isolation_test
+-----------------------------------------------------------------------------
+  PASS  T-0026-AC2 isolation, first
+1 passed

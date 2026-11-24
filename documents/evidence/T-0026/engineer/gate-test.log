@@ -1,0 +1,52 @@
+
+INFO: Analyzed 95 targets (40 packages loaded, 2399 targets configured, 487 aspect applications).
+INFO: Found 52 targets and 43 test targets...
+INFO: Elapsed time: 10.204s, Critical Path: 7.47s
+INFO: 110 processes: 6310 action cache hit, 18 internal, 45 darwin-sandbox, 47 worker.
+INFO: Build completed successfully, 110 total actions
+//app/mini_client:app_test                                               PASSED in 0.8s
+//app/wiring/app_core:boot_test                                          PASSED in 0.9s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.5s
+//spike/hello:widget_test                                                PASSED in 0.9s
+//tool/mc_arch_check:arch_check_test                                     PASSED in 0.5s
+//utility/mc_analysis:lints_test                                         PASSED in 3.0s
+//utility/mc_api_client:api_client_test                                  PASSED in 0.5s
+//utility/mc_api_client:no_flutter_test                                  PASSED in 0.3s
+//utility/mc_api_errors:api_failure_test                                 PASSED in 0.2s
+//utility/mc_api_errors:no_flutter_test                                  PASSED in 0.3s
+//utility/mc_bloc_kit:feature_flow_controller_test                       PASSED in 0.2s
+//utility/mc_bloc_kit:mc_bloc_test                                       PASSED in 0.2s
+//utility/mc_bloc_kit:purity_test                                        PASSED in 0.2s
+//utility/mc_config:app_config_test                                      PASSED in 0.2s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.2s
+//utility/mc_di:di_container_test                                        PASSED in 0.3s
+//utility/mc_di:recording_test                                           PASSED in 0.4s
+//utility/mc_ds_buttons:buttons_test                                     PASSED in 1.8s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.1s
+//utility/mc_ds_feedback:feedback_test                                   PASSED in 1.7s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.4s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.4s
+//utility/mc_ds_layout:layout_test                                       PASSED in 1.6s
+//utility/mc_ds_theme:golden_test                                        PASSED in 1.0s
+//utility/mc_ds_theme:theme_test                                         PASSED in 1.4s
+//utility/mc_ds_tokens:tokens_test                                       PASSED in 0.6s
+//utility/mc_event_bus:event_bus_test                                    PASSED in 0.2s
+//utility/mc_event_bus:no_flutter_test                                   PASSED in 0.2s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 2.7s
+//utility/mc_fixtures_characters:characters_test                         PASSED in 1.0s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 0.7s
+//utility/mc_fixtures_media:bundled_image_resolver_test                  PASSED in 0.7s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 2.0s
+//utility/mc_monitoring:monitoring_test                                  PASSED in 0.2s
+//utility/mc_monitoring:no_flutter_test                                  PASSED in 0.2s
+//utility/mc_prelude:result_test                                         PASSED in 0.3s
+//utility/mc_storage:file_store_test                                     PASSED in 0.4s
+//utility/mc_storage:no_flutter_test                                     PASSED in 0.2s
+//utility/mc_test_utils:fonts_test                                       PASSED in 0.6s
+//utility/mc_test_utils:golden_test                                      PASSED in 0.9s
+//utility/mc_test_utils:harness_test                                     PASSED in 1.0s
+//utility/mc_test_utils:init_flow_test                                   PASSED in 1.3s
+//utility/mc_test_utils:isolation_test                                   PASSED in 0.6s
+
+Executed 43 out of 43 tests: 43 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

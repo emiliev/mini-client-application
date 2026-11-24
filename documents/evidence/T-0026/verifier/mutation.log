@@ -1,0 +1,137 @@
+=== mutant: skip resetDIContainer in _start and _finish
+ utility/mc_test_utils/lib/src/session.dart | 4 ++--
+-    await resetDIContainer();
++    // MUTANT await resetDIContainer();
+-      await resetDIContainer();
++      // MUTANT await resetDIContainer();
+bazel exit=3
+  //utility/mc_test_utils:isolation_test:
+      PASS  T-0026-AC2 isolation, first
+      FAIL  T-0026-AC2 isolation, second
+      FAIL  container initialises once per test
+      FAIL  every root service of the production list is present
+      FAIL  (tearDownAll)
+    1 passed, 4 failed
+  //utility/mc_test_utils:verifier_probe_test:
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      FAIL  VPROBE-AC2 VPROBE-AC2 B
+      FAIL  VPROBE-AC2 VPROBE-AC2 C
+      FAIL  VPROBE-AC2 (tearDownAll)
+      FAIL  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      FAIL  VPROBE-AC3 times counts requests; a user retry succeeds
+      FAIL  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+    1 passed, 6 failed
+  reverted: yes
+=== mutant: skip resetDIContainer in _start only
+ utility/mc_test_utils/lib/src/session.dart | 2 +-
+-    await resetDIContainer();
++    // MUTANT await resetDIContainer();
+bazel exit=0
+  //utility/mc_test_utils:isolation_test:
+      PASS  T-0026-AC2 isolation, first
+      PASS  T-0026-AC2 isolation, second
+      PASS  container initialises once per test
+      PASS  every root service of the production list is present
+    4 passed
+  //utility/mc_test_utils:verifier_probe_test:
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+    6 passed
+  reverted: yes
+=== mutant: skip resetDIContainer in _finish only
+ utility/mc_test_utils/lib/src/session.dart | 2 +-
+-      await resetDIContainer();
++      // MUTANT await resetDIContainer();
+bazel exit=0
+  //utility/mc_test_utils:isolation_test:
+      PASS  T-0026-AC2 isolation, first
+      PASS  T-0026-AC2 isolation, second
+      PASS  container initialises once per test
+      PASS  every root service of the production list is present
+    4 passed
+  //utility/mc_test_utils:verifier_probe_test:
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+    6 passed
+  reverted: yes
+=== mutant: unmatched requests never recorded
+ utility/mc_test_utils/lib/src/backend_harness.dart | 2 +-
+-      _harness._unmatched.add('$method ${uri.path}');
++      // MUTANT
+bazel exit=3
+  //utility/mc_test_utils:harness_test:
+      FAIL  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  fixture set answers; recorded requests and routes
+      PASS  route syntax and unknown names are rejected
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  an unreleased hold fails the test
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  mcSettle outside a session just settles
+    10 passed, 1 failed
+  reverted: yes
+=== mutant: fail() ignores times (always)
+ utility/mc_test_utils/lib/src/backend_harness.dart | 2 +-
+-        times < 0 ? FailureTrigger.always : FailureTrigger.times(times),
++        FailureTrigger.always,
+bazel exit=3
+  //utility/mc_test_utils:harness_test:
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  fixture set answers; recorded requests and routes
+      PASS  route syntax and unknown names are rejected
+      FAIL  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  an unreleased hold fails the test
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  mcSettle outside a session just settles
+    10 passed, 1 failed
+  //utility/mc_test_utils:verifier_probe_test:
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      FAIL  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      FAIL  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+    4 passed, 2 failed
+  reverted: yes
+=== mutant: hold does not block
+ utility/mc_test_utils/lib/src/backend_harness.dart | 2 +-
+-        await hold.gate.future;
++        // MUTANT
+bazel exit=3
+  //utility/mc_test_utils:harness_test:
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  fixture set answers; recorded requests and routes
+      PASS  route syntax and unknown names are rejected
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  fail() with a query subset only fails matching requests
+      FAIL  T-0026-AC3 hold keeps loading observable until release
+      PASS  an unreleased hold fails the test
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  mcSettle outside a session just settles
+    10 passed, 1 failed
+  //utility/mc_test_utils:verifier_probe_test:
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      FAIL  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+    5 passed, 1 failed
+  reverted: yes

@@ -1,0 +1,203 @@
+seed=1 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=1 | 4 passed
+      PASS  container initialises once per test
+      PASS  T-0026-AC2 isolation, second
+      PASS  every root service of the production list is present
+      PASS  T-0026-AC2 isolation, first
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=1 | 11 passed
+      PASS  mcSettle outside a session just settles
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  fixture set answers; recorded requests and routes
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  an unreleased hold fails the test
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  route syntax and unknown names are rejected
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=1 | 3 passed
+      PASS  the flow reaches the root monitoring double
+      PASS  initFlow honours the session text scale and variant
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=1 | 6 passed
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+seed=7 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=7 | 4 passed
+      PASS  T-0026-AC2 isolation, second
+      PASS  every root service of the production list is present
+      PASS  container initialises once per test
+      PASS  T-0026-AC2 isolation, first
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=7 | 11 passed
+      PASS  fixture set answers; recorded requests and routes
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  an unreleased hold fails the test
+      PASS  route syntax and unknown names are rejected
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  mcSettle outside a session just settles
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC3 hold keeps loading observable until release
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=7 | 3 passed
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+      PASS  the flow reaches the root monitoring double
+      PASS  initFlow honours the session text scale and variant
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=7 | 6 passed
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+seed=42 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=42 | 4 passed
+      PASS  T-0026-AC2 isolation, second
+      PASS  container initialises once per test
+      PASS  T-0026-AC2 isolation, first
+      PASS  every root service of the production list is present
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=42 | 11 passed
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  fail() with a query subset only fails matching requests
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  fixture set answers; recorded requests and routes
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  route syntax and unknown names are rejected
+      PASS  an unreleased hold fails the test
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  mcSettle outside a session just settles
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=42 | 3 passed
+      PASS  the flow reaches the root monitoring double
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+      PASS  initFlow honours the session text scale and variant
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=42 | 6 passed
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+seed=1234 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=1234 | 4 passed
+      PASS  container initialises once per test
+      PASS  T-0026-AC2 isolation, first
+      PASS  T-0026-AC2 isolation, second
+      PASS  every root service of the production list is present
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=1234 | 11 passed
+      PASS  an unreleased hold fails the test
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  mcSettle outside a session just settles
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  fixture set answers; recorded requests and routes
+      PASS  fail() with a query subset only fails matching requests
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  route syntax and unknown names are rejected
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=1234 | 3 passed
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+      PASS  initFlow honours the session text scale and variant
+      PASS  the flow reaches the root monitoring double
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=1234 | 6 passed
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+seed=99999 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=99999 | 4 passed
+      PASS  T-0026-AC2 isolation, first
+      PASS  T-0026-AC2 isolation, second
+      PASS  container initialises once per test
+      PASS  every root service of the production list is present
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=99999 | 11 passed
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  fail() with a query subset only fails matching requests
+      PASS  mcSettle outside a session just settles
+      PASS  fixture set answers; recorded requests and routes
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  an unreleased hold fails the test
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  route syntax and unknown names are rejected
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=99999 | 3 passed
+      PASS  the flow reaches the root monitoring double
+      PASS  initFlow honours the session text scale and variant
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=99999 | 6 passed
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+seed=31337 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=31337 | 4 passed
+      PASS  T-0026-AC2 isolation, second
+      PASS  every root service of the production list is present
+      PASS  T-0026-AC2 isolation, first
+      PASS  container initialises once per test
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=31337 | 11 passed
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+      PASS  an unreleased hold fails the test
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  fail() with a query subset only fails matching requests
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  fixture set answers; recorded requests and routes
+      PASS  route syntax and unknown names are rejected
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  mcSettle outside a session just settles
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=31337 | 3 passed
+      PASS  the flow reaches the root monitoring double
+      PASS  initFlow honours the session text scale and variant
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=31337 | 6 passed
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+seed=271828 exit=0
+  isolation_test: randomized order; reproduce with --test-randomize-ordering-seed=271828 | 4 passed
+      PASS  T-0026-AC2 isolation, first
+      PASS  container initialises once per test
+      PASS  every root service of the production list is present
+      PASS  T-0026-AC2 isolation, second
+  harness_test: randomized order; reproduce with --test-randomize-ordering-seed=271828 | 11 passed
+      PASS  route syntax and unknown names are rejected
+      PASS  tags: T-/MC- tags go into the name, the rest stay Dart tags
+      PASS  an unreleased hold fails the test
+      PASS  mcSettle outside a session just settles
+      PASS  T-0026-AC1 session is unavailable outside mcTestWidgets
+      PASS  fixture set answers; recorded requests and routes
+      PASS  fail() with a query subset only fails matching requests
+      PASS  MockMonitoring records; createMockMonitoring is fresh
+      PASS  T-0026-AC3 fail(times: 1) fails once, the retry succeeds
+      PASS  T-0026-AC3 hold keeps loading observable until release
+      PASS  T-0026-AC1 an endpoint with no fixture set fails by route
+  init_flow_test: randomized order; reproduce with --test-randomize-ordering-seed=271828 | 3 passed
+      PASS  T-0026-AC4 initFlow gives the DS theme, en and iOS
+      PASS  the flow reaches the root monitoring double
+      PASS  initFlow honours the session text scale and variant
+  verifier_probe_test: randomized order; reproduce with --test-randomize-ordering-seed=271828 | 6 passed
+      PASS  VPROBE-AC2 VPROBE-AC2 C
+      PASS  VPROBE-AC2 VPROBE-AC2 A
+      PASS  VPROBE-AC2 VPROBE-AC2 B
+      PASS  VPROBE-AC3 times counts requests; a user retry succeeds
+      PASS  VPROBE-AC4 initFlow: DS theme, en, iOS; exports
+      PASS  VPROBE-AC3 fail once under a hold: loading, then retry ok
