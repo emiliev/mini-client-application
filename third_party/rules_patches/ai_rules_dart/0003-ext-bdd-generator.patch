@@ -1,0 +1,1351 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Emil Iliev <emil_iliev1994@yahoo.com>
+Date: Wed, 25 Nov 2026 00:48:31 +0200
+Subject: [PATCH 3/3] ext: hermetic bdd_widget_test generator (dart/ext/bdd)
+
+
+diff --git a/dart/ext/bdd/BUILD.bazel b/dart/ext/bdd/BUILD.bazel
+new file mode 100644
+index 00000000..811d33b8
+--- /dev/null
++++ b/dart/ext/bdd/BUILD.bazel
+@@ -0,0 +1,69 @@
++# dart/ext/bdd: `.feature` -> `_test.dart` for bdd_widget_test-style BDD
++# widget tests, generated hermetically (docs/ext.md "bdd_widget_test").
++#
++# Not a builder shim: bdd_widget_test's Builder writes step and hook files
++# outside its declared outputs, so the generator reuses its parser and
++# emitter (pinned at 3.0.5) and speaks the shim CLI contract itself. It never
++# runs a Builder or the analyzer, but both `package:analyzer` (through
++# dart_style) and `package:build` (a bdd_widget_test dependency) are in the
++# generator's exec closure. Tests built from its output depend on neither.
++
++load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
++load("//dart:defs.bzl", "dart_binary", "dart_library", "dart_test")
++
++exports_files(
++    ["defs.bzl"],
++    visibility = ["//visibility:public"],
++)
++
++bzl_library(
++    name = "defs",
++    srcs = ["defs.bzl"],
++    visibility = ["//visibility:public"],
++    deps = ["//dart:defs"],
++)
++
++_GEN_DEPS = [
++    "@ext_pub_deps//:bdd_widget_test",
++    "@ext_pub_deps//:dart_style",
++    "@ext_pub_deps//:path",
++    "@ext_pub_deps//:pub_semver",
++]
++
++# Generation logic, plus the scaffold library a consumer's own `bazel run`
++# tool can wrap (it needs the consumer's step-library directories).
++dart_library(
++    name = "bdd_generator",
++    package_name = "rules_dart_ext_bdd",
++    srcs = [
++        "lib/bdd_generator.dart",
++        "lib/scaffold.dart",
++    ],
++    language_version = "3.11",
++    visibility = ["//visibility:public"],
++    deps = _GEN_DEPS,
++)
++
++dart_binary(
++    name = "generator",
++    srcs = ["bin/generator.dart"],
++    code_assets_from_deps = False,
++    compile_mode = "kernel",
++    launcher = True,
++    main = "bin/generator.dart",
++    visibility = ["//visibility:public"],
++    deps = [
++        ":bdd_generator",
++        "@ext_pub_deps//:bazel_worker",
++    ],
++)
++
++dart_test(
++    name = "bdd_generator_test",
++    size = "small",
++    main = "test/bdd_generator_test.dart",
++    deps = _GEN_DEPS + [
++        ":bdd_generator",
++        "@ext_pub_deps//:test",
++    ],
++)
+diff --git a/dart/ext/bdd/bin/generator.dart b/dart/ext/bdd/bin/generator.dart
+new file mode 100644
+index 00000000..7dda6796
+--- /dev/null
++++ b/dart/ext/bdd/bin/generator.dart
+@@ -0,0 +1,139 @@
++/// BDD generator binary: the rules_dart shim CLI contract (`docs/ext.md`),
++/// driven by `dart_sqlcodegen` (one action per `.feature`), without
++/// `package:build` or the analyzer.
++///
++/// ```text
++/// --input <exec path of the .feature>   --input-asset <path in package>
++/// --output <exec path of the _test.dart> --package <name>
++/// --root-language-version <x.y>          --config <json>
++/// --dep <exec path>|<asset>              repeatable: local step files
++/// --part <exec path>                     repeatable: `*.bdd_steps.json`
++/// ```
++///
++/// Other contract flags (`--package-config`, `--sdk-path`, `--summary`, ...)
++/// are accepted and ignored. `--persistent_worker` runs the proto worker loop.
++library;
++
++import 'dart:async';
++import 'dart:io';
++
++import 'package:bazel_worker/bazel_worker.dart';
++import 'package:rules_dart_ext_bdd/bdd_generator.dart';
++
++Future<void> main(List<String> argv) async {
++  if (argv.contains('--persistent_worker')) {
++    await _Worker().run();
++    return;
++  }
++  final out = StringBuffer();
++  final int code = _runOnce(_expandFlagFiles(argv), out);
++  if (out.isNotEmpty) {
++    stderr.write(out);
++  }
++  exitCode = code;
++}
++
++class _Worker extends AsyncWorkerLoop {
++  @override
++  Future<WorkResponse> performRequest(WorkRequest request) async {
++    final out = StringBuffer();
++    final int code = _runOnce(_expandFlagFiles(request.arguments), out);
++    return WorkResponse()
++      ..exitCode = code
++      ..output = out.toString();
++  }
++}
++
++List<String> _expandFlagFiles(List<String> argv) => [
++  for (final a in argv)
++    if (a.startsWith('@') && File(a.substring(1)).existsSync())
++      ...File(a.substring(1)).readAsLinesSync().where((l) => l.isNotEmpty)
++    else
++      a,
++];
++
++int _runOnce(List<String> argv, StringBuffer out) {
++  String? input;
++  String? inputAsset;
++  String? output;
++  String? package;
++  var languageVersion = '3.0';
++  var configJson = '';
++  final deps = <({String execPath, String asset})>[];
++  for (var i = 0; i < argv.length; i++) {
++    final String flag = argv[i];
++    if (!flag.startsWith('--') || flag == '--persistent_worker') {
++      continue;
++    }
++    final String value = i + 1 < argv.length ? argv[++i] : '';
++    switch (flag) {
++      case '--input':
++        input = value;
++      case '--input-asset':
++        inputAsset = value;
++      case '--output':
++        if (output != null) {
++          out.writeln('bdd generator: exactly one --output (the _test.dart).');
++          return 2;
++        }
++        output = value;
++      case '--package':
++        package = value;
++      case '--root-language-version':
++        languageVersion = value;
++      case '--config':
++        configJson = value;
++      case '--dep':
++        final int bar = value.indexOf('|');
++        if (bar > 0) {
++          deps.add((
++            execPath: value.substring(0, bar),
++            asset: value.substring(bar + 1),
++          ));
++        }
++      case '--part':
++        // Step indexes from other packages (see `bdd_feature_test`).
++        deps.add((execPath: value, asset: value));
++      default:
++        break; // Other shim-contract flags take a value we do not need.
++    }
++  }
++  if (input == null ||
++      inputAsset == null ||
++      output == null ||
++      package == null) {
++    out.writeln(
++      'bdd generator: --input, --input-asset, --output and --package are '
++      'required.',
++    );
++    return 2;
++  }
++  try {
++    final Map<String, Object?> config = configJson.isEmpty
++        ? const <String, Object?>{}
++        : decodeConfig(configJson);
++    final Map<String, String> shared = mergeStepIndexes({
++      for (final dep in deps)
++        if (dep.asset.endsWith(stepIndexSuffix))
++          dep.asset: File(dep.execPath).readAsStringSync(),
++    });
++    final List<String> local = [
++      for (final dep in deps)
++        if (!dep.asset.endsWith(stepIndexSuffix)) dep.asset,
++    ];
++    final String dart = generateFeatureTest(
++      input: File(input).readAsStringSync(),
++      inputAsset: inputAsset,
++      package: package,
++      localSteps: local,
++      sharedSteps: shared,
++      config: config,
++      languageVersion: languageVersion,
++    );
++    File(output).writeAsStringSync(dart);
++    return 0;
++  } on BddGenerationError catch (e) {
++    out.writeln('BDD generation failed: ${e.message}');
++    return 1;
++  }
++}
+diff --git a/dart/ext/bdd/defs.bzl b/dart/ext/bdd/defs.bzl
+new file mode 100644
+index 00000000..cf17bd12
+--- /dev/null
++++ b/dart/ext/bdd/defs.bzl
+@@ -0,0 +1,145 @@
++"""BDD widget tests from Gherkin `.feature` files (bdd_widget_test 3.0.5 dialect).
++
++    load("@rules_dart//dart/ext/bdd:defs.bzl", "bdd_feature_test", "bdd_step_index", "bdd_suite_main")
++
++- `bdd_step_index` names the step files a shared step library exports.
++- `bdd_feature_test` is one `dart_sqlcodegen` action per `.feature`: it writes
++  `<stem>_test.dart` and fails, naming them, on missing or shadowed steps.
++- `bdd_suite_main` writes one entry file that runs every generated test of a
++  package in a `group` (one test target per package instead of one per file).
++"""
++
++load("//dart:defs.bzl", "dart_sqlcodegen")
++
++def _bdd_step_index_impl(ctx):
++    out = ctx.actions.declare_file(ctx.label.name + ".bdd_steps.json")
++    ctx.actions.write(out, json.encode({
++        "import": ctx.attr.import_uri,
++        "steps": sorted([f.basename for f in ctx.files.srcs]),
++    }))
++    return [DefaultInfo(files = depset([out]))]
++
++bdd_step_index = rule(
++    implementation = _bdd_step_index_impl,
++    attrs = {
++        "srcs": attr.label_list(
++            doc = "Step files, one step function per file named as " +
++                  "bdd_widget_test names the step (`i_see.dart` for " +
++                  "`I see {'x'}`).",
++            allow_files = [".dart"],
++        ),
++        "import_uri": attr.string(
++            doc = "The `package:` URI the generated tests import for these " +
++                  "steps (usually the step library's barrel).",
++            mandatory = True,
++        ),
++    },
++    doc = "A step index (`<name>.bdd_steps.json`) for `bdd_feature_test`'s " +
++          "`step_indexes`.",
++)
++
++def bdd_feature_test(
++        name,
++        src,
++        package_name,
++        steps = [],
++        step_indexes = [],
++        config = {},
++        language_version = "",
++        **kwargs):
++    """Generates `<stem>_test.dart` from the `.feature` file `src`.
++
++    Args:
++        name: Target name.
++        src: The `.feature` file.
++        package_name: The Dart package that owns `src`.
++        steps: The package's own step files (same package as `src`). Only
++            those under the step folder next to `src` (`./step`) count.
++        step_indexes: `bdd_step_index` targets of shared step libraries.
++        config: bdd_widget_test options as a dict: `testMethodName`,
++            `testerType`, `testerName`, `customHeaders`, `literalParameters`,
++            `stepFolderName` (relative), plus `dataTableImport` (the library
++            imported `as bdd` for data tables instead of
++            `package:bdd_widget_test/data_table.dart`) and `forbiddenTags`
++            (default `["skip", "wip"]`). Options that need undeclared files
++            (`addHooks`, `include`, `externalSteps`) are rejected.
++        language_version: The package's language version; the output is
++            formatted at it.
++        **kwargs: Passed to `dart_sqlcodegen` (`tags`, `visibility`, ...).
++    """
++    dart_sqlcodegen(
++        name = name,
++        src = src,
++        generator_bin = Label("//dart/ext/bdd:generator"),
++        output_suffixes = ["_test.dart"],
++        package_name = package_name,
++        language_version = language_version,
++        asset_deps = steps,
++        # Step indexes come from other packages, which `asset_deps` refuses
++        # (no in-package asset path), so they travel as `--part`.
++        parts = step_indexes,
++        config = json.encode(config) if config else "",
++        **kwargs
++    )
++
++def _relpath(path, start):
++    """`path` relative to the directory `start` (both workspace-relative)."""
++    p = path.split("/")
++    s = start.split("/") if start else []
++    i = 0
++    for _ in range(min(len(p), len(s))):
++        if p[i] != s[i]:
++            break
++        i += 1
++    return "/".join([".."] * (len(s) - i) + p[i:])
++
++def _stem(f):
++    """`greeting_browse` for `greeting_browse_test.dart`: the feature's stem."""
++    stem = f.basename[:-len(".dart")] if f.basename.endswith(".dart") else f.basename
++    return stem[:-len("_test")] if stem.endswith("_test") else stem
++
++def _bdd_suite_main_impl(ctx):
++    out = ctx.actions.declare_file(ctx.attr.out)
++    out_dir = out.short_path.rpartition("/")[0]
++    lines = [
++        "// GENERATED CODE - DO NOT MODIFY BY HAND (bdd_suite_main %s)" % ctx.label,
++        "// ignore_for_file: type=lint",
++        "import 'package:flutter_test/flutter_test.dart';",
++    ]
++    if ctx.file.setup:
++        lines.append("import '%s' as bdd_setup;" % _relpath(ctx.file.setup.short_path, out_dir))
++    tests = sorted(ctx.files.tests, key = lambda f: f.short_path)
++    for i, f in enumerate(tests):
++        lines.append("import '%s' as t%d;" % (_relpath(f.short_path, out_dir), i))
++    lines.append("")
++    lines.append("void main() {")
++    if ctx.file.setup:
++        lines.append("  setUpAll(bdd_setup.%s);" % ctx.attr.setup_function)
++    for i, f in enumerate(tests):
++        lines.append("  group('%s', t%d.main);" % (_stem(f), i))
++    lines.append("}")
++    ctx.actions.write(out, "\n".join(lines) + "\n")
++    return [DefaultInfo(files = depset([out]))]
++
++bdd_suite_main = rule(
++    implementation = _bdd_suite_main_impl,
++    attrs = {
++        "tests": attr.label_list(
++            doc = "Generated `_test.dart` files (`bdd_feature_test` targets).",
++            allow_files = [".dart"],
++            mandatory = True,
++        ),
++        "setup": attr.label(
++            doc = "Optional Dart file whose `setup_function` runs once " +
++                  "in `setUpAll` (fixture registration and the like).",
++            allow_single_file = [".dart"],
++        ),
++        "setup_function": attr.string(default = "bddSetUpAll"),
++        "out": attr.string(
++            doc = "Output path, relative to the package; imports are " +
++                  "relative to it.",
++            mandatory = True,
++        ),
++    },
++    doc = "One test entry point that runs every generated test in a group.",
++)
+diff --git a/dart/ext/bdd/lib/bdd_generator.dart b/dart/ext/bdd/lib/bdd_generator.dart
+new file mode 100644
+index 00000000..c17dbbf2
+--- /dev/null
++++ b/dart/ext/bdd/lib/bdd_generator.dart
+@@ -0,0 +1,535 @@
++/// Hermetic `.feature` -> `_test.dart` generation over bdd_widget_test 3.0.5's
++/// parser and emitter (not its `Builder`).
++///
++/// The stock `FeatureBuilder` writes step stubs and hook files straight to
++/// disk, outside the declared outputs, and reads `bdd_options.yaml` and
++/// `pubspec.yaml` from the source tree. This generator reuses the same
++/// `parseFeatureFile` / `StepFile` / `generateFeatureDart` code, so the
++/// generated test is the stock dialect, but:
++///
++/// - it sees only the step files and step indexes Bazel stages (`--dep`);
++/// - a step with no definition is a build error naming every missing step
++///   (never a stub written on disk); `scaffold.dart` writes stubs instead;
++/// - a local step with the name of a shared (indexed) one is a build error;
++/// - tags written above `Feature:` are moved onto every scenario (the "tag
++///   pre-pass"), so they reach the test method's `tags:`; a library-level
++///   `@Tags` is lost when the generated file is imported by an aggregator;
++/// - `@skip` / `@wip` tags are refused;
++/// - Gherkin data tables can be emitted against another `DataTable`
++///   (`dataTableImport`), so tests need no runtime `bdd_widget_test`;
++/// - the output is formatted at the package's language version.
++library;
++
++import 'dart:convert';
++
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/feature_generator.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/feature_model.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/feature_parser.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/generator_options.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/step_file.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/step_generator.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/util/common.dart';
++// ignore: implementation_imports, bdd_widget_test exports no parser or emitter (3.0.5 is pinned exactly)
++import 'package:bdd_widget_test/src/util/constants.dart';
++import 'package:dart_style/dart_style.dart';
++import 'package:path/path.dart' as p;
++import 'package:pub_semver/pub_semver.dart';
++
++/// The placeholder import a shared step is generated with, rewritten to its
++/// index URI afterwards (bdd_widget_test only knows file-path imports).
++const _sharedPrefix = '@mc_shared_step/';
++
++/// The suffix that marks a `--dep` as a step index (see `bdd_step_index`).
++const stepIndexSuffix = '.bdd_steps.json';
++
++/// Config keys this generator accepts: bdd_widget_test's `GeneratorOptions`
++/// that need no file system, plus our own.
++const _allowedConfigKeys = {
++  'testMethodName',
++  'testerType',
++  'testerName',
++  'customHeaders',
++  'literalParameters',
++  'stepFolderName',
++  'dataTableImport',
++  'forbiddenTags',
++};
++
++/// A generation failure meant for the user: the action prints it and fails.
++class BddGenerationError implements Exception {
++  /// A failure with the user-facing [message].
++  BddGenerationError(this.message);
++
++  /// What went wrong and how to fix it; printed as is.
++  final String message;
++
++  @override
++  String toString() => message;
++}
++
++/// One staged file: its exec path and its path inside the package.
++typedef StagedFile = ({String execPath, String asset});
++
++/// Reads a step index (`{"import": "...", "steps": ["a.dart", ...]}`) into
++/// file name -> import URI.
++Map<String, String> parseStepIndex(String json, String origin) {
++  final Object? decoded;
++  try {
++    decoded = jsonDecode(json);
++  } on FormatException catch (e) {
++    throw BddGenerationError('$origin: not JSON (${e.message}).');
++  }
++  if (decoded is! Map ||
++      decoded['import'] is! String ||
++      decoded['steps'] is! List ||
++      (decoded['steps'] as List).any((s) => s is! String)) {
++    throw BddGenerationError(
++      '$origin: a step index needs "import" (a string) and "steps" (a list '
++      'of file names).',
++    );
++  }
++  final uri = decoded['import'] as String;
++  return {for (final s in (decoded['steps'] as List)) s as String: uri};
++}
++
++/// Merges step indexes (origin -> JSON text) into file name -> import URI.
++/// A step file listed by two indexes with different URIs is an error.
++Map<String, String> mergeStepIndexes(Map<String, String> indexes) {
++  final shared = <String, String>{};
++  for (final MapEntry<String, String> index in indexes.entries) {
++    for (final MapEntry<String, String> e in parseStepIndex(
++      index.value,
++      index.key,
++    ).entries) {
++      final String? previous = shared[e.key];
++      if (previous != null && previous != e.value) {
++        throw BddGenerationError(
++          'step ${e.key} is in two step indexes: $previous and ${e.value}',
++        );
++      }
++      shared[e.key] = e.value;
++    }
++  }
++  return shared;
++}
++
++/// Decodes the `--config` JSON object.
++Map<String, Object?> decodeConfig(String json) {
++  final Object? decoded;
++  try {
++    decoded = jsonDecode(json);
++  } on FormatException catch (e) {
++    throw BddGenerationError('--config is not JSON (${e.message}).');
++  }
++  if (decoded is! Map) {
++    throw BddGenerationError('--config must be a JSON object.');
++  }
++  return decoded.cast<String, Object?>();
++}
++
++/// Checks [config] and returns bdd_widget_test's options for it. Shared by
++/// the generator and the scaffold, so both accept the same keys.
++GeneratorOptions optionsFromConfig(Map<String, Object?> config, String origin) {
++  final Iterable<String> unknown = config.keys.where(
++    (k) => !_allowedConfigKeys.contains(k),
++  );
++  if (unknown.isNotEmpty) {
++    throw BddGenerationError(
++      '$origin: unsupported bdd config key(s) ${unknown.join(', ')}. '
++      'Hooks, includes and externalSteps need files outside the declared '
++      'inputs and outputs; supported: ${_allowedConfigKeys.join(', ')}.',
++    );
++  }
++  for (final MapEntry<String, Object?>(:String key, :Object? value)
++      in config.entries) {
++    final bool ok = switch (key) {
++      'literalParameters' => value is bool?,
++      'customHeaders' || 'forbiddenTags' =>
++        value == null || value is List && value.every((v) => v is String),
++      _ => value is String?,
++    };
++    if (!ok) {
++      throw BddGenerationError(
++        '$origin: bdd config "$key" has the wrong type '
++        '(${value.runtimeType}).',
++      );
++    }
++  }
++  final options = GeneratorOptions.fromMap({...config});
++  final String folder = options.stepFolder;
++  if (!folder.startsWith('./') && !folder.startsWith('../')) {
++    throw BddGenerationError(
++      '$origin: stepFolderName must be relative to the feature file '
++      '("./step", "../step"); a folder relative to test/ is not supported.',
++    );
++  }
++  return options;
++}
++
++/// Step files under [stepDir]: file name -> directory relative to
++/// [featureDir], as bdd_widget_test's `getExistingStepSubfolders` reports
++/// it. Two files with one name in different subfolders are an error (the
++/// stock generator would silently pick one).
++Map<String, String> localStepMap(
++  Iterable<String> assets,
++  String stepDir,
++  String featureDir,
++  String origin,
++) {
++  final local = <String, String>{};
++  final where = <String, String>{};
++  for (final asset in assets) {
++    if (!p.posix.isWithin(stepDir, asset) || !asset.endsWith('.dart')) {
++      continue;
++    }
++    final String name = p.posix.basename(asset);
++    final String? previous = where[name];
++    if (previous != null && previous != asset) {
++      throw BddGenerationError(
++        '$origin: two step files named $name: $previous and $asset. A step '
++        'resolves by file name, so rename one.',
++      );
++    }
++    where[name] = asset;
++    local[name] = p.posix.relative(p.posix.dirname(asset), from: featureDir);
++  }
++  return local;
++}
++
++/// Generates the `_test.dart` for the feature at [inputAsset] (path inside
++/// the package, e.g. `test/feature/x.feature`).
++///
++/// [localSteps] are the package's own step files (asset paths); only those
++/// under the step folder next to the feature count. [sharedSteps] maps a
++/// step file name to the URI that exports it.
++String generateFeatureTest({
++  required String input,
++  required String inputAsset,
++  required String package,
++  required Iterable<String> localSteps,
++  required Map<String, String> sharedSteps,
++  Map<String, Object?> config = const {},
++  String languageVersion = '3.0',
++}) {
++  final GeneratorOptions options = optionsFromConfig(config, inputAsset);
++  final Set<String> forbidden = {
++    for (final t in (config['forbiddenTags'] as List?) ?? const ['skip', 'wip'])
++      '@$t',
++  };
++
++  final FeatureFileModel parsed;
++  try {
++    parsed = parseFeatureFile(
++      input,
++      uri: inputAsset,
++      literalParameters: options.literalParameters,
++    );
++  } on FormatException catch (e) {
++    throw BddGenerationError('$inputAsset: ${e.message}');
++  }
++  final FeatureFileModel model = _moveFeatureTagsOntoScenarios(parsed);
++
++  final Set<String> badTags = model.allTagLines
++      .where(forbidden.contains)
++      .toSet();
++  if (badTags.isNotEmpty) {
++    throw BddGenerationError(
++      '$inputAsset: forbidden tag(s) ${badTags.join(', ')}: a scenario is '
++      'never skipped (test-integrity rule).',
++    );
++  }
++
++  final String featureDir = p.posix.dirname(inputAsset);
++  final String stepDir = p.posix.normalize(
++    p.posix.join(featureDir, options.stepFolder),
++  );
++  final Map<String, String> local = localStepMap(
++    localSteps,
++    stepDir,
++    featureDir,
++    inputAsset,
++  );
++
++  final List<String> shadowed =
++      local.keys.where(sharedSteps.containsKey).toList()..sort();
++  if (shadowed.isNotEmpty) {
++    throw BddGenerationError(
++      '$inputAsset: local step(s) shadow shared steps of the same name:\n'
++      '${shadowed.map((f) => '  ${p.posix.join(stepDir, f)} shadows ${sharedSteps[f]}').join('\n')}\n'
++      'Delete the local step or rename it.',
++    );
++  }
++
++  final String testerType = parseCustomTagValue(
++    model.allTagLines,
++    options.testerType,
++    testerTypeTag,
++  );
++  final String testerName = parseCustomTagValue(
++    model.allTagLines,
++    options.testerName,
++    testerNameTag,
++  );
++
++  final stepFiles = <StepFile>[];
++  final missing = <String, String>{}; // file -> step text
++  for (final Step step in model.allSteps) {
++    final file = '${getStepFilename(step.text)}.dart';
++    final bool isLocal = local.containsKey(file);
++    final String? shared = sharedSteps[file];
++    if (!isLocal && shared == null) {
++      missing.putIfAbsent(file, () => step.text);
++      continue;
++    }
++    final stepOptions = GeneratorOptions(
++      testMethodName: options.testMethodName,
++      stepFolderName: options.stepFolder,
++      externalSteps: isLocal ? const [] : ['$_sharedPrefix$file'],
++    );
++    stepFiles.add(
++      StepFile.create(
++        featureDir,
++        package,
++        step,
++        isLocal ? local : const {},
++        stepOptions,
++        testerType,
++        testerName,
++        null,
++      ),
++    );
++  }
++  if (missing.isNotEmpty) {
++    final List<String> names = missing.keys.toList()..sort();
++    throw BddGenerationError(
++      '$inputAsset: ${names.length} step(s) have no definition:\n'
++      '${names.map((f) => '  "${missing[f]}" -> ${p.posix.join(stepDir, f)} '
++          '(${getStepMethodName(missing[f]!)})').join('\n')}\n'
++      'Write them, or run the scaffold tool to create stubs; the build never '
++      'writes into the source tree.',
++    );
++  }
++  if (stepFiles.whereType<NewStepFile>().isNotEmpty) {
++    // Defensive: every step was resolved above.
++    throw BddGenerationError('$inputAsset: unresolved step files.');
++  }
++
++  String dart = generateFeatureDart(
++    model,
++    stepFiles,
++    options.testMethodName,
++    testerType,
++    testerName,
++    false,
++    false,
++    null,
++    options,
++  );
++  dart = _rewriteImports(dart, sharedSteps, config['dataTableImport']);
++
++  try {
++    return _format(dart, languageVersion);
++  } on FormatterException catch (e) {
++    throw BddGenerationError(
++      '$inputAsset: the generated test does not parse '
++      '(${e.message()}):\n$dart',
++    );
++  }
++}
++
++/// Rewrites shared-step placeholder imports to their URIs (each once) and,
++/// with [dataTableImport], bdd_widget_test's `DataTable` import.
++String _rewriteImports(
++  String dart,
++  Map<String, String> sharedSteps,
++  Object? dataTableImport,
++) {
++  final imports = <String>{};
++  final out = <String>[];
++  int? at;
++  for (final String line in const LineSplitter().convert(dart)) {
++    var l = line;
++    if (l.startsWith("import '$_sharedPrefix")) {
++      final String file = l.substring(
++        "import '$_sharedPrefix".length,
++        l.length - 2,
++      );
++      l = "import '${sharedSteps[file]}';";
++    }
++    if (dataTableImport is String &&
++        l == "import 'package:bdd_widget_test/data_table.dart' as bdd;") {
++      l = "import '$dataTableImport' as bdd;";
++    }
++    if (l.startsWith('import ')) {
++      at ??= out.length;
++      imports.add(l);
++      continue;
++    }
++    // Blank lines between the stock import groups go; the sorted block
++    // brings its own.
++    if (l.isEmpty && at != null && out.length == at) {
++      continue;
++    }
++    out.add(l);
++  }
++  if (at != null) {
++    out.insertAll(at, [..._sortedImports(imports), '']);
++  }
++  return '${out.join('\n')}\n';
++}
++
++/// [imports] in `directives_ordering` order: `dart:`, then `package:`, then
++/// relative, each sorted by URI, with a blank line between the groups.
++List<String> _sortedImports(Iterable<String> imports) {
++  String uri(String line) => line.substring(8, line.indexOf("'", 8));
++  int group(String line) {
++    final String u = uri(line);
++    return u.startsWith('dart:')
++        ? 0
++        : u.startsWith('package:')
++        ? 1
++        : 2;
++  }
++
++  final List<String> sorted = imports.toList()
++    ..sort((a, b) {
++      final int g = group(a).compareTo(group(b));
++      if (g != 0) return g;
++      final int u = uri(a).compareTo(uri(b));
++      return u != 0 ? u : a.compareTo(b);
++    });
++  final out = <String>[];
++  for (var i = 0; i < sorted.length; i++) {
++    if (i > 0 && group(sorted[i]) != group(sorted[i - 1])) {
++      out.add('');
++    }
++    out.add(sorted[i]);
++  }
++  return out;
++}
++
++/// The tag pre-pass: file-level tags (except bdd_widget_test's own
++/// `@name: value` tags) are added to every scenario, rules included.
++FeatureFileModel _moveFeatureTagsOntoScenarios(FeatureFileModel model) {
++  bool isOption(String t) => t.contains(':');
++  final List<String> fileTags = model.tagLines
++      .where((t) => !isOption(t))
++      .toList();
++  if (fileTags.isEmpty) {
++    return model;
++  }
++  Scenario tagged(Scenario s) => Scenario(
++    tagLines: {...fileTags, ...s.tagLines}.toList(),
++    title: s.title,
++    steps: s.steps,
++    examples: s.examples,
++  );
++  return FeatureFileModel(
++    header: model.header,
++    tagLines: model.tagLines.where(isOption).toList(),
++    features: [
++      for (final f in model.features)
++        Feature(
++          title: f.title,
++          background: f.background,
++          after: f.after,
++          scenarios: f.scenarios.map(tagged).toList(),
++          rules: [
++            for (final r in f.rules)
++              Rule(
++                title: r.title,
++                background: r.background,
++                scenarios: r.scenarios.map(tagged).toList(),
++              ),
++          ],
++        ),
++    ],
++  );
++}
++
++/// The missing step stubs for [input], as (asset path, content), in the
++/// stock bdd_widget_test stub format. Used by the scaffold tool only.
++List<({String asset, String content})> missingStepStubs({
++  required String input,
++  required String inputAsset,
++  required String package,
++  required Iterable<String> localSteps,
++  required Map<String, String> sharedSteps,
++  Map<String, Object?> config = const {},
++  String languageVersion = '3.0',
++}) {
++  optionsFromConfig(config, inputAsset);
++  // A stub imports only flutter_test (and the DataTable), never the test
++  // file's custom headers.
++  final options = GeneratorOptions.fromMap(
++    {...config}
++      ..remove('dataTableImport')
++      ..remove('forbiddenTags')
++      ..remove('customHeaders'),
++  );
++  final FeatureFileModel model = parseFeatureFile(
++    input,
++    uri: inputAsset,
++    literalParameters: options.literalParameters,
++  );
++  final String featureDir = p.posix.dirname(inputAsset);
++  final String stepDir = p.posix.normalize(
++    p.posix.join(featureDir, options.stepFolder),
++  );
++  final Set<String> have = localStepMap(
++    localSteps,
++    stepDir,
++    featureDir,
++    inputAsset,
++  ).keys.toSet();
++  final String testerType = parseCustomTagValue(
++    model.allTagLines,
++    options.testerType,
++    testerTypeTag,
++  );
++  final String testerName = parseCustomTagValue(
++    model.allTagLines,
++    options.testerName,
++    testerNameTag,
++  );
++  final stubs = <String, String>{};
++  for (final Step step in model.allSteps) {
++    final file = '${getStepFilename(step.text)}.dart';
++    if (have.contains(file) || sharedSteps.containsKey(file)) {
++      continue;
++    }
++    stubs.putIfAbsent(
++      p.posix.join(stepDir, file),
++      () => _format(
++        _rewriteImports(
++          generateStepDart(
++            package,
++            step.text,
++            testerType,
++            testerName,
++            step.isDataTable,
++            options,
++          ),
++          const {},
++          config['dataTableImport'],
++        ),
++        languageVersion,
++      ),
++    );
++  }
++  return [for (final e in stubs.entries) (asset: e.key, content: e.value)];
++}
++
++String _format(String dart, String languageVersion) {
++  final formatter = DartFormatter(
++    languageVersion: Version.parse('$languageVersion.0'),
++  );
++  return formatter.format(dart);
++}
+diff --git a/dart/ext/bdd/lib/scaffold.dart b/dart/ext/bdd/lib/scaffold.dart
+new file mode 100644
+index 00000000..c9cef97f
+--- /dev/null
++++ b/dart/ext/bdd/lib/scaffold.dart
+@@ -0,0 +1,77 @@
++/// The non-hermetic half of the BDD support: writes stubs for steps that no
++/// file defines, the way stock bdd_widget_test does on `build_runner build`.
++/// Never part of a build: run it with `bazel run`, which sets
++/// `BUILD_WORKSPACE_DIRECTORY`.
++library;
++
++import 'dart:io';
++
++import 'package:path/path.dart' as p;
++import 'package:rules_dart_ext_bdd/bdd_generator.dart';
++
++/// Reads `bdd_step_index` files (the same ones `bdd_feature_test` gets), so
++/// the scaffold and the build agree on which steps are shared.
++Map<String, String> readStepIndexes(Iterable<String> paths) =>
++    mergeStepIndexes({for (final f in paths) f: File(f).readAsStringSync()});
++
++/// The `<major>.<minor>` of the `sdk:` lower bound in [pubspec], or null.
++String? languageVersionOf(String pubspec) => RegExp(
++  r'''^\s+sdk:\s*['"]?(?:\^|>=)?\s*(\d+\.\d+)''',
++  multiLine: true,
++).firstMatch(pubspec)?.group(1);
++
++/// Writes a stub for every missing step of every `.feature` directly in
++/// `<packageDir>/<featureDir>` (the files `glob(["<featureDir>/*.feature"])`
++/// gives a BDD test target) and returns the workspace-relative paths
++/// written. Existing files are never touched.
++List<String> scaffoldPackage({
++  required String workspace,
++  required String packageDir,
++  required String package,
++  required Map<String, String> sharedSteps,
++  String featureDir = 'test/feature',
++  Map<String, Object?> config = const {},
++  String languageVersion = '3.0',
++}) {
++  final String root = p.join(workspace, packageDir);
++  final features = Directory(p.join(root, featureDir));
++  if (!features.existsSync()) {
++    throw BddGenerationError('no $featureDir in $packageDir');
++  }
++  String asset(FileSystemEntity f) =>
++      p.posix.joinAll(p.split(p.relative(f.path, from: root)));
++  final List<String> featureFiles = [
++    for (final f in features.listSync())
++      if (f is File && f.path.endsWith('.feature')) asset(f),
++  ]..sort();
++  final List<String> dartFiles = [
++    for (final f in features.listSync(recursive: true))
++      if (f is File && f.path.endsWith('.dart')) asset(f),
++  ];
++  final written = <String>[];
++  for (final feature in featureFiles) {
++    final List<({String asset, String content})> stubs = missingStepStubs(
++      input: File(p.join(root, feature)).readAsStringSync(),
++      inputAsset: feature,
++      package: package,
++      localSteps: [
++        ...dartFiles,
++        ...written.map((w) => p.posix.relative(w, from: packageDir)),
++      ],
++      sharedSteps: sharedSteps,
++      config: config,
++      languageVersion: languageVersion,
++    );
++    for (final stub in stubs) {
++      final file = File(p.join(root, stub.asset));
++      if (file.existsSync()) {
++        continue;
++      }
++      file
++        ..createSync(recursive: true)
++        ..writeAsStringSync(stub.content);
++      written.add(p.posix.join(packageDir, stub.asset));
++    }
++  }
++  return written;
++}
+diff --git a/dart/ext/bdd/test/bdd_generator_test.dart b/dart/ext/bdd/test/bdd_generator_test.dart
+new file mode 100644
+index 00000000..ccaaa3ed
+--- /dev/null
++++ b/dart/ext/bdd/test/bdd_generator_test.dart
+@@ -0,0 +1,258 @@
++import 'package:rules_dart_ext_bdd/bdd_generator.dart';
++import 'package:test/test.dart';
++
++const _feature = '''
++@T-0001-AC9
++Feature: Counter
++  Background:
++    Given the app is ready
++
++  @T-0001-AC1 @smoke
++  Scenario: It counts
++    When I tap {'+'}
++    Then I see {'1'}
++
++  Scenario: It lists
++    Then I see the rows
++      | 'name' |
++      | 'a'    |
++''';
++
++const _shared = {
++  'i_tap.dart': 'package:steps/steps.dart',
++  'i_see.dart': 'package:steps/steps.dart',
++  'i_see_the_rows.dart': 'package:steps/steps.dart',
++};
++
++String _generate({
++  String input = _feature,
++  List<String> local = const ['test/feature/step/the_app_is_ready.dart'],
++  Map<String, String> shared = _shared,
++  Map<String, Object?> config = const {
++    'testMethodName': 'mcTestWidgets',
++    'customHeaders': ["import 'package:flutter_test/flutter_test.dart';"],
++    'dataTableImport': 'package:steps/steps.dart',
++  },
++}) => generateFeatureTest(
++  input: input,
++  inputAsset: 'test/feature/counter.feature',
++  package: 'counter',
++  localSteps: local,
++  sharedSteps: shared,
++  config: config,
++  languageVersion: '3.13',
++);
++
++void main() {
++  test('scenario tags and feature tags reach the test method as tags', () {
++    final String dart = _generate();
++    expect(dart, contains("mcTestWidgets('''It counts'''"));
++    expect(dart, contains("tags: ['T-0001-AC9', 'T-0001-AC1', 'smoke']"));
++    expect(dart, contains("tags: ['T-0001-AC9']"));
++    expect(dart, isNot(contains('@Tags')));
++  });
++
++  test('local steps import relatively, shared steps once by URI', () {
++    final String dart = _generate();
++    expect(dart, contains("import './step/the_app_is_ready.dart';"));
++    expect(
++      RegExp("import 'package:steps/steps.dart';").allMatches(dart),
++      hasLength(1),
++    );
++    expect(dart, isNot(contains('mc_shared_step')));
++  });
++
++  test('a data table uses the configured DataTable library', () {
++    final String dart = _generate();
++    expect(dart, isNot(contains('package:bdd_widget_test')));
++    expect(dart, contains("import 'package:steps/steps.dart' as bdd;"));
++    expect(dart, contains('const bdd.DataTable(['));
++  });
++
++  test('missing steps fail naming each of them', () {
++    expect(
++      () => _generate(local: const [], shared: const {}),
++      throwsA(
++        isA<BddGenerationError>().having(
++          (e) => e.message,
++          'message',
++          allOf(
++            contains('4 step(s) have no definition'),
++            contains(
++              '"the app is ready" -> test/feature/step/the_app_is_ready.dart',
++            ),
++            contains('i_tap.dart (iTap)'),
++          ),
++        ),
++      ),
++    );
++  });
++
++  test('a step outside the step folder does not count', () {
++    expect(
++      () => _generate(local: const ['test/feature/util/the_app_is_ready.dart']),
++      throwsA(isA<BddGenerationError>()),
++    );
++  });
++
++  test('a local step shadowing a shared one fails', () {
++    expect(
++      () => _generate(
++        local: const [
++          'test/feature/step/the_app_is_ready.dart',
++          'test/feature/step/i_see.dart',
++        ],
++      ),
++      throwsA(
++        isA<BddGenerationError>().having(
++          (e) => e.message,
++          'message',
++          contains(
++            'test/feature/step/i_see.dart shadows package:steps/steps.dart',
++          ),
++        ),
++      ),
++    );
++  });
++
++  test('skip and wip tags are refused', () {
++    expect(
++      () => _generate(input: _feature.replaceFirst('@smoke', '@skip')),
++      throwsA(isA<BddGenerationError>()),
++    );
++  });
++
++  test('options that need undeclared files are refused', () {
++    for (final key in ['addHooks', 'include', 'externalSteps']) {
++      expect(
++        () => _generate(config: {key: true}),
++        throwsA(isA<BddGenerationError>()),
++        reason: key,
++      );
++    }
++  });
++
++  test('stubs are only made for missing steps', () {
++    final List<({String asset, String content})> stubs = missingStepStubs(
++      input: _feature,
++      inputAsset: 'test/feature/counter.feature',
++      package: 'counter',
++      localSteps: const [],
++      sharedSteps: const {'i_tap.dart': 'package:steps/steps.dart'},
++      config: const {'dataTableImport': 'package:steps/steps.dart'},
++    );
++    expect(stubs.map((s) => s.asset), [
++      'test/feature/step/the_app_is_ready.dart',
++      'test/feature/step/i_see.dart',
++      'test/feature/step/i_see_the_rows.dart',
++    ]);
++    expect(stubs.first.content, contains('/// Usage: the app is ready'));
++    expect(stubs.first.content, contains('Future<void> theAppIsReady('));
++    expect(
++      stubs.last.content,
++      contains("import 'package:steps/steps.dart' as bdd;"),
++    );
++  });
++
++  test('imports are sorted for directives_ordering', () {
++    final String dart = _generate();
++    final List<String> imports = RegExp(
++      "^import '([^']+)'",
++      multiLine: true,
++    ).allMatches(dart).map((m) => m.group(1)!).toList();
++    expect(imports, [
++      'package:flutter_test/flutter_test.dart',
++      'package:steps/steps.dart',
++      'package:steps/steps.dart',
++      './step/the_app_is_ready.dart',
++    ]);
++  });
++
++  test('a data-table stub sorts its DataTable import', () {
++    final ({String asset, String content}) stub = missingStepStubs(
++      input: _feature,
++      inputAsset: 'test/feature/counter.feature',
++      package: 'counter',
++      localSteps: const ['test/feature/step/the_app_is_ready.dart'],
++      sharedSteps: const {
++        'i_tap.dart': 'package:steps/steps.dart',
++        'i_see.dart': 'package:steps/steps.dart',
++      },
++      config: const {'dataTableImport': 'package:steps/steps.dart'},
++      languageVersion: '3.13',
++    ).single;
++    expect(
++      stub.content,
++      startsWith(
++        "import 'package:flutter_test/flutter_test.dart';\n"
++        "import 'package:steps/steps.dart' as bdd;\n",
++      ),
++    );
++  });
++
++  test('two local steps with one file name fail', () {
++    expect(
++      () => _generate(
++        local: const [
++          'test/feature/step/the_app_is_ready.dart',
++          'test/feature/step/sub/the_app_is_ready.dart',
++        ],
++      ),
++      throwsA(
++        isA<BddGenerationError>().having(
++          (e) => e.message,
++          'message',
++          contains('two step files named the_app_is_ready.dart'),
++        ),
++      ),
++    );
++  });
++
++  test('a step folder above the feature is accepted', () {
++    final String dart = _generate(
++      local: const ['test/step/the_app_is_ready.dart'],
++      config: const {
++        'stepFolderName': '../step',
++        'dataTableImport': 'package:steps/steps.dart',
++      },
++    );
++    // As stock bdd_widget_test writes it: `p.join('.', '../step', file)`.
++    expect(dart, contains("import './../step/the_app_is_ready.dart';"));
++    expect(
++      () => _generate(config: const {'stepFolderName': 'step'}),
++      throwsA(isA<BddGenerationError>()),
++    );
++  });
++
++  test('bad config and bad indexes are reported, not thrown raw', () {
++    expect(() => decodeConfig('{'), throwsA(isA<BddGenerationError>()));
++    expect(() => decodeConfig('[]'), throwsA(isA<BddGenerationError>()));
++    expect(
++      () => _generate(config: const {'testMethodName': 3}),
++      throwsA(isA<BddGenerationError>()),
++    );
++    expect(
++      () => parseStepIndex('{"import": "x", "steps": [1]}', 'x'),
++      throwsA(isA<BddGenerationError>()),
++    );
++    expect(() => parseStepIndex('{', 'x'), throwsA(isA<BddGenerationError>()));
++    expect(
++      () => mergeStepIndexes({
++        'a': '{"import": "package:a/a.dart", "steps": ["s.dart"]}',
++        'b': '{"import": "package:b/b.dart", "steps": ["s.dart"]}',
++      }),
++      throwsA(isA<BddGenerationError>()),
++    );
++  });
++
++  test('parseStepIndex maps file names to the import', () {
++    expect(
++      parseStepIndex(
++        '{"import": "package:s/s.dart", "steps": ["a.dart"]}',
++        'x',
++      ),
++      {'a.dart': 'package:s/s.dart'},
++    );
++    expect(() => parseStepIndex('[]', 'x'), throwsA(isA<BddGenerationError>()));
++  });
++}
+diff --git a/dart/ext/pubspec.lock b/dart/ext/pubspec.lock
+index b19b3159..c2d8764b 100644
+--- a/dart/ext/pubspec.lock
++++ b/dart/ext/pubspec.lock
+@@ -49,6 +49,14 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "1.1.5"
++  bdd_widget_test:
++    dependency: "direct main"
++    description:
++      name: bdd_widget_test
++      sha256: "0d78497fc8a2fa8cf5ee59cf655a89d0b003c767f93a7322b83b7de8b7068a85"
++      url: "https://pub.dev"
++    source: hosted
++    version: "3.0.5"
+   boolean_selector:
+     dependency: transitive
+     description:
+@@ -97,6 +105,14 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "8.13.0"
++  characters:
++    dependency: transitive
++    description:
++      name: characters
++      sha256: faf38497bda5ead2a8c7615f4f7939df04333478bf32e4173fcb06d428b5716b
++      url: "https://pub.dev"
++    source: hosted
++    version: "1.4.1"
+   charcode:
+     dependency: transitive
+     description:
+@@ -201,6 +217,22 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "3.0.7"
++  cucumber_gherkin:
++    dependency: transitive
++    description:
++      name: cucumber_gherkin
++      sha256: "64d7801d0b25ddb5b9129434dff2290d92b8c31a3809e50c6c7bfe8da8a37af4"
++      url: "https://pub.dev"
++    source: hosted
++    version: "42.0.1"
++  cucumber_messages:
++    dependency: transitive
++    description:
++      name: cucumber_messages
++      sha256: d4ee7dfe53da26d5748d08dd64c28e234ad1f6a6833ffa99dd4c7a847e77e196
++      url: "https://pub.dev"
++    source: hosted
++    version: "34.2.1"
+   dart_style:
+     dependency: transitive
+     description:
+@@ -217,6 +249,14 @@ packages:
+       url: "https://pub.dev"
+     source: hosted
+     version: "0.20.0"
++  diacritic:
++    dependency: transitive
++    description:
++      name: diacritic
++      sha256: "12981945ec38931748836cd76f2b38773118d0baef3c68404bdfde9566147876"
++      url: "https://pub.dev"
++    source: hosted
++    version: "0.1.6"
+   dio:
+     dependency: transitive
+     description:
+diff --git a/dart/ext/pubspec.yaml b/dart/ext/pubspec.yaml
+index 34925d28..c0d90226 100644
+--- a/dart/ext/pubspec.yaml
++++ b/dart/ext/pubspec.yaml
+@@ -17,6 +17,9 @@ dependencies:
+   logging: ^1.3.0
+   package_config: ^3.0.0
+   path: ^1.9.0
++  # Exact: dart/ext/bdd imports its lib/src parser and emitter. 3.1.x needs
++  # build ^5 (this lock has build 4).
++  bdd_widget_test: 3.0.5
+   built_value_generator: ^8.12.0
+   copy_with_extension_gen: ^18.0.0
+   drift_dev: ^2.32.0

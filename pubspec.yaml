@@ -18,6 +18,7 @@ workspace:
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
   - spike/api_envelope
+  - spike/bdd_sample
   - spike/di_sample
   - spike/greeting
   - spike/hello
@@ -46,4 +47,5 @@ workspace:
   - utility/mc_monitoring
   - utility/mc_prelude
   - utility/mc_storage
+  - utility/mc_test_steps
   - utility/mc_test_utils

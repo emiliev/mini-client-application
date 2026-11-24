@@ -1,0 +1,5 @@
+@@ai_rules_dart++pub+ext_pub_deps//:bdd_widget_test (b1a3e4e)
+@@ai_rules_dart++pub+ext_pub_deps__bdd_widget_test//:bdd_widget_test (b1a3e4e)
+@@ai_rules_dart++pub+ext_pub_deps__analyzer//:analyzer (b1a3e4e)
+@@ai_rules_dart++pub+ext_pub_deps__build//:build (b1a3e4e)
+@@ai_rules_dart++pub+ext_pub_deps___fe_analyzer_shared//:_fe_analyzer_shared (b1a3e4e)

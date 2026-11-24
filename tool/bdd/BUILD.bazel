@@ -1,0 +1,16 @@
+# T-0029: writes step stubs for a package's `.feature` files into the source
+# tree (plan 05 §5.2). Never part of a build:
+#   tool/bazelw run //tool/bdd:scaffold -- //feature/characters_list
+# Shared steps come from the same `:step_index` the build uses.
+load("@rules_dart//dart:defs.bzl", "dart_binary")
+
+dart_binary(
+    name = "scaffold",
+    testonly = True,  # `:step_index` is test-only
+    srcs = ["scaffold.dart"],
+    args = ["--step-index=$(rootpath //utility/mc_test_steps:step_index)"],
+    data = ["//utility/mc_test_steps:step_index"],
+    language_version = "3.13",
+    main = "scaffold.dart",
+    deps = ["@rules_dart//dart/ext/bdd:bdd_generator"],
+)
