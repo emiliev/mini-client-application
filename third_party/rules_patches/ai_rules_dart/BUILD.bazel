@@ -1,0 +1,2 @@
+# Served to MODULE.bazel as patch labels.
+exports_files(glob(["*.patch"], allow_empty = True))

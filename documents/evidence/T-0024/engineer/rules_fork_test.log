@@ -1,0 +1,9 @@
+PASS T-0024-AC3_checkout_writes_absolute_override
+PASS T-0024-AC3_bazelrc_user_is_gitignored
+PASS T-0024-AC1_export_writes_one_patch_per_commit
+PASS T-0024-AC1_git_override_patches_build_same_as_override_module
+PASS T-0024-AC2_unappliable_patch_fails_naming_it
+PASS T-0024-AC2_checkout_rejects_unappliable_queued_patch
+PASS T-0024-AC3_export_refuses_binary_hunk_naming_file
+PASS T-0024-AC4_committed_queue_matches_module_bazel
+rules_fork_test: 8 passed, 0 failed

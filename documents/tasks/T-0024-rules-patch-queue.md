@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Ready for Verifier |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0024-patch-queue` |
@@ -32,6 +32,20 @@ The mechanism every rules fix and every new codegen shim (retrofit, injectable, 
 
 ## Log
 - 2026-11-24: Created and dispatched.
+- 2026-11-24: Engineer: implemented `tool/rules_fork.sh`, `third_party/rules_patches/`, `MODULE.bazel` wiring (empty queue, `patch_strip = 1`), `tool/test/rules_fork_test.sh`, F-0022. Also proven by hand on the real `ai_rules_dart` pin with a 2-commit demo (override and patches built `//...` with identical `query //...`, 125 targets); the demo was removed, the queue ships empty.
 
 ## Outcome
-_Pending._
+Evidence: `documents/evidence/T-0024/engineer/` (test, lint, arch, rules_fork_test logs).
+
+| AC | Test (`tool/test/rules_fork_test.sh`) |
+|---|---|
+| AC1 | `T-0024-AC1_export_writes_one_patch_per_commit`, `T-0024-AC1_git_override_patches_build_same_as_override_module` |
+| AC2 | `T-0024-AC2_unappliable_patch_fails_naming_it`, `T-0024-AC2_checkout_rejects_unappliable_queued_patch` |
+| AC3 | `T-0024-AC3_export_refuses_binary_hunk_naming_file`, `T-0024-AC3_checkout_writes_absolute_override`, `T-0024-AC3_bazelrc_user_is_gitignored` |
+| AC4 | the script itself, plus `T-0024-AC4_committed_queue_matches_module_bazel`; `test //...` 39/39, lint and `mc_arch_check` green with the empty queue |
+
+Notes for the Verifier and TL:
+- The test uses a local fake upstream module and a throwaway workspace and output base, so it needs no network.
+- F-0022: Bazel's patcher ignores context lines and offsets. AC2 is exercised with a patch whose target file is missing; `checkout` (git am) is the strict check.
+- Fork dirs default to `~/.cache/mc-bazel/forks/<worktree>/<repo>`, outside the repo so their BUILD files stay out of `//...`.
+- Follow-ups: a CI check that every `*.patch` is listed in `MODULE.bazel` (only `status` and the AC4 test compare today); P3-03 should start from `checkout`.

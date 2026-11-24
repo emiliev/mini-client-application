@@ -1,0 +1,5 @@
+INFO: Analyzed 90 targets (0 packages loaded, 67 targets configured, 138 aspect applications).
+INFO: Found 90 targets...
+INFO: Elapsed time: 1.177s, Critical Path: 0.02s
+INFO: 1 process: 1051 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action
