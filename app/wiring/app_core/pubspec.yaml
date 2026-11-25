@@ -22,8 +22,11 @@ dependencies:
   mc_di: any
   mc_ds_feedback: any
   mc_ds_layout: any
+  mc_ds_media: any
   mc_ds_theme: any
   mc_event_bus: any
+  mc_fixtures_characters: any
+  mc_fixtures_media: any
   mc_mocked_backend: any
   mc_monitoring: any
   mc_storage: any
