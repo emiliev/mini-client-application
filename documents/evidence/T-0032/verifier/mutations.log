@@ -1,0 +1,20 @@
+V1 KILLED (1 target(s) failed): AC1/AC5 limit 20 instead of 30
+V2a KILLED (1 target(s) failed): AC1 wrong sort: each page reversed by the mapper
+V2b KILLED (1 target(s) failed): AC1 wrong sort: the API asks for orderBy=-name
+V2c KILLED (3 target(s) failed): AC1 wrong sort at the source: the fixture universe sorts by id (backend and expectation share it)
+V3 KILLED (1 target(s) failed): AC3 openCharacter called twice
+V4a SURVIVED: AC3 preview pushed as a route on the flow's navigator (flow state untouched)
+V4b KILLED (1 target(s) failed): AC3 preview pushed as a route on the root navigator
+V5a SURVIVED: AC5 no de-dup of page 2: controller in-flight guard removed
+V5b SURVIVED: AC5 no de-dup of page 2: grid latch and isLoadingMore check removed
+V5c KILLED (1 target(s) failed): AC5 no de-dup of page 2: both layers removed (V5a + V5b)
+V5d SURVIVED: AC5 no de-dup in the feature: the bloc fires loadMore without awaiting, twice
+V6a KILLED (2 target(s) failed): AC4 German title key missing (falls back to English)
+V6b KILLED (2 target(s) failed): AC4 German preview-button key missing (falls back to English)
+V6c KILLED (1 target(s) failed): AC4 German preview button holds the English text
+V7a SURVIVED: AC5 end guard removed in the controller
+V7b SURVIVED: AC5 end guard removed in the grid
+V7c KILLED (1 target(s) failed): AC5 end guard removed in both layers
+V8 KILLED (1 target(s) failed): AC3 back rebuilds the list page (scroll lost)
+V9 KILLED (1 target(s) failed): AC2 Retry on a failed second page does nothing
+V10 KILLED (1 target(s) failed): AC1 image from the wrong thumbnail
