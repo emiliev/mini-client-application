@@ -24,7 +24,7 @@ class CharacterPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Read in build, not in `create` (F-0032; see CharactersListPage).
+    // Read in build, not in `create` (F-0031 B; see CharactersListPage).
     final flow = FlowScope.of(context).container;
     return BlocProvider(
       create: (_) => flow<CharacterPreviewBloc>(parameter: characterId),

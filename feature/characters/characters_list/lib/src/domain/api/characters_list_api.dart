@@ -11,7 +11,7 @@ part 'characters_list_api.g.dart';
 ///
 /// Paths start with `/`: Dio joins `baseUrl + path` as strings, and
 /// `AppConfig.apiBaseUrl` has no trailing slash, so `v1/characters` would
-/// land on the host (`…invalidv1/characters`, F-0032).
+/// land on the host (`…invalidv1/characters`, F-0031 B).
 @injectable
 @RestApi()
 abstract class CharactersListApi {
