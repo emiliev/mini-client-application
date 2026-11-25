@@ -310,7 +310,6 @@ flutter_test(
     deps = _TEST_DEPS + [
         ":characters_list",
         "//utility/mc_di",
-        "//utility/mc_feature_flow",
         "//utility/mc_test_utils",
         "@pub_deps//:dio",
         "@pub_deps//:flutter",
