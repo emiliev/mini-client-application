@@ -1,0 +1,10 @@
+{
+  "@@locale": "de",
+  "charactersListTitle": "Figuren",
+  "charactersListLoading": "Figuren werden geladen",
+  "charactersListEmptyTitle": "Noch keine Figuren",
+  "charactersListEmptyMessage": "Neue Figuren erscheinen hier.",
+  "charactersListErrorTitle": "Figuren konnten nicht geladen werden",
+  "charactersListLoadMoreFailed": "Weitere Figuren konnten nicht geladen werden.",
+  "charactersListPreviewSeeFullProfile": "Vollständiges Profil ansehen"
+}

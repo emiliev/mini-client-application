@@ -11,6 +11,8 @@ dependencies:
   dio: ^5.11.0
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   get_it: ^8.0.0

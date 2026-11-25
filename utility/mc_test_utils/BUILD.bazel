@@ -18,6 +18,7 @@ _DEPS = [
     "//utility/mc_storage",
     "@pub_deps//:dio",
     "@pub_deps//:flutter",
+    "@pub_deps//:flutter_localizations",
     "@pub_deps//:flutter_test",
     "@pub_deps//:get_it",
 ]

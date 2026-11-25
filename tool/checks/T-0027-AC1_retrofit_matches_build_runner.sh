@@ -30,11 +30,11 @@ done
 equal=$(grep -E '^EQUAL ' "$TMP/all.log" | awk '{print $2}' | sort)
 expected=$(printf '%s\n' "${EXPECTED[@]}" | sort)
 
-BIN="$("$BAZELW" info bazel-bin 2>/dev/null)"
+BIN="$(bzw info bazel-bin 2>/dev/null)"
 api="$BIN/spike/retrofit_api/lib/src/characters_api.g.dart"
 sha=$(shasum -a 256 "$api" 2>/dev/null | cut -c1-64)
 generated=$(grep -c '_CharactersApi' "$api" 2>/dev/null)
-aq="$("$BAZELW" aquery 'mnemonic(DartCodegen, //spike/retrofit_api:_characters_api_retrofit_part)' --output=text 2>/dev/null)"
+aq="$(bzw aquery 'mnemonic(DartCodegen, //spike/retrofit_api:_characters_api_retrofit_part)' --output=text 2>/dev/null)"
 summaries=$(grep -o -- '--summary [^ ]*' <<< "$aq" | wc -l | tr -d ' ')
 envelope_sum=$(grep -c 'spike/api_envelope/api_envelope.dart_analyzer_summary.sum' <<< "$aq")
 sky=$(grep -c 'sky_engine' <<< "$aq")

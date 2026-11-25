@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "charactersListTitle": "Characters",
+  "@charactersListTitle": {"description": "Title of the characters list."},
+  "charactersListLoading": "Loading characters",
+  "@charactersListLoading": {"description": "Screen-reader label while the first page loads."},
+  "charactersListEmptyTitle": "No characters yet",
+  "@charactersListEmptyTitle": {"description": "Title of the empty list."},
+  "charactersListEmptyMessage": "New characters will show up here.",
+  "@charactersListEmptyMessage": {"description": "Message below the empty-list title."},
+  "charactersListErrorTitle": "Characters could not be loaded",
+  "@charactersListErrorTitle": {"description": "Title when the first page fails; the reason and Retry follow."},
+  "charactersListLoadMoreFailed": "Could not load more characters.",
+  "@charactersListLoadMoreFailed": {"description": "Footer text when a later page fails; Retry follows."},
+  "charactersListPreviewSeeFullProfile": "See full profile",
+  "@charactersListPreviewSeeFullProfile": {"description": "Button on the preview that opens the character's full profile."}
+}

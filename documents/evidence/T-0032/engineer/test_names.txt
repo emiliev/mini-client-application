@@ -1,0 +1,37 @@
+bdd_test | characters_list_paging Characters list paging Scrolling to the end of the first page loads the second once [T-0032-AC5]
+bdd_test | characters_list_paging Characters list paging At the last page no further page is requested [T-0032-AC5]
+bdd_test | characters_list Browse characters The first page lists 30 characters in name order [T-0032-AC1]
+bdd_test | characters_list Browse characters A failed first page explains the problem and retries ('server_error', 'The server had a problem. Please try again later.') [T-0032-AC2]
+bdd_test | characters_list Browse characters A failed first page explains the problem and retries ('timeout', 'The request took too long. Please try again.') [T-0032-AC2]
+bdd_test | characters_list Browse characters A failed first page explains the problem and retries ('offline', 'No connection. Check your network and try again.') [T-0032-AC2]
+bdd_test | characters_list Browse characters A failed first page explains the problem and retries ('malformed', 'Something went wrong.') [T-0032-AC2]
+bdd_test | characters_list Browse characters A failed second page keeps the loaded characters and offers Retry [T-0032-AC2]
+bdd_test | characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3]
+bdd_test | characters_list Browse characters The full profile hands over to the app exactly once [T-0032-AC3]
+bdd_test | characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]
+bdd_test | characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]
+bdd_test | characters_list Browse characters In German the title and the preview button come from the German strings [T-0032-AC4]
+bdd_test | characters_list Browse characters The pseudo-locale renders the list and the preview without overflow [T-0032-AC4]
+flow_scope_test | T-0032-AC6 the flow's container resolves every registration
+flow_scope_test | T-0032-AC1 a new initialTeamId builds a new flow that lists that team
+flow_scope_test | T-0032-AC6 a root without a forwarded type fails naming it
+contract_test | T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: the CONTRACT.md example parses field by field
+contract_test | T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: every served item round-trips byte for byte
+contract_test | T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: the mapper keeps id, name and image
+contract_test | T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: an unknown variant is a FormatException
+golden_test | T-0032-AC1 golden: the first page loaded
+golden_test | T-0032-AC2 golden: the first page failed
+golden_test | T-0032-AC3 golden: the preview
+harness_test | T-0032-AC2 recover() ends injected failures on the engine and in the harness, so an unrouted request is reported again
+harness_test | T-0032-AC2 recover() ends the scenario and keeps the store, the traffic and the recorded requests
+fixture_sets_test | T-0032-AC1 the fixture sets are characters.default, paged_45, empty
+fixture_sets_test | T-0032-AC5 characters.paged_45 pages 45 heroes as 30 then 15
+fixture_sets_test | T-0032-AC5 a synthetic hero has bundled art and a detail
+fixture_sets_test | T-0032-AC1 characters.empty answers a well-formed empty page
+fixture_sets_test | T-0032-AC1 synthetic sets keep the list validation
+fixture_sets_test | T-0032-AC5 a synthetic cast past 99 still pages in name order
+api_page_test | T-0032-AC1 ApiPage reads the mocked backend page envelope T-0032-AC1: every envelope field is read
+api_page_test | T-0032-AC1 ApiPage reads the mocked backend page envelope T-0032-AC1: toJson writes the same envelope keys
+architecture_test | T-0032-AC6 the barrel exports only the flow, the navigator and its argument type, each with show
+architecture_test | T-0032-AC6 every file a generator reads imports no Flutter (R15)
+architecture_test | T-0032-AC6 the checks read both quote styles

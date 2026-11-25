@@ -1,0 +1,5 @@
+a_old_step_v4a: rc 3, 1 failing: ['characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]']
+b_fixed_step: rc 0, 0 failing: []
+c_fixed_step_v4a: rc 3, 3 failing: ['characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3]', 'characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]', 'characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]']
+PROBE OK
+exit=0

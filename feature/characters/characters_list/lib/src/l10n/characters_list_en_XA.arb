@@ -1,0 +1,10 @@
+{
+  "@@locale": "en_XA",
+  "charactersListTitle": "[Çĥàŕàçţéŕš ~~~~]",
+  "charactersListLoading": "[Ļóàðíñĝ çĥàŕàçţéŕš ~~~~~~~~]",
+  "charactersListEmptyTitle": "[Ñó çĥàŕàçţéŕš ýéţ ~~~~~~~]",
+  "charactersListEmptyMessage": "[Ñéŵ çĥàŕàçţéŕš ŵíļļ šĥóŵ úþ ĥéŕé. ~~~~~~~~~~~~~~]",
+  "charactersListErrorTitle": "[Çĥàŕàçţéŕš çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~]",
+  "charactersListLoadMoreFailed": "[Çóúļð ñóţ ļóàð ɱóŕé çĥàŕàçţéŕš. ~~~~~~~~~~~~~]",
+  "charactersListPreviewSeeFullProfile": "[Šéé fúļļ þŕófíļé ~~~~~~~]"
+}

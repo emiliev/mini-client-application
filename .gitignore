@@ -24,6 +24,11 @@ coverage/
 # A future build_runner fallback (R28) adds explicit negations below.
 *.g.dart
 *.freezed.dart
+# injectable's config and shards, where its builders write them (T-0032).
+# The BDD generator writes only into bazel-out (`bazel-*` above), so no
+# test/feature pattern: a hand-written test/feature/x_test.dart stays visible.
+**/lib/src/di/*.config.dart
+**/lib/**/*.injectable.json
 **/lib/src/l10n/*_l10n.dart
 **/lib/src/l10n/*_l10n_[a-z]*.dart
 .bazelrc.user.tmp

@@ -108,6 +108,10 @@ class _FailRule {
   final int times;
   int calls = 0;
 
+  /// Cleared by `McBackendHarness.recover`: the engine-side rule stops
+  /// matching, and this mirror is dropped.
+  bool live = true;
+
   bool get fires => times < 0 || calls <= times;
 }
 
@@ -184,16 +188,32 @@ final class McBackendHarness {
   /// A retry beyond [times] gets the normal answer.
   void fail(String route, BackendFailure failure, {int times = -1}) {
     final parsed = _Route.parse(route);
-    _failRules.add(_FailRule(parsed, times));
+    final mirror = _FailRule(parsed, times);
+    _failRules.add(mirror);
     backend.addFailure(
       FailureRule(
         parsed.method,
         parsed.path,
         failure.kind,
         times < 0 ? FailureTrigger.always : FailureTrigger.times(times),
-        parsed.query.isEmpty ? null : parsed.queryMatches,
+        // A recovered rule never matches again (the engine only counts
+        // matching requests, so it is inert).
+        (query) => mirror.live && parsed.queryMatches(query),
       ),
     );
+  }
+
+  /// The backend recovers: every failure injected with [fail] stops, on the
+  /// engine and in the harness's own bookkeeping (so a later request to a
+  /// route no fixture set answers is reported as unmatched again), and the
+  /// active scenario ends. Routes, the engine's store, latency, counters and
+  /// [requests] are kept, unlike `backend.reset()`.
+  void recover() {
+    for (final rule in _failRules) {
+      rule.live = false;
+    }
+    _failRules.clear();
+    backend.useScenario(null);
   }
 
   /// Makes matching requests pend until [release], so the loading state can

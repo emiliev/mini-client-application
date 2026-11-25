@@ -9,8 +9,13 @@
 # 1. Builds every DartCodegen / DartAggregateCodegen target of the package with
 #    --remote_download_all (outputs land in bazel-bin even on cache hits).
 # 2. Copies lib/ into .dart_tool/mc_overlay/<pkg>_injectable/ (git-ignored) with
-#    injectable/pubspec.yaml and the first-party path deps (mc_di).
-# 3. Resolves; fails if any hosted version differs from injectable/pubspec.lock.
+#    injectable/pubspec.yaml, the package's own hosted deps and its pure-Dart
+#    first-party deps, followed transitively, as path deps (P-059).
+#    MC_REF_SRCS_FROM=<library label> copies only that library's srcs plus
+#    the aggregates' init files (a Flutter feature's Flutter-free inputs, R15).
+# 3. Resolves; fails if a package of injectable/pubspec.lock (the generator
+#    side) resolves to another version. Packages only the package's own deps
+#    add are allowed.
 # 4. Runs build_runner.
 # 5. cmp's every *.config.dart with bazel-bin, and every shard build_runner
 #    wrote (.dart_tool/build/generated) with Bazel's. Only the outputs the
@@ -51,21 +56,55 @@ outputs=$(bz cquery --output=files "$(printf '%s\n' $targets | paste -sd '+' - |
 echo "== 2. Overlay scratch tree ${SCRATCH#"$ROOT"/}"
 rm -rf "$SCRATCH"
 mkdir -p "$SCRATCH/_deps"
-cp -R "$ROOT/$PKG_DIR/lib" "$SCRATCH/lib"
+if [[ -n "${MC_REF_SRCS_FROM:-}" ]]; then
+  # The staged generator inputs plus each aggregate's init file (T-0032).
+  inits=$(bz query "kind('dart_aggregate_codegen', //$PKG_DIR:*) except attr(tags, manual, //$PKG_DIR:*)" 2>/dev/null | paste -sd '+' - | sed 's/+/ + /g')
+  srcs=$(bz cquery "labels(srcs, $MC_REF_SRCS_FROM)${inits:+ + labels(srcs, $inits)}" --output=files 2>/dev/null | grep -E "^$PKG_DIR/lib/.*\.dart$" | sort -u) \
+    || { echo "FAIL: no source files in $MC_REF_SRCS_FROM"; exit 1; }
+  [[ -n "$srcs" ]] || { echo "FAIL: no source files in $MC_REF_SRCS_FROM"; exit 1; }
+  echo "   $(wc -l <<< "$srcs" | tr -d ' ') files from $MC_REF_SRCS_FROM and the init file(s)"
+  while IFS= read -r f; do
+    mkdir -p "$SCRATCH/$(dirname "${f#"$PKG_DIR"/}")"
+    cp "$ROOT/$f" "$SCRATCH/${f#"$PKG_DIR"/}"
+  done <<< "$srcs"
+else
+  cp -R "$ROOT/$PKG_DIR/lib" "$SCRATCH/lib"
+fi
 find "$SCRATCH/lib" \( -name '*.config.dart' -o -name '*.injectable.json' \) -delete
-{
-  sed "s/^name: .*/name: $PKG_NAME/" "$OVERLAY/pubspec.yaml" | awk '{ print } /^dependencies:$/ { print "  mc_di: any" }'
-  printf 'dependency_overrides:\n  mc_di:\n    path: _deps/mc_di\n'
-} > "$SCRATCH/pubspec.yaml"
-mkdir -p "$SCRATCH/_deps/mc_di"
-cp -R "$ROOT/utility/mc_di/lib" "$SCRATCH/_deps/mc_di/lib"
-grep -v '^resolution: workspace' "$ROOT/utility/mc_di/pubspec.yaml" | sed '/^dev_dependencies:/,$d' > "$SCRATCH/_deps/mc_di/pubspec.yaml"
+# Pure-Dart first-party deps, transitively, as path deps, and the package's own
+# hosted deps (P-059; this overlay resolves with `dart pub get`).
+OVERLAY_TOOLS="$ROOT/tool/build_runner_overlay"
+deps_info=$(/usr/bin/python3 -I "$OVERLAY_TOOLS/overlay_deps.py" "$ROOT" "$PKG_DIR" --pure)
+first_party=$(sed -n 's/^first	//p' <<< "$deps_info")
+hosted=$(sed -n 's/^hosted	//p' <<< "$deps_info")
+sed "s/^name: .*/name: $PKG_NAME/" "$OVERLAY/pubspec.yaml" > "$SCRATCH/pubspec.yaml"
+add_dep() { /usr/bin/python3 -I "$OVERLAY_TOOLS/add_dep.py" "$SCRATCH/pubspec.yaml" "$1"; }
+while IFS= read -r dep; do
+  [[ -z "$dep" ]] && continue
+  add_dep "$dep"
+done <<< "$hosted"
+own=""
+if [[ -n "$first_party" ]]; then
+  echo "dependency_overrides:" >> "$SCRATCH/pubspec.yaml"
+  while IFS=$'\t' read -r dep dir; do
+    echo "   first-party path dep: $dep ($dir)"
+    own+="$dep "
+    mkdir -p "$SCRATCH/_deps/$dep"
+    cp -R "$ROOT/$dir/lib" "$SCRATCH/_deps/$dep/lib"
+    grep -v '^resolution: workspace' "$ROOT/$dir/pubspec.yaml" | sed '/^dev_dependencies:/,$d' > "$SCRATCH/_deps/$dep/pubspec.yaml"
+    add_dep "$dep"
+    printf '  %s:\n    path: _deps/%s\n' "$dep" "$dep" >> "$SCRATCH/pubspec.yaml"
+  done <<< "$first_party"
+fi
 cp "$OVERLAY/pubspec.lock" "$SCRATCH/pubspec.lock"
 
 echo "== 3. Resolve (hosted versions must equal the committed overlay lock)"
 cd "$SCRATCH"
 fvm dart pub get >/dev/null
-drift=$(/usr/bin/python3 -I - "$OVERLAY/pubspec.lock" "$SCRATCH/pubspec.lock" <<'EOF'
+# Every package of the committed lock (the generator side above all) must
+# resolve to its locked version; packages only the package's own deps bring in
+# are listed, not failed.
+drift=$(/usr/bin/python3 -I - "$OVERLAY/pubspec.lock" "$SCRATCH/pubspec.lock" "$own" <<'EOF'
 import re, sys
 def load(p):
     d, cur = {}, None
@@ -76,9 +115,11 @@ def load(p):
         if m and cur: d[cur] = m.group(1)
     return d
 a, b = load(sys.argv[1]), load(sys.argv[2])
-for k in sorted(set(a) | set(b)):
-    if k == "mc_di": continue
+own = set(sys.argv[3].split())
+for k in sorted(set(a) - own):
     if a.get(k) != b.get(k): print(f"{k}: lock {a.get(k)} -> resolved {b.get(k)}")
+added = sorted(set(b) - set(a) - own)
+if added: print("ADDED " + " ".join(added), file=sys.stderr)
 EOF
 )
 if [[ -n "$drift" ]]; then echo "DRIFT from tool/build_runner_overlay/injectable/pubspec.lock:"; echo "$drift"; exit 1; fi

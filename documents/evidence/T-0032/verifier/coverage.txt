@@ -1,0 +1,22 @@
+characters_list.dart: NOT IN ANY REPORT
+src/di/di_initializer.dart: 3/3 100.0% missed=[]
+src/di/flow_scope.dart: NOT IN ANY REPORT
+src/domain/api/characters_list_api.dart: NOT IN ANY REPORT
+src/domain/model/character.dart: NOT IN ANY REPORT
+src/domain/model/character_dto.dart: 4/4 100.0% missed=[]
+src/domain/model/character_id.dart: 1/1 100.0% missed=[]
+src/domain/model/character_mapper.dart: 11/11 100.0% missed=[]
+src/domain/model/characters_query.dart: 1/1 100.0% missed=[]
+src/domain/repository/characters_list_repository.dart: 12/13 92.3% missed=[41]
+src/flow/characters_list_flow.dart: 14/14 100.0% missed=[]
+src/flow/characters_list_flow_state.dart: NOT IN ANY REPORT
+src/navigator/characters_list_navigator.dart: NOT IN ANY REPORT
+src/presentation/bloc/character_preview_bloc.dart: 7/7 100.0% missed=[]
+src/presentation/bloc/characters_list_bloc.dart: 33/33 100.0% missed=[]
+src/presentation/bloc/characters_list_event.dart: 7/7 100.0% missed=[]
+src/presentation/bloc/characters_list_state.dart: NOT IN ANY REPORT
+src/presentation/page/character_preview_page.dart: 19/19 100.0% missed=[]
+src/presentation/page/characters_list_page.dart: 36/36 100.0% missed=[]
+src/presentation/widget/character_tile.dart: 7/7 100.0% missed=[]
+src/presentation/widget/failure_message.dart: 5/5 100.0% missed=[]
+TOTAL 160/161 99.4%

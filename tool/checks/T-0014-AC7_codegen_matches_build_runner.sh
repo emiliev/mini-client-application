@@ -9,9 +9,9 @@ source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO"
 log="$(mktemp)"
 "$REPO/tool/build_runner_overlay/spike_reference.sh" spike/hello > "$log" 2>&1; rc=$?
-frz="$("$BAZELW" info bazel-bin 2>/dev/null)/spike/hello/lib/src/counter_state.freezed.dart"
+frz="$(bzw info bazel-bin 2>/dev/null)/spike/hello/lib/src/counter_state.freezed.dart"
 methods=$(grep -o -E 'TResult\?? (when|maybeWhen|map|maybeMap|whenOrNull|mapOrNull)<' "$frz" 2>/dev/null | sed -E 's/.* ([a-zA-Z]+)</\1/' | sort | tr '\n' ' ')
-sums() { "$BAZELW" aquery "mnemonic(DartCodegen, //spike/hello:$1)" --output=text 2>/dev/null | grep -c -- '--summary' || true; }
+sums() { bzw aquery "mnemonic(DartCodegen, //spike/hello:$1)" --output=text 2>/dev/null | grep -c -- '--summary' || true; }
 s_routes=$(sums routes_go_router_part); s_frz=$(sums counter_state_freezed)
 report "# T-0014-AC6 / AC7: Bazel codegen vs build_runner" "" '```' "$(grep -E '^(==|   |EQUAL|DIFFER|MISSING|DRIFT|UNRESOLVED)' "$log")" '```' "" \
   "- freezed pattern methods: $methods" \

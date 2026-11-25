@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:mc_fixtures_characters/src/data/vocabulary.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -76,6 +78,38 @@ final class CharacterUniverse {
     });
     byName = List.unmodifiable(all);
     _byId = {for (final c in all) c.id: c};
+  }
+
+  /// A small synthetic cast for paging tests: `Hero 01` to `Hero <count>`
+  /// (zero-padded to at least two digits and to the width of [count], so
+  /// name order is generation order), ids from [idBase], thumbnails cycling
+  /// through the bundled `characters` art. No randomness: every field is a
+  /// function of the index.
+  CharacterUniverse.synthetic(int count, DateTime clock) {
+    final images = placeholderSets['characters']!;
+    final width = math.max(2, '$count'.length);
+    byName = List.unmodifiable([
+      for (var i = 0; i < count; i++)
+        CharacterRecord(
+          id: idBase + i,
+          name: 'Hero ${(i + 1).toString().padLeft(width, '0')}',
+          description: '',
+          modified: clock,
+          thumbnail: ApiImage(
+            path:
+                'mock-asset://characters/'
+                '${(i % images).toString().padLeft(3, '0')}',
+          ),
+          powers: const [],
+          team: '',
+          origin: '',
+          firstAppearanceYear: 2000,
+          comics: 0,
+          series: 0,
+          events: 0,
+        ),
+    ]);
+    _byId = {for (final c in byName) c.id: c};
   }
 
   /// Every character in name order.
