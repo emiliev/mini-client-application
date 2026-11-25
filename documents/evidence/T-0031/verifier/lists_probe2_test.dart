@@ -4,10 +4,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_cards/mc_ds_cards.dart';
 import 'package:mc_ds_lists/mc_ds_lists.dart';
-import 'package:mc_ds_media/mc_ds_media.dart';
-import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_paging/mc_paging.dart';
-import 'package:mc_test_utils/mc_test_utils.dart';
 
 import 'support.dart';
 
@@ -62,7 +59,7 @@ void main() {
         for (var i = 0; i < 20; i++) {
           await t.pump(const Duration(milliseconds: 16));
         }
-        print(
+        debugPrint(
           'PROBE2 ${entry.key} skeleton=$skeleton maxWhileLoading=$maxLoading '
           'maxAfterPage=${maxScroll(t)} onLoadMore=$n',
         );
@@ -71,59 +68,66 @@ void main() {
     }
   }
 
-  testWidgets('PROBE2 default cellHeight with McMediaCard at scale 1', (
-    t,
-  ) async {
-    await mcLoadFonts();
-    final bundle = McFixtureAssetBundle();
-    mcSetSurface(t, 375, 800);
-    await t.pumpWidget(
-      mcGoldenApp(
-        bundle: bundle,
-        child: McMediaScope(
-          resolver: const BundledImageResolver(),
-          child: SizedBox(
-            width: 375,
-            height: 800,
-            child: McPagedGrid<int>(
-              state: pagedState(4, hasReachedEnd: true),
-              onLoadMore: () {},
-              onRetry: () {},
-              onRefresh: () async {},
-              itemBuilder: (c, i, _) => McMediaCard(
-                image: ApiImage(path: 'mock-asset://characters/$i'),
-                title: 'Wiimm the Wanderer',
-                subtitle: 'Hero',
-                onTap: () {},
-              ),
-            ),
-          ),
-        ),
+  testWidgets('PROBE3 short list: a pull-down re-fires onLoadMore', (t) async {
+    var n = 0;
+    var refreshes = 0;
+    await pumpOnSurface(
+      t,
+      McPagedList<int>(
+        state: pagedState(2),
+        onLoadMore: () => n++,
+        onRetry: () {},
+        onRefresh: () async => refreshes++,
+        itemBuilder: (c, i, _) => SizedBox(height: 100, child: Text('item $i')),
       ),
     );
     await t.pump();
-    final e = t.takeException();
-    final cell = t.getSize(find.byType(McMediaCard).first);
-    final need = McMediaCard.heightFor(
-      width: cell.width,
-      textScaler: TextScaler.noScaling,
+    final afterMount = n;
+    await t.drag(find.byType(Scrollable).first, const Offset(0, 40));
+    await t.pumpAndSettle();
+    final afterSmallPull = n;
+    await t.drag(find.byType(Scrollable).first, const Offset(0, 400));
+    await t.pumpAndSettle();
+    debugPrint(
+      'PROBE3 afterMount=$afterMount afterSmallPull=$afterSmallPull '
+      'afterPullToRefresh=$n refreshes=$refreshes',
     );
-    final card = t.getRect(find.byType(McMediaCard).first);
-    final title = t.getRect(find.text('Wiimm the Wanderer').first);
-    final sub = t.getRect(find.text('Hero').first);
-    final flexes = t
-        .renderObjectList<RenderFlex>(
-          find.descendant(
-            of: find.byType(McMediaCard).first,
-            matching: find.byType(Column),
-          ),
-        )
-        .map((r) => '${r.size}')
-        .toList();
-    print(
-      'PROBE2 default cell=$cell heightFor=$need exception=$e '
-      'card=$card title=$title subtitle=$sub columns=$flexes',
+  });
+
+  testWidgets('PROBE3 semantics tree of a first-load grid of card skeletons', (
+    t,
+  ) async {
+    final h = t.ensureSemantics();
+    await pumpOnSurface(
+      t,
+      McPagedGrid<int>(
+        state: const PagedState<int>(isLoadingMore: true),
+        onLoadMore: () {},
+        onRetry: () {},
+        onRefresh: () async {},
+        cellHeight: (w, s) => McMediaCard.heightFor(width: w, textScaler: s),
+        skeletonBuilder: (_) => const McMediaCard.skeleton(),
+        itemBuilder: (c, i, _) => Text('item $i'),
+      ),
     );
-    expect(e, isNull, reason: 'default cell overflows McMediaCard');
+    await t.pump();
+    final root =
+        t.binding.renderViews.first.owner!.semanticsOwner!.rootSemanticsNode!;
+    final labels = <String>[];
+    void walk(SemanticsNode node) {
+      final d = node.getSemanticsData();
+      if (d.label.isNotEmpty) {
+        labels.add(d.label);
+      }
+      node.visitChildren((c) {
+        walk(c);
+        return true;
+      });
+    }
+
+    walk(root);
+    debugPrint('PROBE3 labelled nodes: $labels');
+    expect(labels.where((l) => l.startsWith('Loading')), hasLength(1));
+    h.dispose();
   });
 }

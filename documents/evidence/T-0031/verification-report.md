@@ -5,7 +5,8 @@
 - **Branch / commit verified:** `fleet/T-0031-ds-lists-media-cards` @ **`a9eb91a`** (detached checkout in the Verifier's own worktree). It includes the merge of `origin/main` 4f4c8de (`3f1ae29`).
 - **Simulator:** none. This is a package-level task (widget and golden tests only; no app and no e2e).
 - **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0031-verifier …`, a new output base. The shared disk cache is still used, as `.bazelrc` sets. Shut down at the end.
-- **Verdict:** **FAIL.** AC2 to AC6 pass. **AC1 fails on test strength.** The implementation fires at 80 % (my probe below), but the mapped test does not pin the 80 % boundary for either widget:
+- **Current verdict: PASS at `8c0264c`** (see "Re-verification at 8c0264c" at the end; two minor findings, neither blocking).
+- **Round-1 verdict at `a9eb91a`:** **FAIL.** AC2 to AC6 pass. **AC1 fails on test strength.** The implementation fires at 80 % (my probe below), but the mapped test does not pin the 80 % boundary for either widget:
   - Thresholds of 60 % and 75 % pass both suites.
   - A 50 % threshold passes the `McPagedGrid` suite.
   - A 95 % threshold passes the `McPagedList` suite.
@@ -148,3 +149,71 @@
   - `documents/evidence/T-0031/verifier/`: 4 PNGs; the probe sources `lists_probe_test.dart`, `cards_a11y_test.dart` and `media_probe_test.dart`; `mutate.sh`; `cov.py`.
   - My scratch tests and temporary BUILD targets were removed from the packages.
   - Every mutation was restored from a backup, and `git status` was clean apart from this evidence before the commit.
+
+---
+
+# Re-verification at 8c0264c
+
+- **Commit verified:** `8c0264c` (detached; fix commits `b47ce00`, `201281a`, `8c0264c` on top of my `1148d25`). Same output base `/tmp/mc-ob-T-0031-verifier`, own worktree.
+- **Verdict:** **PASS.** All six ACs pass. Issues 1 to 8 from rounds 1 and 2 are fixed and each fix is pinned by a test (mutations below). Two new **minor** findings (R-1, R-2), neither blocking.
+
+## Gates
+| Gate | Result |
+|---|---|
+| Uncached: the 8 affected packages, including `mc_paging` | 25/25 targets PASSED. Cases: list 21, grid 23, card 8, image 14, media_scope 3; goldens 24 / 24 / 32. |
+| `test //...` | 68/68, exit 0 |
+| `build --config=lint //...` | exit 0 |
+| `mc_arch_check` / `rules_fork.sh check` | OK / 3 patches apply strictly, `ai_rules_flutter` queue empty |
+| Format | `dart format --set-exit-if-changed utility app` gives 226 files, 0 changed. With `tool` included, it flags the 4 `tool/loc` files. Those are byte-identical to `origin/main` (`git diff --quiet origin/main HEAD -- tool/loc`), so `main` itself isn't format-clean there. This is pre-existing and out of T-0031's scope (fix 13 reverted the formatting at the TL's request). |
+| Coverage (my parser, `verifier/cov.py`) | `mc_ds_media` 64/64, `mc_ds_cards` 63/63, `mc_ds_lists` 150/150, `mc_media` 36/36, `mc_paging` 117/117: all 100 %. Only barrels and the factory-only `paged_state.dart` have no executable lines. |
+| AC6 closure check | PASS. Negative control (fixtures dependency on the `mc_ds_media` library) gives **FAIL T-0031-AC6**, naming `mc_ds_media` and, transitively, `mc_ds_cards`. Reverted. |
+| T-0030-AC7 closure check | PASS. Negative control (`//utility/mc_ds_media` added to the `mc_paging` deps) gives **FAIL T-0030-AC7**: `mc_paging` grows to 4102 targets with `pub_deps__flutter`. Reverted. |
+| Golden determinism | Regenerated 24 + 24 + 32; `git status` clean. Against `a9eb91a`, only the 8 `grid_error_footer.*` PNGs changed (fix 9). I viewed `grid_error_footer.light.x2`: "Could not load." fits on one line beside Retry, the cards are unchanged, and there is no overflow. |
+
+## Focus items
+| # | Check | Result |
+|---|---|---|
+| 1 | AC1 threshold | `asks once past 80 % and not just below it` now holds one finger down and moves it in 6 px steps, reading the live `maxScrollExtent`. It expects 0 calls in [77, 79.5] % and 1 call in [81, 83] %. **Mutations 0.5, 0.6, 0.75, 0.85 and 0.95 each fail BOTH suites.** 0.79 fails the list but not the grid, which is within the test's stated ±0.5 % band and acceptable. **Flakiness:** `--runs_per_test=20` on both suites gives 40/40 runs passing (21 and 23 cases each). The tests run under FakeAsync with no real clock, so they are deterministic. My own boundary probe still fires at 0.797 → 0.819 (grid) and 0.796 → 0.810 (list). **PASS** |
+| 2 | Short-page stall | My 4 round-2 cases (grid/list × with/without skeletons: loading, then a 2-item page) all give `onLoadMore=1` (before: 0, 0, 0, 1). My page-3 probe (2 → loading → 4 items) asks again. The new tests `a short first page asks for the next one` and `a list still short after page 2 asks for page 3` cover both widgets in both skeleton modes. **Engineer's claim confirmed:** with the post-frame check removed, 7 of 8 fail (list-with-skeletons first page survives because the skeleton extent 40 → 0 sends a metrics notification). With **both** the post-frame check and the metrics listener removed, all 8 short-page tests fail, plus `a list shorter than the viewport asks once` in both suites. So the list-with-skeletons behaviour is still pinned: its test would catch the regression whenever neither mechanism fires. **PASS.** See R-1 for the listener alone. |
+| 3 | `cellHeight` required | The default is gone (`mc_paged_grid.dart`: `required this.cellHeight`). In the new test `T-0031-AC4: a card title is not clipped in its cell`, putting the old `(w, _) => w / 0.75` in as `cellHeight` **fails it at scales 1.0 and 2.0** (`Title 0 Rect.fromLTRB(24.0, 230.9, …) outside cell Rect.fromLTRB(16.0, 16.0, 181.5, …)`). Halving the text part of `McMediaCard.heightFor` fails it too, along with 3 `card_test` cases. **PASS** |
+| 4 | Purity test | It is back to a recursive listing of all of `lib/` (BUILD `data = glob(lib/**)`). A probe `lib/src/zz_verifier_probe.dart` importing `package:flutter/widgets.dart` **fails** `purity_test` (`Actual: ['utility/mc_media/lib/src/zz_verifier_probe.dart']`). Removed afterwards. **PASS** |
+| 5.6 | Button and enabled semantics | `button: onTap != null` → `true` fails `without onTap the card is not a button`. Dropping `enabled:` fails `the card is a button labelled with its title` (it now expects `isEnabled`). Guideline re-run (iOS/Android/labeled tap targets, text contrast): card 8/8, grid states 24/24. Node: `actions: [tap], flags: [isButton, hasEnabledState, isEnabled], label: "Nova", value: "Hero"`. **PASS** |
+| 5.7 | One "Loading" | Walking the semantics tree (`renderViews.first.owner.semanticsOwner.rootSemanticsNode`) of a first-load grid of 6 `McMediaCard.skeleton()` cells gives labelled nodes `[Loading]`: exactly one. `excludeSemantics: false` on the `SliverSemantics` fails `the skeleton announces one Loading` in both suites. Putting the skeleton card back into semantics fails `the skeleton card has no content, tap or semantics`. **PASS** |
+| 5.8 | `McImage` lets an `Error` surface | Back to `on Object` fails `an Error from a resolver is not swallowed`. Narrowing to `on FormatException` fails `UnresolvedImageException shows the fallback…`. **PASS** |
+| 5.9 | Neutral copy | `footerErrorMessage = 'Could not load.'` in both widgets. Only the 8 `grid_error_footer` goldens changed against `a9eb91a`; the other 72 are byte-identical. **PASS** |
+| 5.10 | Latch resets below the threshold | Dropping the reset fails `a dropped request is asked again by scrolling` in both suites. **PASS as designed**, but see R-2. |
+| 5.11 | `mc_paging` `Error` path | Dropping `_emit(_state.copyWith(isLoadingMore: false))` fails `T-0030-AC3 errors and inputs T-0031-AC1: an Error from the fetcher settles isLoadingMore`. **PASS** |
+| 5.12 | Both IDs | The 3 moved tests are named `T-0030-AC6 T-0031-AC6: …`; their bodies are unchanged apart from formatting. **PASS** |
+| 5.13 | `tool/loc` | Identical to `origin/main`. **PASS** |
+| 5.14 | Tap target | The `ConstrainedBox` is gone; `the tap target is at least 44 x 44` measures `find.byType(InkWell)`, which is now the card's real tap surface, at 1x and 2x. **PASS** |
+
+## Regression sample of the round-1 mutations (`verifier/sample_mutations_8c0264c.sh`)
+Each of these is still red. Numbers are failed cases per suite:
+- M3 latch always armed: 5 list / 4 grid
+- M4 no end guard: 1 / 1
+- M5 no in-flight guard: 3 / 3
+- M6 no failure guard: 2 / 2
+- M9 failure hides items: 1 / 1
+- M10 Retry fires twice: 1 / 1
+- M11 no empty view: 1 / 1
+- M12 no skeletons: 2 / 2
+- M14 no placeholder, M15 catch too narrow, M17 network as asset, M18 error shows the placeholder: 1 image case each
+- M21 label/value swapped: 1 card case
+- M22 no `ExcludeSemantics`: 2 card cases
+- G1 dark outline +1: 6 card goldens and 6 list goldens; media goldens 0, as before
+
+Every mutation was restored from its backup, and the tree was clean after each.
+
+## New findings (minor, non-blocking)
+- **R-1 (minor, test gap):** removing the `ScrollMetricsNotification` listener (`paged_body.dart`, `_onMetrics`) leaves **every** repo test green (list 21/21, grid 23/23). The post-frame check now covers what the listener's only test used to pin. The listener is still needed for a resize or rotation with no state change: my `verifier/lists_probe_test.dart` "rotation / resize" probe fails with it removed (grid 375x600 at 70 %, rotated to 812x375, now 92 %, should give `n=1` but gives `n=0`). The TL decision "the lists also listen to `ScrollMetricsNotification`" holds in the code but nothing pins it. **Fix:** add a resize test to `shared_behaviour.dart` (pump at 375x600, scroll to about 70 %, re-pump at 812x375, expect one call for the grid).
+- **R-2 (minor, behaviour / AC wording):** the latch reset (fix 10) treats any position below `0.8 × maxScrollExtent` as "below the threshold". On a short list (`maxScrollExtent == 0`), any downward overscroll has `pixels < 0`, so it clears the latch and the bounce back re-fires `onLoadMore` with the state unchanged. Probe (`verifier/lists_probe2_test.dart`, PROBE3): `afterMount=1`, a 40 px pull-down gives 2, a pull-to-refresh gives 3 (plus `onRefresh` once). This is also why my round-1 "short list" probe now fails at its overscroll step (`Expected 1, Actual 2`). For long lists, fix 10 deliberately re-asks after a dip below 80 %, which is the intended retry for a dropped request. That contradicts AC1's wording ("exactly once, including across further scroll events before the state changes"). With the standard owner it has no practical effect: `PagingController.loadMore` emits `isLoadingMore: true` synchronously and guards `_inFlight`, so `_canLoadMore` is false before any second event. **Suggested:** the TL either amends AC1 to "once per crossing of 80 % while the state is unchanged", or the reset ignores overscroll (`m.pixels < m.minScrollExtent`) and `maxScrollExtent == 0`.
+
+## Integrity
+- **No test deleted or weakened:**
+  - The removed `the default cell is a 3:4 portrait` test went away with the feature it tested, and the new clipping test replaces it.
+  - The skeleton-card test's old `isSemantics(label: 'Loading')` assertion became "no semantics", which matches fix 7. The one announcement now lives in the list tests.
+  - The `resolver that throws` test was split into an `Exception` case (fallback) and an `Error` case (surfaces), matching fix 8.
+- **No new `// ignore:`:** `git diff 1148d25 8c0264c` has no added `ignore` lines.
+- **Goldens:** only the 8 `grid_error_footer` PNGs changed, as disclosed.
+- **Engineer evidence:** `mutations.sh` and `mutations.log` were added under `documents/evidence/T-0031/engineer/`. I did not rely on them.
+- **My scratch files:** the probe and accessibility tests and their temporary BUILD targets were removed again. Updated copies are in `verifier/` (`lists_probe2_test.dart` now holds PROBE2 and PROBE3), along with `sample_mutations_8c0264c.sh`.
