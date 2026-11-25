@@ -19,6 +19,9 @@ dependencies:
   mc_monitoring: any
 
 dev_dependencies:
+  flutter_bloc: any
+  flutter_localizations:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   mc_analysis: any

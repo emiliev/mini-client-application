@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_feature_flow/testing.dart';
 import 'package:mc_l10n_core/mc_l10n_core.dart';
@@ -50,11 +51,22 @@ class _StringsDelegate extends LocalizationsDelegate<_Strings> {
 }
 
 Widget _app(Widget home, {Locale locale = const Locale('en')}) => MaterialApp(
+  theme: McTheme.light,
   locale: locale,
   supportedLocales: const [Locale('en'), Locale('de')],
   localizationsDelegates: GlobalMaterialLocalizations.delegates,
   home: Scaffold(body: home),
 );
+
+/// Gives a flow a bounded slot, so two of them fit one column.
+class _Slot extends StatelessWidget {
+  const _Slot(this.child);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(height: 100, child: child);
+}
 
 McDIInitializer _counterInitializer() => McDIInitializer(
   (getIt, _) => getIt.registerFactory<_Counter>(_Counter.new),
@@ -67,7 +79,10 @@ class _CounterPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => BlocProvider(
     create: (context) => context.di<_Counter>(),
-    child: const Text('counter page'),
+    child: Builder(
+      builder: (context) =>
+          Text('counter page ${context.read<_Counter>().state}'),
+    ),
   );
 }
 
@@ -115,7 +130,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.takeException(), isNull);
-    expect(find.text('counter page'), findsOneWidget);
+    expect(find.text('counter page 0'), findsOneWidget);
     expect(_Counter.created, 1);
 
     // Unmounting disposes the provider without the lifecycle assertion.
@@ -133,18 +148,17 @@ void main() {
     ))!;
     var plainBuilds = 0;
     var listeningBuilds = 0;
-    Widget host(ChildDIContainer container) => _app(
-      FlowScope(
-        container: container,
-        child: Column(
-          children: [
-            const _CounterPage(),
-            _Dependent(listen: false, onBuild: () => plainBuilds++),
-            _Dependent(listen: true, onBuild: () => listeningBuilds++),
-          ],
-        ),
-      ),
+    // One widget instance below the scope: only a dependency on the scope
+    // rebuilds it, never its parent.
+    final page = Column(
+      children: [
+        const _CounterPage(),
+        _Dependent(listen: false, onBuild: () => plainBuilds++),
+        _Dependent(listen: true, onBuild: () => listeningBuilds++),
+      ],
     );
+    Widget host(ChildDIContainer container) =>
+        _app(FlowScope(container: container, child: page));
 
     await tester.pumpWidget(host(first));
     expect((plainBuilds, listeningBuilds), (1, 1));
@@ -168,39 +182,43 @@ void main() {
       _app(
         Column(
           children: [
-            FeatureFlow<_State>(
-              state: const _State(),
-              provide: (scope) =>
-                  scope.registerSingleton<_Provided>(const _Provided('nav')),
-              onGeneratePages: (_) => [
-                McFlowPage(
-                  name: 'list',
-                  child: Builder(
-                    builder: (context) {
-                      inside = context.di<_Provided>().label;
-                      return const Text('inside');
-                    },
+            _Slot(
+              FeatureFlow<_State>(
+                state: const _State(),
+                provide: (scope) =>
+                    scope.registerSingleton<_Provided>(const _Provided('nav')),
+                onGeneratePages: (_) => [
+                  McFlowPage(
+                    name: 'list',
+                    child: Builder(
+                      builder: (context) {
+                        inside = context.di<_Provided>().label;
+                        return const Text('inside');
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-            FeatureFlow<_State>(
-              state: const _State(),
-              onGeneratePages: (_) => [
-                McFlowPage(
-                  name: 'list',
-                  child: Builder(
-                    builder: (context) {
-                      try {
-                        context.di<_Provided>();
-                      } on Object catch (error) {
-                        otherFlow = error;
-                      }
-                      return const Text('other');
-                    },
+            _Slot(
+              FeatureFlow<_State>(
+                state: const _State(),
+                onGeneratePages: (_) => [
+                  McFlowPage(
+                    name: 'list',
+                    child: Builder(
+                      builder: (context) {
+                        try {
+                          context.di<_Provided>();
+                        } on Object catch (error) {
+                          otherFlow = error;
+                        }
+                        return const Text('other');
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
@@ -318,19 +336,21 @@ void main() {
                 return const SizedBox();
               },
             ),
-            FeatureFlow<_State>(
-              state: const _State(),
-              onGeneratePages: (_) => [
-                McFlowPage(
-                  name: 'list',
-                  child: Builder(
-                    builder: (context) {
-                      page = context;
-                      return const Text('list');
-                    },
+            _Slot(
+              FeatureFlow<_State>(
+                state: const _State(),
+                onGeneratePages: (_) => [
+                  McFlowPage(
+                    name: 'list',
+                    child: Builder(
+                      builder: (context) {
+                        page = context;
+                        return const Text('list');
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ],
         ),
