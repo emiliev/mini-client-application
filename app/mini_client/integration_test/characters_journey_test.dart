@@ -19,7 +19,7 @@ void main() {
     // package's own facts.
     final first = CharacterUniverse(42, defaultMockClock).byName.first;
 
-    app.main();
+    startApp(app.main);
     await pumpUntil(
       tester,
       find.byKey(const Key('home.placeholder')),

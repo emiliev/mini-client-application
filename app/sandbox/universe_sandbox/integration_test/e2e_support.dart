@@ -1,6 +1,20 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+
+/// Runs the app's `main()`, then gives the test binding its error handlers
+/// back. `main()` installs the app's own hooks; left in place, a failing
+/// `expect` makes the binding assert and `flutter drive` hangs instead of
+/// failing. The app's errors then fail the test, which is what e2e wants.
+void startApp(void Function() main) {
+  final flutterHook = FlutterError.onError;
+  final platformHook = PlatformDispatcher.instance.onError;
+  main();
+  FlutterError.onError = flutterHook;
+  PlatformDispatcher.instance.onError = platformHook;
+}
 
 /// Pumps until [finder] matches, or fails with [what] after [timeout]. Real
 /// time passes (the live binding), so animations and the mocked backend's

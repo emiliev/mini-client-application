@@ -1,4 +1,4 @@
-INFO: Invocation ID: b2526bea-86ab-45a3-86b2-9b2c4d9b9308
+INFO: Invocation ID: 58cdcb8d-e776-411f-bc64-3dcf7194a25c
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -7,7 +7,7 @@ Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configu
 
 INFO: Analyzed target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured).
 INFO: Found 1 target...
-INFO: Elapsed time: 0.895s, Critical Path: 0.00s
+INFO: Elapsed time: 0.927s, Critical Path: 0.00s
 INFO: 1 process: 1 internal.
 INFO: Build completed successfully, 1 total action
 INFO: Running command line: bazel-bin/tool/mc_arch_check/bin

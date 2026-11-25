@@ -92,6 +92,8 @@ Make the first Marvel feature visible: `characters_list` reachable through typed
 - `dart format --set-exit-if-changed feature utility tool/l10n_check tool/mc_arch_check spike app tool/e2e`: 0 changed.
 - `tool/checks/T-0031-AC6_closure.sh`: PASS.
 - App builds: `tool/bazelw build --config=sim //app/mini_client:mini_client_ios //app/sandbox/universe_sandbox:universe_sandbox_ios`: OK. The brief's `//app/mini_client //app/sandbox/universe_sandbox` shorthand names no target (neither package has a target of that name; the apps are `:mini_client_ios` and `:universe_sandbox_ios`).
+- Merged `origin/main` (0395230, T-0032 merged; no conflicts, lock unchanged by `pub get`) and re-ran every gate and the e2e on the merge result.
+- e2e negative control: a wrong expected string exits 1 ([summary](../evidence/T-0033/engineer/e2e-negative-control-summary.md)).
 - e2e: all 3 targets PASS on iPhone 17 Pro, iOS 26.2, each run on its own `mc-T-0033-engineer-<pid>` simulator, deleted by `tool/e2e_ios.sh` (0 `mc-T-0033` simulators remain).
 
 ### Root and shared changes
@@ -100,7 +102,7 @@ Make the first Marvel feature visible: `characters_list` reachable through typed
 - No existing test was deleted, skipped or weakened; no `// ignore:` added.
 
 ### Findings
-- [F-0032](../findings/F-0032-e2e-for-a-bazel-only-app.md): how an app with no Xcode project and no committed generated code runs under `tool/e2e_ios.sh`.
+- [F-0032](../findings/F-0032-e2e-for-a-bazel-only-app.md): how an app with no Xcode project and no committed generated code runs under `tool/e2e_ios.sh`, and why a failing e2e hung until the app's error hooks were handed back.
 
 ### Follow-ups for the TL
 - `RouteTargets` members must return a `*Flow` (arch guard), so the details placeholder is a `*Flow` too; the interface imports the feature barrel, so the route codegen closure holds Flutter, which is why both actions carry the `sky_engine` dep. Phase D's route bricks should copy this.

@@ -24,7 +24,7 @@ void main() {
       'miniclient://app/characters',
     );
 
-    app.main();
+    startApp(app.main);
     await pumpUntil(tester, find.text(first.name), 'the linked character list');
 
     expect(find.byKey(charactersGridKey), findsOneWidget);

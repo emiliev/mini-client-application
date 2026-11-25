@@ -1,4 +1,4 @@
-INFO: Invocation ID: 91ff20e7-0a73-4e08-bb7a-44759dbd9755
+INFO: Invocation ID: 1f9e9468-d221-4465-a8b7-0eba689e961b
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -6,11 +6,28 @@ WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, dis
 Analyzing: 2 targets (0 packages loaded, 0 targets configured)
 Analyzing: 2 targets (0 packages loaded, 0 targets configured)
 
-INFO: Analyzed 2 targets (84 packages loaded, 8884 targets configured, 454 aspect applications).
-[11,536 / 11,557] DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 1s disk-cache, worker ... (2 actions running)
-[11,538 / 11,557] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 3s disk-cache, worker ... (2 actions, 1 running)
-[11,548 / 11,557] Linking Dart kernel @@//app/mini_client:mini_client_app; 0s disk-cache, worker ... (2 actions, 1 running)
+INFO: Analyzed 2 targets (112 packages loaded, 8917 targets configured, 454 aspect applications).
+[7,285 / 9,335] Compiling Dart kernel module utility/mc_fixtures_characters/mc_fixtures_characters.app_debug.flutter.kmod; 0s disk-cache, worker ... (4 actions, 3 running)
+[11,525 / 11,557] DartCodegen @@//app/mini_client:app_routes_go_router_part; 1s disk-cache, worker ... (2 actions running)
+INFO: From DartAggregateCodegen @@//feature/characters/characters_list:di_config:
+Missing dependencies in characters_list/src/di/di_initializer.dart
+
+[CharacterPreviewBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharacterPreviewBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListBloc] depends on unregistered type [FeatureFlowController<(CharactersListFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersListBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[11,531 / 11,557] DartCodegen @@//app/mini_client:app_routes_go_router_part; 2s disk-cache, worker ... (4 actions running)
+[11,532 / 11,557] DartCodegen @@//app/mini_client:app_routes_go_router_part; 3s disk-cache, worker ... (3 actions running)
+[11,536 / 11,557] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 2s disk-cache, worker ... (2 actions running)
+[11,539 / 11,557] DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 5s disk-cache, worker
+[11,547 / 11,557] [Prepa] Linking Dart kernel @@//app/sandbox/universe_sandbox:universe_sandbox_app
 INFO: Found 2 targets...
-INFO: Elapsed time: 6.386s, Critical Path: 5.37s
-INFO: 4385 processes: 7172 action cache hit, 4371 internal, 8 darwin-sandbox, 6 worker.
-INFO: Build completed successfully, 4385 total actions
+INFO: Elapsed time: 10.967s, Critical Path: 9.58s
+INFO: 97 processes: 11460 action cache hit, 72 internal, 8 darwin-sandbox, 17 worker.
+INFO: Build completed successfully, 97 total actions

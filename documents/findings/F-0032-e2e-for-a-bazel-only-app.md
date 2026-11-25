@@ -20,10 +20,11 @@ The test files and drivers live in the apps (`integration_test/`, `test_driver/i
 4. **The first screenshot after the names appear shows grey art.** The cards render before their images decode. The tests wait 3 s of real time (`letArtLoad`) before the list screenshot; the grey frame is in the history of this task (the first run's `02_characters_list.png`).
 5. **The first `flutter drive` of a fresh scratch directory takes about 6 minutes** (Xcode build, pods); later runs on it take 20 to 35 s per target.
 6. **The deep link uses the file-drop hook** (F-0020): the test writes `<tmp>/mc_e2e_link` before `main()`, which reads and deletes it.
-7. **A `RouteTargets` member must return a `*Flow`** (`mc_arch_check` R15). The first draft returned `Widget`, and the guard failed with exactly that message.
+7. **The app's error hooks make a failing e2e hang.** `main()` calls `installErrorHooks()`, which replaces `FlutterError.onError`. When an `expect` then fails, the binding asserts ("A test overrode FlutterError.onError but either failed to return it...") and `flutter drive` never returns (a negative control sat for over 30 minutes). `startApp` in `integration_test/e2e_support.dart` saves both handlers, runs `main()` and puts them back, so a wrong expectation exits 1 in 36 s.
+8. **A `RouteTargets` member must return a `*Flow`** (`mc_arch_check` R15). The first draft returned `Widget`, and the guard failed with exactly that message.
 
 ## Evidence
-`documents/evidence/T-0033/engineer/{mini_client,sandbox}/` (`e2e-summary.md`, logs, screenshots at most 1200 px). A negative control (a wrong expected string in the journey) makes `tool/e2e_ios.sh` exit 1; see the T-0033 task Outcome.
+`documents/evidence/T-0033/engineer/{mini_client,sandbox}/` (`e2e-summary.md`, logs, screenshots at most 1200 px). Negative control: a wrong expected string in the journey makes `tool/e2e_ios.sh` exit 1 ([summary](../evidence/T-0033/engineer/e2e-negative-control-summary.md), [log](../evidence/T-0033/engineer/e2e-negative-control.log)).
 
 ## Implications
 - P-042 (a real `simctl openurl` e2e) still stands; this does not touch it.

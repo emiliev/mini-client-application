@@ -16,7 +16,7 @@ void main() {
       'fixture names and art', (tester) async {
     final names = CharacterUniverse(42, defaultMockClock).byName;
 
-    app.main();
+    startApp(app.main);
     await pumpUntil(tester, find.text(names.first.name), 'the first card');
 
     expect(find.byKey(charactersGridKey), findsOneWidget);
