@@ -85,6 +85,8 @@ Phase D's generators (mason bricks, buildgen) will copy this package, so its sha
   - A freezed library behaviour surfaced: the deep `copyWith` refers to `$PagedStateCopyWith`, which `mc_paging`'s `show` barrel hides. build_runner emits the same bytes, so it is not the shim. The bloc state uses `@Freezed(copyWith: false)` (F-0031 A2).
   - Three run-time gotchas in plan 01's canonical code, fixed in the feature and marked in the code (F-0031 B): `context.di` inside `BlocProvider.create` asserts; a relative retrofit path loses `/v1`; `McTestApp` lacked Flutter's localisations.
 - 2026-11-25 (Engineer): Handed off. Gates green; evidence in `documents/evidence/T-0032/engineer/`.
+- 2026-11-25: Verifier FAIL on AC3 test strength (V4a survived), plus 2 review bugs; TL fix round (12 items). Brought in the report with `git merge --ff-only 88a3c99`.
+- 2026-11-25 (Engineer): Fix round done (below). T-0034's three marked kit workarounds stay in place.
 
 ## Outcome
 **Handed off** for verification on `fleet/T-0032-characters-list`. Finding: [F-0031](../findings/F-0031-first-feature-through-the-stack.md) (A: codegen, B: run-time gotchas). Evidence: [`documents/evidence/T-0032/engineer/`](../evidence/T-0032/engineer/).
@@ -93,16 +95,16 @@ Phase D's generators (mason bricks, buildgen) will copy this package, so its sha
 - **`feature/characters/characters_list`** in plan 01 §3.3's layout.
   - **Barrel:** `CharactersListFlow`, `CharactersListNavigator` and `CharacterId`, the navigator's argument (R4).
   - **Navigator:** `openCharacter(CharacterId)` only.
-  - **Flow:** `CharactersListFlowState(teamId?, previewId?)` (freezed). The preview is a flow page named `preview` whose argument is `previewId`.
+  - **Flow:** `CharactersListFlowState(teamId?, preview?)` (freezed; fix round: `preview` is the selected `Character` summary, which plays the AC's `previewId` role). The preview is a flow page named `preview`, keyed by the character's id, with that id as its argument. `CharactersListFlow` is immutable after creation, and its `FeatureFlow` is keyed by `initialTeamId`.
   - **Pages:** list and preview.
   - **Blocs:**
     - `CharactersListBloc`, over `PagingController`: load, load more, refresh, retry and preview. Its state is a sealed freezed union read with `state.when`, R16.
-    - `CharacterPreviewBloc`: `@factoryParam CharacterId`; the only caller of the navigator.
+    - `CharacterPreviewBloc`: `@factoryParam Character` (from the flow state); the only caller of the navigator. The list bloc ignores a preview event while a preview is open.
   - **Data:**
     - `CharactersListApi` (`@RestApi`, injectable `@factoryMethod`) returning `ApiPage<CharacterDto>`;
     - `CharacterDto` + `ThumbnailDto` with `@Freezed(fromJson: true, toJson: true)` (R30);
     - mappers to the domain `Character(id, name, ApiImage)`;
-    - `CharactersListRepository`, a lazy singleton per flow that remembers loaded characters for the preview.
+    - `CharactersListRepository`: stateless `@injectable` (fix round, TL decision: no cache; the selection lives in the flow state).
   - **DI:** `CharactersListDIInitializer` (Tide's verbatim shape). The flow's root imports `[Dio, Monitoring]` are hand-written in `di/flow_scope.dart`, marked for `mcgen wire`, and pinned by `flow_scope_test`.
   - **l10n:** ARBs in en, de and `en_XA`, through `flutter_gen_l10n`.
 - **`mc_api_client`:** `ApiPage<T>` (json_serializable, `genericArgumentFactories`, a Bazel action) matching the backend's `pageEnvelope`, `count` included.
@@ -121,7 +123,7 @@ JUnit names: [test_names.txt](../evidence/T-0032/engineer/test_names.txt).
 |---|---|
 | AC1 | `:bdd_test` "The first page lists 30 characters in name order [T-0032-AC1]": walks the grid with real drags; checks 30 `McMediaCard`s in the fixture's name order, each `Image` the bundled asset of its own thumbnail, and request `offset=0&limit=30`. Also `:golden_test` "T-0032-AC1 golden: the first page loaded"; `//utility/mc_api_client:api_page_test` and `//utility/mc_fixtures_characters:fixture_sets_test` (T-0032-AC1 cases) |
 | AC2 | `:bdd_test` Scenario Outline "A failed first page explains the problem and retries" × server_error, timeout, offline, malformed (error copy from `mc_l10n_core`; `the backend recovers`, Retry, list shows) and "A failed second page keeps the loaded characters and offers Retry" (30 kept, footer copy + Retry, recover, Retry → 60). `:golden_test` "T-0032-AC2 golden: the first page failed" |
-| AC3 | `:bdd_test`: "Tapping a character opens its preview inside the flow" (title, art, page `preview` on the flow's navigator, not the root one, with `previewId` as argument); "The full profile hands over to the app exactly once" (mocktail `verify(...).called(1)` + `verifyNoMoreInteractions`); "Going back from the preview keeps the list where I left it" (iOS edge swipe; exact scroll offset, 30 items, 1 request). `:golden_test` "T-0032-AC3 golden: the preview" |
+| AC3 | `:bdd_test`: "Tapping a character opens its preview inside the flow" (the flow state selects it, read through its `FeatureFlowController`; the route's settings are a flow `Page`, named `preview`, with the id as argument, on the flow's navigator, not the root one; the page is keyed by the id; title, art); "A second tap while the preview slides in keeps the first character" (fix round);  "The full profile hands over to the app exactly once" (mocktail `verify(...).called(1)` + `verifyNoMoreInteractions`); "Going back from the preview keeps the list where I left it" (iOS edge swipe; exact scroll offset, 30 items, 1 request). `:golden_test` "T-0032-AC3 golden: the preview" |
 | AC4 | `:bdd_test` "In German the title and the preview button come from the German strings" and "The pseudo-locale renders the list and the preview without overflow" (both `@l10n`). `//tool/l10n_check:workspace_gate_test` "T-0032-AC4 the gate checks the characters_list ARB set"; `l10n_check: OK` over the repo. `//utility/mc_test_utils:init_flow_test` "T-0032-AC4 initFlow in de has Flutter's German strings" |
 | AC5 | `:bdd_test` "Scrolling to the end of the first page loads the second once" (real drags; 1 request at `offset=30&limit=30`, 2 in all, 60 items) and "At the last page no further page is requested" (`characters.paged_45`; 45 items, 2 requests, still 2 after another scroll to the end). `fixture_sets_test` (T-0032-AC5 cases) |
 | AC6 | `:architecture_test` (the barrel is exactly the 3 types, all with `show`; every `:_stage` file is Flutter-free); `run //tool/mc_arch_check:bin` OK; `:flow_scope_test` (R17: `debugResolveAll` over the flow; a root without `Monitoring` fails naming `RootImport<Monitoring>`); `:contract_test` (DTO against the CONTRACT.md example and the served JSON, canonical round trip, mapper); `tool/checks/T-0032-AC6_matches_build_runner.sh`, `T-0032-AC6_cutoff.sh` and `T-0032-AC6_generated_not_committed.sh` (below) |
@@ -150,8 +152,8 @@ Two scenarios carry no AC tag because no AC asks for them: "An empty catalogue s
 - `tool/rules_fork.sh check`: 3 patches apply strictly.
 - `dart format --set-exit-if-changed` over `feature utility tool/l10n_check tool/mc_arch_check spike app`: 0 changed.
 - `tool/l10n_check`: OK.
-- **Coverage: 160/161 = 99.4 %** of hand-written `lib/` ([coverage.txt](../evidence/T-0032/engineer/coverage.txt)). Measured as the union of `bazel coverage //feature/...`; generated freezed, `.g.dart`, `.config.dart` and gen-l10n files are excluded. The one missed line is the `StateError` for a character the flow never loaded, which no flow path can reach.
-- Mutations: [12 of 12 killed](../evidence/T-0032/engineer/mutations.log) by failing scenarios, none by a compile error ([script](../evidence/T-0032/engineer/mutations.sh)). The other negative controls are in [negative_controls.md](../evidence/T-0032/engineer/negative_controls.md).
+- **Coverage: 160/160 = 100 %** of hand-written `lib/` after the fix round ([coverage.txt](../evidence/T-0032/engineer/coverage.txt); 99.4 % before it, when the repository's unreachable `StateError` existed). Measured as the union of `bazel coverage` over the package; generated freezed, `.g.dart`, `.config.dart` and gen-l10n files are excluded.
+- Mutations: [19 of 19 killed](../evidence/T-0032/engineer/mutations.log) by failing tests, none by a compile error ([script](../evidence/T-0032/engineer/mutations.sh)): M1–M12 plus the fix round's F1–F6. The other negative controls are in [negative_controls.md](../evidence/T-0032/engineer/negative_controls.md).
 - Goldens (402×874, real Inter and fixture art): [loaded](../evidence/T-0032/engineer/goldens/characters_list_loaded.png), [error](../evidence/T-0032/engineer/goldens/characters_list_error.png), [empty](../evidence/T-0032/engineer/goldens/characters_list_empty.png), [preview](../evidence/T-0032/engineer/goldens/character_preview.png).
 
 ### Root and shared changes
@@ -159,7 +161,7 @@ Two scenarios carry no AC tag because no AC asks for them: "An empty catalogue s
   - `pubspec.yaml`: workspace member `feature/characters/characters_list`;
   - `pubspec.lock`: re-resolved with `fvm flutter pub get`; **added** flutter_bloc 9.1.1, provider 6.1.5+1, nested 1.0.0 and mocktail 1.0.5 (ADR-0007's stack); nothing moved;
   - `MODULE.bazel.lock`: regenerated by Bazel;
-  - `.gitignore`: `*.config.dart`, `*.injectable.json`, `**/test/feature/*_test.dart` (plan 01 §3.1).
+  - `.gitignore`: `**/lib/src/di/*.config.dart` and `**/lib/**/*.injectable.json` (scoped in the fix round; the BDD generator writes only into bazel-out, so there is no `test/feature` pattern).
 - **Outside the named packages (TL, please confirm):**
   - **`mc_test_utils`:** `McTestApp` installs `GlobalMaterialLocalizations.delegates` (+ the `flutter_localizations` dep and a test). AC4's German scenario cannot pass without it: `MaterialApp` reports the unsupported locale itself (F-0031 B3).
   - **`tool/checks/lib.sh`:** `bzw`, and `T-0014-AC7` / `T-0027-AC1` now use it, so they read the same output base as the reference script under `MC_BAZEL_STARTUP`. Assertions unchanged.
@@ -183,6 +185,30 @@ No test deleted, skipped or weakened. No `// ignore:` added. Goldens are new (4)
 - Plan 01 §3.3 code: the `McFailureState` field names (`error`, `stackTrace`), `McFlowPage`, the `/v1` path, and the `BlocProvider` lookup.
 - Plan 05 §3.2 catalogue: generated step names (hyphens dropped).
 - `mc_test_steps`: solitary tests for the new generic steps (today only the feature's BDD runs them).
-- `the backend recovers` resets the engine but leaves the harness's mirrored fail rules, so unmatched detection stays off for that route.
 - UX: a failed pull-to-refresh with items shows the "Could not load more characters." footer.
 - The app shell (T-0033) needs `McMediaScope` and Flutter's localisation delegates at its root.
+
+## Fix round (Verifier FAIL `88a3c99` + code review; TL items 1–12)
+Each fix has a `T-0032-ACn` test or scenario, and each is shown to fail without the fix ([negative_controls.md](../evidence/T-0032/engineer/negative_controls.md), "Fix round"; [mutations.log](../evidence/T-0032/engineer/mutations.log) F1–F6; [probe_v4a.log](../evidence/T-0032/engineer/probe_v4a.log)).
+
+| # | Fix | Test / proof |
+|---|---|---|
+| 1 | `I see the character preview for` asserts `route.settings is Page` and reads the flow state (`preview`) through the flow's `FeatureFlowController`. The state type is package-private, so it is reached dynamically from a live flow page (F-0031 B11). `I don't see the character preview` checks the state is cleared | AC3 scenarios. `probe_v4a.py`: V4a survives the old step and is killed by the new one |
+| 2 | Stateless `@injectable CharactersListRepository` (no cache, no `StateError`). `CharactersListFlowState.preview: Character?` carries the summary; the preview page and bloc read it (`@factoryParam Character`) | all BDD scenarios; byte identity 11/11 with new hashes for the config and the repository and preview-bloc shards |
+| 3 | The list bloc ignores `_Preview` while a preview is open; the preview page is keyed by `ValueKey(character.id)` | "A second tap while the preview slides in keeps the first character [T-0032-AC3]": both taps land in one frame, then the preview and "See full profile" must be the first character. F1 and F2 kill it. A tap during the slide-in hits the preview route's modal barrier, so the race is within one frame (F-0031 B9) |
+| 4 | `McBackendHarness.recover()` switches every harness fail rule off on the engine and in the mirrors, and ends the scenario. Store, latency, counters, traffic and requests are kept. The `the backend recovers` step uses it | `//utility/mc_test_utils:harness_test` "T-0032-AC2 recover() …" ×2 (an unrouted request after recover is reported; the store survives); F3a and F3b kill them |
+| 5 | `tool/checks/T-0032-AC7_gates.sh`: test (T-0032 packages uncached), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, coverage ≥ `MC_COVERAGE_MIN` (90) | [PASS](../evidence/T-0032/engineer/T-0032-AC7_gates.md); with `MC_COVERAGE_MIN=100.1`, [FAIL](../evidence/T-0032/engineer/T-0032-AC7_gates_negative_control.md) |
+| 6 | BUILD comment: no per-package `analysis_options.yaml`, the root file applies (F-0021) | — |
+| 7 | `CharactersListFlow` documented as immutable after creation; `FeatureFlow` keyed by `ValueKey(initialTeamId)` | `:flow_scope_test` "T-0032-AC1 a new initialTeamId builds a new flow that lists that team"; F4 kills it |
+| 8 | `.gitignore` scoped to `**/lib/src/di/*.config.dart` and `**/lib/**/*.injectable.json`. No `test/feature` pattern, because the BDD output lives only in bazel-out | `T-0032-AC6_generated_not_committed.sh` now also requires `test/feature/helpers_test.dart`, `lib/src/app.config.dart` and a step file to stay visible: [PASS](../evidence/T-0032/engineer/T-0032-AC6_generated_not_committed.md); with the old pattern, [FAIL](../evidence/T-0032/engineer/fixround-gitignore-old-pattern.md) |
+| 9 | `add_dep.py` checks only the `dependencies:` block; `overlay_deps.py` reads a block up to the next top-level key, skipping blank lines and comments | `tool/checks/T-0032-AC6_overlay_tools.sh`: [PASS](../evidence/T-0032/engineer/T-0032-AC6_overlay_tools.md); over the old scripts, [FAIL](../evidence/T-0032/engineer/fixround-overlay-tools-old.md) |
+| 10 | The l10n gate test copies the package's ARBs, removes a German key and expects the violation naming it | `//tool/l10n_check:workspace_gate_test` "T-0032-AC4 the gate checks the characters_list ARB set" |
+| 11 | `architecture_test` matches both quote styles (barrel exports, Flutter imports), checks every export directive is parsed, and drops the `dart test` claim (it is Bazel-only) | `:architecture_test` "T-0032-AC6 the checks read both quote styles"; F6 kills it |
+| 12 | `CharacterUniverse.synthetic` pads to the width of `count` (at least 2), so name order is generation order past 99 | `fixture_sets_test` "T-0032-AC5 a synthetic cast past 99 still pages in name order"; F5 kills it |
+
+- **Gates after the round:** [T-0032-AC7_gates.md](../evidence/T-0032/engineer/T-0032-AC7_gates.md). `test //...` 75/75 (T-0032 packages uncached); lint, `mc_arch_check`, `rules_fork.sh check` (3 patches), format and `l10n_check` green; coverage 100 %.
+- **Byte identity:** [11/11 EQUAL](../evidence/T-0032/engineer/T-0032-AC6_byte_identity.md). **Cutoff:** [PASS](../evidence/T-0032/engineer/T-0032-AC6_cutoff.md).
+- **Goldens:** none regenerated. The four goldens still match (the visuals did not change).
+- **Test integrity:** no test deleted, skipped or weakened, and no `// ignore:` added. Steps changed: `I see the character preview for` (stronger), `I don't see the character preview` (also checks the state). New: the double-tap step and scenario, 2 harness tests, the team-key test, the quote-style test, the synthetic-width test and the planted-key gate case. M1, M8 and M11 in `mutations.sh` were rewritten for the new code.
+- **Follow-ups:** a public test hook on `FeatureFlow` for reading the flow state (today the step reads `mc_feature_flow` internals dynamically, F-0031 B11); `mc_test_steps` unit tests for the generic steps (still open).
+
