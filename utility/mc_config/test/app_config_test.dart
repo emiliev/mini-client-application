@@ -16,7 +16,7 @@ void main() {
     expect(config.backend.latency, const Duration(milliseconds: 250));
     expect(config.backend.scenario, 'happy');
     expect(config.build, '3');
-    expect(config.apiBaseUrl, 'https://api.test');
+    expect(config.apiBaseUrl, 'https://api.test/');
   });
 
   test(
@@ -34,4 +34,45 @@ void main() {
       expect(reads, 1);
     },
   );
+
+  group('T-0034-AC4 apiBaseUrl', () {
+    String parseUrl(String url) => AppConfig.parse(
+      '{"env":"dev","backend":{"seed":7,"latencyMs":0,"scenario":"happy"},'
+      '"apiBaseUrl":"$url","build":"1"}',
+    ).apiBaseUrl;
+
+    test('T-0034-AC4 a value without a trailing slash is normalised', () {
+      expect(parseUrl('https://api.test'), 'https://api.test/');
+      expect(parseUrl('https://api.test/v2'), 'https://api.test/v2/');
+    });
+
+    test('T-0034-AC4 a value with a trailing slash is kept as it is', () {
+      expect(parseUrl('https://api.test/'), 'https://api.test/');
+    });
+
+    test('T-0034-AC4 the constructor asserts the trailing slash', () {
+      AppConfig build(String url) => AppConfig(
+        env: 'dev',
+        backend: const BackendConfig(
+          seed: 1,
+          latency: Duration.zero,
+          scenario: 'happy',
+        ),
+        apiBaseUrl: url,
+        build: '1',
+      );
+
+      expect(build('https://api.test/').apiBaseUrl, 'https://api.test/');
+      expect(
+        () => build('https://api.test'),
+        throwsA(
+          isA<AssertionError>().having(
+            (e) => '${e.message}',
+            'message',
+            contains('https://api.test'),
+          ),
+        ),
+      );
+    });
+  });
 }

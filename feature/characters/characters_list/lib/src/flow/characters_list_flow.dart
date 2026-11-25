@@ -6,10 +6,7 @@ import 'package:characters_list/src/navigator/characters_list_navigator.dart';
 import 'package:characters_list/src/presentation/page/character_preview_page.dart';
 import 'package:characters_list/src/presentation/page/characters_list_page.dart';
 import 'package:flutter/widgets.dart';
-import 'package:get_it/get_it.dart';
-import 'package:mc_di/mc_di.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
-import 'package:mc_l10n_core/mc_l10n_core.dart';
 
 /// The feature's only entry point (R4): a paged grid of characters whose
 /// preview opens inside the flow, and whose "See full profile" leaves the
@@ -35,41 +32,25 @@ class CharactersListFlow extends StatelessWidget {
   final String? initialTeamId;
 
   @override
-  Widget build(BuildContext context) => Localizations.override(
-    context: context,
-    // The feature's strings, then the core strings (Retry, error copy) and
-    // Flutter's own, whatever the host app installed (plan 01 §3.3 passes
-    // these to the flow; mc_feature_flow has no `localizationsDelegates` yet).
-    delegates: const [
-      CharactersListL10n.delegate,
-      ...mcLocalizationsDelegates,
-    ],
-    child: FeatureFlow<CharactersListFlowState>(
-      key: ValueKey(initialTeamId),
-      state: CharactersListFlowState(teamId: initialTeamId),
-      rootImports: charactersListRootImports,
-      flowInitializer: McDIInitializer(_initializeWith(navigator)),
-      onGeneratePages: (state) => [
-        const McFlowPage(name: 'list', child: CharactersListPage()),
-        if (state.preview case final character?)
-          McFlowPage(
-            name: 'preview',
-            arguments: character.id,
-            child: CharacterPreviewPage(
-              key: ValueKey(character.id),
-              character: character,
-            ),
+  Widget build(BuildContext context) => FeatureFlow<CharactersListFlowState>(
+    key: ValueKey(initialTeamId),
+    flowInitializer: const CharactersListDIInitializer(),
+    rootImports: charactersListRootImports,
+    provide: (scope) =>
+        scope.registerSingleton<CharactersListNavigator>(navigator),
+    localizationsDelegates: const [CharactersListL10n.delegate],
+    state: CharactersListFlowState(teamId: initialTeamId),
+    onGeneratePages: (state) => [
+      const McFlowPage(name: 'list', child: CharactersListPage()),
+      if (state.preview case final character?)
+        McFlowPage(
+          name: 'preview',
+          arguments: character.id,
+          child: CharacterPreviewPage(
+            key: ValueKey(character.id),
+            character: character,
           ),
-      ],
-    ),
+        ),
+    ],
   );
 }
-
-/// The flow's container: the navigator the app passed (plan 01's `provide:`,
-/// which `FeatureFlow` does not have yet), then the package's injectable
-/// registrations.
-GetItInitializer _initializeWith(CharactersListNavigator navigator) =>
-    (GetIt getIt, String? environment) async {
-      getIt.registerSingleton<CharactersListNavigator>(navigator);
-      await const CharactersListDIInitializer().init(getIt);
-    };

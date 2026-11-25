@@ -22,12 +22,9 @@ class CharactersListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The only DI lookup in UI code (R17). The flow's container is read here,
-    // in build: `context.di` inside `create` registers an inherited-widget
-    // dependency in a callback provider forbids it in (F-0031 B).
-    final flow = FlowScope.of(context).container;
+    // The only DI lookup in UI code (R17).
     return BlocProvider(
-      create: (_) => flow<CharactersListBloc>(),
+      create: (context) => context.di<CharactersListBloc>(),
       child: const _CharactersListPageContent(),
     );
   }

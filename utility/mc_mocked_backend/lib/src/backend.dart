@@ -126,7 +126,7 @@ final class MockBackend {
   late final MockBackendAdapter adapter = MockBackendAdapter(this);
 
   /// A [Dio] on this backend. The base URL is never contacted.
-  Dio createDio({String baseUrl = 'https://mock.mini-client.invalid'}) =>
+  Dio createDio({String baseUrl = 'https://mock.mini-client.invalid/'}) =>
       Dio(BaseOptions(baseUrl: baseUrl))..httpClientAdapter = adapter;
 
   // --- Diagnostics (the `NetworkDiagnostics` surface) -----------------------

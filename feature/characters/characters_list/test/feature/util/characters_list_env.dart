@@ -2,6 +2,7 @@ import 'package:characters_list/characters_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
+import 'package:mc_feature_flow/testing.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_media/mc_media.dart';
@@ -42,19 +43,14 @@ typedef FlowStateView = ({
   ({CharacterId id, String name})? preview,
 });
 
-/// The flow's current state, read through its `FeatureFlowController`: the
-/// authoritative state the blocs update (flow_builder only sees structural
-/// changes, F-0018). Every live page of the flow holds that controller. The
-/// state type is package-private (R4; R7 keeps `src/` out of BDD tests), so
-/// the controller and its fields are reached dynamically.
+/// The flow's current state, through `mc_feature_flow`'s public test hook:
+/// the controller's state is authoritative (flow_builder only sees structural
+/// changes, F-0018). The state type is package-private (R4; R7 keeps `src/`
+/// out of BDD tests), so the hook is asked for `dynamic`.
 FlowStateView charactersFlowState(WidgetTester tester) {
-  final page = find.byWidgetPredicate(
-    (w) => '${w.runtimeType}' == '_LivePage<CharactersListFlowState>',
-    skipOffstage: false,
-  );
-  expect(page, findsWidgets, reason: 'the characters_list flow is open');
-  final dynamic controller = (tester.widget(page.first) as dynamic).controller;
-  final dynamic state = controller.state;
+  final scaffold = find.byType(Scaffold, skipOffstage: false);
+  expect(scaffold, findsWidgets, reason: 'the characters_list flow is open');
+  final dynamic state = flowStateOf<dynamic>(tester.element(scaffold.first));
   final dynamic preview = state.preview;
   return (
     teamId: state.teamId as String?,
@@ -96,10 +92,8 @@ final List<CharacterRecord> _paged45 = CharacterUniverse.synthetic(
   defaultMockClock,
 ).byName;
 
-CharacterRecord characterNamed(String name) => [
-  ...defaultCast,
-  ..._paged45,
-].firstWhere((c) => c.name == name);
+CharacterRecord characterNamed(String name) =>
+    [...defaultCast, ..._paged45].firstWhere((c) => c.name == name);
 
 /// What every test host provides above a flow: the bundled-art resolver and
 /// the fixture asset bundle (the app root does this in production, T-0033).

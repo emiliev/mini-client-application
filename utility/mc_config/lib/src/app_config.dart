@@ -19,20 +19,27 @@ class BackendConfig {
   final String scenario;
 }
 
+/// [url] with exactly one trailing `/` added when it has none.
+String withTrailingSlash(String url) => url.endsWith('/') ? url : '$url/';
+
 /// Typed per-environment configuration. Read once at boot (R13: no
 /// dart-defines).
 class AppConfig {
-  const AppConfig({
+  AppConfig({
     required this.env,
     required this.backend,
     required this.apiBaseUrl,
     required this.build,
-  });
+  }) : assert(
+         apiBaseUrl.endsWith('/'),
+         'apiBaseUrl must end with "/" (retrofit paths are relative), got '
+         '"$apiBaseUrl". AppConfig.fromJson adds it.',
+       );
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
     env: json['env'] as String,
     backend: BackendConfig.fromJson(json['backend'] as Map<String, dynamic>),
-    apiBaseUrl: json['apiBaseUrl'] as String,
+    apiBaseUrl: withTrailingSlash(json['apiBaseUrl'] as String),
     build: json['build'] as String,
   );
 
@@ -43,7 +50,9 @@ class AppConfig {
   final String env;
   final BackendConfig backend;
 
-  /// Base URL of the API. The mocked backend never contacts it.
+  /// Base URL of the API; always ends with `/`, so a retrofit path like
+  /// `'v1/characters'` (relative, no leading `/`) lands under it. Dio joins
+  /// `baseUrl + path` as strings. The mocked backend never contacts it.
   final String apiBaseUrl;
   final String build;
 }

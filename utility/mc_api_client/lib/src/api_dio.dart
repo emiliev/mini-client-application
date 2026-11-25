@@ -4,8 +4,8 @@ import 'package:mc_api_client/src/retry_interceptor.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 
 /// The placeholder host used when no real backend exists. The mocked
-/// backend never contacts it.
-const String defaultApiBaseUrl = 'https://mock.mini-client.invalid';
+/// backend never contacts it. Ends with `/`: retrofit paths are relative.
+const String defaultApiBaseUrl = 'https://mock.mini-client.invalid/';
 
 /// Builds the shared [Dio]: base URL, timeouts, one log line per attempt
 /// (when [monitoring] is given; it is resolved on each request) and retry for idempotent requests.
@@ -21,6 +21,11 @@ Dio createApiDio({
   Duration retryDelay = const Duration(milliseconds: 200),
   Monitoring Function()? monitoring,
 }) {
+  assert(
+    baseUrl.endsWith('/'),
+    'The API base URL must end with "/" (retrofit paths are relative), got '
+    '"$baseUrl".',
+  );
   final dio = Dio(
     BaseOptions(
       baseUrl: baseUrl,
