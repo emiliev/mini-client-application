@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0032 merges) |
+| Status | In Progress |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0034-exemplar-workarounds` |
@@ -38,7 +38,7 @@ T-0032 left marked workarounds in `characters_list`, because three kits don't do
 - **T-0034-AC6:** The T-0032 preview step uses the public flow-state test hook, with no dynamic access to `mc_feature_flow` internals; the hook is tested in `mc_feature_flow`.
 
 ## Log
-- 2026-11-25: Created (TL) from T-0032's handoff questions.
+- 2026-11-25: Created (TL) from T-0032's handoff questions; dispatched to a Sonnet engineer after T-0032 merged.
 - 2026-11-25: Engineer started on `fleet/T-0034-exemplar-workarounds` from `origin/main` 0395230.
 - 2026-11-25: Handoff. See Outcome.
 
