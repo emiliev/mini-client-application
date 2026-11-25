@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress (branched from T-0031 head `8c0264c`; merges `origin/main` after T-0031) |
+| Status | Done (merged 2026-11-25 `ab75dbf`; Verifier PASS `b35e8b8`) |
 | Owner | crew: Engineer (**Opus**, worktree). This is the template the generators will copy, so quality outweighs speed |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0032-characters-list` |
@@ -212,3 +212,6 @@ Each fix has a `T-0032-ACn` test or scenario, and each is shown to fail without 
 - **Test integrity:** no test deleted, skipped or weakened, and no `// ignore:` added. Steps changed: `I see the character preview for` (stronger), `I don't see the character preview` (also checks the state). New: the double-tap step and scenario, 2 harness tests, the team-key test, the quote-style test, the synthetic-width test and the planted-key gate case. M1, M8 and M11 in `mutations.sh` were rewritten for the new code.
 - **Follow-ups:** a public test hook on `FeatureFlow` for reading the flow state (today the step reads `mc_feature_flow` internals dynamically, F-0031 B11); `mc_test_steps` unit tests for the generic steps (still open).
 
+## Merge (TL)
+- 2026-11-25: Verifier FAIL `88a3c99` on AC3 test strength (an in-flow `Navigator.push` passed every scenario; the code was correct). `/code-review` found 2 important bugs (a same-frame second tap showed the wrong preview; `the backend recovers` left the harness's fail rules) and 7 nits. TL decisions: stateless repository, with the selected `Character` in flow state (Tide shape); no per-package `analysis_options.yaml` (F-0021); the 5 kit questions went to T-0034. Fixed in `1d5e74a` (12 items, each proven); re-verify PASS `b35e8b8` (100 % coverage, 11/11 byte-identical, cutoff holds, goldens unchanged). The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 75/75 tests, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-069 to P-071; T-0034 (kit workarounds, flow-state test hook).

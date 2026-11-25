@@ -7,7 +7,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 |---|---|---|---|---|---|
 | [T-0034](T-0034-exemplar-workarounds-removal.md) | Remove the exemplar's workarounds (`mc_feature_flow` `provide:`/delegates/non-listening `di`, `$PagedStateCopyWith`, base URL) | Ready | Engineer (Sonnet) | T-0032 | `fleet/T-0034-exemplar-workarounds` |
 | [T-0033](T-0033-universe-wiring-and-sandbox.md) | `characters_list` in the app: `universe_wiring`, sandbox, simulator e2e (P1-17 app half) | **In Progress** | Engineer (Sonnet) | T-0032 | `fleet/T-0033-universe-wiring` |
-| [T-0032](T-0032-characters-list-exemplar.md) | **`characters_list` exemplar feature** (LD, P1-17 feature package) | **In Verification** | Engineer (Opus) | T-0030, T-0031 | `fleet/T-0032-characters-list` |
 
 ## Done
 | ID | Title | Result |
@@ -16,6 +15,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0032](T-0032-characters-list-exemplar.md) | **`characters_list`, the first Marvel feature** (LD exemplar, P1-17 feature package) | merged; Verifier [PASS](../evidence/T-0032/verification-report.md) (re-verified after FAIL); F-0031 |
 | [T-0031](T-0031-ds-lists-media-cards.md) | DS `mc_ds_media`, `mc_ds_lists`, `mc_ds_cards` (P1-12 subset): paged grid and list, `McImage`, `McMediaCard`, 80 goldens | merged; Verifier [PASS](../evidence/T-0031/verification-report.md) (re-verified after FAIL); F-0030 |
 | [T-0030](T-0030-paging-and-media-kits.md) | `mc_paging` + `mc_media` kits (P1-14 subset, U14, U19) | merged; Verifier [PASS](../evidence/T-0030/verification-report.md) (re-verified after review fixes); F-0029 |
 | [T-0029](T-0029-bdd-generator.md) | BDD generator (`.feature` → tests), `mc_bdd_tests`, `mc_test_steps` skeleton, patch 0003 (P3-05) | merged; Verifier [PASS](../evidence/T-0029/verification-report.md) (re-verified after FAIL); F-0027 |
