@@ -42,6 +42,7 @@ class _Package {
 ///   another feature); app on anything (`layer`);
 /// - a package never imports another package's `src/`, and no relative path
 ///   leaves its own package (`barrel-only`);
+/// - `package:x/testing.dart` is imported from `test/` only (`test-only`);
 /// - a feature barrel exports with `show` and never a page, bloc or DI
 ///   initializer (`R4`);
 /// - a route library imports no feature barrel, and every `RouteTargets`
@@ -244,6 +245,15 @@ Iterable<Violation> _checkUri(_FileContext ctx, String uri) sync* {
       return;
     }
     yield* _edge(ctx, target, 'package:$name');
+    if (path == 'testing.dart' &&
+        !p.isWithin(p.join(pkg.dir, 'test'), ctx.path)) {
+      yield Violation(
+        'test-only',
+        ctx.rel,
+        'imports package:$name/testing.dart outside test/; test hooks are '
+            'for tests only',
+      );
+    }
     if (path.startsWith('src/')) {
       yield Violation(
         'barrel-only',

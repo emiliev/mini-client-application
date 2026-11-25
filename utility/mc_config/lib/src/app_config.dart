@@ -19,15 +19,19 @@ class BackendConfig {
   final String scenario;
 }
 
+/// [url] with a trailing `/` added when it has none. Real code, not an
+/// assert: asserts are stripped in release builds.
+String withTrailingSlash(String url) => url.endsWith('/') ? url : '$url/';
+
 /// Typed per-environment configuration. Read once at boot (R13: no
 /// dart-defines).
 class AppConfig {
-  const AppConfig({
+  AppConfig({
     required this.env,
     required this.backend,
-    required this.apiBaseUrl,
+    required String apiBaseUrl,
     required this.build,
-  });
+  }) : apiBaseUrl = withTrailingSlash(apiBaseUrl);
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
     env: json['env'] as String,
@@ -43,7 +47,10 @@ class AppConfig {
   final String env;
   final BackendConfig backend;
 
-  /// Base URL of the API. The mocked backend never contacts it.
+  /// Base URL of the API; the constructor adds a trailing `/` when it is
+  /// missing, so it always ends with one and a retrofit path like
+  /// `'v1/characters'` (relative, no leading `/`) lands under it. Dio joins
+  /// `baseUrl + path` as strings. The mocked backend never contacts it.
   final String apiBaseUrl;
   final String build;
 }

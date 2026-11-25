@@ -1,0 +1,101 @@
+## M1: di listening again (FlowScope.of in McFlowContext.di)
+exit=3
+//feature/characters/characters_list:bdd_test                            FAILED in 6.6s
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 6.0s
+Executed 2 out of 2 tests: 2 fail locally.
+INFO: Build completed, 2 tests FAILED, 13 total actions
+
+## M2: debugResolveAll listening again
+exit=0
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.5s
+//utility/mc_feature_flow:flow_kit_test                                  PASSED in 1.3s
+Executed 2 out of 2 tests: 2 tests pass.
+
+## M3: provide: registered after flowInitializer
+exit=0
+//feature/characters/characters_list:bdd_test                            PASSED in 3.5s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.3s
+//utility/mc_feature_flow:flow_kit_test                                  PASSED in 1.0s
+Executed 3 out of 3 tests: 3 tests pass.
+
+## M5: provide: ignored
+exit=3
+//feature/characters/characters_list:bdd_test                            FAILED in 3.3s
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 1.3s
+Executed 2 out of 2 tests: 2 fail locally.
+INFO: Build completed, 2 tests FAILED, 13 total actions
+
+## M6: core + Flutter delegates not appended
+exit=3
+//feature/characters/characters_list:bdd_test                            FAILED in 1.3s
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 1.0s
+Executed 2 out of 2 tests: 2 fail locally.
+INFO: Build completed, 2 tests FAILED, 13 total actions
+
+## M7: feature delegates dropped
+exit=3
+//feature/characters/characters_list:bdd_test                            FAILED in 1.2s
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 1.0s
+Executed 2 out of 2 tests: 2 fail locally.
+INFO: Build completed, 2 tests FAILED, 13 total actions
+
+## M8: flowStateOf without the type check
+exit=3
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.8s
+Executed 1 out of 1 test: 1 fails locally.
+INFO: Build completed, 1 test FAILED, 12 total actions
+
+## M10: mc_paging barrel without $PagedStateCopyWith
+exit=1
+//feature/characters/characters_list:bdd_test                   FAILED TO BUILD
+//utility/mc_paging:copywith_barrel_test                        FAILED TO BUILD
+Executed 0 out of 2 tests: 2 fail to build.
+ERROR: <worktree>/utility/mc_paging/BUILD.bazel:107:10: Compiling Dart kernel module utility/mc_paging/copywith_barrel_test.entry.kmod failed: (Exit 1): dartaotruntime failed: error executing DartKernel command (from dart_test rule target //utility/mc_paging:copywith_barrel_test) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec-ST-5d9b44f4dbf9/bin/external/ai_rules_dart+/dart/private/tools/kernel_module.aot ... (remaining 5 arguments skipped)
+ERROR: <worktree>/feature/characters/characters_list/BUILD.bazel:266:13: Compiling Dart kernel module feature/characters/characters_list/bdd_test.flutter_entry.kmod failed: (Exit 1): dartaotruntime failed: error executing DartKernel command (from flutter_test rule target //feature/characters/characters_list:bdd_test) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/kernel_module.aot --kernel-worker ... (remaining 4 arguments skipped)
+ERROR: Build did NOT complete successfully
+
+## M11: AppConfig.fromJson does not normalise
+exit=3
+//app/mini_client:app_test                                               FAILED in 0.8s
+//app/wiring/app_core:boot_test                                          FAILED in 1.0s
+//utility/mc_config:app_config_test                                      FAILED in 0.2s
+Executed 3 out of 3 tests: 3 fail locally.
+INFO: Build completed, 3 tests FAILED, 21 total actions
+
+## M12: createApiDio without the assert
+exit=3
+//utility/mc_api_client:api_client_test                                  FAILED in 0.4s
+Executed 1 out of 1 test: 1 fails locally.
+INFO: Build completed, 1 test FAILED, 10 total actions
+
+## M13: withTrailingSlash adds a slash always (double slash)
+exit=3
+//utility/mc_config:app_config_test                                      FAILED in 0.2s
+Executed 1 out of 1 test: 1 fails locally.
+INFO: Build completed, 1 test FAILED, 7 total actions
+
+## M14: exemplar path back to a leading slash
+exit=0
+//feature/characters/characters_list:bdd_test                            PASSED in 1.9s
+//feature/characters/characters_list:contract_test                       PASSED in 0.3s
+Executed 2 out of 2 tests: 2 tests pass.
+
+## M15: exemplar path wrong (v2)
+exit=3
+//feature/characters/characters_list:bdd_test                            FAILED in 2.7s
+Executed 1 out of 1 test: 1 fails locally.
+INFO: Build completed, 1 test FAILED, 30 total actions
+
+## M1: di listening again (FlowScope.of in McFlowContext.di)
+exit=3
+//feature/characters/characters_list:bdd_test                            FAILED in 1.3s
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 1.0s
+Executed 2 out of 2 tests: 2 fail locally.
+INFO: Build completed, 2 tests FAILED, 39 total actions
+
+## M3P: provide: after flowInitializer, probe P1
+exit=3
+//utility/mc_feature_flow:verifier_probe_test                            FAILED in 0.7s
+Executed 1 out of 1 test: 1 fails locally.
+INFO: Build completed, 1 test FAILED, 12 total actions
+

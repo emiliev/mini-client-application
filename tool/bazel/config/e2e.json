@@ -1,6 +1,6 @@
 {
   "env": "e2e",
   "backend": { "seed": 42, "latencyMs": 0, "scenario": "happy" },
-  "apiBaseUrl": "https://mock.mini-client.invalid",
+  "apiBaseUrl": "https://mock.mini-client.invalid/",
   "build": "1"
 }

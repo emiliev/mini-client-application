@@ -1,0 +1,7 @@
+asserts enabled: false
+AppConfig(apiBaseUrl: "https://api.test").apiBaseUrl = https://api.test/
+AppConfig.parse(slashless).apiBaseUrl = https://api.test/
+createApiDio(baseUrl: slashless).options.baseUrl = https://api.test/
+request path via createApiDio = /v1/characters
+MockBackend.createDio(slashless).options.baseUrl = https://api.test/
+request path via MockBackend.createDio = /v1/characters

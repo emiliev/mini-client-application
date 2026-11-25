@@ -1,0 +1,47 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //app/wiring/app_core:boot_test
+-----------------------------------------------------------------------------
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[error] Bad state: wiring exploded
+#0      _flaky.<anonymous closure> (org-dartlang-app:///app/wiring/app_core/test/boot_test.dart:27:7)
+#1      McDIInitializer.init (package:mc_di/src/di_initializer.dart:19:51)
+#2      initializeDIContainer (package:mc_di/src/di_container.dart:68:25)
+<asynchronous suspension>
+#3      BootBloc._begin.<anonymous closure> (package:app_core/src/boot/boot_bloc.dart:126:7)
+<asynchronous suspension>
+
+[debug] BootBloc: _BootThrew BootBooting -> BootFailed
+[debug] BootBloc: BootRetried BootFailed -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC1 a failing root initializer shows the error and Retry succeeds on the second attempt
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootTimeoutElapsed BootBooting -> BootTimedOut
+[debug] BootBloc: BootRetried BootTimedOut -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC2 boot taking longer than 10 s shows the timeout state, and Retry abandons the attempt and starts a fresh one
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootTimeoutElapsed BootBooting -> BootTimedOut
+[debug] BootBloc: BootRetried BootTimedOut -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC2 Retry escapes a never-completing root initializer: the hung mc_di run is abandoned and a fresh one boots (P-028)
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootTimeoutElapsed BootBooting -> BootTimedOut
+[debug] BootBloc: _BootSucceeded BootTimedOut -> BootReady
+  PASS  T-0021-AC2 a boot that succeeds after the timeout showed goes to ready
+  PASS  T-0021-AC1 a boot that fails after the timeout showed shows the error and records it to monitoring
+  PASS  T-0021-AC1 BootBloc (a McBloc) discards a failed run, so Retry runs the task again, and the failure is recorded to monitoring
+  FAIL  the root list registers every root type once, with the backend behind Dio
+        TestFailure: Expected: 'https://mock.mini-client.invalid'
+          Actual: 'https://mock.mini-client.invalid/'
+           Which: is different. Both strings start the same, but the actual value also has the following trailing characters: /
+
+        package:matcher                                                    expect
+        package:flutter_test/src/widget_tester.dart 473:18                 expect
+        org-dartlang-app:///app/wiring/app_core/test/boot_test.dart 278:5  main.<fn>
+
+  PASS  T-0021-AC1 an unknown backend.scenario fails boot with a clear error
+  PASS  a configured latency becomes a constant backend latency
+  PASS  appStorageDirectory sits in the data container
+  PASS  AppLocations
+
+10 passed, 1 failed

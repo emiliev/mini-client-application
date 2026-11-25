@@ -1,0 +1,17 @@
+  PASS  P1 provide: is resolvable by the flow initializer
+P2 staleDi=FlutterError: Looking up a deactivated widget's ancestor is unsafe.
+P2 staleContainer=StateError: Bad state: GetIt: Object/factory with type _Provided is not registered inside GetIt. 
+P2 staleHook=FlutterError: Looking up a deactivated widget's ancestor is unsafe.
+  PASS  P2 after dispose: provided not reachable, di on stale context
+P3 localizations widgets=2; inner delegates=[_StringsDelegate, _CustomMaterialDelegate, _WidgetsLocalizationsDelegate, _GlobalCupertinoLocalizationsDelegate, _McL10nCoreL10nDelegate, _MaterialLocalizationsDelegate, _CupertinoLocalizationsDelegate, _WidgetsLocalizationsDelegate]
+P3 duplicates=[MapEntry(_WidgetsLocalizationsDelegate: 2)]
+P3 host custom MaterialLocalizations okButtonLabel inside the flow = CUSTOM-OK
+P3 flow string = flow-en
+  PASS  P3 delegates list: duplicates and host overrides
+P4 innerErr=StateError
+  PASS  P4 nested flow: outer provide: not visible in inner flow; hook returns innermost state
+P5 core=Retry flow=flow-en material=OK
+  PASS  P5 bare host: core strings inside the flow
+P6 root back buttons before=1 after=0
+  PASS  P6 flowLeading on the root page after it rebuilt while an inner page was on top
+//utility/mc_feature_flow:verifier_probe_test                            PASSED in 0.9s

@@ -11,12 +11,17 @@ dependencies:
   flow_builder: ^0.1.0
   flutter:
     sdk: flutter
+  get_it: ^8.0.0
   mc_bloc_kit: any
   mc_di: any
   mc_ds_feedback: any
+  mc_l10n_core: any
   mc_monitoring: any
 
 dev_dependencies:
+  flutter_bloc: any
+  flutter_localizations:
+    sdk: flutter
   flutter_test:
     sdk: flutter
   mc_analysis: any

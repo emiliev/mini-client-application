@@ -46,18 +46,21 @@ class McMediaCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool _skeleton;
 
-  /// The height of a card [width] wide, with room for a two-line title and a
-  /// one-line subtitle at [textScaler].
+  /// The height of a card [width] wide, with room for [titleLines] title
+  /// lines and, when [hasSubtitle], a one-line subtitle at [textScaler]. A
+  /// grid of cards without subtitles passes `hasSubtitle: false`, so the cells
+  /// do not reserve an empty line.
   static double heightFor({
     required double width,
     required TextScaler textScaler,
+    bool hasSubtitle = true,
+    int titleLines = 2,
   }) {
     double line(TextStyle style) =>
         textScaler.scale(style.fontSize!) * style.height!;
     final text =
-        2 * line(_titleStyle) +
-        McSpacing.xxs +
-        line(_subtitleStyle) +
+        titleLines * line(_titleStyle) +
+        (hasSubtitle ? McSpacing.xxs + line(_subtitleStyle) : 0) +
         2 * _textPadding;
     // Rounded up: a fractional line must not overflow.
     return (width / imageAspectRatio + text).ceilToDouble() + 1;

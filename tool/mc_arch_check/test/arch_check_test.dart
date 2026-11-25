@@ -185,4 +185,15 @@ void main() {
     // nullable `AFlow? maybe()`; neither is flagged.
     expect(_check('ok'), isEmpty);
   });
+
+  test('T-0034-AC6 a testing.dart import outside test/ fails; inside test/ '
+      'it is allowed', () {
+    final actual = _check('testing_import');
+
+    expect(actual, hasLength(1));
+    expect(actual.single, contains('test-only'));
+    expect(actual.single, contains('uses_hook.dart'));
+    expect(actual.single, contains('package:u_base/testing.dart'));
+    expect(actual.join(), isNot(contains('ok_test.dart')));
+  });
 }
