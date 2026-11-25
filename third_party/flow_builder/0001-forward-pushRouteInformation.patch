@@ -1,0 +1,44 @@
+--- a/lib/flow_builder.dart
++++ b/lib/flow_builder.dart
+@@ -360,15 +360,21 @@
+         return _popRoute();
+       case 'pushRoute':
+         return _pushRoute(methodCall.arguments);
++      // mini-client T-0035: the engine's deep links arrive as
++      // `pushRouteInformation`; stock 0.1.0 dropped it (see VENDORED.md).
++      case 'pushRouteInformation':
++        return _pushRouteInformation(methodCall.arguments);
+       default:
+-        return Future<dynamic>.value();
++        // Same answer as the framework's own handler for an unknown method.
++        return Future<dynamic>.value(false);
+     }
+   }
+ 
+   static Future<dynamic> _popRoute() async {
+     for (final interceptor in _interceptors) {
+       final preventDefault = await interceptor();
+-      if (preventDefault) return Future<dynamic>.value();
++      // mini-client T-0035: iOS counts any reply but `true` as unhandled.
++      if (preventDefault) return Future<dynamic>.value(true);
+     }
+     return WidgetsBinding.instance.handlePopRoute();
+   }
+@@ -380,6 +386,17 @@
+       return Future<dynamic>.value();
+     }
+   }
++
++  // mini-client T-0035: hands the location to the framework's observers, as
++  // its own `flutter/navigation` handler does. The `state` argument is not
++  // forwarded (`handlePushRoute` takes a location only); iOS does not send one.
++  static Future<dynamic> _pushRouteInformation(dynamic arguments) async {
++    final location = arguments is Map ? arguments['location'] : null;
++    if (location is String) {
++      return WidgetsBinding.instance.handlePushRoute(location);
++    }
++    return Future<dynamic>.value(false);
++  }
+ }
+ 
+ /// Visible for testing system navigation.

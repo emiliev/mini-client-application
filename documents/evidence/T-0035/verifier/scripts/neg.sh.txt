@@ -1,0 +1,103 @@
+#!/bin/bash
+# neg.sh: plants one change at a time, runs a check, restores, prints rc + the report's key rows.
+W=/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a2fe366999ee7848d
+S=/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad
+R=$W/documents/evidence/T-0035/verifier/rv
+cd $W
+mkdir -p $S/neg_orig
+for f in pubspec.lock MODULE.bazel.lock third_party/flow_builder/LICENSE third_party/flow_builder/lib/flow_builder.dart utility/mc_feature_flow/BUILD.bazel utility/mc_feature_flow/pubspec.yaml tool/bazel/defs.bzl; do
+  mkdir -p "$S/neg_orig/$(dirname $f)"; cp "$f" "$S/neg_orig/$f"
+done
+restore() {
+  for f in pubspec.lock MODULE.bazel.lock third_party/flow_builder/LICENSE third_party/flow_builder/lib/flow_builder.dart utility/mc_feature_flow/BUILD.bazel utility/mc_feature_flow/pubspec.yaml tool/bazel/defs.bzl; do
+    cp "$S/neg_orig/$f" "$f"
+  done
+  rm -f utility/mc_feature_flow/BUILD feature/zz_verifier_plant.bzl
+}
+run() {  # run <name> <check> : runs check after plant
+  local name=$1 check=$2
+  tool/checks/$check > "$R/neg-$name.md" 2>&1; local rc=$?
+  restore
+  echo "== $name ($check) rc=$rc"
+  grep -E "^\| " "$R/neg-$name.md" | grep -v -E "\| (sha256 matches|byte-equal|none|0|identical|equal) \|" | grep -v "^| Check" | grep -v "^|---"
+  grep -E "\*\*(PASS|FAIL)" "$R/neg-$name.md"
+}
+P=T-0035-AC4_provenance.sh
+D=T-0035-AC4_lock_delta.sh
+
+# --- evergreen: a post-merge main whose lock moved for another reason must PASS
+/usr/bin/python3 -I - pubspec.lock <<'EOF'
+import sys
+p = sys.argv[1]; s = open(p).read()
+a = 'version: "17.5.0"'   # go_router
+assert s.count(a) == 1
+open(p, 'w').write(s.replace(a, 'version: "17.5.1"'))
+EOF
+printf '\n' >> MODULE.bazel.lock
+run evergreen-lock-moved-elsewhere $P
+
+# --- evergreen negatives
+cp $S/mut/M6_intercepted_pop_null.dart third_party/flow_builder/lib/flow_builder.dart
+run evergreen-lib-edited $P
+printf 'x' >> third_party/flow_builder/LICENSE
+run evergreen-license $P
+/usr/bin/python3 -I - pubspec.lock <<'EOF'
+import sys
+p = sys.argv[1]; s = open(p).read()
+a = '  flutter:\n    dependency: transitive\n    description: flutter\n'
+assert s.count(a) == 1
+blk = ('  flow_builder:\n    dependency: transitive\n    description:\n      name: flow_builder\n'
+       '      sha256: "9e66aa7209e9a31c347bb316abf191d2300db41cd6b7254f89abd4e76d9b3f8d"\n'
+       '      url: "https://pub.dev"\n    source: hosted\n    version: "0.1.0"\n')
+open(p, 'w').write(s.replace(a, blk + a))
+EOF
+run evergreen-lock-entry-back $P
+
+# --- wider scan
+printf '\n_X = ["@pub_deps//:flow_builder"]\n' >> tool/bazel/defs.bzl
+run scan-bzl $P
+printf 'x = @pub_deps//:flow_builder\n' > feature/zz_verifier_plant.bzl
+run scan-bzl-unquoted $P
+printf 'filegroup(name = "x", srcs = [], tags = [pub_deps//:flow_builder])\n' > utility/mc_feature_flow/BUILD
+run scan-BUILD-unquoted $P
+sed -i '' 's#^    "//third_party/flow_builder",#    @pub_deps//:flow_builder,#' utility/mc_feature_flow/BUILD.bazel
+run scan-BUILD.bazel-unquoted $P
+/usr/bin/python3 -I - utility/mc_feature_flow/pubspec.yaml <<'EOF'
+import sys
+p = sys.argv[1]; s = open(p).read()
+a = '  flow_builder: ^0.1.0\n'
+assert s.count(a) == 1
+open(p, 'w').write(s.replace(a, '  flow_builder:\n    hosted: https://pub.dev\n    version: ^0.1.0\n'))
+EOF
+run scan-pubspec-hosted-block $P
+/usr/bin/python3 -I - utility/mc_feature_flow/pubspec.yaml <<'EOF'
+import sys
+p = sys.argv[1]; s = open(p).read()
+a = '  flow_builder: ^0.1.0\n'
+open(p, 'w').write(s.replace(a, '  flow_builder: {hosted: https://pub.dev, version: ^0.1.0}\n'))
+EOF
+run scan-pubspec-hosted-inline $P
+
+# --- lock delta negatives
+/usr/bin/python3 -I - pubspec.lock <<'EOF'
+import sys
+p = sys.argv[1]; s = open(p).read()
+open(p, 'w').write(s.replace('version: "17.5.0"', 'version: "17.5.1"'))
+EOF
+run delta-pubspec-lock-other-version $D
+/usr/bin/python3 -I - MODULE.bazel.lock <<'EOF'
+import json, sys
+p = sys.argv[1]; d = json.load(open(p))
+specs = d["moduleExtensions"]["@@ai_rules_flutter+//flutter:extensions.bzl%flutter"]["general"]["generatedRepoSpecs"]
+specs["pub_deps__go_router"]["attributes"]["version"] = "17.5.1"
+open(p, 'w').write(json.dumps(d, indent=2) + "\n")
+EOF
+run delta-module-lock-other-version $D
+/usr/bin/python3 -I - MODULE.bazel.lock <<'EOF'
+import json, sys
+p = sys.argv[1]; d = json.load(open(p))
+specs = d["moduleExtensions"]["@@ai_rules_flutter+//flutter:extensions.bzl%flutter"]["general"]["generatedRepoSpecs"]
+del specs["pub_deps__go_router"]
+open(p, 'w').write(json.dumps(d, indent=2) + "\n")
+EOF
+run delta-module-lock-repo-removed $D

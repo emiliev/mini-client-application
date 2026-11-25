@@ -1,0 +1,17 @@
+# Vendored flow_builder 0.1.0 (T-0035); see VENDORED.md for the diff.
+name: flow_builder
+description: Flutter Flows made easy! A Flutter package which simplifies flows with a flexible, declarative API.
+repository: https://github.com/felangel/flow_builder
+homepage: https://github.com/felangel/flow_builder
+topics: [navigation, routing]
+
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter

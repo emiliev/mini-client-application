@@ -1,0 +1,9 @@
+  PASS  T-0035-AC2 baseline: the framework answers the script as recorded, with no flow ever mounted
+  PASS  T-0035-AC1 control: a link reaches the router with no flow mounted
+  PASS  T-0035-AC1 a deep link reaches the router while a FeatureFlow is mounted, query and fragment intact, and is answered true
+  PASS  T-0035-AC1 the legacy pushRoute message also reaches the router while a flow is mounted
+  PASS  T-0035-AC2 after the flow is disposed, the replies equal the framework's own
+  FAIL  T-0035-AC2 a flow nested inside another flow keeps links and popRoute working
+  FAIL  T-0035-AC2 popRoute pops a pushed flow page before the router sees it (answered true), and falls through at the flow root
+  PASS  T-0035-AC2 an unknown navigation method is answered like the framework does (false) while a flow is mounted
+4 passed, 2 failed

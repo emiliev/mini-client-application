@@ -25,6 +25,7 @@ workspace:
   - spike/greeting
   - spike/hello
   - spike/retrofit_api
+  - third_party/flow_builder
   - tool/l10n_check
   - tool/mc_arch_check
   - utility/mc_analysis

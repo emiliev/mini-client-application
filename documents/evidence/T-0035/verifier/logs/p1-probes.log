@@ -1,0 +1,91 @@
+INFO: Invocation ID: c4387a9d-b335-4c6f-a2f0-53218a1bf723
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 2 targets (1 packages loaded, 0 targets configured)
+Analyzing: 2 targets (1 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (1 packages loaded, 9 targets configured, 9 aspect applications).
+INFO: From Testing //utility/mc_feature_flow:feature_flow_test:
+==================== Test output for //utility/mc_feature_flow:feature_flow_test:
+  PASS  T-0022-AC1 no flowInitializer renders the first page
+  PASS  T-0022-AC2 a throwing initializer shows Retry and records
+  PASS  T-0022-AC3 complete(r) calls onComplete once with r
+  PASS  T-0022-AC4 two flows in an IndexedStack own their controllers
+  PASS  T-0022-AC5 iOS edge swipe pops a named page and reverts state
+  PASS  T-0022-AC5 an in-place update then an edge swipe keeps state and pages in step
+  PASS  T-0022-AC5 a filter changed on the list survives push and edge swipe
+  PASS  T-0022-AC5 two pushes then two edge swipes restore each level
+  PASS  T-0022-AC6 an unregistered root import fails naming its type
+Error while creating _Other
+Stack trace:
+ #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
+#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
+#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
+#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
+#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:380:61)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
+#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:177:22)
+<asynchronous suspension>
+#12     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#13     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#14     OutstandingWork.complete (package:test_api/hooks.dart:77:3)
+<asynchronous suspension>
+#15     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#16     main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:397:5)
+<asynchronous suspension>
+#17     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#18     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#19     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+  PASS  T-0022-AC6 debugResolveAll names both types
+  PASS  VPROBE1 list filter foo, push, swipe back keeps foo
+  PASS  VPROBE2 in-place change inside detail, back gives pre-push
+  PASS  VPROBE3 push push back back restores each level, re-push ok
+  PASS  VPROBE4 same-depth page replace, then swipe: pages match state
+
+14 passed
+================================================================================
+[82 / 83] 2 / 2 tests; Testing //utility/mc_feature_flow:verifier_probe_test; 0s darwin-sandbox
+INFO: From Testing //utility/mc_feature_flow:verifier_probe_test:
+==================== Test output for //utility/mc_feature_flow:verifier_probe_test:
+VPROBE baseline [[link, true, /a/b?q=1&r=x%20y#frag], [ioslink, true, miniclient://app/characters/6?tab=info#bio], [legacy, true, /legacy?z=2#f], [pop-handled, true, 1, 0], [pop-unhandled, false, 2, 1], [unknown, false], [withState, true, /s, st]]
+  PASS  BASELINE framework handler, no flow ever mounted
+VPROBE goBaseline [[go-link, true, /items/7?tab=info#sec, 1], [go-ios, true, miniclient://app/items/8?x=1#y], [go-pop, true, /]]
+  PASS  BASELINE go_router, no flow ever mounted
+VPROBE1 replies true true locations [/, /a/b?q=1&r=x%20y#frag, /second?x=2]
+  PASS  VPROBE1 query+fragment, two links in a row, link with inner page open
+VPROBE2 after [[link, true, /a/b?q=1&r=x%20y#frag], [ioslink, true, miniclient://app/characters/6?tab=info#bio], [legacy, true, /legacy?z=2#f], [pop-handled, true, 1, 0], [pop-unhandled, false, 2, 1], [unknown, false], [withState, true, /s, null]]
+  PASS  VPROBE2 after dispose: identical to the no-flow baseline
+VPROBE3 replies null false pops 1 systemPops 1 exception null
+VPROBE3 inner root after fall-through: 0
+  PASS  VPROBE3 nested: innermost first, then falls through while mounted
+VPROBE3b after pop1: inner detail=1 outer detail=1 pops=0
+VPROBE3b after pop2: inner detail=0 outer detail=0 pops=0
+  PASS  VPROBE3b nested, both levels pushed (observation)
+  PASS  VPROBE4 two sibling flows, dispose the second, channel still works
+VPROBE5 after /flow: /flow shown=[go detail]
+VPROBE5 [[go-link, true, /items/7?tab=info#sec, 1], [go-ios, true, miniclient://app/items/8?x=1#y], [go-pop, true, /]]
+  PASS  VPROBE5 go_router: flow route with inner page open, links reach go_router
+
+8 passed
+================================================================================
+INFO: Found 2 test targets...
+INFO: Elapsed time: 1.160s, Critical Path: 0.98s
+INFO: 12 processes: 69 action cache hit, 4 internal, 4 darwin-sandbox, 4 worker.
+INFO: Build completed successfully, 12 total actions
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 0.9s
+//utility/mc_feature_flow:verifier_probe_test                            PASSED in 0.9s
+
+Executed 2 out of 2 tests: 2 tests pass.

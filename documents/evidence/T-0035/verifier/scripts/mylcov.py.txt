@@ -1,0 +1,32 @@
+"""Verifier's own LCOV union: line hit if hit in any test target. Usage: mylcov.py <pkg-prefix> files..."""
+import re
+import sys
+
+prefix = sys.argv[1]
+lines = {}
+for path in sys.argv[2:]:
+    sf = None
+    for raw in open(path):
+        raw = raw.strip()
+        if raw.startswith('SF:'):
+            sf = raw[3:]
+            m = re.match(r'(package:' + re.escape(prefix) + r'/.*)$', sf)
+            sf = m.group(1) if m else None
+        elif raw.startswith('DA:') and sf:
+            n, h = raw[3:].split(',')[:2]
+            key = (sf, int(n))
+            lines[key] = lines.get(key, 0) or int(h)
+            if int(h):
+                lines[key] = 1
+        elif raw == 'end_of_record':
+            sf = None
+files = sorted({f for f, _ in lines})
+th = tt = 0
+for f in files:
+    hit = sum(1 for (g, _), h in lines.items() if g == f and h)
+    tot = sum(1 for (g, _) in lines if g == f)
+    th += hit
+    tt += tot
+    miss = sorted(n for (g, n), h in lines.items() if g == f and not h)
+    print(f'{f}: {hit}/{tot} missed={miss}')
+print(f'TOTAL {prefix}: {th}/{tt} = {100.0 * th / tt:.1f} %' if tt else 'NO DATA')

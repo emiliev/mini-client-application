@@ -1,0 +1,106 @@
+INFO: Invocation ID: 380fee13-0224-4cf1-9ec9-ededc19e44f3
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (0 packages loaded, 0 targets configured).
+INFO: From Testing //utility/mc_feature_flow:framework_navigation_baseline_test:
+==================== Test output for //utility/mc_feature_flow:framework_navigation_baseline_test:
+  PASS  T-0035-AC2 baseline: the framework answers the script as recorded, with no flow ever mounted
+  PASS  T-0035-AC1 control: a link reaches the router with no flow mounted
+
+2 passed
+================================================================================
+FAIL: //utility/mc_feature_flow:flow_navigation_channel_test (Exit 1) (see /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/flow_navigation_channel_test/test.log)
+INFO: From Testing //utility/mc_feature_flow:flow_navigation_channel_test:
+==================== Test output for //utility/mc_feature_flow:flow_navigation_channel_test:
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <null>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/flow_navigation_channel_test.dart:42:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///utility/mc_feature_flow/test/flow_navigation_channel_test.dart line 42
+The test description was:
+  T-0035-AC1 a deep link reaches the router while a FeatureFlow is mounted, query and fragment
+  intact, and is answered true
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0035-AC1 a deep link reaches the router while a FeatureFlow is mounted, query and fragment intact, and is answered true
+        String: Test failed. See exception logs above.
+        The test description was: T-0035-AC1 a deep link reaches the router while a FeatureFlow is mounted, query and fragment intact, and is answered true
+
+  PASS  T-0035-AC1 the legacy pushRoute message also reaches the router while a flow is mounted
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <null>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/flow_navigation_channel_test.dart:65:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///utility/mc_feature_flow/test/flow_navigation_channel_test.dart line 65
+The test description was:
+  T-0035-AC2 after the flow is disposed, the replies equal the framework's own
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0035-AC2 after the flow is disposed, the replies equal the framework's own
+        String: Test failed. See exception logs above.
+        The test description was: T-0035-AC2 after the flow is disposed, the replies equal the framework's own
+
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <true>
+  Actual: <null>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/flow_navigation_channel_test.dart:83:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///utility/mc_feature_flow/test/flow_navigation_channel_test.dart line 83
+The test description was:
+  T-0035-AC2 a flow nested inside another flow keeps links and popRoute working
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0035-AC2 a flow nested inside another flow keeps links and popRoute working
+        String: Test failed. See exception logs above.
+        The test description was: T-0035-AC2 a flow nested inside another flow keeps links and popRoute working
+
+  PASS  T-0035-AC2 popRoute pops a pushed flow page before the router sees it (answered true), and falls through at the flow root
+  PASS  T-0035-AC2 an unknown navigation method is answered like the framework does (false) while a flow is mounted
+
+3 passed, 3 failed
+================================================================================
+INFO: Found 2 test targets...
+INFO: Elapsed time: 0.869s, Critical Path: 0.69s
+INFO: 11 processes: 4 action cache hit, 5 disk cache hit, 4 internal, 2 darwin-sandbox.
+INFO: Build completed, 1 test FAILED, 11 total actions
+//utility/mc_feature_flow:framework_navigation_baseline_test             PASSED in 0.5s
+//utility/mc_feature_flow:flow_navigation_channel_test                   FAILED in 0.7s
+  /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/flow_navigation_channel_test/test.log
+
+Executed 2 out of 2 tests: 1 test passes and 1 fails locally.

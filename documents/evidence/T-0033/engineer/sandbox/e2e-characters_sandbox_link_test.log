@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0033 engineer on mc-T-0033-engineer-97144 (ADFAD89E-C387-47B8-9B63-7D55BE401A1A)
+# e2e_ios.sh: T-0033 engineer on mc-T-0033-engineer-17624 (3214CE20-BE5F-4CDA-8A0E-24536541C43F)
 # cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox/app/sandbox/universe_sandbox
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.RpuLrK/screenshots/1-characters_sandbox_link_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_sandbox_link_test.dart -d ADFAD89E-C387-47B8-9B63-7D55BE401A1A
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.IKDi96/screenshots/2-characters_sandbox_link_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_sandbox_link_test.dart -d 3214CE20-BE5F-4CDA-8A0E-24536541C43F
 
 Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox`...
 Downloading packages...
@@ -20,10 +20,10 @@ Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mi
 11 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           15.6s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64076/DYFRw9Zyd7c=/
-VMServiceFlutterDriver: Isolate found with number: 5447536335378659
-VMServiceFlutterDriver: Isolate 5447536335378659 is runnable.
+Xcode build done.                                            9.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:49776/ZAR3-g5_0iU=/
+VMServiceFlutterDriver: Isolate found with number: 1090780169070855
+VMServiceFlutterDriver: Isolate 1090780169070855 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC3 a sandbox start link opens that character on the simulator
@@ -35,7 +35,7 @@ flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
 flutter: 00:01 +1: (tearDownAll)
 flutter: 00:01 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.RpuLrK/screenshots/1-characters_sandbox_link_test/02_sandbox_start_link.png (222291)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.IKDi96/screenshots/2-characters_sandbox_link_test/02_sandbox_start_link.png (222291)
 All tests passed.
 
 # exit code: 0

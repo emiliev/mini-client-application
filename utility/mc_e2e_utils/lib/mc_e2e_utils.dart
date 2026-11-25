@@ -1,5 +1,6 @@
 import 'dart:ui' show PlatformDispatcher;
 
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -65,3 +66,18 @@ Future<void> shot(
   await tester.pump();
   await binding.takeScreenshot(name);
 }
+
+/// Sends [location] to the running app the way iOS delivers a link to a
+/// running app: a `pushRouteInformation` call on `flutter/navigation`
+/// (`simctl openurl` shows a prompt no script can answer, F-0020).
+Future<void> pushLink(WidgetTester tester, String location) =>
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', {
+          'location': location,
+          'state': null,
+        }),
+      ),
+      (_) {},
+    );

@@ -11,7 +11,7 @@
 #   6. run //tool/l10n_check:bin over the repo
 #   7. coverage of characters_list's hand-written lib/ >= MC_COVERAGE_MIN
 #      (default 90, ADR-0010): `bazel coverage //feature/...`, then the union
-#      of the per-target LCOV (documents/evidence/T-0032/engineer/merge_lcov.py)
+#      of the per-target LCOV (tool/checks/merge_lcov.py)
 #   tool/checks/T-0034-AC5_gates.sh [--out FILE] [--role R]
 # MC_BAZEL_STARTUP holds extra Bazel startup options (e.g. --output_base=...).
 set -uo pipefail
@@ -56,7 +56,7 @@ coverage() {
   bzw coverage $(printf '//%s/... ' "${PKGS[@]}") || return 1
   for pkg in "${PKGS[@]}"; do
     echo "== $pkg" >> "$work/coverage.txt"
-    /usr/bin/python3 -I "$REPO/documents/evidence/T-0032/engineer/merge_lcov.py" \
+    /usr/bin/python3 -I "$REPO/tool/checks/merge_lcov.py" \
       "$(bzw info output_path 2>/dev/null)" "$pkg" "$MIN" >> "$work/coverage.txt" || {
       if [[ " $EXEMPT " == *" $pkg "* ]]; then echo "UNDER $MIN (exempt, pre-existing): $pkg" >> "$work/coverage.txt"
       else echo "UNDER $MIN: $pkg" >> "$work/coverage.txt"; rc=1; fi; }

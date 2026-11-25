@@ -1,0 +1,362 @@
+INFO: Invocation ID: d9587498-0a2f-42b8-9b75-6a046f55e7de
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --collect_code_coverage and --instrumentation_filter have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 60 targets (4 packages loaded, 0 targets configured)
+Analyzing: 60 targets (4 packages loaded, 0 targets configured)
+
+Analyzing: 60 targets (326 packages loaded, 18476 targets configured, 1181 aspect applications)
+[7,691 / 8,214] Testing //utility/mc_feature_flow:framework_navigation_baseline_test; 0s darwin-sandbox ... (12 actions, 8 running)
+INFO: Analyzed 60 targets (326 packages loaded, 18488 targets configured, 1246 aspect applications).
+INFO: From Testing //feature/characters/characters_list:contract_test:
+==================== Test output for //feature/characters/characters_list:contract_test:
+  PASS  T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: the CONTRACT.md example parses field by field
+  PASS  T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: every served item round-trips byte for byte
+  PASS  T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: the mapper keeps id, name and image
+  PASS  T-0032-AC6 CharacterDto against the fixture JSON T-0032-AC6: an unknown variant is a FormatException
+
+4 passed
+================================================================================
+INFO: From Testing //app/wiring/app_core:links_and_hooks_test:
+==================== Test output for //app/wiring/app_core:links_and_hooks_test:
+  PASS  normalise keeps path, query and fragment of a miniclient link
+  PASS  T-0021-AC4 normalise sends links for another host or scheme to /
+  PASS  while attached it consumes pushed links, newest wins
+  PASS  the cold-start link is the platform default route
+  PASS  after detach it no longer consumes links
+  PASS  the e2e start link is read once and offered as a held link
+  PASS  T-0021-AC3 an unreadable e2e start link file is ignored
+  PASS  error hooks forward framework and async errors to Monitoring
+  PASS  error hooks leave async errors unhandled before boot
+
+9 passed
+================================================================================
+INFO: From Testing //utility/mc_feature_flow:framework_navigation_baseline_test:
+==================== Test output for //utility/mc_feature_flow:framework_navigation_baseline_test:
+  PASS  T-0035-AC2 baseline: the framework answers the script as recorded, with no flow ever mounted
+  PASS  T-0035-AC1 control: a link reaches the router with no flow mounted
+
+2 passed
+================================================================================
+INFO: From Testing //app/wiring/app_core:router_ref_and_scheme_test:
+==================== Test output for //app/wiring/app_core:router_ref_and_scheme_test:
+  PASS  T-0033-AC1 RouterRef hands out the attached router, then none after detach
+Error while creating GoRouter
+Stack trace:
+ #0      RouterRef.router (package:app_core/src/router/router_ref.dart:15:8)
+#1      RouterDIInitializer._init.<anonymous closure>.<anonymous closure> (package:app_core/src/router/router_ref.dart:38:49)
+#2      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#3      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#4      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#5      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#6      _GetItContainer.call (package:mc_di/src/di_container.dart:231:18)
+#7      main.<anonymous closure>.<anonymous closure> (org-dartlang-app:///app/wiring/app_core/test/router_ref_and_scheme_test.dart:45:29)
+#8      Throws.matchAsync (package:matcher/src/expect/throws_matcher.dart:85:37)
+#9      _expect (package:matcher/src/expect/expect.dart:137:26)
+#10     expect (package:matcher/src/expect/expect.dart:65:3)
+#11     expect (package:flutter_test/src/widget_tester.dart:473:18)
+#12     main.<anonymous closure> (org-dartlang-app:///app/wiring/app_core/test/router_ref_and_scheme_test.dart:45:5)
+<asynchronous suspension>
+#13     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#15     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+  PASS  T-0033-AC1 RouterDIInitializer resolves whatever router is attached now, never a cached one
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC1 McApp attaches its router and detaches it when it is disposed
+  PASS  T-0033-AC3 a link scheme accepts only its own scheme and host
+  PASS  T-0033-AC3 PendingLinks with a scheme keeps its cold-start and pushed links, and drops the main app's
+
+5 passed
+================================================================================
+INFO: From Testing //utility/mc_feature_flow:flow_navigation_channel_test:
+==================== Test output for //utility/mc_feature_flow:flow_navigation_channel_test:
+  PASS  T-0035-AC1 a deep link reaches the router while a FeatureFlow is mounted, query and fragment intact, and is answered true
+  PASS  T-0035-AC1 the legacy pushRoute message also reaches the router while a flow is mounted
+  PASS  T-0035-AC2 after the flow is disposed, the replies equal the framework's own
+  PASS  T-0035-AC2 a flow nested inside another flow keeps links and popRoute working
+  PASS  T-0035-AC2 popRoute pops a pushed flow page before the router sees it (answered true), and falls through at the flow root
+  PASS  T-0035-AC2 an unknown navigation method is answered like the framework does (false) while a flow is mounted
+
+6 passed
+================================================================================
+INFO: From Testing //feature/characters/characters_list:architecture_test:
+==================== Test output for //feature/characters/characters_list:architecture_test:
+00:00 +0: loading feature/characters/characters_list/test/architecture/architecture_test.dart
+00:00 +0: T-0032-AC6 the barrel exports only the flow, the navigator and its argument type, each with show
+00:00 +1: T-0032-AC6 every file a generator reads imports no Flutter (R15)
+00:00 +2: T-0032-AC6 the checks read both quote styles
+00:00 +3: All tests passed!
+================================================================================
+INFO: From Testing //app/wiring/app_core:boot_test:
+==================== Test output for //app/wiring/app_core:boot_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[error] Bad state: wiring exploded
+#0      _flaky.<anonymous closure> (org-dartlang-app:///app/wiring/app_core/test/boot_test.dart:27:7)
+#1      McDIInitializer.init (package:mc_di/src/di_initializer.dart:19:51)
+#2      initializeDIContainer (package:mc_di/src/di_container.dart:68:25)
+<asynchronous suspension>
+#3      BootBloc._begin.<anonymous closure> (package:app_core/src/boot/boot_bloc.dart:126:7)
+<asynchronous suspension>
+
+[debug] BootBloc: _BootThrew BootBooting -> BootFailed
+[debug] BootBloc: BootRetried BootFailed -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC1 a failing root initializer shows the error and Retry succeeds on the second attempt
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootTimeoutElapsed BootBooting -> BootTimedOut
+[debug] BootBloc: BootRetried BootTimedOut -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC2 boot taking longer than 10 s shows the timeout state, and Retry abandons the attempt and starts a fresh one
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootTimeoutElapsed BootBooting -> BootTimedOut
+[debug] BootBloc: BootRetried BootTimedOut -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC2 Retry escapes a never-completing root initializer: the hung mc_di run is abandoned and a fresh one boots (P-028)
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootTimeoutElapsed BootBooting -> BootTimedOut
+[debug] BootBloc: _BootSucceeded BootTimedOut -> BootReady
+  PASS  T-0021-AC2 a boot that succeeds after the timeout showed goes to ready
+  PASS  T-0021-AC1 a boot that fails after the timeout showed shows the error and records it to monitoring
+  PASS  T-0021-AC1 BootBloc (a McBloc) discards a failed run, so Retry runs the task again, and the failure is recorded to monitoring
+  PASS  the root list registers every root type once, with the backend behind Dio
+  PASS  T-0021-AC1 an unknown backend.scenario fails boot with a clear error
+  PASS  a configured latency becomes a constant backend latency
+  PASS  appStorageDirectory sits in the data container
+  PASS  AppLocations
+
+11 passed
+================================================================================
+[14,634 / 14,680] 8 / 17 tests; Testing //utility/mc_feature_flow:feature_flow_test; 1s darwin-sandbox ... (7 actions running)
+INFO: From Testing //utility/mc_feature_flow:feature_flow_test:
+==================== Test output for //utility/mc_feature_flow:feature_flow_test:
+  PASS  T-0022-AC1 no flowInitializer renders the first page
+  PASS  T-0022-AC2 a throwing initializer shows Retry and records
+  PASS  T-0022-AC3 complete(r) calls onComplete once with r
+  PASS  T-0022-AC4 two flows in an IndexedStack own their controllers
+  PASS  T-0022-AC5 iOS edge swipe pops a named page and reverts state
+  PASS  T-0022-AC5 an in-place update then an edge swipe keeps state and pages in step
+  PASS  T-0022-AC5 a filter changed on the list survives push and edge swipe
+  PASS  T-0022-AC5 two pushes then two edge swipes restore each level
+  PASS  T-0022-AC6 an unregistered root import fails naming its type
+Error while creating _Other
+Stack trace:
+ #0      throwIfNot (package:get_it/get_it_impl.dart:14:19)
+#1      _GetItImplementation._findRegistrationByNameAndType (package:get_it/get_it_impl.dart:618:5)
+#2      _GetItImplementation._get (package:get_it/get_it_impl.dart:676:11)
+#3      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#4      _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#5      RecordingGetIt.call (package:mc_di/src/recording_get_it.dart:374:16)
+#6      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:380:61)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:229:37)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     RecordingGetIt._sync.<anonymous closure> (package:mc_di/src/recording_get_it.dart:51:26)
+#11     ChildDIContainer.debugResolveAll (package:mc_di/src/di_container.dart:177:22)
+<asynchronous suspension>
+#12     Throws._matchFuture (package:matcher/src/expect/throws_matcher.dart:103:19)
+<asynchronous suspension>
+#13     _expect.<anonymous closure> (package:matcher/src/expect/expect.dart:153:17)
+<asynchronous suspension>
+#14     OutstandingWork.complete (package:test_api/hooks.dart:77:3)
+<asynchronous suspension>
+#15     expectLater.<anonymous closure> (package:flutter_test/src/widget_tester.dart:508:19)
+<asynchronous suspension>
+#16     main.<anonymous closure> (org-dartlang-app:///utility/mc_feature_flow/test/feature_flow_test.dart:397:5)
+<asynchronous suspension>
+#17     testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#18     TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#19     TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+  PASS  T-0022-AC6 debugResolveAll names both types
+
+10 passed
+================================================================================
+INFO: From Testing //utility/mc_feature_flow:flow_kit_test:
+==================== Test output for //utility/mc_feature_flow:flow_kit_test:
+  PASS  T-0034-AC1 context.di inside BlocProvider.create does not throw and creates the bloc once
+  PASS  T-0034-AC1 context.di registers no dependency on the scope and a new scope does not recreate the bloc
+  PASS  T-0034-AC2 provide: resolves inside the flow and nowhere outside it
+  PASS  T-0034-AC2 localizationsDelegates resolve the flow strings in en and de
+  PASS  T-0034-AC2 without localizationsDelegates the host decides
+  PASS  T-0034-AC6 flowStateOf reads the flow state through the controller
+  PASS  T-0034-AC6 flowStateOf fails on another state type and outside a flow
+  PASS  T-0034-AC2 provide: is registered before flowInitializer runs
+  PASS  T-0034-AC2 a host MaterialLocalizations override survives inside the flow, and the flow still adds its own strings
+  PASS  T-0034-AC2 a host without core or Flutter delegates gets them from the flow
+  PASS  T-0034-AC2 changing localizationsDelegates keeps the pushed page and its state
+  PASS  T-0034-AC5 the flow root page can leave the flow T-0034-AC5 present when pushed, and tapping it pops the flow
+  PASS  T-0034-AC5 the flow root page can leave the flow T-0034-AC5 absent when the flow is the root
+  PASS  T-0034-AC5 the flow root page can leave the flow T-0034-AC5 a page pushed inside the flow keeps the automatic back button, which pops that page only
+  PASS  T-0034-AC1 FlowScope.of outside a flow names the problem
+  PASS  T-0034-AC6 flowStateOf fails when the scope has no controller
+
+16 passed
+================================================================================
+INFO: From Testing //feature/characters/characters_list:flow_scope_test:
+==================== Test output for //feature/characters/characters_list:flow_scope_test:
+  PASS  T-0032-AC6 the flow's container resolves every registration
+  PASS  T-0032-AC1 a new initialTeamId builds a new flow that lists that team
+  PASS  T-0032-AC6 a root without a forwarded type fails naming it
+
+3 passed
+================================================================================
+INFO: From Testing //feature/characters/characters_list:golden_test:
+==================== Test output for //feature/characters/characters_list:golden_test:
+  PASS  T-0032-AC1 golden: the first page loaded
+  PASS  T-0032-AC2 golden: the first page failed
+  PASS  golden: the empty catalogue
+  PASS  T-0032-AC3 golden: the preview
+
+4 passed
+================================================================================
+[14,638 / 14,680] 11 / 17 tests; DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 2s disk-cache, worker ... (3 actions running)
+INFO: From Testing //feature/characters/characters_list:bdd_test:
+==================== Test output for //feature/characters/characters_list:bdd_test:
+  PASS  characters_list_paging Characters list paging Scrolling to the end of the first page loads the second once [T-0032-AC5]
+  PASS  characters_list_paging Characters list paging At the last page no further page is requested [T-0032-AC5]
+  PASS  characters_list_paging Characters list paging An empty catalogue says so
+  PASS  characters_list_paging Characters list paging Pulling down reloads the first page
+  PASS  characters_list Browse characters The first page lists 30 characters in name order [T-0032-AC1]
+  PASS  characters_list Browse characters A failed first page explains the problem and retries ('server_error', 'The server had a problem. Please try again later.') [T-0032-AC2]
+  PASS  characters_list Browse characters A failed first page explains the problem and retries ('timeout', 'The request took too long. Please try again.') [T-0032-AC2]
+  PASS  characters_list Browse characters A failed first page explains the problem and retries ('offline', 'No connection. Check your network and try again.') [T-0032-AC2]
+  PASS  characters_list Browse characters A failed first page explains the problem and retries ('malformed', 'Something went wrong.') [T-0032-AC2]
+  PASS  characters_list Browse characters A failed second page keeps the loaded characters and offers Retry [T-0032-AC2]
+  PASS  characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3]
+  PASS  characters_list Browse characters The full profile hands over to the app exactly once [T-0032-AC3]
+  PASS  characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]
+  PASS  characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]
+  PASS  characters_list Browse characters In German the title and the preview button come from the German strings [T-0032-AC4]
+  PASS  characters_list Browse characters The pseudo-locale renders the list and the preview without overflow [T-0032-AC4]
+
+16 passed
+================================================================================
+[14,639 / 14,680] 12 / 17 tests; DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 3s disk-cache, worker ... (2 actions running)
+[14,646 / 14,680] 12 / 17 tests; [Prepa] Checking Dart library imports of @@//app/wiring/universe_wiring:universe_wiring ... (2 actions, 0 running)
+INFO: From Testing //app/sandbox/universe_sandbox:universe_sandbox_router_test:
+==================== Test output for //app/sandbox/universe_sandbox:universe_sandbox_router_test:
+  PASS  T-0033-AC3 the sandbox opens on the characters list
+  PASS  T-0033-AC3 a route of another group shows the stub page
+
+2 passed
+================================================================================
+INFO: From Testing //app/wiring/universe_wiring:routes_test:
+==================== Test output for //app/wiring/universe_wiring:routes_test:
+  PASS  T-0033-AC1 the navigator opens CharacterDetailsRoute and the placeholder shows the id
+  PASS  T-0033-AC1 the navigator pushes: Back returns to the list and the router keeps the list as its location
+  PASS  T-0033-AC1 the navigator pushes to the live router after the router was replaced, not to the one it first saw
+  PASS  T-0033-AC1 the wiring initializer resolves the route targets and the navigator
+  PASS  T-0033-AC2 every AppLocations entry equals its typed route
+
+5 passed
+================================================================================
+INFO: From Testing //app/sandbox/universe_sandbox:universe_sandbox_links_test:
+==================== Test output for //app/sandbox/universe_sandbox:universe_sandbox_links_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a cold-start link of the sandbox scheme opens its route
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a cold-start link of the main app scheme is not the sandbox's: it opens the list
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a sandbox link that arrives during boot is held and opened once boot is ready
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a foreign link that arrives after boot is ignored the same way as a cold-start one
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a sandbox link that arrives after boot opens its route
+
+5 passed
+================================================================================
+[14,683 / 14,685] 16 / 17 tests; Testing //app/mini_client:app_test; 1s darwin-sandbox ... (2 actions running)
+INFO: From Testing //app/mini_client:links_after_flow_test:
+==================== Test output for //app/mini_client:links_after_flow_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC4 a link sent to the running app opens its route after the characters list (a flow) is shown
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+VERIFIER before-flow link shown=1 grid=1 after-flow link shown=1 details6-texts=2
+  PASS  VERIFIER R1 a link after the characters flow mounted
+
+2 passed
+================================================================================
+INFO: From Testing //app/mini_client:app_test:
+==================== Test output for //app/mini_client:app_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a cold-start link held during boot shows its route once boot succeeds, and no route builder or redirect ran before ready
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a link pushed while boot is held wins and is not seen by the boot navigator
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[error] Bad state: first boot fails
+#0      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///app/mini_client/test/app_test.dart:178:13)
+#1      McDIInitializer.init (package:mc_di/src/di_initializer.dart:19:51)
+#2      initializeDIContainer (package:mc_di/src/di_container.dart:68:25)
+<asynchronous suspension>
+#3      BootBloc._begin.<anonymous closure> (package:app_core/src/boot/boot_bloc.dart:126:7)
+<asynchronous suspension>
+
+[debug] BootBloc: _BootThrew BootBooting -> BootFailed
+[debug] BootBloc: BootRetried BootFailed -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC5 with the same link and a failing first boot, Retry replays the link once and every root type is registered exactly once
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC3 a miniclient://app/placeholder link delivered on the platform navigation channel to the running app shows that route
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a link delivered between BootReady and the router's first frame is held and forwarded to go_router, not lost
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC3 a link for another host or scheme shows home, not its path
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  the home placeholder shows the bundled config env
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC4 the app boots with its own router wired for the navigators and the characters domain on the backend
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  an unknown path shows the not-found page
+  PASS  AppLocations match the typed routes
+  PASS  all 7 wirings are composed
+
+11 passed
+================================================================================
+INFO: Found 43 targets and 17 test targets...
+INFO: Elapsed time: 9.945s, Critical Path: 8.31s
+INFO: 181 processes: 14504 action cache hit, 41 disk cache hit, 116 internal, 17 darwin-sandbox, 7 worker.
+INFO: Build completed successfully, 181 total actions
+//app/mini_client:app_test                                               PASSED in 1.1s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.0s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 0.8s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.6s
+//app/wiring/app_core:boot_test                                          PASSED in 1.1s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.6s
+//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 0.8s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 0.7s
+//feature/characters/characters_list:architecture_test                   PASSED in 0.2s
+//feature/characters/characters_list:bdd_test                            PASSED in 2.6s
+//feature/characters/characters_list:contract_test                       PASSED in 0.5s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.1s
+//feature/characters/characters_list:golden_test                         PASSED in 1.3s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 1.4s
+//utility/mc_feature_flow:flow_kit_test                                  PASSED in 1.4s
+//utility/mc_feature_flow:flow_navigation_channel_test                   PASSED in 1.1s
+//utility/mc_feature_flow:framework_navigation_baseline_test             PASSED in 0.9s
+
+Executed 17 out of 17 tests: 17 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

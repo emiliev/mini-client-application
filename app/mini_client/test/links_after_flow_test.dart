@@ -39,16 +39,13 @@ void main() {
     storage.deleteSync(recursive: true);
   });
 
-  // R1 (the T-0033 re-verification): once a flow (flow_builder's FlowBuilder)
-  // is mounted, flow_builder 0.1.0 replaces the `flutter/navigation` handler
-  // and drops `pushRouteInformation`, so a link sent to the running app is
-  // lost. The kit fix is T-0035 (`mc_feature_flow`); un-skip this test (`skip: true` below) when it
-  // merges. Un-skipped today it fails on the last expectation.
+  // R1 (the T-0033 re-verification): flow_builder 0.1.0 replaced the
+  // `flutter/navigation` handler once a flow mounted and dropped
+  // `pushRouteInformation`, so a link sent to the running app was lost. The
+  // vendored flow_builder forwards it (T-0035).
   testWidgets(
     'T-0033-AC4 a link sent to the running app opens its route after the '
     'characters list (a flow) is shown',
-    // T-0035: flow_builder drops pushRouteInformation once a flow is mounted.
-    skip: true,
     (tester) async {
       final links = PendingLinks.install(tester.binding);
       addTearDown(links.detach);

@@ -1,0 +1,11 @@
+# T-0035-AC4: vendored flow_builder provenance
+
+| Check | Result | Required |
+|---|---|---|
+| pub.dev archive | sha256 matches | sha256 matches |
+| lib/ vs archive | DIFFERS in other files: Only in third_party/flow_builder/lib: extra.dart | archive + the patch |
+| LICENSE vs archive | byte-equal | byte-equal |
+| references to the hosted copy | none | none |
+| pubspec.lock vs origin/main minus the flow_builder block | identical | identical |
+
+**FAIL T-0035-AC4-provenance**

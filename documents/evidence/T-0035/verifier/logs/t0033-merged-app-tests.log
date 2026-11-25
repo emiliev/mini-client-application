@@ -1,0 +1,36 @@
+INFO: Invocation ID: 19eec186-5967-4d56-8ce6-13f823fc1402
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 59 targets (1 packages loaded, 0 targets configured)
+Analyzing: 59 targets (1 packages loaded, 3 targets configured)
+
+Analyzing: 59 targets (39 packages loaded, 4230 targets configured, 148 aspect applications)
+[858 / 913] Compiling Dart kernel module app/wiring/app_core/router_ref_and_scheme_test.flutter_entry.kmod; 0s disk-cache, worker ... (14 actions, 13 running)
+Analyzing: 59 targets (39 packages loaded, 4230 targets configured, 148 aspect applications)
+[908 / 919] 4 / 15 tests; Testing //utility/mc_feature_flow:flow_kit_test; 2s darwin-sandbox ... (11 actions, 9 running)
+INFO: Analyzed 59 targets (49 packages loaded, 6657 targets configured, 476 aspect applications).
+[2,557 / 2,560] 14 / 16 tests; Testing //feature/characters/characters_list:bdd_test; 1s darwin-sandbox ... (3 actions running)
+INFO: Found 43 targets and 16 test targets...
+INFO: Elapsed time: 4.680s, Critical Path: 3.22s
+INFO: 317 processes: 2237 action cache hit, 52 disk cache hit, 224 internal, 16 darwin-sandbox, 25 worker.
+INFO: Build completed successfully, 317 total actions
+//app/mini_client:app_test                                               PASSED in 1.3s
+//app/mini_client:links_after_flow_test                                  PASSED in 2.0s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 0.9s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.7s
+//app/wiring/app_core:boot_test                                          PASSED in 1.8s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.7s
+//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 0.7s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 0.9s
+//feature/characters/characters_list:architecture_test                   PASSED in 0.2s
+//feature/characters/characters_list:bdd_test                            PASSED in 2.3s
+//feature/characters/characters_list:contract_test                       PASSED in 1.0s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.2s
+//feature/characters/characters_list:golden_test                         PASSED in 1.7s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 2.0s
+//utility/mc_feature_flow:flow_kit_test                                  PASSED in 2.3s
+//utility/mc_feature_flow:flow_navigation_channel_test                   PASSED in 1.8s
+
+Executed 16 out of 16 tests: 16 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

@@ -1,0 +1,15 @@
+#!/bin/bash
+# probe.sh <logname> [extra-target...]: installs the probe file + target (and T-0022 VPROBEs), runs, restores.
+S=/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad
+W=/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a2fe366999ee7848d
+log=$1; shift
+cp $W/documents/evidence/T-0035/verifier/verifier_probe_test.dart $W/utility/mc_feature_flow/test/verifier_probe_test.dart
+cat $S/BUILD.orig $S/probe_build.txt > $W/utility/mc_feature_flow/BUILD.bazel
+/usr/bin/python3 -I $S/splice.py "$S/feature_flow_test.orig" "$W/documents/evidence/T-0022/verifier/probes-cd30e2e.dart.txt" "$W/utility/mc_feature_flow/test/feature_flow_test.dart"
+cd $W && fvm dart format utility/mc_feature_flow/test/feature_flow_test.dart > /dev/null && tool/bazelw --output_base=/tmp/mc-ob-T-0035-verifier test --nocache_test_results --test_output=all //utility/mc_feature_flow:verifier_probe_test //utility/mc_feature_flow:feature_flow_test "$@" > "$W/documents/evidence/T-0035/verifier/logs/$log" 2>&1
+rc=$?
+cp $S/BUILD.orig $W/utility/mc_feature_flow/BUILD.bazel
+cp $S/feature_flow_test.orig $W/utility/mc_feature_flow/test/feature_flow_test.dart
+rm -f $W/utility/mc_feature_flow/test/verifier_probe_test.dart
+echo rc=$rc
+grep -a -E "^\s+(PASS|FAIL) |^[0-9]+ passed|failed$|Expected:|Actual:|VPROBE|Error:|error:" "$W/documents/evidence/T-0035/verifier/logs/$log" | cut -c1-500
