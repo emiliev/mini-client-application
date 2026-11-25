@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-25 `1671aad`; Verifier PASS `16bd800`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0035-flow-deep-links` |
@@ -55,3 +55,7 @@ Notes for the TL:
 - **Deviation from the decision text:** the framework's handler cannot be captured, so it is not "restored" on dispose. flow_builder's handler stays installed and forwards to the same `WidgetsBinding` entry points (F-0034 §2). `pushRouteInformation.state` is dropped (iOS sends none). Alternative, if you want it exact: wrap `PlatformDispatcher.onPlatformMessage` (bigger patch, and the test messenger bypasses it).
 - The vendored target has `no-dart-analyze` and `no-dart-format` tags (F-0034 §4); `third_party/` is excluded from the format gate. No test deleted, skipped or weakened; no `// ignore:` added.
 - Not run: the T-0033 simulator repro (`app/` is T-0033's); the engineer proof is the widget test through the real messenger path.
+
+## Merge (TL)
+- 2026-11-25: Verifier PASS `9c012f3`. The T-0033 R1 repro passes with the vendored copy (`after-flow link shown=1`). `/code-review` and the Verifier found that the provenance check would go red after merge (it compared against the moving `origin/main`), plus weak reply and fragment asserts and an order-dependent baseline. TL decision: not restoring the framework handler and dropping `state` are accepted, documented deviations. Fixed in `4de779d`: an evergreen provenance check plus a pinned lock-delta check, a wider scan, a baseline target, and an intercepted `popRoute` that replies `true`. Re-verify PASS `16bd800`. The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 79/79 tests, lint was clean, `mc_arch_check` reported OK and the evergreen provenance check passed.
+- Follow-ups: P-075 (flow_builder pop quirks).
