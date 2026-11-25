@@ -1,0 +1,2 @@
+[test-only] feature/characters/characters_list/lib/src/flow/characters_list_flow.dart: imports package:mc_feature_flow/testing.dart outside test/; test hooks are for tests only
+mc_arch_check: 1 violation(s) in <worktree>

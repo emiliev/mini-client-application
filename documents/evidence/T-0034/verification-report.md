@@ -125,3 +125,56 @@ The divergences that remain are all from before T-0034 and none is a workaround.
 - **The task Outcome is stale.** It says `test //...` passes 76 of 77, but it is 77/77 at 8d7599c.
 - **T-0033's branch** still has `boot_test.dart:273` with the old expectation, and the old exemplar (`FlowScope.of`, `'/v1/characters'`). Whichever merges second will hit textual conflicts in `characters_list` and `boot_test`, and must take T-0034's side.
 - **Bazel's shared disk cache** answered the first plain `test //...` (0 of 77 executed). Only the `--nocache_test_results` runs above count.
+
+## Re-verification at 318189f
+
+- **Commit verified:** `318189f`, the engineer's fix round on top of my `f97e3dd`, as a detached checkout in my own worktree.
+- **Bazel:** the same output base, `/tmp/mc-ob-T-0034-verifier`. I ran `fvm flutter pub get --offline` before `dart format`.
+- **Evidence:** [`verifier/r2/`](verifier/r2/).
+- **Verdict: PASS.**
+  - Round-1 issues 1 to 7 are all resolved.
+  - The new back button and card height work as intended, and their tests catch every mutation I tried.
+  - One new minor issue (R2-1) and three nits (R2-2), none blocking.
+
+### Gates
+| Gate | Result |
+|---|---|
+| `test --nocache_test_results //...` (covers every touched package uncached) | **Executed 77 out of 77 tests: 77 tests pass** |
+| `build --config=lint //...` | exit 0 |
+| `mc_arch_check` | OK. **My negative control:** importing `package:mc_feature_flow/testing.dart` from `characters_list_flow.dart` gives exit 1, `[test-only] … imports package:mc_feature_flow/testing.dart outside test/` ([log](verifier/r2/mc_arch_check_negative_control.log)). Reverted. The feature's own `test/` import of the hook stays allowed |
+| `rules_fork.sh check` | exit 0 (3 patches on pin `e7163aab8f91`; the flutter queue is empty) |
+| Format | 371 files, 0 changed, exit 0 |
+| `l10n_check` | OK |
+| Coverage, own parser ([coverage.txt](verifier/r2/coverage.txt)) | characters_list 156/156 = 100 %; mc_feature_flow 142/143 = **99.3 %** (up from 97.8; only `feature_flow.dart:213` is missed); mc_paging 100 %; mc_config 100 %; mc_api_client 98.5 %; mc_mocked_backend 93.9 %; **mc_ds_cards 62/62 = 100 %**; **mc_arch_check 173/176 = 98.3 %** (the new rule's lines are covered); mc_test_utils 87.0 % (exempt, unchanged) |
+| T-0032 byte identity | **11 of 11 EQUAL**, with build_runner run fresh ("wrote 8 outputs", then "wrote 5 outputs") ([report](verifier/r2/T-0032-AC6_matches_build_runner.md)) |
+| T-0032 cutoff / not-committed / overlay tools | PASS / PASS / PASS |
+| T-0034-AC4 scan / T-0034-AC5 markers | PASS / PASS. The marker check now reports "every marker tripped" for its one-sample-per-marker control |
+
+### The coordinator's checklist
+| # | Check | Result |
+|---|---|---|
+| 1 | Base URL in release | **PASS.**<br>- `grep assert` finds no assert left in `app_config.dart`, `api_dio.dart` or `backend.dart`.<br>- **Probe** ([source](verifier/r2/verifier_release_probe.dart), [output](verifier/r2/release_probe.log)): `fvm dart run --no-enable-asserts` (the probe confirms `asserts enabled: false`). The `AppConfig` constructor, `AppConfig.parse`, `createApiDio` and `MockBackend.createDio` all turn `https://api.test` into `https://api.test/`, and the requests through both Dios land on `/v1/characters`.<br>- `withTrailingSlash` has a direct test: one slash only, and the `v2` and empty cases.<br>- Mutations: B1 (identity) is killed by `app_config_test`, `api_client_test` and `boot_test`; B2 (`createDio` doesn't normalise) is killed by `mocked_backend_test` |
+| 2 | Host delegates | **PASS.**<br>- **Re-run of P3:** inside the flow, the host's override reads **`CUSTOM-OK`**. The flow added no core or Flutter delegate the host already had. The only duplicate left is the host's own (MaterialApp's default Widgets delegate).<br>- **P5:** a bare `MaterialApp` gets `Retry` from the core strings inside the flow.<br>- Committed tests cover both. Mutation D1 (add all the core and Flutter delegates again) is killed by `flow_kit_test`. D2 (add none) is killed by `flow_kit_test` and `bdd_test` |
+| 3 | `provide:` order | **PASS.** My swap mutation M3 now fails `flow_kit_test` ("provide: is registered before flowInitializer runs"). In round 1 it survived |
+| 4 | Tree shape | **PASS.** The test goes from empty delegates to non-empty and back, with a pushed page. That page's `State` is created once, and the flow state is kept. Mutation T1 (wrap only when the list is non-empty, the old shape) is killed. The test uses a stateful probe page in place of a bloc; that is equivalent, because a remount would recreate both |
+| 5 | Back button | **PASS, with R2-1.**<br>- Tests: shown when the flow is pushed, and tapping it pops the flow; absent at the root; an inner page keeps `AppBar`'s automatic back, which pops only that page.<br>- Mutations L1 (always null), L2 (ignore the inner navigator), L3 (pop the inner navigator) and L4 (ignore `outer.canPop()`) are each killed by `flow_kit_test`.<br>- **Generic shape:** a kit-level helper that pops the flow's *outer* navigator through `maybePop` (so `PopScope` is respected), and returns null elsewhere so `AppBar`'s own back stays, is the right concept for every generated feature. But it is computed in the caller's `build` from `inner.canPop()`, which nothing re-evaluates (R2-1) |
+| 6 | Card height | **PASS.**<br>- `hasSubtitle` defaults to `true`, and the plain `heightFor(...)` equals the explicit default (test).<br>- `git diff origin/main` lists **one golden: `characters_list_loaded.png`**, plus the before/after copies in the engineer's evidence. I checked that "before" is byte-identical to main's golden and "after" to the committed one.<br>- **Looking at both images:** same layout and art. After the change, each card ends just below the title's two-line slot, with no empty subtitle line, so each row is about 18 px shorter: the third row starts at y≈652 instead of y≈688. Nothing is clipped or overflowing.<br>- The new card test pumps a long two-line title at scales 1 and 2 with `hasSubtitle: false` and gets no exception. The T-0031 clipping test (`paged_grid_test` "a card title is not clipped in its cell") still passes.<br>- Mutations: H1 (default `false`) fails `card_test`, the DS goldens (`mc_ds_cards`, `mc_ds_lists`) and `paged_grid_test`. H2 (drop a title line as well) fails `card_test` (overflow) and the feature golden. H3 (the exemplar back on the default height) fails the feature golden |
+| 7 | Items 7–14 | **PASS.**<br>- **Grid anchor:** `charactersFlowState` finds `charactersGridKey` with `findsOneWidget`.<br>- **Marker control:** it plants one sample per marker and requires each marker name to hit, and "every marker tripped".<br>- **Arch rule:** see Gates.<br>- **Python scan:** my own plant in `app/` holds a multi-line `@GET(\n '/v1/…',\n)`, a double-quoted `@POST("/v1/b")`, a raw `@GET(r'/v1/c')`, a multi-line raw `@PUT(\n r"/v1/d")` and a relative `@GET('v1/ok')`. All four bad paths are reported, the relative one is not, and the check FAILS ([report](verifier/r2/T-0034-AC4_my_plants.md)). Its built-in controls pass.<br>- **New tests:** the hook's no-controller branch, `FlowScope.of` outside a flow, and the German `Erneut versuchen`.<br>- **Formatting reverts:** `flow_scope_test.dart` is byte-identical to `origin/main`. `characters_list_env.dart` differs only by the hook import and the lookup. `api_client_test.dart` differs only by the URL literals and the T-0034-AC4 tests. The BUILD dep is sorted.<br>- **`provide:` read once:** this is documented in `characters_list_flow.dart`'s doc comment.<br>- **Outcome:** now 77/77 and lists the fix round. F-0033 facts 3, 5, 7 and 8 are updated |
+| 8 | Sample of earlier mutations | M1 (listening `di`): killed by `flow_kit_test` and `bdd_test`. M10 (barrel): `copywith_barrel_test` FAILS TO BUILD. M15 (`v2`): killed by `bdd_test`. Every mutation in [mutations.log](verifier/r2/mutations.log) (16) is killed |
+
+### Test integrity (fix round)
+- **Two tests changed behaviour, as the fix requested; neither is weakened.**
+  - `api_client_test` "…a base URL without a trailing slash is rejected" became "…is normalised", and now also checks the request path.
+  - `app_config_test` "…the constructor asserts…" became "…normalises too, with no assert".
+- **The two `mcTestWidgets(` lines removed in `flow_scope_test.dart`** are the reverse of the round-1 reformat, back to `origin/main`'s bytes.
+- **No new `// ignore:` or `skip:`.** The only golden change is `characters_list_loaded.png`, with before and after attached.
+
+### Issues found (round 2)
+- **R2-1 (minor) `flowLeading()` can lose the root page's back button.** `utility/mc_feature_flow/lib/src/flow_context.dart:79-89`.
+  - **The cause:** the decision is made once, in the caller's `build`, from `Navigator.maybeOf(this).canPop()`, and it registers no dependency.
+  - **The trigger:** a const root page (the exemplar's shape) rebuilds while an inner page is on top. In the exemplar that is a locale change while the preview is open, because `_CharactersListPageContent` depends on `CharactersListL10n.of`. It then gets `null`, and nothing rebuilds it after the pop.
+  - **Probe P6** ([probes.log](verifier/r2/probes.log)): back buttons on the root page went from 1 before to 0 after.
+  - **Suggested fix:** a const widget that decides in its own `build` with `ModalRoute.of(context)?.isFirst`. That registers a dependency, so it rebuilds when routes change, and it also gives the bricks one shape: `leading: const McFlowBackButton()`.
+- **R2-2 (nit) Stale comments.**
+  - `utility/mc_feature_flow/lib/src/feature_flow.dart:66` and the last sentence of F-0033 fact 3 still say "Empty: the flow leaves `Localizations` as the host set it". Now the flow is always wrapped and adds the missing core and Flutter delegates even with an empty list; the bare-host test shows it.
+  - `utility/mc_api_client/test/api_client_test.dart:328-329` still says the control is "what the assertion above prevents", but there is no assertion any more.
