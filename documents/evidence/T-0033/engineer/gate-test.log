@@ -1,32 +1,20 @@
-INFO: Invocation ID: 1f9fd3ac-7a9e-43e8-a006-3946bd47a78f
+INFO: Invocation ID: f5e560d4-37d5-4cdf-80a9-48d904efde1a
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
-Analyzing: 200 targets (18 packages loaded, 0 targets configured)
-Analyzing: 200 targets (18 packages loaded, 6 targets configured)
+Analyzing: 200 targets (0 packages loaded, 0 targets configured)
+Analyzing: 200 targets (0 packages loaded, 0 targets configured)
 
-INFO: From DartCodegen @@//spike/api_envelope:_api_response_json_part:
-[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
-Analyzing: 200 targets (72 packages loaded, 13528 targets configured, 1376 aspect applications)
-[10,194 / 11,555] 7 / 28 tests; Writing file utility/mc_feature_flow/mc_feature_flow.dart_analyze.summary.proj/analysis_options.yaml; 0s local ... (10 actions, 3 running)
-Analyzing: 200 targets (85 packages loaded, 13989 targets configured, 1471 aspect applications)
-[18,632 / 18,632] 41 / 41 tests; no actions running
-INFO: From DartCodegen @@//spike/api_envelope:_api_response_json_part:
-[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
-INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
-[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
-Analyzing: 200 targets (89 packages loaded, 14699 targets configured, 1949 aspect applications)
-[24,614 / 24,618] 67 / 68 tests; [Prepa] Creating symlink utility/mc_api_errors/api_failure_test ... (3 actions, 0 running)
-INFO: Analyzed 200 targets (89 packages loaded, 14707 targets configured, 1980 aspect applications).
+INFO: Analyzed 200 targets (0 packages loaded, 0 targets configured).
 INFO: Found 123 targets and 77 test targets...
-INFO: Elapsed time: 3.357s, Critical Path: 0.26s
-INFO: 12727 processes: 12359 action cache hit, 1027 disk cache hit, 11700 internal.
-INFO: Build completed successfully, 12727 total actions
-//app/mini_client:app_test                                      (cached) PASSED in 1.0s
-//app/sandbox/universe_sandbox:universe_sandbox_router_test     (cached) PASSED in 0.6s
+INFO: Elapsed time: 0.972s, Critical Path: 0.00s
+INFO: 1 process: 162 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action
+//app/mini_client:app_test                                      (cached) PASSED in 0.9s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test     (cached) PASSED in 0.5s
 //app/wiring/app_core:boot_test                                 (cached) PASSED in 0.9s
 //app/wiring/app_core:links_and_hooks_test                      (cached) PASSED in 0.5s
-//app/wiring/universe_wiring:routes_test                        (cached) PASSED in 0.7s
+//app/wiring/universe_wiring:routes_test                        (cached) PASSED in 0.6s
 //feature/characters/characters_list:architecture_test          (cached) PASSED in 0.2s
 //feature/characters/characters_list:bdd_test                   (cached) PASSED in 1.9s
 //feature/characters/characters_list:contract_test              (cached) PASSED in 0.2s

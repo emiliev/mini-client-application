@@ -1,0 +1,16 @@
+INFO: Invocation ID: 91ff20e7-0a73-4e08-bb7a-44759dbd9755
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 2 targets (84 packages loaded, 8884 targets configured, 454 aspect applications).
+[11,536 / 11,557] DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 1s disk-cache, worker ... (2 actions running)
+[11,538 / 11,557] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 3s disk-cache, worker ... (2 actions, 1 running)
+[11,548 / 11,557] Linking Dart kernel @@//app/mini_client:mini_client_app; 0s disk-cache, worker ... (2 actions, 1 running)
+INFO: Found 2 targets...
+INFO: Elapsed time: 6.386s, Critical Path: 5.37s
+INFO: 4385 processes: 7172 action cache hit, 4371 internal, 8 darwin-sandbox, 6 worker.
+INFO: Build completed successfully, 4385 total actions

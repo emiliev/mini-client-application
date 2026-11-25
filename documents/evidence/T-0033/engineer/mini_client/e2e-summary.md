@@ -8,11 +8,11 @@
 | Project | `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0033-engineer-80966` |
-| Simulator UDID | `19EB0912-95CD-47EE-948A-2A64E30057C4` |
+| Simulator | `mc-T-0033-engineer-87624` |
+| Simulator UDID | `CB358A6A-AB09-4584-8CEB-0A457BB70C4B` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-25T08:59:01Z |
-| Finished | 2026-11-25T09:00:17Z |
+| Started | 2026-11-25T09:03:07Z |
+| Finished | 2026-11-25T09:04:22Z |
 
 ## Targets
 
