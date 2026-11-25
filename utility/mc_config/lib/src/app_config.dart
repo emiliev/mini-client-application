@@ -19,7 +19,8 @@ class BackendConfig {
   final String scenario;
 }
 
-/// [url] with exactly one trailing `/` added when it has none.
+/// [url] with a trailing `/` added when it has none. Real code, not an
+/// assert: asserts are stripped in release builds.
 String withTrailingSlash(String url) => url.endsWith('/') ? url : '$url/';
 
 /// Typed per-environment configuration. Read once at boot (R13: no
@@ -28,18 +29,14 @@ class AppConfig {
   AppConfig({
     required this.env,
     required this.backend,
-    required this.apiBaseUrl,
+    required String apiBaseUrl,
     required this.build,
-  }) : assert(
-         apiBaseUrl.endsWith('/'),
-         'apiBaseUrl must end with "/" (retrofit paths are relative), got '
-         '"$apiBaseUrl". AppConfig.fromJson adds it.',
-       );
+  }) : apiBaseUrl = withTrailingSlash(apiBaseUrl);
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
     env: json['env'] as String,
     backend: BackendConfig.fromJson(json['backend'] as Map<String, dynamic>),
-    apiBaseUrl: withTrailingSlash(json['apiBaseUrl'] as String),
+    apiBaseUrl: json['apiBaseUrl'] as String,
     build: json['build'] as String,
   );
 
@@ -50,7 +47,8 @@ class AppConfig {
   final String env;
   final BackendConfig backend;
 
-  /// Base URL of the API; always ends with `/`, so a retrofit path like
+  /// Base URL of the API; the constructor adds a trailing `/` when it is
+  /// missing, so it always ends with one and a retrofit path like
   /// `'v1/characters'` (relative, no leading `/`) lands under it. Dio joins
   /// `baseUrl + path` as strings. The mocked backend never contacts it.
   final String apiBaseUrl;

@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:mc_api_client/src/logging_interceptor.dart';
 import 'package:mc_api_client/src/retry_interceptor.dart';
+import 'package:mc_config/mc_config.dart' show withTrailingSlash;
 import 'package:mc_monitoring/mc_monitoring.dart';
 
 /// The placeholder host used when no real backend exists. The mocked
@@ -21,14 +22,9 @@ Dio createApiDio({
   Duration retryDelay = const Duration(milliseconds: 200),
   Monitoring Function()? monitoring,
 }) {
-  assert(
-    baseUrl.endsWith('/'),
-    'The API base URL must end with "/" (retrofit paths are relative), got '
-    '"$baseUrl".',
-  );
   final dio = Dio(
     BaseOptions(
-      baseUrl: baseUrl,
+      baseUrl: withTrailingSlash(baseUrl),
       connectTimeout: connectTimeout,
       receiveTimeout: receiveTimeout,
     ),

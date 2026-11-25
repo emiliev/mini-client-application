@@ -260,7 +260,7 @@ void main() {
     await pumpIn(const Locale('en'));
     expect(find.text('Hello / Retry'), findsOneWidget);
     await pumpIn(const Locale('de'));
-    expect(find.textContaining('Hallo / '), findsOneWidget);
+    expect(find.text('Hallo / Erneut versuchen'), findsOneWidget);
     expect(find.text('Hello / Retry'), findsNothing);
     expect(tester.takeException(), isNull);
   });
@@ -370,4 +370,360 @@ void main() {
     );
     expect(() => flowStateOf<_State>(outside), throwsFlutterError);
   });
+
+  testWidgets('T-0034-AC2 provide: is registered before flowInitializer runs', (
+    tester,
+  ) async {
+    Object? seen;
+    await tester.pumpWidget(
+      _app(
+        FeatureFlow<_State>(
+          state: const _State(),
+          provide: (scope) =>
+              scope.registerSingleton<_Provided>(const _Provided('first')),
+          flowInitializer: McDIInitializer((getIt, _) {
+            // Throws when `provide:` has not run yet.
+            seen = getIt<_Provided>().label;
+          }),
+          onGeneratePages: (_) => const [
+            McFlowPage(name: 'list', child: Text('list page')),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(seen, 'first');
+    expect(find.text('list page'), findsOneWidget);
+  });
+
+  testWidgets('T-0034-AC2 a host MaterialLocalizations override survives '
+      'inside the flow, and the flow still adds its own strings', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: McTheme.light,
+        localizationsDelegates: [
+          const _CustomMaterialDelegate(),
+          ...GlobalMaterialLocalizations.delegates,
+        ],
+        supportedLocales: const [Locale('en')],
+        home: Scaffold(
+          body: FeatureFlow<_State>(
+            state: const _State(),
+            localizationsDelegates: const [_StringsDelegate()],
+            onGeneratePages: (_) => [
+              McFlowPage(
+                name: 'list',
+                child: Builder(
+                  builder: (context) => Text(
+                    '${MaterialLocalizations.of(context).okButtonLabel} / '
+                    '${_Strings.of(context).hello}',
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('CUSTOM-OK / Hello'), findsOneWidget);
+  });
+
+  testWidgets('T-0034-AC2 a host without core or Flutter delegates gets them '
+      'from the flow', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: McTheme.light,
+        home: Scaffold(
+          body: FeatureFlow<_State>(
+            state: const _State(),
+            onGeneratePages: (_) => [
+              McFlowPage(
+                name: 'list',
+                child: Builder(
+                  builder: (context) =>
+                      Text(McL10nCoreL10n.of(context).commonRetry),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('T-0034-AC2 changing localizationsDelegates keeps the pushed '
+      'page and its state', (tester) async {
+    late FeatureFlowController<_State> controller;
+    final delegates = ValueNotifier<List<LocalizationsDelegate<Object?>>>(
+      const [],
+    );
+    addTearDown(delegates.dispose);
+    _Probe.inits = 0;
+    await tester.pumpWidget(
+      _app(
+        ValueListenableBuilder(
+          valueListenable: delegates,
+          builder: (context, value, _) => FeatureFlow<_State>(
+            state: const _State(),
+            localizationsDelegates: value,
+            onGeneratePages: (s) => [
+              McFlowPage(
+                name: 'list',
+                child: Builder(
+                  builder: (context) {
+                    controller = context.di<FeatureFlowController<_State>>();
+                    return const Text('list');
+                  },
+                ),
+              ),
+              if (s.selected != null)
+                const McFlowPage(name: 'detail', child: _Probe()),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    controller.update((_) => const _State('x'));
+    await tester.pumpAndSettle();
+    expect(_Probe.inits, 1);
+
+    delegates.value = const [_StringsDelegate()];
+    await tester.pumpAndSettle();
+    delegates.value = const [];
+    await tester.pumpAndSettle();
+
+    expect(find.text('detail probe'), findsOneWidget);
+    expect(_Probe.inits, 1, reason: 'the page was not remounted');
+    expect(controller.state.selected, 'x');
+  });
+
+  group('T-0034-AC5 the flow root page can leave the flow', () {
+    Widget flowWithAppBar() => FeatureFlow<_State>(
+      state: const _State(),
+      onGeneratePages: (s) => [
+        McFlowPage(
+          name: 'list',
+          child: Builder(
+            builder: (context) => Scaffold(
+              appBar: AppBar(
+                leading: context.flowLeading(),
+                title: const Text('flow root'),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+
+    Widget app(Widget home) => MaterialApp(
+      theme: McTheme.light,
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      home: home,
+    );
+
+    testWidgets('T-0034-AC5 present when pushed, and tapping it pops the '
+        'flow', (tester) async {
+      await tester.pumpWidget(
+        app(
+          Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(builder: (_) => flowWithAppBar()),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      expect(find.text('flow root'), findsOneWidget);
+
+      expect(find.byType(BackButton), findsOneWidget);
+      await tester.tap(find.byType(BackButton));
+      await tester.pumpAndSettle();
+
+      expect(find.text('flow root'), findsNothing);
+      expect(find.text('open'), findsOneWidget);
+    });
+
+    testWidgets('T-0034-AC5 absent when the flow is the root', (tester) async {
+      await tester.pumpWidget(app(flowWithAppBar()));
+      await tester.pumpAndSettle();
+
+      expect(find.text('flow root'), findsOneWidget);
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('T-0034-AC5 a page pushed inside the flow keeps the automatic '
+        'back button, which pops that page only', (tester) async {
+      late FeatureFlowController<_State> controller;
+      await tester.pumpWidget(
+        app(
+          Builder(
+            builder: (context) => Scaffold(
+              body: TextButton(
+                onPressed: () => Navigator.of(context).push<void>(
+                  MaterialPageRoute(
+                    builder: (_) => FeatureFlow<_State>(
+                      state: const _State(),
+                      onGeneratePages: (s) => [
+                        McFlowPage(
+                          name: 'list',
+                          child: Builder(
+                            builder: (context) {
+                              controller = context
+                                  .di<FeatureFlowController<_State>>();
+                              return Scaffold(
+                                appBar: AppBar(leading: context.flowLeading()),
+                              );
+                            },
+                          ),
+                        ),
+                        if (s.selected != null)
+                          McFlowPage(
+                            name: 'detail',
+                            child: Builder(
+                              builder: (context) => Scaffold(
+                                appBar: AppBar(
+                                  leading: context.flowLeading(),
+                                  title: const Text('detail'),
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                child: const Text('open'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+      controller.update((_) => const _State('x'));
+      await tester.pumpAndSettle();
+      expect(find.text('detail'), findsOneWidget);
+
+      await tester.tap(find.byType(BackButton).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('detail'), findsNothing);
+      expect(controller.state.selected, isNull);
+      expect(find.text('open'), findsNothing, reason: 'still inside the flow');
+    });
+  });
+
+  testWidgets('T-0034-AC1 FlowScope.of outside a flow names the problem', (
+    tester,
+  ) async {
+    late BuildContext outside;
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) {
+            outside = context;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(
+      () => FlowScope.of(outside),
+      throwsA(
+        isA<FlutterError>().having(
+          (e) => e.message,
+          'message',
+          contains('not below a FeatureFlow'),
+        ),
+      ),
+    );
+  });
+
+  testWidgets('T-0034-AC6 flowStateOf fails when the scope has no controller', (
+    tester,
+  ) async {
+    final container = (await tester.runAsync(createChildContainer))!;
+    late BuildContext page;
+    await tester.pumpWidget(
+      _app(
+        FlowScope(
+          container: container,
+          child: Builder(
+            builder: (context) {
+              page = context;
+              return const SizedBox();
+            },
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      () => flowStateOf<_State>(page),
+      throwsA(
+        isA<StateError>().having(
+          (e) => '$e',
+          'message',
+          contains('no controller'),
+        ),
+      ),
+    );
+  });
+}
+
+class _Probe extends StatefulWidget {
+  const _Probe();
+
+  static int inits = 0;
+
+  @override
+  State<_Probe> createState() => _ProbeState();
+}
+
+class _ProbeState extends State<_Probe> {
+  @override
+  void initState() {
+    super.initState();
+    _Probe.inits++;
+  }
+
+  @override
+  Widget build(BuildContext context) => const Text('detail probe');
+}
+
+class _CustomMaterial extends DefaultMaterialLocalizations {
+  const _CustomMaterial();
+
+  @override
+  String get okButtonLabel => 'CUSTOM-OK';
+}
+
+class _CustomMaterialDelegate
+    extends LocalizationsDelegate<MaterialLocalizations> {
+  const _CustomMaterialDelegate();
+
+  @override
+  bool isSupported(Locale locale) => true;
+
+  @override
+  Future<MaterialLocalizations> load(Locale locale) async =>
+      const _CustomMaterial();
+
+  @override
+  bool shouldReload(_CustomMaterialDelegate old) => false;
 }

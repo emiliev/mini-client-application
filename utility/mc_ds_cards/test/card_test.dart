@@ -200,7 +200,7 @@ void main() {
     expect(wide, greaterThan(small));
   });
 
-  test('T-0034-AC7 heightFor without a subtitle is shorter by the subtitle '
+  test('T-0034-AC5 heightFor without a subtitle is shorter by the subtitle '
       'line, and fewer title lines are shorter again', () {
     double h({bool sub = true, int lines = 2}) => McMediaCard.heightFor(
       width: 160,
@@ -217,7 +217,7 @@ void main() {
     );
   });
 
-  testWidgets('T-0034-AC7 a card without a subtitle fits the shorter height, '
+  testWidgets('T-0034-AC5 a card without a subtitle fits the shorter height, '
       'at every text scale', (tester) async {
     for (final scale in [1.0, 2.0]) {
       await tester.pumpWidget(

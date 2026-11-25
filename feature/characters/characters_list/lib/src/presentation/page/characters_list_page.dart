@@ -41,7 +41,11 @@ class _CharactersListPageContent extends StatelessWidget {
     final bloc = context.read<CharactersListBloc>();
     void retry() => bloc.add(const CharactersListEvent.retry());
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.charactersListTitle)),
+      appBar: AppBar(
+        // The flow has its own navigator, so its root page needs this to leave.
+        leading: context.flowLeading(),
+        title: Text(l10n.charactersListTitle),
+      ),
       body: BlocBuilder<CharactersListBloc, CharactersListState>(
         builder: (context, state) => state.when(
           loading: () => McLoading(semanticLabel: l10n.charactersListLoading),
@@ -54,12 +58,11 @@ class _CharactersListPageContent extends StatelessWidget {
           success: (page) => McPagedGrid<Character>(
             key: charactersGridKey,
             state: page,
-            cellHeight: (width, textScaler) =>
-                McMediaCard.heightFor(
-                  width: width,
-                  textScaler: textScaler,
-                  hasSubtitle: false,
-                ),
+            cellHeight: (width, textScaler) => McMediaCard.heightFor(
+              width: width,
+              textScaler: textScaler,
+              hasSubtitle: false,
+            ),
             itemBuilder: (context, character, _) =>
                 CharacterTile(character: character),
             onLoadMore: () => bloc.add(const CharactersListEvent.loadMore()),

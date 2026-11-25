@@ -16,8 +16,9 @@ import 'package:mc_feature_flow/mc_feature_flow.dart';
 /// navigator implementation from its wiring; tests pass a mock.
 ///
 /// Immutable after creation: the flow reads [navigator] and [initialTeamId]
-/// once, when its scope opens. A rebuild with a different navigator keeps the
-/// first one; a different [initialTeamId] builds a new flow (its
+/// once, when its scope opens (`provide:` runs once per flow instance). A
+/// rebuild with a different navigator keeps the first one; a different
+/// [initialTeamId] builds a new flow (its
 /// `FeatureFlow` is keyed by it), with a fresh scope, state and first page.
 class CharactersListFlow extends StatelessWidget {
   const CharactersListFlow({

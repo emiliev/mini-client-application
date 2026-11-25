@@ -48,9 +48,10 @@ typedef FlowStateView = ({
 /// changes, F-0018). The state type is package-private (R4; R7 keeps `src/`
 /// out of BDD tests), so the hook is asked for `dynamic`.
 FlowStateView charactersFlowState(WidgetTester tester) {
-  final scaffold = find.byType(Scaffold, skipOffstage: false);
-  expect(scaffold, findsWidgets, reason: 'the characters_list flow is open');
-  final dynamic state = flowStateOf<dynamic>(tester.element(scaffold.first));
+  // Anchored to the flow's own grid, not to whichever Scaffold comes first.
+  final grid = find.byKey(charactersGridKey, skipOffstage: false);
+  expect(grid, findsOneWidget, reason: 'the characters_list flow is open');
+  final dynamic state = flowStateOf<dynamic>(tester.element(grid));
   final dynamic preview = state.preview;
   return (
     teamId: state.teamId as String?,
@@ -92,8 +93,10 @@ final List<CharacterRecord> _paged45 = CharacterUniverse.synthetic(
   defaultMockClock,
 ).byName;
 
-CharacterRecord characterNamed(String name) =>
-    [...defaultCast, ..._paged45].firstWhere((c) => c.name == name);
+CharacterRecord characterNamed(String name) => [
+  ...defaultCast,
+  ..._paged45,
+].firstWhere((c) => c.name == name);
 
 /// What every test host provides above a flow: the bundled-art resolver and
 /// the fixture asset bundle (the app root does this in production, T-0033).

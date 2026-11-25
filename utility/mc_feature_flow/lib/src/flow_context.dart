@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart' show BackButton;
 import 'package:flutter/widgets.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_di/mc_di.dart';
@@ -9,6 +12,7 @@ class FlowScope extends InheritedWidget {
     required this.container,
     required super.child,
     this.controller,
+    this.outerNavigator,
     super.key,
   });
 
@@ -16,6 +20,10 @@ class FlowScope extends InheritedWidget {
 
   /// The flow's state controller, for the test hook (`testing.dart`).
   final FeatureFlowController<Object?>? controller;
+
+  /// The navigator the flow itself sits in (the app's, when it was pushed from
+  /// another screen); null when the flow is not inside a navigator.
+  final NavigatorState? outerNavigator;
 
   /// The nearest scope without depending on it: the flow's container never
   /// changes while its scope lives, so a lookup in a lifecycle that cannot
@@ -61,4 +69,22 @@ extension McFlowContext on BuildContext {
   /// Fails naming the registered type and its missing dependency.
   Future<void> debugResolveAll() =>
       FlowScope.read(this).container.debugResolveAll();
+}
+
+extension McFlowNavigation on BuildContext {
+  /// The leading widget for a flow page's app bar: a back button that leaves
+  /// the flow, when this page is the flow's root and the navigator the flow
+  /// sits in can pop; null otherwise, so `AppBar` keeps its own automatic
+  /// back button for pages pushed inside the flow.
+  ///
+  /// A flow has its own navigator, so its root page never gets the automatic
+  /// back button, and iOS has no system back key.
+  Widget? flowLeading() {
+    final outer = FlowScope.read(this).outerNavigator;
+    final inner = Navigator.maybeOf(this);
+    if (outer == null || !outer.canPop() || (inner?.canPop() ?? false)) {
+      return null;
+    }
+    return BackButton(onPressed: () => unawaited(outer.maybePop()));
+  }
 }

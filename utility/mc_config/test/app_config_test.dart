@@ -50,7 +50,7 @@ void main() {
       expect(parseUrl('https://api.test/'), 'https://api.test/');
     });
 
-    test('T-0034-AC4 the constructor asserts the trailing slash', () {
+    test('T-0034-AC4 the constructor normalises too, with no assert', () {
       AppConfig build(String url) => AppConfig(
         env: 'dev',
         backend: const BackendConfig(
@@ -62,17 +62,15 @@ void main() {
         build: '1',
       );
 
+      expect(build('https://api.test').apiBaseUrl, 'https://api.test/');
       expect(build('https://api.test/').apiBaseUrl, 'https://api.test/');
-      expect(
-        () => build('https://api.test'),
-        throwsA(
-          isA<AssertionError>().having(
-            (e) => '${e.message}',
-            'message',
-            contains('https://api.test'),
-          ),
-        ),
-      );
+    });
+
+    test('T-0034-AC4 withTrailingSlash adds one slash and only one', () {
+      expect(withTrailingSlash('https://a.test'), 'https://a.test/');
+      expect(withTrailingSlash('https://a.test/'), 'https://a.test/');
+      expect(withTrailingSlash('https://a.test/v2'), 'https://a.test/v2/');
+      expect(withTrailingSlash(''), '/');
     });
   });
 }

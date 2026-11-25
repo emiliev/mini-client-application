@@ -230,15 +230,19 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final delegates = widget.localizationsDelegates;
-    final content = _content(context);
-    if (delegates.isEmpty) {
-      return content;
-    }
+    // Always wrapped, so the tree keeps one shape whatever the delegates are.
+    // `Localizations.override` puts the flow's delegates ahead of the host's
+    // own, so the core and Flutter delegates are added only for the types the
+    // host does not provide: a host override of, say, `MaterialLocalizations`
+    // must survive inside the flow.
+    final missing = [
+      for (final delegate in mcLocalizationsDelegates)
+        if (Localizations.of<Object>(context, delegate.type) == null) delegate,
+    ];
     return Localizations.override(
       context: context,
-      delegates: [...delegates, ...mcLocalizationsDelegates],
-      child: content,
+      delegates: [...widget.localizationsDelegates, ...missing],
+      child: _content(context),
     );
   }
 
@@ -265,6 +269,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
           return FlowScope(
             container: container,
             controller: _controller,
+            outerNavigator: Navigator.maybeOf(context),
             child: FlowBuilder<T>(
               controller: _flowController,
               onGeneratePages: _pages,

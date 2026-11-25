@@ -253,9 +253,9 @@ flutter_library(
 # --- tests (R6: BDD + contract + l10n + golden; no solitary unit tests) -----
 _TEST_DEPS = [
     "//utility/mc_ds_cards",
-    "//utility/mc_feature_flow",
     "//utility/mc_ds_feedback",
     "//utility/mc_ds_media",
+    "//utility/mc_feature_flow",
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_media",
     "//utility/mc_media",
