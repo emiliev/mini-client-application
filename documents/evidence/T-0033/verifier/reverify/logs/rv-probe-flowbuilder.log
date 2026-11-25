@@ -1,0 +1,94 @@
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: 7c561c16-4c53-4a71-94fe-a70d4da8bf23
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: target //app/mini_client:app_test (6 packages loaded, 6 targets configured)
+Analyzing: target //app/mini_client:app_test (6 packages loaded, 6 targets configured)
+
+Analyzing: target //app/mini_client:app_test (277 packages loaded, 11654 targets configured, 327 aspect applications)
+
+INFO: Analyzed target //app/mini_client:app_test (289 packages loaded, 11822 targets configured, 763 aspect applications).
+[12,003 / 12,006] Compiling Dart kernel module app/mini_client/app_test.flutter_entry.kmod; 0s disk-cache, worker
+[12,006 / 12,007] Testing //app/mini_client:app_test; 0s disk-cache, darwin-sandbox
+FAIL: //app/mini_client:app_test (Exit 1) (see /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/mini_client/app_test/test.log)
+INFO: From Testing //app/mini_client:app_test:
+==================== Test output for //app/mini_client:app_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a cold-start link held during boot shows its route once boot succeeds, and no route builder or redirect ran before ready
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a link pushed while boot is held wins and is not seen by the boot navigator
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[error] Bad state: first boot fails
+#0      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///app/mini_client/test/app_test.dart:178:13)
+#1      McDIInitializer.init (package:mc_di/src/di_initializer.dart:19:51)
+#2      initializeDIContainer (package:mc_di/src/di_container.dart:68:25)
+<asynchronous suspension>
+#3      BootBloc._begin.<anonymous closure> (package:app_core/src/boot/boot_bloc.dart:126:7)
+<asynchronous suspension>
+
+[debug] BootBloc: _BootThrew BootBooting -> BootFailed
+[debug] BootBloc: BootRetried BootFailed -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC5 with the same link and a failing first boot, Retry replays the link once and every root type is registered exactly once
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC3 a miniclient://app/placeholder link delivered on the platform navigation channel to the running app shows that route
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a link delivered between BootReady and the router's first frame is held and forwarded to go_router, not lost
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC3 a link for another host or scheme shows home, not its path
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  the home placeholder shows the bundled config env
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC4 the app boots with its own router wired for the navigators and the characters domain on the backend
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  an unknown path shows the not-found page
+  PASS  AppLocations match the typed routes
+  PASS  all 7 wirings are composed
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+VERIFIER before-flow link shown=1 grid=1 after-flow link shown=0
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <1>
+  Actual: <0>
+a deep link after the characters flow mounted
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///app/mini_client/test/app_test.dart:397:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///app/mini_client/test/app_test.dart line 397
+The test description was:
+  VERIFIER a link after the characters flow mounted
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  VERIFIER a link after the characters flow mounted
+        String: Test failed. See exception logs above.
+        The test description was: VERIFIER a link after the characters flow mounted
+
+
+11 passed, 1 failed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 5.410s, Critical Path: 1.62s
+INFO: 8 processes: 11999 action cache hit, 3 internal, 3 darwin-sandbox, 2 worker.
+INFO: Build completed, 1 test FAILED, 8 total actions
+//app/mini_client:app_test                                               FAILED in 1.1s
+  /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/mini_client/app_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.

@@ -130,3 +130,75 @@ All screenshots are 552×1200. The script downscaled them from 1206×2622.
 - To re-run the e2e path until D1 is fixed, first run `tool/bazelw --output_base=<ob> build --remote_download_outputs=all //app/mini_client:mini_client_lib //app/sandbox/universe_sandbox:universe_sandbox_lib`, then `prepare_pub_project.sh`.
 - `tool/e2e_ios.sh` still has no per-target timeout. The 7ab4924 handback (`startApp` saves `FlutterError.onError` and `PlatformDispatcher.onError`, runs `main()`, then restores them) is correct: `installErrorHooks` (`app_core/lib/src/shell/error_hooks.dart:29-30`) is the only production writer, and it runs synchronously inside `main()`. But any future boot-time hook install would bring the hang back. A watchdog in `e2e_ios.sh` would make that fail bounded.
 - The scratchpad e2e copies (with the probe and negative-control targets) live outside the repo. Nothing in the repo was changed beyond this report and `documents/evidence/T-0033/verifier/`.
+
+---
+
+## Re-verification at 61535d2
+
+- **Commit verified:** `fleet/T-0033-universe-wiring` @ `61535d2` (detached, own worktree), on top of 51e1c1a. T-0034 is not on this branch and was not verified.
+- **Bazel:** `/tmp/mc-ob-T-0033-verifier`, wiped before the e2e prepares and shut down at the end. `T-0033-e2e_prepare.sh` used its own throw-away base, `/tmp/mc-ob-T-0033-verifier-fresh`, which it wiped and deleted.
+- **Simulators:** each was created and deleted by `tool/e2e_ios.sh`: `mc-T-0033-verifier-69243` (sandbox), `-74006` (mini_client), `-85079` and `-86869` (warm-link probes) and `-87975` (mini_client warm-link probe from the list). None was left over from before the stop. `xcrun simctl list devices | grep -c mc-T-0033` → `0`.
+- **Verdict:** **FAIL**, on one blocker (R1). The fix round itself is good: every item the engineer claims is verified below, and all five T-0033 ACs still pass as written. R1 is a regression that the fix round's sandbox link tests can't see: once `characters_list`'s flow has mounted, **every deep link that arrives while the app runs is dropped**, in both apps. This breaks T-0021-AC3's behaviour in the real app. The TL can waive R1 for a follow-up, but it is not something to merge silently.
+
+### R1 (blocker): live deep links die once a `FeatureFlow` has mounted (flow_builder 0.1.0)
+- **Symptom on the simulator** (the real `main()`, links delivered as the iOS embedder delivers them: a `pushRouteInformation` call on `flutter/navigation`):
+  - **mini_client** ([log](verifier/reverify/warm_probe_mini/e2e-verifier_warm_link_test.log)):
+    - `miniclient://app/placeholder/42` from home works, and so does `miniclient://app/characters/6`, which builds the list flow under the details page.
+    - After that, `miniclient://app/characters`, `miniclient://app/placeholder/43` and `miniclient://app/characters/8` all leave the location at `…/characters/6` ([screenshot](verifier/reverify/warm_probe_mini/rv_07_mini_warm_probe_from_list.png): still "Character details 6").
+  - **sandbox**, which opens on the list ([log](verifier/reverify/warm_probe_sandbox/e2e-verifier_warm_own_link_test.log)): `miniclientuniverse://app/characters/6` and even the plain path `/characters/7` leave the location at `/characters`. My first sandbox probe (`verifier_foreign_link_test`) timed out waiting for "details 6" after a warm own-scheme link, which is how I found this.
+- **Reproduced under Bazel.** A temporary case appended to `app_test` and then removed ([log](verifier/reverify/logs/rv-probe-flowbuilder.log)) booted the real app with `roots()` and pushed `placeholder/41` (shown), then `/characters` (grid shown), then `placeholder/43`. It printed `before-flow link shown=1 grid=1 after-flow link shown=0`.
+- **Root cause:** `flow_builder-0.1.0/lib/flow_builder.dart`.
+  - `FlowBuilder.initState` (`:104`) calls `_SystemNavigationObserver.add`, which **replaces the framework's `flutter/navigation` handler** (`:350`, `SystemChannels.navigation.setMethodCallHandler(_handleSystemNavigation)`).
+  - The replacement handles only `popRoute` and `pushRoute`. Its `default:` case drops `pushRouteInformation`, which is what the iOS embedder sends for deep links (`:357-365`).
+  - `remove` (`:143`) never restores the handler, so the breakage lasts for the rest of the process.
+  - Cold-start links (`defaultRouteName`) and links held during boot are not affected.
+- **Why the fix-round tests pass:** `universe_sandbox_links_test` uses `FakeTargets`, whose list is a `SizedBox`, so no `FlowBuilder` ever mounts. "a sandbox link that arrives after boot opens its route" is therefore true in the test and false in the app.
+- **Where it belongs:** `mc_feature_flow`, or a rules/pub patch of flow_builder.
+  - Possible fixes: handle `pushRouteInformation` and every other method by delegating to the framework, and restore the previous handler on `remove`. Or don't use flow_builder's system-navigation interceptor at all.
+  - Pin it with a test that mounts a real `FeatureFlow`, then pushes a link.
+  - F-0018 doesn't mention this, so it should get a finding.
+  - It isn't T-0033's code, but T-0033 is the first task to put a `FlowBuilder` into the app, so the merge would introduce the regression.
+
+### Fix-round items
+| # | Item | What I ran | Result |
+|---|---|---|---|
+| 1 | Sandbox deep links: `LinkScheme`, sandbox `miniclientuniverse://app`, router guard | `//app/sandbox/universe_sandbox:universe_sandbox_links_test` (5) + `//app/wiring/app_core:router_ref_and_scheme_test` (2 scheme cases), uncached | **7/7 PASS** ([log](verifier/reverify/logs/rv-gate-test-app.log)) |
+| | mutations | L1: drop `scheme.isForeign(uri)` from `buildSandboxRouter`'s redirect · L2: `installSandboxLinks` without `scheme:` | L1 **killed** ("a foreign link that arrives after boot is ignored"); L2 **killed** (3 cases) |
+| | **cold start on the sim**, `miniclientuniverse://app/characters/5` | probe `verifier_cold_link_test`: sets `PlatformDispatcher.defaultRouteName` (where the iOS embedder puts the cold-start route) and runs the real `main()`. The sandbox's `main()` has no file-drop hook | **PASS**: [details placeholder 5](verifier/reverify/sandbox/rv_01_sandbox_cold_link_details_5.png) |
+| | **foreign scheme refused on the sim** | probe `verifier_foreign_link_test`: cold start with `miniclient://app/characters/5`, then live `miniclient://app/…`, `https://example.com/…` and `miniclientuniverse://other/…` | cold: **refused**, the [list](verifier/reverify/sandbox/rv_02_sandbox_cold_foreign_link_list.png) opens. Live: no details shown, but that proves nothing, because live links are dropped anyway (R1). The probe's final own-scheme step failed on R1 |
+| 2 | D1 `prepare_pub_project.sh` | `MC_FRESH_OUTPUT_BASE=/tmp/mc-ob-T-0033-verifier-fresh tool/checks/T-0033-e2e_prepare.sh` | **PASS** ([report](verifier/reverify/T-0033-e2e_prepare.md)): from a wiped base, 6 targets, 18 generated files, exactly the listed outputs; the planted stale `stale_planted.g.dart` was not copied; **both negatives FAILED as they must**. `git status --porcelain --ignored`: **identical** before and after |
+| | my own prepares | wiped `/tmp/mc-ob-T-0033-verifier`, then prepared both apps | mini_client 18 and sandbox 17 files; exit 0 ([logs](verifier/reverify/logs/)). My part-file scan of the copy: **0 missing**. My worktree has ignored, pub-generated l10n files from an earlier `pub get`; they weren't copied (git's list), and both apps compiled and ran |
+| 3 | D2 closure check | `tool/checks/T-0031-AC6_closure.sh` | **PASS**, with **23** production feature and utility targets (`characters_list` included). Its built-in negative is reported ([log](verifier/reverify/logs/rv-ac6.log)) |
+| | my negative | `//utility/mc_fixtures_media` in `characters_list`'s `_FLUTTER_DEPS` | **FAIL T-0031-AC6**, exit 1 ([log](verifier/reverify/logs/rv-ac6-neg.log)): fixed |
+| 4 | D3 push lock | mutation `push` → `go` | **killed**: "T-0033-AC1 the navigator pushes: Back returns to the list…" FAILs |
+| 5 | D4 | `git ls-files \| grep -c flutter-plugins-dependencies` | `0`: fixed |
+| 6 | D6 | `git diff origin/main..HEAD --stat` on the 3 files | `boot_test.dart` and `links_and_hooks_test.dart` are **identical** to `origin/main`; `app_test.dart` +28/−5, only item 7's `roots()` signature, `appMockDomains` and `routerRef`, plus the new T-0033-AC4 case. No assertion weakened |
+| 7 | D7 `T-0033-AC5_gates.sh` | positive run | **PASS** (8 gates; 79 tests) ([report](verifier/reverify/T-0033-AC5_gates.md)) |
+| | `MC_GATES_NEGATIVE=1` | built-in negative | the fixtures gate **FAILs** and the script reports "caught" (exit 0 by design: it inverts) ([report](verifier/reverify/T-0033-AC5_gates_negative.md)). Narrow: it plants only the fixtures dependency |
+| | my negative | an unformatted file planted in `universe_wiring/lib/src/`, full run | script **exit 1**: test, lint and format FAIL ([report](verifier/reverify/T-0033-AC5_gates_planted_format_violation.md)); file removed |
+| 8a | `roots()` boots like production | temporary `app_test` case: boot with `roots()`, tap Characters | `location=/characters grid=1 amber=6`: the real list loads from the mocked backend ([log](verifier/reverify/logs/rv-probe-roots.log)) |
+| 8b | `RouterRef.detach` | `router_ref_and_scheme_test` (3 AC1 cases) PASS. Temporary `routes_test` case: attach r1, resolve the navigator, detach and dispose r1, attach r2, `openCharacter(9)` | **R2 (minor):** the `GoRouter` factory never hands out a detached router. But `CharactersListNavigatorImpl` is a `@LazySingleton` that captured r1 in its constructor, so the same instance comes back and pushes to the disposed router ("A GoRouteInformationProvider was used after being disposed"; r2 stays at `/characters`) ([log](verifier/reverify/logs/rv-probe-detach.log)). No production path disposes `McApp`, so this is minor. Fix: navigators read the router per call (inject `RouterRef` or a `GoRouter Function()`), or register as factories |
+| 8c | `mc_e2e_utils` | `query attr(testonly,1,…)`; `rdeps(//..., mc_e2e_utils)`; `deps()` of both `*_ios` apps | **testonly**; no reverse dependency but itself; 0 hits for `mc_e2e_utils`, `integration_test` or `flutter_driver` in either app's closure; only `dev_dependencies` and `integration_test/` import it |
+| 9 | Full e2e on my sims | `tool/e2e_ios.sh` on both prepared projects | mini_client **PASS** (journey 26 s, deep link 34 s) ([summary](verifier/reverify/mini_client/e2e-summary.md)); sandbox target `characters_sandbox_test` **PASS** (35 s). The sandbox run's FAIL is my own probe hitting R1 ([summary](verifier/reverify/sandbox/e2e-summary.md)) |
+| 10 | Gates | `test //...` + `test --nocache_test_results //app/... //utility/mc_e2e_utils/...`; plus `T-0033-AC5_gates.sh` (lint, arch, rules_fork, format, l10n_check, closure, both `--config=sim` builds) | **79/79**; the 7 app targets uncached PASS; all 8 gates PASS |
+| | sample mutations | M1 wrong id, M3 wrong route, M5a untabled route, M6a path change | all **killed** ([logs](verifier/reverify/logs/)) |
+
+### Screenshots (all 552×1200, viewed)
+| File | What is visible |
+|---|---|
+| `reverify/mini_client/01_home.png` | home placeholder, `Config: env=e2e`, **Characters** and "Open placeholder 7" buttons |
+| `reverify/mini_client/02_characters_list.png` | "Characters" grid: Amber Alchemist / Artisan / Bard / Beacon with art |
+| `reverify/mini_client/03_preview.png` | back arrow, "Amber Alchemist", art, "See full profile" |
+| `reverify/mini_client/04_full_profile_placeholder.png` | "Character 100486" / "Character details 100486" |
+| `reverify/mini_client/05_deep_link_characters.png` | the grid as the start screen (file-drop cold link) |
+| `reverify/sandbox/01_sandbox_characters.png` | the sandbox opens on the same grid with art |
+| `reverify/sandbox/rv_01_sandbox_cold_link_details_5.png` | back arrow, "Character 5" / "Character details 5" |
+| `reverify/sandbox/rv_02_sandbox_cold_foreign_link_list.png` | the grid (foreign `miniclient://` cold link refused) |
+| `reverify/warm_probe_mini/rv_06_mini_warm_probe.png`, `rv_07_…from_list.png` | "Character details 6" in both: the links after it were dropped (R1) |
+| `reverify/warm_probe_sandbox/rv_04_sandbox_warm_probe.png` | the grid; the live own-scheme link was dropped (R1) |
+
+### Issues at 61535d2
+1. **R1 (blocker)**, `mc_feature_flow` / flow_builder 0.1.0 `flow_builder.dart:104,350,357-365`: live deep links are dropped app-wide after the first `FeatureFlow` mounts. It regresses T-0021-AC3 in the running app, and the sandbox's live links never work. Repro is above.
+2. **R2 (minor)**, `app/wiring/universe_wiring/lib/src/navigators/characters_list_navigator_impl.dart:9-13`: the lazy-singleton navigator keeps the router it was built with, so `RouterRef.detach` doesn't reach it.
+3. **R3 (minor)**, `app/sandbox/universe_sandbox/lib/main.dart`: there is no e2e file-drop start link (mini_client's `main()` has one), so on-sim sandbox cold links can only be driven through `defaultRouteName`.
+4. Carried over from the first pass, not in scope: D5 (no back button on the list pushed from home) and the card's reserved subtitle area (DS).
