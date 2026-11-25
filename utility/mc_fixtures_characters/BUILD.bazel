@@ -49,3 +49,13 @@ flutter_test(
     main = "test/contract/provider_contract_test.dart",
     deps = _TEST_DEPS,
 )
+
+# T-0032: the named fixture sets feature tests switch on (plan 05 §3.4).
+flutter_test(
+    name = "fixture_sets_test",
+    package_name = "mc_fixtures_characters",
+    language_version = _LANG,
+    size = "small",
+    main = "test/fixture_sets_test.dart",
+    deps = _TEST_DEPS,
+)

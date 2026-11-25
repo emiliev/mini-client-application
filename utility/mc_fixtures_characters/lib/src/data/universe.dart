@@ -78,6 +78,36 @@ final class CharacterUniverse {
     _byId = {for (final c in all) c.id: c};
   }
 
+  /// A small synthetic cast for paging tests: `Hero 01` to `Hero <count>`
+  /// (two digits, so name order is generation order), ids from [idBase],
+  /// thumbnails cycling through the bundled `characters` art. No randomness:
+  /// every field is a function of the index.
+  CharacterUniverse.synthetic(int count, DateTime clock) {
+    final images = placeholderSets['characters']!;
+    byName = List.unmodifiable([
+      for (var i = 0; i < count; i++)
+        CharacterRecord(
+          id: idBase + i,
+          name: 'Hero ${(i + 1).toString().padLeft(2, '0')}',
+          description: '',
+          modified: clock,
+          thumbnail: ApiImage(
+            path:
+                'mock-asset://characters/'
+                '${(i % images).toString().padLeft(3, '0')}',
+          ),
+          powers: const [],
+          team: '',
+          origin: '',
+          firstAppearanceYear: 2000,
+          comics: 0,
+          series: 0,
+          events: 0,
+        ),
+    ]);
+    _byId = {for (final c in byName) c.id: c};
+  }
+
   /// Every character in name order.
   late final List<CharacterRecord> byName;
   late final Map<int, CharacterRecord> _byId;

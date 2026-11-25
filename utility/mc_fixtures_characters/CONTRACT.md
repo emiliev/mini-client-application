@@ -76,6 +76,16 @@ An unknown or non-numeric id gives `404` with `{"error": {"code": "character_not
 | `characters.empty` | `GET /v1/characters` returns a well-formed page with `total: 0` |
 | `characters.server_error` | `GET /v1/characters` fails with `500` |
 
+## Fixture sets
+
+Named sets for feature tests (plan 05 §3.4), exported as `charactersFixtureSets`. A test registers them once (`charactersFixtureSets.forEach(McFixtureSets.register)`) and switches one on per scenario (`the backend serves {'characters.default'}`). Each set serves both routes with the paging, validation and envelope above.
+
+| Set | Cast | Test-facing facts |
+|---|---|---|
+| `characters.default` | `CharactersMockDomain` (the 1,500 above, seed 42) | First page at 30: `Amber Alchemist` (id 100486) to `Amber Striker`; index 12 is `Amber Herald`; offset 30 starts at `Amber Tinker` |
+| `characters.paged_45` | `SyntheticCharactersDomain(45)` | `Hero 01` to `Hero 45` (ids 100000 to 100044), in that order; at 30 per page: two pages (30 + 15); thumbnails cycle `000` to `023`; no scenarios |
+| `characters.empty` | `SyntheticCharactersDomain(0)` | `total: 0`, `count: 0`; every detail is `404`; no scenarios |
+
 ## Snapshots
 
 `test/contract/snapshots/*.json` pin one request each (`request`, `status`, `body`). A diff there is a contract change: regenerate with `fvm dart run utility/mc_fixtures_characters/tool/update_snapshots.dart`, review it, and update this file.
