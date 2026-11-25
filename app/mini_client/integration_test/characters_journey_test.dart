@@ -32,6 +32,7 @@ void main() {
     await pumpUntil(tester, find.text(first.name), 'the first character card');
     expect(find.byKey(charactersGridKey), findsOneWidget);
     expect(find.byType(Image), findsWidgets, reason: 'bundled art shows');
+    await letArtLoad(tester);
     await shot(binding, tester, '02_characters_list');
 
     await tester.tap(find.text(first.name));

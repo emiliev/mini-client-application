@@ -33,6 +33,7 @@ void main() {
       findsNothing,
       reason: 'the link, not home, was the start location',
     );
+    await letArtLoad(tester);
     await shot(binding, tester, '05_deep_link_characters');
   });
 }

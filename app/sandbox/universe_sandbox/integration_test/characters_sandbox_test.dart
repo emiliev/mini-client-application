@@ -22,6 +22,7 @@ void main() {
     expect(find.byKey(charactersGridKey), findsOneWidget);
     expect(find.text(names[1].name), findsOneWidget);
     expect(find.byType(Image), findsWidgets, reason: 'bundled art shows');
+    await letArtLoad(tester);
     await shot(binding, tester, '01_sandbox_characters');
   });
 }

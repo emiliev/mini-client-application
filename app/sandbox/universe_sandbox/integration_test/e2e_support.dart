@@ -22,6 +22,18 @@ Future<void> pumpUntil(
   await tester.pump(const Duration(milliseconds: 600));
 }
 
+/// Lets [duration] of real time pass (art decodes and fades in after the
+/// names appear).
+Future<void> letArtLoad(
+  WidgetTester tester, [
+  Duration duration = const Duration(seconds: 3),
+]) async {
+  final end = DateTime.now().add(duration);
+  while (DateTime.now().isBefore(end)) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
 /// Takes a named screenshot of the running app (to `$SCREENSHOT_DIR`).
 Future<void> shot(
   IntegrationTestWidgetsFlutterBinding binding,
