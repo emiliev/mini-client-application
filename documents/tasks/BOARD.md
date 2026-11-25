@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0033](T-0033-universe-wiring-and-sandbox.md) | `characters_list` in the app: `universe_wiring`, sandbox, simulator e2e (P1-17 app half) | Ready | Engineer (Sonnet) | T-0032 | `fleet/T-0033-universe-wiring` |
 | [T-0032](T-0032-characters-list-exemplar.md) | **`characters_list` exemplar feature** (LD, P1-17 feature package) | **In Progress** | Engineer (Opus) | T-0030, T-0031 | `fleet/T-0032-characters-list` |
 
 ## Done
