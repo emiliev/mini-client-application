@@ -11,7 +11,7 @@
 #   6. run //tool/l10n_check:bin over the repo
 #   7. coverage of characters_list's hand-written lib/ >= MC_COVERAGE_MIN
 #      (default 90, ADR-0010): `bazel coverage //feature/...`, then the union
-#      of the per-target LCOV (documents/evidence/T-0032/engineer/merge_lcov.py)
+#      of the per-target LCOV (tool/checks/merge_lcov.py)
 #   tool/checks/T-0032-AC7_gates.sh [--out FILE] [--role R]
 # MC_BAZEL_STARTUP holds extra Bazel startup options (e.g. --output_base=...).
 set -uo pipefail
@@ -47,7 +47,7 @@ gate "dart format" fvm dart format --output=none --set-exit-if-changed \
 gate "l10n_check" bzw run //tool/l10n_check:bin -- "$REPO"
 coverage() {
   bzw coverage //feature/characters/characters_list/... || return 1
-  /usr/bin/python3 -I "$REPO/documents/evidence/T-0032/engineer/merge_lcov.py" \
+  /usr/bin/python3 -I "$REPO/tool/checks/merge_lcov.py" \
     "$(bzw info output_path 2>/dev/null)" feature/characters/characters_list "$MIN" | tee "$work/coverage.txt"
 }
 gate "coverage >= $MIN %" coverage

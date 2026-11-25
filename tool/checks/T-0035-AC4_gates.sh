@@ -11,7 +11,7 @@
 #   6. run //tool/l10n_check:bin over the repo
 #   7. coverage of mc_feature_flow and characters_list >= MC_COVERAGE_MIN
 #      (default 90, ADR-0010): `bazel coverage //feature/...`, then the union
-#      of the per-target LCOV (documents/evidence/T-0032/engineer/merge_lcov.py)
+#      of the per-target LCOV (tool/checks/merge_lcov.py)
 #   tool/checks/T-0035-AC4_gates.sh [--out FILE] [--role R]
 # MC_BAZEL_STARTUP holds extra Bazel startup options (e.g. --output_base=...).
 set -uo pipefail
@@ -45,6 +45,8 @@ gate "rules_fork.sh check" "$REPO/tool/rules_fork.sh" check
 gate "dart format" fvm dart format --output=none --set-exit-if-changed \
   app feature spike utility tool/l10n_check tool/mc_arch_check
 gate "l10n_check" bzw run //tool/l10n_check:bin -- "$REPO"
+gate "flow_builder provenance (evergreen)" "$REPO/tool/checks/T-0035-AC4_provenance.sh"
+gate "lock delta vs 6e7eaaf (one-off, pre-merge)" "$REPO/tool/checks/T-0035-AC4_lock_delta.sh"
 PKGS=(utility/mc_feature_flow feature/characters/characters_list)
 EXEMPT="${MC_COVERAGE_EXEMPT-}"
 coverage() {
@@ -53,7 +55,7 @@ coverage() {
   bzw coverage $(printf '//%s/... ' "${PKGS[@]}") || return 1
   for pkg in "${PKGS[@]}"; do
     echo "== $pkg" >> "$work/coverage.txt"
-    /usr/bin/python3 -I "$REPO/documents/evidence/T-0032/engineer/merge_lcov.py" \
+    /usr/bin/python3 -I "$REPO/tool/checks/merge_lcov.py" \
       "$(bzw info output_path 2>/dev/null)" "$pkg" "$MIN" >> "$work/coverage.txt" || {
       if [[ " $EXEMPT " == *" $pkg "* ]]; then echo "UNDER $MIN (exempt, pre-existing): $pkg" >> "$work/coverage.txt"
       else echo "UNDER $MIN: $pkg" >> "$work/coverage.txt"; rc=1; fi; }

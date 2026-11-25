@@ -42,6 +42,12 @@ Our fix is small (see `third_party/flow_builder/0001-forward-pushRouteInformatio
 in the mini-client repo): handle `pushRouteInformation` by passing `location` to
 `WidgetsBinding.instance.handlePushRoute`, and answer an unknown method with `false`.
 
+Our vendored patch has two known limits, both deliberate: it cannot restore the
+framework's handler (that handler is private to `WidgetsBinding` and not readable), and
+it drops the `state` of `pushRouteInformation` (`handlePushRoute` takes a location only;
+iOS sends none). It also answers an intercepted `popRoute` with `true` instead of `null`,
+because iOS counts any other reply as unhandled.
+
 A better fix, if you are willing: do not replace the channel handler at all. Register a
 `WidgetsBindingObserver` whose `didPopRoute` runs the interceptors, so `Router`,
 `didPushRouteInformation` and every method added to the channel later keep working.
