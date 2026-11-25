@@ -1,0 +1,109 @@
+INFO: Invocation ID: 75288058-425e-4415-9042-751b6b512914
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/sandbox/universe_sandbox:universe_sandbox_links_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/sandbox/universe_sandbox:universe_sandbox_links_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/sandbox/universe_sandbox:universe_sandbox_links_test (0 packages loaded, 0 targets configured).
+FAIL: //app/sandbox/universe_sandbox:universe_sandbox_links_test (Exit 1) (see /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/sandbox/universe_sandbox/universe_sandbox_links_test/test.log)
+INFO: From Testing //app/sandbox/universe_sandbox:universe_sandbox_links_test:
+==================== Test output for //app/sandbox/universe_sandbox:universe_sandbox_links_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _KeyWidgetFinder:<Found 0 widgets with key [<'character.details.placeholder'>]: []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///app/sandbox/universe_sandbox/test/universe_sandbox_links_test.dart:64:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///app/sandbox/universe_sandbox/test/universe_sandbox_links_test.dart line 64
+The test description was:
+  T-0033-AC3 a cold-start link of the sandbox scheme opens its route
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0033-AC3 a cold-start link of the sandbox scheme opens its route
+        String: Test failed. See exception logs above.
+        The test description was: T-0033-AC3 a cold-start link of the sandbox scheme opens its route
+
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _KeyWidgetFinder:<Found 0 widgets with key [<'fake.characters'>]: []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///app/sandbox/universe_sandbox/test/universe_sandbox_links_test.dart:75:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///app/sandbox/universe_sandbox/test/universe_sandbox_links_test.dart line 75
+The test description was:
+  T-0033-AC3 a cold-start link of the main app scheme is not the sandbox's: it opens the list
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0033-AC3 a cold-start link of the main app scheme is not the sandbox's: it opens the list
+        String: Test failed. See exception logs above.
+        The test description was: T-0033-AC3 a cold-start link of the main app scheme is not the sandbox's: it opens the list
+
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Character details 5": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///app/sandbox/universe_sandbox/test/universe_sandbox_links_test.dart:91:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///app/sandbox/universe_sandbox/test/universe_sandbox_links_test.dart line 91
+The test description was:
+  T-0033-AC3 a sandbox link that arrives during boot is held and opened once boot is ready
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0033-AC3 a sandbox link that arrives during boot is held and opened once boot is ready
+        String: Test failed. See exception logs above.
+        The test description was: T-0033-AC3 a sandbox link that arrives during boot is held and opened once boot is ready
+
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a foreign link that arrives after boot is ignored the same way as a cold-start one
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC3 a sandbox link that arrives after boot opens its route
+
+2 passed, 3 failed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 1.222s, Critical Path: 0.72s
+INFO: 12 processes: 1 action cache hit, 5 disk cache hit, 6 internal, 1 darwin-sandbox.
+INFO: Build completed, 1 test FAILED, 12 total actions
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               FAILED in 0.7s
+  /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/sandbox/universe_sandbox/universe_sandbox_links_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.
