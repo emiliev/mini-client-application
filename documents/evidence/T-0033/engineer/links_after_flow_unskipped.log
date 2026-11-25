@@ -1,0 +1,50 @@
+INFO: Invocation ID: 1cea5d29-2d27-4abe-a31e-5fbb18bc5bac
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/mini_client:links_after_flow_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/mini_client:links_after_flow_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/mini_client:links_after_flow_test (0 packages loaded, 0 targets configured).
+FAIL: //app/mini_client:links_after_flow_test (Exit 1) (see /private/tmp/mc-ob-T-0033-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/mini_client/links_after_flow_test/test.log)
+INFO: From Testing //app/mini_client:links_after_flow_test:
+==================== Test output for //app/mini_client:links_after_flow_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Placeholder detail 42": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///app/mini_client/test/links_after_flow_test.dart:84:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///app/mini_client/test/links_after_flow_test.dart line 84
+The test description was:
+  T-0033-AC4 a link sent to the running app opens its route after the characters list (a flow) is
+  shown
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0033-AC4 a link sent to the running app opens its route after the characters list (a flow) is shown
+        String: Test failed. See exception logs above.
+        The test description was: T-0033-AC4 a link sent to the running app opens its route after the characters list (a flow) is shown
+
+
+1 failed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 1.479s, Critical Path: 0.95s
+INFO: 11 processes: 4 internal, 3 darwin-sandbox, 4 worker.
+INFO: Build completed, 1 test FAILED, 11 total actions
+//app/mini_client:links_after_flow_test                                  FAILED in 0.8s
+  /private/tmp/mc-ob-T-0033-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/mini_client/links_after_flow_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.

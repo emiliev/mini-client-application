@@ -11,6 +11,6 @@
 | fixtures closure (T-0031-AC6 widened) | PASS |
 | apps build for the simulator | PASS |
 
-- tests: Executed 0 out of 79 tests: 79 tests pass.
+- tests: Executed 0 out of 82 tests: 82 tests pass.
 
 **PASS T-0033-AC5-gates**

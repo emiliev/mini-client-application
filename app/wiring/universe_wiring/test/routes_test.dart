@@ -113,6 +113,44 @@ void main() {
     );
   });
 
+  testWidgets('T-0033-AC1 the navigator pushes to the live router after the '
+      'router was replaced, not to the one it first saw', (tester) async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseNavigatorsDIInitializer(),
+      McDIInitializer((getIt, _) {
+        getIt.registerSingleton<RouteTargets>(_Targets());
+      }),
+    ]);
+    GoRouter build() => GoRouter(
+      initialLocation: AppLocations.characters,
+      routes: universeRoutes,
+    );
+    final first = ref.attach(build());
+    await tester.pumpWidget(MaterialApp.router(routerConfig: first));
+    // The navigator is created (and, in the old design, captured `first`).
+    final navigator = diContainer<CharactersListNavigator>();
+    navigator.openCharacter(const CharacterId(1));
+    await tester.pumpAndSettle();
+    expect(first.state.uri.toString(), '/characters/1');
+
+    ref.detach();
+    final second = ref.attach(build());
+    addTearDown(second.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: second));
+    first.dispose();
+    navigator.openCharacter(const CharacterId(2));
+    await tester.pumpAndSettle();
+
+    expect(second.state.uri.toString(), '/characters/2');
+    expect(
+      find.byKey(const Key('character.details.placeholder')),
+      findsOneWidget,
+    );
+    expect(find.text('Character details 2'), findsOneWidget);
+  });
+
   test('T-0033-AC1 the wiring initializer resolves the route targets and the '
       'navigator', () async {
     final ref = RouterRef();

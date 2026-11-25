@@ -24,6 +24,7 @@ _INIT = "lib/src/di/di_initializer.dart"
 _NAVIGATOR = "lib/src/navigators/characters_list_navigator_impl.dart"
 
 _DEPS = [
+    "//app/wiring/app_core",
     "//feature/characters/characters_list",
     "//utility/mc_di",
     "@pub_deps//:flutter",
@@ -107,7 +108,6 @@ flutter_library(
 
 _TEST_DEPS = _DEPS + [
     ":universe_wiring",
-    "//app/wiring/app_core",
     "@pub_deps//:flutter_test",
 ]
 

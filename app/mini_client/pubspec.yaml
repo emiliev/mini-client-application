@@ -41,6 +41,7 @@ dev_dependencies:
   mc_mocked_backend: any
   mc_monitoring: any
   mc_storage: any
+  mc_test_utils: any
 
 flutter:
   uses-material-design: true

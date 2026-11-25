@@ -55,7 +55,7 @@ mutate "scheme: the sandbox installs its links with the default scheme" \
 
 mutate "navigator: push becomes go" \
   app/wiring/universe_wiring/lib/src/navigators/characters_list_navigator_impl.dart \
-  "_router.push(" "_router.go(" \
+  "_routerRef.router.push(" "_routerRef.router.go(" \
   //app/wiring/universe_wiring:routes_test
 
 mutate "RouterRef.detach does nothing" \
@@ -78,5 +78,22 @@ mutate "MiniClientApp gives test initializers no router ref" \
   app/mini_client/lib/src/mini_client_app.dart \
   "widget.initializers?.call(_routerRef)" "widget.initializers?.call(RouterRef())" \
   //app/mini_client:app_test
+
+mutate "navigator keeps the first router it saw (R2)" \
+  app/wiring/universe_wiring/lib/src/navigators/characters_list_navigator_impl.dart \
+  "  final RouterRef _routerRef;
+
+  @override
+  void openCharacter(CharacterId id) {
+    unawaited(
+      _routerRef.router.push(" \
+  "  final RouterRef _routerRef;
+  dynamic _first;
+
+  @override
+  void openCharacter(CharacterId id) {
+    unawaited(
+      (_first ??= _routerRef.router).push(" \
+  //app/wiring/universe_wiring:routes_test
 
 exit "$rc"

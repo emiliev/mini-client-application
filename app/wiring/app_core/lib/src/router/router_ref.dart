@@ -33,6 +33,8 @@ class RouterDIInitializer extends McDIInitializer {
 
   static GetItInitializer _init(RouterRef ref) =>
       (GetIt getIt, String? environment) {
-        getIt.registerFactory<GoRouter>(() => ref.router);
+        getIt
+          ..registerSingleton<RouterRef>(ref)
+          ..registerFactory<GoRouter>(() => ref.router);
       };
 }
