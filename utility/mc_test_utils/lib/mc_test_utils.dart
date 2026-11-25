@@ -2,6 +2,7 @@
 library;
 
 export 'package:mc_test_utils/src/backend_harness.dart';
+export 'package:mc_test_utils/src/fixture_assets.dart';
 export 'package:mc_test_utils/src/golden.dart';
 export 'package:mc_test_utils/src/init_flow.dart';
 export 'package:mc_test_utils/src/mocks.dart';

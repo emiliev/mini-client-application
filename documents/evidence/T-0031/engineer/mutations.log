@@ -1,0 +1,45 @@
+[threshold 0.5] failing tests:
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: asks once past 80 % and not just below it
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: asks once past 80 % and not just below it
+[threshold 0.6] failing tests:
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: asks once past 80 % and not just below it
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: asks once past 80 % and not just below it
+[threshold 0.75] failing tests:
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: asks once past 80 % and not just below it
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: asks once past 80 % and not just below it
+[threshold 0.95] failing tests:
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: asks once past 80 % and not just below it
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: asks once past 80 % and not just below it
+[no post-frame check on state change] failing tests:
+    FAIL  T-0031-AC1 McPagedGrid short pages T-0031-AC1: a list still short after page 2 asks for page 3 (with skeletons)
+    FAIL  T-0031-AC1 McPagedGrid short pages T-0031-AC1: a list still short after page 2 asks for page 3 (without skeletons)
+    FAIL  T-0031-AC1 McPagedGrid short pages T-0031-AC1: a short first page asks for the next one (with skeletons)
+    FAIL  T-0031-AC1 McPagedGrid short pages T-0031-AC1: a short first page asks for the next one (without skeletons)
+    FAIL  T-0031-AC1 McPagedList short pages T-0031-AC1: a list still short after page 2 asks for page 3 (with skeletons)
+    FAIL  T-0031-AC1 McPagedList short pages T-0031-AC1: a list still short after page 2 asks for page 3 (without skeletons)
+    FAIL  T-0031-AC1 McPagedList short pages T-0031-AC1: a short first page asks for the next one (without skeletons)
+[no latch reset below threshold] failing tests:
+    FAIL  T-0031-AC1 McPagedGrid load more T-0031-AC1: a dropped request is asked again by scrolling
+    FAIL  T-0031-AC1 McPagedList load more T-0031-AC1: a dropped request is asked again by scrolling
+[skeleton not excluded] failing tests:
+    FAIL  T-0031-AC2 McPagedGrid states T-0031-AC2: the skeleton announces one Loading
+    FAIL  T-0031-AC2 McPagedList states T-0031-AC2: the skeleton announces one Loading
+[card always a button] failing tests:
+    FAIL  T-0031-AC5: without onTap the card is not a button
+[skeleton card announces] failing tests:
+    FAIL  T-0031-AC2: the skeleton card has no content, tap or semantics
+[McImage swallows Error] failing tests:
+    FAIL  T-0031-AC3 McImage states T-0031-AC3: an Error from a resolver is not swallowed
+[paging Error leaves isLoadingMore] failing tests:
+    00:00 +20 -1: T-0030-AC3 errors and inputs T-0031-AC1: an Error from the fetcher settles isLoadingMore [E]
+[grid cell too short (old default)] failing tests:
+    FAIL  T-0031-AC4: a card title is not clipped in its cell at scale 1.0
+    FAIL  T-0031-AC4: a card title is not clipped in its cell at scale 2.0
+[flutter import probe] failing tests:
+    00:00 +1 -1: T-0030-AC7 every file of the pure mc_media library imports no Flutter [E]

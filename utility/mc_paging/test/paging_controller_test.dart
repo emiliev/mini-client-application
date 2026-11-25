@@ -356,6 +356,19 @@ void main() {
     });
 
     test(
+      'T-0031-AC1: an Error from the fetcher settles isLoadingMore',
+      () async {
+        final (:sut, :backend, :seen) = _make();
+        backend.throwOnNext = TypeError();
+
+        await expectLater(sut.loadFirst(), throwsA(isA<TypeError>()));
+
+        expect(sut.state.isLoadingMore, isFalse);
+        expect(seen.last.isLoadingMore, isFalse);
+      },
+    );
+
+    test(
       'T-0030-AC1: later changes to the fetcher list do not change the state',
       () async {
         final shared = <int>[1, 2, 3];

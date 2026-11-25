@@ -1,0 +1,22 @@
+name: mc_ds_cards
+description: Design-system cards. McMediaCard and its skeleton (T-0031).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mc_ds_media: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_media: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_fixtures_media: any
+  mc_test_utils: any

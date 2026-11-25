@@ -1,0 +1,61 @@
+# T-0031 (U29): resolver-based images. McMediaScope moved here from mc_media.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "//utility/mc_media",
+    "@pub_deps//:flutter",
+]
+
+flutter_library(
+    name = "mc_ds_media",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "mc_ds_media",
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_ds_media",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_test_utils",
+    "@pub_deps//:flutter_test",
+]
+
+[flutter_test(
+    name = t,
+    size = "small",
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    language_version = _LANG,
+    main = "test/%s.dart" % t,
+    package_name = "mc_ds_media",
+    deps = _TEST_DEPS,
+) for t in [
+    "media_scope_test",
+    "image_test",
+]]
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ] + glob(["test/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden_test.dart",
+    package_name = "mc_ds_media",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS,
+)

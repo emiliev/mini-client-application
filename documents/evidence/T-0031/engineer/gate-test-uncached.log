@@ -1,0 +1,17 @@
+//utility/mc_ds_cards:card_test                                          PASSED in 0.9s
+//utility/mc_ds_cards:golden_test                                        PASSED in 1.5s
+//utility/mc_ds_lists:golden_test                                        PASSED in 2.1s
+//utility/mc_ds_lists:paged_grid_test                                    PASSED in 2.1s
+//utility/mc_ds_lists:paged_list_test                                    PASSED in 2.0s
+//utility/mc_ds_media:golden_test                                        PASSED in 1.3s
+//utility/mc_ds_media:image_test                                         PASSED in 1.0s
+//utility/mc_ds_media:media_scope_test                                   PASSED in 0.5s
+//utility/mc_media:api_image_test                                        PASSED in 0.2s
+//utility/mc_media:purity_test                                           PASSED in 0.2s
+//utility/mc_media:resolved_image_test                                   PASSED in 0.2s
+//utility/mc_paging:debounced_query_test                                 PASSED in 0.2s
+//utility/mc_paging:paged_state_test                                     PASSED in 0.2s
+//utility/mc_paging:paging_controller_test                               PASSED in 0.3s
+//utility/mc_paging:purity_test                                          PASSED in 0.2s
+//utility/mc_paging:search_history_test                                  PASSED in 0.2s
+Executed 16 out of 16 tests: 16 tests pass.

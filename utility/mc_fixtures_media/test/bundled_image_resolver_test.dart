@@ -30,7 +30,7 @@ void main() {
       for (final entry in placeholderSets.entries) {
         for (var i = 0; i < entry.value; i++) {
           final image = ApiImage(path: 'mock-asset://${entry.key}/$i');
-          final bundled = resolver.resolve(image);
+          final bundled = resolver.locate(image);
           for (final path in bundled.allDensityPaths) {
             final file = File('${dir.path}/$path');
             expect(file.existsSync(), isTrue, reason: '$image -> $path');
@@ -41,7 +41,7 @@ void main() {
     });
 
     test('T-0018-AC7: path and variant resolve to a package asset key', () {
-      final bundled = resolver.resolve(
+      final bundled = resolver.locate(
         const ApiImage(
           path: 'mock-asset://characters/017',
           variant: ImageVariant.portraitLarge,
@@ -53,7 +53,7 @@ void main() {
       );
       expect(bundled.variant, ImageVariant.portraitLarge);
       expect(
-        resolver.resolve(const ApiImage(path: 'mock-asset://characters/7')).id,
+        resolver.locate(const ApiImage(path: 'mock-asset://characters/7')).id,
         '007',
       );
     });
@@ -70,7 +70,7 @@ void main() {
         'https://example.invalid/a.png',
       ]) {
         expect(
-          () => resolver.resolve(ApiImage(path: path)),
+          () => resolver.locate(ApiImage(path: path)),
           throwsA(isA<UnresolvedImageException>()),
           reason: path,
         );

@@ -29,8 +29,16 @@ void main() {
 
     expect(resolved.variant, ImageVariant.standard);
     expect(
-      (resolved as BundledImage).assetKey,
-      'packages/mc_fixtures_media/assets/characters/003.png',
+      resolved,
+      const ResolvedImage.asset(
+        'assets/characters/003.png',
+        package: 'mc_fixtures_media',
+        variant: ImageVariant.standard,
+      ),
+    );
+    expect(
+      () => sut.resolve(const ApiImage(path: 'mock-asset://nowhere/1')),
+      throwsA(isA<UnresolvedImageException>()),
     );
   });
 }

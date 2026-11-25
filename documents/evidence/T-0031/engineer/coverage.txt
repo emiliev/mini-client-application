@@ -1,0 +1,30 @@
+== mc_ds_media
+package:mc_ds_media/src/image_provider_for.dart: 3/3 100.0% missed=[]
+package:mc_ds_media/src/mc_avatar.dart: 8/8 100.0% missed=[]
+package:mc_ds_media/src/mc_image.dart: 46/46 100.0% missed=[]
+package:mc_ds_media/src/mc_media_scope.dart: 7/7 100.0% missed=[]
+TOTAL 64/64 100.0%
+exit=0
+== mc_ds_cards
+package:mc_ds_cards/src/mc_media_card.dart: 63/63 100.0% missed=[]
+TOTAL 63/63 100.0%
+exit=0
+== mc_ds_lists
+package:mc_ds_lists/src/mc_paged_grid.dart: 35/35 100.0% missed=[]
+package:mc_ds_lists/src/mc_paged_list.dart: 25/25 100.0% missed=[]
+package:mc_ds_lists/src/paged_body.dart: 90/90 100.0% missed=[]
+TOTAL 150/150 100.0%
+exit=0
+== mc_media
+package:mc_media/src/api_image.dart: 14/14 100.0% missed=[]
+package:mc_media/src/image_resolver.dart: 22/22 100.0% missed=[]
+TOTAL 36/36 100.0%
+exit=0
+== mc_paging
+package:mc_paging/src/page.dart: 18/18 100.0% missed=[]
+package:mc_paging/src/paged_state.dart: 0/0 0.0% missed=[]
+package:mc_paging/src/paging_controller.dart: 58/58 100.0% missed=[]
+package:mc_paging/src/query/debounced_query.dart: 20/20 100.0% missed=[]
+package:mc_paging/src/query/search_history.dart: 21/21 100.0% missed=[]
+TOTAL 117/117 100.0%
+exit=0

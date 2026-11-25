@@ -134,7 +134,7 @@ void main() {
 
       final seen = <String>{};
       for (final image in images) {
-        final bundled = resolver.resolve(image);
+        final bundled = resolver.locate(image);
         for (final path in bundled.allDensityPaths) {
           if (!seen.add(path)) {
             continue;
