@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0033 engineer on mc-T-0033-engineer-32019 (A031E0D4-208A-477E-AADD-BF3F42071F34)
+# e2e_ios.sh: T-0033 engineer on mc-T-0033-engineer-60314 (D0536563-A85F-4772-9395-3E34B3E9AE9F)
 # cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZRUTwE/screenshots/1-characters_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_deeplink_test.dart -d A031E0D4-208A-477E-AADD-BF3F42071F34
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.X2i6MA/screenshots/1-characters_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_deeplink_test.dart -d D0536563-A85F-4772-9395-3E34B3E9AE9F
 
 Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini`...
 Downloading packages...
@@ -20,10 +20,10 @@ Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mi
 11 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                            9.7s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54105/awCWbDM1ESo=/
-VMServiceFlutterDriver: Isolate found with number: 68898387496115
-VMServiceFlutterDriver: Isolate 68898387496115 is runnable.
+Xcode build done.                                           22.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58284/40Uomp0IyKM=/
+VMServiceFlutterDriver: Isolate found with number: 2387000716415211
+VMServiceFlutterDriver: Isolate 2387000716415211 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 the deep link miniclient://app/characters opens the list
@@ -35,7 +35,7 @@ flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
 flutter: 00:04 +1: (tearDownAll)
 flutter: 00:04 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZRUTwE/screenshots/1-characters_deeplink_test/05_deep_link_characters.png (396818)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.X2i6MA/screenshots/1-characters_deeplink_test/05_deep_link_characters.png (396818)
 All tests passed.
 
 # exit code: 0

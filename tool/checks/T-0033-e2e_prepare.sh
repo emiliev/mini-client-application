@@ -17,12 +17,14 @@ PLANT="utility/mc_prelude/lib/src/stale_planted.g.dart"
 cleanup() {
   rm -f "$REPO/$PLANT"
   "$BAZELW" --output_base="$FRESH" shutdown >/dev/null 2>&1
-  rm -rf "$SCR"
+  chmod -R u+w "$FRESH" 2>/dev/null
+  rm -rf "$FRESH" "$SCR"
 }
 trap cleanup EXIT
 
 report "# T-0033 e2e prepare: fresh output base, no stale or junk files" ""
 "$BAZELW" --output_base="$FRESH" shutdown >/dev/null 2>&1
+chmod -R u+w "$FRESH" 2>/dev/null
 rm -rf "$FRESH"
 printf '// planted by T-0033-e2e_prepare.sh; an older build could have left this\n' >"$REPO/$PLANT"
 git check-ignore -q "$PLANT" || { report "the planted file is not git-ignored: the check is invalid"; finish T-0033-e2e_prepare 1; }

@@ -8,17 +8,17 @@
 | Project | `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox/app/sandbox/universe_sandbox` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0033-engineer-33649` |
-| Simulator UDID | `D6122630-505B-4A46-9126-CFC56891C658` |
+| Simulator | `mc-T-0033-engineer-63655` |
+| Simulator UDID | `21124241-9CD3-4DE5-B0C3-D46745806F94` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-25T13:54:15Z |
-| Finished | 2026-11-25T13:55:00Z |
+| Started | 2026-11-25T14:20:56Z |
+| Finished | 2026-11-25T14:21:45Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/characters_sandbox_test.dart` | PASS | 26 s | [e2e-characters_sandbox_test.log](e2e-characters_sandbox_test.log) |
+| `integration_test/characters_sandbox_test.dart` | PASS | 32 s | [e2e-characters_sandbox_test.log](e2e-characters_sandbox_test.log) |
 
 ## Screenshots
 

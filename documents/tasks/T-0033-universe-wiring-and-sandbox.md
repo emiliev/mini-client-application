@@ -82,7 +82,7 @@ Make the first Marvel feature visible: `characters_list` reachable through typed
 | T-0033-AC2 | `routes_test`: "T-0033-AC2 every AppLocations entry equals its typed route". It also asserts that the number of `GoRoute`s in `universeRoutes` equals the table's size, so a new route without a row fails |
 | T-0033-AC3 | Screenshot [`sandbox/01_sandbox_characters.png`](../evidence/T-0033/engineer/sandbox/01_sandbox_characters.png) from `integration_test/characters_sandbox_test.dart` (names from the fixture package; the test fails unless the first two names, the grid and `Image`s are on screen); [e2e-summary](../evidence/T-0033/engineer/sandbox/e2e-summary.md). Plus `//app/sandbox/universe_sandbox:universe_sandbox_router_test` ("T-0033-AC3": opens on the list; a foreign route shows the stub) |
 | T-0033-AC4 | `integration_test/characters_journey_test.dart` through `tool/e2e_ios.sh`: [01_home](../evidence/T-0033/engineer/mini_client/01_home.png), [02_characters_list](../evidence/T-0033/engineer/mini_client/02_characters_list.png), [03_preview](../evidence/T-0033/engineer/mini_client/03_preview.png), [04_full_profile_placeholder](../evidence/T-0033/engineer/mini_client/04_full_profile_placeholder.png) (taps Characters, the first character, "See full profile"; asserts the preview title and `Character details <id from the fixture>`). The deep link: `characters_deeplink_test.dart` (file-drop start link, F-0020) → [05_deep_link_characters](../evidence/T-0033/engineer/mini_client/05_deep_link_characters.png). [e2e-summary](../evidence/T-0033/engineer/mini_client/e2e-summary.md) |
-| T-0033-AC5 | `gate-arch.log` (OK; it failed first, which is how the `*Flow` return types came about), `T-0031-AC6_closure.md` (PASS, fixtures dependencies: none in features and DS), `gate-test.log`, `gate-lint.log`, `gate-rules-fork.log`, `gate-format.log`, `gate-app-builds.log` |
+| T-0033-AC5 | `gate-arch.log` (OK; it failed first, which is how the `*Flow` return types came about), `T-0031-AC6_closure.md` (PASS: none of the 23 production `//feature/...` and `//utility/mc_*` targets reaches `mc_fixtures_*`; fixtures, the mocked backend and test utilities excluded; negative control: a fixtures dependency in `characters_list` is reported). The first version of this check read only `mc_ds_*`, so the earlier claim "none in features and DS" was not backed for features; it is now, `gate-test.log`, `gate-lint.log`, `gate-rules-fork.log`, `gate-format.log`, `gate-app-builds.log` |
 
 ### Gates
 - `test //...`: 77/77 pass (75 before; +`routes_test`, +`universe_sandbox_router_test`).
@@ -109,3 +109,23 @@ Make the first Marvel feature visible: `characters_list` reachable through typed
 - `McApp` has no `localizationsDelegates` yet (F-0031 B3 says the shell needs them once it localises); the flows install their own.
 - The e2e prepare step copies the repo and `flutter create`s an Xcode project every run; a cached project would cut the cold build (about 6 min the first time per scratch dir).
 - The 5-tab shell, auth guard and analytics stay out of scope, as the task says.
+
+## Fix round (Engineer, after the Verifier PASS and the code review)
+Fast-forwarded to the report (51e1c1a), then one round. Every fix has a `T-0033-ACn` test that fails without it: [mutations.log](../evidence/T-0033/engineer/mutations.log) (8 of 8 killed; [script](../evidence/T-0033/engineer/mutations.sh)).
+
+| # | Item | Fix and evidence |
+|---|---|---|
+| 1 | Sandbox deep links | `LinkScheme(scheme, host)` in `app_core` (default `miniclient://app`); `PendingLinks.install(binding, scheme:)` and `normalise(link, scheme:)` use it for the cold-start link, a link during boot and `offer`. The sandbox installs `miniclientuniverse://app` (`installSandboxLinks`) and `buildSandboxRouter` has the same foreign-link guard as mini_client's redirect (`LinkScheme.isForeign`). The scheme travels on `PendingLinks`, not on `McApp`, because `McApp` only receives the holder. Tests: `universe_sandbox_links_test` (cold start of the sandbox and of the main scheme, a link during boot, after boot, foreign after boot) and `router_ref_and_scheme_test` (T-0033-AC3) |
+| 2 | D1 prepare script | cquery lists the generated outputs, builds those targets with `--remote_download_outputs=all`, copies only them; the repo copy uses git's list, so no stale file; no `-exec` copies. `T-0033-e2e_prepare.sh`: PASS from a wiped output base, planted stale file not copied, 18 files, 2 negative controls. F-0032 corrected (212 was wrong) |
+| 3 | D2 closure check | `T-0031-AC6_closure.sh` now covers 23 targets; negative control inside it |
+| 4 | D3 push | `routes_test` "the navigator pushes": the router's own location stays the list and Back returns to it; the `push` to `go` mutation fails |
+| 5 | D4 | `git rm --cached` the sandbox's `.flutter-plugins-dependencies` (ignored by the existing pattern) |
+| 6 | D7 gates | `tool/checks/T-0033-AC5_gates.sh` ([report](../evidence/T-0033/engineer/T-0033-AC5_gates.md)); `MC_GATES_NEGATIVE=1` plants a fixtures dependency and the fixtures gate must fail ([report](../evidence/T-0033/engineer/T-0033-AC5_gates_negative.md)) |
+| 7 | app_test boot | `roots()` passes `appMockDomains` and the app's `RouterRef`; `MiniClientApp.initializers` is now `List<McDIInitializer> Function(RouterRef)`; new test "T-0033-AC4 the app boots with its own router..." (killed when the app hands out a fresh `RouterRef`) |
+| 8 | `RouterRef.detach` | called from `McApp.dispose`; `RouterDIInitializer` registers a factory, not a cached singleton, so a detached router is never handed out. Tests in `router_ref_and_scheme_test` |
+| 9 | e2e support | `utility/mc_e2e_utils` (testonly; `startApp`, `pumpUntil`, `letArtLoad`, `shot`, the list keys); both apps' journeys import it |
+| 10 | D6 formatting | the 3 existing test files are back at their `origin/main` text (plus only the `app_test` edits of item 7), formatted after `fvm flutter pub get --offline` |
+
+Root changes in this round: `pubspec.yaml` (workspace member `utility/mc_e2e_utils`; `pubspec.lock` unchanged, first-party), and `MODULE.bazel.lock` regenerated by Bazel for the earlier `integration_test` lock entries.
+
+Gates after the round: `tool/checks/T-0033-AC5_gates.sh` PASS (79 tests; lint; arch; rules_fork; format; l10n_check; fixtures closure; both `--config=sim` app builds). e2e through `tool/e2e_ios.sh`: mini_client journey and deep link, and the sandbox, all PASS with fresh screenshots; no `mc-T-0033` simulator left.

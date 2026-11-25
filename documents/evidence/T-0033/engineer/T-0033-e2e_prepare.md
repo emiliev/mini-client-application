@@ -3,20 +3,17 @@
 ## prepare from a fresh output base (/tmp/mc-ob-T-0033-fresh): exit 0
 ```
 ==> cquery: the generated Dart files under //app/mini_client:mini_client_lib
-==> bazel build of the 21 targets that make them
-==> copying the repo's own files to /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/tmp.aGSmCh1YmO/p
-==> copying the 37 generated files from the execroot
-GENERATED_FILES=37
+==> bazel build of the 6 targets that make them
+==> copying the repo's own files to /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/tmp.KimE5a5bey/p
+==> copying the 18 generated files from the execroot
+GENERATED_FILES=18
 ==> bundling the e2e config as assets/app_config.json
 ==> flutter create --platforms=ios (adds the Xcode project; keeps existing files)
 ==> flutter pub get
-E2E_PROJECT=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/tmp.aGSmCh1YmO/p/app/mini_client
+E2E_PROJECT=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/tmp.KimE5a5bey/p/app/mini_client
 ```
-## verify: FAIL
-```
-generated-looking files: 18, built outputs: 37
-```
+## verify: PASS (18 generated files, exactly the built outputs; the planted stale `utility/mc_prelude/lib/src/stale_planted.g.dart` was not copied)
 ## negative control (stale file in the copy): verify FAILED as it must
 ## negative control (junk generated-looking file): verify FAILED as it must
 
-**FAIL T-0033-e2e_prepare**
+**PASS T-0033-e2e_prepare**
