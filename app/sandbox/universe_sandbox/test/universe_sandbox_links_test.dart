@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:universe_sandbox/src/universe_sandbox_app.dart';
-import 'package:universe_sandbox/src/universe_sandbox_router.dart';
 import 'package:universe_wiring/universe_wiring.dart';
 
 import 'fake_targets.dart';
@@ -47,10 +46,7 @@ void main() {
       tester.platformDispatcher.defaultRouteNameTestValue = coldStart;
       addTearDown(tester.platformDispatcher.clearDefaultRouteNameTestValue);
     }
-    final links = PendingLinks.install(
-      tester.binding,
-      scheme: sandboxLinkScheme,
-    );
+    final links = installSandboxLinks(tester.binding);
     addTearDown(links.detach);
     return links;
   }

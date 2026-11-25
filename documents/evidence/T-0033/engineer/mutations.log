@@ -1,0 +1,8 @@
+MUTATION scheme: normalise ignores the app's scheme: killed by //app/sandbox/universe_sandbox:universe_sandbox_links_test //app/wiring/app_core:router_ref_and_scheme_test 
+MUTATION scheme: sandbox router has no foreign-link guard: killed by //app/sandbox/universe_sandbox:universe_sandbox_links_test 
+MUTATION scheme: the sandbox installs its links with the default scheme: SURVIVED (tests passed)  [//app/sandbox/universe_sandbox:universe_sandbox_links_test]
+MUTATION navigator: push becomes go: killed by //app/wiring/universe_wiring:routes_test 
+MUTATION RouterRef.detach does nothing: killed by //app/wiring/app_core:router_ref_and_scheme_test 
+MUTATION McApp.dispose does not detach: killed by //app/wiring/app_core:router_ref_and_scheme_test 
+MUTATION GoRouter registered as a caching singleton: killed by //app/wiring/app_core:router_ref_and_scheme_test 
+MUTATION MiniClientApp gives test initializers no router ref: killed by //app/mini_client:app_test 

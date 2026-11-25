@@ -5,6 +5,11 @@ import 'package:mc_di/mc_di.dart';
 import 'package:universe_sandbox/src/universe_sandbox_router.dart';
 import 'package:universe_wiring/universe_wiring.dart';
 
+/// `main()`'s link holder: the sandbox's own scheme, so a cold-start link and a
+/// link during boot are judged alike.
+PendingLinks installSandboxLinks(WidgetsBinding binding) =>
+    PendingLinks.install(binding, scheme: sandboxLinkScheme);
+
 /// The asset Bazel bundles from `//tool/bazel/config:app_config` (R13).
 const String appConfigAsset = 'assets/app_config.json';
 

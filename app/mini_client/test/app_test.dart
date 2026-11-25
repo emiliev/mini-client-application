@@ -328,6 +328,22 @@ void main() {
     expect(find.text('Placeholder detail 7'), findsOneWidget);
   });
 
+  testWidgets('T-0033-AC4 the app boots with its own router wired for the '
+      'navigators and the characters domain on the backend', (tester) async {
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    await tester.pumpWidget(MiniClientApp(links: links, initializers: roots()));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final router = GoRouter.of(tester.element(find.text('Marvel universe')));
+    expect(diContainer<GoRouter>(), same(router));
+    expect(
+      diContainer<MockBackend>().scenarioNames,
+      contains('characters.empty'),
+    );
+  });
+
   testWidgets('an unknown path shows the not-found page', (tester) async {
     final links = PendingLinks.install(tester.binding);
     addTearDown(links.detach);
