@@ -37,18 +37,22 @@ flutter_library(
     deps = _RUNTIME_DEPS,
 )
 
-flutter_test(
-    name = "universe_sandbox_router_test",
+[flutter_test(
+    name = t,
     size = "small",
     package_name = _PKG,
     language_version = _LANG,
-    main = "test/universe_sandbox_router_test.dart",
+    srcs = ["test/fake_targets.dart"],
+    main = "test/%s.dart" % t,
     deps = _RUNTIME_DEPS + [
         ":universe_sandbox_lib",
         "//feature/characters/characters_list",
         "@pub_deps//:flutter_test",
     ],
-)
+) for t in [
+    "universe_sandbox_links_test",
+    "universe_sandbox_router_test",
+]]
 
 # The app (manual, R14). The app rule carries no DartInfo, so its sources are
 # listed again, as in //app/mini_client.

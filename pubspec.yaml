@@ -42,6 +42,7 @@ workspace:
   - utility/mc_ds_testing
   - utility/mc_ds_theme
   - utility/mc_ds_tokens
+  - utility/mc_e2e_utils
   - utility/mc_event_bus
   - utility/mc_feature_flow
   - utility/mc_formatters

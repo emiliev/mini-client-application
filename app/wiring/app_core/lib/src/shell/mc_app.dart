@@ -113,6 +113,7 @@ class _McAppState extends State<McApp> {
   void dispose() {
     unawaited(_bootStates?.cancel());
     unawaited(_boot.close());
+    widget.routerRef?.detach();
     _router?.dispose();
     if (widget.themeMode == null) {
       _themeMode.dispose();

@@ -19,15 +19,20 @@ class RouterRef {
 
   /// Records [router] and returns it.
   GoRouter attach(GoRouter router) => _router = router;
+
+  /// Forgets the router (`McApp` disposes it), so a disposed `GoRouter` is
+  /// never handed out. Safe to call more than once.
+  void detach() => _router = null;
 }
 
-/// Registers `GoRouter` lazily from [RouterRef], for navigator
+/// Registers `GoRouter` from [RouterRef] on every resolution (a factory, so
+/// it never caches a router that was later detached), for navigator
 /// implementations (`@LazySingleton` classes taking a `GoRouter`).
 class RouterDIInitializer extends McDIInitializer {
   RouterDIInitializer(RouterRef ref) : super(_init(ref));
 
   static GetItInitializer _init(RouterRef ref) =>
       (GetIt getIt, String? environment) {
-        getIt.registerLazySingleton<GoRouter>(() => ref.router);
+        getIt.registerFactory<GoRouter>(() => ref.router);
       };
 }

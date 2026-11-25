@@ -59,11 +59,17 @@ void main() {
     storage.deleteSync(recursive: true);
   });
 
-  List<McDIInitializer> roots({List<McDIInitializer> extra = const []}) =>
-      rootInitializers(
+  /// The production root list over test config and storage, with the same
+  /// mock domains and router wiring as `appRootInitializers`.
+  List<McDIInitializer> Function(RouterRef) roots({
+    List<McDIInitializer> extra = const [],
+  }) =>
+      (routerRef) => rootInitializers(
         config: () async => _config,
         storageDirectory: storage,
         monitoringSinks: [InMemorySink()],
+        mockDomains: appMockDomains,
+        routerRef: routerRef,
         wirings: [...wiringInitializers, ...extra],
       );
 
@@ -83,7 +89,9 @@ void main() {
         MiniClientApp(
           links: links,
           probe: probe,
-          initializers: roots(extra: [McDIInitializer((_, _) => hold.future)]),
+          initializers: roots(
+            extra: [McDIInitializer((_, _) => hold.future)],
+          ),
         ),
       );
       await tester.pump(const Duration(seconds: 2));
@@ -121,7 +129,9 @@ void main() {
         MiniClientApp(
           links: links,
           probe: probe,
-          initializers: roots(extra: [McDIInitializer((_, _) => hold.future)]),
+          initializers: roots(
+            extra: [McDIInitializer((_, _) => hold.future)],
+          ),
         ),
       );
       await _pushLink(tester, 'miniclient://app/placeholder/3');
@@ -158,8 +168,9 @@ void main() {
       final recording = _Recording();
       var routersCreated = 0;
       var failures = 1;
-      final initializers = [
-        for (final (i, init) in roots().indexed) recording.wrap('root$i', init),
+      final initializers = (RouterRef routerRef) => [
+        for (final (i, init) in roots()(routerRef).indexed)
+          recording.wrap('root$i', init),
         // Last, so the first attempt has registered every root type before
         // it fails: a non-transactional init would then re-register them.
         McDIInitializer((_, _) {
@@ -194,11 +205,14 @@ void main() {
       expect(routersCreated, 1);
       expect(links.takes, 1, reason: 'the held link is replayed once');
       expect(probe.beforeReady, 0);
-      expect(probe.builds.where((b) => b == 'placeholder'), hasLength(1));
+      expect(
+        probe.builds.where((b) => b == 'placeholder'),
+        hasLength(1),
+      );
 
       // Each root initializer ran once per attempt, into a fresh container
       // per attempt, and the published root holds attempt 2's instances.
-      expect(recording.runs.keys, hasLength(roots().length));
+      expect(recording.runs.keys, hasLength(roots()(RouterRef()).length));
       for (final MapEntry(:key, :value) in recording.runs.entries) {
         expect(value, hasLength(2), reason: key);
         expect(identical(value[0], value[1]), isFalse, reason: key);
@@ -219,35 +233,36 @@ void main() {
     },
   );
 
-  testWidgets('T-0021-AC3 a miniclient://app/placeholder link delivered on the '
-      'platform navigation channel to the running app shows that route', (
-    tester,
-  ) async {
-    final links = PendingLinks.install(tester.binding);
-    addTearDown(links.detach);
-    final probe = McRouteProbe();
-    await tester.pumpWidget(
-      MiniClientApp(links: links, initializers: roots(), probe: probe),
-    );
-    await tester.pump();
-    await tester.pumpAndSettle();
-    expect(find.text('Marvel universe'), findsOneWidget);
+  testWidgets(
+    'T-0021-AC3 a miniclient://app/placeholder link delivered on the '
+    'platform navigation channel to the running app shows that route',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      final probe = McRouteProbe();
+      await tester.pumpWidget(
+        MiniClientApp(links: links, initializers: roots(), probe: probe),
+      );
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(find.text('Marvel universe'), findsOneWidget);
 
-    // What the iOS embedder sends for `simctl openurl` (FlutterDeepLinking).
-    await _pushLink(tester, 'miniclient://app/placeholder/42');
-    await tester.pumpAndSettle();
+      // What the iOS embedder sends for `simctl openurl` (FlutterDeepLinking).
+      await _pushLink(tester, 'miniclient://app/placeholder/42');
+      await tester.pumpAndSettle();
 
-    expect(find.text('Placeholder detail 42'), findsOneWidget);
-    expect(probe.builds, contains('placeholder'));
-    // Nested under home, so back returns to the home placeholder.
-    final router = GoRouter.of(
-      tester.element(find.text('Placeholder detail 42')),
-    );
-    expect(router.canPop(), isTrue);
-    router.pop();
-    await tester.pumpAndSettle();
-    expect(find.text('Marvel universe'), findsOneWidget);
-  });
+      expect(find.text('Placeholder detail 42'), findsOneWidget);
+      expect(probe.builds, contains('placeholder'));
+      // Nested under home, so back returns to the home placeholder.
+      final router = GoRouter.of(
+        tester.element(find.text('Placeholder detail 42')),
+      );
+      expect(router.canPop(), isTrue);
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.text('Marvel universe'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'T-0021-AC4 a link delivered between BootReady and the router\'s first '
@@ -300,7 +315,9 @@ void main() {
   ) async {
     final links = PendingLinks.install(tester.binding);
     addTearDown(links.detach);
-    await tester.pumpWidget(MiniClientApp(links: links, initializers: roots()));
+    await tester.pumpWidget(
+      MiniClientApp(links: links, initializers: roots()),
+    );
     await tester.pump();
     await tester.pumpAndSettle();
     expect(find.text('Marvel universe'), findsOneWidget);

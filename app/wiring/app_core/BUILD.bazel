@@ -48,4 +48,5 @@ flutter_library(
 ) for t in [
     "boot_test",
     "links_and_hooks_test",
+    "router_ref_and_scheme_test",
 ]]

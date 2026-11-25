@@ -1,6 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+/// The deep-link scheme and host an app answers to: `scheme://host/path`.
+/// Anything else is not the app's (a cold-start link and a link after boot
+/// are treated alike).
+class LinkScheme {
+  const LinkScheme(this.scheme, this.host);
+
+  /// The main app: `miniclient://app/…`.
+  static const LinkScheme app = LinkScheme('miniclient', 'app');
+
+  final String scheme;
+  final String host;
+
+  /// Whether [uri] names another scheme or host (a plain path is ours).
+  bool isForeign(Uri uri) =>
+      uri.hasScheme && (uri.scheme != scheme || uri.host != host);
+}
+
 /// Holds deep links until boot is ready (R29, plan 01 §3.4 step 1).
 ///
 /// Register it with [install] **before** `runApp`, so it is the first
@@ -12,17 +29,24 @@ import 'package:flutter/widgets.dart';
 /// frame it [drain]s a link caught in between and [detach]es, so later links
 /// go to go_router.
 class PendingLinks extends WidgetsBindingObserver {
-  PendingLinks._(this._binding, String? coldStart)
-    : _latest = coldStart == null ? null : normalise(coldStart);
+  PendingLinks._(this._binding, this.scheme, String? coldStart)
+    : _latest = coldStart == null ? null : normalise(coldStart, scheme: scheme);
 
   /// Records the cold-start link and registers the holder as an observer.
-  static PendingLinks install(WidgetsBinding binding) {
-    final links = PendingLinks._(binding, _coldStart(binding));
+  /// [scheme] is what the app answers to (a sandbox has its own).
+  static PendingLinks install(
+    WidgetsBinding binding, {
+    LinkScheme scheme = LinkScheme.app,
+  }) {
+    final links = PendingLinks._(binding, scheme, _coldStart(binding));
     binding.addObserver(links);
     return links;
   }
 
   final WidgetsBinding _binding;
+
+  /// The scheme and host this app's links must carry.
+  final LinkScheme scheme;
   String? _latest;
   bool _attached = true;
 
@@ -45,7 +69,7 @@ class PendingLinks extends WidgetsBindingObserver {
       return SynchronousFuture<bool>(false);
     }
     _received++;
-    _latest = normalise(routeInformation.uri.toString());
+    _latest = normalise(routeInformation.uri.toString(), scheme: scheme);
     return SynchronousFuture<bool>(true);
   }
 
@@ -53,7 +77,7 @@ class PendingLinks extends WidgetsBindingObserver {
   /// Ignored once detached.
   void offer(String link) {
     if (_attached) {
-      _latest = normalise(link);
+      _latest = normalise(link, scheme: scheme);
     }
   }
 
@@ -86,12 +110,14 @@ class PendingLinks extends WidgetsBindingObserver {
   }
 
   /// `miniclient://app/placeholder/7?x=1` → `/placeholder/7?x=1`; a plain
-  /// path is kept. A link with any other scheme or host than
-  /// `miniclient://app` is not the app's and becomes `/`.
-  static String normalise(String link) {
+  /// path is kept. A link with any other scheme or host than [scheme]'s
+  /// (default `miniclient://app`) is not the app's and becomes `/`.
+  static String normalise(
+    String link, {
+    LinkScheme scheme = LinkScheme.app,
+  }) {
     final uri = Uri.tryParse(link);
-    if (uri == null ||
-        (uri.hasScheme && (uri.scheme != 'miniclient' || uri.host != 'app'))) {
+    if (uri == null || scheme.isForeign(uri)) {
       return '/';
     }
     final path = uri.path.isEmpty ? '/' : uri.path;

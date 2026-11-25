@@ -74,6 +74,45 @@ void main() {
     expect(find.text('Character details 42'), findsOneWidget);
   });
 
+  testWidgets('T-0033-AC1 the navigator pushes: Back returns to the list and '
+      'the router keeps the list as its location', (tester) async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseNavigatorsDIInitializer(),
+      McDIInitializer((getIt, _) {
+        getIt.registerSingleton<RouteTargets>(_Targets());
+      }),
+    ]);
+    final router = ref.attach(
+      GoRouter(
+        initialLocation: AppLocations.characters,
+        routes: universeRoutes,
+      ),
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    diContainer<CharactersListNavigator>().openCharacter(const CharacterId(42));
+    await tester.pumpAndSettle();
+    // A `go` would make details the router's own location; a push leaves the
+    // list there and stacks details on top.
+    expect(
+      router.routerDelegate.currentConfiguration.uri.toString(),
+      AppLocations.characters,
+    );
+    expect(router.canPop(), isTrue);
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('fake.characters')), findsOneWidget);
+    expect(
+      find.byKey(const Key('character.details.placeholder')),
+      findsNothing,
+    );
+  });
+
   test('T-0033-AC1 the wiring initializer resolves the route targets and the '
       'navigator', () async {
     final ref = RouterRef();

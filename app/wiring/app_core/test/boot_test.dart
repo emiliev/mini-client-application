@@ -31,7 +31,9 @@ McDIInitializer _flaky(int failures, void Function() onRun) {
 
 GoRouter _router(String initialLocation) => GoRouter(
   initialLocation: initialLocation,
-  routes: [GoRoute(path: '/', builder: (_, _) => const Text('home'))],
+  routes: [
+    GoRoute(path: '/', builder: (_, _) => const Text('home')),
+  ],
 );
 
 void main() {
@@ -55,36 +57,39 @@ void main() {
         wirings: wirings,
       );
 
-  testWidgets('T-0021-AC1 a failing root initializer shows the error and Retry '
-      'succeeds on the second attempt', (tester) async {
-    final links = PendingLinks.install(tester.binding);
-    addTearDown(links.detach);
-    var runs = 0;
-    final initializers = roots([_flaky(1, () => runs++)]);
-    await tester.pumpWidget(
-      McApp(
-        boot: () => initializeDIContainer(initializers),
-        router: _router,
-        links: links,
-      ),
-    );
-    await tester.pump();
+  testWidgets(
+    'T-0021-AC1 a failing root initializer shows the error and Retry '
+    'succeeds on the second attempt',
+    (tester) async {
+      final links = PendingLinks.install(tester.binding);
+      addTearDown(links.detach);
+      var runs = 0;
+      final initializers = roots([_flaky(1, () => runs++)]);
+      await tester.pumpWidget(
+        McApp(
+          boot: () => initializeDIContainer(initializers),
+          router: _router,
+          links: links,
+        ),
+      );
+      await tester.pump();
 
-    expect(find.byKey(BootPage.failedKey), findsOneWidget);
-    expect(find.text('Could not start'), findsOneWidget);
-    expect(find.textContaining('wiring exploded'), findsOneWidget);
-    expect(find.text('home'), findsNothing);
-    expect(diContainer.isRegistered<AppConfig>(), isFalse);
+      expect(find.byKey(BootPage.failedKey), findsOneWidget);
+      expect(find.text('Could not start'), findsOneWidget);
+      expect(find.textContaining('wiring exploded'), findsOneWidget);
+      expect(find.text('home'), findsNothing);
+      expect(diContainer.isRegistered<AppConfig>(), isFalse);
 
-    await tester.tap(find.text('Retry'));
-    await tester.pump();
-    await tester.pump();
+      await tester.tap(find.text('Retry'));
+      await tester.pump();
+      await tester.pump();
 
-    expect(runs, 2);
-    expect(find.text('home'), findsOneWidget);
-    expect(find.byType(BootPage), findsNothing);
-    expect(diContainer.isRegistered<AppConfig>(), isTrue);
-  });
+      expect(runs, 2);
+      expect(find.text('home'), findsOneWidget);
+      expect(find.byType(BootPage), findsNothing);
+      expect(diContainer.isRegistered<AppConfig>(), isTrue);
+    },
+  );
 
   testWidgets(
     'T-0021-AC2 boot taking longer than 10 s shows the timeout state, and '
@@ -315,8 +320,10 @@ void main() {
   test('a configured latency becomes a constant backend latency', () async {
     await initializeDIContainer(
       rootInitializers(
-        config: () async =>
-            _config.replaceFirst('"latencyMs":0', '"latencyMs":250'),
+        config: () async => _config.replaceFirst(
+          '"latencyMs":0',
+          '"latencyMs":250',
+        ),
         storageDirectory: storage,
       ),
     );

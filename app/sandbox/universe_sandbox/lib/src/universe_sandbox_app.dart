@@ -20,9 +20,17 @@ List<McDIInitializer> sandboxRootInitializers({RouterRef? routerRef}) =>
 
 /// `McApp` over the universe wiring alone (plan 01 §6.3).
 class UniverseSandboxApp extends StatefulWidget {
-  const UniverseSandboxApp({required this.links, super.key});
+  const UniverseSandboxApp({
+    required this.links,
+    this.initializers,
+    super.key,
+  });
 
+  /// Made with `PendingLinks.install(binding, scheme: sandboxLinkScheme)`.
   final PendingLinks links;
+
+  /// Overrides [sandboxRootInitializers] (tests); gets the app's [RouterRef].
+  final List<McDIInitializer> Function(RouterRef routerRef)? initializers;
 
   @override
   State<UniverseSandboxApp> createState() => _UniverseSandboxAppState();
@@ -34,8 +42,10 @@ class _UniverseSandboxAppState extends State<UniverseSandboxApp> {
   @override
   Widget build(BuildContext context) => McApp(
     title: 'Universe Sandbox',
-    boot: () =>
-        initializeDIContainer(sandboxRootInitializers(routerRef: _routerRef)),
+    boot: () => initializeDIContainer(
+      widget.initializers?.call(_routerRef) ??
+          sandboxRootInitializers(routerRef: _routerRef),
+    ),
     router: (initialLocation) =>
         buildSandboxRouter(initialLocation: initialLocation),
     links: widget.links,

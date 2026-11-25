@@ -35,6 +35,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mc_analysis: any
+  mc_e2e_utils: any
   mc_event_bus: any
   mc_fixtures_characters: any
   mc_mocked_backend: any

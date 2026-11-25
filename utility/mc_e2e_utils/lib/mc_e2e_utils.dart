@@ -4,10 +4,17 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+/// Keys of the characters list, which journeys find by (steps find by key,
+/// never by feature widget type).
+const charactersGridKey = ValueKey<String>('characters_list.grid');
+const characterPreviewTitleKey = ValueKey<String>(
+  'characters_list.preview.title',
+);
+
 /// Runs the app's `main()`, then gives the test binding its error handlers
 /// back. `main()` installs the app's own hooks; left in place, a failing
 /// `expect` makes the binding assert and `flutter drive` hangs instead of
-/// failing. The app's errors then fail the test, which is what e2e wants.
+/// failing (F-0032). The app's errors then fail the test, as e2e wants.
 void startApp(void Function() main) {
   final flutterHook = FlutterError.onError;
   final platformHook = PlatformDispatcher.instance.onError;
@@ -58,6 +65,3 @@ Future<void> shot(
   await tester.pump();
   await binding.takeScreenshot(name);
 }
-
-/// The feature's key (steps find by key, never by type).
-const charactersGridKey = ValueKey<String>('characters_list.grid');

@@ -1,0 +1,19 @@
+# T-0033: helpers shared by the apps' integration_test journeys. Test-only.
+# The apps' journeys run through tool/e2e_ios.sh (flutter drive, F-0032), not
+# Bazel, so this library is built and linted here and copied with the repo.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library")
+
+package(default_visibility = ["//visibility:public"])
+
+flutter_library(
+    name = "mc_e2e_utils",
+    testonly = True,
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    package_name = "mc_e2e_utils",
+    deps = [
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+        "@pub_deps//:integration_test",
+    ],
+)

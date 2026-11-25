@@ -4,11 +4,10 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mini_client/main.dart' as app;
-
-import 'e2e_support.dart';
 
 /// T-0033-AC4's deep link: `miniclient://app/characters` reaches the list
 /// through the file-drop start link (F-0020: `simctl openurl` shows a prompt

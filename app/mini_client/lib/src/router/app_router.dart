@@ -32,7 +32,7 @@ GoRouter buildAppRouter({required String initialLocation}) => GoRouter(
     McRouteProbe.recordRedirect(context, state.uri);
     // Only miniclient://app/… links are the app's (as PendingLinks.normalise).
     final uri = state.uri;
-    if (uri.hasScheme && (uri.scheme != 'miniclient' || uri.host != 'app')) {
+    if (LinkScheme.app.isForeign(uri)) {
       return AppLocations.home;
     }
     return null;

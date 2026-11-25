@@ -1,0 +1,20 @@
+name: mc_e2e_utils
+description: Helpers for the apps' integration_test journeys, testonly (polling waits, screenshots, app start).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+
+dev_dependencies:
+  mc_analysis: any

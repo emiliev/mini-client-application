@@ -49,8 +49,9 @@ class MiniClientApp extends StatefulWidget {
 
   final PendingLinks links;
 
-  /// Overrides [appRootInitializers] (tests).
-  final List<McDIInitializer>? initializers;
+  /// Overrides [appRootInitializers] (tests). Gets the app's [RouterRef], so
+  /// a test boots with the same router wiring as production.
+  final List<McDIInitializer> Function(RouterRef routerRef)? initializers;
 
   /// Overrides [buildAppRouter] (tests count router creations).
   final McRouterFactory? router;
@@ -68,7 +69,8 @@ class _MiniClientAppState extends State<MiniClientApp> {
   @override
   Widget build(BuildContext context) => McApp(
     boot: () => initializeDIContainer(
-      widget.initializers ?? appRootInitializers(routerRef: _routerRef),
+      widget.initializers?.call(_routerRef) ??
+          appRootInitializers(routerRef: _routerRef),
     ),
     router:
         widget.router ??

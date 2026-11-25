@@ -1,5 +1,4 @@
 import 'package:app_core/app_core.dart';
-import 'package:characters_list/characters_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -7,34 +6,14 @@ import 'package:mc_di/mc_di.dart';
 import 'package:universe_sandbox/src/universe_sandbox_router.dart';
 import 'package:universe_wiring/universe_wiring.dart';
 
-class _NoNavigator implements CharactersListNavigator {
-  @override
-  void openCharacter(CharacterId id) {}
-}
-
-class _FakeList extends CharactersListFlow {
-  _FakeList() : super(navigator: _NoNavigator());
-
-  @override
-  Widget build(BuildContext context) =>
-      const SizedBox(key: Key('fake.characters'));
-}
-
-class _Targets implements RouteTargets {
-  @override
-  CharactersListFlow characters() => _FakeList();
-
-  @override
-  CharacterDetailsPlaceholderFlow characterDetails(int id) =>
-      CharacterDetailsPlaceholderFlow(id: id);
-}
+import 'fake_targets.dart';
 
 void main() {
   setUp(() async {
     await resetDIContainer();
     await initializeDIContainer([
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<RouteTargets>(FakeTargets());
       }),
     ]);
   });
