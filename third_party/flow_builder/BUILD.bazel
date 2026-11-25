@@ -9,5 +9,11 @@ flutter_library(
     srcs = glob(["lib/**/*.dart"]),
     language_version = "3.13",
     package_name = "flow_builder",
+    # Vendored upstream source keeps upstream's formatting and lints (VENDORED.md),
+    # so the archive diff stays the patch alone. It still compiles under Bazel.
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
     deps = ["@pub_deps//:flutter"],
 )

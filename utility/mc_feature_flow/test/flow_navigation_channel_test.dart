@@ -155,9 +155,7 @@ void main() {
 
   testWidgets('T-0035-AC2 a flow nested inside another flow keeps links and '
       'popRoute working', (tester) async {
-    final body = ValueNotifier<Widget>(
-      _flow(nested: _flow(startPushed: true)),
-    );
+    final body = ValueNotifier<Widget>(_flow(nested: _flow(startPushed: true)));
     final delegate = await _mount(tester, body);
     expect(find.text('detail'), findsOneWidget);
 
