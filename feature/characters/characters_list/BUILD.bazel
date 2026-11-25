@@ -275,3 +275,85 @@ mc_bdd_tests(
     ]),
     deps = _TEST_DEPS,
 )
+
+# The DTO and the envelope against the fixture JSON (the one src/ importer, R7).
+flutter_test(
+    name = "contract_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/characters_api_contract_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":characters_list",
+        "//utility/mc_api_client",
+        "//utility/mc_fixtures_characters",
+        "//utility/mc_media",
+        "//utility/mc_mocked_backend",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R17: the hand-written root imports resolve every registration of the flow.
+flutter_test(
+    name = "flow_scope_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    language_version = _LANG,
+    main = "test/flow_scope_test.dart",
+    package_name = _PKG,
+    deps = _TEST_DEPS + [
+        ":characters_list",
+        "//utility/mc_di",
+        "//utility/mc_feature_flow",
+        "//utility/mc_test_utils",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ] + glob(["test/golden/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden/characters_list_golden_test.dart",
+    package_name = _PKG,
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS + [
+        ":characters_list",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R4 and R15 conformance. The list of generator-read files is written from the
+# same glob as :_stage, so the check cannot drift from the staging library.
+genrule(
+    name = "_pure_srcs_list",
+    outs = ["test/architecture/pure_srcs.txt"],
+    cmd = "cat > $@ <<'EOF'\n" + "\n".join(_PURE_SRCS) + "\nEOF",
+)
+
+dart_test(
+    name = "architecture_test",
+    size = "small",
+    data = [
+        "lib/characters_list.dart",
+        ":_pure_srcs_list",
+    ] + _PURE_SRCS,
+    language_version = _LANG,
+    main = "test/architecture/architecture_test.dart",
+    package_name = _PKG,
+    deps = ["@pub_deps//:test"],
+)
