@@ -88,3 +88,31 @@ dart_test(
     main = "test/paged_state_test.dart",
     deps = _TEST_DEPS,
 )
+
+# T-0034-AC3: a freezed bloc state that holds `PagedState` keeps freezed's
+# default `copyWith`, deep copy included, through the barrel alone.
+dart_codegen(
+    name = "_holder_state_freezed",
+    package_name = _PKG,
+    language_version = _LANG,
+    src = "test/support/holder_state.dart",
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    output_suffixes = [".freezed.dart"],
+    deps = [
+        ":mc_paging",
+        "@pub_deps//:freezed_annotation",
+    ],
+)
+
+dart_test(
+    name = "copywith_barrel_test",
+    size = "small",
+    srcs = [
+        "test/support/holder_state.dart",
+        ":_holder_state_freezed",
+    ],
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/copywith_barrel_test.dart",
+    deps = _TEST_DEPS,
+)
