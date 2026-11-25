@@ -6,9 +6,11 @@ _DEPS = [
     "//utility/mc_bloc_kit",
     "//utility/mc_di",
     "//utility/mc_ds_feedback",
+    "//utility/mc_l10n_core",
     "//utility/mc_monitoring",
     "@pub_deps//:flow_builder",
     "@pub_deps//:flutter",
+    "@pub_deps//:get_it",
 ]
 
 flutter_library(

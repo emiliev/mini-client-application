@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_feedback/mc_ds_feedback.dart';
 import 'package:mc_feature_flow/src/flow_context.dart';
+import 'package:mc_l10n_core/mc_l10n_core.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 
 /// One page of a flow. [name] is the route name (analytics, restoration).
@@ -31,6 +33,10 @@ typedef OnGenerateFlowPages<T> = List<McFlowPage> Function(T state);
 /// Each instance owns a child DI container (R17): it forwards [rootImports]
 /// from the root, registers its [FeatureFlowController] and then runs
 /// [flowInitializer]. An unregistered root import fails fast, naming its type.
+/// [provide] registers flow-scoped instances (a navigator the app passes in)
+/// in that container before [flowInitializer] runs; they resolve inside the
+/// flow and nowhere else. [localizationsDelegates] are the feature's own; the
+/// flow adds the core strings and Flutter's own after them.
 /// A failing [flowInitializer] shows an error view with Retry and reports the
 /// error to [Monitoring] when the root has one.
 class FeatureFlow<T> extends StatefulWidget {
@@ -38,6 +44,8 @@ class FeatureFlow<T> extends StatefulWidget {
     required this.state,
     required this.onGeneratePages,
     this.flowInitializer,
+    this.provide,
+    this.localizationsDelegates = const [],
     this.rootImports = const <RootImport<Object>>[],
     this.onComplete,
     super.key,
@@ -50,6 +58,14 @@ class FeatureFlow<T> extends StatefulWidget {
   final OnGenerateFlowPages<T> onGeneratePages;
 
   final McDIInitializer? flowInitializer;
+
+  /// Registers instances in the flow's container, before [flowInitializer].
+  final void Function(GetIt scope)? provide;
+
+  /// The feature's localisation delegates, installed for the flow's pages.
+  /// Empty: the flow leaves `Localizations` as the host set it.
+  final List<LocalizationsDelegate<Object?>> localizationsDelegates;
+
   final List<RootImport<Object>> rootImports;
 
   /// Called once with the result passed to `FeatureFlowController.complete`.
@@ -150,6 +166,8 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
             (getIt, _) =>
                 getIt.registerSingleton<FeatureFlowController<T>>(_controller),
           ),
+          if (widget.provide case final provide?)
+            McDIInitializer((getIt, _) => provide(getIt)),
           ?widget.flowInitializer,
         ],
       );
@@ -212,6 +230,19 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final delegates = widget.localizationsDelegates;
+    final content = _content(context);
+    if (delegates.isEmpty) {
+      return content;
+    }
+    return Localizations.override(
+      context: context,
+      delegates: [...delegates, ...mcLocalizationsDelegates],
+      child: content,
+    );
+  }
+
+  Widget _content(BuildContext context) {
     return ColoredBox(
       color: Theme.of(context).scaffoldBackgroundColor,
       child: FutureBuilder<ChildDIContainer>(
@@ -233,6 +264,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
           }
           return FlowScope(
             container: container,
+            controller: _controller,
             child: FlowBuilder<T>(
               controller: _flowController,
               onGeneratePages: _pages,
