@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress (branched from T-0030 head `63dbaf4`; merges `origin/main` after T-0030) |
+| Status | Done (merged 2026-11-25 `dc73b89`; Verifier PASS `cde302c`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0031-ds-lists-media-cards` |
@@ -115,3 +115,8 @@ Evidence: `documents/evidence/T-0031/engineer/` (`mutations.sh` and `mutations.l
 | 14 | 44 pt minimum | removed from `McMediaCard` (it could not act inside a cell); `the tap target is at least 44 x 44` asserts the real `InkWell` size at scales 1 and 2 |
 
 Changed goldens: only `utility/mc_ds_lists/test/goldens/grid_error_footer.*` (8 files), because the footer text changed (item 9).
+
+## Merge (TL)
+- 2026-11-25: TL rejected `mc_ds_media → mc_fixtures_media` before verification (the TL's own spec error); replaced by a sealed pure-Dart `ResolvedImage` plus a check with a negative control. Verifier FAIL `1148d25`: the AC1 tests didn't pin the 80 % threshold, and the TL review's two bugs were confirmed (a short page never asks for the next one; the default grid cell clipped the card text silently), plus a merge that reverted the T-0030 purity fix. Fixed in `8c0264c` (14 items, 13 proof mutations). TL decisions: `cellHeight` is required (no default that can be wrong); neutral error copy for refresh failures. Re-verify PASS `cde302c`. The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 68/68 tests, lint was clean and `mc_arch_check` reported OK.
+- **AC1 amendment (TL):** "exactly once" means once per crossing of the threshold while the state is unchanged. Scrolling back below 80 % re-arms the trigger, so a dropped request can be retried by scrolling. Duplicate calls are harmless because `PagingController` marks a load in flight synchronously. Overscroll on short lists re-arming is P-065.
+- Follow-ups: P-065.
