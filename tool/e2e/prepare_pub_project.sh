@@ -66,10 +66,12 @@ echo "==> cquery: the generated Dart files under $TARGET"
 bzl cquery "deps($TARGET)" --output=starlark \
   --starlark:expr='"\n".join([str(target.label) + " " + f.path for f in target.files.to_list()])' \
   2>/dev/null >"$SCRATCH/all.txt"
-awk '$2 ~ /^bazel-out\/[^\/]+\/bin\/(app|feature|utility)\// &&
+# Tool configurations (-exec, built for the generators themselves) are not the
+# app's own outputs, and a file is listed once.
+awk '$2 ~ /^bazel-out\/[^\/]+\/bin\/(app|feature|utility)\// && $2 !~ /-exec\// &&
      ($2 ~ /\.g\.dart$/ || $2 ~ /\.freezed\.dart$/ || $2 ~ /\.config\.dart$/ ||
       $2 ~ /\/lib\/src\/l10n\/[^\/]*_l10n[^\/]*\.dart$/)' "$SCRATCH/all.txt" \
-  | sort -u >"$SCRATCH/gen.txt"
+  | sort -u -k2,2 >"$SCRATCH/gen.txt"
 count="$(wc -l <"$SCRATCH/gen.txt" | tr -d ' ')"
 [ "$count" -gt 0 ] || { echo "no generated file under $TARGET: the app cannot compile" >&2; exit 1; }
 

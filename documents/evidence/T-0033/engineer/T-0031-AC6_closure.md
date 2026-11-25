@@ -15,10 +15,14 @@ Flutter markers: @@ai_rules_flutter++flutter+pub_deps__flutter//:flutter
 ```
 none
 ```
-## production mc_ds_* targets checked (9):  //utility/mc_ds_buttons:mc_ds_buttons //utility/mc_ds_cards:mc_ds_cards //utility/mc_ds_feedback:mc_ds_feedback //utility/mc_ds_layout:mc_ds_layout //utility/mc_ds_lists:mc_ds_lists //utility/mc_ds_media:mc_ds_media //utility/mc_ds_testing:mc_ds_testing //utility/mc_ds_theme:mc_ds_theme //utility/mc_ds_tokens:mc_ds_tokens
+## production feature and utility targets checked (23):  //feature/characters/characters_list:characters_list //utility/mc_api_client:mc_api_client //utility/mc_api_errors:mc_api_errors //utility/mc_bloc_kit:mc_bloc_kit //utility/mc_config:mc_config //utility/mc_di:mc_di //utility/mc_ds_buttons:mc_ds_buttons //utility/mc_ds_cards:mc_ds_cards //utility/mc_ds_feedback:mc_ds_feedback //utility/mc_ds_layout:mc_ds_layout //utility/mc_ds_lists:mc_ds_lists //utility/mc_ds_media:mc_ds_media //utility/mc_ds_theme:mc_ds_theme //utility/mc_ds_tokens:mc_ds_tokens //utility/mc_event_bus:mc_event_bus //utility/mc_feature_flow:mc_feature_flow //utility/mc_formatters:mc_formatters //utility/mc_l10n_core:mc_l10n_core //utility/mc_media:mc_media //utility/mc_monitoring:mc_monitoring //utility/mc_paging:mc_paging //utility/mc_prelude:mc_prelude //utility/mc_storage:mc_storage
 ```
 fixtures dependencies: none
 ```
 ## positive control: //utility/mc_ds_media:image_test (a test) depends on: //utility/mc_fixtures_media:asset_files //utility/mc_fixtures_media:assets/characters/000.png //utility/mc_fixtures_media:assets/characters/001.png 
+## negative control: a mc_fixtures_characters dependency in characters_list
+```
+//feature/characters/characters_list:characters_list -> //utility/mc_fixtures_characters:lib/mc_fixtures_characters.dart //utility/mc_fixtures_characters:lib/src/data/universe.dart //utility/mc_fixtures_characters:lib/src/data/vocabulary.dart 
+```
 
 **PASS T-0031-AC6**
