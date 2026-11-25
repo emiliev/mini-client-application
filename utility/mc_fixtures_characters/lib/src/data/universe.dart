@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:mc_fixtures_characters/src/data/vocabulary.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -79,16 +81,18 @@ final class CharacterUniverse {
   }
 
   /// A small synthetic cast for paging tests: `Hero 01` to `Hero <count>`
-  /// (two digits, so name order is generation order), ids from [idBase],
-  /// thumbnails cycling through the bundled `characters` art. No randomness:
-  /// every field is a function of the index.
+  /// (zero-padded to at least two digits and to the width of [count], so
+  /// name order is generation order), ids from [idBase], thumbnails cycling
+  /// through the bundled `characters` art. No randomness: every field is a
+  /// function of the index.
   CharacterUniverse.synthetic(int count, DateTime clock) {
     final images = placeholderSets['characters']!;
+    final width = math.max(2, '$count'.length);
     byName = List.unmodifiable([
       for (var i = 0; i < count; i++)
         CharacterRecord(
           id: idBase + i,
-          name: 'Hero ${(i + 1).toString().padLeft(2, '0')}',
+          name: 'Hero ${(i + 1).toString().padLeft(width, '0')}',
           description: '',
           modified: clock,
           thumbnail: ApiImage(

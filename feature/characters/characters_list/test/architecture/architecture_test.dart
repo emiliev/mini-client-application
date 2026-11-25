@@ -4,15 +4,22 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
-/// `dart test` runs in the package; Bazel runs at the runfiles root.
-String _path(String rel) {
-  const pkg = 'feature/characters/characters_list';
-  return File('$pkg/$rel').existsSync() ? '$pkg/$rel' : rel;
-}
+/// Bazel only (`pure_srcs.txt` is a genrule output): the test runs at the
+/// runfiles root, where the package sits at its workspace path.
+String _path(String rel) => 'feature/characters/characters_list/$rel';
 
+/// One export directive, in either quote style, with an optional `show`.
 final RegExp _export = RegExp(
-  r'''export\s+'([^']+)'\s*(show\s+([^;]+))?;''',
+  r'''export\s+(['"])([^'"]+)\1\s*(show\s+([^;]+))?;''',
   multiLine: true,
+);
+
+/// Any export directive at all, to check [_export] understood each one.
+final RegExp _anyExport = RegExp(r'^\s*export\b', multiLine: true);
+
+/// A Flutter import or export, in either quote style.
+final RegExp _flutter = RegExp(
+  r'''(import|export)\s+['"](package:flutter[a-z_]*/|dart:ui)''',
 );
 
 void main() {
@@ -22,15 +29,20 @@ void main() {
     final exports = _export.allMatches(barrel).toList();
 
     expect(exports, isNotEmpty);
+    expect(
+      exports,
+      hasLength(_anyExport.allMatches(barrel).length),
+      reason: 'every export directive is one this check understands',
+    );
     final shown = <String>{};
     for (final e in exports) {
       expect(
-        e.group(2),
+        e.group(3),
         isNotNull,
-        reason: '${e.group(1)} exports without show',
+        reason: '${e.group(2)} exports without show',
       );
-      shown.addAll(e.group(3)!.split(',').map((s) => s.trim()));
-      expect(e.group(1), startsWith('package:characters_list/src/'));
+      shown.addAll(e.group(4)!.split(',').map((s) => s.trim()));
+      expect(e.group(2), startsWith('package:characters_list/src/'));
     }
     expect(shown, {
       'CharactersListFlow',
@@ -52,12 +64,22 @@ void main() {
         .toList();
 
     expect(files, hasLength(greaterThan(10)));
-    final flutter = RegExp(
-      r'''(import|export)\s+'(package:flutter|dart:ui)''',
-    );
     for (final f in files) {
       final source = File(_path(f)).readAsStringSync();
-      expect(flutter.hasMatch(source), isFalse, reason: '$f imports Flutter');
+      expect(_flutter.hasMatch(source), isFalse, reason: '$f imports Flutter');
     }
+  });
+
+  test('T-0032-AC6 the checks read both quote styles', () {
+    expect(_flutter.hasMatch('import "package:flutter/widgets.dart";'), isTrue);
+    expect(_flutter.hasMatch("import 'package:flutter/widgets.dart';"), isTrue);
+    expect(_flutter.hasMatch('export "dart:ui";'), isTrue);
+    expect(_flutter.hasMatch("import 'package:flutter_bloc/x.dart';"), isTrue);
+    expect(_flutter.hasMatch("import 'package:freezed/x.dart';"), isFalse);
+
+    final e = _export.firstMatch('export "package:x/src/a.dart" show A, B;')!;
+    expect(e.group(2), 'package:x/src/a.dart');
+    expect(e.group(4), 'A, B');
+    expect(_export.hasMatch('export "package:x/a.dart\';'), isFalse);
   });
 }

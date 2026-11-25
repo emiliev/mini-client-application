@@ -95,4 +95,31 @@ void main() {
     expect(page['error'], containsPair('code', 'invalid_parameter'));
     expect(const SyntheticCharactersDomain(3).scenarios, isEmpty);
   });
+
+  test(
+    'T-0032-AC5 a synthetic cast past 99 still pages in name order',
+    () async {
+      final cast = CharacterUniverse.synthetic(150, DateTime.utc(2026)).byName;
+      final names = [for (final c in cast) c.name];
+
+      expect(names.first, 'Hero 001');
+      expect(names[99], 'Hero 100');
+      expect(names.last, 'Hero 150');
+      expect(names, [...names]..sort(), reason: 'byName is in name order');
+      expect(
+        [for (final c in cast) c.id],
+        [
+          for (var i = 0; i < 150; i++) 100000 + i,
+        ],
+      );
+
+      final dio = MockBackend(
+        domains: [const SyntheticCharactersDomain(150)],
+      ).createDio();
+      final page = await _get(dio, '/v1/characters?offset=95&limit=10');
+      expect(_names(page), [
+        for (var i = 96; i <= 105; i++) 'Hero ${'$i'.padLeft(3, '0')}',
+      ]);
+    },
+  );
 }

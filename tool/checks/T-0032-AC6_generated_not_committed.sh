@@ -8,8 +8,10 @@
 # 2. Each kind (retrofit .g.dart, json .g.dart, freezed, injectable config and
 #    shards, gen-l10n, the generated BDD tests and their main) is a declared output of a Bazel
 #    target of the package (cquery --output=files): the build makes them.
-# 3. The root .gitignore ignores every kind, so an IDE / build_runner run
-#    cannot add one by accident.
+# 3. The root .gitignore ignores every kind a non-Bazel tool can write into the
+#    source tree (an IDE / build_runner run cannot add one by accident), and
+#    its scoped patterns leave hand-written files such as
+#    test/feature/helpers_test.dart visible.
 #   tool/checks/T-0032-AC6_generated_not_committed.sh [--out FILE] [--role R]
 # MC_BAZEL_STARTUP holds extra Bazel startup options (e.g. --output_base=...).
 set -uo pipefail
@@ -31,9 +33,15 @@ kinds=(
   "injectable config|lib/src/di/di_initializer.config.dart"
   "injectable shard|lib/src/presentation/bloc/characters_list_bloc.injectable.json"
   "gen-l10n|lib/src/l10n/characters_list_l10n.dart"
-  "BDD test|test/feature/characters_list_test.dart"
-  "BDD test|test/feature/characters_list_paging_test.dart"
+  "BDD test|test/feature/characters_list_test.dart|bazel-only"
+  "BDD test|test/feature/characters_list_paging_test.dart|bazel-only"
   "BDD main|test/feature/bdd_test_main.dart|bazel-only"
+)
+# Hand-written files the ignore rules must NOT hide (scoped patterns).
+visible=(
+  "test/feature/helpers_test.dart"
+  "lib/src/app.config.dart"
+  "test/feature/step/i_open_the_characters_list.dart"
 )
 rows=()
 declared_ok=1
@@ -41,17 +49,24 @@ ignored_ok=1
 for k in "${kinds[@]}"; do
   IFS='|' read -r label rel scope <<< "$k"
   declared=no; grep -qxF "$rel" <<< "$outputs" && declared=yes || declared_ok=0
-  # The BDD aggregator main exists only in bazel-out: no IDE or build_runner
-  # path writes it into the source tree, so it needs no ignore rule.
+  # The BDD generator writes only into bazel-out (tests and main): no Bazel
+  # path writes them into the source tree, so they need no ignore rule.
   if [[ "$scope" == bazel-only ]]; then ignored="n/a (bazel-out only)"
   else ignored=no; git check-ignore -q --no-index "$PKG/$rel" && ignored=yes || ignored_ok=0; fi
   rows+=("| $label | \`$rel\` | $declared | $ignored |")
+done
+
+vis_rows=()
+for rel in "${visible[@]}"; do
+  if git check-ignore -q --no-index "$PKG/$rel"; then vis_rows+=("| \`$rel\` | IGNORED |"); ignored_ok=0
+  else vis_rows+=("| \`$rel\` | visible |"); fi
 done
 
 report "# T-0032-AC6: generated files are Bazel outputs, never committed" "" \
   "Generated files in the git index under \`$PKG\`: ${committed:-none}" "" \
   "| Kind | File (package-relative) | declared Bazel output | git-ignored |" "|---|---|---|---|" \
   "${rows[@]}" "" \
+  "Hand-written paths the scoped ignore rules must leave visible:" "" "| File | git |" "|---|---|" "${vis_rows[@]}" "" \
   "All declared outputs of the package's generator targets ($(grep -c . <<< "$outputs")):" "" '```' "$outputs" '```'
 ok=1
 [[ -z "$committed" ]] || ok=0
