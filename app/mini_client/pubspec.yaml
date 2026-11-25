@@ -36,6 +36,7 @@ dev_dependencies:
     sdk: flutter
   mc_analysis: any
   mc_event_bus: any
+  mc_fixtures_characters: any
   mc_mocked_backend: any
   mc_monitoring: any
   mc_storage: any

@@ -23,6 +23,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   mc_analysis: any
+  mc_fixtures_characters: any
+  mc_mocked_backend: any
 
 flutter:
   uses-material-design: true
