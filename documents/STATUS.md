@@ -10,7 +10,7 @@ _Last updated: 2026-11-24 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`): 24 packages (foundation utilities, design system, mocked backend and fixtures, API client, feature flow), 39 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7 |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0031 engineer (Sonnet) |
+| **Active crew** | T-0031 Verifier (re-verify), T-0032 engineer (Opus) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.

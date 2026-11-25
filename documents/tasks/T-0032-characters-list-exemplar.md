@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0030 and T-0031 merge) |
+| Status | In Progress (branched from T-0031 head `8c0264c`; merges `origin/main` after T-0031) |
 | Owner | crew: Engineer (**Opus**, worktree). This is the template the generators will copy, so quality outweighs speed |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0032-characters-list` |
@@ -79,4 +79,4 @@ Phase D's generators (mason bricks, buildgen) will copy this package, so its sha
 - **If a codegen shim can't handle a real-world case:** stop and write a finding. Don't work around it silently. That is exactly the data the stress test exists to find.
 
 ## Log
-- 2026-11-25: Created (TL).
+- 2026-11-25: Created and dispatched (TL) to an Opus engineer, on top of T-0031.
