@@ -1,6 +1,4 @@
 import 'package:characters_list/src/domain/model/character.dart';
-import 'package:characters_list/src/domain/model/character_id.dart';
-import 'package:characters_list/src/domain/repository/characters_list_repository.dart';
 import 'package:characters_list/src/navigator/characters_list_navigator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
@@ -18,18 +16,18 @@ final class _SeeFullProfile extends CharacterPreviewEvent {
   const _SeeFullProfile();
 }
 
-/// The preview page's bloc. Its state is the character the list loaded (no
-/// second request); "See full profile" leaves the feature through the
-/// navigator, which only blocs call (plan 01 §4.1).
+/// The preview page's bloc. Its state is the character the flow state
+/// selected (the summary the list loaded: no second request); "See full
+/// profile" leaves the feature through the navigator, which only blocs call
+/// (plan 01 §4.1).
 @injectable
 final class CharacterPreviewBloc
     extends McBloc<CharacterPreviewEvent, Character> {
   CharacterPreviewBloc(
-    @factoryParam CharacterId id,
-    CharactersListRepository repository,
+    @factoryParam Character character,
     this._navigator,
     Monitoring monitoring,
-  ) : super(repository.loaded(id), monitoring: monitoring) {
+  ) : super(character, monitoring: monitoring) {
     on<CharacterPreviewEvent>((event, emit) {
       switch (event) {
         case _SeeFullProfile():

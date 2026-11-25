@@ -129,6 +129,62 @@ void main() {
     expect(backend.backend.recentTraffic.map((t) => t.status), [500, 200]);
   });
 
+  mcTestWidgets(
+    'T-0032-AC2 recover() ends injected failures on the engine and in the '
+    'harness, so an unrouted request is reported again',
+    (tester) async {
+      final backend = McTestSession.current.backend
+        ..useFixtureSet(thingsSet)
+        ..fail('GET /v1/things', BackendFailure.serverError)
+        ..fail('GET /v1/nowhere', BackendFailure.offline);
+      final dio = backend.backend.createDio()
+        ..httpClientAdapter = backend.adapter;
+
+      expect((await _get(tester, dio, '/v1/things')).statusCode, 500);
+      final offline = await tester.runAsync(() async {
+        try {
+          await dio.get<Object?>('/v1/nowhere');
+          return null;
+        } on DioException catch (e) {
+          return e.type;
+        }
+      });
+      expect(offline, DioExceptionType.connectionError);
+      // A failed unrouted path is the rule's doing, not unmatched.
+      expect(backend.unmatched, isEmpty);
+
+      backend.recover();
+
+      expect((await _get(tester, dio, '/v1/things')).statusCode, 200);
+      expect((await _get(tester, dio, '/v1/nowhere')).statusCode, 404);
+      expect(backend.takeUnmatched(), ['GET /v1/nowhere']);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0032-AC2 recover() ends the scenario and keeps the store, the traffic '
+    'and the recorded requests',
+    (tester) async {
+      final backend = McTestSession.current.backend
+        ..useFixtureSet(thingsSet)
+        ..useDomain(_NotesDomain());
+      final dio = backend.backend.createDio()
+        ..httpClientAdapter = backend.adapter;
+      await tester.runAsync(() => dio.post<Object?>('/v1/notes'));
+      await tester.runAsync(() => dio.post<Object?>('/v1/notes'));
+      backend.backend.useScenario('things_down');
+      expect((await _get(tester, dio, '/v1/things')).statusCode, 503);
+
+      backend.recover();
+
+      expect((await _get(tester, dio, '/v1/things')).statusCode, 200);
+      final notes = await _get(tester, dio, '/v1/notes');
+      expect(notes.data, {'notes': 2}, reason: 'the store survives');
+      expect(backend.requests, hasLength(5));
+      expect(backend.backend.recentTraffic, hasLength(5));
+    },
+  );
+
   mcTestWidgets('fail() with a query subset only fails matching requests', (
     tester,
   ) async {
@@ -285,4 +341,27 @@ void main() {
     await tester.pumpWidget(const SizedBox());
     await mcSettle(tester);
   });
+}
+
+/// `POST /v1/notes` counts in the engine's store; `GET /v1/notes` reads it.
+class _NotesDomain implements MockDomain {
+  @override
+  String get name => 'notes';
+
+  @override
+  void register(MockRouter router, MockDomainEnvironment environment) {
+    router
+      ..post('/v1/notes', (request, context) {
+        context.store['notes'] = ((context.store['notes'] as int?) ?? 0) + 1;
+        return const MockResponse.ok({'ok': true});
+      })
+      ..get(
+        '/v1/notes',
+        (request, context) =>
+            MockResponse.ok({'notes': context.store['notes'] ?? 0}),
+      );
+  }
+
+  @override
+  Map<String, MockScenario> get scenarios => const {};
 }

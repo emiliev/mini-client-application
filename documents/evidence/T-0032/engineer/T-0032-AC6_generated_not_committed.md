@@ -13,9 +13,17 @@ Generated files in the git index under `feature/characters/characters_list`: non
 | injectable config | `lib/src/di/di_initializer.config.dart` | yes | yes |
 | injectable shard | `lib/src/presentation/bloc/characters_list_bloc.injectable.json` | yes | yes |
 | gen-l10n | `lib/src/l10n/characters_list_l10n.dart` | yes | yes |
-| BDD test | `test/feature/characters_list_test.dart` | yes | yes |
-| BDD test | `test/feature/characters_list_paging_test.dart` | yes | yes |
+| BDD test | `test/feature/characters_list_test.dart` | yes | n/a (bazel-out only) |
+| BDD test | `test/feature/characters_list_paging_test.dart` | yes | n/a (bazel-out only) |
 | BDD main | `test/feature/bdd_test_main.dart` | yes | n/a (bazel-out only) |
+
+Hand-written paths the scoped ignore rules must leave visible:
+
+| File | git |
+|---|---|
+| `test/feature/helpers_test.dart` | visible |
+| `lib/src/app.config.dart` | visible |
+| `test/feature/step/i_open_the_characters_list.dart` | visible |
 
 All declared outputs of the package's generator targets (19):
 

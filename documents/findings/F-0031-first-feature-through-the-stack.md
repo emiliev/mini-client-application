@@ -57,6 +57,20 @@ Plan 01 §3.3's code for the exemplar feature compiles in most places but fails 
 7. **Hosts must provide `McMediaScope` and an asset bundle.** `McImage` throws without a `McMediaScope` (T-0031). Feature tests wrap the flow in `McMediaScope(resolver: BundledImageResolver())` plus `DefaultAssetBundle(McFixtureAssetBundle())` (`charactersTestHost`). The app root does the same in T-0033.
 8. **flutter_bloc and mocktail were not in the lock.** Both are in ADR-0007's stack. Root `pubspec.lock` now has flutter_bloc 9.1.1 (with provider 6.1.5+1 and nested 1.0.0) and mocktail 1.0.5; nothing else moved. F-0024 item 1's hand-written `MockMonitoring` stays; navigator mocks are mocktail `Mock`s.
 
+Added in the fix round (after the Verifier and code review):
+
+9. **A second tile tap can land before the preview exists.** Once the preview route is pushed, its `ModalBarrier` takes every tap until the slide-in settles; a hit test one frame in ends at `IgnorePointer` → `BlockSemantics` → `ExcludeSemantics` of the incoming route, not at the tile. So the race is two taps **within one frame**: both reach the list and both preview events reach the bloc. The second one overwrote the selection while the open page and its bloc kept the first character.
+   - The fix: the bloc ignores a preview event while a preview is open, and the preview page is keyed by the character's id, so another selection always gets a new page and bloc.
+   - The scenario "A second tap while the preview slides in keeps the first character" taps both tiles before any pump. Without the guard it fails (F1); without the key every preview scenario fails (F2).
+   - Also: a push that lands between frames makes the Navigator absorb pointers until the next frame (`_cancelActivePointers`).
+10. **Repositories are stateless (TL decision, Tide's shape).** The selected character's summary travels in the flow state (`CharactersListFlowState.preview: Character?`), and the preview page and bloc read it from there. The repository is a plain `@injectable` with no cache. A freezed flow state holding another freezed type of the same package keeps its deep `copyWith`, since `$CharacterCopyWith` is visible (contrast Part A fact 2).
+11. **Proving "the flow state has it" from a BDD step.** The flow state type is package-private (R4; R7 keeps `src/` out of BDD tests), so the step cannot name `FeatureFlowController<CharactersListFlowState>`. It reads the controller dynamically from a live flow page (`_LivePage<CharactersListFlowState>.controller`). That is the authoritative state; flow_builder's own controller sees only structural updates (F-0018).
+   - The step also asserts `route.settings is Page`. A route pushed imperatively has plain `RouteSettings`, so the Verifier's V4a mutation is now killed ([probe](../evidence/T-0032/engineer/probe_v4a.log)).
+   - Both reads depend on `mc_feature_flow` internals. A public test hook (for example `FeatureFlow.debugStateOf(context)`) would remove that; P-follow-up.
+12. **"the backend recovers" needs the harness, not the engine.** `MockBackend.reset()` clears the injected rules, but the harness's mirrored fail rules stay, so the unmatched-request check stays off for those routes. The reset also drops the store, latency, counters and traffic.
+   - `McBackendHarness.recover()` switches every harness rule off on both sides: each engine rule's predicate checks a liveness flag the mirror shares, and the mirrors are dropped. It then ends the scenario and keeps everything else. No `mc_mocked_backend` change was needed.
+   - Tests: `harness_test` "T-0032-AC2 recover() …" (×2). Both fail with the old behaviour (F3a) and with engine rules left live (F3b).
+
 ### Evidence
 - 1: the first BDD run (all 15 scenarios failed with the provider assertion); the stack shows `FlowScope.of` ← `McFlowContext.di` ← `CharactersListPage.build.<closure>` ← `_CreateInheritedProviderState.value`.
 - 2: the second run: every scenario failed with `Unmatched request GET /characters`.

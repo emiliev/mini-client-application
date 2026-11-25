@@ -17,6 +17,11 @@ import 'package:mc_l10n_core/mc_l10n_core.dart';
 ///
 /// The app builds it from a route (`RouteTargets`, T-0033) with the
 /// navigator implementation from its wiring; tests pass a mock.
+///
+/// Immutable after creation: the flow reads [navigator] and [initialTeamId]
+/// once, when its scope opens. A rebuild with a different navigator keeps the
+/// first one; a different [initialTeamId] builds a new flow (its
+/// `FeatureFlow` is keyed by it), with a fresh scope, state and first page.
 class CharactersListFlow extends StatelessWidget {
   const CharactersListFlow({
     required this.navigator,
@@ -40,16 +45,20 @@ class CharactersListFlow extends StatelessWidget {
       ...mcLocalizationsDelegates,
     ],
     child: FeatureFlow<CharactersListFlowState>(
+      key: ValueKey(initialTeamId),
       state: CharactersListFlowState(teamId: initialTeamId),
       rootImports: charactersListRootImports,
       flowInitializer: McDIInitializer(_initializeWith(navigator)),
       onGeneratePages: (state) => [
         const McFlowPage(name: 'list', child: CharactersListPage()),
-        if (state.previewId case final id?)
+        if (state.preview case final character?)
           McFlowPage(
             name: 'preview',
-            arguments: id,
-            child: CharacterPreviewPage(characterId: id),
+            arguments: character.id,
+            child: CharacterPreviewPage(
+              key: ValueKey(character.id),
+              character: character,
+            ),
           ),
       ],
     ),

@@ -7,10 +7,10 @@ _Last updated: 2026-11-24 by Tech Lead_
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
 | **Phase** | Phase A done: foundation and all three codegen shims (retrofit, injectable, BDD) are Bazel-native. Now Phase C: the LD kits, then the first feature, `characters_list` |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
-| **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`): 24 packages (foundation utilities, design system, mocked backend and fixtures, API client, feature flow), 39 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7 |
+| **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0032 engineer (Opus) |
+| **Active crew** | T-0033 engineer (Sonnet), T-0034 engineer (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -19,7 +19,8 @@ _Last updated: 2026-11-24 by Tech Lead_
 - **T-0029 merged:** `.feature` files generate AC-tagged widget tests in Bazel (patch 0003). **No generator needed the build_runner fallback (R28).**
 - **T-0030 merged:** `mc_paging` (paging controller, debounce, search history) and pure-Dart `mc_media`.
 - **T-0031 merged:** the paged grid and list, `McImage` and `McMediaCard`, with 80 goldens across 4 themes and 2 text scales.
-- **T-0032 `characters_list`**, the first Marvel feature, is in progress (Opus). T-0033 (universe wiring, sandbox app, simulator screenshot) follows.
+- **T-0032 merged: `characters_list`, the first Marvel feature**, is on `main`. It has a paged grid with bundled art and an in-flow preview; 75/75 tests, 100 % coverage, all generated code is byte-identical to build_runner's, and no codegen fallback was needed.
+- T-0033 (universe wiring, sandbox app, simulator e2e) is in progress; T-0034 removes the exemplar's kit workarounds before the generators copy it.
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).

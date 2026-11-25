@@ -29,8 +29,19 @@ def name(text):
 
 
 def section(text):
-    m = re.search(r"^dependencies:\n((?:[ \t]+.*\n?)*)", text, re.M)
-    return m.group(1) if m else ""
+    """The top-level `dependencies:` block, up to the next top-level key, with
+    blank lines and comments dropped (a blank line no longer ends it)."""
+    out, inside = [], False
+    for line in text.split("\n"):
+        if not inside:
+            inside = bool(re.match(r"^dependencies:\s*(#.*)?$", line))
+            continue
+        if not line.strip() or line.lstrip().startswith("#"):
+            continue
+        if not line[0].isspace():
+            break
+        out.append(line)
+    return "\n".join(out) + "\n"
 
 
 def deps(text):

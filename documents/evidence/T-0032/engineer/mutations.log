@@ -1,13 +1,20 @@
-M1 killed (AC3 the tap opens no preview): 5 failing scenario(s)
-M2 killed (AC3 openCharacter twice): 1 failing scenario(s)
-M3 killed (AC1/AC5 pages of 20): 6 failing scenario(s)
-M4 killed (AC5 every page is page 1): 3 failing scenario(s)
-M5 killed (AC2 timeout copy): 1 failing scenario(s)
-M6 killed (AC2 first-page failure shown as loading): 4 failing scenario(s)
-M7 killed (AC2 footer copy): 1 failing scenario(s)
-M8 killed (AC3 preview page without previewId): 2 failing scenario(s)
-M9 killed (AC4 German title): 1 failing scenario(s)
-M10 killed (AC1 wrong art): 3 failing scenario(s)
-M11 killed (AC3 preview of the wrong character): 5 failing scenario(s)
-M12 killed (AC3 list rebuilt on back (scroll lost)): 1 failing scenario(s)
+M1 killed (AC3 the tap opens no preview): characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3];characters_list Browse characters The full profile hands over to the app exactly once [T-0032-AC3];characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]
+M2 killed (AC3 openCharacter twice): characters_list Browse characters The full profile hands over to the app exactly once [T-0032-AC3];characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]
+M3 killed (AC1/AC5 pages of 20): characters_list_paging Characters list paging Scrolling to the end of the first page loads the second once [T-0032-AC5];characters_list_paging Characters list paging At the last page no further page is requested [T-0032-AC5];characters_list_paging Characters list paging Pulling down reloads the first page
+M4 killed (AC5 every page is page 1): characters_list_paging Characters list paging Scrolling to the end of the first page loads the second once [T-0032-AC5];characters_list_paging Characters list paging At the last page no further page is requested [T-0032-AC5];characters_list Browse characters A failed second page keeps the loaded characters and offers Retry [T-0032-AC2]
+M5 killed (AC2 timeout copy): characters_list Browse characters A failed first page explains the problem and retries ('timeout', 'The request took too long. Please try again.') [T-0032-AC2]
+M6 killed (AC2 first-page failure shown as loading): characters_list Browse characters A failed first page explains the problem and retries ('server_error', 'The server had a problem. Please try again later.') [T-0032-AC2];characters_list Browse characters A failed first page explains the problem and retries ('timeout', 'The request took too long. Please try again.') [T-0032-AC2];characters_list Browse characters A failed first page explains the problem and retries ('offline', 'No connection. Check your network and try again.') [T-0032-AC2]
+M7 killed (AC2 footer copy): characters_list Browse characters A failed second page keeps the loaded characters and offers Retry [T-0032-AC2]
+M8 killed (AC3 preview page without the selected id): characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3];characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3];characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]
+M9 killed (AC4 German title): characters_list Browse characters In German the title and the preview button come from the German strings [T-0032-AC4]
+M10 killed (AC1 wrong art): characters_list Browse characters The first page lists 30 characters in name order [T-0032-AC1];characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3];characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]
+M11 killed (AC3 preview of the wrong character): characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3];characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3];characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]
+M12 killed (AC3 list rebuilt on back (scroll lost)): characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]
+F1 killed (item 3: a second tap replaces the open preview): characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3]
+F2 killed (item 3: the preview page is not keyed by the id): characters_list Browse characters Tapping a character opens its preview inside the flow [T-0032-AC3];characters_list Browse characters A second tap while the preview slides in keeps the first character [T-0032-AC3];characters_list Browse characters Going back from the preview keeps the list where I left it [T-0032-AC3]
+F3a killed (item 4: recover() as the old step did it (engine reset, harness mirrors kept)): T-0032-AC2 recover() ends injected failures on the engine and in the harness, so an unrouted request is reported again;T-0032-AC2 recover() ends the scenario and keeps the store, the traffic and the recorded requests
+F3b killed (item 4: recover() leaves the engine-side rules live): T-0032-AC2 recover() ends injected failures on the engine and in the harness, so an unrouted request is reported again
+F4 killed (item 7: a new team keeps the old flow): T-0032-AC1 a new initialTeamId builds a new flow that lists that team
+F5 killed (item 12: two-digit names past 99): T-0032-AC5 a synthetic cast past 99 still pages in name order
+F6 killed (item 11: a single-quote-only import check): a failing test
 exit=0

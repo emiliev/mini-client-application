@@ -1,5 +1,6 @@
 # T-0032 (P1-17): `characters_list`, the LD exemplar feature (plan 01 §3.3).
 # Phase D's buildgen emits this file; until then it is written by hand.
+# No per-package analysis_options.yaml: the root file applies (F-0021).
 #
 # Every generator runs as a Bazel action; nothing generated is committed:
 #   freezed      character, character_dto, flow state, list bloc (state part)

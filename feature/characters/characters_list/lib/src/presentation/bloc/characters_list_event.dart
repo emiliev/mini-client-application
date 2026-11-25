@@ -18,8 +18,9 @@ sealed class CharactersListEvent {
   /// [done] completes when the reload settled, so the refresh control closes.
   const factory CharactersListEvent.refresh(Completer<void> done) = _Refresh;
 
-  /// A tile was tapped: its preview opens inside the flow.
-  const factory CharactersListEvent.preview(CharacterId id) = _Preview;
+  /// A tile was tapped: its preview opens inside the flow (ignored while a
+  /// preview is open).
+  const factory CharactersListEvent.preview(Character character) = _Preview;
 }
 
 final class _Load extends CharactersListEvent {
@@ -41,9 +42,9 @@ final class _Refresh extends CharactersListEvent {
 }
 
 final class _Preview extends CharactersListEvent {
-  const _Preview(this.id);
+  const _Preview(this.character);
 
-  final CharacterId id;
+  final Character character;
 }
 
 /// Internal: the paging controller produced a new state.

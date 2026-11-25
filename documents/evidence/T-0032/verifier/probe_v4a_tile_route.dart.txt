@@ -1,0 +1,22 @@
+import 'package:characters_list/src/domain/model/character.dart';
+import 'package:characters_list/src/presentation/page/character_preview_page.dart';
+import 'package:flutter/material.dart';
+import 'package:mc_ds_cards/mc_ds_cards.dart';
+
+class CharacterTile extends StatelessWidget {
+  const CharacterTile({required this.character, super.key});
+
+  final Character character;
+
+  @override
+  Widget build(BuildContext context) => McMediaCard(
+    title: character.name,
+    image: character.image,
+    onTap: () => Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        settings: RouteSettings(name: 'preview', arguments: character.id),
+        builder: (_) => CharacterPreviewPage(characterId: character.id),
+      ),
+    ),
+  );
+}
