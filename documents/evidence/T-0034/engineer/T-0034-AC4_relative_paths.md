@@ -6,6 +6,6 @@
 |---|---|
 | leading-slash paths | none |
 | config apiBaseUrl without a trailing slash | none |
-| negative control (planted `@GET('/x')`) | tripped |
+| negative controls (one-line, multi-line, raw, double-quoted; a relative path stays quiet) | all behave |
 
 **PASS T-0034-AC4-relative-paths**
