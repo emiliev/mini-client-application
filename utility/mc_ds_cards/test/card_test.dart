@@ -199,4 +199,45 @@ void main() {
     expect(large, greaterThan(small));
     expect(wide, greaterThan(small));
   });
+
+  test('T-0034-AC7 heightFor without a subtitle is shorter by the subtitle '
+      'line, and fewer title lines are shorter again', () {
+    double h({bool sub = true, int lines = 2}) => McMediaCard.heightFor(
+      width: 160,
+      textScaler: TextScaler.noScaling,
+      hasSubtitle: sub,
+      titleLines: lines,
+    );
+    expect(h(sub: false), lessThan(h()));
+    expect(h(lines: 1), lessThan(h()));
+    // The defaults keep the old two-line title plus subtitle.
+    expect(
+      McMediaCard.heightFor(width: 160, textScaler: TextScaler.noScaling),
+      h(),
+    );
+  });
+
+  testWidgets('T-0034-AC7 a card without a subtitle fits the shorter height, '
+      'at every text scale', (tester) async {
+    for (final scale in [1.0, 2.0]) {
+      await tester.pumpWidget(
+        _app(
+          textScale: scale,
+          SizedBox(
+            width: 160,
+            height: McMediaCard.heightFor(
+              width: 160,
+              textScaler: TextScaler.linear(scale),
+              hasSubtitle: false,
+            ),
+            child: const McMediaCard(
+              image: _image,
+              title: 'A very long character name that wraps over two lines',
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull, reason: 'scale $scale');
+    }
+  });
 }

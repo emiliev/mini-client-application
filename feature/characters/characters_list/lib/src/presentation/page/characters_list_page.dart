@@ -55,7 +55,11 @@ class _CharactersListPageContent extends StatelessWidget {
             key: charactersGridKey,
             state: page,
             cellHeight: (width, textScaler) =>
-                McMediaCard.heightFor(width: width, textScaler: textScaler),
+                McMediaCard.heightFor(
+                  width: width,
+                  textScaler: textScaler,
+                  hasSubtitle: false,
+                ),
             itemBuilder: (context, character, _) =>
                 CharacterTile(character: character),
             onLoadMore: () => bloc.add(const CharactersListEvent.loadMore()),
