@@ -1,0 +1,34 @@
+"""Structural diff of two MODULE.bazel.lock files: prints every changed JSON path."""
+import json
+import sys
+
+a = json.load(open(sys.argv[1]))
+b = json.load(open(sys.argv[2]))
+out = []
+
+
+def walk(x, y, path):
+    if type(x) is not type(y):
+        out.append(('TYPE', path))
+        return
+    if isinstance(x, dict):
+        for k in sorted(set(x) | set(y)):
+            if k not in x:
+                out.append(('ADDED', path + '/' + k))
+            elif k not in y:
+                out.append(('REMOVED', path + '/' + k))
+            else:
+                walk(x[k], y[k], path + '/' + k)
+    elif isinstance(x, list):
+        if x != y:
+            removed = [e for e in x if e not in y]
+            added = [e for e in y if e not in x]
+            out.append(('LIST', path, 'removed=%r' % sorted(set(map(str, removed))), 'added=%r' % sorted(set(map(str, added)))))
+    elif x != y:
+        out.append(('VALUE', path, str(x)[:90], str(y)[:90]))
+
+
+walk(a, b, '')
+for o in out:
+    print(*o)
+print('changes:', len(out))

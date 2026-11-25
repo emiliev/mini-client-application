@@ -1,0 +1,42 @@
+INFO: Invocation ID: fe0397c8-2820-411a-a163-16e9259d0f4a
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --collect_code_coverage and --instrumentation_filter have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: target //app/mini_client:links_after_flow_test (3 packages loaded, 2 targets configured)
+Analyzing: target //app/mini_client:links_after_flow_test (3 packages loaded, 2 targets configured)
+
+Analyzing: target //app/mini_client:links_after_flow_test (273 packages loaded, 11631 targets configured, 297 aspect applications)
+
+INFO: Analyzed target //app/mini_client:links_after_flow_test (287 packages loaded, 11830 targets configured, 768 aspect applications).
+[12,104 / 12,122] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 1s disk-cache, worker ... (2 actions running)
+[12,105 / 12,122] DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 6s disk-cache, worker ... (2 actions, 1 running)
+INFO: From DartAggregateCodegen @@//app/wiring/universe_wiring:di_config:
+Missing dependencies in universe_wiring/src/di/di_initializer.dart
+
+[CharactersListNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[12,120 / 12,122] [Prepa] Linking Dart kernel @@//app/mini_client:links_after_flow_test
+INFO: From Testing //app/mini_client:links_after_flow_test:
+==================== Test output for //app/mini_client:links_after_flow_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC4 a link sent to the running app opens its route after the characters list (a flow) is shown
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+VERIFIER before-flow link shown=1 grid=1 after-flow link shown=1 details6-texts=2
+  PASS  VERIFIER R1 a link after the characters flow mounted
+
+2 passed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 10.713s, Critical Path: 8.77s
+INFO: 6106 processes: 6017 action cache hit, 13 disk cache hit, 6080 internal, 3 darwin-sandbox, 10 worker.
+INFO: Build completed successfully, 6106 total actions
+//app/mini_client:links_after_flow_test                                  PASSED in 0.8s
+
+Executed 1 out of 1 test: 1 test passes.

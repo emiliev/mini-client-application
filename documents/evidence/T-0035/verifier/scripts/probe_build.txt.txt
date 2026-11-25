@@ -1,0 +1,15 @@
+
+flutter_test(
+    name = "verifier_probe_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/verifier_probe_test.dart",
+    package_name = "mc_feature_flow",
+    deps = _DEPS + [
+        ":mc_feature_flow",
+        "//utility/mc_ds_theme",
+        "@pub_deps//:flutter_localizations",
+        "@pub_deps//:flutter_test",
+        "@pub_deps//:go_router",
+    ],
+)

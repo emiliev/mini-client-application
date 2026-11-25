@@ -1,0 +1,18 @@
+INFO: Invocation ID: 26dc3480-dd19-42f3-b185-df881840ed7f
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 4 targets (0 packages loaded, 0 targets configured)
+Analyzing: 4 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 4 targets (41 packages loaded, 3848 targets configured, 417 aspect applications).
+[2,870 / 2,872] 2 / 3 tests; Testing //utility/mc_feature_flow:feature_flow_test; 0s darwin-sandbox ... (2 actions running)
+INFO: Found 1 target and 3 test targets...
+INFO: Elapsed time: 1.902s, Critical Path: 1.05s
+INFO: 13 processes: 2859 action cache hit, 10 internal, 3 darwin-sandbox.
+INFO: Build completed successfully, 13 total actions
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 0.9s
+//utility/mc_feature_flow:flow_kit_test                                  PASSED in 1.0s
+//utility/mc_feature_flow:flow_navigation_channel_test                   PASSED in 0.7s
+
+Executed 3 out of 3 tests: 3 tests pass.

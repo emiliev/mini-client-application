@@ -1,0 +1,7 @@
+import sys
+
+src = open(sys.argv[1]).read()
+probes = open(sys.argv[2]).read()
+i = src.index('void main() {')
+j = src.index('\n}\n', i)
+open(sys.argv[3], 'w').write(src[: j + 1] + probes + src[j + 3 :])
