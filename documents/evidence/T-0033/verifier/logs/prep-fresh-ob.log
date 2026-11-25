@@ -1,0 +1,105 @@
+==> bazel build //app/sandbox/universe_sandbox:universe_sandbox_lib (runs every generator)
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: b4b4cb32-b2f8-4627-8baa-8c91804331dc
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: target //app/sandbox/universe_sandbox:universe_sandbox_lib (6 packages loaded, 6 targets configured)
+Analyzing: target //app/sandbox/universe_sandbox:universe_sandbox_lib (6 packages loaded, 6 targets configured)
+
+Analyzing: target //app/sandbox/universe_sandbox:universe_sandbox_lib (254 packages loaded, 11258 targets configured, 315 aspect applications)
+
+INFO: Analyzed target //app/sandbox/universe_sandbox:universe_sandbox_lib (256 packages loaded, 11281 targets configured, 344 aspect applications).
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartAggregateCodegen @@//feature/characters/characters_list:di_config:
+Missing dependencies in characters_list/src/di/di_initializer.dart
+
+[CharactersListApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[CharacterPreviewBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharacterPreviewBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListBloc] depends on unregistered type [FeatureFlowController<(CharactersListFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersListBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[8,505 / 8,518] DartCodegen @@//feature/characters/characters_list:_characters_list_api_g; 0s disk-cache
+INFO: From DartAggregateCodegen @@//app/wiring/universe_wiring:di_config:
+Missing dependencies in universe_wiring/src/di/di_initializer.dart
+
+[CharactersListNavigatorImpl] depends on unregistered type [GoRouter] , from package:go_router/go_router.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: Found 1 target...
+Aspect @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze of //app/sandbox/universe_sandbox:universe_sandbox_lib up-to-date:
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__collection/collection.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__meta/meta.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__async/async.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__path/path.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__term_glyph/term_glyph.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__source_span/source_span.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__string_scanner/string_scanner.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__typed_data/typed_data.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__http_parser/http_parser.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__mime/mime.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__dio/dio.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_api_errors/mc_api_errors.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__get_it/get_it.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_di/mc_di.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_config/mc_config.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_monitoring/mc_monitoring.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_prelude/mc_prelude.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__json_annotation/json_annotation.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_api_client/mc_api_client.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__bloc/bloc.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_bloc_kit/mc_bloc_kit.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__characters/characters.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__material_color_utilities/material_color_utilities.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__vector_math/vector_math.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__flutter/flutter.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_tokens/mc_ds_tokens.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_layout/mc_ds_layout.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_theme/mc_ds_theme.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_buttons/mc_ds_buttons.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_feedback/mc_ds_feedback.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_media/mc_media.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_media/mc_ds_media.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_event_bus/mc_event_bus.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_fixtures_media/mc_fixtures_media.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_mocked_backend/mc_mocked_backend.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_fixtures_characters/mc_fixtures_characters.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_storage/mc_storage.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__flutter_web_plugins/flutter_web_plugins.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__logging/logging.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__go_router/go_router.dart_analyzer_summary.sum
+  bazel-bin/app/wiring/app_core/app_core.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__freezed_annotation/freezed_annotation.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_paging/mc_paging.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__injectable/injectable.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__retrofit/retrofit.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_cards/mc_ds_cards.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_ds_lists/mc_ds_lists.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__flow_builder/flow_builder.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_feature_flow/mc_feature_flow.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__clock/clock.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__intl/intl.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__flutter_localizations/flutter_localizations.dart_analyzer_summary.sum
+  bazel-bin/utility/mc_l10n_core/mc_l10n_core.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__nested/nested.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__provider/provider.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+pub_deps__flutter_bloc/flutter_bloc.dart_analyzer_summary.sum
+  bazel-bin/feature/characters/characters_list/characters_list.dart_analyzer_summary.sum
+  bazel-bin/app/wiring/universe_wiring/universe_wiring.dart_analyzer_summary.sum
+  bazel-bin/app/sandbox/universe_sandbox/universe_sandbox_lib.dart_analyzer_summary.sum
+  bazel-bin/external/ai_rules_flutter++flutter+flutter_sky_engine/sky_engine/sky_engine.embedder_sdk.sum
+INFO: Elapsed time: 3.985s, Critical Path: 0.31s
+INFO: 8518 processes: 166 disk cache hit, 8352 internal.
+INFO: Build completed successfully, 8518 total actions
+==> copying the repo to /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-fresh
+==> copying generated files from /private/tmp/mc-ob-T-0033-verifier-fresh/execroot/_main/bazel-out/darwin_arm64-fastbuild/bin
+cp: /private/tmp/mc-ob-T-0033-verifier-fresh/execroot/_main/bazel-out/darwin_arm64-fastbuild/bin/app/wiring/universe_wiring/universe_wiring.dart_analyzer_summary.summary_root/lib/src/di/di_initializer.config.dart: No such file or directory

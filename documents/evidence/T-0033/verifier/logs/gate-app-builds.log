@@ -1,0 +1,47 @@
+INFO: Invocation ID: 67e473b2-7e43-4670-9c7a-073e039a4660
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 2 targets (2 packages loaded, 0 targets configured)
+Analyzing: 2 targets (2 packages loaded, 0 targets configured)
+
+Analyzing: 2 targets (90 packages loaded, 5489 targets configured, 400 aspect applications)
+
+Analyzing: 2 targets (112 packages loaded, 6025 targets configured, 400 aspect applications)
+
+Analyzing: 2 targets (112 packages loaded, 6025 targets configured, 400 aspect applications)
+
+INFO: Analyzed 2 targets (114 packages loaded, 8925 targets configured, 454 aspect applications).
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/characters/characters_list:_character_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+[8,930 / 11,557] [Prepa] Creating symlink feature/characters/characters_list/_di_config_src_domain_repository_characters_list_repository_inj.pkg_roots.2f1993648f2d0167/mc__api__client/lib/src/api_dio.dart ... (11 actions, 0 running)
+INFO: From DartAggregateCodegen @@//feature/characters/characters_list:di_config:
+Missing dependencies in characters_list/src/di/di_initializer.dart
+
+[CharacterPreviewBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharacterPreviewBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListBloc] depends on unregistered type [FeatureFlowController<(CharactersListFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersListBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/universe_wiring:di_config:
+Missing dependencies in universe_wiring/src/di/di_initializer.dart
+
+[CharactersListNavigatorImpl] depends on unregistered type [GoRouter] , from package:go_router/go_router.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[11,547 / 11,557] [Prepa] Linking Dart kernel @@//app/sandbox/universe_sandbox:universe_sandbox_app ... (2 actions, 0 running)
+INFO: Found 2 targets...
+INFO: Elapsed time: 7.828s, Critical Path: 1.25s
+INFO: 11407 processes: 150 action cache hit, 426 disk cache hit, 10979 internal, 2 darwin-sandbox.
+INFO: Build completed successfully, 11407 total actions

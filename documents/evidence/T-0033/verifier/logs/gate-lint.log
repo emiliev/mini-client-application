@@ -1,0 +1,18 @@
+INFO: Invocation ID: c2373c75-23ac-4df0-bc91-103cde3c133f
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 200 targets (0 packages loaded, 0 targets configured)
+Analyzing: 200 targets (0 packages loaded, 0 targets configured)
+
+Analyzing: 200 targets (0 packages loaded, 3377 targets configured, 280 aspect applications)
+[5,130 / 5,150] Bundling Flutter assets @@//utility/mc_ds_cards:golden_test; 0s disk-cache ... (2 actions, 0 running)
+Analyzing: 200 targets (0 packages loaded, 7053 targets configured, 975 aspect applications)
+[7,963 / 7,963] no actions running
+Analyzing: 200 targets (0 packages loaded, 7097 targets configured, 1158 aspect applications)
+[12,579 / 12,585] [Prepa] Executing genrule //tool/bazel/config:app_config
+INFO: Analyzed 200 targets (0 packages loaded, 7099 targets configured, 1166 aspect applications).
+INFO: Found 200 targets...
+INFO: Elapsed time: 4.465s, Critical Path: 0.38s
+INFO: 207 processes: 12481 action cache hit, 161 disk cache hit, 46 internal.
+INFO: Build completed successfully, 207 total actions

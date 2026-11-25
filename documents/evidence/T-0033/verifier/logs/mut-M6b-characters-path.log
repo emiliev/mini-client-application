@@ -1,0 +1,35 @@
+INFO: Invocation ID: cc715ea0-ea25-4288-9e12-af36984e1b31
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured).
+FAIL: //app/wiring/universe_wiring:routes_test (Exit 1) (see /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/wiring/universe_wiring/routes_test/test.log)
+[11 / 12] 1 / 1 tests, 1 failed; Testing //app/wiring/universe_wiring:routes_test; 0s disk-cache, darwin-sandbox
+INFO: From Testing //app/wiring/universe_wiring:routes_test:
+==================== Test output for //app/wiring/universe_wiring:routes_test:
+  PASS  T-0033-AC1 the navigator opens CharacterDetailsRoute and the placeholder shows the id
+  PASS  T-0033-AC1 the wiring initializer resolves the route targets and the navigator
+  FAIL  T-0033-AC2 every AppLocations entry equals its typed route
+        TestFailure: Expected: '/characters'
+          Actual: '/characters/'
+           Which: is different. Both strings start the same, but the actual value also has the following trailing characters: /
+        characters
+
+        package:matcher                                                             expect
+        package:flutter_test/src/widget_tester.dart 473:18                          expect
+        org-dartlang-app:///app/wiring/universe_wiring/test/routes_test.dart 109:7  main.<fn>
+
+
+2 passed, 1 failed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 1.716s, Critical Path: 1.25s
+INFO: 12 processes: 4 internal, 3 darwin-sandbox, 5 worker.
+INFO: Build completed, 1 test FAILED, 12 total actions
+//app/wiring/universe_wiring:routes_test                                 FAILED in 0.5s
+  /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/wiring/universe_wiring/routes_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.

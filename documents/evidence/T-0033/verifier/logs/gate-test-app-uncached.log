@@ -1,0 +1,21 @@
+INFO: Invocation ID: 279332cf-4332-4348-a7a6-ec8abef288e4
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 25 targets (0 packages loaded, 0 targets configured)
+Analyzing: 25 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 25 targets (0 packages loaded, 21 targets configured, 46 aspect applications).
+[12,364 / 12,369] Testing //app/wiring/app_core:boot_test; 0s darwin-sandbox ... (5 actions running)
+[12,368 / 12,369] 4 / 5 tests; Testing //app/mini_client:app_test; 1s darwin-sandbox
+INFO: Found 20 targets and 5 test targets...
+INFO: Elapsed time: 3.520s, Critical Path: 2.35s
+INFO: 6 processes: 145 action cache hit, 1 internal, 5 darwin-sandbox.
+INFO: Build completed successfully, 6 total actions
+//app/mini_client:app_test                                               PASSED in 2.2s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 1.5s
+//app/wiring/app_core:boot_test                                          PASSED in 1.9s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 1.2s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 1.6s
+
+Executed 5 out of 5 tests: 5 tests pass.

@@ -1,0 +1,23 @@
+==> Task T-0033, role verifier, project /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client
+==> Evidence dir: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd/documents/evidence/T-0033/verifier/back_probe
+==> Creating simulator mc-T-0033-verifier-47325 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0033-verifier-47325
+SIMULATOR_UDID=486EC1E5-2DD3-4874-B223-1D9C152AFA1A
+SIMULATOR_CREATED_AT=1795615470
+==> Booting 486EC1E5-2DD3-4874-B223-1D9C152AFA1A
+==> Booted in 16 s
+==> Running target 1/1: integration_test/verifier_back_probe_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/verifier_back_probe_test.dart -d 486EC1E5-2DD3-4874-B223-1D9C152AFA1A
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd/documents/evidence/T-0033/verifier/back_probe/e2e-verifier_back_probe_test.log
+==>   screenshot probe_01_after_back_from_placeholder.png (downscaled from 1206x2622)
+==>   screenshot probe_02_after_second_back.png (downscaled from 1206x2622)
+==>   screenshot probe_03_after_system_back.png (downscaled from 1206x2622)
+==> PASS integration_test/verifier_back_probe_test.dart (33 s)
+==> Summary: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd/documents/evidence/T-0033/verifier/back_probe/e2e-summary.md
+==> RESULT: PASS (1 target(s))
+==> Deleted simulator mc-T-0033-verifier-47325 (486EC1E5-2DD3-4874-B223-1D9C152AFA1A)
+SIMULATOR_DELETED_AT=1795615523
+RUN_EXIT=0 ELAPSED=54s
+/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/run_probe.sh: line 20: 47326 Terminated: 15          ( sleep "$limit"; if kill -0 $pid 2> /dev/null; then
+    echo "WATCHDOG: SIGTERM after ${limit}s"; kill -TERM $pid;
+fi )

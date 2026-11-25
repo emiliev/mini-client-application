@@ -1,0 +1,17 @@
+#!/bin/bash
+# fixtures_scan.sh: every production library under //feature and //utility
+# (except the fixtures and the backend themselves) and whether its deps()
+# reach //utility/mc_fixtures_*. Prints hits; exits 1 on any hit.
+set -u
+cd /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd
+B="--output_base=/tmp/mc-ob-T-0033-verifier"
+libs=$(tool/bazelw $B query 'kind("flutter_library|dart_library", //feature/... + //utility/...)' 2>/dev/null \
+  | grep -vE ':_|mc_fixtures_|mc_mocked_backend|_test|testing|test_utils')
+n=0 hits=0
+for l in $libs; do
+  n=$((n + 1))
+  h=$(tool/bazelw $B query "deps($l)" 2>/dev/null | grep -E '^//utility/mc_fixtures_' | head -2 | tr '\n' ' ')
+  if [ -n "$h" ]; then echo "HIT $l -> $h"; hits=$((hits + 1)); fi
+done
+echo "checked $n libraries, $hits with a fixtures dependency"
+[ $hits -eq 0 ]

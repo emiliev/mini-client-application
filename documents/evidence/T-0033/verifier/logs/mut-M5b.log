@@ -1,0 +1,40 @@
+INFO: Invocation ID: e12e0a45-5312-4bed-a0c4-aeb8061b1d47
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured).
+[9 / 20] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 1s disk-cache, worker
+[10 / 20] [Prepa] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_g
+FAIL: //app/wiring/universe_wiring:routes_test (Exit 1) (see /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/wiring/universe_wiring/routes_test/test.log)
+[20 / 21] 1 / 1 tests, 1 failed; Testing //app/wiring/universe_wiring:routes_test; 0s disk-cache, darwin-sandbox
+INFO: From Testing //app/wiring/universe_wiring:routes_test:
+==================== Test output for //app/wiring/universe_wiring:routes_test:
+  PASS  T-0033-AC1 the navigator opens CharacterDetailsRoute and the placeholder shows the id
+  PASS  T-0033-AC1 the wiring initializer resolves the route targets and the navigator
+  FAIL  T-0033-AC2 every AppLocations entry equals its typed route
+        TestFailure: Expected: an object with length of <2>
+          Actual: _SyncStarIterable<GoRoute>:[
+                    GoRoute:GoRoute#69ade(name: null, path: "/characters"),
+                    GoRoute:GoRoute#542ae(name: null, path: ":id"),
+                    GoRoute:GoRoute#eee79(name: null, path: "search")
+                  ]
+           Which: has length of <3>
+
+        package:matcher                                                             expect
+        package:flutter_test/src/widget_tester.dart 473:18                          expect
+        org-dartlang-app:///app/wiring/universe_wiring/test/routes_test.dart 112:5  main.<fn>
+
+
+2 passed, 1 failed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 5.446s, Critical Path: 4.91s
+INFO: 18 processes: 1 action cache hit, 1 disk cache hit, 8 internal, 3 darwin-sandbox, 6 worker.
+INFO: Build completed, 1 test FAILED, 18 total actions
+//app/wiring/universe_wiring:routes_test                                 FAILED in 0.5s
+  /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/wiring/universe_wiring/routes_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.
