@@ -1,0 +1,5 @@
+# Vendored third-party source (T-0035): not held to the workspace lint rules, so
+# the diff to the pub.dev archive stays reviewable. Keep only the real errors.
+analyzer:
+  exclude:
+    - build/**

@@ -1,0 +1,13 @@
+load("@rules_flutter//flutter:defs.bzl", "flutter_library")
+
+# Vendored flow_builder 0.1.0 (T-0035, VENDORED.md). Replaces
+# `@pub_deps//:flow_builder`; nothing else may depend on the hosted copy.
+package(default_visibility = ["//visibility:public"])
+
+flutter_library(
+    name = "flow_builder",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    package_name = "flow_builder",
+    deps = ["@pub_deps//:flutter"],
+)

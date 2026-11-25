@@ -50,3 +50,19 @@ flutter_test(
         "@pub_deps//:flutter_test",
     ],
 )
+
+# T-0035: deep links and popRoute through `flutter/navigation` while a flow is
+# mounted, after it is disposed, and for nested flows.
+flutter_test(
+    name = "flow_navigation_channel_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/flow_navigation_channel_test.dart",
+    package_name = "mc_feature_flow",
+    deps = _DEPS + [
+        ":mc_feature_flow",
+        "//utility/mc_ds_theme",
+        "@pub_deps//:flutter_localizations",
+        "@pub_deps//:flutter_test",
+    ],
+)
