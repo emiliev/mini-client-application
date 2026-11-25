@@ -56,12 +56,30 @@ flutter_test(
 flutter_test(
     name = "flow_navigation_channel_test",
     size = "small",
+    srcs = ["test/navigation_channel_support.dart"],
     language_version = "3.13",
     main = "test/flow_navigation_channel_test.dart",
     package_name = "mc_feature_flow",
     deps = _DEPS + [
         ":mc_feature_flow",
         "//utility/mc_ds_theme",
+        "@pub_deps//:flutter_localizations",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0035: the framework's own replies on `flutter/navigation`, in a target
+# where no FlowBuilder ever mounts (the baseline the flow tests compare with).
+flutter_test(
+    name = "framework_navigation_baseline_test",
+    size = "small",
+    srcs = ["test/navigation_channel_support.dart"],
+    language_version = "3.13",
+    main = "test/framework_navigation_baseline_test.dart",
+    package_name = "mc_feature_flow",
+    deps = [
+        "//utility/mc_ds_theme",
+        "@pub_deps//:flutter",
         "@pub_deps//:flutter_localizations",
         "@pub_deps//:flutter_test",
     ],

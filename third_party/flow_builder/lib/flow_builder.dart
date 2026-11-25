@@ -373,7 +373,8 @@ abstract class _SystemNavigationObserver implements WidgetsBinding {
   static Future<dynamic> _popRoute() async {
     for (final interceptor in _interceptors) {
       final preventDefault = await interceptor();
-      if (preventDefault) return Future<dynamic>.value();
+      // mini-client T-0035: iOS counts any reply but `true` as unhandled.
+      if (preventDefault) return Future<dynamic>.value(true);
     }
     return WidgetsBinding.instance.handlePopRoute();
   }
