@@ -23,6 +23,7 @@ dart_test(
     name = "workspace_gate_test",
     size = "small",
     data = [
+        "//feature/characters/characters_list:arbs",
         "//utility/mc_l10n_core:arbs",
     ],
     language_version = "3.13",

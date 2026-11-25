@@ -24,6 +24,10 @@ coverage/
 # A future build_runner fallback (R28) adds explicit negations below.
 *.g.dart
 *.freezed.dart
+# injectable config and shards, generated BDD tests (plan 01 §3.1; T-0032)
+*.config.dart
+*.injectable.json
+**/test/feature/*_test.dart
 **/lib/src/l10n/*_l10n.dart
 **/lib/src/l10n/*_l10n_[a-z]*.dart
 .bazelrc.user.tmp

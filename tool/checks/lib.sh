@@ -5,6 +5,10 @@
 
 REPO="$(git -C "$(dirname "${BASH_SOURCE[0]}")" rev-parse --show-toplevel)"
 BAZELW="$REPO/tool/bazelw"
+# `bzw` is tool/bazelw with MC_BAZEL_STARTUP's startup options (e.g.
+# --output_base=...), the same server the reference scripts use (T-0032).
+read -r -a MC_STARTUP <<< "${MC_BAZEL_STARTUP:-}"
+bzw() { "$BAZELW" ${MC_STARTUP[@]+"${MC_STARTUP[@]}"} "$@"; }
 OUT=""
 while [[ $# -gt 0 ]]; do
   case "$1" in

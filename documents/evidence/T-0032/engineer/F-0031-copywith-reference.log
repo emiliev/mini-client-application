@@ -1,0 +1,36 @@
+== 1. Bazel codegen for //feature/characters/characters_list
+INFO: Build completed successfully, 15 total actions
+== 2. Overlay scratch tree .dart_tool/mc_overlay/characters_list
+   14 files from //feature/characters/characters_list:_stage
+   first-party path dep: mc_api_client (utility/mc_api_client)
+   first-party path dep: mc_api_errors (utility/mc_api_errors)
+   first-party path dep: mc_bloc_kit (utility/mc_bloc_kit)
+   first-party path dep: mc_config (utility/mc_config)
+   first-party path dep: mc_di (utility/mc_di)
+   first-party path dep: mc_ds_buttons (utility/mc_ds_buttons)
+   first-party path dep: mc_ds_cards (utility/mc_ds_cards)
+   first-party path dep: mc_ds_feedback (utility/mc_ds_feedback)
+   first-party path dep: mc_ds_layout (utility/mc_ds_layout)
+   first-party path dep: mc_ds_lists (utility/mc_ds_lists)
+   first-party path dep: mc_ds_media (utility/mc_ds_media)
+   first-party path dep: mc_ds_theme (utility/mc_ds_theme)
+   first-party path dep: mc_ds_tokens (utility/mc_ds_tokens)
+   first-party path dep: mc_feature_flow (utility/mc_feature_flow)
+   first-party path dep: mc_l10n_core (utility/mc_l10n_core)
+   first-party path dep: mc_media (utility/mc_media)
+   first-party path dep: mc_monitoring (utility/mc_monitoring)
+   first-party path dep: mc_paging (utility/mc_paging)
+   first-party path dep: mc_prelude (utility/mc_prelude)
+   first-party path dep: mc_storage (utility/mc_storage)
+== 3. Resolve (hosted versions must equal the committed overlay lock)
+== 4. build_runner
+  0s source_gen:combining_builder on 28 inputs: 10 skipped, 2 output, 16 no-op
+  Built with build_runner/aot in 13s; wrote 8 outputs.
+   dart analyze: no unresolved imports
+== 5. Compare with bazel-bin (declared outputs only)
+EQUAL   feature/characters/characters_list/lib/src/domain/api/characters_list_api.g.dart  sha256 36401c9e5f6ced2a
+EQUAL   feature/characters/characters_list/lib/src/domain/model/character.freezed.dart  sha256 df12820ec377eab6
+EQUAL   feature/characters/characters_list/lib/src/domain/model/character_dto.freezed.dart  sha256 e2c0bd64fad89365
+EQUAL   feature/characters/characters_list/lib/src/domain/model/character_dto.g.dart  sha256 5cfff5a2c7ab408c
+EQUAL   feature/characters/characters_list/lib/src/flow/characters_list_flow_state.freezed.dart  sha256 cc2848b05137068c
+EQUAL   feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.freezed.dart  sha256 109d9e05941b95f2

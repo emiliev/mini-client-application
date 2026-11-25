@@ -15,4 +15,15 @@ void main() {
     expect(arbs, isNotEmpty, reason: 'no ARB files in runfiles at $root');
     expect(checkL10n(root), isEmpty);
   });
+
+  test('T-0032-AC4 the gate checks the characters_list ARB set', () {
+    const dir = 'feature/characters/characters_list/lib/src/l10n';
+    for (final locale in ['en', 'de', 'en_XA']) {
+      expect(
+        File('$dir/characters_list_$locale.arb').existsSync(),
+        isTrue,
+        reason: 'characters_list_$locale.arb is not in the gate runfiles',
+      );
+    }
+  });
 }
