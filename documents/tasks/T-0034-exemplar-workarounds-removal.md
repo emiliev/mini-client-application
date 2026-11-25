@@ -26,7 +26,7 @@ T-0032 left marked workarounds in `characters_list`, because three kits don't do
 6. **mocktail** is in the lock now. Moving F-0024's hand-written `MockMonitoring` to mocktail is optional and out of scope.
 
 ## Scope
-- **In:** decisions 1–3, implemented in `mc_feature_flow`, `mc_paging` and `mc_config`/`mc_api_client`. Remove the marked workarounds in `feature/characters/characters_list` so it matches plan 01 §3.3's code.
+- **In:** decisions 1–3 and 5, implemented in `mc_feature_flow`, `mc_paging` and `mc_config`/`mc_api_client`. Remove the marked workarounds in `feature/characters/characters_list` so it matches plan 01 §3.3's code.
 - **Out:** `mcgen wire`, and any changes to the exemplar beyond removing the workarounds.
 
 ## Acceptance criteria
@@ -34,8 +34,8 @@ T-0032 left marked workarounds in `characters_list`, because three kits don't do
 - **T-0034-AC2:** A `FeatureFlow` with `provide:` makes the provided instance resolvable inside the flow, and nowhere outside it. With `localizationsDelegates:`, the flow's strings resolve for `en` and `de`. Both are tested in `mc_feature_flow`.
 - **T-0034-AC3:** A freezed bloc state holding `PagedState<T>` compiles with the default `copyWith`, including the deep `copyWith`, in a test package. The generated outputs are still byte-identical to build_runner's (`spike_reference.sh`).
 - **T-0034-AC4:** `apiBaseUrl` without a trailing slash is normalised. A retrofit path with a leading slash is rejected or flagged by a test or lint. The exemplar uses `'v1/characters'`, and its requests still hit `/v1/characters`.
-- **T-0034-AC6:** The T-0032 preview step uses the public flow-state test hook, with no dynamic access to `mc_feature_flow` internals; the hook is tested in `mc_feature_flow`.
 - **T-0034-AC5:** `characters_list` has no workaround markers left (grep for the T-0032 marker comments). All T-0032 ACs still pass unchanged, and the T-0032 byte-identity and cutoff checks still pass. Gates: `test //...`, lint, `mc_arch_check`, `rules_fork.sh check`, format, coverage ≥ 90 % for every touched package.
+- **T-0034-AC6:** The T-0032 preview step uses the public flow-state test hook, with no dynamic access to `mc_feature_flow` internals; the hook is tested in `mc_feature_flow`.
 
 ## Log
 - 2026-11-25: Created (TL) from T-0032's handoff questions.
