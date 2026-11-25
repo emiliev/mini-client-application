@@ -5,7 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0034](T-0034-exemplar-workarounds-removal.md) | Remove the exemplar's workarounds (`mc_feature_flow` `provide:`/delegates/non-listening `di`, `$PagedStateCopyWith`, base URL) | Ready | Engineer (Sonnet) | T-0032 | `fleet/T-0034-exemplar-workarounds` |
+| [T-0034](T-0034-exemplar-workarounds-removal.md) | Remove the exemplar's workarounds (`mc_feature_flow` `provide:`/delegates/non-listening `di`, `$PagedStateCopyWith`, base URL) | **In Progress** | Engineer (Sonnet) | T-0032 | `fleet/T-0034-exemplar-workarounds` |
 | [T-0033](T-0033-universe-wiring-and-sandbox.md) | `characters_list` in the app: `universe_wiring`, sandbox, simulator e2e (P1-17 app half) | **In Progress** | Engineer (Sonnet) | T-0032 | `fleet/T-0033-universe-wiring` |
 
 ## Done
