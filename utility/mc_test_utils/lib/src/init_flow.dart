@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_test_utils/src/session.dart';
@@ -19,6 +20,10 @@ class McTestApp extends StatelessWidget {
         .copyWith(platform: TargetPlatform.iOS),
     locale: session.locale,
     supportedLocales: [session.locale],
+    // Flutter's own strings in every locale, as the app installs them, so a
+    // test in `de` sees no "locale not supported" warning (T-0032-AC4).
+    // Feature strings come from each flow's own delegates.
+    localizationsDelegates: GlobalMaterialLocalizations.delegates,
     builder: (context, app) => MediaQuery(
       data: MediaQuery.of(context)
           .copyWith(textScaler: TextScaler.linear(session.textScale)),

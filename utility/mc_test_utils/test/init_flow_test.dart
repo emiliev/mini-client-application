@@ -70,4 +70,25 @@ void main() {
     await session.monitoring.trackEvent('seen');
     expect(session.monitoring.events.single.name, 'seen');
   });
+
+  mcTestWidgets('T-0032-AC4 initFlow in de has Flutter\'s German strings', (
+    tester,
+  ) async {
+    McTestSession.current
+      ..backend.useFixtureSet(thingsSet)
+      ..locale = const Locale('de');
+    late MaterialLocalizations material;
+    await initFlow(
+      tester,
+      () => thingsFlow(
+        onBuild: (context) => material = MaterialLocalizations.of(context),
+      ),
+    );
+    await mcSettle(tester);
+
+    // Without the global delegates MaterialApp reports "de is not supported"
+    // and the test fails on that warning.
+    expect(tester.takeException(), isNull);
+    expect(material.backButtonTooltip, 'Zurück');
+  });
 }

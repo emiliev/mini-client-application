@@ -8,13 +8,17 @@ part 'characters_list_api.g.dart';
 
 /// The feature's own retrofit API on the shared `Dio` (Tide: one per
 /// feature). The `Dio` comes from the root container (a `RootImport`).
+///
+/// Paths start with `/`: Dio joins `baseUrl + path` as strings, and
+/// `AppConfig.apiBaseUrl` has no trailing slash, so `v1/characters` would
+/// land on the host (`…invalidv1/characters`, F-0032).
 @injectable
 @RestApi()
 abstract class CharactersListApi {
   @factoryMethod
   factory CharactersListApi(Dio dio) = _CharactersListApi;
 
-  @GET('v1/characters')
+  @GET('/v1/characters')
   Future<ApiPage<CharacterDto>> getCharacters({
     @Query('offset') int offset = 0,
     @Query('limit') int limit = 30,

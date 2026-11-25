@@ -27,6 +27,7 @@ dependencies:
   mc_api_errors: any
   mc_bloc_kit: any
   mc_di: any
+  mc_ds_buttons: any
   mc_ds_cards: any
   mc_ds_feedback: any
   mc_ds_layout: any

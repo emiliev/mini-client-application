@@ -212,3 +212,66 @@ _CODEGEN = [
     ":di_config",
     ":_l10n",
 ]
+
+# --- the package library ----------------------------------------------------
+_FLUTTER_DEPS = [
+    "//utility/mc_ds_buttons",
+    "//utility/mc_ds_cards",
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_lists",
+    "//utility/mc_ds_media",
+    "//utility/mc_ds_theme",
+    "//utility/mc_feature_flow",
+    "//utility/mc_l10n_core",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_bloc",
+    "@pub_deps//:flutter_localizations",
+    "@pub_deps//:intl",
+]
+
+flutter_library(
+    name = "characters_list",
+    srcs = glob(
+        ["lib/**/*.dart"],
+        # `fvm flutter pub get` writes the l10n outputs beside the ARBs for
+        # the IDE; Bazel builds its own copies (:_l10n).
+        exclude = [
+            "lib/src/l10n/*_l10n*.dart",
+            "**/*.g.dart",
+            "**/*.freezed.dart",
+            "**/*.config.dart",
+        ],
+    ) + _CODEGEN,
+    language_version = _LANG,
+    package_name = _PKG,
+    visibility = ["//visibility:public"],
+    deps = _PURE_DEPS + _FLUTTER_DEPS,
+)
+
+# --- tests (R6: BDD + contract + l10n + golden; no solitary unit tests) -----
+_TEST_DEPS = [
+    "//utility/mc_ds_cards",
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_media",
+    "//utility/mc_fixtures_characters",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_media",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:mocktail",
+]
+
+mc_bdd_tests(
+    name = "bdd_test",
+    data = ["//utility/mc_fixtures_media:asset_files"],
+    features = glob(["test/feature/*.feature"]),
+    language_version = _LANG,
+    lib = ":characters_list",
+    package_name = _PKG,
+    setup = "test/feature/util/characters_list_env.dart",
+    steps = glob([
+        "test/feature/step/**/*.dart",
+        "test/feature/util/*.dart",
+    ]),
+    deps = _TEST_DEPS,
+)
