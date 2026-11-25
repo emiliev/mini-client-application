@@ -1,9 +1,8 @@
 import 'package:characters_list/characters_list.dart';
-import 'package:flutter/widgets.dart';
-import 'package:universe_wiring/src/pages/character_details_placeholder_page.dart';
+import 'package:universe_wiring/src/flows/character_details_placeholder_flow.dart';
 import 'package:universe_wiring/src/routes/route_targets.dart';
 
-/// Builds each route's page from the feature barrels (R15: unannotated, so no
+/// Builds each route's flow from the feature barrels (R15: unannotated, so no
 /// generator reads it).
 class RouteTargetsImpl implements RouteTargets {
   const RouteTargetsImpl({required CharactersListNavigator charactersList})
@@ -12,10 +11,10 @@ class RouteTargetsImpl implements RouteTargets {
   final CharactersListNavigator _charactersList;
 
   @override
-  Widget characters(BuildContext context) =>
+  CharactersListFlow characters() =>
       CharactersListFlow(navigator: _charactersList);
 
   @override
-  Widget characterDetails(BuildContext context, int id) =>
-      CharacterDetailsPlaceholderPage(id: id);
+  CharacterDetailsPlaceholderFlow characterDetails(int id) =>
+      CharacterDetailsPlaceholderFlow(id: id);
 }

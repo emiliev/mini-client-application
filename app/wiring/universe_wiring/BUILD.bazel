@@ -37,6 +37,7 @@ flutter_library(
     name = "_stage",
     package_name = _PKG,
     srcs = [
+        "lib/src/flows/character_details_placeholder_flow.dart",
         "lib/src/routes/route_targets.dart",
     ],
     language_version = _LANG,

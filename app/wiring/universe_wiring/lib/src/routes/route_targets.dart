@@ -1,14 +1,15 @@
-import 'package:flutter/widgets.dart';
+import 'package:characters_list/characters_list.dart';
+import 'package:universe_wiring/src/flows/character_details_placeholder_flow.dart';
 
-/// What the typed routes build (R15). The route file imports only this
-/// interface, so the code generator reads no feature barrel;
-/// `RouteTargetsImpl` (unannotated) imports the barrels and is registered by
+/// What the typed routes build (R15): each member returns a feature's `*Flow`.
+/// The route file imports only this interface; `RouteTargetsImpl`
+/// (unannotated) supplies the flows' navigators and is registered by
 /// `UniverseWiringDIInitializer`.
 abstract interface class RouteTargets {
   /// The characters list: `/characters`.
-  Widget characters(BuildContext context);
+  CharactersListFlow characters();
 
   /// The details of one character: `/characters/:id`. A placeholder until
   /// `characters_details` exists.
-  Widget characterDetails(BuildContext context, int id);
+  CharacterDetailsPlaceholderFlow characterDetails(int id);
 }

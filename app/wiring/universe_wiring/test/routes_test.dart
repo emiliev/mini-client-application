@@ -7,15 +7,23 @@ import 'package:mc_di/mc_di.dart';
 import 'package:universe_wiring/universe_wiring.dart';
 
 /// Stands in for the real list (which needs the backend), so the test is
-/// about the wiring: the details page is the real placeholder.
-class _Targets implements RouteTargets {
-  @override
-  Widget characters(BuildContext context) =>
-      const SizedBox(key: Key('fake.characters'));
+/// about the wiring.
+class _FakeList extends CharactersListFlow {
+  const _FakeList({required super.navigator});
 
   @override
-  Widget characterDetails(BuildContext context, int id) =>
-      CharacterDetailsPlaceholderPage(id: id);
+  Widget build(BuildContext context) =>
+      const SizedBox(key: Key('fake.characters'));
+}
+
+class _Targets implements RouteTargets {
+  @override
+  CharactersListFlow characters() =>
+      _FakeList(navigator: diContainer<CharactersListNavigator>());
+
+  @override
+  CharacterDetailsPlaceholderFlow characterDetails(int id) =>
+      CharacterDetailsPlaceholderFlow(id: id);
 }
 
 /// Every [GoRoute] under [routes], depth first.

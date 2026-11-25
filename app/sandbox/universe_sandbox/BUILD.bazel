@@ -45,6 +45,7 @@ flutter_test(
     main = "test/universe_sandbox_router_test.dart",
     deps = _RUNTIME_DEPS + [
         ":universe_sandbox_lib",
+        "//feature/characters/characters_list",
         "@pub_deps//:flutter_test",
     ],
 )

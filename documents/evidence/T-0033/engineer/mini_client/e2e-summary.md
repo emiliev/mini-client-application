@@ -8,18 +8,18 @@
 | Project | `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0033-engineer-75845` |
-| Simulator UDID | `ED3DBE24-C956-4F13-9B6A-3A5C8083CA7B` |
+| Simulator | `mc-T-0033-engineer-80966` |
+| Simulator UDID | `19EB0912-95CD-47EE-948A-2A64E30057C4` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-25T08:51:30Z |
-| Finished | 2026-11-25T08:58:24Z |
+| Started | 2026-11-25T08:59:01Z |
+| Finished | 2026-11-25T09:00:17Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/characters_deeplink_test.dart` | PASS | 373 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
-| `integration_test/characters_journey_test.dart` | PASS | 21 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
+| `integration_test/characters_deeplink_test.dart` | PASS | 34 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
+| `integration_test/characters_journey_test.dart` | PASS | 25 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
 
 ## Screenshots
 

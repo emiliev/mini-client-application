@@ -18,6 +18,7 @@ dependencies:
   universe_wiring: any
 
 dev_dependencies:
+  characters_list: any
   flutter_test:
     sdk: flutter
   integration_test:

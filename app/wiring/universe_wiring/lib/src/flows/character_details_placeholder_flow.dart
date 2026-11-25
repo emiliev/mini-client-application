@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
-/// Stands in for `characters_details` at `/characters/:id`.
-class CharacterDetailsPlaceholderPage extends StatelessWidget {
-  const CharacterDetailsPlaceholderPage({required this.id, super.key});
+/// Stands in for `characters_details`' flow at `/characters/:id`, so a route
+/// builds a `*Flow` as R15 asks. Replaced by that feature's flow later.
+class CharacterDetailsPlaceholderFlow extends StatelessWidget {
+  const CharacterDetailsPlaceholderFlow({required this.id, super.key});
 
   final int id;
 

@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0033 engineer on mc-T-0033-engineer-75845 (ED3DBE24-C956-4F13-9B6A-3A5C8083CA7B)
+# e2e_ios.sh: T-0033 engineer on mc-T-0033-engineer-80966 (19EB0912-95CD-47EE-948A-2A64E30057C4)
 # cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.SJsnfE/screenshots/2-characters_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d ED3DBE24-C956-4F13-9B6A-3A5C8083CA7B
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8vt8k9/screenshots/2-characters_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 19EB0912-95CD-47EE-948A-2A64E30057C4
 
 Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini`...
 Downloading packages...
@@ -20,10 +20,10 @@ Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mi
 11 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                            9.2s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64323/VYTxSBTxawg=/
-VMServiceFlutterDriver: Isolate found with number: 857130861172295
-VMServiceFlutterDriver: Isolate 857130861172295 is runnable.
+Xcode build done.                                            9.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64881/fu3BaRVBxnk=/
+VMServiceFlutterDriver: Isolate found with number: 318010397149087
+VMServiceFlutterDriver: Isolate 318010397149087 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
@@ -33,12 +33,13 @@ flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
 flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
-flutter: 00:04 +1: (tearDownAll)
-flutter: 00:04 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.SJsnfE/screenshots/2-characters_journey_test/01_home.png (294321)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.SJsnfE/screenshots/2-characters_journey_test/02_characters_list.png (252670)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.SJsnfE/screenshots/2-characters_journey_test/03_preview.png (303372)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.SJsnfE/screenshots/2-characters_journey_test/04_full_profile_placeholder.png (222291)
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: 00:07 +1: (tearDownAll)
+flutter: 00:07 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8vt8k9/screenshots/2-characters_journey_test/01_home.png (294321)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8vt8k9/screenshots/2-characters_journey_test/02_characters_list.png (396818)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8vt8k9/screenshots/2-characters_journey_test/03_preview.png (303372)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8vt8k9/screenshots/2-characters_journey_test/04_full_profile_placeholder.png (222291)
 All tests passed.
 
 # exit code: 0
