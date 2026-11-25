@@ -58,6 +58,14 @@ Feature: Browse characters
     Then the app was asked to open character {'Amber Alchemist'}
 
   @T-0032-AC3
+  Scenario: A second tap while the preview slides in keeps the first character
+    When I open the characters list
+    And I tap {'Amber Alchemist'} and {'Amber Bard'} in quick succession
+    Then I see the character preview for {'Amber Alchemist'}
+    When I tap {'See full profile'}
+    Then the app was asked to open character {'Amber Alchemist'}
+
+  @T-0032-AC3
   Scenario: Going back from the preview keeps the list where I left it
     When I open the characters list
     And I scroll the characters list until I see {'Amber Herald'}

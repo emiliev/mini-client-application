@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:characters_list/src/domain/model/character.dart';
-import 'package:characters_list/src/domain/model/character_id.dart';
 import 'package:characters_list/src/domain/model/characters_query.dart';
 import 'package:characters_list/src/domain/repository/characters_list_repository.dart';
 import 'package:characters_list/src/flow/characters_list_flow_state.dart';
@@ -69,8 +68,12 @@ final class CharactersListBloc
         } finally {
           done.complete();
         }
-      case _Preview(:final id):
-        _flow.update((s) => s.copyWith(previewId: id));
+      case _Preview(:final character):
+        // One preview at a time: a second tap while the first preview slides
+        // in must not replace what the open preview shows and opens.
+        if (_flow.state.preview == null) {
+          _flow.update((s) => s.copyWith(preview: character));
+        }
       case _PageChanged(:final page):
         emit(_toState(page));
     }

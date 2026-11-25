@@ -16,7 +16,7 @@ class CharacterTile extends StatelessWidget {
     title: character.name,
     image: character.image,
     onTap: () => context.read<CharactersListBloc>().add(
-      CharactersListEvent.preview(character.id),
+      CharactersListEvent.preview(character),
     ),
   );
 }

@@ -1,5 +1,4 @@
 import 'package:characters_list/src/domain/model/character.dart';
-import 'package:characters_list/src/domain/model/character_id.dart';
 import 'package:characters_list/src/l10n/characters_list_l10n.dart';
 import 'package:characters_list/src/presentation/bloc/character_preview_bloc.dart';
 import 'package:flutter/material.dart';
@@ -16,18 +15,20 @@ const characterPreviewTitleKey = ValueKey<String>(
 );
 
 /// The in-flow preview of one character (a flow page, not a route): its art,
-/// its name and "See full profile", which leaves the feature.
+/// its name and "See full profile", which leaves the feature. The flow keys
+/// it by the character's id, so another character gets a new page and bloc.
 class CharacterPreviewPage extends StatelessWidget {
-  const CharacterPreviewPage({required this.characterId, super.key});
+  const CharacterPreviewPage({required this.character, super.key});
 
-  final CharacterId characterId;
+  /// The flow state's selection.
+  final Character character;
 
   @override
   Widget build(BuildContext context) {
     // Read in build, not in `create` (F-0031 B; see CharactersListPage).
     final flow = FlowScope.of(context).container;
     return BlocProvider(
-      create: (_) => flow<CharacterPreviewBloc>(parameter: characterId),
+      create: (_) => flow<CharacterPreviewBloc>(parameter: character),
       child: const _CharacterPreviewContent(),
     );
   }

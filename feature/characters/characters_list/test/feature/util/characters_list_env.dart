@@ -36,6 +36,34 @@ const characterPreviewTitleKey = ValueKey<String>(
   'characters_list.preview.title',
 );
 
+/// What the flow state selects, as the tests see it.
+typedef FlowStateView = ({
+  String? teamId,
+  ({CharacterId id, String name})? preview,
+});
+
+/// The flow's current state, read through its `FeatureFlowController`: the
+/// authoritative state the blocs update (flow_builder only sees structural
+/// changes, F-0018). Every live page of the flow holds that controller. The
+/// state type is package-private (R4; R7 keeps `src/` out of BDD tests), so
+/// the controller and its fields are reached dynamically.
+FlowStateView charactersFlowState(WidgetTester tester) {
+  final page = find.byWidgetPredicate(
+    (w) => '${w.runtimeType}' == '_LivePage<CharactersListFlowState>',
+    skipOffstage: false,
+  );
+  expect(page, findsWidgets, reason: 'the characters_list flow is open');
+  final dynamic controller = (tester.widget(page.first) as dynamic).controller;
+  final dynamic state = controller.state;
+  final dynamic preview = state.preview;
+  return (
+    teamId: state.teamId as String?,
+    preview: preview == null
+        ? null
+        : (id: preview.id as CharacterId, name: preview.name as String),
+  );
+}
+
 /// The grid's own scrollable.
 Finder charactersScrollable() => find.descendant(
   of: find.byKey(charactersGridKey),
