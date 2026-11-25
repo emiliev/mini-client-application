@@ -34,7 +34,7 @@ gate() {  # gate <name> <command...>: runs it, records PASS/FAIL and its log tai
     fails+=("" "### $name failed" "" '```' "$(plain "$log" | grep -a -v '^\[' | tail -25)" '```')
   fi
 }
-uncached=(//feature/characters/characters_list/... //utility/mc_feature_flow/... //utility/mc_paging/... //utility/mc_config/... //utility/mc_api_client/... //utility/mc_mocked_backend/... //utility/mc_test_utils/...)
+uncached=(//feature/characters/characters_list/... //utility/mc_feature_flow/... //utility/mc_paging/... //utility/mc_config/... //utility/mc_api_client/... //utility/mc_mocked_backend/... //utility/mc_test_utils/... //utility/mc_ds_cards/... //tool/mc_arch_check/...)
 tests() {
   bzw test --nocache_test_results "${uncached[@]}" && bzw test //...
 }
@@ -45,7 +45,7 @@ gate "rules_fork.sh check" "$REPO/tool/rules_fork.sh" check
 gate "dart format" fvm dart format --output=none --set-exit-if-changed \
   app feature spike utility tool/l10n_check tool/mc_arch_check
 gate "l10n_check" bzw run //tool/l10n_check:bin -- "$REPO"
-PKGS=(feature/characters/characters_list utility/mc_feature_flow utility/mc_paging utility/mc_config utility/mc_api_client utility/mc_mocked_backend utility/mc_test_utils)
+PKGS=(feature/characters/characters_list utility/mc_ds_cards tool/mc_arch_check utility/mc_feature_flow utility/mc_paging utility/mc_config utility/mc_api_client utility/mc_mocked_backend utility/mc_test_utils)
 # Measured but not gated: mc_test_utils was already under 90 % on origin/main
 # (fixture_assets.dart is exercised by the feature tests, not in-package);
 # T-0034 changed one line of it (test_container.dart, 100 %).
