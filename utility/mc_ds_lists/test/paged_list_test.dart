@@ -6,12 +6,17 @@ import 'package:mc_paging/mc_paging.dart';
 import 'shared_behaviour.dart';
 import 'support.dart';
 
-Widget _list(PagedHarness h) => McPagedList<int>(
+Widget _list(PagedHarness h, {required bool skeletons}) => McPagedList<int>(
   state: h.state,
   onLoadMore: h.onLoadMore,
   onRetry: h.onRetry,
   onRefresh: h.onRefresh,
-  skeletonBuilder: (_) => const SizedBox(key: Key('skeleton'), height: 100),
+  skeletonBuilder: skeletons
+      ? (_) => Semantics(
+          label: 'skeleton row',
+          child: SizedBox(key: Key('skeleton'), height: 100),
+        )
+      : null,
   itemBuilder: (context, item, index) =>
       SizedBox(height: 100, child: Text('item $item')),
 );

@@ -75,15 +75,15 @@ class McImage extends StatelessWidget {
           );
   }
 
-  /// Null when the image cannot be resolved: an expected state, drawn as the
-  /// fallback.
+  /// Null when the image cannot be resolved: an expected state (an
+  /// `Exception`), drawn as the fallback. An `Error` is a bug and surfaces.
   static ImageProvider? _providerFor(McImageResolver resolver, ApiImage image) {
     try {
       if (!resolver.canResolve(image)) {
         return null;
       }
       return mcImageProviderFor(resolver.resolve(image));
-    } on Object catch (_) {
+    } on Exception catch (_) {
       return null;
     }
   }

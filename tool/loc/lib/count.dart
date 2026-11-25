@@ -11,7 +11,6 @@ class FileScan {
   /// token and containing a non-whitespace character.
   final Set<int> lines;
   final int imports;
-
   /// `MixinDeclaration` nodes (`mixin class` is a class, not counted).
   final int mixins;
 

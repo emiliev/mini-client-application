@@ -25,6 +25,7 @@ class PagedBody<T> extends StatefulWidget {
     required this.errorTitle,
     required this.footerErrorMessage,
     required this.retryLabel,
+    this.loadingLabel = 'Loading',
     this.controller,
     super.key,
   });
@@ -44,6 +45,9 @@ class PagedBody<T> extends StatefulWidget {
   final String errorTitle;
   final String footerErrorMessage;
   final String retryLabel;
+
+  /// The one announcement for the whole skeleton while the first page loads.
+  final String loadingLabel;
   final ScrollController? controller;
 
   @override
@@ -52,21 +56,52 @@ class PagedBody<T> extends StatefulWidget {
 
 class _PagedBodyState<T> extends State<PagedBody<T>> {
   /// Set when `onLoadMore` was called for the current state; cleared when the
-  /// state changes. A scroll burst before the owner reacts asks only once.
+  /// state changes or the scroll position goes back below the threshold. A
+  /// scroll burst before the owner reacts asks only once.
   bool _requested = false;
+
+  final ScrollController _own = ScrollController();
+
+  ScrollController get _controller => widget.controller ?? _own;
+
+  @override
+  void initState() {
+    super.initState();
+    _scheduleCheck();
+  }
 
   @override
   void didUpdateWidget(PagedBody<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.state != oldWidget.state) {
       _requested = false;
+      // A page that does not fill the viewport never scrolls, and the metrics
+      // do not change when the extent stays 0: look at the position once the
+      // frame is laid out, so a short page still asks for the next one.
+      _scheduleCheck();
     }
+  }
+
+  @override
+  void dispose() {
+    _own.dispose();
+    super.dispose();
+  }
+
+  void _scheduleCheck() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _controller.hasClients) {
+        final position = _controller.position;
+        if (position.hasContentDimensions) {
+          _maybeRequest(position, 0);
+        }
+      }
+    });
   }
 
   bool get _canLoadMore {
     final s = widget.state;
-    return !_requested &&
-        s.items.isNotEmpty &&
+    return s.items.isNotEmpty &&
         !s.hasReachedEnd &&
         !s.isLoadingMore &&
         s.failure == null;
@@ -77,9 +112,15 @@ class _PagedBodyState<T> extends State<PagedBody<T>> {
       m.pixels >= m.maxScrollExtent * mcPagedLoadMoreThreshold;
 
   /// Asks the owner for the next page when [m] is past the threshold and no
-  /// request is outstanding for the current state.
+  /// request is outstanding for the current state. Going back below the
+  /// threshold clears the latch, so a dropped request is retried by scrolling.
   void _maybeRequest(ScrollMetrics m, int depth) {
-    if (depth == 0 && _canLoadMore && _pastThreshold(m)) {
+    if (depth != 0 || !_canLoadMore) {
+      return;
+    }
+    if (!_pastThreshold(m)) {
+      _requested = false;
+    } else if (!_requested) {
       _requested = true;
       widget.onLoadMore();
     }
@@ -90,8 +131,7 @@ class _PagedBodyState<T> extends State<PagedBody<T>> {
     return false;
   }
 
-  /// Sent after layout when the extents change. This is how a list that does
-  /// not fill the viewport yet (nothing to scroll) asks for its next page.
+  /// Sent after layout when the extents change.
   bool _onMetrics(ScrollMetricsNotification n) {
     _maybeRequest(n.metrics, n.depth);
     return false;
@@ -121,12 +161,16 @@ class _PagedBodyState<T> extends State<PagedBody<T>> {
         ),
       );
     } else if (firstLoad) {
-      content =
-          widget.skeletonSliver?.call(context) ??
-          const SliverFillRemaining(
-            hasScrollBody: false,
-            child: McLoading(),
-          );
+      final skeleton = widget.skeletonSliver?.call(context);
+      content = skeleton == null
+          ? const SliverFillRemaining(hasScrollBody: false, child: McLoading())
+          : SliverSemantics(
+              label: widget.loadingLabel,
+              liveRegion: true,
+              container: true,
+              excludeSemantics: true,
+              sliver: skeleton,
+            );
     } else {
       content = widget.itemsSliver(context, s.items);
     }
@@ -136,7 +180,7 @@ class _PagedBodyState<T> extends State<PagedBody<T>> {
       child: NotificationListener<ScrollNotification>(
         onNotification: _onScroll,
         child: CustomScrollView(
-          controller: widget.controller,
+          controller: _controller,
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
           ),

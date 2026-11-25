@@ -110,9 +110,11 @@ final class PagingController<T> {
       result = failure(ApiFailure.from(error));
     } on Object {
       // An Error is a bug, not a failed request: let it propagate, but do
-      // not leave this run's request marked as in flight.
+      // not leave this run's request marked as in flight, and settle the
+      // state so a footer does not spin forever (P-063).
       if (generation == _generation) {
         _inFlight = false;
+        _emit(_state.copyWith(isLoadingMore: false));
       }
       rethrow;
     }

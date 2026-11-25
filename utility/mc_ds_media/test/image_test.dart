@@ -11,11 +11,15 @@ const _art = 'packages/mc_fixtures_media/assets/characters/000.png';
 const _good = ApiImage(path: 'mock-asset://characters/0');
 
 class _ThrowingResolver implements McImageResolver {
+  const _ThrowingResolver(this.error);
+
+  final Object error;
+
   @override
   bool canResolve(ApiImage image) => true;
 
   @override
-  ResolvedImage resolve(ApiImage image) => throw StateError('no');
+  ResolvedImage resolve(ApiImage image) => throw error;
 }
 
 Widget _app(
@@ -143,17 +147,33 @@ void main() {
       },
     );
 
-    testWidgets('T-0031-AC3: a resolver that throws shows the fallback', (
+    testWidgets(
+      'T-0031-AC3: a resolver that throws an Exception shows the fallback',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _app(
+            const SizedBox(width: 100, child: McImage(image: _good)),
+            resolver: const _ThrowingResolver(FormatException('bad')),
+          ),
+        );
+        expect(find.byKey(McImage.fallbackKey), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('T-0031-AC3: an Error from a resolver is not swallowed', (
       tester,
     ) async {
       await tester.pumpWidget(
         _app(
           const SizedBox(width: 100, child: McImage(image: _good)),
-          resolver: _ThrowingResolver(),
+          resolver: _ThrowingResolver(StateError('bug')),
         ),
       );
-      expect(find.byKey(McImage.fallbackKey), findsOneWidget);
-      expect(tester.takeException(), isNull);
+      expect(find.byKey(McImage.fallbackKey), findsNothing);
+      expect(tester.takeException(), isA<StateError>());
     });
 
     test('T-0031-AC3: each ResolvedImage case maps to its ImageProvider', () {

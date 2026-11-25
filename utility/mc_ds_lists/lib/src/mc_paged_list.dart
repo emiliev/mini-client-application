@@ -26,7 +26,8 @@ class McPagedList<T> extends StatelessWidget {
     this.emptyTitle = 'Nothing here yet',
     this.emptyMessage = 'There is nothing to show.',
     this.errorTitle = 'Something went wrong',
-    this.footerErrorMessage = 'Could not load more.',
+    this.footerErrorMessage = 'Could not load.',
+    this.loadingLabel = 'Loading',
     this.retryLabel = 'Retry',
     this.controller,
     super.key,
@@ -48,6 +49,7 @@ class McPagedList<T> extends StatelessWidget {
   final String errorTitle;
   final String footerErrorMessage;
   final String retryLabel;
+  final String loadingLabel;
   final ScrollController? controller;
 
   Widget _rows(
@@ -79,6 +81,7 @@ class McPagedList<T> extends StatelessWidget {
       errorTitle: errorTitle,
       footerErrorMessage: footerErrorMessage,
       retryLabel: retryLabel,
+      loadingLabel: loadingLabel,
       skeletonSliver: skeleton == null
           ? null
           : (context) =>

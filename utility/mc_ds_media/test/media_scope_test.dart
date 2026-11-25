@@ -12,7 +12,7 @@ class _FakeResolver implements McImageResolver {
 }
 
 void main() {
-  testWidgets('T-0031-AC6: of(context) returns the scope resolver', (
+  testWidgets('T-0030-AC6 T-0031-AC6: of(context) returns the scope resolver', (
     tester,
   ) async {
     final resolver = _FakeResolver();
@@ -33,40 +33,46 @@ void main() {
     expect(found, same(resolver));
   });
 
-  testWidgets('T-0031-AC6: of(context) without a scope throws FlutterError', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      Builder(
+  testWidgets(
+    'T-0030-AC6 T-0031-AC6: of(context) without a scope throws FlutterError',
+    (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        Builder(
+          builder: (context) {
+            McMediaScope.of(context);
+            return const SizedBox();
+          },
+        ),
+      );
+
+      final error = tester.takeException();
+      expect(error, isA<FlutterError>());
+      expect(error.toString(), contains('McMediaScope'));
+    },
+  );
+
+  testWidgets(
+    'T-0030-AC6 T-0031-AC6: a new resolver rebuilds dependents only',
+    (
+      tester,
+    ) async {
+      final first = _FakeResolver();
+      final second = _FakeResolver();
+      final seen = <McImageResolver>[];
+      final child = Builder(
         builder: (context) {
-          McMediaScope.of(context);
+          seen.add(McMediaScope.of(context));
           return const SizedBox();
         },
-      ),
-    );
+      );
 
-    final error = tester.takeException();
-    expect(error, isA<FlutterError>());
-    expect(error.toString(), contains('McMediaScope'));
-  });
+      await tester.pumpWidget(McMediaScope(resolver: first, child: child));
+      await tester.pumpWidget(McMediaScope(resolver: first, child: child));
+      await tester.pumpWidget(McMediaScope(resolver: second, child: child));
 
-  testWidgets('T-0031-AC6: a new resolver rebuilds dependents only', (
-    tester,
-  ) async {
-    final first = _FakeResolver();
-    final second = _FakeResolver();
-    final seen = <McImageResolver>[];
-    final child = Builder(
-      builder: (context) {
-        seen.add(McMediaScope.of(context));
-        return const SizedBox();
-      },
-    );
-
-    await tester.pumpWidget(McMediaScope(resolver: first, child: child));
-    await tester.pumpWidget(McMediaScope(resolver: first, child: child));
-    await tester.pumpWidget(McMediaScope(resolver: second, child: child));
-
-    expect(seen, [same(first), same(second)]);
-  });
+      expect(seen, [same(first), same(second)]);
+    },
+  );
 }

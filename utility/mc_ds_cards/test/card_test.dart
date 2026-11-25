@@ -39,7 +39,10 @@ void main() {
     final node = tester.getSemantics(
       find.bySemanticsLabel('Wiimm the Wanderer'),
     );
-    expect(node, isSemantics(isButton: true, label: 'Wiimm the Wanderer'));
+    expect(
+      node,
+      isSemantics(isButton: true, isEnabled: true, label: 'Wiimm the Wanderer'),
+    );
     expect(node.value, 'Hero');
     handle.dispose();
   });
@@ -109,20 +112,47 @@ void main() {
     expect(taps, 1);
   });
 
-  testWidgets('T-0031-AC2: the skeleton card has no content and no tap', (
+  testWidgets(
+    'T-0031-AC2: the skeleton card has no content, tap or semantics',
+    (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          const SizedBox(
+            width: 160,
+            height: 300,
+            child: McMediaCard.skeleton(),
+          ),
+        ),
+      );
+      expect(find.byType(McImage), findsNothing);
+      expect(find.byType(Text), findsNothing);
+      expect(find.byType(InkWell), findsNothing);
+      expect(find.bySemanticsLabel(RegExp('.+')), findsNothing);
+      handle.dispose();
+    },
+  );
+
+  testWidgets('T-0031-AC5: without onTap the card is not a button', (
     tester,
   ) async {
     final handle = tester.ensureSemantics();
     await tester.pumpWidget(
       _app(
-        const SizedBox(width: 160, height: 300, child: McMediaCard.skeleton()),
+        SizedBox(
+          width: 160,
+          height: McMediaCard.heightFor(
+            width: 160,
+            textScaler: TextScaler.noScaling,
+          ),
+          child: const McMediaCard(image: _image, title: 'Wiimm'),
+        ),
       ),
     );
-    expect(find.byType(McImage), findsNothing);
-    expect(find.byType(Text), findsNothing);
-    expect(find.byType(InkWell), findsNothing);
-    final node = tester.getSemantics(find.bySemanticsLabel('Loading'));
-    expect(node, isSemantics(isButton: false, label: 'Loading'));
+    final node = tester.getSemantics(find.bySemanticsLabel('Wiimm'));
+    expect(node, isSemantics(isButton: false, label: 'Wiimm'));
     handle.dispose();
   });
 

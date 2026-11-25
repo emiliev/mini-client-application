@@ -8,8 +8,11 @@ import 'package:mc_media/mc_media.dart';
 /// grid is built from.
 ///
 /// The title is one semantics button label (the picture is excluded, the
-/// subtitle is its value). The tile is never smaller than 44 x 44. Use
-/// [McMediaCard.skeleton] while the first page loads.
+/// subtitle is its value); without [onTap] it is not a button. The card takes
+/// the size of its cell: grid cells are well above the 44 pt tap target (a
+/// test asserts it), so the card adds no minimum of its own. Use
+/// [McMediaCard.skeleton] while the first page loads; a skeleton is excluded
+/// from semantics, its list announces one "Loading".
 ///
 /// The card fills the height it is given. In a grid, size cells with
 /// [heightFor] so the text never overflows at large text scales.
@@ -117,24 +120,15 @@ class McMediaCard extends StatelessWidget {
           ? body
           : InkWell(
               onTap: onTap,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  minWidth: mcMinTapTarget,
-                  minHeight: mcMinTapTarget,
-                ),
-                child: body,
-              ),
+              child: body,
             ),
     );
     if (_skeleton) {
-      return Semantics(
-        label: 'Loading',
-        container: true,
-        child: ExcludeSemantics(child: card),
-      );
+      return ExcludeSemantics(child: card);
     }
     return Semantics(
-      button: true,
+      button: onTap != null,
+      enabled: onTap != null ? true : null,
       container: true,
       label: title,
       value: subtitle,

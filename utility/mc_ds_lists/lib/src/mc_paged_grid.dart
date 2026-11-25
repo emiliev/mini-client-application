@@ -11,8 +11,9 @@ typedef McCellHeight = double Function(double cellWidth, TextScaler textScaler);
 /// trigger, footer, empty and error views, pull to refresh) and chooses its
 /// column count from the width: 2, 3 or 4 (`McWidthClass`).
 ///
-/// Cells are [cellHeight] tall, so a cell with text can grow with the text
-/// scale; the default keeps a 3:4 portrait cell.
+/// Cells are [cellHeight] tall. It is required: a cell with text must grow
+/// with the text scale, and a wrong default would silently clip the text. A
+/// card supplies the matching function (`McMediaCard.heightFor`).
 class McPagedGrid<T> extends StatelessWidget {
   const McPagedGrid({
     required this.state,
@@ -20,15 +21,16 @@ class McPagedGrid<T> extends StatelessWidget {
     required this.onLoadMore,
     required this.onRetry,
     required this.onRefresh,
+    required this.cellHeight,
     this.skeletonBuilder,
     this.skeletonCount = 6,
-    this.cellHeight = _defaultCellHeight,
     this.spacing = McSpacing.md,
     this.padding = McInsets.screen,
     this.emptyTitle = 'Nothing here yet',
     this.emptyMessage = 'There is nothing to show.',
     this.errorTitle = 'Something went wrong',
-    this.footerErrorMessage = 'Could not load more.',
+    this.footerErrorMessage = 'Could not load.',
+    this.loadingLabel = 'Loading',
     this.retryLabel = 'Retry',
     this.controller,
     super.key,
@@ -51,9 +53,8 @@ class McPagedGrid<T> extends StatelessWidget {
   final String errorTitle;
   final String footerErrorMessage;
   final String retryLabel;
+  final String loadingLabel;
   final ScrollController? controller;
-
-  static double _defaultCellHeight(double width, TextScaler _) => width / 0.75;
 
   Widget _grid(
     BuildContext context,
@@ -99,6 +100,7 @@ class McPagedGrid<T> extends StatelessWidget {
       errorTitle: errorTitle,
       footerErrorMessage: footerErrorMessage,
       retryLabel: retryLabel,
+      loadingLabel: loadingLabel,
       skeletonSliver: skeleton == null
           ? null
           : (context) =>
