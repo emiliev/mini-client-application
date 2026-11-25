@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Engineer done, awaiting Verifier |
+| Status | In Progress |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0035-flow-deep-links` |
