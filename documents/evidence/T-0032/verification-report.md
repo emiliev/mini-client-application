@@ -5,7 +5,8 @@
 - **Branch / commit verified:** `fleet/T-0032-characters-list` @ **`c3a5e82`**, a detached checkout in the Verifier's own worktree
 - **Simulator:** none. This is a package-level task: widget, BDD and golden tests only. The app wiring and the simulator journey belong to T-0033.
 - **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0032-verifier …`, a new output base. The shared disk cache is still used, because `.bazelrc` sets it, so every test ran with `--nocache_test_results`. The server was shut down at the end.
-- **Verdict: FAIL.**
+- **Current verdict: PASS at `1d5e74a`.** See "Re-verification at 1d5e74a" at the end. All seven ACs pass; Issues 1 to 4 are resolved; three new minor notes, none blocking.
+- **Round-1 verdict at `c3a5e82`: FAIL.**
   - AC1, AC2, AC4, AC5, AC6 and AC7 pass.
   - **AC3 fails on test strength.** The implementation is right: the preview is a flow page built from `previewId`. But the scenarios cannot tell that apart from a preview pushed imperatively onto the flow's navigator, so the AC's clause "and the flow state has `previewId`" is not proven. The TL's "preview pushed as a route" mutation **survives** when the push goes to the flow's navigator (V4a). It is killed only when the push goes to the root navigator (V4b).
   - The fix is a one-line assertion, already proven by a probe (Issue 1).
@@ -155,3 +156,73 @@ There is no German golden. German is covered by the BDD scenario.
 - The contract tests are tagged `T-0032-AC6`, although AC6 is about architecture and codegen; it is a loose fit, but harmless.
 - The feature relies on the backend's default `orderBy=name` and does not send it. That is fine under the contract, and any change would be caught by AC1's scenario.
 - Re-verifying a fix for Issue 1 needs only `:bdd_test`, plus `probe_v4a.py`'s V4a half against the fixed step.
+
+## Re-verification at 1d5e74a
+- **Commit verified:** `1d5e74a`, a detached head in my own worktree. Since my report (`88a3c99`) it adds 3 WIP commits, the fix commit `55c2654` and a docs-only merge of `origin/main`.
+- **Bazel:** `--output_base=/tmp/mc-ob-T-0032-verifier`, shut down at the end.
+- **Evidence:** [`verifier/reverify-1d5e74a/`](verifier/reverify-1d5e74a/). Every mutation and probe restored its files, and `git status` was clean after each batch.
+- **Verdict: PASS.** All seven ACs pass. Round-1 Issue 1 (major) is fixed and pinned. Issues 2 to 4 are resolved or decided by the TL. Three new minor notes follow, none blocking.
+
+### Gates
+| Gate | Result |
+|---|---|
+| `test --nocache_test_results //...` | **75/75 PASSED**, all executed ([gate-test.log](verifier/reverify-1d5e74a/gate-test.log)). `:bdd_test` has 16 cases (new: "A second tap while the preview slides in keeps the first character [T-0032-AC3]"). `:flow_scope_test` has 3, `harness_test` gains 2 `T-0032-AC2 recover()` cases, and `:architecture_test` has 3 |
+| `tool/checks/T-0032-AC7_gates.sh`, which I ran myself | **PASS**: test (T-0032 packages uncached), lint, `mc_arch_check`, `rules_fork.sh check` (3 patches strict), `dart format`, `l10n_check`, coverage ≥ 90 % ([report](verifier/reverify-1d5e74a/T-0032-AC7_gates.md)) |
+| Coverage, my own parser over the same `bazel coverage` output | **160/160 = 100 %** ([coverage.txt](verifier/reverify-1d5e74a/coverage.txt)). The repository's unreachable `StateError` is gone. The files absent from every report have no executable lines |
+| Byte identity (`T-0032-AC6_matches_build_runner.sh`, build_runner regenerated in fresh overlays) | **11 of 11 EQUAL** ([report](verifier/reverify-1d5e74a/T-0032-AC6_byte_identity.md)). New hashes where the code changed: `.config.dart` `084e4f6f…`, the flow-state `.freezed.dart` `a1375d3d…`, the repository shard `605a4035…` and the preview-bloc shard `b0c8e6b1…`. Unchanged: the API `.g.dart` `36401c9e…`, the DTO files and the bloc state |
+| Cutoff (`T-0032-AC6_cutoff.sh`) | **PASS**. Both positive controls executed. No aggregate miss and no retrofit, combine or json spawn. `.config.dart` and the API `.g.dart` are unchanged ([report](verifier/reverify-1d5e74a/T-0032-AC6_cutoff.md)) |
+| Generated files not committed | **PASS**, including the new visibility rows ([report](verifier/reverify-1d5e74a/T-0032-AC6_generated_not_committed.md)) |
+| Locks | `pubspec.lock`, `MODULE.bazel.lock` and the root `pubspec.yaml` are unchanged since `c3a5e82` |
+| Goldens | `git diff c3a5e82..1d5e74a -- '*.png'` is empty, so all 4 are byte-identical to the ones I inspected in round 1. `:golden_test` passes. No file was deleted |
+
+### The 12 fix items
+| # | Item | What I did | Result |
+|---|---|---|---|
+| 1 | **AC3: the preview is flow state** | **R1** (V4a adapted: push a `MaterialPageRoute` named `preview` onto the flow's navigator, with the flow state untouched) is killed: 3 AC3 scenarios fail.<br>**R2** is V4a with the step's new `Page` check deleted, so only the flow-state read is left. It is still killed: the first failure is `Expected: <100486> Actual: <null>, the flow state selects Amber Alchemist`.<br>**R3** (V4b, root navigator) and **R6** (preview page not keyed by the id) are killed.<br>**The flow-state read cannot pass vacuously.** `charactersFlowState` first expects at least one `_LivePage<CharactersListFlowState>` (`findsWidgets`). It then reads `.controller.state`, the flow's `FeatureFlowController` (`feature_flow.dart:203-207`), which is the same object the bloc injects and updates. A renamed internal throws (`NoSuchMethodError` or a failed `findsWidgets`), so it fails loud.<br>`I don't see the character preview` now also expects `preview == null`, so the swipe back really clears the flow state. Reading internals is accepted until T-0034 | **PASS** |
+| 2 | **Stateless repository** | `CharactersListRepository` is a `const` stateless `@injectable` with no cache and no `StateError`, and `CharactersListFlowState.preview` is a `Character?`. The flow builds `CharacterPreviewPage(character: state.preview)`, and the page gets its bloc with `flow<CharacterPreviewBloc>(parameter: character)`. The bloc's state is that `@factoryParam Character`, and it no longer depends on the repository (`character_preview_bloc.dart:25-30`). So the preview reads the flow state, not a repository | **PASS** |
+| 3 | **Fast second tap** | The guard is at `characters_list_bloc.dart:71-76` (`if (_flow.state.preview == null)`), and the preview page is keyed `ValueKey(character.id)`. **R5** removes the guard, and the new same-frame scenario fails.<br>**My own probe** puts a second tap on Amber Bard (left column, still visible) at 12 % of the slide-in, not in the same frame. With the guard in place (**P1**) and without it (**P2**), the preview stays Amber Alchemist and "See full profile" opens Alchemist. That second tap never reached the list, so the preview route's barrier does take taps during the slide-in, as the engineer says.<br>The only open window is two taps in one frame, and the scenario reproduces exactly that. **I accept it** | **PASS** |
+| 4 | **`McBackendHarness.recover()`** | `recover()` switches each harness rule off on the engine (its predicate becomes `mirror.live && …`) and in the mirrors (`_failRules.clear()`), then calls `useScenario(null)`. It does not touch store, latency, counters, traffic or requests.<br>**H1** keeps the mirrors: killed (an unrouted request is not reported). **H2** keeps the engine rule live: killed in `harness_test` and in 5 AC2 BDD scenarios. **H3** goes back to `backend.reset()`: killed ("the store survives").<br>**Meaning of existing tests:** the predicate is now always passed. With an empty query, `queryMatches` is `every` over nothing, which is `true`, the same as the old `null`; the engine uses the predicate only in `matches()`. Against `origin/main`, `mc_test_utils/test/` only gained cases (2 in `harness_test`, 1 in `init_flow_test`). No existing line changed, and all of its targets pass | **PASS** |
+| 5 | **AC7 gates check** | My forced miss adds a 20-line function that no test calls to `failure_message.dart`, keeping the default threshold of 90. Result: **FAIL T-0032-AC7-gates**, exit 1, with the coverage row **FAIL** at 160/180 = 88.9 % and every other gate PASS ([report](verifier/reverify-1d5e74a/T-0032-AC7_gates_forced_miss.md)). Reverted | **PASS** |
+| 6 | BUILD comment on `analysis_options` | `BUILD.bazel:3`: "No per-package analysis_options.yaml: the root file applies (F-0021)". This matches the TL decision | **PASS** |
+| 7 | Team switch | **K7** drops `key: ValueKey(initialTeamId)`, and "T-0032-AC1 a new initialTeamId builds a new flow that lists that team" fails | **PASS** |
+| 8 | `.gitignore` scoping | My `git check-ignore -v --no-index` run:<br>**Visible:** `test/feature/x_test.dart`, `test/feature/characters_list_test.dart`, `lib/src/app.config.dart` and a step file.<br>**Ignored:** `lib/src/di/di_initializer.config.dart` (`.gitignore:30`), `*.injectable.json` (`:31`), `.g.dart` (`:25`), `.freezed.dart` (`:26`), and `characters_list_l10n.dart` / `_de.dart` (`:32`, `:33`) | **PASS** (note N1) |
+| 9 | Overlay helpers | `T-0032-AC6_overlay_tools.sh` passes over the new scripts. With `MC_OVERLAY_TOOLS` pointing at the `c3a5e82` scripts it **FAILS**: `overlay_deps.py` stops at the blank line (it returns only `b`, losing `dio`), and `add_dep.py` does not add the dev-only `mocktail` ([new](verifier/reverify-1d5e74a/T-0032-AC6_overlay_tools.md), [old](verifier/reverify-1d5e74a/T-0032-AC6_overlay_tools_old_scripts.md)) | **PASS** |
+| 10 | l10n gate names a missing German key | The gate test now plants a copy without `charactersListTitle` in `de`. It expects a violation naming the package, `de` and the key. Independently, **V6b** (the real `de` ARB loses the button key) fails `//tool/l10n_check:workspace_gate_test` and the German BDD scenario | **PASS** |
+| 11 | Both quote styles | A double-quoted `export "…/characters_list_bloc.dart" show CharactersListBloc;` in the barrel fails both:<br>- `:architecture_test`, because the exports are no longer the 3 allowed ones;<br>- `mc_arch_check`: `[R4] … barrel exports CharactersListBloc`.<br>A double-quoted `import "package:flutter/foundation.dart"` in the navigator fails `:architecture_test` ("… imports Flutter"). Both reverted | **PASS** |
+| 12 | Synthetic padding | `CharacterUniverse.synthetic` pads to `max(2, len(count))`. **K12** goes back to `padLeft(2)`, and "T-0032-AC5 a synthetic cast past 99 still pages in name order" fails | **PASS** |
+
+### Sampled round-1 mutations
+Script: [mutations.py](verifier/reverify-1d5e74a/mutations.py). Log: [mutations.log](verifier/reverify-1d5e74a/mutations.log). Every one below is still killed by failing scenarios, never by a build failure:
+- V1 (limit 20)
+- V2b (`orderBy=-name`)
+- V3 (`openCharacter` twice)
+- V5c (no page-2 de-dup, both layers)
+- V6b (German key missing; BDD and l10n gate)
+- V7c (no end guard, both layers)
+- V8 (list rebuilt on back)
+- V10 (wrong art)
+
+### Acceptance criteria at 1d5e74a
+| AC | Result |
+|---|---|
+| T-0032-AC1 | **PASS**. As in round 1, plus the team-key test (item 7) |
+| T-0032-AC2 | **PASS**. The `recover()` semantics are pinned (H1 to H3) |
+| T-0032-AC3 | **PASS**. The preview is proven to be flow state: R1, R2, R3 and R6 are killed. The double-tap guard is pinned (R5), and my slide-in probe confirms the barrier |
+| T-0032-AC4 | **PASS** |
+| T-0032-AC5 | **PASS**. Plus the padding fix (K12) |
+| T-0032-AC6 | **PASS**. 11/11 EQUAL, the cutoff passes, nothing generated is committed, and both quote styles are handled |
+| T-0032-AC7 | **PASS**. `T-0032-AC7_gates.sh` passes, and it fails on a forced coverage miss (this closes round-1 Issue 4) |
+
+### Test-integrity audit (fix round)
+- No test deleted, skipped or weakened. No `// ignore:`, `skip:`, `@skip` or `@wip` was added (checked by grepping the `c3a5e82..1d5e74a` diff).
+- The removed `expect` lines are rewrites, not removals:
+  - in `architecture_test`, regex groups were renumbered for the quote-style capture, and the same assertions remain;
+  - in the preview step, the `arguments` check is kept with a hoisted `id`.
+- The two changed steps are stronger: Page, flow state and key in one; the flow state cleared in the other.
+- `architecture_test` dropped its `dart test` path fallback. It is Bazel-only, as documented.
+- No golden changed.
+
+### New notes (minor, none blocking)
+- **N1 (minor, docs).** Plan 01 §3.1 (`documents/plan/01-architecture-and-modules.md:192`) still lists `*.config.dart` and `test/feature/*_test.dart`, so it no longer matches the scoped root `.gitignore`. Under an R28 BDD fallback, stock bdd_widget_test writes `test/feature/*_test.dart` into the source tree, and those files would show as untracked. The R28 managed block would need its own pattern. This is TL-owned text.
+- **N2 (minor).** `tool/checks/T-0032-AC7_gates.sh` runs `documents/evidence/T-0032/engineer/merge_lcov.py`. A gate script that depends on a file under evidence is fragile; it belongs in `tool/`.
+- **N3 (cosmetic).** The gates report's "tests:" line shows the second, cached `test //...` ("Executed 0 out of 75"), not the uncached T-0032 run that precedes it. The gate itself is right.
