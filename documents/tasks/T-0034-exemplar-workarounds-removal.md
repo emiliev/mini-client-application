@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-25 `2d90da9`; Verifier PASS `e955f0d`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0034-exemplar-workarounds` |
@@ -76,3 +76,7 @@ Kits fixed and the exemplar is back to plan 01 §3.3's shape. Details and gotcha
   12. The formatting-only hunks in `flow_scope_test.dart`, `api_client_test.dart` and `characters_list_env.dart` are reverted; the BUILD dep is sorted.
   13. I documented that `provide:` is read once per flow instance (the flow is already keyed by `initialTeamId`); the navigator is not part of the key.
 - **Open for the TL:** the hook is untyped in the BDD step (`dynamic` over the feature's private state); typing it needs the feature to export the state type for tests. Wiring the relative-path scan into `mcgen check` is a follow-up.
+
+## Merge (TL)
+- 2026-11-25: Verifier PASS `f97e3dd`. `/code-review` found that the trailing slash was only asserted (stripped in release); the Verifier found host delegate overrides replaced inside flows and the `provide:` order unpinned; the T-0033 Verifier found the list had no back button when pushed and the card reserved empty subtitle space. Fixed in `318189f` (14 items, 10 proof mutations). TL decisions: `mc_feature_flow` gives a flow's root page an automatic back button (`context.flowLeading()`); `McMediaCard.heightFor(hasSubtitle:, titleLines:)`, with the default kept at `true` so DS goldens are stable. Re-verify PASS `e955f0d` (release probe with asserts off, 16 mutations). The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 77/77 tests, lint was clean and `mc_arch_check` reported OK.
+- Follow-ups: P-074.
