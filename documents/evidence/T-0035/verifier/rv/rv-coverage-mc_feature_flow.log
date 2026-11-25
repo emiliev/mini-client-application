@@ -1,0 +1,32 @@
+INFO: Invocation ID: 116ab990-e239-4bb5-8562-443f1fbbd119
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+INFO: Using default value for --instrumentation_filter: "^//utility/mc_feature_flow[/:]".
+INFO: Override the above default with --instrumentation_filter
+WARNING: Build option --instrumentation_filter has changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 5 targets (0 packages loaded, 0 targets configured)
+Analyzing: 5 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 5 targets (0 packages loaded, 1740 targets configured, 267 aspect applications).
+INFO: LCOV coverage report is located at /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/_coverage/_baseline_report.dat
+ and execpath is bazel-out/_coverage/_baseline_report.dat
+INFO: From Coverage report generation:
+Nov 24, 2026 5:29:45 AM com.google.devtools.coverageoutputgenerator.Main runWithArgs
+WARNING: There was no coverage found.
+INFO: LCOV coverage report is located at /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/_coverage/_coverage_report.dat
+ and execpath is bazel-out/_coverage/_coverage_report.dat
+INFO: Found 1 target and 4 test targets...
+INFO: Elapsed time: 0.359s, Critical Path: 0.13s
+INFO: 13 processes: 2913 action cache hit, 5 disk cache hit, 7 internal, 1 darwin-sandbox.
+INFO: Build completed successfully, 13 total actions
+//utility/mc_feature_flow:feature_flow_test                     (cached) PASSED in 1.4s
+  /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/feature_flow_test/coverage.dat
+//utility/mc_feature_flow:flow_kit_test                         (cached) PASSED in 1.6s
+  /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/flow_kit_test/coverage.dat
+//utility/mc_feature_flow:flow_navigation_channel_test          (cached) PASSED in 1.2s
+  /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/flow_navigation_channel_test/coverage.dat
+//utility/mc_feature_flow:framework_navigation_baseline_test    (cached) PASSED in 1.0s
+  /private/tmp/mc-ob-T-0035-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/framework_navigation_baseline_test/coverage.dat
+
+Executed 0 out of 4 tests: 4 tests pass.

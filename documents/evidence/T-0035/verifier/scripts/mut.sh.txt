@@ -1,0 +1,13 @@
+#!/bin/bash
+# mut.sh <replacement-file> <logname> <targets...>: swaps the vendored lib, runs tests, restores.
+S=/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad
+W=/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a2fe366999ee7848d
+F=$W/third_party/flow_builder/lib/flow_builder.dart
+repl=$1; log=$2; shift 2
+cp "$repl" "$F"
+cd $W && tool/bazelw --output_base=/tmp/mc-ob-T-0035-verifier test --nocache_test_results --test_output=all "$@" > "$W/documents/evidence/T-0035/verifier/logs/$log" 2>&1
+rc=$?
+cp $S/flow_builder.patched.dart "$F"
+cmp -s $S/flow_builder.patched.dart "$F" && echo restored
+echo rc=$rc
+grep -a -E "^\s+(PASS|FAIL) |^[0-9]+ passed|failed$|Expected:|Actual:" "$W/documents/evidence/T-0035/verifier/logs/$log"

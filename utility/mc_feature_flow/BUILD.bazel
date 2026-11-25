@@ -3,12 +3,12 @@ load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
 package(default_visibility = ["//visibility:public"])
 
 _DEPS = [
+    "//third_party/flow_builder",
     "//utility/mc_bloc_kit",
     "//utility/mc_di",
     "//utility/mc_ds_feedback",
     "//utility/mc_l10n_core",
     "//utility/mc_monitoring",
-    "@pub_deps//:flow_builder",
     "@pub_deps//:flutter",
     "@pub_deps//:get_it",
 ]
@@ -46,6 +46,40 @@ flutter_test(
         ":mc_feature_flow",
         "//utility/mc_ds_theme",
         "@pub_deps//:flutter_bloc",
+        "@pub_deps//:flutter_localizations",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0035: deep links and popRoute through `flutter/navigation` while a flow is
+# mounted, after it is disposed, and for nested flows.
+flutter_test(
+    name = "flow_navigation_channel_test",
+    size = "small",
+    srcs = ["test/navigation_channel_support.dart"],
+    language_version = "3.13",
+    main = "test/flow_navigation_channel_test.dart",
+    package_name = "mc_feature_flow",
+    deps = _DEPS + [
+        ":mc_feature_flow",
+        "//utility/mc_ds_theme",
+        "@pub_deps//:flutter_localizations",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0035: the framework's own replies on `flutter/navigation`, in a target
+# where no FlowBuilder ever mounts (the baseline the flow tests compare with).
+flutter_test(
+    name = "framework_navigation_baseline_test",
+    size = "small",
+    srcs = ["test/navigation_channel_support.dart"],
+    language_version = "3.13",
+    main = "test/framework_navigation_baseline_test.dart",
+    package_name = "mc_feature_flow",
+    deps = [
+        "//utility/mc_ds_theme",
+        "@pub_deps//:flutter",
         "@pub_deps//:flutter_localizations",
         "@pub_deps//:flutter_test",
     ],

@@ -38,3 +38,20 @@ Fix it at the kit level, so no feature can trip over it.
 
 ## Log
 - 2026-11-25: Created (TL) from the T-0033 Verifier's blocker R1.
+- 2026-11-25: Engineer. Tests first: `utility/mc_feature_flow/test/flow_navigation_channel_test.dart` (6 cases) against stock flow_builder 0.1.0: 4 fail, 2 pass as controls ([ac1-stock log](../evidence/T-0035/engineer/ac1-stock-flow_builder-0.1.0-test.log)). Then vendored 0.1.0 as `third_party/flow_builder` (pub workspace member, Bazel `flutter_library`, `VENDORED.md`, `0001-forward-pushRouteInformation.patch`) and pointed `mc_feature_flow` at it; all 6 pass, and the existing `mc_feature_flow` cases pass unchanged. Locks re-resolved (`fvm flutter pub get --offline`; Bazel rewrote `MODULE.bazel.lock`): the only change is flow_builder's hosted entry going away. Upstream draft `U-X-flow_builder-navigation-channel`, finding F-0034.
+- 2026-11-25: Engineer fix round after Verifier PASS (`9c012f3`), merged `origin/main`. (1) Provenance check split: evergreen `T-0035-AC4_provenance.sh` (working tree only) and one-off `T-0035-AC4_lock_delta.sh` pinned to `6e7eaaf`; (2) hosted-reference scan widened (BUILD, BUILD.bazel, *.bzl, quoted or not; pubspec sources; lock entry); (3) the channel test asserts the `true` reply and a link with query and fragment, mutants killed; (4) framework baseline moved to its own target `framework_navigation_baseline_test` and constants; (5) `flow_builder: ^0.1.0` restored; (6) `merge_lcov.py` moved to `tool/checks/` (P-071); (7) an intercepted `popRoute` answers `true`, quirks in F-0034 §7. Evidence: [negatives.md](../evidence/T-0035/engineer/negatives.md), [mutants](../evidence/T-0035/engineer/mutants/), [ac4-gates.md](../evidence/T-0035/engineer/ac4-gates.md).
+
+## Outcome
+**Engineer done**, awaiting a fresh Verifier. Alternative (fix inside `mc_feature_flow`) not needed; reasoning in F-0034 §2 and §3.
+
+| AC | Evidence | Result |
+|---|---|---|
+| T-0035-AC1 | `flow_navigation_channel_test` cases named `T-0035-AC1 ...`; red on stock: [log](../evidence/T-0035/engineer/ac1-stock-flow_builder-0.1.0-test.log) | PASS (red on stock, green vendored) |
+| T-0035-AC2 | cases `T-0035-AC2 ...`: after dispose, nested flows, popRoute interception and fall-through, unknown method answers `false` | PASS |
+| T-0035-AC3 | no existing test file changed (`git diff origin/main -- '*_test.dart'` lists only the new file); `feature_flow_test` (T-0022-AC5 edge swipes), `flow_kit_test`, and all 8 `characters_list` targets green | PASS |
+| T-0035-AC4 | [ac4-provenance.md](../evidence/T-0035/engineer/ac4-provenance.md) (archive sha256, `lib/` = archive + patch, LICENSE equal, lock diff = the flow_builder block; fails when `lib/` is edited, checked) and [ac4-gates.md](../evidence/T-0035/engineer/ac4-gates.md) (`test //...` 78 targets pass, lint, `mc_arch_check`, `rules_fork.sh check`, format, l10n_check, coverage mc_feature_flow 142/143 = 99.3 %) | PASS |
+
+Notes for the TL:
+- **Deviation from the decision text:** the framework's handler cannot be captured, so it is not "restored" on dispose. flow_builder's handler stays installed and forwards to the same `WidgetsBinding` entry points (F-0034 §2). `pushRouteInformation.state` is dropped (iOS sends none). Alternative, if you want it exact: wrap `PlatformDispatcher.onPlatformMessage` (bigger patch, and the test messenger bypasses it).
+- The vendored target has `no-dart-analyze` and `no-dart-format` tags (F-0034 §4); `third_party/` is excluded from the format gate. No test deleted, skipped or weakened; no `// ignore:` added.
+- Not run: the T-0033 simulator repro (`app/` is T-0033's); the engineer proof is the widget test through the real messenger path.

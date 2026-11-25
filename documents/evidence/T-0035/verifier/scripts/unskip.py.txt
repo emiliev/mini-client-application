@@ -1,0 +1,60 @@
+import sys
+
+p = sys.argv[1]
+s = open(p).read()
+a = "    // T-0035: flow_builder drops pushRouteInformation once a flow is mounted.\n    skip: true,\n"
+assert s.count(a) == 1
+s = s.replace(a, "")
+probe = r'''
+  // T-0035 Verifier: the T-0033 Verifier's R1 repro, re-run on T-0035 + T-0033.
+  testWidgets('VERIFIER R1 a link after the characters flow mounted', (
+    tester,
+  ) async {
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    await tester.pumpWidget(
+      DefaultAssetBundle(
+        bundle: McFixtureAssetBundle(),
+        child: MiniClientApp(
+          links: links,
+          initializers: (routerRef) => rootInitializers(
+            config: () async => _config,
+            storageDirectory: storage,
+            monitoringSinks: [InMemorySink()],
+            mockDomains: appMockDomains,
+            routerRef: routerRef,
+            wirings: wiringInitializers,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+    await _pushLink(tester, 'miniclient://app/placeholder/41');
+    await tester.pumpAndSettle();
+    final before = find.text('Placeholder detail 41').evaluate().length;
+    await _pushLink(tester, 'miniclient://app/characters');
+    await tester.pumpAndSettle();
+    final grid = find
+        .byKey(const ValueKey<String>('characters_list.grid'))
+        .evaluate()
+        .length;
+    await _pushLink(tester, 'miniclient://app/placeholder/43?from=verifier#x');
+    await tester.pumpAndSettle();
+    final after = find.text('Placeholder detail 43').evaluate().length;
+    await _pushLink(tester, 'miniclient://app/characters/6');
+    await tester.pumpAndSettle();
+    final details6 = find.textContaining('6').evaluate().length;
+    debugPrint(
+      'VERIFIER before-flow link shown=$before grid=$grid '
+      'after-flow link shown=$after details6-texts=$details6',
+    );
+    expect(before, 1);
+    expect(grid, 1);
+    expect(after, 1, reason: 'a deep link after the characters flow mounted');
+  });
+}
+'''
+i = s.rstrip().rfind('}')
+s = s[:i].rstrip() + '\n' + probe
+open(p, 'w').write(s)

@@ -1,0 +1,31 @@
+import sys
+
+src_path, out_dir = sys.argv[1], sys.argv[2]
+src = open(src_path).read()
+
+M = {
+    'M1_query_dropped': (
+        "return WidgetsBinding.instance.handlePushRoute(location);",
+        "return WidgetsBinding.instance.handlePushRoute(Uri.parse(location).path);",
+    ),
+    'M2_unknown_null': (
+        "return Future<dynamic>.value(false);\n    }\n  }\n\n  static Future<dynamic> _popRoute",
+        "return Future<dynamic>.value();\n    }\n  }\n\n  static Future<dynamic> _popRoute",
+    ),
+    'M3_link_reply_null': (
+        "return WidgetsBinding.instance.handlePushRoute(location);",
+        "await WidgetsBinding.instance.handlePushRoute(location);\n      return null;",
+    ),
+    'M4_pop_skips_interceptors': (
+        "    for (final interceptor in _interceptors) {\n      final preventDefault",
+        "    for (final interceptor in const <ValueGetter<Future<bool>>>[]) {\n      final preventDefault",
+    ),
+    'M5_fragment_dropped': (
+        "return WidgetsBinding.instance.handlePushRoute(location);",
+        "return WidgetsBinding.instance.handlePushRoute(location.split('#').first);",
+    ),
+}
+for name, (a, b) in M.items():
+    assert src.count(a) == 1, (name, src.count(a))
+    open(f'{out_dir}/{name}.dart', 'w').write(src.replace(a, b))
+    print(name)

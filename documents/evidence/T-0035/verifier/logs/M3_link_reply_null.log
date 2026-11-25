@@ -1,0 +1,26 @@
+INFO: Invocation ID: 56e876a8-52cd-4cfa-bd61-967f2e6087d4
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //utility/mc_feature_flow:flow_navigation_channel_test (0 packages loaded, 0 targets configured)
+Analyzing: target //utility/mc_feature_flow:flow_navigation_channel_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //utility/mc_feature_flow:flow_navigation_channel_test (0 packages loaded, 0 targets configured).
+INFO: From Testing //utility/mc_feature_flow:flow_navigation_channel_test:
+==================== Test output for //utility/mc_feature_flow:flow_navigation_channel_test:
+  PASS  T-0035-AC1 a deep link reaches the router while a FeatureFlow is mounted
+  PASS  T-0035-AC1 the legacy pushRoute message also reaches the router while a flow is mounted
+  PASS  T-0035-AC2 after the flow is disposed, links and popRoute behave as without a flow
+  PASS  T-0035-AC2 a flow nested inside another flow keeps links and popRoute working
+  PASS  T-0035-AC2 popRoute pops a pushed flow page before the router sees it, and falls through at the flow root
+  PASS  T-0035-AC2 an unknown navigation method is answered like the framework does (false)
+
+6 passed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 0.789s, Critical Path: 0.63s
+INFO: 10 processes: 10 action cache hit, 4 internal, 3 darwin-sandbox, 3 worker.
+INFO: Build completed successfully, 10 total actions
+//utility/mc_feature_flow:flow_navigation_channel_test                   PASSED in 0.6s
+
+Executed 1 out of 1 test: 1 test passes.
