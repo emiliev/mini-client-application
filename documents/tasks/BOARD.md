@@ -5,7 +5,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
-| [T-0033](T-0033-universe-wiring-and-sandbox.md) | `characters_list` in the app: `universe_wiring`, sandbox, simulator e2e (P1-17 app half) | **In Progress** | Engineer (Sonnet) | T-0032 | `fleet/T-0033-universe-wiring` |
+| [T-0035](T-0035-flow-builder-deep-link-hijack.md) | Deep links survive a mounted `FeatureFlow` (flow_builder takes over the navigation channel) | **In Progress** | Engineer (Sonnet) | T-0034 | `fleet/T-0035-flow-deep-links` |
+| [T-0033](T-0033-universe-wiring-and-sandbox.md) | `characters_list` in the app: `universe_wiring`, sandbox, simulator e2e (P1-17 app half) | **Blocked on T-0035** (re-verify FAIL R1) | Engineer (Sonnet) | T-0032 | `fleet/T-0033-universe-wiring` |
 
 ## Done
 | ID | Title | Result |
