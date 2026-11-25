@@ -83,9 +83,7 @@ void main() {
         MiniClientApp(
           links: links,
           probe: probe,
-          initializers: roots(
-            extra: [McDIInitializer((_, _) => hold.future)],
-          ),
+          initializers: roots(extra: [McDIInitializer((_, _) => hold.future)]),
         ),
       );
       await tester.pump(const Duration(seconds: 2));
@@ -123,9 +121,7 @@ void main() {
         MiniClientApp(
           links: links,
           probe: probe,
-          initializers: roots(
-            extra: [McDIInitializer((_, _) => hold.future)],
-          ),
+          initializers: roots(extra: [McDIInitializer((_, _) => hold.future)]),
         ),
       );
       await _pushLink(tester, 'miniclient://app/placeholder/3');
@@ -198,10 +194,7 @@ void main() {
       expect(routersCreated, 1);
       expect(links.takes, 1, reason: 'the held link is replayed once');
       expect(probe.beforeReady, 0);
-      expect(
-        probe.builds.where((b) => b == 'placeholder'),
-        hasLength(1),
-      );
+      expect(probe.builds.where((b) => b == 'placeholder'), hasLength(1));
 
       // Each root initializer ran once per attempt, into a fresh container
       // per attempt, and the published root holds attempt 2's instances.
@@ -226,36 +219,35 @@ void main() {
     },
   );
 
-  testWidgets(
-    'T-0021-AC3 a miniclient://app/placeholder link delivered on the '
-    'platform navigation channel to the running app shows that route',
-    (tester) async {
-      final links = PendingLinks.install(tester.binding);
-      addTearDown(links.detach);
-      final probe = McRouteProbe();
-      await tester.pumpWidget(
-        MiniClientApp(links: links, initializers: roots(), probe: probe),
-      );
-      await tester.pump();
-      await tester.pumpAndSettle();
-      expect(find.text('Marvel universe'), findsOneWidget);
+  testWidgets('T-0021-AC3 a miniclient://app/placeholder link delivered on the '
+      'platform navigation channel to the running app shows that route', (
+    tester,
+  ) async {
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    final probe = McRouteProbe();
+    await tester.pumpWidget(
+      MiniClientApp(links: links, initializers: roots(), probe: probe),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(find.text('Marvel universe'), findsOneWidget);
 
-      // What the iOS embedder sends for `simctl openurl` (FlutterDeepLinking).
-      await _pushLink(tester, 'miniclient://app/placeholder/42');
-      await tester.pumpAndSettle();
+    // What the iOS embedder sends for `simctl openurl` (FlutterDeepLinking).
+    await _pushLink(tester, 'miniclient://app/placeholder/42');
+    await tester.pumpAndSettle();
 
-      expect(find.text('Placeholder detail 42'), findsOneWidget);
-      expect(probe.builds, contains('placeholder'));
-      // Nested under home, so back returns to the home placeholder.
-      final router = GoRouter.of(
-        tester.element(find.text('Placeholder detail 42')),
-      );
-      expect(router.canPop(), isTrue);
-      router.pop();
-      await tester.pumpAndSettle();
-      expect(find.text('Marvel universe'), findsOneWidget);
-    },
-  );
+    expect(find.text('Placeholder detail 42'), findsOneWidget);
+    expect(probe.builds, contains('placeholder'));
+    // Nested under home, so back returns to the home placeholder.
+    final router = GoRouter.of(
+      tester.element(find.text('Placeholder detail 42')),
+    );
+    expect(router.canPop(), isTrue);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.text('Marvel universe'), findsOneWidget);
+  });
 
   testWidgets(
     'T-0021-AC4 a link delivered between BootReady and the router\'s first '
@@ -308,9 +300,7 @@ void main() {
   ) async {
     final links = PendingLinks.install(tester.binding);
     addTearDown(links.detach);
-    await tester.pumpWidget(
-      MiniClientApp(links: links, initializers: roots()),
-    );
+    await tester.pumpWidget(MiniClientApp(links: links, initializers: roots()));
     await tester.pump();
     await tester.pumpAndSettle();
     expect(find.text('Marvel universe'), findsOneWidget);

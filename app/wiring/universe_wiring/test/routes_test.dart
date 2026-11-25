@@ -32,41 +32,39 @@ void main() {
   setUp(resetDIContainer);
   tearDown(resetDIContainer);
 
-  testWidgets(
-    'T-0033-AC1 the navigator opens CharacterDetailsRoute and the '
-    'placeholder shows the id',
-    (tester) async {
-      final ref = RouterRef();
-      await initializeDIContainer([
-        RouterDIInitializer(ref),
-        const UniverseNavigatorsDIInitializer(),
-        McDIInitializer((getIt, _) {
-          getIt.registerSingleton<RouteTargets>(_Targets());
-        }),
-      ]);
-      final router = ref.attach(
-        GoRouter(initialLocation: AppLocations.characters, routes: universeRoutes),
-      );
-      addTearDown(router.dispose);
-      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
-      expect(find.byKey(const Key('fake.characters')), findsOneWidget);
+  testWidgets('T-0033-AC1 the navigator opens CharacterDetailsRoute and the '
+      'placeholder shows the id', (tester) async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseNavigatorsDIInitializer(),
+      McDIInitializer((getIt, _) {
+        getIt.registerSingleton<RouteTargets>(_Targets());
+      }),
+    ]);
+    final router = ref.attach(
+      GoRouter(
+        initialLocation: AppLocations.characters,
+        routes: universeRoutes,
+      ),
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    expect(find.byKey(const Key('fake.characters')), findsOneWidget);
 
-      diContainer<CharactersListNavigator>().openCharacter(
-        const CharacterId(42),
-      );
-      await tester.pumpAndSettle();
+    diContainer<CharactersListNavigator>().openCharacter(const CharacterId(42));
+    await tester.pumpAndSettle();
 
-      expect(
-        router.routerDelegate.currentConfiguration.uri.toString(),
-        const CharacterDetailsRoute(id: 42).location,
-      );
-      expect(
-        find.byKey(const Key('character.details.placeholder')),
-        findsOneWidget,
-      );
-      expect(find.text('Character details 42'), findsOneWidget);
-    },
-  );
+    expect(
+      router.state.uri.toString(),
+      const CharacterDetailsRoute(id: 42).location,
+    );
+    expect(
+      find.byKey(const Key('character.details.placeholder')),
+      findsOneWidget,
+    );
+    expect(find.text('Character details 42'), findsOneWidget);
+  });
 
   test('T-0033-AC1 the wiring initializer resolves the route targets and the '
       'navigator', () async {
@@ -75,6 +73,9 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseWiringDIInitializer(),
     ]);
+    // Lazy: a navigator needs the router, which only exists after boot.
+    final router = ref.attach(GoRouter(routes: universeRoutes));
+    addTearDown(router.dispose);
 
     expect(diContainer<RouteTargets>(), isA<RouteTargets>());
     expect(
