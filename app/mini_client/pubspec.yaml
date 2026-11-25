@@ -32,6 +32,8 @@ dev_dependencies:
   dio: ^5.11.0
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   mc_analysis: any
   mc_event_bus: any
   mc_mocked_backend: any

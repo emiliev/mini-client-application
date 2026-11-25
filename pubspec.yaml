@@ -9,6 +9,7 @@ environment:
 
 workspace:
   - app/mini_client
+  - app/sandbox/universe_sandbox
   - app/wiring/account_wiring
   - app/wiring/app_core
   - app/wiring/chronicle_wiring

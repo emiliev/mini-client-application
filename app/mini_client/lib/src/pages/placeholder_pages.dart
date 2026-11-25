@@ -7,12 +7,14 @@ class HomePlaceholderPage extends StatelessWidget {
   const HomePlaceholderPage({
     required this.env,
     required this.onOpenPlaceholder,
+    required this.onOpenCharacters,
     super.key,
   });
 
   /// The bundled config's environment (shows which asset was bundled).
   final String env;
   final ValueChanged<int> onOpenPlaceholder;
+  final VoidCallback onOpenCharacters;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,8 @@ class HomePlaceholderPage extends StatelessWidget {
           const McGap.lg(),
           Text('Config: env=$env', style: text.labelLarge),
           const McGap.xl(),
+          McButton(label: 'Characters', onPressed: onOpenCharacters),
+          const McGap.md(),
           McButton(
             label: 'Open placeholder 7',
             onPressed: () => onOpenPlaceholder(7),

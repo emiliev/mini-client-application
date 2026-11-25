@@ -27,14 +27,17 @@ const List<McDIInitializer> wiringInitializers = [
 
 /// The production root list: config from the bundled asset, storage in the
 /// app's data container, and all 7 wirings.
-List<McDIInitializer> appRootInitializers() => rootInitializers(
-  config: () => rootBundle.loadString(appConfigAsset),
-  storageDirectory: appStorageDirectory(),
-  wirings: wiringInitializers,
-);
+List<McDIInitializer> appRootInitializers({RouterRef? routerRef}) =>
+    rootInitializers(
+      config: () => rootBundle.loadString(appConfigAsset),
+      storageDirectory: appStorageDirectory(),
+      mockDomains: appMockDomains,
+      routerRef: routerRef,
+      wirings: wiringInitializers,
+    );
 
 /// The Marvel app: [McApp] over the app router.
-class MiniClientApp extends StatelessWidget {
+class MiniClientApp extends StatefulWidget {
   const MiniClientApp({
     required this.links,
     this.initializers,
@@ -55,13 +58,25 @@ class MiniClientApp extends StatelessWidget {
   final McRouteProbe? probe;
 
   @override
+  State<MiniClientApp> createState() => _MiniClientAppState();
+}
+
+class _MiniClientAppState extends State<MiniClientApp> {
+  /// Lets the navigator implementations reach the router once it exists.
+  final RouterRef _routerRef = RouterRef();
+
+  @override
   Widget build(BuildContext context) => McApp(
-    boot: () => initializeDIContainer(initializers ?? appRootInitializers()),
+    boot: () => initializeDIContainer(
+      widget.initializers ?? appRootInitializers(routerRef: _routerRef),
+    ),
     router:
-        router ??
+        widget.router ??
         (initialLocation) => buildAppRouter(initialLocation: initialLocation),
-    links: links,
-    bootTimeout: bootTimeout,
-    probe: probe,
+    links: widget.links,
+    bootTimeout: widget.bootTimeout,
+    probe: widget.probe,
+    routerRef: _routerRef,
+    appBuilder: mediaScopeBuilder,
   );
 }

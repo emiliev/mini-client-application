@@ -1,5 +1,7 @@
 // Typed routes (go_router_builder writes `app_routes.g.dart`). Placeholders
 // until the wirings carry feature routes (T-0021).
+import 'dart:async';
+
 import 'package:app_core/app_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -23,6 +25,8 @@ class HomeRoute extends GoRouteData with $HomeRoute {
     return HomePlaceholderPage(
       env: diContainer<AppConfig>().env,
       onOpenPlaceholder: (id) => PlaceholderRoute(id: id).go(context),
+      // A push, so Back returns home (the list is not a child of home).
+      onOpenCharacters: () => unawaited(context.push(AppLocations.characters)),
     );
   }
 }
