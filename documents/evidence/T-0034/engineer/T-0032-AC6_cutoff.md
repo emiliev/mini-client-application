@@ -1,6 +1,6 @@
 # T-0032-AC6: a bloc body edit cuts off before retrofit and the injectable aggregate
 
-Edit: `assert('cutoff-1795614595-27886'.isNotEmpty);` added to the body of `close()` in `feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart`, then `build //feature/characters/characters_list:characters_list` with `--execution_log_json_file`.
+Edit: `assert('cutoff-1795616576-65659'.isNotEmpty);` added to the body of `close()` in `feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart`, then `build //feature/characters/characters_list:characters_list` with `--execution_log_json_file`.
 
 | | before | after |
 |---|---|---|

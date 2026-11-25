@@ -55,10 +55,24 @@ Kits fixed and the exemplar is back to plan 01 §3.3's shape. Details and gotcha
 | AC6 | `flow_kit_test` "T-0034-AC6 …" x2 (reads state; wrong-type and outside-a-flow errors); the exemplar's `charactersFlowState` uses `flowStateOf<dynamic>`. |
 
 - **Gates:** lint, `mc_arch_check`, `rules_fork.sh check`, format and `l10n_check` PASS. Coverage: characters_list 100 %, mc_feature_flow 97.8 %, mc_paging 100 %, mc_config 100 %, mc_api_client 98.5 %, mc_mocked_backend 92.5 %. `mc_test_utils` is 87 % (`fixture_assets.dart` is only exercised by feature tests); that was already so on `origin/main`, I changed one line of it (100 %), and the gate script lists it as exempt.
-- **`test //...`: 76 of 77 pass.** The failure is `//app/wiring/app_core:boot_test` (`dio.options.baseUrl` expected `https://mock.mini-client.invalid`, now `…invalid/`). It is a T-0033 file under `app/`, which I was told not to touch; the fix is one line (`app/wiring/app_core/test/boot_test.dart:278`). Log: `boot_test_expected_failure.log`.
+- **`test //...`: 77 of 77 pass.** The one-line expectation in `app/wiring/app_core/test/boot_test.dart:278` (`…invalid/`) was changed by this task's engineer, with the TL's permission (commit `T-0034: Expect the normalised base URL in the boot test`).
 - **Test changes (no test deleted, skipped or weakened; no `// ignore:`):**
   - `characters_list_env.dart`: `charactersFlowState` now uses the hook (AC6); the BUILD gains a direct `mc_feature_flow` test dep.
   - `mc_config` `app_config_test` and `mc_api_client` `api_client_test`: URL literals gained the trailing slash because the behaviour changed (TL decision 3).
   - `McTestContainer.config` is `static final`, since `AppConfig`'s constructor can no longer be `const`.
 - **Non-test changes outside the named packages:** `mc_mocked_backend` and `mc_test_utils` default URLs, and `tool/bazel/config/{dev,e2e,perf}.json` (trailing slash).
+- **Fix round (after the Verifier PASS and the reviews).** Evidence: `fixround_mutations.txt` (10 mutations, each killed by the named tests), `goldens/`, regenerated gates.
+  1. The trailing slash is normalised in code, not asserted: `AppConfig` constructor, `createApiDio`, `MockBackend.createDio`. `withTrailingSlash` has a direct test. Tests: T-0034-AC4 in `mc_config`, `mc_api_client`, `mc_mocked_backend`.
+  2. The flow no longer shadows host delegates: `Localizations.override` already puts the flow's own delegates first and keeps the host's, so the flow adds a core or Flutter delegate only when the host lacks that type. Test: a host `MaterialLocalizations` override (`CUSTOM-OK`) survives; a bare host still gets the core strings.
+  3. `provide:` before `flowInitializer` is pinned by an initializer that resolves the provided instance at once.
+  4. The tree shape is stable: the flow is always wrapped in `Localizations.override`. Test: changing the delegates from empty to non-empty and back keeps the pushed page and its state (no remount).
+  5. `context.flowLeading()` (in `mc_feature_flow`): a back button for the flow's root page when the outer navigator can pop, which pops the flow; null otherwise, so inner pages keep AppBar's automatic back. `CharactersListPage` uses it. Tests: present when pushed, tap pops the flow, absent at the root, inner page unaffected.
+  6. `McMediaCard.heightFor` gained `hasSubtitle` and `titleLines`. I chose `hasSubtitle = true` as the default, so every existing DS caller and golden keeps its height; `characters_list` passes `false`. Goldens changed: only `feature/characters/characters_list/test/golden/goldens/characters_list_loaded.png` (shorter cards; before and after in `goldens/`). No DS golden changed.
+  7. The env's flow-state lookup is anchored to `charactersGridKey`.
+  8. The AC5 marker script plants one sample per marker and requires every marker to trip (a broken regex now fails it).
+  9. `mc_arch_check` rule `test-only`: `package:x/testing.dart` may be imported from `test/` only. Fixture `testing_import`, test `T-0034-AC6 a testing.dart import outside test/ fails`.
+  10. `T-0034-AC4_relative_paths.sh` is now a Python scan: multi-line annotations, raw strings, both quote styles, with a control for each (and a relative path must stay quiet).
+  11. New tests: the hook's no-controller branch, `FlowScope.of` outside a flow, and the German core string (`Erneut versuchen`) in the en/de test.
+  12. The formatting-only hunks in `flow_scope_test.dart`, `api_client_test.dart` and `characters_list_env.dart` are reverted; the BUILD dep is sorted.
+  13. I documented that `provide:` is read once per flow instance (the flow is already keyed by `initialTeamId`); the navigator is not part of the key.
 - **Open for the TL:** the hook is untyped in the BDD step (`dynamic` over the feature's private state); typing it needs the feature to export the state type for tests. Wiring the relative-path scan into `mcgen check` is a follow-up.
