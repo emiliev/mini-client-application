@@ -234,25 +234,25 @@ void main() {
   group('T-0023-AC4 DI', () {
     const config =
         '{"env":"dev","backend":{"seed":1,"latencyMs":0,"scenario":"happy"},'
-        '"apiBaseUrl":"https://api.test","build":"1"}';
+        '"apiBaseUrl":"https://api.test/","build":"1"}';
     setUp(resetDIContainer);
 
     test('T-0023-AC4: an explicit baseUrl overrides the config', () async {
       await initializeDIContainer([
         ApiClientDIInitializer(
           adapter: _backend().adapter,
-          baseUrl: 'https://override.test',
+          baseUrl: 'https://override.test/',
           retryDelay: Duration.zero,
         ),
       ]);
-      expect(diContainer<Dio>().options.baseUrl, 'https://override.test');
+      expect(diContainer<Dio>().options.baseUrl, 'https://override.test/');
     });
 
     test('T-0023-AC4: a missing Monitoring fails the request loudly', () async {
       await initializeDIContainer([
         ApiClientDIInitializer(
           adapter: _backend().adapter,
-          baseUrl: 'https://x.test',
+          baseUrl: 'https://x.test/',
         ),
       ]);
       await expectLater(
@@ -271,7 +271,7 @@ void main() {
           ApiClientDIInitializer(adapter: backend.adapter),
         ]);
         final dio = diContainer<Dio>();
-        expect(dio.options.baseUrl, 'https://api.test');
+        expect(dio.options.baseUrl, 'https://api.test/');
         expect(identical(dio, diContainer<Dio>()), isTrue);
         expect(dio.httpClientAdapter, same(backend.adapter));
 
@@ -282,5 +282,56 @@ void main() {
         expect(page['results']! as List, isNotEmpty);
       },
     );
+  });
+
+  group('T-0034-AC4 base URL and relative paths', () {
+    test('T-0034-AC4: a relative path lands under the base URL', () async {
+      final backend = _backend();
+      final dio = _dio(backend);
+
+      await dio.get<Object?>('v1/characters');
+
+      expect(
+        [for (final t in backend.recentTraffic) t.path],
+        ['/v1/characters'],
+      );
+    });
+
+    test('T-0034-AC4: a base URL without a trailing slash is normalised, '
+        'in code that does not depend on asserts', () async {
+      final backend = _backend();
+      final dio = createApiDio(
+        adapter: backend.adapter,
+        baseUrl: 'https://api.test',
+      );
+      expect(dio.options.baseUrl, 'https://api.test/');
+
+      await dio.get<Object?>('v1/characters');
+      expect(backend.recentTraffic.single.path, '/v1/characters');
+    });
+
+    test(
+      'T-0034-AC4: ApiClientDIInitializer normalises an explicit baseUrl',
+      () async {
+        await resetDIContainer();
+        await initializeDIContainer([
+          ApiClientDIInitializer(
+            adapter: _backend().adapter,
+            baseUrl: 'https://x.test',
+          ),
+        ]);
+        expect(diContainer<Dio>().options.baseUrl, 'https://x.test/');
+      },
+    );
+
+    test('T-0034-AC4: control: without the slash dio fuses host and path', () {
+      // Dio joins baseUrl + path as strings (F-0031 B2); this is what the
+      // assertion above prevents.
+      final uri = RequestOptions(
+        path: 'v1/characters',
+        baseUrl: 'https://api.test',
+      ).uri;
+      expect(uri.host, 'api.testv1');
+    });
   });
 }

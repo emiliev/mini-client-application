@@ -1,0 +1,13 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //utility/mc_feature_flow:flow_kit_test
+-----------------------------------------------------------------------------
+[flutter_tester] The Dart VM service is listening on http://127.0.0.1:53233/lljEOQf8eLE=/
+  PASS  T-0034-AC1 context.di inside BlocProvider.create does not throw and creates the bloc once
+  PASS  T-0034-AC1 context.di registers no dependency on the scope and a new scope does not recreate the bloc
+  PASS  T-0034-AC2 provide: resolves inside the flow and nowhere outside it
+  PASS  T-0034-AC2 localizationsDelegates resolve the flow strings in en and de
+  PASS  T-0034-AC2 without localizationsDelegates the host decides
+  PASS  T-0034-AC6 flowStateOf reads the flow state through the controller
+  PASS  T-0034-AC6 flowStateOf fails on another state type and outside a flow
+
+7 passed

@@ -1,0 +1,37 @@
+=== M1 flow re-adds every core/Flutter delegate
+  FAIL  T-0034-AC2 a host MaterialLocalizations override survives inside the flow, and the flow still adds its own strings
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.9s
+=== M2 provide after flowInitializer
+  FAIL  T-0034-AC2 provide: is registered before flowInitializer runs
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.9s
+=== M3 unwrapped when there are no delegates
+  FAIL  T-0034-AC2 a host without core or Flutter delegates gets them from the flow
+  FAIL  T-0034-AC2 changing localizationsDelegates keeps the pushed page and its state
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.9s
+=== M4 no flow leading
+  FAIL  T-0034-AC5 the flow root page can leave the flow T-0034-AC5 present when pushed, and tapping it pops the flow
+INFO: Build completed, 1 test FAILED, 12 total actions
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.9s
+=== M5 leading shown on inner pages too
+  FAIL  T-0034-AC5 the flow root page can leave the flow T-0034-AC5 a page pushed inside the flow keeps the automatic back button, which pops that page only
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.9s
+=== M6 AppConfig does not normalise
+INFO: Build completed, 1 test FAILED, 7 total actions
+//utility/mc_config:app_config_test                                      FAILED in 0.1s
+=== M7 createApiDio does not normalise
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_api_client:api_client_test                                  FAILED in 0.4s
+=== M8 createDio does not normalise
+INFO: Build completed, 1 test FAILED, 7 total actions
+//utility/mc_mocked_backend:mocked_backend_test                          FAILED in 1.8s
+=== M9 heightFor ignores hasSubtitle
+  FAIL  T-0034-AC5 heightFor without a subtitle is shorter by the subtitle line, and fewer title lines are shorter again
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_ds_cards:card_test                                          FAILED in 0.6s
+=== M10 arch check ignores testing.dart
+INFO: Build completed, 1 test FAILED, 7 total actions
+//tool/mc_arch_check:arch_check_test                                     FAILED in 0.2s

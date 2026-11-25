@@ -612,4 +612,19 @@ void main() {
       },
     );
   });
+
+  test(
+    'T-0034-AC4 createDio normalises a base URL without a trailing slash',
+    () {
+      final backend = _backend();
+      expect(
+        backend.createDio(baseUrl: 'https://x.test').options.baseUrl,
+        'https://x.test/',
+      );
+      expect(
+        backend.createDio(baseUrl: 'https://x.test/').options.baseUrl,
+        'https://x.test/',
+      );
+    },
+  );
 }

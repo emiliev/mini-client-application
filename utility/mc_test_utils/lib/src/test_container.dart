@@ -49,10 +49,10 @@ final class ExternalDouble<T extends Object> {
 /// F-0024 records how drift is guarded.
 abstract final class McTestContainer {
   /// The `AppConfig` tests run on: seed 42, no latency, the happy scenario.
-  static const AppConfig config = AppConfig(
+  static final AppConfig config = AppConfig(
     env: 'test',
     backend: BackendConfig(seed: 42, latency: Duration.zero, scenario: 'happy'),
-    apiBaseUrl: 'https://mock.mini-client.invalid',
+    apiBaseUrl: 'https://mock.mini-client.invalid/',
     build: 'test',
   );
 

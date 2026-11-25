@@ -275,7 +275,7 @@ void main() {
     expect(diContainer<MockBackend>().seed, 7);
     expect(diContainer<MockBackend>().latency, same(LatencyProfile.none));
     final dio = diContainer<Dio>();
-    expect(dio.options.baseUrl, 'https://mock.mini-client.invalid');
+    expect(dio.options.baseUrl, 'https://mock.mini-client.invalid/');
     final adapter = dio.httpClientAdapter as MockBackendHttpAdapter;
     expect(adapter.target, same(diContainer<MockBackend>().adapter));
     expect(diContainer.isRegistered<EventBus>(), isTrue);

@@ -1,0 +1,18 @@
+  PASS  P1 provide: is resolvable by the flow initializer
+P2 staleDi=FlutterError: Looking up a deactivated widget's ancestor is unsafe.
+P2 staleContainer=StateError: Bad state: GetIt: Object/factory with type _Provided is not registered inside GetIt. 
+P2 staleHook=FlutterError: Looking up a deactivated widget's ancestor is unsafe.
+  PASS  P2 after dispose: provided not reachable, di on stale context
+P3 localizations widgets=2; inner delegates=[_StringsDelegate, _McL10nCoreL10nDelegate, _MaterialLocalizationsDelegate, _WidgetsLocalizationsDelegate, _GlobalCupertinoLocalizationsDelegate, _CustomMaterialDelegate, _WidgetsLocalizationsDelegate, _GlobalCupertinoLocalizationsDelegate, _McL10nCoreL10nDelegate, _MaterialLocalizationsDelegate, _CupertinoLocalizationsDelegate, _WidgetsLocalizationsDelegate]
+P3 duplicates=[MapEntry(_McL10nCoreL10nDelegate: 2), MapEntry(_MaterialLocalizationsDelegate: 2), MapEntry(_WidgetsLocalizationsDelegate: 3), MapEntry(_GlobalCupertinoLocalizationsDelegate: 2)]
+P3 host custom MaterialLocalizations okButtonLabel inside the flow = OK
+P3 flow string = flow-en
+  PASS  P3 delegates list: duplicates and host overrides
+P4 innerErr=StateError
+  PASS  P4 nested flow: outer provide: not visible in inner flow; hook returns innermost state
+//utility/mc_feature_flow:verifier_probe_test                            PASSED in 0.6s
+[under M3P: provide after flowInitializer]   FAIL  P1 provide: is resolvable by the flow initializer
+[under M3P: provide after flowInitializer]   PASS  P2 after dispose: provided not reachable, di on stale context
+[under M3P: provide after flowInitializer]   PASS  P3 delegates list: duplicates and host overrides
+[under M3P: provide after flowInitializer]   PASS  P4 nested flow: outer provide: not visible in inner flow; hook returns innermost state
+[under M3P: provide after flowInitializer] FAIL: //utility/mc_feature_flow:verifier_probe_test (Exit 1) (see /private/tmp/mc-ob-T-0034-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/utility/mc_feature_flow/verifier_probe_test/test.log)
