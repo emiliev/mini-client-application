@@ -17,6 +17,7 @@ workspace:
   - app/wiring/library_wiring
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
+  - feature/characters/characters_list
   - spike/api_envelope
   - spike/bdd_sample
   - spike/di_sample

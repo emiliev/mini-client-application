@@ -10,6 +10,7 @@ environment:
 dependencies:
   dio: ^5.11.0
   get_it: ^8.0.0
+  json_annotation: 4.12.0
   mc_api_errors: any
   mc_config: any
   mc_di: any

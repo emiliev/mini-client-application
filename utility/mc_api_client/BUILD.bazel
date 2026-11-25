@@ -1,10 +1,32 @@
 # T-0023 (P1-05): the shared Dio. Pure Dart (R15); the mocked backend is a test-only dep.
-load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+
+# T-0032 (P-053): the `ApiPage<T>` envelope, json_serializable with
+# genericArgumentFactories, generated as a Bazel action (no build_runner).
+dart_codegen(
+    name = "_api_page_json_part",
+    package_name = "mc_api_client",
+    language_version = "3.13",
+    src = "lib/src/api_page.dart",
+    generator_bin = "@rules_dart//dart/ext/json_serializable:shim",
+    output_suffixes = [".json_serializable.g.part"],
+    deps = ["@pub_deps//:json_annotation"],
+)
+
+dart_codegen(
+    name = "_api_page_g",
+    package_name = "mc_api_client",
+    language_version = "3.13",
+    src = "lib/src/api_page.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    output_suffixes = [".g.dart"],
+    parts = [":_api_page_json_part"],
+)
 
 dart_library(
     name = "mc_api_client",
     package_name = "mc_api_client",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"]) + [":_api_page_g"],
     language_version = "3.13",
     visibility = ["//visibility:public"],
     deps = [
@@ -15,6 +37,7 @@ dart_library(
         "//utility/mc_prelude",
         "@pub_deps//:dio",
         "@pub_deps//:get_it",
+        "@pub_deps//:json_annotation",
     ],
 )
 
@@ -34,6 +57,21 @@ dart_test(
         "//utility/mc_monitoring",
         "//utility/mc_prelude",
         "@pub_deps//:dio",
+        "@pub_deps//:test",
+    ],
+)
+
+# T-0032-AC1: ApiPage over the real mocked-backend page.
+dart_test(
+    name = "api_page_test",
+    size = "small",
+    package_name = "mc_api_client",
+    language_version = "3.13",
+    main = "test/api_page_test.dart",
+    deps = [
+        ":mc_api_client",
+        "//utility/mc_fixtures_characters",
+        "//utility/mc_mocked_backend",
         "@pub_deps//:test",
     ],
 )
