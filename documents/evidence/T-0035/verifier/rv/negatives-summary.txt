@@ -1,0 +1,37 @@
+== evergreen-lock-moved-elsewhere (T-0035-AC4_provenance.sh) rc=0
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**PASS T-0035-AC4-provenance**
+== evergreen-lib-edited (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | DIFFERS from the recorded patch | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== evergreen-license (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== evergreen-lock-entry-back (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== scan-bzl (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== scan-bzl-unquoted (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== scan-BUILD-unquoted (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== scan-BUILD.bazel-unquoted (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== scan-pubspec-hosted-block (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== scan-pubspec-hosted-inline (T-0035-AC4_provenance.sh) rc=1
+| lib/ vs archive | lib/ = archive + 0001-forward-pushRouteInformation.patch (20 changed lines) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== delta-pubspec-lock-other-version (T-0035-AC4_lock_delta.sh) rc=1
+| pubspec.lock = base minus the flow_builder block | DIFFERS: 223c223
+**FAIL T-0035-AC4-lock-delta**
+== delta-module-lock-other-version (T-0035-AC4_lock_delta.sh) rc=1
+**FAIL T-0035-AC4-lock-delta**
+== delta-module-lock-repo-removed (T-0035-AC4_lock_delta.sh) rc=1
+**FAIL T-0035-AC4-lock-delta**
