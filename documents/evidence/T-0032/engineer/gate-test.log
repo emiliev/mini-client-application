@@ -1,0 +1,102 @@
+INFO: Invocation ID: 96c742d0-5fa2-4dfe-a0e4-8a914153b3c3
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --collect_code_coverage and --instrumentation_filter have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 191 targets (20 packages loaded, 0 targets configured)
+Analyzing: 191 targets (20 packages loaded, 77 targets configured)
+
+Analyzing: 191 targets (284 packages loaded, 20636 targets configured, 1572 aspect applications)
+[8,567 / 9,243] 12 / 16 tests; Testing //utility/mc_fixtures_characters:provider_contract_test; 0s disk-cache, darwin-sandbox ... (3 actions, 2 running)
+Analyzing: 191 targets (284 packages loaded, 20710 targets configured, 1927 aspect applications)
+[15,847 / 17,235] 36 / 64 tests; Compiling Dart kernel module app/wiring/app_core/app_core.flutter.kmod; 1s disk-cache, worker ... (14 actions, 8 running)
+INFO: Analyzed 191 targets (284 packages loaded, 20721 targets configured, 1953 aspect applications).
+[20,425 / 20,469] 58 / 75 tests; Testing //spike/bdd_sample:bdd_test; 0s disk-cache, darwin-sandbox ... (14 actions, 12 running)
+[20,450 / 20,476] 62 / 75 tests; Testing //utility/mc_ds_media:golden_test; 1s disk-cache, darwin-sandbox ... (13 actions, 10 running)
+[20,456 / 20,476] 69 / 75 tests; DartCodegen @@//app/mini_client:app_routes_go_router_part; 2s disk-cache, worker ... (7 actions running)
+[20,462 / 20,476] 74 / 75 tests; DartCodegen @@//app/mini_client:app_routes_go_router_part; 4s disk-cache, worker
+[20,463 / 20,476] 74 / 75 tests; [Prepa] DartCodegen @@//app/mini_client:app_routes_g
+[20,476 / 20,477] 75 / 75 tests; Testing //app/mini_client:app_test; 0s disk-cache, darwin-sandbox
+INFO: Found 116 targets and 75 test targets...
+INFO: Elapsed time: 10.967s, Critical Path: 8.05s
+INFO: 6179 processes: 14298 action cache hit, 345 disk cache hit, 5739 internal, 18 darwin-sandbox, 77 worker.
+INFO: Build completed successfully, 6179 total actions
+//feature/characters/characters_list:architecture_test          (cached) PASSED in 0.1s
+//feature/characters/characters_list:bdd_test                   (cached) PASSED in 1.9s
+//feature/characters/characters_list:contract_test              (cached) PASSED in 0.2s
+//spike/di_sample:di_sample_test                                (cached) PASSED in 0.2s
+//spike/hello:widget_test                                       (cached) PASSED in 1.5s
+//spike/retrofit_api:characters_api_test                        (cached) PASSED in 0.2s
+//tool/l10n_check:l10n_check_test                               (cached) PASSED in 0.6s
+//tool/l10n_check:workspace_gate_test                           (cached) PASSED in 0.1s
+//tool/mc_arch_check:arch_check_test                            (cached) PASSED in 0.6s
+//utility/mc_analysis:lints_test                                (cached) PASSED in 2.9s
+//utility/mc_api_client:api_client_test                         (cached) PASSED in 0.4s
+//utility/mc_api_client:api_page_test                           (cached) PASSED in 0.2s
+//utility/mc_api_client:no_flutter_test                         (cached) PASSED in 0.6s
+//utility/mc_api_errors:api_failure_test                        (cached) PASSED in 0.2s
+//utility/mc_api_errors:no_flutter_test                         (cached) PASSED in 0.2s
+//utility/mc_bloc_kit:feature_flow_controller_test              (cached) PASSED in 0.2s
+//utility/mc_bloc_kit:mc_bloc_test                              (cached) PASSED in 0.2s
+//utility/mc_bloc_kit:purity_test                               (cached) PASSED in 0.2s
+//utility/mc_config:app_config_test                             (cached) PASSED in 0.3s
+//utility/mc_config:bundled_config_test                         (cached) PASSED in 0.2s
+//utility/mc_di:di_container_test                               (cached) PASSED in 0.3s
+//utility/mc_di:recording_test                                  (cached) PASSED in 0.4s
+//utility/mc_ds_buttons:buttons_test                            (cached) PASSED in 1.0s
+//utility/mc_ds_feedback:feedback_test                          (cached) PASSED in 0.9s
+//utility/mc_ds_layout:layout_test                              (cached) PASSED in 0.9s
+//utility/mc_ds_media:media_scope_test                          (cached) PASSED in 0.5s
+//utility/mc_ds_theme:theme_test                                (cached) PASSED in 0.7s
+//utility/mc_ds_tokens:tokens_test                              (cached) PASSED in 0.3s
+//utility/mc_event_bus:event_bus_test                           (cached) PASSED in 0.2s
+//utility/mc_event_bus:no_flutter_test                          (cached) PASSED in 0.2s
+//utility/mc_feature_flow:feature_flow_test                     (cached) PASSED in 0.7s
+//utility/mc_fixtures_characters:characters_test                (cached) PASSED in 0.7s
+//utility/mc_fixtures_characters:fixture_sets_test              (cached) PASSED in 0.6s
+//utility/mc_fixtures_media:bundled_image_resolver_test         (cached) PASSED in 0.5s
+//utility/mc_fixtures_media:media_contract_test                 (cached) PASSED in 0.5s
+//utility/mc_formatters:formatters_test                         (cached) PASSED in 0.5s
+//utility/mc_l10n_core:l10n_test                                (cached) PASSED in 1.4s
+//utility/mc_media:api_image_test                               (cached) PASSED in 0.2s
+//utility/mc_media:purity_test                                  (cached) PASSED in 0.2s
+//utility/mc_media:resolved_image_test                          (cached) PASSED in 0.2s
+//utility/mc_mocked_backend:mocked_backend_test                 (cached) PASSED in 2.3s
+//utility/mc_monitoring:monitoring_test                         (cached) PASSED in 0.3s
+//utility/mc_monitoring:no_flutter_test                         (cached) PASSED in 0.2s
+//utility/mc_paging:debounced_query_test                        (cached) PASSED in 0.3s
+//utility/mc_paging:paged_state_test                            (cached) PASSED in 0.2s
+//utility/mc_paging:paging_controller_test                      (cached) PASSED in 0.3s
+//utility/mc_paging:purity_test                                 (cached) PASSED in 0.2s
+//utility/mc_paging:search_history_test                         (cached) PASSED in 0.3s
+//utility/mc_prelude:result_test                                (cached) PASSED in 0.6s
+//utility/mc_storage:file_store_test                            (cached) PASSED in 0.2s
+//utility/mc_storage:no_flutter_test                            (cached) PASSED in 0.2s
+//utility/mc_test_steps:data_table_test                         (cached) PASSED in 0.3s
+//utility/mc_test_utils:fonts_test                              (cached) PASSED in 0.4s
+//utility/mc_test_utils:golden_test                             (cached) PASSED in 0.7s
+//utility/mc_test_utils:harness_test                            (cached) PASSED in 0.9s
+//utility/mc_test_utils:init_flow_test                          (cached) PASSED in 0.8s
+//utility/mc_test_utils:isolation_test                          (cached) PASSED in 0.5s
+//app/mini_client:app_test                                               PASSED in 0.8s
+//app/wiring/app_core:boot_test                                          PASSED in 1.0s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.5s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.3s
+//feature/characters/characters_list:golden_test                         PASSED in 1.7s
+//spike/bdd_sample:bdd_test                                              PASSED in 1.3s
+//utility/mc_ds_buttons:golden_test                                      PASSED in 1.0s
+//utility/mc_ds_cards:card_test                                          PASSED in 1.2s
+//utility/mc_ds_cards:golden_test                                        PASSED in 1.5s
+//utility/mc_ds_feedback:golden_test                                     PASSED in 1.3s
+//utility/mc_ds_layout:golden_test                                       PASSED in 1.3s
+//utility/mc_ds_lists:golden_test                                        PASSED in 2.5s
+//utility/mc_ds_lists:paged_grid_test                                    PASSED in 2.7s
+//utility/mc_ds_lists:paged_list_test                                    PASSED in 1.8s
+//utility/mc_ds_media:golden_test                                        PASSED in 1.7s
+//utility/mc_ds_media:image_test                                         PASSED in 1.4s
+//utility/mc_ds_theme:golden_test                                        PASSED in 0.9s
+//utility/mc_fixtures_characters:provider_contract_test                  PASSED in 1.3s
+
+Executed 18 out of 75 tests: 75 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+exit=0

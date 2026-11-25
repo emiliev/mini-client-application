@@ -1,0 +1,16 @@
+INFO: Invocation ID: 5d062b29-b101-4ad7-b14c-7a8bffa9d7b1
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured)
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: Elapsed time: 0.723s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/tool/mc_arch_check/bin
+[R4] feature/characters/characters_list/lib/characters_list.dart: barrel exports CharactersListPage (from package:characters_list/src/presentation/page/characters_list_page.dart); a feature barrel exports only flows, navigators and arg/result types
+mc_arch_check: 1 violation(s) in /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-ade7c3a7bfd72cea6
+arch exit=1

@@ -1,0 +1,13 @@
+M1 killed (AC3 the tap opens no preview): 5 failing scenario(s)
+M2 killed (AC3 openCharacter twice): 1 failing scenario(s)
+M3 killed (AC1/AC5 pages of 20): 6 failing scenario(s)
+M4 killed (AC5 every page is page 1): 3 failing scenario(s)
+M5 killed (AC2 timeout copy): 1 failing scenario(s)
+M6 killed (AC2 first-page failure shown as loading): 4 failing scenario(s)
+M7 killed (AC2 footer copy): 1 failing scenario(s)
+M8 killed (AC3 preview page without previewId): 2 failing scenario(s)
+M9 killed (AC4 German title): 1 failing scenario(s)
+M10 killed (AC1 wrong art): 3 failing scenario(s)
+M11 killed (AC3 preview of the wrong character): 5 failing scenario(s)
+M12 killed (AC3 list rebuilt on back (scroll lost)): 1 failing scenario(s)
+exit=0
