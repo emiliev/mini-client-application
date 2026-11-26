@@ -1,0 +1,6 @@
+Analyzing app, feature, utility...
+
+   info - utility/mc_fixtures_characters/tool/update_snapshots.dart:28:22 - Statement should be on a separate line. Try moving the statement to a new line. - always_put_control_body_on_new_line
+   info - utility/mc_fixtures_comics/tool/update_snapshots.dart:28:22 - Statement should be on a separate line. Try moving the statement to a new line. - always_put_control_body_on_new_line
+
+2 issues found.
