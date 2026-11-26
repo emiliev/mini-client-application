@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
 
 import '../util/reading_list_editor_env.dart';
 

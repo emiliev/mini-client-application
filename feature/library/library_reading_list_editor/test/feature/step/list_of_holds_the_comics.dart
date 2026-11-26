@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mc_test_steps/mc_test_steps.dart';
 
 import '../util/reading_list_editor_env.dart';
@@ -18,7 +17,10 @@ Future<void> listOfHoldsTheComics(
 ) async {
   final list = await storedList(tester, email, id);
   expect(
-    [for (final item in list['items']! as List<Object?>) (item! as Map)['title']],
+    [
+      for (final item in list['items']! as List<Object?>)
+        (item! as Map)['title'],
+    ],
     titlesOf(table),
     reason: 'the comics of $id',
   );

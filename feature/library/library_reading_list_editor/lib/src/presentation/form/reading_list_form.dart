@@ -99,8 +99,8 @@ Validator<String> _trimmed(Validator<String> rule) =>
     (value) => rule(value?.trim());
 
 /// More than [max] items fails with [ValidationCode.aboveMax].
-Validator<List<T>> _atMost<T>(int max) => (value) =>
-    value != null && value.length > max
+Validator<List<T>> _atMost<T>(int max) =>
+    (value) => value != null && value.length > max
     ? FieldError(ValidationCode.aboveMax, max: max)
     : null;
 

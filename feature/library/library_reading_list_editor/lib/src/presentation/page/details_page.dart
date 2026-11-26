@@ -119,8 +119,7 @@ class _DetailsForm extends StatelessWidget {
             McFormTextField(
               field: form.fieldOf<String>(ReadingListFields.name),
               label: l10n.readingListEditorNameLabel,
-              onChanged: (v) =>
-                  bloc.add(ReadingListEditorEvent.nameChanged(v)),
+              onChanged: (v) => bloc.add(ReadingListEditorEvent.nameChanged(v)),
               onTouched: () => bloc.add(
                 const ReadingListEditorEvent.touched(ReadingListFields.name),
               ),

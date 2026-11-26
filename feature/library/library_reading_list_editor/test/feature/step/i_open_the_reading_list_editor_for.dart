@@ -6,7 +6,10 @@ import '../util/reading_list_editor_env.dart';
 /// Usage: I open the reading list editor for {'l-1'}
 ///
 /// Enters the feature in edit mode, as the app does for `/me/lists/:id/edit`.
-Future<void> iOpenTheReadingListEditorFor(WidgetTester tester, String id) async {
+Future<void> iOpenTheReadingListEditorFor(
+  WidgetTester tester,
+  String id,
+) async {
   await ensureEditorContainer();
   await initFlow(
     tester,

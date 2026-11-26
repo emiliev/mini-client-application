@@ -23,8 +23,7 @@ part 'comic_picker_state.dart';
 /// One per comics page (a factory): leaving the step closes it, and a late
 /// answer is dropped with it.
 @injectable
-final class ComicPickerBloc
-    extends McBloc<ComicPickerEvent, ComicPickerState> {
+final class ComicPickerBloc extends McBloc<ComicPickerEvent, ComicPickerState> {
   ComicPickerBloc(this._repository, Monitoring monitoring)
     : super(const ComicPickerState.loading(query: ''), monitoring: monitoring) {
     _query = DebouncedQuery(

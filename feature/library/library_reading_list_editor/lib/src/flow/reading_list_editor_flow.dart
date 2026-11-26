@@ -49,24 +49,23 @@ class ReadingListEditorFlow extends StatelessWidget {
   final ValueChanged<ReadingListId?> onComplete;
 
   @override
-  Widget build(BuildContext context) =>
-      FeatureFlow<ReadingListEditorFlowState>(
-        key: ValueKey(editing),
-        flowInitializer: const ReadingListEditorDIInitializer(),
-        rootImports: readingListEditorRootImports,
-        provide: (scope) =>
-            scope.registerSingleton<ReadingListEditorNavigator>(navigator),
-        localizationsDelegates: const [ReadingListEditorL10n.delegate],
-        state: ReadingListEditorFlowState(editing: editing),
-        onComplete: (result) => onComplete(result as ReadingListId?),
-        // One page per step, pushed in order, so a back gesture on a later
-        // step returns to the step before it.
-        onGeneratePages: (state) => [
-          const McFlowPage(name: 'details', child: ReadingListDetailsPage()),
-          if (state.step >= 1)
-            const McFlowPage(name: 'comics', child: ReadingListComicsPage()),
-          if (state.step >= 2)
-            const McFlowPage(name: 'review', child: ReadingListReviewPage()),
-        ],
-      );
+  Widget build(BuildContext context) => FeatureFlow<ReadingListEditorFlowState>(
+    key: ValueKey(editing),
+    flowInitializer: const ReadingListEditorDIInitializer(),
+    rootImports: readingListEditorRootImports,
+    provide: (scope) =>
+        scope.registerSingleton<ReadingListEditorNavigator>(navigator),
+    localizationsDelegates: const [ReadingListEditorL10n.delegate],
+    state: ReadingListEditorFlowState(editing: editing),
+    onComplete: (result) => onComplete(result as ReadingListId?),
+    // One page per step, pushed in order, so a back gesture on a later
+    // step returns to the step before it.
+    onGeneratePages: (state) => [
+      const McFlowPage(name: 'details', child: ReadingListDetailsPage()),
+      if (state.step >= 1)
+        const McFlowPage(name: 'comics', child: ReadingListComicsPage()),
+      if (state.step >= 2)
+        const McFlowPage(name: 'review', child: ReadingListReviewPage()),
+    ],
+  );
 }

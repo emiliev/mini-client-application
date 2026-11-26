@@ -60,8 +60,7 @@ class EditorStepBar extends StatelessWidget {
             ? const ReadingListEditorEvent.submit()
             : const ReadingListEditorEvent.next(),
       ),
-      onBlockedNext: () =>
-          bloc.add(const ReadingListEditorEvent.blockedNext()),
+      onBlockedNext: () => bloc.add(const ReadingListEditorEvent.blockedNext()),
       blockedHint: l10n.readingListEditorBlockedHint,
     );
   }

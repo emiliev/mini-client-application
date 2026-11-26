@@ -8,7 +8,10 @@ import '../util/reading_list_editor_env.dart';
 /// the step bar reads "Step n of 3".
 Future<void> iAmOnStep(WidgetTester tester, int step) async {
   expect(
-    editorFlowState(tester, find.byKey(detailsBodyKey, skipOffstage: false)).step,
+    editorFlowState(
+      tester,
+      find.byKey(detailsBodyKey, skipOffstage: false),
+    ).step,
     step - 1,
     reason: 'the flow is on step $step',
   );

@@ -166,7 +166,8 @@ class _Results extends StatelessWidget {
     final ids = {for (final comic in picked) comic.id};
     return BlocBuilder<ComicPickerBloc, ComicPickerState>(
       builder: (context, state) => state.when(
-        loading: (_) => McLoading(semanticLabel: l10n.readingListEditorSearching),
+        loading: (_) =>
+            McLoading(semanticLabel: l10n.readingListEditorSearching),
         empty: (query) => McEmptyView(
           title: l10n.readingListEditorSearchLabel,
           message: l10n.readingListEditorNoResults(query),

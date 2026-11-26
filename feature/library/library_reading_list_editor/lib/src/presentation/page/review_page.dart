@@ -12,6 +12,7 @@ import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_navigation/mc_ds_navigation.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_forms/mc_forms.dart';
 import 'package:mc_l10n_core/mc_l10n_core.dart';
@@ -124,8 +125,7 @@ class _Summary extends StatelessWidget {
     final core = McL10nCoreL10n.of(context);
     final text = Theme.of(context).textTheme;
     final values = wizard.form.values;
-    final description =
-        values.get<String>(ReadingListFields.description) ?? '';
+    final description = values.get<String>(ReadingListFields.description) ?? '';
     final visibility =
         values.get<ReadingListVisibility>(ReadingListFields.visibility) ??
         ReadingListVisibility.private;

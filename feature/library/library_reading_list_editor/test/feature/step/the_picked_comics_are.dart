@@ -11,7 +11,10 @@ import '../util/reading_list_editor_env.dart';
 /// Step 2's picked chips, in the order they were picked.
 Future<void> thePickedComicsAre(WidgetTester tester, DataTable table) async {
   final chips = tester.widgetList<McChip>(
-    find.descendant(of: find.byKey(pickedComicsKey), matching: find.byType(McChip)),
+    find.descendant(
+      of: find.byKey(pickedComicsKey),
+      matching: find.byType(McChip),
+    ),
   );
   expect(
     [for (final chip in chips) chip.label],

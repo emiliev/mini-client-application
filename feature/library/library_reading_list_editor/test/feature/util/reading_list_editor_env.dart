@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide DataTable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:library_reading_list_editor/library_reading_list_editor.dart';
 import 'package:mc_di/mc_di.dart';
@@ -179,7 +179,10 @@ List<String> readingOrder(WidgetTester tester) {
     final message = (element.widget as Tooltip).message ?? '';
     final match = RegExp(r'^Move (.+) up$').firstMatch(message);
     if (match != null) {
-      rows.add((y: tester.getTopLeft(find.byWidget(element.widget)).dy, title: match.group(1)!));
+      rows.add((
+        y: tester.getTopLeft(find.byWidget(element.widget)).dy,
+        title: match.group(1)!,
+      ));
     }
   }
   rows.sort((a, b) => a.y.compareTo(b.y));

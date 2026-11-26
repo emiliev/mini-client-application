@@ -8,8 +8,7 @@ sealed class ReadingListEditorEvent {
   /// Loads the list again after a failed load (edit mode).
   const factory ReadingListEditorEvent.retry() = _Retry;
 
-  const factory ReadingListEditorEvent.nameChanged(String name) =
-      _NameChanged;
+  const factory ReadingListEditorEvent.nameChanged(String name) = _NameChanged;
 
   const factory ReadingListEditorEvent.descriptionChanged(String text) =
       _DescriptionChanged;
