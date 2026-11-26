@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' hide DataTable;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:library_reading_list_editor/library_reading_list_editor.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
@@ -207,8 +208,37 @@ Future<void> scrollComicsToTop(WidgetTester tester) async {
   await tester.pump();
 }
 
+/// The user signs out from another screen: the real `AuthApi.signOut`,
+/// inside `runAsync` (the session clears a real file, F-0038).
+Future<void> endSessionElsewhere(WidgetTester tester) async {
+  await tester.runAsync(() => diContainer<AuthApi>().signOut());
+  await mcSettle(tester);
+}
+
 /// What the flow state holds, as the tests see it.
 typedef FlowStateView = ({ReadingListId? editing, int step});
+
+/// Taps the step 2 search result titled [title] (see `I pick`).
+Future<void> pickComic(WidgetTester tester, String title) async {
+  final key = comicRowKey(comicTitled(title).id);
+  if (find.byKey(key, skipOffstage: false).evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      find.byKey(key),
+      100,
+      scrollable: find
+          .descendant(
+            of: find.byKey(comicResultsKey),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+  }
+  await tester.ensureVisible(find.byKey(key, skipOffstage: false));
+  await tester.pump();
+  await tester.tap(find.byKey(key).hitTestable());
+  await mcSettle(tester);
+  await scrollComicsToTop(tester);
+}
 
 /// The flow's current state, through `mc_feature_flow`'s public test hook.
 /// The state type is package-private (R4), so the hook is asked for

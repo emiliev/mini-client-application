@@ -92,10 +92,10 @@ class _ReviewBody extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: McSpacing.xl),
       header: _Summary(wizard: wizard),
       itemCount: comics.length,
-      onReorder: (from, to) => bloc.add(
-        // Flutter counts the target before the item is removed.
-        ReadingListEditorEvent.comicMoved(from, to > from ? to - 1 : to),
-      ),
+      // `onReorderItem` gives the target position after the item left its
+      // place: exactly what `comicMoved` takes.
+      onReorderItem: (from, to) =>
+          bloc.add(ReadingListEditorEvent.comicMoved(from, to)),
       itemBuilder: (context, i) => ReadingOrderRow(
         key: ValueKey<int>(comics[i].id.value),
         index: i,

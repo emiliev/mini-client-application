@@ -26,10 +26,11 @@ part 'reading_list_editor_state.dart';
 /// user's reading lists refreshes.
 const String readingListsTopic = 'readingLists';
 
-/// What a save returns when the session it was started for has ended. The
-/// bloc then shows `sessionEnded`, whatever the save answered.
-const ApiFailure _sessionChanged = ApiFailure.unauthorized(
-  'The session changed',
+/// What a save returns when it stops before a write: the session it was
+/// started for has ended (the bloc then shows `sessionEnded`, whatever the
+/// save answered), or the editor was closed.
+const ApiFailure _stopped = ApiFailure.unauthorized(
+  'The session changed or the editor closed',
 );
 
 /// The editor's bloc: one per flow (a lazy singleton of the flow's own
@@ -110,6 +111,9 @@ final class ReadingListEditorBloc
 
   bool _loading = false;
   bool _ended = false;
+
+  /// Set when the flow's container closes the bloc.
+  bool _closing = false;
 
   ReadingListId? get _editing => _flow.state.editing;
 
@@ -294,8 +298,9 @@ final class ReadingListEditorBloc
   }
 
   /// The wizard's completion: create, or write what changed. Every write is
-  /// sent only while the editor's session is current, checked after each
-  /// await (a session change between two writes stops the second).
+  /// sent only while the editor's session is current and the editor is open,
+  /// checked after each await (a session change, or the flow leaving the
+  /// screen, between two writes stops the second).
   Future<Result<ReadingListId, ApiFailure>> _save(FormValues values) async {
     _rejection = null;
     _wrote = false;
@@ -303,15 +308,15 @@ final class ReadingListEditorBloc
     final draft = readingListDraftOf(values);
     final editing = _editing;
     if (editing == null) {
-      if (_session.epoch != epoch) {
-        return failure(_sessionChanged);
+      if (!_canWrite(epoch)) {
+        return failure(_stopped);
       }
       return _settle(await _repository.create(draft));
     }
     var saved = _saved!;
     if (draft.detailsDifferFrom(saved)) {
-      if (_session.epoch != epoch) {
-        return failure(_sessionChanged);
+      if (!_canWrite(epoch)) {
+        return failure(_stopped);
       }
       final written = await _repository.updateDetails(editing, draft);
       final list = written.getOrNull();
@@ -322,8 +327,8 @@ final class ReadingListEditorBloc
       saved = _saved = list;
     }
     if (draft.itemsDifferFrom(saved)) {
-      if (_session.epoch != epoch) {
-        return failure(_sessionChanged);
+      if (!_canWrite(epoch)) {
+        return failure(_stopped);
       }
       final written = await _repository.replaceItems(editing, draft);
       final list = written.getOrNull();
@@ -335,6 +340,11 @@ final class ReadingListEditorBloc
     }
     return success(editing);
   }
+
+  /// `isClosed` turns true only once running handlers finished (bloc waits
+  /// for them), so a save in flight would not see it: the bloc's own flag
+  /// is set as soon as the flow disposes it.
+  bool _canWrite(int? epoch) => !_closing && _session.epoch == epoch;
 
   /// The kit completes with an `ApiFailure`; a field the backend refused is
   /// kept aside and shown once the completion returned.
@@ -408,6 +418,7 @@ final class ReadingListEditorBloc
   @override
   @disposeMethod
   Future<void> close() async {
+    _closing = true;
     await _flowChanges.cancel();
     await _sessionChanges.cancel();
     _wizard?.dispose();
