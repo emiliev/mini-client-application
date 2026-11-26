@@ -68,7 +68,7 @@ SEG=$LIB/mc_segmented.dart
 STP=$LIB/mc_stepper.dart
 
 # --- AC1: layout --------------------------------------------------------------
-mutate $T "AC1 unbounded width not handled" $FLD "re.sub(r'constraints.hasBoundedWidth\\s*\\?', 'true ?', s)"
+mutate $T "AC1 unbounded width not handled" $FLD "re.sub(r': c\\.tighten\\(width: c\\.constrainWidth\\(mcFieldUnboundedWidth\\)\\)', ': c', s)"
 mutate $T "AC1 chip label not flexible (overflows at 3x)" $CHP \
   "re.sub(r'Flexible\(\s*child:', 'Padding(padding: EdgeInsets.zero, child:', s)"
 mutate $T "AC1 segment label not flexible (overflows)" $SEG \

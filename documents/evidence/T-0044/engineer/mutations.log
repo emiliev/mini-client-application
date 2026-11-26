@@ -1,6 +1,7 @@
 baseline (behaviour and semantics tests): PASS
 baseline (goldens): PASS
-AC1 unbounded width not handled: KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 an unbounded width (Row without Expanded) does not throw)
+MUTATION DID NOT CHANGE THE FILE
+AC1 unbounded width not handled: NOT APPLIED
 AC1 chip label not flexible (overflows at 3x): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 every widget with long German labels at 1.0x does not overflow)
 AC1 segment label not flexible (overflows): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 every widget with long German labels at 1.0x does not overflow)
 AC1 segment label scale uncapped: KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 segment labels are capped at 1.5x so five fit a phone at 3x)
@@ -24,7 +25,7 @@ AC2 single deselect always allowed: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC
 AC2 multi set mutated in place: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 multi-select chip group toggles and copies the set)
 AC2 multi never adds: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 multi-select chip group toggles and copies the set)
 AC2 chip group without handler stays enabled: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 a chip group with no handler is disabled)
-AC2 chip reports the old value: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 single-select chip group deselects the previous chip)
+AC2 chip reports the old value: KILLED (FAIL  T-0044-AC1 intrinsic sizing T-0044-AC1 the drawn chip pill, not the 44 pt box, takes the ripple)
 AC2 stepper does not clamp: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 stepper clamps at min and max and disables buttons)
 AC2 stepper decrease never disabled: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 stepper clamps at min and max and disables buttons)
 AC2 stepper increase never disabled: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 stepper clamps at min and max and disables buttons)
@@ -55,10 +56,15 @@ AC3 disabled outline dimmed in high contrast: KILLED (FAIL  T-0044-AC3 semantics
 AC3 selected text colour invisible (contrast): KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 meetsGuideline (tap target, label, contrast) light)
 AC3 chip selected text invisible (contrast): KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 meetsGuideline (tap target, label, contrast) light)
 AC3 muted hint colour too faint (contrast): KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 text field colours reach 4.5:1 light)
+R1 text field has no intrinsic width: KILLED (FAIL  T-0044-AC1 intrinsic sizing T-0044-AC1 a text field under IntrinsicWidth is 280 pt wide)
+R1 segmented intrinsic width not per cell: KILLED (FAIL  T-0044-AC1 intrinsic sizing T-0044-AC1 segmented under IntrinsicWidth keeps equal cells)
+R1 segmented height ignores intrinsics: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 segmented reports the tapped index)
+R3 search disabled fill raised again: KILLED (FAIL  T-0044-AC1 search_field_disabled golden light x1)
+R4 chip padding strip not tappable: KILLED (FAIL  T-0044-AC1 intrinsic sizing T-0044-AC1 the drawn chip pill, not the 44 pt box, takes the ripple)
 AC1 golden: selected chip fill removed: KILLED (FAIL  T-0044-AC1 chip_states golden light x1)
 AC1 golden: disabled selected text invisible: KILLED (FAIL  T-0044-AC1 chip_states golden light x1)
 AC1 golden: focused border not primary: KILLED (FAIL  T-0044-AC1 text_field_focused golden light x1)
 AC1 golden: error border not error colour: KILLED (FAIL  T-0044-AC1 text_field_error golden light x1)
 AC1 golden: segmented selection fill hidden: KILLED (FAIL  T-0044-AC1 segmented_2 golden light x1)
 
-ALL MUTATIONS KILLED
+SOME MUTATIONS SURVIVED OR FAILED TO APPLY
