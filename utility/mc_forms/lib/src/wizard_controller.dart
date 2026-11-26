@@ -175,10 +175,10 @@ final class WizardController<R> {
     stepIds: [for (final s in _steps) s.id],
   );
 
+  // No disposed check: every caller is guarded, and the form (the only other
+  // source) stops emitting on dispose.
   void _emit(WizardState<R> next) {
     _state = next;
-    if (!_disposed) {
-      onState(next);
-    }
+    onState(next);
   }
 }

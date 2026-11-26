@@ -131,6 +131,14 @@ void main() {
       expect(rule('abcd'), isNull);
     });
 
+    test('T-0045-AC1 with two failing rules the earlier one is reported', () {
+      final rule = Validators.compose<String>([
+        Validators.minLength(10),
+        Validators.maxLength(5),
+      ]);
+      expect(rule('abcdefg'), _err(ValidationCode.tooShort, min: 10));
+    });
+
     test('T-0045-AC1 an empty composition passes', () {
       expect(Validators.compose<String>([])('x'), isNull);
     });

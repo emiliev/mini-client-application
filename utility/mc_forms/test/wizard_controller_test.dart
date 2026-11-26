@@ -223,6 +223,30 @@ void main() {
       expect(h.s.result, 'ok');
     });
 
+    test('T-0045-AC2 next and back are blocked while completing', () async {
+      final gate = Completer<Result<String, ApiFailure>>();
+      final h = _Harness(onComplete: (_) => gate.future)..fillAll();
+      final run = h.controller.complete();
+      expect(h.s.isCompleting, isTrue);
+      expect(h.s.stepIndex, 0);
+      expect(h.controller.next(), isFalse);
+      expect(h.s.stepIndex, 0);
+      gate.complete(success('ok'));
+      await run;
+    });
+
+    test('T-0045-AC2 the last step cannot complete while it is invalid', () {
+      final h = _Harness()..fillStep0();
+      h.fillStep1();
+      h.controller
+        ..next()
+        ..next();
+      expect(h.s.isLast, isTrue);
+      expect(h.s.canComplete, isFalse);
+      h.controller.setValue('agree', true);
+      expect(h.s.canComplete, isTrue);
+    });
+
     test('T-0045-AC2 complete with an invalid step jumps to it', () async {
       final h = _Harness()..fillStep0();
       h.controller

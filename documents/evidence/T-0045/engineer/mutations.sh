@@ -88,7 +88,7 @@ WC=$F/lib/src/wizard_controller.dart
 
 # --- validators (AC1) ---
 m V-required-null $VAL $V 'value == null ||
-        (value is String' 'value is! Object ||
+        (value is String' 'false ||
         (value is String'
 m V-required-blank $VAL $V 'value.trim().isEmpty' 'value.isEmpty'
 m V-required-iterable $VAL $V '(value is Iterable<Object?> && value.isEmpty) ||' 'false ||'
@@ -128,11 +128,11 @@ m V-formvalues-unknown $VAL $F/lib/src/form_values.dart "if (!_values.containsKe
 # --- field and form state, form controller (AC2) ---
 m F-dirty $FORM $ST 'bool get dirty => value != initial;' 'bool get dirty => true;'
 m F-visible $FORM $ST 'touched ? error : null' 'error'
-m F-touch-idempotent $FORM $ST 'FieldState<T> touch() => touched
-      ? this
-      :' 'FieldState<T> touch() => true
-      ? FieldState<T>(value: value, initial: initial, error: error, touched: true)
-      :'
+m F-touch-idempotent $FORM $ST '          error: error,
+          touched: true,
+        );' '          error: error,
+          touched: false,
+        );'
 m F-equality $FORM $ST '      other.touched == touched;' '      true;'
 m F-valid $FORM $FST 'fields.values.every((f) => f.isValid)' 'fields.values.any((f) => f.isValid)'
 m F-visible-errors $FORM $FST 'if (e.value.visibleError != null) e.key: e.value.visibleError!,' 'if (e.value.error != null) e.key: e.value.error!,'
@@ -200,9 +200,8 @@ m W-complete-jump $WIZ $WC '        _goTo(i);
 m W-complete-validate $WIZ $WC '      if (!_state.isStepValid(i)) {' '      if (false) {'
 m W-empty-steps $WIZ $WC 'if (steps.isEmpty) {' 'if (false) {'
 m W-keeps-step $WIZ $WC 'void _onForm(McFormState form) => _emit(_build(form, _state.stepIndex));' 'void _onForm(McFormState form) => _emit(_build(form, 0));'
-m W-disposed-emit $WIZ $WC 'if (!_disposed) {
-      onState(next);' 'if (true) {
-      onState(next);'
+m W-disposed-form $WIZ $WC '    _disposed = true;
+    _form.dispose();' '    _disposed = true;'
 m W-result $WIZ $WC 'R? get result => isCompleted ? form.submitResult as R? : null;' 'R? get result => null;'
 m W-failure $WIZ $WC 'ApiFailure? get failure => form.submitFailure;' 'ApiFailure? get failure => null;'
 
