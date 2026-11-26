@@ -84,3 +84,20 @@ flutter_test(
         "@pub_deps//:flutter_test",
     ],
 )
+
+# T-0037: McFlowBackButton in every navigation state (outer-route changes, use
+# outside a flow, precedence on the flow root) and the flow_builder pop scope.
+flutter_test(
+    name = "flow_back_button_test",
+    size = "small",
+    srcs = ["test/navigation_channel_support.dart"],
+    language_version = "3.13",
+    main = "test/flow_back_button_test.dart",
+    package_name = "mc_feature_flow",
+    deps = _DEPS + [
+        ":mc_feature_flow",
+        "//utility/mc_ds_theme",
+        "@pub_deps//:flutter_localizations",
+        "@pub_deps//:flutter_test",
+    ],
+)

@@ -255,6 +255,9 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
       child: FutureBuilder<ChildDIContainer>(
         future: _container,
         builder: (context, snapshot) {
+          // Depends on the flow's own route, so this rebuilds, and the scope
+          // republishes `outerCanPop`, when the routes below the flow change.
+          final route = ModalRoute.of(context);
           if (snapshot.hasError) {
             final configError = _configError;
             if (configError != null) {
@@ -273,6 +276,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
             container: container,
             controller: _controller,
             outerNavigator: Navigator.maybeOf(context),
+            outerCanPop: route != null && !route.isFirst,
             child: FlowBuilder<T>(
               controller: _flowController,
               onGeneratePages: _pages,
