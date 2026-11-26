@@ -3,8 +3,11 @@
 // missing one fails at flow creation, naming the type (`mcgen wire` will
 // generate the list, Phase D). The editor bloc is the flow's own: one per
 // flow, shared by the step pages, closed with the flow.
+import 'dart:ui' show Tristate;
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:library_reading_list_editor/library_reading_list_editor.dart';
 import 'package:mc_di/mc_di.dart';
@@ -140,6 +143,33 @@ void main() {
         ),
         isEmpty,
       );
+    },
+  );
+
+  mcTestWidgets(
+    'T-0048-AC1 a search result is one accessible toggle: its label says '
+    'what a tap does, it reports whether it is picked, and it can be tapped',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      await signIn(tester);
+      await initFlow(tester, () => editorTestHost(editorFlowUnderTest()));
+      await mcSettle(tester);
+      await enterText(tester, 'Name', 'Amber reads');
+      await tester.tap(find.text('Next'));
+      await mcSettle(tester);
+
+      SemanticsData row() => tester
+          .getSemantics(find.byKey(comicRowKey(500060)))
+          .getSemanticsData();
+      expect(row().label, 'Add Amber Chronicles #1');
+      expect(row().hasAction(SemanticsAction.tap), isTrue);
+      expect(row().flagsCollection.isSelected, Tristate.isFalse);
+
+      await pickComic(tester, 'Amber Chronicles #1');
+      expect(row().label, 'Remove Amber Chronicles #1');
+      expect(row().flagsCollection.isSelected, Tristate.isTrue);
+      // Before the test ends (the framework checks for a live handle).
+      semantics.dispose();
     },
   );
 

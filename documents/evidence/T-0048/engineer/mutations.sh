@@ -47,6 +47,7 @@ FLOWW=$FE/lib/src/flow/reading_list_editor_flow.dart
 DETAILS=$FE/lib/src/presentation/page/details_page.dart
 REVIEW=$FE/lib/src/presentation/page/review_page.dart
 ORDER_ROW=$FE/lib/src/presentation/widget/reading_order_row.dart
+COMIC_ROW=$FE/lib/src/presentation/widget/comic_row.dart
 STEPBAR=$FE/lib/src/presentation/widget/editor_step_bar.dart
 DE=$FE/lib/src/l10n/library_reading_list_editor_de.arb
 BARREL=$FE/lib/library_reading_list_editor.dart
@@ -59,7 +60,7 @@ PW_NAV=$PW/lib/src/navigators/comics_details_navigator_impl.dart
 HOME_PAGE=app/mini_client/lib/src/pages/placeholder_pages.dart
 SCOPE=$FE/lib/src/di/flow_scope.dart
 
-FILES=($BLOC $PICKER $FORM $DRAFT $MAPPER $REPO_ $FLOWW $DETAILS $REVIEW $ORDER_ROW $STEPBAR $DE $BARREL
+FILES=($BLOC $PICKER $FORM $DRAFT $MAPPER $REPO_ $FLOWW $DETAILS $REVIEW $ORDER_ROW $COMIC_ROW $STEPBAR $DE $BARREL
   $TARGETS_IMPL $NAV $RESULTS_SRC $LOCATIONS $SHEET $PW_NAV $HOME_PAGE $SCOPE)
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
@@ -132,6 +133,8 @@ mutate AC3-f "a no-change save still announces a change" $BLOC \
   "s.replace('        if (_wrote) {', '        if (_wrote || _epoch != -1) {')" $BDD
 mutate AC1-i "the reorder arrow moves the comic to the wrong place" $REVIEW \
   "s.replace('ReadingListEditorEvent.comicMoved(i, i - 1)', 'ReadingListEditorEvent.comicMoved(i, 0)')" $BDD
+mutate AC1-j "a search result cannot be tapped by a screen reader" $COMIC_ROW \
+  "s.replace('      onTap: onTap,\n      excludeSemantics: true,', '      excludeSemantics: true,')" $FLOW
 # --- AC2: a failed save keeps everything; a refused field goes back -----------
 mutate AC2-a "a failed save shows no inline error" $REVIEW \
   "s.replace('if (failure != null) ...[', 'if (failure != null && failure.message.isEmpty) ...[')" $BDD
@@ -142,7 +145,7 @@ mutate AC2-c "a refused field is not shown (the verdict is ignored)" $BLOC \
 mutate AC2-d "the verdict rule never fails" $FORM \
   "s.replace('return refused != null && refused.value == wire(value)', 'return refused != null && refused.value == \'\' && wire(value) == \'never\'')" $BDD
 mutate AC2-e "the repository maps no 400 to a field" $REPO_ \
-  "s.replace('if (error is! DioException || error.response?.statusCode != 400) {', 'if (error is DioException) {')" $BDD $CONTRACT
+  "s.replace('if (error is! DioException || error.response?.statusCode != 400) {', 'if (error is! DioException || error.response?.statusCode != 400 || identical(error, error)) {')" $BDD $CONTRACT
 mutate AC2-f "the wizard stays on the review step after a refusal" $BLOC \
   "s.replace('    while (wizard.state.stepIndex > step && wizard.back()) {}', '')" $BDD
 # --- AC3: edit mode -------------------------------------------------------

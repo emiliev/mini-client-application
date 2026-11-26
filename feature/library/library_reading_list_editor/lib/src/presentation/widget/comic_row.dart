@@ -35,6 +35,8 @@ class ComicRow extends StatelessWidget {
       label: picked
           ? l10n.readingListEditorRemoveComic(comic.title)
           : l10n.readingListEditorAddComic(comic.title),
+      // The InkWell's own node is excluded below, so the tap action is here.
+      onTap: onTap,
       excludeSemantics: true,
       child: InkWell(
         key: comicRowKey(comic),
