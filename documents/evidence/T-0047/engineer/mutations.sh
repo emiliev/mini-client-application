@@ -84,8 +84,9 @@ mutate "V14 update keeps the old description when absent" $H "..description = bo
 # --- validation: visibility ---------------------------------------------
 mutate "V15 any string is a visibility" $H "if (!visibilities.contains(raw)) {" "if (raw is! String) {"
 mutate "V16 visibility case-insensitive" $H "if (!visibilities.contains(raw)) {" "if (!visibilities.contains(raw is String ? raw.toLowerCase() : raw)) {"
-mutate "V17 update skips the visibility check" $H "_checkDescription(body['description']) ??
-          _checkVisibility(body['visibility']);" "_checkDescription(body['description']);"
+mutate "V17 update skips the visibility check" $H "_checkName(body['name']) ??
+          _checkDescription(body['description']) ??
+          _checkVisibility(body['visibility']);" "_checkName(body['name']) ?? _checkDescription(body['description']);"
 mutate "V18 update does not store visibility" $H "..visibility = body['visibility'] as String" "..visibility = list.visibility"
 # --- validation: comicIds -----------------------------------------------
 mutate "V19 comicIds shape unchecked" $H "if (raw is! List || raw.any((e) => e is! int)) {" "if (raw is! List) {"
