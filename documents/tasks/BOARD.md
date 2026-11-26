@@ -14,6 +14,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0044](T-0044-ds-inputs.md) | `mc_ds_inputs`: text and search fields, chips, segmented, stepper | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0040 | `fleet/T-0044-ds-inputs` |
 | [T-0045](T-0045-forms-kit.md) | `mc_forms` + `mc_ds_forms`: validators, form state, wizard steps (P1-14 AC4) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0044 | `fleet/T-0045-forms-kit` |
 
+| [T-0046](T-0046-discovery-search-exemplar.md) | **`discovery_search` exemplar** (SR, P1-19): debounced search, grouped results, history, `discovery_wiring` | Ready | Engineer (Opus) / Verifier (Opus) | T-0043, T-0044 | `fleet/T-0046-discovery-search` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
