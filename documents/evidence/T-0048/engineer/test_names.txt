@@ -1,4 +1,5 @@
 app/mini_client/reading_list_route_test: T-0048-AC3 home opens the created list in the editor, which returns the same id once saved
+app/mini_client/reading_list_route_test: T-0048-AC5 a double tap on New reading list opens one editor
 app/mini_client/reading_list_route_test: T-0048-AC5 the link miniclient://app/me/lists/new opens the editor (after the sign-in it asks for)
 app/mini_client/reading_list_route_test: T-0048-AC6 home awaits the editor and shows the list id the wiring returned
 app/mini_client/reading_list_route_test: T-0048-AC6 leaving the editor by Back gives home nothing
@@ -12,10 +13,11 @@ app/wiring/app_core/app_layer_test: T-0048-AC8 without a probe, recording does n
 app/wiring/app_core/flow_results_test: T-0048-AC5 the reading-list locations
 app/wiring/app_core/flow_results_test: T-0048-AC6 AppFlows.editReadingList pushes the edit location and completes with the id
 app/wiring/app_core/flow_results_test: T-0048-AC6 a flow that ends without a result, and Back, give the caller null
+app/wiring/app_core/flow_results_test: T-0048-AC6 a result that arrives under a dialog is kept, and the caller gets it once the dialog closed
 app/wiring/app_core/flow_results_test: T-0048-AC6 a route opened by a deep link (nothing below it) goes home when it completes
+app/wiring/app_core/flow_results_test: T-0048-AC6 a second completion pops nothing more
 app/wiring/app_core/flow_results_test: T-0048-AC6 completing after the route left the tree does nothing
 app/wiring/app_core/flow_results_test: T-0048-AC6 the caller awaits AppFlows.createReadingList and gets the result the flow completed with
-app/wiring/app_core/flow_results_test: T-0048-AC6 with a dialog above the route, completing pops nothing
 app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn before the router shows anything answers false
 app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: Not now answers false and sends nothing
 app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: Sign in signs the fixture user in, says why, and answers true
@@ -32,10 +34,10 @@ app/wiring/library_wiring/routes_test: T-0048-AC6 requestSignIn shows the shared
 app/wiring/library_wiring/routes_test: T-0048-AC6 requestSignIn: signed in answers true without a sheet
 app/wiring/library_wiring/routes_test: T-0048-AC6 the wiring initializer resolves the route targets, whose flows carry the navigator and map the feature's result
 app/wiring/library_wiring/routes_test: T-0048-AC6 the wiring returns the new list id to the caller that awaits AppFlows.createReadingList
-feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list A description the backend refuses shows the error under the description [T-0048-AC2]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list A failed save shows an inline error with Retry, and Retry resends once with nothing lost [T-0048-AC2]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list A name the backend refuses takes the wizard back to step 1 with the error under the name [T-0048-AC2]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list An invalid step keeps Next disabled, and a tap on it shows why [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Lengths count what a reader sees, on both sides: sixty flags are a valid name [T-0048-AC1]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Search narrows the comics, says when nothing matches, and recovers from a failure [T-0048-AC1]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Signed out, backing out of sign-in closes the editor with no result [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Signed out, the editor asks to sign in first and then opens on step 1 [T-0048-AC6]
@@ -49,10 +51,12 @@ feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit E
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list that fails to load explains the problem, and Retry recovers [T-0048-AC3 T-0048-AC2]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list that is not the reader's shows that it was not found ('l-4') [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list that is not the reader's shows that it was not found ('l-999') [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list without comics can still be renamed [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A new name sends only the details [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A new order sends only the items [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Details and comics that both changed are both sent, the details first [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Editing loads the list and fills in every step [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Removing every comic of a list is not a change the editor saves [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Saving without a change sends nothing and completes with the same id [T-0048-AC3]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list When the details saved and the comics failed, Retry sends only the comics [T-0048-AC3 T-0048-AC2]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In German a list that is not the reader's is &quot;not found&quot; [T-0048-AC4]
@@ -64,6 +68,7 @@ feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n T
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In the pseudo-locale the states outside the wizard fit at &lt;scale&gt;x (2) [T-0048-AC4]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A double Create sends one POST and completes once [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A double Save sends each changed part once [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A half-saved edit is announced: the details saved, the comics failed [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A session change while the list loads shows no list of the old session [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A sign-out before Finish ends the editing and sends nothing [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A sign-out during the save writes nothing more and hands out no list [T-0048-AC6]
@@ -73,8 +78,10 @@ feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races 
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight Going back by the button and by the swipe keeps every step's values [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight Going back while a search is held, its late answer changes nothing [T-0048-AC6]
 feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight While the save runs the buttons are off, going back is refused and nothing is lost [T-0048-AC6]
-feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a 400 maps to the field it names T-0048-AC2 invalid_name, invalid_description, comics
-feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a 400 maps to the field it names T-0048-AC2 the error body decides: a field the editor has not, a body off the contract, or another status is an ordinary failure
+feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a refused write is an ApiClientError naming the code and the field T-0048-AC1 names and descriptions are counted as a reader sees them: 60 flags are a valid name
+feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a refused write is an ApiClientError naming the code and the field T-0048-AC2 a renamed list that takes another list's name
+feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a refused write is an ApiClientError naming the code and the field T-0048-AC2 duplicate_name: a name the user already has
+feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a refused write is an ApiClientError naming the code and the field T-0048-AC2 the comics: a duplicate and too many
 feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC1 create answers the new list with its id
 feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC1 searchComics: a prefix narrows, an empty query lists all
 feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC3 another user's list and an unknown id are not found
@@ -83,11 +90,12 @@ feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the reposi
 feature/library/library_reading_list_editor/contract_test: T-0048-AC7 a value outside the contract is malformed
 feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 GET /v1/comics results round-trip byte for byte
 feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 GET /v1/me/lists/:id round-trips byte for byte
-feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 the 400 body parses, extra fields ignored
 feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 the write bodies have exactly the contract keys
 feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC1 a search result is one accessible toggle: its label says what a tap does, it reports whether it is picked, and it can be tapped
 feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC3 a different list builds a new flow that loads that list
-feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC6 an editor closed while its save is held hands out nothing when the save returns
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC6 an editor closed while its save is held hands out no result and writes nothing more, but announces what it wrote
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC6 leaving while the app signs the user in: the late answer adds, reports and sends nothing
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC6 leaving while the list is loading: the late answer adds and reports nothing
 feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC7 a root without a forwarded type fails naming it
 feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC7 every step page uses McAppBar with McFlowBackButton as leading
 feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC7 the flow's container resolves every registration
@@ -98,3 +106,26 @@ feature/library/library_reading_list_editor/golden_test: T-0048-AC3 golden: a li
 feature/library/library_reading_list_editor/golden_test: T-0048-AC3 golden: step 3, the reading order of a list
 feature/library/library_reading_list_editor/golden_test: T-0048-AC6 golden: step 1, a blocked Next shows the error
 feature/library/library_reading_list_editor/golden_test: T-0048-AC6 golden: the session ended
+utility/mc_api_errors/api_failure_test: T-0048-AC2 a 4xx keeps the code and parameter of its error body T-0048-AC2 a JSON text body, and a body without a parameter
+utility/mc_api_errors/api_failure_test: T-0048-AC2 a 4xx keeps the code and parameter of its error body T-0048-AC2 a body off that shape leaves both null
+utility/mc_api_errors/api_failure_test: T-0048-AC2 a 4xx keeps the code and parameter of its error body T-0048-AC2 a map body
+utility/mc_api_errors/api_failure_test: T-0048-AC2 a 4xx keeps the code and parameter of its error body T-0048-AC2 the plain constructor has no body
+utility/mc_api_errors/api_failure_test: T-0048-AC8 the other Dio outcomes T-0048-AC8 a plain FormatException is malformed
+utility/mc_api_errors/api_failure_test: T-0048-AC8 the other Dio outcomes T-0048-AC8 an unknown error: its inner failure, or its text
+utility/mc_api_errors/api_failure_test: T-0048-AC8 the other Dio outcomes T-0048-AC8 cancel, bad certificate and a status below 400
+utility/mc_api_errors/api_failure_test: T-0048-AC8 the other Dio outcomes T-0048-AC8 toString names the type and the message
+utility/mc_fixtures_library/validation_test: T-0048-AC2 duplicate_name: a user's list names are unique T-0048-AC2 a malformed name is reported before a duplicate one
+utility/mc_fixtures_library/validation_test: T-0048-AC2 duplicate_name: a user's list names are unique T-0048-AC2 another user's list name is free
+utility/mc_fixtures_library/validation_test: T-0048-AC2 duplicate_name: a user's list names are unique T-0048-AC2 creating a list with a name the user has is refused, case-insensitively after trimming
+utility/mc_fixtures_library/validation_test: T-0048-AC2 duplicate_name: a user's list names are unique T-0048-AC2 renaming to another of the lists is refused; keeping the own name is not
+utility/mc_fixtures_library/validation_test: T-0048-AC2 lengths count grapheme clusters, as the form does T-0048-AC2 a description of 280 flags is valid, 281 is too long
+utility/mc_fixtures_library/validation_test: T-0048-AC2 lengths count grapheme clusters, as the form does T-0048-AC2 a name of 60 flags is valid, 61 is too long
+utility/mc_forms/form_controller_test: T-0048-AC2 a server-side error on a field T-0048-AC2 a failing rule wins over the server error
+utility/mc_forms/form_controller_test: T-0048-AC2 a server-side error on a field T-0048-AC2 reject after a failed submit clears the failure
+utility/mc_forms/form_controller_test: T-0048-AC2 a server-side error on a field T-0048-AC2 reject is ignored while a submit runs, and names an unknown field
+utility/mc_forms/form_controller_test: T-0048-AC2 a server-side error on a field T-0048-AC2 reject keeps an idle status idle and other fields as they were
+utility/mc_forms/form_controller_test: T-0048-AC2 a server-side error on a field T-0048-AC2 reject shows the error on the field and makes the form invalid until the value changes
+utility/mc_forms/form_controller_test: T-0048-AC2 a server-side error on a field T-0048-AC2 reset forgets the server errors
+utility/mc_forms/wizard_controller_test: T-0048-AC2 a server-side error goes to its step T-0048-AC2 reject goes back to the field's step and shows the error there; a new value clears it
+utility/mc_forms/wizard_controller_test: T-0048-AC2 a server-side error goes to its step T-0048-AC2 reject goes forward too, and stays on the step it is on
+utility/mc_forms/wizard_controller_test: T-0048-AC2 a server-side error goes to its step T-0048-AC2 reject is ignored while completing, once completed and after dispose

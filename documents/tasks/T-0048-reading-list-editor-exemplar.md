@@ -75,6 +75,8 @@ On submit, the flow completes with the new or updated list id, and **the wiring 
 - 2026-11-26: Created (TL); dispatched after T-0047 merged.
 - 2026-11-27 (Engineer): Branched from `origin/main` `e866b71`; merged `origin/main` `fab18f0` before handoff (docs only, no conflict; T-0046 is not on `main` yet, so its `app_core`, `mini_client`, `mc_test_steps` and `l10n_check` changes are still to be met). Every generator built on the first try, including a flow-scoped `@lazySingleton` bloc with `@disposeMethod`: **no codegen shim failed on a real-world case**, so no R28 fallback. Two kit gaps are handled with the kits' public API and need a TL decision (F-0048 facts 3 and 4). Handed off; evidence in `documents/evidence/T-0048/engineer/`.
 
+- 2026-11-27 (Engineer): Review round (TL decisions 1 to 4, findings 5 to 11, one round). Merged `origin/main` `1d9bde1` (docs only; T-0046 is still not on `main`, so its `app_core`, `mini_client`, `mc_test_steps` and `l10n_check` changes are still to be met). Locks unchanged. Re-handed off; see "Review round" below.
+
 ## Outcome
 **Handed off** for review and verification on `fleet/T-0048-reading-list-editor`. Finding: [F-0048](../findings/F-0048-form-wizard-exemplar-and-flow-results.md). Evidence: [`documents/evidence/T-0048/engineer/`](../evidence/T-0048/engineer/).
 
@@ -133,7 +135,7 @@ New: 7 in `test/golden/goldens/` (steps 1 to 3, the blocked step 1, a failed sav
 ### Test integrity
 No test deleted, skipped or weakened; no `// ignore:`. publishing_wiring's sign-in tests are unchanged (the sheet's behaviour is now also pinned on the shared function in `app_core:sign_in_sheet_test`). Changed: the comics e2e journey's two key constants.
 
-### Decisions for the TL
+### Decisions for the TL (all answered in the review round, below)
 1. **Server-side field errors (F-0048 fact 3):** keep the feature-level `ServerVerdicts` plus the `_rejection` side channel, or add a kit API (`WizardController.reject(Map<String, FieldError>)` and the error body on `ApiClientError`) in a small task before the FW bricks.
 2. **Graphemes and runes (F-0048 fact 4):** align `mc_forms` and the library contract, or keep the realistic disagreement (the AC2 scenarios rely on it).
 3. **The sign-in sheet in `app_core`** (factored out as the brief allowed), with keys renamed to `app.sign_in.*`.
@@ -145,3 +147,36 @@ No test deleted, skipped or weakened; no `// ignore:`. publishing_wiring's sign-
 - A "discard changes?" confirmation when leaving the editor from step 1 with unsaved values.
 - Plan 01 §4.3: name `FlowResultRoute` and `AppFlows` in the text.
 - `mcgen wire` for `flow_scope.dart` (as T-0032, T-0041).
+
+## Review round (TL decisions 1 to 4, review findings 5 to 11)
+Every fix has a `T-0048-ACn` test that fails without it, and a mutation in [mutations.sh](../evidence/T-0048/engineer/mutations.sh) (ids in brackets).
+
+| # | Fix | Tests (fail without the fix) |
+|---|---|---|
+| 1 | **Kit support for a server-side field error; the side channel is gone.** `mc_api_errors`: `ApiClientError` keeps the error body's `code` and `parameter` (a map or JSON text; null otherwise). `mc_forms`: `FormController.reject(name, FieldError)` (the field shows the error and the form is invalid until the value changes; a failed submit goes back to idle; `reset` forgets it; a failing rule wins; ignored while submitting) and `WizardController.reject(name, error)` (the same, then goes to the field's step; ignored while completing, after completing and after dispose). The feature maps `parameter` to a field (`ReadingListFields.ofParameter`) and calls `wizard.reject`; `ServerVerdicts`, `SaveFailure`/`SaveRejected`, the `_rejection` side channel and the error-body DTOs are removed. `reject` takes a `FieldError` (not a bare code), so `too_many_comics` keeps its limit for the message | `mc_api_errors:api_failure_test` "T-0048-AC2 a 4xx keeps the code and parameter ..." (4); `mc_forms:form_controller_test` (6) and `wizard_controller_test` (3) "T-0048-AC2 ..."; `:contract_test` "a refused write is an ApiClientError naming the code and the field" (4); BDD "A name the backend refuses ..." [AC2-c to AC2-h] |
+| 2 | **The library counts what a reader sees** (grapheme clusters, `package:characters`; CONTRACT.md updated), and a server-only rule: **`duplicate_name`** (check 8: a user's list names are unique, case-insensitive after trimming; a renamed list may keep its own; `listId` names the holder). AC2's refusal path is now "you already have a list with this name" (`' weekend reads '` against `Weekend Reads`), and a new scenario shows 60 flags are a valid name on both sides | `mc_fixtures_library:validation_test` "T-0048-AC2 ..." (6: flags and combining accents, duplicate on create, case and trim, another user's name is free, rename, order); BDD "A name the backend refuses ...", "Lengths count what a reader sees, on both sides ..."; `:contract_test` "60 flags are a valid name" [AC2-i, AC2-j] |
+| 3 | The shared sign-in sheet in `app_core` and the key rename: approved | — |
+| 4 | A session change ends the editing: accepted | — |
+| 5 | **No `add` after `close`.** `close()` calls `super.close()` first, so `isClosed` is true at once; after every await (the sign-in, the load, the save) the bloc returns if closed; `add` is guarded in `_open`, `_onWizardState` and the session listener | `:flow_scope_test` "T-0048-AC6 leaving while the list is loading ..." and "... while the app signs the user in ..." (no exception, `monitoring.errors` empty, no request) [AC6-u, AC6-v] |
+| 6 | **A half-saved edit is announced:** a save that wrote anything publishes `DataChanged('readingLists')` once, also when it then failed, or the session or the editor ended | BDD races "A half-saved edit is announced: the details saved, the comics failed"; `:flow_scope_test` "an editor closed while its save is held ... announces what it wrote" [AC6-w] |
+| 7 | **An empty list can be renamed.** "At least one comic" applies to a new list, and to an edited one only once its comics change | BDD edit "A list without comics can still be renamed" (`l-3`: one `PUT` details, no items), "Removing every comic of a list is not a change the editor saves" [AC3-g] |
+| 8 | **A result under an overlay is kept.** `FlowResultRoute` is stateful: a result that arrives while the route is not current waits, and is handed over once the route is current again (its `ModalRoute` dependency brings `didChangeDependencies`; the pop runs after that frame). Nothing above it is popped, a second completion is ignored, a late one after the route left does nothing. `completeRoute` (a function) is gone | `app_core:flow_results_test` "a result that arrives under a dialog is kept, and the caller gets it once the dialog closed", "a second completion pops nothing more", "completing after the route left the tree does nothing" [AC6-t, AC6-f, AC6-e] |
+| 9 | Home ignores New and Edit while an editor it opened is open | `mini_client:reading_list_route_test` "T-0048-AC5 a double tap on New reading list opens one editor" [AC5-c] |
+| 10 | `_closing` is gone; `_canWrite` uses `isClosed` (see 5), with the comment corrected | [AC6-m] |
+| 11 | Follow-ups to the TL for `pending-work.md`: `library_sandbox`, `Validators.maxItems`, bound segmented and choice widgets, multi-line `McFormTextField`, a discard-changes prompt, plan 01 §4.3 | — |
+
+**Also:** the name's server error reads "You already have a list with this name. Please choose another." (en, de, `en_XA`); `mc_api_errors` was not under a coverage gate before and was at 85 % with its older branches (cancel, bad certificate, an unknown inner error, a status below 400, a raw `FormatException`), so `api_failure_test` gains "T-0048-AC8 the other Dio outcomes" (4); [F-0048](../findings/F-0048-form-wizard-exemplar-and-flow-results.md) facts 1, 3, 4 and 5 follow the decisions.
+
+**Removed or changed tests (disclosed):**
+- Removed: BDD "A description the backend refuses shows the error under the description" (the backend now counts as the form does, so no valid description is refused; TL decision 2) and the contract tests of the removed side channel (`SaveRejected` mapping, `ApiErrorBodyDto`, the throwing-API mapping), whose behaviour moved into `mc_api_errors` and is tested there.
+- Changed by the TL's decisions: BDD "A name the backend refuses ..." now uses `duplicate_name` (it used 31 flags); BDD races "Another user signing in during the save ..." now expects `{1}` change (item 6: what was written is announced); `:flow_scope_test` "an editor closed while its save is held ..." now expects one `readingLists` announcement (item 6).
+- No other test deleted, skipped or weakened; T-0047's library tests are unchanged and green; no `// ignore:`.
+
+**Results** on the merged tree (`origin/main` `1d9bde1`):
+- Gates [PASS](../evidence/T-0048/engineer/T-0048-AC8_gates.md): `test //...` **137/137** (the feature, `//app/...`, `mc_test_steps`, `l10n_check`, `mc_forms`, `mc_ds_forms`, `mc_api_errors` and `mc_fixtures_library` uncached first), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures check, relative paths, the four AC7 checks. **Coverage:** library_reading_list_editor 723/736 = 98.2 %, library_wiring 37/37 = 100 %, app_core 354/368 = 96.2 %, publishing_wiring 47/47 = 100 %, mc_forms 286/286 = 100 %, mc_api_errors 60/60 = 100 %, mc_fixtures_library 203/206 = 98.5 %. Locks unchanged.
+- AC7: [byte identity 12 of 12](../evidence/T-0048/engineer/T-0048-AC7_matches_build_runner.md), [cutoff](../evidence/T-0048/engineer/T-0048-AC7_cutoff.md), [not committed](../evidence/T-0048/engineer/T-0048-AC7_generated_not_committed.md), [gen-l10n parity](../evidence/T-0048/engineer/T-0048-AC7_gen_l10n_parity.md); after `tool/ide_sync --env dev`, [`T-0042-AC4_safety.sh`](../evidence/T-0048/engineer/T-0042-AC4_safety.md) PASS; `--clean` afterwards.
+- **Mutations:** 57 in the full run, [55 killed](../evidence/T-0048/engineer/mutations.log); the other two were defects of the script, both fixed and re-run: AC5-a no longer matched the changed home code (not applied), and AC6-u removed only one of the two guards item 5 asks for, so the other one still held (survived; it now removes both). Re-run: [2 of 2 killed](../evidence/T-0048/engineer/mutations_rerun.log). So **57 of 57** are killed by a failing test, none by a compile error.
+- **e2e** on a fresh `mc-T-0048-engineer-*` (iOS 26.2, deleted): 4 of 4 PASS, screenshots 30–38 refreshed ([summary](../evidence/T-0048/engineer/mini_client/e2e-summary.md)).
+- **Goldens:** none changed (7 pass as they were).
+- AC traceability: [test_names.txt](../evidence/T-0048/engineer/test_names.txt), 131 names (AC1 15, AC2 28, AC3 21, AC4 7, AC5 6, AC6 42, AC7 7, AC8 10).
+
