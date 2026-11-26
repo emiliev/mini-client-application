@@ -1,0 +1,32 @@
+KILLED: no shared refresh (each 401 refreshes)
+    00:00 +9 -1: T-0039-AC2 one refresh then one retry T-0039-AC2 3 concurrent requests that all get a 401 share one refresh [E]
+    00:00 +9 -1: T-0039-AC2 one refresh then one retry T-0039-AC2 the same under latency, with a request that starts later
+    00:00 +9 -2: T-0039-AC2 one refresh then one retry T-0039-AC2 the same under latency, with a request that starts later [E]
+    00:00 +9 -2: T-0039-AC2 one refresh then one retry T-0039-AC2 a 401 that arrives after the refresh is replayed without a second refresh
+KILLED: always refresh, no stale-token comparison
+    00:00 +11 -1: T-0039-AC2 one refresh then one retry T-0039-AC2 a 401 that arrives after the refresh is replayed without a second refresh [E]
+    00:00 +11 -1: T-0039-AC2 one refresh then one retry T-0039-AC2 a replay that gets a 401 again is not refreshed again
+    00:00 +12 -1: T-0039-AC2 one refresh then one retry T-0039-AC2 a second expiry refreshes again with the rotated token
+    00:00 +13 -1: T-0039-AC2 one refresh then one retry T-0039-AC2 the expired_token scenario signs in expired and recovers
+KILLED: failed refresh does not sign out
+    00:00 +15 -1: T-0039-AC2 a failed refresh signs out T-0039-AC2 a refresh that fails clears the session, publishes signedOut and fails with unauthorized [E]
+    00:00 +15 -1: T-0039-AC2 a failed refresh signs out T-0039-AC2 3 concurrent 401s with a failing refresh: one refresh, one sign-out, three failures
+    00:00 +15 -2: T-0039-AC2 a failed refresh signs out T-0039-AC2 3 concurrent 401s with a failing refresh: one refresh, one sign-out, three failures [E]
+    00:00 +15 -2: T-0039-AC2 a failed refresh signs out T-0039-AC2 a used (rotated) refresh token also signs out
+KILLED: replays are refreshed again (no replay flag)
+KILLED: no bearer when signed in
+    00:00 +0 -1: T-0039-AC1 the bearer header T-0039-AC1 a signed-in session sends Authorization: Bearer <token> [E]
+    00:00 +0 -1: T-0039-AC1 the bearer header T-0039-AC1 signed out, a request carries no Authorization header
+    00:00 +1 -1: T-0039-AC1 the bearer header T-0039-AC1 the header follows the session: sign-in, then sign-out
+    00:00 +1 -2: T-0039-AC1 the bearer header T-0039-AC1 the header follows the session: sign-in, then sign-out [E]
+KILLED: corrupt store crashes instead of reading signed out
+    00:00 +4 -1: T-0039-AC4 persistence T-0039-AC4 a corrupt store reads as signed out and heals on sign-in [E]
+    00:00 +4 -1: T-0039-AC4 persistence T-0039-AC4 a value of the wrong shape reads as signed out
+    00:00 +5 -1: T-0039-AC4 persistence T-0039-AC4 sign-out heals a corrupt store
+    00:00 +5 -2: T-0039-AC4 persistence T-0039-AC4 sign-out heals a corrupt store [E]
+KILLED: updateTokens revives a signed-out session
+KILLED: refresh tokens do not rotate
+    00:00 +5 -1: T-0039-AC3 tokens T-0039-AC3 refresh rotates: a token works once [E]
+    00:00 +5 -1: T-0039-AC3 tokens T-0039-AC3 a refresh token saved by an earlier run still works once
+    00:00 +5 -2: T-0039-AC3 tokens T-0039-AC3 a refresh token saved by an earlier run still works once [E]
+    00:00 +5 -2: T-0039-AC3 tokens T-0039-AC3 refresh rejects unknown tokens and bad bodies
