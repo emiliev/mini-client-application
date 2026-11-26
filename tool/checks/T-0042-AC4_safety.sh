@@ -42,7 +42,7 @@ executed() {  # executed <build log>: true when the log shows a non-cached actio
 hash_outputs() {  # every file under bazel-bin, hashed, sorted by path
   (cd "$REPO" && find -L bazel-bin -type f -print0 2>/dev/null | xargs -0 shasum -a 256 | sed 's/  /\t/' | awk -F'\t' '{print $2 "\t" $1}' | sort)
 }
-[[ -z "$(git status --porcelain --untracked-files=no)" ]] || { echo "refusing: tracked files are modified" >&2; exit 2; }
+[[ -z "$(git status --porcelain --untracked-files=no -- . ':!documents/evidence')" ]] || { echo "refusing: tracked files are modified" >&2; exit 2; }
 
 report "# T-0042-AC4: tool/ide_sync is safe" ""
 
