@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0040 engineer on mc-T-0040-engineer-24845 (B00E5DD6-1C00-47FA-93D6-C76AF1C41152)
+# e2e_ios.sh: T-0040 engineer on mc-T-0040-engineer-68211 (DA10E852-0F4D-458D-8F05-EB48286F4F76)
 # cwd: /tmp/mc-T-0040-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Q8ORcZ/screenshots/1-characters_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d B00E5DD6-1C00-47FA-93D6-C76AF1C41152
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QmjKjD/screenshots/1-characters_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d DA10E852-0F4D-458D-8F05-EB48286F4F76
 
 Resolving dependencies in `/private/tmp/mc-T-0040-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0040-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           23.0s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:63194/iS5zc7BaDTQ=/
-VMServiceFlutterDriver: Isolate found with number: 4293934471763275
-VMServiceFlutterDriver: Isolate 4293934471763275 is runnable.
+Xcode build done.                                           15.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50867/vwTO_Q6iQJs=/
+VMServiceFlutterDriver: Isolate found with number: 6165987225656943
+VMServiceFlutterDriver: Isolate 6165987225656943 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
@@ -35,12 +35,12 @@ flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
 flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
 VMServiceFlutterDriver: request_data message is taking a long time to complete...
-flutter: 00:07 +1: (tearDownAll)
+flutter: 00:06 +1: (tearDownAll)
 flutter: 00:07 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Q8ORcZ/screenshots/1-characters_journey_test/01_home.png (294321)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Q8ORcZ/screenshots/1-characters_journey_test/02_characters_list.png (405341)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Q8ORcZ/screenshots/1-characters_journey_test/03_preview.png (300571)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Q8ORcZ/screenshots/1-characters_journey_test/04_full_profile_placeholder.png (222291)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QmjKjD/screenshots/1-characters_journey_test/01_home.png (294321)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QmjKjD/screenshots/1-characters_journey_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QmjKjD/screenshots/1-characters_journey_test/03_preview.png (300571)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QmjKjD/screenshots/1-characters_journey_test/04_full_profile_placeholder.png (222291)
 All tests passed.
 
 # exit code: 0

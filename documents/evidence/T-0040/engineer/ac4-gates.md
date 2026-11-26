@@ -13,7 +13,7 @@
 | layering (T-0040-AC3) | PASS |
 | coverage >= 90 % (touched packages) | PASS |
 
-- tests: Executed 5 out of 87 tests: 87 tests pass.
-- coverage: == utility/mc_ds_navigation TOTAL 109/109 100.0% == utility/mc_feature_flow TOTAL 165/166 99.4% == feature/characters/characters_list TOTAL 155/155 100.0% (threshold 90 %)
+- tests: Executed 5 out of 90 tests: 90 tests pass.
+- coverage: == utility/mc_ds_navigation TOTAL 173/186 93.0% == utility/mc_feature_flow TOTAL 165/166 99.4% == feature/characters/characters_list TOTAL 155/155 100.0% (threshold 90 %)
 
 **PASS T-0040-AC4-gates**

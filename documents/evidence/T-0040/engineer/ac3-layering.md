@@ -17,9 +17,12 @@ none
 ## positive control: characters_list closure holds mc_feature_flow (5 targets) and mc_ds_navigation (5 targets)
 ## negative controls (each must be reported)
 ```
-BUILD dep:     //utility/mc_ds_navigation:mc_ds_navigation -> //utility/mc_feature_flow:lib/mc_feature_flow.dart //utility/mc_feature_flow:lib/src/feature_flow.dart //utility/mc_feature_flow:lib/src/flow_context.dart 
-pubspec dep:   utility/mc_ds_navigation/pubspec.yaml:15:  mc_feature_flow: any
-Dart import:   utility/mc_ds_navigation/lib/src/mc_tab_bar.dart:1:import 'package:mc_feature_flow/mc_feature_flow.dart';
+BUILD dep:               //utility/mc_ds_navigation:mc_ds_navigation -> //utility/mc_feature_flow:lib/mc_feature_flow.dart //utility/mc_feature_flow:lib/src/feature_flow.dart //utility/mc_feature_flow:lib/src/flow_context.dart 
+pubspec dep:             utility/mc_ds_navigation/pubspec.yaml:15:  mc_feature_flow: any
+Dart import:             utility/mc_ds_navigation/lib/src/mc_tab_bar.dart:1:import 'package:mc_feature_flow/mc_feature_flow.dart';
+import + trailing ///:   utility/mc_ds_navigation/lib/src/mc_tab_bar.dart:1:import 'package:mc_feature_flow/mc_feature_flow.dart'; /// layering
+other ds pubspec only:   utility/mc_ds_buttons/pubspec.yaml:13:  mc_feature_flow: any
+other ds BUILD only:     utility/mc_ds_buttons/BUILD.bazel:9:    "//utility/mc_feature_flow",
 ```
 ## characters_list page: McAppBar with leading McFlowBackButton: PASS
 

@@ -8,18 +8,18 @@
 | Project | `/tmp/mc-T-0040-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0040-engineer-24845` |
-| Simulator UDID | `B00E5DD6-1C00-47FA-93D6-C76AF1C41152` |
+| Simulator | `mc-T-0040-engineer-68211` |
+| Simulator UDID | `DA10E852-0F4D-458D-8F05-EB48286F4F76` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-26T10:19:07Z |
-| Finished | 2026-11-26T10:20:31Z |
+| Started | 2026-11-26T15:03:21Z |
+| Finished | 2026-11-26T15:04:40Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/characters_journey_test.dart` | PASS | 47 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
-| `integration_test/characters_link_after_flow_test.dart` | PASS | 20 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
+| `integration_test/characters_journey_test.dart` | PASS | 39 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
+| `integration_test/characters_link_after_flow_test.dart` | PASS | 21 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
 
 ## Screenshots
 

@@ -19,7 +19,7 @@ selected tab not revealed on build: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC
 selected tab not revealed on change: KILLED (FAIL  T-0040-AC1 behaviour T-0040-AC1 the selected tab is scrolled into view)
 reveal scrolls every ancestor: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 a tab bar inside a vertical ListView leaves the page offset)
 reveal on every parent rebuild: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 a parent rebuild with the same index does not snap the bar)
-tab bar fills a tall parent (no Align): SURVIVED
+tab fills a tall parent (no max height, no height factor): KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 the tab bar is 49 pt high in a tall box)
 divider not padded in (48 pt, not 49): KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 the tab bar is 49 pt high in a Column)
 tabs do not share the free width: KILLED (FAIL  T-0040-AC1 behaviour T-0040-AC1 two tabs share the width)
 unbounded width scrolls (crash): KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 an unbounded width does not crash)
@@ -27,4 +27,4 @@ no Material ancestor of its own: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 t
 high-contrast divider keeps alpha: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 the high-contrast divider has no alpha)
 currentIndex upper bound unchecked: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 currentIndex out of range is asserted)
 tab label scale uncapped: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 a tall text scale keeps the tabs 48 pt)
-overall: SOME SURVIVED OR FAILED
+overall: all mutations killed
