@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0048 engineer on mc-T-0048-engineer-70664 (01AD955D-97F9-4E9A-9947-474F209A7B66)
+# e2e_ios.sh: T-0048 engineer on mc-T-0048-engineer-33242 (F7E8FC9E-E5E4-4D2C-8C02-BA41766EE99B)
 # cwd: /tmp/mc-T-0048-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comics_journey_test.dart -d 01AD955D-97F9-4E9A-9947-474F209A7B66
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comics_journey_test.dart -d F7E8FC9E-E5E4-4D2C-8C02-BA41766EE99B
 
 Resolving dependencies in `/private/tmp/mc-T-0048-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0048-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                            9.8s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51182/C5y034DK7Q0=/
-VMServiceFlutterDriver: Isolate found with number: 6907424874927507
-VMServiceFlutterDriver: Isolate 6907424874927507 is runnable.
+Xcode build done.                                           10.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54603/nKz7X1zxXfU=/
+VMServiceFlutterDriver: Isolate found with number: 6718741656276379
+VMServiceFlutterDriver: Isolate 6718741656276379 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0041-AC5 home to a character preview, a related comic and its page; favourite after sign-in; the cast leads on
@@ -50,14 +50,14 @@ flutter: [debug] PUT /v1/me/favourites/comic/501267 -> 200
 flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _Ready
 flutter: 00:16 +1: (tearDownAll)
 flutter: 00:16 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/10_home.png (304790)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/11_characters_list.png (405341)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/12_preview_related_comics.png (332722)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/13_comic_page.png (374920)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/14_sign_in_sheet.png (348220)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/15_favourite_saved.png (377614)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/16_comic_cast.png (352658)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.J7fJ0f/screenshots/3-comics_journey_test/17_cast_member_placeholder.png (222291)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/10_home.png (304790)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/11_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/12_preview_related_comics.png (332722)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/13_comic_page.png (374920)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/14_sign_in_sheet.png (348220)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/15_favourite_saved.png (377614)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/16_comic_cast.png (352658)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Qua3ef/screenshots/3-comics_journey_test/17_cast_member_placeholder.png (222291)
 All tests passed.
 
 # exit code: 0

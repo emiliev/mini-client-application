@@ -2,7 +2,7 @@
 
 | Check | Result | Detail |
 |---|---|---|
-| A. no sync: build and test //... | PASS | test passed; 47604 output files hashed |
+| A. no sync: build and test //... | PASS | test passed; 55222 output files hashed |
 | 1. git status after a sync | PASS | unchanged (46 files synced, all ignored) |
 | 1. negative control (stray file) | PASS | git status changed as it must |
 | 2a. no synced file is tracked | PASS | 46 checked |
@@ -11,7 +11,7 @@
 | 2b. negative control (planted .g.dart in a package without the exclusion) | PASS | the query reports it |
 | B. synced: build and test //... | PASS | both pass |
 | 3. synced tree runs 0 actions and 0 tests | PASS | Executed 0 out of 137 tests: 137 tests pass. |
-| 3. every unsynced output is in the synced run with the same hash | PASS | 47604 files, same bytes |
+| 3. every unsynced output is in the synced run with the same hash | PASS | 55222 files, same bytes |
 | 3. negative control (planted file in a build) | PASS | the build ran actions, so 'no action' is a real signal |
 
 Files only in the synced run (0): none
