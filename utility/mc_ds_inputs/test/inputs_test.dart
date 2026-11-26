@@ -3,6 +3,7 @@ import 'dart:ui' show Tristate;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_inputs/mc_ds_inputs.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
@@ -308,6 +309,29 @@ void main() {
         expect(controller.offset, 30);
       },
     );
+    testWidgets(
+      'T-0044-AC1 segment labels are capped at ${McSegmented.labelMaxScale}x '
+      'so five fit a phone at 3x',
+      (tester) async {
+        mcSetSurface(tester, 375, 600);
+        await tester.pumpWidget(
+          _page(
+            McSegmented(
+              segments: [
+                for (final l in ['Alle', 'Helden', 'Größte', 'Neu', 'Mehr'])
+                  McSegment(label: l),
+              ],
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
+            scale: 3,
+          ),
+        );
+        final text = tester.widget<Text>(find.text('Helden'));
+        expect(text.textScaler!.scale(10), 10 * McSegmented.labelMaxScale);
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 
   group('T-0044-AC2 behaviour', () {
@@ -395,6 +419,29 @@ void main() {
         );
       },
     );
+
+    testWidgets('T-0044-AC2 text field shows a prefix and a tappable suffix', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _page(
+          McTextField(
+            controller: TextEditingController(),
+            label: 'Password',
+            prefix: const Icon(Icons.lock, key: ValueKey('prefix')),
+            suffix: McIconButton(
+              icon: Icons.visibility,
+              semanticLabel: 'Show password',
+              onPressed: () => taps++,
+            ),
+          ),
+        ),
+      );
+      expect(find.byKey(const ValueKey('prefix')), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Show password'));
+      expect(taps, 1);
+    });
 
     testWidgets(
       'T-0044-AC2 text field is controlled, reports user edits only',
