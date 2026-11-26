@@ -11,7 +11,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0041](T-0041-comics-details-exemplar.md) | **`comics_details` exemplar** (SC, P1-18): sections, auth-gated favourite, publishing wiring | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0039, T-0040 | `fleet/T-0041-comics-details` |
 
-| [T-0042](T-0042-ide-sync.md) | `tool/ide_sync`: generated code in the checkout for the IDE, `flutter run`, debugging (P3-10) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0033 | `fleet/T-0042-ide-sync` |
 
 ## Done
 | ID | Title | Result |
@@ -20,6 +19,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0042](T-0042-ide-sync.md) | **`tool/ide_sync`**: Bazel-generated code in the checkout, so the IDE, `flutter run`, debugging and hot reload work (P3-10) | merged; Verifier [PASS](../evidence/T-0042/verification-report.md) (Sonnet, re-verified); F-0041 |
 | [T-0039](T-0039-session-and-auth.md) | Auth slice: `mc_session` (epoch), `mc_api_auth` (bearer, single refresh, no cross-account replay), `mc_fixtures_identity` (sign-in, favourites) | merged; Verifier [PASS](../evidence/T-0039/verification-report.md) (re-verified after FAIL); F-0038 |
 | [T-0040](T-0040-ds-navigation.md) | `mc_ds_navigation`: `McAppBar` (large title, `bottom`), `McTabBar`, `McSectionHeader`; `characters_list` on `McAppBar` | merged; Verifier [PASS](../evidence/T-0040/verification-report.md) (re-verified, Sonnet narrow); F-0039 |
 | [T-0038](T-0038-fixtures-comics.md) | `mc_fixtures_comics`: 2,400 comics, series, creators, variants (P1-08 subset) | merged; Verifier [PASS](../evidence/T-0038/verification-report.md) (re-verified after review fixes) |

@@ -39,3 +39,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0038](T-0038/verification-report.md) | PASS (re-verified after review fixes) | Comics mock domain: determinism mutations, filter and paging probes, cross-links to characters, trademark scan |
 | [T-0040](T-0040/verification-report.md) | PASS (Opus, then a Sonnet narrow re-verification) | DS navigation: 72 goldens, semantics guidelines, transitive layering negatives, e2e |
 | [T-0039](T-0039/verification-report.md) | PASS (re-verified after FAIL) | Auth: concurrent 401s on real Dio, cross-account race probes, refresh-failure policy, boot restore on the simulator |
+| [T-0042](T-0042/verification-report.md) | PASS (Sonnet, re-verified) | `ide_sync`: analyzer 176 → 0 errors, `flutter run` from the checkout, hash-identical `bazel-bin`, e2e regression |

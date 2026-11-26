@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-26 `923b34a`; Verifier PASS `12723f0`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (tooling; ADR-0011) |
 | Branch | `fleet/T-0042-ide-sync` |
@@ -83,3 +83,7 @@ Bazel generates all codegen into `bazel-bin/`, and nothing generated is committe
 10. `ide_sync` reads `MC_GENERATED_DART` from `tool/bazel/defs.bzl` for its sync filter and the watch filter (so a hand-named `lib/src/app.config.dart` is a source; test 16 and 20).
 Each fix was mutation-checked: reverting it makes its test fail (`review_mutations.txt`; item 9 by hand: the unanchored regex fails AC3 step e).
 A fifth finding of the round (not in the review): `cquery` can name another configuration after a `bazel test`; `ide_sync` now reads the outputs from the build event stream (F-0041 fact 5; `T-0042-AC3` step 0 runs a test first).
+
+## Merge (TL)
+- 2026-11-26: Review-first (ADR-0011): `/code-review` found 7 important bugs, among them the e2e pipeline broken by a duplicate `assets:` key, a failed write reported as success, and stale outputs from another configuration. The engineer fixed them and found one more on the way: after `bazel test`, `cquery` lists outputs of the test-transition configuration, so outputs now come from the BEP. Single Sonnet Verifier pass: FAIL `8c74763`, on one check-script defect (the AC4 exact file-set compare failed on a fresh output base). Fixed in `351e732` (hash-equal subset plus 0 actions); narrow Sonnet re-verify PASS `12723f0` (about 91k and 103k tokens). The TL merged `--no-ff`; on the merge result `check` passed, 101/101 tests, lint was clean, `mc_arch_check` reported OK and the fixtures check passed.
+- **Developer workflow now:** `tool/ide_sync --env dev`, then open the IDE and run `fvm flutter run`. `--watch` re-syncs on save. See the root `README.md`, "Developing".
