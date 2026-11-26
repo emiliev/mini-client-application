@@ -105,14 +105,28 @@ bzw build //... >"$work/B_build.log" 2>&1
 b_build_rc=$?
 bzw test //... >"$work/B_test.log" 2>&1
 b_test_rc=$?
+# Negative control hook (verifier runs): change one real output before it is hashed.
+if [[ -n "${MC_AC4_TAMPER:-}" ]]; then
+  victim="$(cut -f1 "$work/A.hashes" | grep -m1 '\.dart$' || true)"
+  if [[ -n "$victim" ]]; then chmod u+w "$REPO/$victim"; printf 'tampered\n' >>"$REPO/$victim"; fi
+  report "(MC_AC4_TAMPER: appended a line to \`$victim\` before hashing)" ""
+fi
 hash_outputs >"$work/B.hashes"
 if [[ $b_build_rc == 0 && $b_test_rc == 0 ]]; then pass "B. synced: build and test //..." "both pass"
 else fail "B. synced: build and test //..." "build exit $b_build_rc, test exit $b_test_rc"; fi
-if executed "$work/B_build.log" || executed "$work/B_test.log"; then
-  fail "3. synced tree runs no action and no test" "$(plain "$work/B_build.log" | grep -a 'INFO: .* process'; plain "$work/B_test.log" | grep -a 'INFO: .* process\|^Executed')"
-else pass "3. synced tree runs no action and no test" "$(plain "$work/B_test.log" | grep -a '^Executed' | tail -1)"; fi
-if cmp -s "$work/A.hashes" "$work/B.hashes"; then pass "3. outputs identical with and without a sync" "$a_n files, same bytes"
-else fail "3. outputs identical with and without a sync" "$(diff "$work/A.hashes" "$work/B.hashes" | head -6)"; fi
+# The real property: the synced tree runs 0 actions and 0 tests.
+if executed "$work/B_build.log" || executed "$work/B_test.log" || ! plain "$work/B_test.log" | grep -aq '^Executed 0 out of'; then
+  fail "3. synced tree runs 0 actions and 0 tests" "$(plain "$work/B_build.log" | grep -a 'INFO: .* process'; plain "$work/B_test.log" | grep -a 'INFO: .* process\|^Executed')"
+else pass "3. synced tree runs 0 actions and 0 tests" "$(plain "$work/B_test.log" | grep -a '^Executed' | tail -1)"; fi
+# Every file of the unsynced run exists in the synced run with the same hash. The
+# synced run may hold more: its own codegen build can add outputs that
+# `build //...` and `test //...` never build (on a fresh output base, e.g.
+# external/ai_rules_dart+/dart/private/analyzer_sdk_summary.sum). They are listed.
+differ="$(comm -23 "$work/A.hashes" "$work/B.hashes" | cut -f1)"
+extra="$(comm -13 <(cut -f1 "$work/A.hashes") <(cut -f1 "$work/B.hashes"))"
+if [[ -z "$differ" ]]; then pass "3. every unsynced output is in the synced run with the same hash" "$a_n files, same bytes"
+else fail "3. every unsynced output is in the synced run with the same hash" "missing or different: $(head -5 <<< "$differ" | paste -sd' ' -)"; fi
+extra_note="Files only in the synced run ($(grep -c . <<< "$extra")): ${extra:-none}"
 
 # After B is hashed (this build adds its own outputs to bazel-bin): a build with
 # a planted file in a package without the exclusion runs actions.
@@ -125,5 +139,5 @@ rm -f "$REPO/$PLANT"
 bzw build //utility/mc_prelude/... >/dev/null 2>&1
 
 report "| Check | Result | Detail |" "|---|---|---|" "${rows[@]}" "" \
-  "Test summary (synced tree): $(plain "$work/B_test.log" | grep -a 'tests pass\|Executed' | tail -2 | paste -sd' ' -)"
+  "$extra_note" "" "Test summary (synced tree): $(plain "$work/B_test.log" | grep -a 'tests pass\|Executed' | tail -2 | paste -sd' ' -)"
 finish T-0042-AC4 $rc
