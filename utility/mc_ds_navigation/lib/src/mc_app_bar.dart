@@ -4,25 +4,34 @@ import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 
 /// The app bar every page uses, so features do not hand-roll `AppBar`s.
 ///
-/// **Leading slot.** [leading] is a plain widget slot, the same one `AppBar`
-/// has. The design system does not know about flows: a feature that wants the
-/// flow's back behaviour passes `leading: const McFlowBackButton()` (from
-/// `mc_feature_flow`), so `mc_ds_navigation` never depends on
-/// `mc_feature_flow`. When [leading] is null the bar falls back to what
-/// `AppBar` shows itself (back, close or drawer button), so a page pushed
-/// inside a flow needs nothing.
+/// **IMPORTANT: pass `leading: const McFlowBackButton()` on every flow page
+/// that can be a flow's root.** This design-system package does not depend on
+/// `mc_feature_flow` (a utility must not know the sibling that owns
+/// navigation state), so `McAppBar` cannot default to the flow's back button.
+/// Left null, [leading] falls back to what `AppBar` shows itself (back, close
+/// or drawer button). That is right for a page pushed inside a flow, but a
+/// flow has its own navigator, so on the flow's first page `AppBar` shows
+/// nothing and the user cannot leave the flow on iOS. Features and bricks
+/// therefore always pass `leading: const McFlowBackButton()` (from
+/// `mc_feature_flow`), which is safe on every page.
 ///
 /// **Large title.** With [largeTitle] the title is drawn big under the toolbar
-/// (iOS style) and the toolbar itself carries no title. The bar's height is
-/// fixed, so the large title is single-line, ellipsised, and its text scale is
-/// capped at [largeTitleMaxScale]; the full title stays available to screen
-/// readers.
+/// (iOS style) and the toolbar itself carries no title. The band has a fixed
+/// height, so the large title is single-line and ellipsised, and its text
+/// scale is capped at [largeTitleMaxScale]. iOS truncates large titles too.
+/// Screen readers still get the full title, and the title names the route.
+/// Note that Flutter's `AppBar` itself caps the plain title's scale at 1.34,
+/// so a plain title at "2x" renders at 1.34x.
+///
+/// **Bottom.** [bottom] (for example a [McTabBar]) goes under the title and
+/// is part of [preferredSize].
 class McAppBar extends StatelessWidget implements PreferredSizeWidget {
   const McAppBar({
     required this.title,
     this.leading,
     this.actions = const [],
     this.largeTitle = false,
+    this.bottom,
     this.titleKey,
     super.key,
   });
@@ -30,7 +39,8 @@ class McAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// The page title. A semantics header.
   final String title;
 
-  /// Fills the leading slot; null means `AppBar`'s automatic leading.
+  /// Fills the leading slot; null means `AppBar`'s automatic leading. See the
+  /// class comment: flow pages pass `McFlowBackButton`.
   final Widget? leading;
 
   /// Trailing widgets. Each should be at least [mcMinTapTarget] square
@@ -39,6 +49,9 @@ class McAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Draws the title large under the toolbar.
   final bool largeTitle;
+
+  /// A widget under the title, such as a tab bar.
+  final PreferredSizeWidget? bottom;
 
   /// Key of the title text, for tests.
   final Key? titleKey;
@@ -49,13 +62,31 @@ class McAppBar extends StatelessWidget implements PreferredSizeWidget {
   /// Cap of the text scale in the large title (the band has a fixed height).
   static const double largeTitleMaxScale = 1.5;
 
+  double get _bottomHeight =>
+      (largeTitle ? largeTitleExtent : 0) + (bottom?.preferredSize.height ?? 0);
+
   @override
-  Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight + (largeTitle ? largeTitleExtent : 0));
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + _bottomHeight);
 
   @override
   Widget build(BuildContext context) {
     final p = context.mcPalette;
+    final extra = bottom;
+    final PreferredSizeWidget? under;
+    if (largeTitle) {
+      under = PreferredSize(
+        preferredSize: Size.fromHeight(_bottomHeight),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _LargeTitle(title: title, titleKey: titleKey),
+            if (extra != null) extra,
+          ],
+        ),
+      );
+    } else {
+      under = extra;
+    }
     return AppBar(
       leading: leading,
       actions: actions,
@@ -71,12 +102,7 @@ class McAppBar extends StatelessWidget implements PreferredSizeWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-      bottom: largeTitle
-          ? PreferredSize(
-              preferredSize: const Size.fromHeight(largeTitleExtent),
-              child: _LargeTitle(title: title, titleKey: titleKey),
-            )
-          : null,
+      bottom: under,
     );
   }
 }
@@ -99,8 +125,11 @@ class _LargeTitle extends StatelessWidget {
             start: McSpacing.lg,
             end: McSpacing.lg,
           ),
+          // The toolbar carries no title in this mode, so this one names the
+          // route, as `AppBar`'s own title does.
           child: Semantics(
             header: true,
+            namesRoute: true,
             child: Text(
               title,
               key: titleKey,

@@ -38,6 +38,7 @@ class McSectionHeader extends StatelessWidget {
         child: Row(
           children: [
             Expanded(
+              flex: 2,
               child: Semantics(
                 header: true,
                 child: Text(
@@ -47,14 +48,22 @@ class McSectionHeader extends StatelessWidget {
               ),
             ),
             if (label != null)
-              TextButton(
-                onPressed: onAction,
-                style: TextButton.styleFrom(
-                  foregroundColor: p.primary,
-                  minimumSize: const Size(mcMinTapTarget, mcMinTapTarget),
-                  textStyle: McTypeScale.label,
+              // Loose, at most a third of the free width: a long label
+              // ellipsises instead of overflowing, and the title keeps room.
+              Flexible(
+                child: TextButton(
+                  onPressed: onAction,
+                  style: TextButton.styleFrom(
+                    foregroundColor: p.primary,
+                    minimumSize: const Size(mcMinTapTarget, mcMinTapTarget),
+                    textStyle: McTypeScale.label,
+                  ),
+                  child: Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
-                child: Text(label),
               ),
           ],
         ),
