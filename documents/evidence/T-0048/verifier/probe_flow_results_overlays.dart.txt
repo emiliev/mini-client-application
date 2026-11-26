@@ -1,0 +1,106 @@
+
+  // ---- Verifier probes (T-0048) ----
+  testWidgets('VPROBE a result under a modal bottom sheet is kept until the '
+      'sheet closes', (tester) async {
+    final router = await _app(tester);
+    String? got;
+    var done = false;
+    final result = AppFlows.createReadingList(router).then((v) {
+      got = v;
+      done = true;
+    });
+    await tester.pumpAndSettle();
+    final finish = tester.widget<TextButton>(find.byKey(_finish));
+    unawaited(
+      showModalBottomSheet<void>(
+        context: tester.element(find.byKey(_finish)),
+        builder: (_) => const SizedBox(
+          height: 200,
+          child: Text('sheet', key: Key('sheet')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    finish.onPressed!();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('sheet')), findsOneWidget);
+    expect(done, isFalse);
+    Navigator.of(tester.element(find.byKey(const Key('sheet')))).pop();
+    await tester.pumpAndSettle();
+    await result;
+    expect(got, 'l-5');
+    expect(find.byKey(const Key('home')), findsOneWidget);
+  });
+
+  testWidgets('VPROBE a result under a dialog and a sheet on top of it waits '
+      'for both', (tester) async {
+    final router = await _app(tester);
+    String? got;
+    var done = false;
+    final result = AppFlows.createReadingList(router).then((v) {
+      got = v;
+      done = true;
+    });
+    await tester.pumpAndSettle();
+    final finish = tester.widget<TextButton>(find.byKey(_finish));
+    unawaited(
+      showDialog<void>(
+        context: tester.element(find.byKey(_finish)),
+        builder: (_) => const Text('dialog', key: Key('dialog')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    unawaited(
+      showModalBottomSheet<void>(
+        context: tester.element(find.byKey(const Key('dialog'))),
+        builder: (_) => const SizedBox(
+          height: 200,
+          child: Text('sheet', key: Key('sheet')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    finish.onPressed!();
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.byKey(const Key('sheet')))).pop();
+    await tester.pumpAndSettle();
+    expect(done, isFalse, reason: 'the dialog still covers the route');
+    expect(find.byKey(const Key('dialog')), findsOneWidget);
+    Navigator.of(tester.element(find.byKey(const Key('dialog')))).pop();
+    await tester.pumpAndSettle();
+    await result;
+    expect(got, 'l-5');
+    expect(find.byKey(const Key('home')), findsOneWidget);
+  });
+
+  testWidgets('VPROBE a result under another pushed page is handed over when '
+      'that page is popped', (tester) async {
+    final router = await _app(tester);
+    String? got;
+    final result = AppFlows.createReadingList(router).then((v) => got = v);
+    await tester.pumpAndSettle();
+    final finish = tester.widget<TextButton>(find.byKey(_finish));
+    unawaited(router.push<void>('/me/lists/l-9/edit'));
+    await tester.pumpAndSettle();
+    finish.onPressed!();
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), '/me/lists/l-9/edit');
+    router.pop();
+    await tester.pumpAndSettle();
+    await result;
+    expect(got, 'l-5');
+    expect(router.state.uri.toString(), '/');
+  });
+
+  testWidgets('VPROBE a pushed result route replaced by go never completes '
+      'its caller', (tester) async {
+    final router = await _app(tester);
+    var done = false;
+    unawaited(AppFlows.createReadingList(router).then((_) => done = true));
+    await tester.pumpAndSettle();
+    router.go('/');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('home')), findsOneWidget);
+    expect(done, isFalse, reason: 'go_router does not complete a replaced push');
+  });
+}

@@ -1,0 +1,47 @@
+292:  mcTestWidgets('VPROBE a user switch right after the Create tap, before the '
+293-      'bloc handles it, sends no POST for anyone', (tester) async {
+294-    await signIn(tester);
+295-    await initFlow(tester, () => editorTestHost(editorFlowUnderTest()));
+296-    await mcSettle(tester);
+297-    await ensureEditorContainer();
+298-    await enterText(tester, 'Name', 'Amber reads');
+299-    await tester.tap(find.text('Next'));
+300-    await mcSettle(tester);
+301-    await pickComic(tester, 'Amber Chronicles #1');
+302-    await tester.tap(find.text('Next'));
+303-    await mcSettle(tester);
+304-
+305-    // The tap adds the submit event; the session changes (synchronously)
+306-    // before the event loop lets the bloc handle it.
+307-    final reader = diContainer<SessionReader>();
+308-    final before = reader.epoch;
+309-    // ignore: avoid_print
+310-    print(
+311:      'VPROBE identical=${identical(reader, diContainer<Session>())} epoch=$before',
+312-    );
+313-    await tester.tap(find.text('Create list'));
+314-    final collector = fixtureUser('collector@mini-client.test');
+315-    unawaited(
+316-      diContainer<Session>().signIn(
+317-        userId: collector.id,
+318-        tokens: AuthTokens(
+319-          accessToken: mintAccessToken(collector.id, 1),
+320-          refreshToken: 'r',
+321-        ),
+322-      ),
+323-    );
+324-    // ignore: avoid_print
+325:    print('VPROBE epoch after switch=${reader.epoch} user=${reader.userId}');
+326-    await mcSettle(tester);
+327-    // ignore: avoid_print
+328-    print(
+329:      'VPROBE requests=${[for (final r in McTestSession.current.backend.requests) "${r.routeKey} ${r.headers['Authorization']}"]}',
+330-    );
+331-
+332-    final posts = McTestSession.current.backend.requests
+333-        .where((r) => matchesRequest(r, 'POST /v1/me/lists'))
+334-        .toList();
+335-    expect(posts, isEmpty, reason: 'nothing written: $posts');
+336-    expect(find.text('You are no longer signed in as before'), findsOneWidget);
+337-  });
+338-}

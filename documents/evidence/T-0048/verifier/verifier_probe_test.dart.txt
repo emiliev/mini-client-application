@@ -1,0 +1,120 @@
+// T-0048 Verifier probe (not part of the branch): back at each step, the iOS
+// back swipe on steps 2 and 3, values kept, and a linked editor that goes
+// home when it finishes.
+import 'package:app_core/app_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
+import 'package:mini_client/main.dart' as app;
+
+ValueKey<String> _result(int id) =>
+    ValueKey<String>('reading_list_editor.result.$id');
+
+Finder _field(String label) =>
+    find.ancestor(of: find.text(label), matching: find.byType(TextField));
+
+final Finder _sheetOrStep1 = find.byWidgetPredicate(
+  (w) =>
+      w.key == fixtureSignInSheetKey || (w is Text && w.data == 'Step 1 of 3'),
+);
+
+Future<void> _swipeBack(WidgetTester tester) async {
+  await tester.dragFrom(const Offset(2, 400), const Offset(320, 0));
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('T-0048-AC5 verifier probe: back at every step', (tester) async {
+    startApp(app.main);
+    await pumpUntil(tester, find.byKey(const Key('home.placeholder')), 'home');
+    await tester.ensureVisible(find.text('New reading list'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New reading list'));
+    await pumpUntil(tester, _sheetOrStep1, 'sheet or step 1');
+    if (find.byKey(fixtureSignInSheetKey).evaluate().isNotEmpty) {
+      await tester.tap(find.byKey(fixtureSignInButtonKey));
+      await pumpUntil(tester, find.text('Step 1 of 3'), 'step 1');
+    }
+    // Back on step 1 (the app bar) leaves the editor with no result.
+    await tester.tap(find.byType(BackButton));
+    await pumpUntil(tester, find.byKey(const Key('home.placeholder')), 'home');
+    expect(find.textContaining('List created'), findsNothing);
+    expect(find.text('Step 1 of 3'), findsNothing);
+
+    await tester.ensureVisible(find.text('New reading list'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('New reading list'));
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'step 1 again');
+    await tester.enterText(_field('Name'), 'Amber reads');
+    await tester.tap(find.text('Public'));
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.byKey(_result(500060)), 'step 2');
+    await tester.tap(find.byKey(_result(500060)));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_result(500061)));
+    await pumpUntil(tester, find.text('2 comics picked'), 'two picks');
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 3 of 3'), 'step 3');
+
+    // iOS back swipe on step 3 goes to step 2, the picks kept.
+    await _swipeBack(tester);
+    await pumpUntil(tester, find.text('Step 2 of 3'), 'swiped to step 2');
+    expect(find.text('Step 3 of 3'), findsNothing);
+    expect(find.text('2 comics picked'), findsOneWidget);
+    await letArtLoad(tester);
+    await shot(binding, tester, 'v01_swipe_back_to_step2');
+
+    // iOS back swipe on step 2 goes to step 1, the details kept.
+    await _swipeBack(tester);
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'swiped to step 1');
+    expect(
+      tester.widget<TextField>(_field('Name')).controller!.text,
+      'Amber reads',
+    );
+    expect(find.byKey(const Key('home.placeholder')), findsNothing);
+    await shot(binding, tester, 'v02_swipe_back_to_step1');
+
+    // The app bar's back on step 3, the step bar's Back on step 2.
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 2 of 3'), 'step 2');
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 3 of 3'), 'step 3');
+    await tester.tap(find.byType(BackButton));
+    await pumpUntil(tester, find.text('Step 2 of 3'), 'app-bar back to 2');
+    await tester.tap(find.text('Back').hitTestable());
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'step-bar back to 1');
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 2 of 3'), 'step 2');
+    expect(find.text('2 comics picked'), findsOneWidget);
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 3 of 3'), 'step 3');
+    await tester.tap(find.text('Create list'));
+    await pumpUntil(tester, find.text('List created: l-5'), 'home with l-5');
+
+    // A link opens the editor on l-5 (a `go`: nothing below it); saving it
+    // goes home.
+    await pushLink(tester, 'miniclient://app/me/lists/l-5/edit');
+    await pumpUntil(tester, find.text('Edit reading list'), 'linked editor');
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'linked step 1');
+    await tester.enterText(_field('Name'), 'Amber reads 2');
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 2 of 3'), 'linked step 2');
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Save changes'), 'linked step 3');
+    await tester.tap(find.text('Save changes'));
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('home.placeholder')),
+      'home after the linked save',
+    );
+    expect(find.text('Edit reading list'), findsNothing);
+    await shot(binding, tester, 'v03_linked_editor_home');
+  });
+}
