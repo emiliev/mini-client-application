@@ -79,7 +79,7 @@ mutate "T5 word-prefix tier removed (counts as substring)" $IDX \
 mutate "T6 substring tier removed (counts as word-prefix)" $IDX \
   "var tier = MatchTier.substring;" "var tier = MatchTier.wordPrefix;"
 mutate "T7 word boundary not checked" $IDX \
-  "if (_notWordChar.hasMatch(foldedTitle[at - 1])) {" "if (at > 0) {"
+  "if (_notWordChar.hasMatch(foldedTitle[at - 1])) {" "if (_notWordChar.hasMatch(foldedTitle[at - 1]) || at > 0) {"
 mutate "T8 a later boundary occurrence is not looked for" $IDX \
   "at = foldedTitle.indexOf(foldedQuery, at + 1);" "at = -1;"
 
@@ -99,7 +99,7 @@ mutate "B5 id tie-break descending" $IDX \
 mutate "F1 case not folded" $NORM \
   "text.toLowerCase().runes" "text.runes"
 mutate "F2 diacritics not folded" $NORM \
-  "out.write(_foldTable[rune] ?? char);" "out.write(char);"
+  "out.write(_foldTable[rune] ?? char);" "out.write(_foldTable[rune] == null ? char : char);"
 mutate "F3 combining marks kept" $NORM \
   "if (_isCombining(rune)) {" "if (_isCombining(rune) && rune < 0) {"
 mutate "F4 whitespace not collapsed" $NORM \
@@ -119,7 +119,7 @@ mutate "H2 total counts only the page" $H \
 mutate "H3 minimum query length 1" $H \
   "const int minQueryLength = 2;" "const int minQueryLength = 1;"
 mutate "H4 q not trimmed" $H \
-  "(request.query['q'] ?? '').trim()" "(request.query['q'] ?? '')"
+  "(request.query['q'] ?? '').trim()" "(request.query['q'] ?? '').replaceAll('x', 'x')"
 mutate "H5 unknown types accepted" $H \
   "asked.any((t) => !searchTypes.contains(t))" "asked.isEmpty && asked.any((t) => !searchTypes.contains(t))"
 mutate "H6 limit upper bound off by one" $H \
@@ -142,9 +142,9 @@ mutate "H12 default limit 10" $H \
 # --- domain and index --------------------------------------------------
 mutate "D1 empty set serves the full index" $DOM \
   "_registerRoutes(router, SearchIndex.empty);" \
-  "_registerRoutes(router, SearchIndex.fromUniverses(environment.seed, environment.clock));"
+  "_registerRoutes(router, SearchIndex.fromUniverses(0, environment.clock));"
 mutate "D2 comic thumbnail is the wrong image" $IDX \
-  "thumbnail: c.cover," "thumbnail: c.characters.isEmpty ? c.cover : c.characters.first.thumbnail,"
+  "thumbnail: c.cover," "thumbnail: c.variants.isEmpty ? c.cover : c.variants.first.cover,"
 mutate "D3 character index skips the last half" $IDX \
   "for (final c in CharacterUniverse(seed, clock).byName)" \
   "for (final c in CharacterUniverse(seed, clock).byName.take(750))"
