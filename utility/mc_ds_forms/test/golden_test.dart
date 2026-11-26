@@ -95,6 +95,7 @@ void main() {
   mcGoldenMatrix(
     acId: 'T-0045-AC3',
     component: 'form_scaffold_busy',
+    settle: const Duration(milliseconds: 400),
     builder: (c) => _page(
       c,
       () => McFormScaffold(
