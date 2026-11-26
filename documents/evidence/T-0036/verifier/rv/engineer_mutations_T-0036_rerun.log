@@ -1,0 +1,5 @@
+MUTATION widget: isFirst ignored (every route is the flow root): killed by //utility/mc_feature_flow:flow_kit_test 
+MUTATION widget: root ignores whether the outer navigator can pop: killed by //utility/mc_feature_flow:flow_kit_test 
+MUTATION widget: no DrawerButton off the root: killed by //utility/mc_feature_flow:flow_kit_test 
+MUTATION widget: fullscreen dialog gets a BackButton: killed by //utility/mc_feature_flow:flow_kit_test 
+MUTATION flow_builder hunk 4: no canPop recompute after a state update: killed by //utility/mc_feature_flow:flow_kit_test 

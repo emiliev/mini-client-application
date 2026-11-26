@@ -1,0 +1,37 @@
+bazel rc=3
+P1 back buttons: list before=1 preview up=1 list after locale change + pop=1
+P1 one tap on the list back button returned home
+  PASS  P1 locale change with the preview open keeps the list back button
+V1 back buttons: root before=1 inner page up=1 root after pop=1
+  PASS  V1 real user pop: root rebuilt under the inner page keeps its back button, and one tap leaves the flow
+V1b root back buttons after swipe=1
+  PASS  V1b same, with the iOS edge swipe instead of a tap
+V3 onstage back buttons on a misused inner page=1
+  PASS  V3 (observation) McFlowBackButton misused on an inner page
+V4 back buttons on the replacement root=0
+Expected: <1>
+  Actual: <0>
+  FAIL  V4 a replaced root page (new first route) gets the button
+V5 android dirty-rebuilt widgets during the pop: FlowBuilder, _InheritedFlowController, _ConditionalPopScope, Navigator, HeroControllerScope, NotificationListener, FocusTraversalGroup, Focus, _FocusInheritedScope, UnmanagedRestorationScope, Overlay, _OverlayEntryWidget, TickerMode, _EffectiveTickerMode, _RenderTheaterMarker, Builder, ModalBarrier, _ModalBarrierGestureDetector, RawGestureDetector, 
+V5 android root builds during the user pop=1 back buttons after=1
+  PASS  V5 android: tap the inner back; root build count
+V6 android root builds during the update=0 back buttons after=0
+Expected: <1>
+  Actual: <0>
+  FAIL  V6 android: back to the root by controller.update (the AC1 test shape)
+V5 iOS dirty-rebuilt widgets during the pop: FlowBuilder, _InheritedFlowController, _ConditionalPopScope, Navigator, HeroControllerScope, NotificationListener, FocusTraversalGroup, Focus, _FocusInheritedScope, UnmanagedRestorationScope, Overlay, _OverlayEntryWidget, TickerMode, _EffectiveTickerMode, _RenderTheaterMarker, Builder, ModalBarrier, _ModalBarrierGestureDetector, RawGestureDetector, _Mod
+V5 iOS root builds during the user pop=1 back buttons after=1
+  PASS  V5 iOS: tap the inner back; root build count
+V6 iOS root builds during the update=0 back buttons after=0
+Expected: <1>
+  Actual: <0>
+  FAIL  V6 iOS: back to the root by controller.update (the AC1 test shape)
+V7 PopScope canPop values after the programmatic return: [false]
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "BackButton": []>
+   Which: means none were found but one was expected
+  FAIL  V7 after a programmatic return to the root, taps needed on the root back button to leave the flow
+INFO: Build completed, 1 test FAILED, 27 total actions
+//feature/characters/characters_list:verifier_probe_test                 PASSED in 0.9s
+//utility/mc_feature_flow:verifier_probe_test                            FAILED in 1.3s
+Executed 2 out of 2 tests: 1 test passes and 1 fails locally.

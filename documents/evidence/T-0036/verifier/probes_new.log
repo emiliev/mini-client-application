@@ -1,0 +1,34 @@
+bazel rc=0
+P1 back buttons: list before=1 preview up=1 list after locale change + pop=1
+P1 one tap on the list back button returned home
+  PASS  P1 locale change with the preview open keeps the list back button
+V1 back buttons: root before=1 inner page up=1 root after pop=1
+  PASS  V1 real user pop: root rebuilt under the inner page keeps its back button, and one tap leaves the flow
+V1b root back buttons after swipe=1
+  PASS  V1b same, with the iOS edge swipe instead of a tap
+V3 onstage back buttons on a misused inner page=0
+  PASS  V3 (observation) McFlowBackButton misused on an inner page
+V4 back buttons on the replacement root=1
+  PASS  V4 a replaced root page (new first route) gets the button
+V5 android dirty-rebuilt widgets during the pop: FlowBuilder, _InheritedFlowController, _ConditionalPopScope, Navigator, HeroControllerScope, NotificationListener, FocusTraversalGroup, Focus, _FocusInheritedScope, UnmanagedRestorationScope, Overlay, _OverlayEntryWidget, TickerMode, _EffectiveTickerMode, _RenderTheaterMarker, Builder, ModalBarrier, _ModalBarrierGestureDetector, RawGestureDetector, 
+V5 android root builds during the user pop=1 back buttons after=1
+  PASS  V5 android: tap the inner back; root build count
+V6 android root builds during the update=0 back buttons after=1
+  PASS  V6 android: back to the root by controller.update (the AC1 test shape)
+V5 iOS dirty-rebuilt widgets during the pop: FlowBuilder, _InheritedFlowController, _ConditionalPopScope, Navigator, HeroControllerScope, NotificationListener, FocusTraversalGroup, Focus, _FocusInheritedScope, UnmanagedRestorationScope, Overlay, _OverlayEntryWidget, TickerMode, _EffectiveTickerMode, _RenderTheaterMarker, Builder, ModalBarrier, _ModalBarrierGestureDetector, RawGestureDetector, _Mod
+V5 iOS root builds during the user pop=1 back buttons after=1
+  PASS  V5 iOS: tap the inner back; root build count
+V6 iOS root builds during the update=0 back buttons after=1
+  PASS  V6 iOS: back to the root by controller.update (the AC1 test shape)
+V7 PopScope canPop values after the programmatic return: [false]
+V7 after tap 1: detail shown=false root shown=true home shown=false state.selected=null
+V7 after tap 2: detail shown=false root shown=true home shown=false state.selected=null
+V7 after tap 3: detail shown=false root shown=true home shown=false state.selected=null
+V7 after tap 4: detail shown=false root shown=true home shown=false state.selected=null
+V7 after tap 5: detail shown=false root shown=true home shown=false state.selected=null
+V7 after tap 6: detail shown=false root shown=true home shown=false state.selected=null
+V7 taps to leave the flow after controller.update: 6
+  PASS  V7 after a programmatic return to the root, taps needed on the root back button to leave the flow
+//feature/characters/characters_list:verifier_probe_test                 PASSED in 1.0s
+//utility/mc_feature_flow:verifier_probe_test                            PASSED in 1.1s
+Executed 2 out of 2 tests: 2 tests pass.

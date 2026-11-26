@@ -1,0 +1,8 @@
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "BackButton": []>
+  FAIL  T-0036-AC1 the back button is present after the root page rebuilds under an inner page
+  PASS  T-0036-AC1 the iOS edge swipe leaves the flow after a state-driven return to the root
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "DrawerButton": []>
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "CloseButton": []>

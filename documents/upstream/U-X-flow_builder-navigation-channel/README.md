@@ -53,3 +53,13 @@ A better fix, if you are willing: do not replace the channel handler at all. Reg
 `didPushRouteInformation` and every method added to the channel later keep working.
 (Ordering relative to other observers changes, which is why we did not do it.)
 Failing that, keep the framework's handler and delegate to it.
+
+## Second issue (found in mini-client T-0036): a stale `PopScope` after a state update
+
+`_FlowBuilderState._canPop` is `_pages.length > 1 || (_navigator?.canPop() ?? false)`, read
+in `build`. When the flow's state moves back to a single page through
+`FlowController.update`, `build` runs while the `Navigator` still holds the old routes, so
+`canPop` is still true and `PopScope(canPop: false)` stays mounted. Nothing rebuilds the
+flow afterwards, so the next pop (a back button's `maybePop`, or the iOS edge swipe) is
+swallowed. We recompute `_canPop` in a post-frame `setState` after each state update, and
+mount the `PopScope` always (`canPop: !condition`) instead of swapping the widget.

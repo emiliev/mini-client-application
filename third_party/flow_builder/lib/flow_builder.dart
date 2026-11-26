@@ -171,6 +171,13 @@ class _FlowBuilderState<T> extends State<FlowBuilder<T>> {
       _pages = widget.onGeneratePages(_state, List.of(_pages));
       _history.add(_state);
     });
+    // mini-client T-0036: `_canPop` reads the navigator, which still holds the
+    // old routes while this build runs. After a state update that returns to
+    // the root, `PopScope(canPop: false)` would stay mounted and eat the next
+    // pop, so recompute once the navigator has the new pages (see VENDORED.md).
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -338,7 +345,10 @@ class _ConditionalPopScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return condition ? PopScope(canPop: false, child: child) : child;
+    // mini-client T-0036: always mounted, so toggling `condition` updates the
+    // scope in place (stock swapped the widget, which re-parented the whole
+    // navigator subtree and rebuilt every page).
+    return PopScope(canPop: !condition, child: child);
   }
 }
 
