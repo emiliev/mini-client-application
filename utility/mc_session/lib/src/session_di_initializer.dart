@@ -5,17 +5,26 @@ import 'package:mc_session/src/session.dart';
 import 'package:mc_session/src/session_ports.dart';
 import 'package:mc_storage/mc_storage.dart';
 
-/// Opens the saved session (async) and registers it as [Session],
-/// [SessionReader] and [SessionWriter]. List `StorageDIInitializer` and
-/// `EventBusDIInitializer` first.
+/// Opens the saved session and registers it as [Session], [SessionReader] and
+/// [SessionWriter]. List `StorageDIInitializer` and `EventBusDIInitializer`
+/// first.
+///
+/// Reading the saved session is real file I/O. When the storage directory is
+/// missing or empty (a first launch, and every widget test with a fresh temp
+/// directory) nothing can be saved, so the read is skipped: that keeps boot
+/// free of I/O, which a `testWidgets` body under fake async cannot await
+/// (F-0038).
 class SessionDIInitializer extends McDIInitializer {
   const SessionDIInitializer() : super(_init);
 
   static Future<void> _init(GetIt getIt, String? environment) async {
-    final session = await Session.restore(
-      getIt<FileStore>(),
-      bus: getIt<EventBus>(),
-    );
+    final store = getIt<FileStore>();
+    final bus = getIt<EventBus>();
+    final dir = store.directory;
+    final nothingSaved = !dir.existsSync() || dir.listSync().isEmpty;
+    final session = nothingSaved
+        ? Session.empty(store, bus: bus)
+        : await Session.restore(store, bus: bus);
     getIt
       ..registerSingleton<Session>(session, dispose: (s) => s.dispose())
       ..registerSingleton<SessionReader>(session)

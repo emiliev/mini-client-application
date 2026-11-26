@@ -30,6 +30,14 @@ final class Session implements SessionReader, SessionWriter {
     return Session._(store, bus, key, read.fold(_decode, (_) => null));
   }
 
+  /// A signed-out session on [store], without reading it. Only right when
+  /// nothing was ever saved there; [restore] is the general case.
+  factory Session.empty(
+    FileStore store, {
+    EventBus? bus,
+    String key = 'session',
+  }) => Session._(store, bus, key, null);
+
   static _Active? _decode(Object? json) {
     final tokens = AuthTokens.fromJson(json);
     if (tokens != null &&

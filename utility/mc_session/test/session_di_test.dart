@@ -12,10 +12,10 @@ void main() {
   setUp(() => dir = Directory.systemTemp.createTempSync('mc_session_di'));
   tearDown(() => dir.deleteSync(recursive: true));
 
-  Future<GetIt> boot() async {
+  Future<GetIt> boot([Directory? storage]) async {
     final getIt = GetIt.asNewInstance();
     for (final init in [
-      StorageDIInitializer(dir),
+      StorageDIInitializer(storage ?? dir),
       const EventBusDIInitializer(),
       const SessionDIInitializer(),
     ]) {
@@ -58,6 +58,35 @@ void main() {
       await second.reset();
     },
   );
+
+  test(
+    'T-0039-AC4 a missing or empty storage directory boots signed out, '
+    'without reading',
+    () async {
+      final missing = await boot(Directory('${dir.path}/never-created'));
+      final empty = await boot();
+
+      expect(missing<SessionReader>().isSignedIn, isFalse);
+      expect(empty<SessionReader>().isSignedIn, isFalse);
+      expect(Directory('${dir.path}/never-created').existsSync(), isFalse);
+      await missing.reset();
+      await empty.reset();
+    },
+  );
+
+  test('T-0039-AC4 a directory with other saved keys still restores', () async {
+    await FileStore(dir).write('search_history', ['x']);
+    await FileStore(dir).write('session', {
+      'userId': 'u-9',
+      'accessToken': 'a',
+      'refreshToken': 'r',
+    });
+
+    final getIt = await boot();
+
+    expect(getIt<SessionReader>().userId, 'u-9');
+    await getIt.reset();
+  });
 
   test(
     'T-0039-AC5 the session needs storage and the event bus first',
