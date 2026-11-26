@@ -79,10 +79,10 @@ mutate "D2: no DrawerButton outside a flow / off the root" $BTN \
   "    if (route.impliesAppBarDismissal"
 # --- TL decision 3: precedence on the flow root ------------------------------
 mutate "D3: local history ignored on the flow root" $BTN \
-  "if (route.willHandlePopInternally) {" \
+  "if (route.willHandlePopInternally && route.impliesAppBarDismissal) {" \
   "if (route.willHandlePopInternally && scope.outerCanPop) {"
 mutate "D3: a drawer beats a local history entry" $BTN \
-  "if (route.willHandlePopInternally) {" \
+  "if (route.willHandlePopInternally && route.impliesAppBarDismissal) {" \
   "if (route.willHandlePopInternally && !hasDrawer) {"
 mutate "D3: no DrawerButton on the flow root" $BTN \
   "      if (hasDrawer) {
