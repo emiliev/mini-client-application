@@ -17,7 +17,7 @@ Flutter markers: @flutter_sky_engine//:sky_engine
 @flutter_sky_engine//sky_engine:lib/_empty.dart
 BUILD restored byte-for-byte: yes
 ```
-## fixtures check (28 production targets scanned)
+## fixtures check (30 production targets scanned)
 ```
 library dependencies: none
 positive control (its own test): //utility/mc_fixtures_library:lib/mc_fixtures_library.dart //utility/mc_fixtures_library:lib/src/data/reading_list.dart 
@@ -40,7 +40,7 @@ BUILD restored byte-for-byte: yes
 | coverage >= 90 % | PASS |
 
 - library tests, uncached: Executed 4 out of 4 tests: 4 tests pass.
-- test //...: Executed 0 out of 121 tests: 121 tests pass.
+- test //...: Executed 0 out of 127 tests: 127 tests pass.
 - mc_fixtures_library coverage: TOTAL 194/197 98.5% (threshold 90 %)
 
 **PASS T-0047-AC5-gates**
