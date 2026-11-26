@@ -84,6 +84,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
   final List<StreamSubscription<Object?>> _subscriptions = [];
   late Future<ChildDIContainer> _container;
   final Map<int, T> _snapshots = {};
+  final NavigatorObserver _navigatorObserver = NavigatorObserver();
   bool _forwarding = false;
   Object? _configError;
   StackTrace? _configStack;
@@ -269,17 +270,50 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
           if (container == null) {
             return const McLoading();
           }
-          return FlowScope(
+          return _FlowScopeHost(
             container: container,
             controller: _controller,
-            outerNavigator: Navigator.maybeOf(context),
+            flowNavigatorObserver: _navigatorObserver,
             child: FlowBuilder<T>(
               controller: _flowController,
               onGeneratePages: _pages,
+              observers: [_navigatorObserver],
             ),
           );
         },
       ),
+    );
+  }
+}
+
+/// Publishes the [FlowScope]. It depends on the flow's own outer route, so a
+/// change of that route (a route below the flow, or `isCurrent` flipping when a
+/// dialog opens above) rebuilds only this widget and republishes the scope. The
+/// [child] is built by the caller and is the same instance, so the flow's
+/// navigator and pages are not rebuilt.
+class _FlowScopeHost extends StatelessWidget {
+  const _FlowScopeHost({
+    required this.container,
+    required this.controller,
+    required this.flowNavigatorObserver,
+    required this.child,
+  });
+
+  final ChildDIContainer container;
+  final FeatureFlowController<Object?> controller;
+  final NavigatorObserver flowNavigatorObserver;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final route = ModalRoute.of(context);
+    return FlowScope(
+      container: container,
+      controller: controller,
+      outerNavigator: Navigator.maybeOf(context),
+      outerCanPop: route != null && !route.isFirst,
+      flowNavigatorObserver: flowNavigatorObserver,
+      child: child,
     );
   }
 }

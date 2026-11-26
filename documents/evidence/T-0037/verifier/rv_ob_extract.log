@@ -1,0 +1,5 @@
+[--output_base=/tmp/a] -> [/tmp/a]
+[--host_jvm_args=-Xmx2g --output_base=/tmp/b --batch] -> [/tmp/b]
+[--batch] -> []
+[--output_base=/tmp/c	--x] -> [/tmp/c]
+bash 3.2.57(1)-release

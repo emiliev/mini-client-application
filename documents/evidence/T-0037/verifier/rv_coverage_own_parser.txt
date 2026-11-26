@@ -1,0 +1,5 @@
+== utility/mc_feature_flow
+    99.2 %   127/ 128  utility/mc_feature_flow/lib/src/feature_flow.dart
+   100.0 %    31/  31  utility/mc_feature_flow/lib/src/flow_context.dart
+   100.0 %     7/   7  utility/mc_feature_flow/lib/testing.dart
+TOTAL utility/mc_feature_flow: 165/166 = 99.4 %

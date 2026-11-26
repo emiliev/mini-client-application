@@ -1,0 +1,41 @@
+  Widget build(BuildContext context) {
+    final route = ModalRoute.of(context);
+    if (route == null) {
+      return const SizedBox.shrink();
+    }
+    final hasDrawer = Scaffold.maybeOf(context)?.hasDrawer ?? false;
+    if (route.isFirst) {
+      final outer = FlowScope.read(context).outerNavigator;
+      if (outer != null && outer.canPop()) {
+        return BackButton(onPressed: () => unawaited(outer.maybePop()));
+      }
+      return hasDrawer ? const DrawerButton() : const SizedBox.shrink();
+    }
+    if (hasDrawer) {
+      return const DrawerButton();
+    }
+    if (route.impliesAppBarDismissal && route.canPop) {
+      return route is PageRoute && route.fullscreenDialog
+          ? const CloseButton()
+          : const BackButton();
+    }
+    return const SizedBox.shrink();
+  }
+}
+bazel rc=3
+  FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 a rebuilt stack [home, flow] under the same flow page key shows the button, which pops back home
+  FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the route below a pushed flow (removeRoute) removes the button
+  FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the routes below a pushed flow (page stack) removes the button
+  FAIL  T-0037-AC2 outside any FeatureFlow T-0037-AC2 a first route with a drawer shows the DrawerButton
+  FAIL  T-0037-AC2 outside any FeatureFlow T-0037-AC2 a first route without a drawer builds empty, without an error
+  FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a drawer on a pushed flow root shows the DrawerButton, not the back button
+  FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry shows the button even when the flow is the app root
+  FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+  FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 flow_builder keeps one PopScope mounted whatever its canPop
+  FAIL  T-0037-AC4 flow_builder and the gates T-0037-AC4 a FlowBuilder driven by state from its parent accepts the next pop after two pages become one
+  FAIL  T-0037-AC4 flow_builder and the gates T-0037-AC4 a FlowBuilder whose parent swaps its controller accepts the next pop after two pages become one
+  PASS  T-0037-AC2 outside any FeatureFlow T-0037-AC2 a pushed route outside a flow keeps the automatic back button
+  PASS  T-0037-AC3 precedence on the flow root T-0037-AC3 a drawer on a flow that is the app root shows the DrawerButton
+  PASS  T-0037-AC3 precedence on the flow root T-0037-AC3 otherwise the flow back button shows and leaves the flow
+  PASS  T-0037-AC3 precedence on the flow root T-0037-AC3 the root button respects the outer route's PopScope
+  PASS  T-0037-AC4 flow_builder and the gates T-0037-AC4 outside any route the widget renders an empty box of its own

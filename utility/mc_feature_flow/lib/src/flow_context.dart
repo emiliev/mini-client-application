@@ -14,6 +14,8 @@ class FlowScope extends InheritedWidget {
     required super.child,
     this.controller,
     this.outerNavigator,
+    this.outerCanPop = false,
+    this.flowNavigatorObserver,
     super.key,
   });
 
@@ -26,6 +28,24 @@ class FlowScope extends InheritedWidget {
   /// another screen); null when the flow is not inside a navigator.
   final NavigatorState? outerNavigator;
 
+  /// Whether the flow's own route has a route below it in [outerNavigator], so
+  /// the flow can be left. `FeatureFlow` depends on its outer `ModalRoute` and
+  /// republishes this value, so a widget that depends on the scope rebuilds
+  /// when the routes below the flow change (a router `go`, a deep-link stack
+  /// rebuild, `pushAndRemoveUntil`).
+  final bool outerCanPop;
+
+  /// An observer attached to the flow's own navigator, so the scope knows
+  /// which `Navigator` is the flow's ([isFlowNavigator]).
+  final NavigatorObserver? flowNavigatorObserver;
+
+  /// Whether [navigator] is the flow's own navigator. A scope built without an
+  /// observer (a test double) cannot tell and says yes.
+  bool isFlowNavigator(NavigatorState? navigator) {
+    final observer = flowNavigatorObserver;
+    return observer == null || identical(observer.navigator, navigator);
+  }
+
   /// The nearest scope without depending on it: the flow's container never
   /// changes while its scope lives, so a lookup in a lifecycle that cannot
   /// rebuild (`BlocProvider.create`) needs no dependency.
@@ -36,6 +56,11 @@ class FlowScope extends InheritedWidget {
     }
     return scope;
   }
+
+  /// The nearest scope, registering a dependency on it, or null outside any
+  /// flow.
+  static FlowScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<FlowScope>();
 
   static FlowScope of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<FlowScope>();
@@ -53,7 +78,7 @@ class FlowScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(FlowScope oldWidget) =>
-      container != oldWidget.container;
+      container != oldWidget.container || outerCanPop != oldWidget.outerCanPop;
 }
 
 extension McFlowContext on BuildContext {
@@ -72,23 +97,39 @@ extension McFlowContext on BuildContext {
       FlowScope.read(this).container.debugResolveAll();
 }
 
-/// The `leading` of a flow page's `AppBar`: `AppBar(leading: const
-/// McFlowBackButton())`. Safe on every page of a flow.
+/// The `leading` of a page's `AppBar`: `AppBar(leading: const
+/// McFlowBackButton())`. Safe on every page: inside a flow or not, on a flow's
+/// root or on a page pushed inside it, with or without a drawer. It never
+/// throws.
 ///
 /// A flow has its own navigator, so its root page never gets `AppBar`'s
 /// automatic back button, and iOS has no system back key. This widget decides
-/// for itself every time it builds:
-/// - On the flow's first route it is a `BackButton` that pops the flow (the
-///   navigator the flow sits in), when that navigator can pop.
-/// - On any other route it renders what `AppBar` would have shown itself: a
-///   `DrawerButton` when the `Scaffold` has a drawer, else a `BackButton`
-///   (`CloseButton` for a fullscreen dialog) that pops that page, when it can.
-/// - Otherwise it is empty.
+/// for itself every time it builds, and it rebuilds when what it decides on
+/// changes (the route's own state, and the routes below the flow, which the
+/// flow publishes through [FlowScope.outerCanPop]).
 ///
-/// When the flow is the app's root (nothing to leave), a page without a drawer
-/// gets an empty leading slot: `AppBar` still reserves its 56 px, so the title
-/// stays centred on iOS, which is the layout the app wants (F-0035). It is not
-/// worked around.
+/// On the root page of a flow (the first route of the flow's navigator), in
+/// this order:
+/// 1. A local history entry that implies dismissal (`route.willHandlePopInternally`
+///    and `route.impliesAppBarDismissal`, for example a `showBottomSheet`): a
+///    plain `BackButton`, which removes the entry and stays in the flow. A
+///    drawer's own entry does not imply dismissal, so an open drawer does not
+///    turn the leading into a back arrow (as in `AppBar`).
+/// 2. A drawer: a `DrawerButton`, as `AppBar` does.
+/// 3. The flow can be left (a route below it in the outer navigator): a
+///    `BackButton` that calls `maybePop` on the outer navigator, so the outer
+///    route's `PopScope` is respected.
+/// 4. Otherwise it is empty.
+///
+/// On any other page, and on a first route outside any flow, it renders what
+/// `AppBar` would show itself: a `DrawerButton` when the `Scaffold` has a
+/// drawer, else a `BackButton` (`CloseButton` for a fullscreen dialog) that
+/// pops that page, when it can; otherwise it is empty. Outside any route it is
+/// empty.
+///
+/// When the flow is the app's root and has no drawer, the widget is empty and
+/// `AppBar` still reserves its 56 px leading slot. iOS centres titles, so this
+/// is the layout the app wants (F-0035). It is not worked around.
 class McFlowBackButton extends StatelessWidget {
   const McFlowBackButton({super.key});
 
@@ -99,12 +140,26 @@ class McFlowBackButton extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final hasDrawer = Scaffold.maybeOf(context)?.hasDrawer ?? false;
-    if (route.isFirst) {
-      final outer = FlowScope.read(context).outerNavigator;
-      if (outer != null && outer.canPop()) {
+    // The flow-root branch is for the first route of the flow's own
+    // navigator; the first route of a navigator nested in a flow page follows
+    // the AppBar's default logic.
+    final flowScope = route.isFirst ? FlowScope.maybeOf(context) : null;
+    final scope =
+        flowScope != null && flowScope.isFlowNavigator(route.navigator)
+        ? flowScope
+        : null;
+    if (scope != null) {
+      if (route.willHandlePopInternally && route.impliesAppBarDismissal) {
+        return const BackButton();
+      }
+      if (hasDrawer) {
+        return const DrawerButton();
+      }
+      final outer = scope.outerNavigator;
+      if (outer != null && scope.outerCanPop) {
         return BackButton(onPressed: () => unawaited(outer.maybePop()));
       }
-      return hasDrawer ? const DrawerButton() : const SizedBox.shrink();
+      return const SizedBox.shrink();
     }
     if (hasDrawer) {
       return const DrawerButton();

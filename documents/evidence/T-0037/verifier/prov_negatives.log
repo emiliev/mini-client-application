@@ -1,0 +1,15 @@
+== extra *.patch (copy of the real one): exit 1 (FAIL as expected)
+| lib/ vs archive | 2 patch files in third_party/flow_builder (exactly one is allowed) | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== patch renamed back to the old name: exit 1 (FAIL as expected)
+| lib/ vs archive | DIFFERS from the recorded patch | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== lib/ loses change 5, patch unchanged: exit 1 (FAIL as expected)
+| lib/ vs archive | DIFFERS from the recorded patch | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== patch loses one change-5 line, lib/ unchanged: exit 1 (FAIL as expected)
+| lib/ vs archive | DIFFERS from the recorded patch | archive + the patch |
+**FAIL T-0035-AC4-provenance**
+== no patch file: exit 1 (FAIL as expected)
+| lib/ vs archive | 0 patch files in third_party/flow_builder (exactly one is allowed) | archive + the patch |
+**FAIL T-0035-AC4-provenance**

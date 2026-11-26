@@ -117,6 +117,7 @@ class _FlowBuilderState<T> extends State<FlowBuilder<T>> {
       _history
         ..clear()
         ..add(_state);
+      _recomputeCanPopAfterFrame();
     } else if (oldWidget.controller != widget.controller) {
       _removeListeners(dispose: oldWidget.controller == null);
       _controller = widget.controller ?? _initController(_controller.state);
@@ -124,6 +125,7 @@ class _FlowBuilderState<T> extends State<FlowBuilder<T>> {
       _history
         ..clear()
         ..add(_state);
+      _recomputeCanPopAfterFrame();
     }
   }
 
@@ -171,10 +173,16 @@ class _FlowBuilderState<T> extends State<FlowBuilder<T>> {
       _pages = widget.onGeneratePages(_state, List.of(_pages));
       _history.add(_state);
     });
-    // mini-client T-0036: `_canPop` reads the navigator, which still holds the
-    // old routes while this build runs. After a state update that returns to
-    // the root, `PopScope(canPop: false)` would stay mounted and eat the next
-    // pop, so recompute once the navigator has the new pages (see VENDORED.md).
+    _recomputeCanPopAfterFrame();
+  }
+
+  // mini-client T-0036 and T-0037: `_canPop` reads the navigator, which still
+  // holds the old routes while a build runs. After a state update that returns
+  // to the root, `PopScope(canPop: false)` would stay mounted and eat the next
+  // pop, so recompute once the navigator has the new pages (see VENDORED.md).
+  // Used by `_listener` (the controller changed) and by `didUpdateWidget` (the
+  // parent passed a new `state` or `controller`).
+  void _recomputeCanPopAfterFrame() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) setState(() {});
     });

@@ -1,0 +1,13 @@
+=== 279:            outerCanPop: route?.canPop ?? false,
+00:00 +11 -1: isFirst vs canPop VP8 app-root flow whose outer route has a local history entry: outer.canPop() is true, !isFirst false, button hidden [E]
+00:00 +12 -1: isFirst vs canPop VP10 edge: pushed flow, outer route holds a local history entry, then the route below is removed: is the button stale?
+VP10 RESULT outerCanPop=true backButtons=1
+VP10 AFTER TAP still in flow=1 outerCanPop=false backButtons=0
+00:00 +20 -1: Some tests failed.
+=== 279:            outerCanPop: route != null && Navigator.of(context).canPop(),
+00:00 +11 -1: isFirst vs canPop VP8 app-root flow whose outer route has a local history entry: outer.canPop() is true, !isFirst false, button hidden [E]
+00:00 +11 -2: isFirst vs canPop VP9 app-root flow with a dialog route above it in the outer navigator: outer.canPop() true, isFirst true [E]
+00:00 +11 -2: isFirst vs canPop VP10 edge: pushed flow, outer route holds a local history entry, then the route below is removed: is the button stale?
+VP10 RESULT outerCanPop=true backButtons=1
+VP10 AFTER TAP still in flow=1 outerCanPop=false backButtons=0
+00:01 +19 -2: Some tests failed.

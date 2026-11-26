@@ -1,0 +1,24 @@
+== utility/mc_feature_flow
+    99.2 %   118/ 119  utility/mc_feature_flow/lib/src/feature_flow.dart
+   100.0 %    27/  27  utility/mc_feature_flow/lib/src/flow_context.dart
+   100.0 %     7/   7  utility/mc_feature_flow/lib/testing.dart
+TOTAL utility/mc_feature_flow: 152/153 = 99.3 %
+== feature/characters/characters_list
+   100.0 %     3/   3  feature/characters/characters_list/lib/src/di/di_initializer.dart
+   100.0 %     4/   4  feature/characters/characters_list/lib/src/domain/model/character_dto.dart
+   100.0 %     1/   1  feature/characters/characters_list/lib/src/domain/model/character_id.dart
+   100.0 %    11/  11  feature/characters/characters_list/lib/src/domain/model/character_mapper.dart
+   100.0 %     1/   1  feature/characters/characters_list/lib/src/domain/model/characters_query.dart
+   100.0 %     8/   8  feature/characters/characters_list/lib/src/domain/repository/characters_list_repository.dart
+   100.0 %    13/  13  feature/characters/characters_list/lib/src/flow/characters_list_flow.dart
+    88.9 %    16/  18  feature/characters/characters_list/lib/src/l10n/characters_list_l10n.dart
+   100.0 %     8/   8  feature/characters/characters_list/lib/src/l10n/characters_list_l10n_de.dart
+   100.0 %    16/  16  feature/characters/characters_list/lib/src/l10n/characters_list_l10n_en.dart
+   100.0 %     7/   7  feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart
+   100.0 %    34/  34  feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart
+   100.0 %     7/   7  feature/characters/characters_list/lib/src/presentation/bloc/characters_list_event.dart
+   100.0 %    19/  19  feature/characters/characters_list/lib/src/presentation/page/character_preview_page.dart
+   100.0 %    35/  35  feature/characters/characters_list/lib/src/presentation/page/characters_list_page.dart
+   100.0 %     7/   7  feature/characters/characters_list/lib/src/presentation/widget/character_tile.dart
+   100.0 %     5/   5  feature/characters/characters_list/lib/src/presentation/widget/failure_message.dart
+TOTAL feature/characters/characters_list: 195/197 = 99.0 %

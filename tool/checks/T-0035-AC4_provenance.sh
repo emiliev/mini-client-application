@@ -4,8 +4,8 @@
 # whenever flow_builder is re-vendored.
 #   1. the pub.dev archive downloads and matches the pinned sha256 (needs
 #      network: a failed download is a FAIL, never a skip);
-#   2. third_party/flow_builder/lib/ differs from the archive's lib/ by exactly
-#      0001-forward-pushRouteInformation.patch, and LICENSE is byte-equal;
+#   2. third_party/flow_builder holds exactly one *.patch, and lib/ differs from the archive's lib/ by exactly
+#      0001-navigation-channel-and-popscope.patch, and LICENSE is byte-equal;
 #   3. nothing outside third_party/flow_builder uses the hosted copy:
 #      - no BUILD / BUILD.bazel / *.bzl names `pub_deps//:flow_builder`, quoted
 #        or not;
@@ -35,9 +35,11 @@ if curl -sfL https://pub.dev/api/archives/flow_builder-0.1.0.tar.gz -o "$tmp/fb.
       | sed -e '1s|.*|--- a/lib/flow_builder.dart|' -e '2s|.*|+++ b/lib/flow_builder.dart|')
     if [[ -n "$other" ]]; then lib_diff="DIFFERS in other files: $other"
     elif [[ -z "$got" ]]; then lib_diff="NO DIFF (the fix is missing)"
-    elif [[ "$got" == "$(cat "$VEND/0001-forward-pushRouteInformation.patch")" ]]; then
-      lib_diff="lib/ = archive + 0001-forward-pushRouteInformation.patch ($(grep -c '^[+-][^+-]' <<< "$got") changed lines)"
+    elif [[ "$got" == "$(cat "$VEND/0001-navigation-channel-and-popscope.patch")" ]]; then
+      lib_diff="lib/ = archive + 0001-navigation-channel-and-popscope.patch ($(grep -c '^[+-][^+-]' <<< "$got") changed lines)"
     else lib_diff="DIFFERS from the recorded patch"; fi
+    n_patches=$(find "$VEND" -maxdepth 1 -name '*.patch' | wc -l | tr -d ' ')
+    [[ "$n_patches" == 1 ]] || lib_diff="$n_patches patch files in $VEND (exactly one is allowed)"
     cmp -s "$tmp/a/LICENSE" "$VEND/LICENSE" && license="byte-equal" || license="DIFFERS"
   else archive="SHA MISMATCH ($sum)"; fi
 fi

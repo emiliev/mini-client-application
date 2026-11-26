@@ -1,0 +1,22 @@
+MUTATION D1: updateShouldNotify ignores outerCanPop: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D1: FeatureFlow reads the outer navigator without a dependency: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D1: the button never reads outerCanPop (root always shows back): killed by //utility/mc_feature_flow:flow_back_button_test //utility/mc_feature_flow:flow_kit_test 
+MUTATION D2: the scope lookup throws outside a flow: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D2: no DrawerButton outside a flow / off the root: killed by //utility/mc_feature_flow:flow_back_button_test //utility/mc_feature_flow:flow_kit_test 
+MUTATION D3: local history ignored on the flow root: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D3: a drawer beats a local history entry: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D3: no DrawerButton on the flow root: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D3: root back button pops instead of maybePop (R-1): killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION flow_builder: PopScope not always mounted (R-3): killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION flow_builder change 5: no recompute after a new state: from the parent: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION flow_builder change 5: no recompute after a new controller: from the parent: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION flow_builder change 4: no recompute after a controller update (T-0036): killed by //utility/mc_feature_flow:flow_back_button_test //utility/mc_feature_flow:flow_kit_test 
+MUTATION T-0036: isFirst ignored (every route is the flow root): killed by //utility/mc_feature_flow:flow_kit_test 
+MUTATION T-0036: fullscreen dialog gets a BackButton: killed by //utility/mc_feature_flow:flow_kit_test 
+MUTATION R1: an open drawer's own history entry counts (willHandlePopInternally alone): killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION R2: outerCanPop from route.canPop instead of isFirst: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION R2: outerCanPop from Navigator.canPop() instead of isFirst: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION R3: a nested navigator's first route takes the flow-root branch: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION R4: the flow navigator depends on the outer route again: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION R5: outside a flow, canPop without impliesAppBarDismissal: killed by //utility/mc_feature_flow:flow_back_button_test 
+rc=0
