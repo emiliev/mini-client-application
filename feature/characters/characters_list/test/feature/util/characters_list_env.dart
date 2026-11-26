@@ -38,6 +38,7 @@ const characterPreviewTitleKey = ValueKey<String>(
   'characters_list.preview.title',
 );
 const relatedComicsKey = ValueKey<String>('characters_list.preview.comics');
+const characterPreviewArtKey = ValueKey<String>('characters_list.preview.art');
 
 /// What the flow state selects, as the tests see it.
 typedef FlowStateView = ({

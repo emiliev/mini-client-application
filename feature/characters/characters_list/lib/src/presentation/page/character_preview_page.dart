@@ -17,6 +17,10 @@ const characterPreviewTitleKey = ValueKey<String>(
   'characters_list.preview.title',
 );
 
+/// Key of the preview's character art (the related comics below it have
+/// covers of their own), for tests.
+const characterPreviewArtKey = ValueKey<String>('characters_list.preview.art');
+
 /// The in-flow preview of one character (a flow page, not a route): its art,
 /// its name, "See full profile" and the comics it appears in, each of which
 /// leaves the feature. The flow keys it by the character's id, so another
@@ -66,6 +70,7 @@ class _CharacterPreviewContent extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   McImage(
+                    key: characterPreviewArtKey,
                     image: character.image,
                     variant: ImageVariant.portraitLarge,
                   ),
