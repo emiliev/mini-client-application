@@ -9,6 +9,7 @@
 # byte-identical is a cache hit for the aggregate (V3-04, T-0028-AC2).
 load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
 load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_config", "injectable_package")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//visibility:private"])
 
@@ -22,7 +23,7 @@ _INIT = "lib/src/di/di_initializer.dart"
 
 _HAND_WRITTEN = glob(
     ["lib/**/*.dart"],
-    exclude = ["lib/**/*.config.dart"],
+    exclude = MC_GENERATED_DART,
 )
 
 # Files the annotation scan marks injectable. plain_helper.dart matches only
