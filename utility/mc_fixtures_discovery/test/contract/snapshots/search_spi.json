@@ -1,0 +1,81 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [
+          {
+            "id": 100480,
+            "subtitle": "The Lantern Circle",
+            "thumbnail": {
+              "path": "mock-asset://characters/014",
+              "variant": "portrait_medium"
+            },
+            "title": "Spindle Alchemist",
+            "type": "character"
+          },
+          {
+            "id": 101400,
+            "subtitle": "Harbor Watch",
+            "thumbnail": {
+              "path": "mock-asset://characters/006",
+              "variant": "portrait_medium"
+            },
+            "title": "Spindle Artisan",
+            "type": "character"
+          },
+          {
+            "id": 101440,
+            "subtitle": "Open Road",
+            "thumbnail": {
+              "path": "mock-asset://characters/020",
+              "variant": "portrait_medium"
+            },
+            "title": "Spindle Bard",
+            "type": "character"
+          }
+        ],
+        "total": 152,
+        "type": "character"
+      },
+      {
+        "results": [
+          {
+            "id": 500000,
+            "subtitle": "2020",
+            "thumbnail": {
+              "path": "mock-asset://characters/016",
+              "variant": "portrait_large"
+            },
+            "title": "Spindle Chronicles #1",
+            "type": "comic"
+          },
+          {
+            "id": 500009,
+            "subtitle": "2020",
+            "thumbnail": {
+              "path": "mock-asset://characters/000",
+              "variant": "portrait_large"
+            },
+            "title": "Spindle Chronicles #10",
+            "type": "comic"
+          },
+          {
+            "id": 500010,
+            "subtitle": "2020",
+            "thumbnail": {
+              "path": "mock-asset://characters/016",
+              "variant": "portrait_large"
+            },
+            "title": "Spindle Chronicles #11",
+            "type": "comic"
+          }
+        ],
+        "total": 400,
+        "type": "comic"
+      }
+    ],
+    "query": "spi"
+  },
+  "request": "GET /v1/search?q=spi&limit=3",
+  "status": 200
+}
