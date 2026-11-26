@@ -11,6 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   mc_ds_buttons: any
+  mc_ds_inputs: any
   mc_ds_layout: any
   mc_ds_theme: any
   mc_ds_tokens: any

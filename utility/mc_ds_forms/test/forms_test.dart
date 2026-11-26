@@ -90,6 +90,103 @@ WizardState<String> _wizard({
   return c.state;
 }
 
+String _message(FieldError e) => switch (e.code) {
+  ValidationCode.required => 'Required',
+  ValidationCode.tooShort => 'At least ${e.min} characters',
+  _ => 'Invalid',
+};
+
+/// A two-step wizard: step one has a name (required, at least 3 characters),
+/// step two has a note. State changes rebuild through setState, as a bloc
+/// would.
+class _Wizard extends StatefulWidget {
+  const _Wizard();
+
+  @override
+  State<_Wizard> createState() => _WizardState();
+}
+
+class _WizardState extends State<_Wizard> {
+  late final WizardController<String> controller = WizardController<String>(
+    steps: [
+      WizardStep(
+        'name',
+        fields: [
+          FieldDef<String>(
+            'name',
+            initial: '',
+            validators: [Validators.required(), Validators.minLength(3)],
+          ),
+        ],
+      ),
+      const WizardStep('note', fields: [FieldDef<String>('note', initial: '')]),
+    ],
+    onState: (_) => setState(() {}),
+    onComplete: (_) async => success('done'),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    final s = controller.state;
+    final name = s.form.field('name');
+    final note = s.form.field('note');
+    return Scaffold(
+      body: McFieldGroup(
+        title: s.stepId == 'name' ? 'Your name' : 'Your note',
+        description: 'Step description',
+        children: [
+          if (s.stepId == 'name')
+            McFormTextField(
+              field: FieldState<String>(
+                value: name.value as String?,
+                initial: name.initial as String?,
+                error: name.error,
+                touched: name.touched,
+              ),
+              label: 'Name',
+              onChanged: (v) => controller.setValue('name', v),
+              onTouched: () => controller.touch('name'),
+              errorMessage: _message,
+            )
+          else
+            McFormTextField(
+              field: FieldState<String>(
+                value: note.value as String?,
+                initial: note.initial as String?,
+                error: note.error,
+                touched: note.touched,
+              ),
+              label: 'Note',
+              onChanged: (v) => controller.setValue('note', v),
+              onTouched: () => controller.touch('note'),
+              errorMessage: _message,
+            ),
+        ],
+      ),
+      bottomNavigationBar: McWizardStepper.fromState(
+        s,
+        stepLabel: _stepLabel,
+        backLabel: 'Back',
+        nextLabel: 'Next',
+        finishLabel: 'Finish',
+        onBack: controller.back,
+        onNext: () {
+          if (s.isLast) {
+            controller.complete();
+          } else {
+            controller.next();
+          }
+        },
+      ),
+    );
+  }
+}
+
+Widget _wizardApp() => MaterialApp(
+  theme: McTheme.light.copyWith(platform: TargetPlatform.iOS),
+  home: const _Wizard(),
+);
+
 SemanticsData _data(WidgetTester tester, Finder f) =>
     tester.getSemantics(f).getSemanticsData();
 
@@ -310,6 +407,154 @@ void main() {
       expect(_button(tester, McWizardStepper.backKey).onPressed, isNull);
       gate.complete(success('ok'));
       await run;
+    });
+  });
+
+  group('T-0045-AC3 fields bound to the form state', () {
+    testWidgets('T-0045-AC3 Next is disabled and no error shows before touch', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wizardApp());
+      expect(_button(tester, McWizardStepper.nextKey).onPressed, isNull);
+      expect(find.text('Required'), findsNothing);
+      expect(find.text('Step 1 of 2'), findsOneWidget);
+    });
+
+    testWidgets('T-0045-AC3 the error shows under the field after it is left', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wizardApp());
+      await tester.enterText(find.byType(TextField), 'ab');
+      await tester.pump();
+      expect(
+        find.text('At least 3 characters'),
+        findsNothing,
+        reason: 'not touched yet',
+      );
+      expect(_button(tester, McWizardStepper.nextKey).onPressed, isNull);
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      expect(find.text('At least 3 characters'), findsOneWidget);
+      expect(
+        tester.getTopLeft(find.text('At least 3 characters')).dy,
+        greaterThan(tester.getBottomLeft(find.byType(TextField)).dy - 40),
+        reason: 'the message sits at the bottom of the field',
+      );
+      expect(_button(tester, McWizardStepper.nextKey).onPressed, isNull);
+    });
+
+    testWidgets('T-0045-AC3 the field error is announced', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_wizardApp());
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      final error = _data(tester, find.bySemanticsLabel('Required'));
+      expect(error.flagsCollection.isLiveRegion, isTrue);
+      handle.dispose();
+    });
+
+    testWidgets('T-0045-AC3 a valid value clears the error and enables Next', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wizardApp());
+      await tester.enterText(find.byType(TextField), 'ab');
+      FocusManager.instance.primaryFocus?.unfocus();
+      await tester.pump();
+      expect(find.text('At least 3 characters'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'abc');
+      await tester.pump();
+      expect(find.text('At least 3 characters'), findsNothing);
+      expect(_button(tester, McWizardStepper.nextKey).onPressed, isNotNull);
+      await tester.tap(find.text('Next'));
+      await tester.pump();
+      expect(find.text('Step 2 of 2'), findsOneWidget);
+      expect(find.text('Your note'), findsOneWidget);
+      expect(find.text('Finish'), findsOneWidget);
+      await tester.tap(find.text('Back'));
+      await tester.pump();
+      expect(find.text('Step 1 of 2'), findsOneWidget);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'abc',
+        reason: 'going back restores the value',
+      );
+    });
+
+    testWidgets('T-0045-AC3 a value set from outside updates the text', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_wizardApp());
+      await tester.enterText(find.byType(TextField), 'abc');
+      final state = tester.state<_WizardState>(find.byType(_Wizard));
+      state.controller.setValue('name', 'zed');
+      await tester.pump();
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller!.text,
+        'zed',
+      );
+    });
+
+    testWidgets('T-0045-AC3 a field shows its initial value', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: McTheme.light,
+          home: Scaffold(
+            body: McFormTextField(
+              field: const FieldState<String>(value: 'Ada', initial: 'Ada'),
+              label: 'Name',
+              onChanged: (_) {},
+              onTouched: () {},
+              errorMessage: _message,
+            ),
+          ),
+        ),
+      );
+      expect(find.text('Ada'), findsOneWidget);
+    });
+
+    testWidgets('T-0045-AC3 touch is reported once when focus leaves', (
+      tester,
+    ) async {
+      var touched = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: McTheme.light,
+          home: Scaffold(
+            body: Column(
+              children: [
+                McFormTextField(
+                  field: const FieldState<String>(value: '', initial: ''),
+                  label: 'Name',
+                  onChanged: (_) {},
+                  onTouched: () => touched++,
+                  errorMessage: _message,
+                ),
+                const TextField(),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(TextField).first);
+      await tester.pump();
+      expect(touched, 0, reason: 'focused, not left');
+      await tester.tap(find.byType(TextField).last);
+      await tester.pump();
+      expect(touched, 1);
+    });
+
+    testWidgets('T-0045-AC3 the group title is a semantics header', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_wizardApp());
+      final data = _data(tester, find.text('Your name'));
+      expect(data.flagsCollection.isHeader, isTrue);
+      expect(find.text('Step description'), findsOneWidget);
+      handle.dispose();
     });
   });
 

@@ -11,6 +11,7 @@ _LANG = "3.13"
 
 _DEPS = [
     "//utility/mc_ds_buttons",
+    "//utility/mc_ds_inputs",
     "//utility/mc_ds_layout",
     "//utility/mc_ds_theme",
     "//utility/mc_ds_tokens",
