@@ -1,0 +1,4 @@
+E3 one shared refresh across epochs: V-AC1 sign-in as B during a retry backoff: the retry carries B; gated V-P9 one refresh per epoch: A in flight, B starts its own
+X3 onError post-refresh epoch check off: V-AC1 sign-in as B during a retry backoff: the retry carries B; gated V-P10 A PUT after a local sign-out mid-refresh is not replayed anonymously
+X4 both onError epoch checks off: V-AC1 sign-in as B during a retry backoff: the retry carries B; gated V-P10 A PUT after a local sign-out mid-refresh is not replayed anonymously
+S1 boot check back to directory listing: V-B1 an unrelated key in the directory: no async read at boot

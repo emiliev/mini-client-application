@@ -1,0 +1,18 @@
+== utility/mc_session (3 coverage.dat files)
+  utility/mc_session/lib/src/auth_tokens.dart: 17/17 missing []
+  utility/mc_session/lib/src/session.dart: 58/58 missing []
+  utility/mc_session/lib/src/session_di_initializer.dart: 10/10 missing []
+  utility/mc_session/lib/src/session_ports.dart: 7/7 missing []
+  TOTAL 92/92 100.0%
+== utility/mc_api_auth (4 coverage.dat files)
+  utility/mc_api_auth/lib/src/api_auth_di_initializer.dart: 8/8 missing []
+  utility/mc_api_auth/lib/src/auth_api.dart: 33/33 missing []
+  utility/mc_api_auth/lib/src/auth_interceptor.dart: 78/78 missing []
+  TOTAL 119/119 100.0%
+== utility/mc_fixtures_identity (3 coverage.dat files)
+  utility/mc_fixtures_identity/lib/src/data/users.dart: 5/5 missing []
+  utility/mc_fixtures_identity/lib/src/domain.dart: 31/33 missing [30, 81]
+  utility/mc_fixtures_identity/lib/src/fixture_sets.dart: 3/3 missing []
+  utility/mc_fixtures_identity/lib/src/handlers/identity_handlers.dart: 74/74 missing []
+  utility/mc_fixtures_identity/lib/src/handlers/tokens.dart: 15/15 missing []
+  TOTAL 128/130 98.5%
