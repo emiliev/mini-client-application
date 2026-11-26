@@ -1,0 +1,17 @@
+00:00 +0 -1: VP1 GoRouter go [flow] -> [home, flow] same page key (same flow instance) [E]
+00:00 +0 -2: VP2 GoRouter go [home, flow] -> [flow] same key (same flow instance) [E]
+00:00 +0 -3: VP3 deep link via flutter/navigation [flow] -> [home, flow] (same flow instance) [E]
+00:00 +0 -4: VP4 deep link via flutter/navigation [home, flow] -> [flow] (same flow instance) [E]
+00:00 +0 -5: VP1 GoRouter go [flow] -> [home, flow] same page key (new flow instance each build) [E]
+00:00 +0 -6: VP2 GoRouter go [home, flow] -> [flow] same key (new flow instance each build) [E]
+00:00 +0 -7: VP3 deep link via flutter/navigation [flow] -> [home, flow] (new flow instance each build) [E]
+00:00 +0 -8: VP4 deep link via flutter/navigation [home, flow] -> [flow] (new flow instance each build) [E]
+00:00 +0 -9: VP5 pushed flow, then removeRouteBelow(flow): button goes [E]
+VP10 RESULT outerCanPop=null backButtons=1
+00:00 +5 -10: AC3 precedence with a LocalHistoryEntry VP11 pushed flow, LocalHistoryEntry on the root page: BackButton removes the entry and stays in the flow [E]
+00:01 +5 -11: AC3 precedence with a LocalHistoryEntry VP12 drawer + LocalHistoryEntry on a pushed root: the entry wins (BackButton, not DrawerButton) [E]
+00:01 +5 -12: AC3 precedence with a LocalHistoryEntry VP13 app-root flow with a LocalHistoryEntry: BackButton, which removes it [E]
+00:01 +5 -13: AC3 precedence with a LocalHistoryEntry VP14 real showBottomSheet on a pushed root, no drawer: back closes the sheet, stays in the flow [E]
+00:01 +5 -14: AC2 outside a flow VP15 first route, no flow, no drawer: empty, no error [E]
+00:01 +5 -15: AC2 outside a flow VP16 first route, no flow, drawer: DrawerButton opens it [E]
+00:01 +6 -15: Some tests failed.

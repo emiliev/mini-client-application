@@ -1,0 +1,50 @@
+V1 order: outer, local, drawer: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a drawer on a pushed flow root shows the DrawerButton, not the back button
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V2 order: local, outer, drawer: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a drawer on a pushed flow root shows the DrawerButton, not the back button
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V3 order: drawer, local, outer: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V4 order: drawer, outer, local: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V5 order: outer, drawer, local: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a drawer on a pushed flow root shows the DrawerButton, not the back button
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V6 local history step removed: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry shows the button even when the flow is the app root
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V7 local history entry gets the outer button: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry shows the button even when the flow is the app root
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry wins: back removes the sheet and stays in the flow
+V8 maybePop -> pop: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 the root button respects the outer route's PopScope
+V9 outerCanPop from route.canPop (not isFirst): SURVIVED
+V10 outerCanPop from Navigator.canPop() (route dependency kept): SURVIVED
+V11 FlowScope.maybeOf registers no dependency: KILLED by
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 a rebuilt stack [home, flow] under the same flow page key shows the button, which pops back home
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the route below a pushed flow (removeRoute) removes the button
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the routes below a pushed flow (page stack) removes the button
+V13 PopScope conditionally mounted (stock): KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 flow_builder keeps one PopScope mounted whatever its canPop
+V14 patch change 5 reverted (both didUpdateWidget branches): KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 flow_builder keeps one PopScope mounted whatever its canPop
+      FAIL  T-0037-AC4 flow_builder and the gates T-0037-AC4 a FlowBuilder driven by state from its parent accepts the next pop after two pages become one
+      FAIL  T-0037-AC4 flow_builder and the gates T-0037-AC4 a FlowBuilder whose parent swaps its controller accepts the next pop after two pages become one
+V15 outside a flow: drawer ignored on a first route: KILLED by
+      FAIL  T-0037-AC2 outside any FeatureFlow T-0037-AC2 a first route with a drawer shows the DrawerButton
+V16 updateShouldNotify always false: KILLED by
+      FAIL  T-0034-AC1 context.di registers no dependency on the scope and a new scope does not recreate the bloc
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 a rebuilt stack [home, flow] under the same flow page key shows the button, which pops back home
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the route below a pushed flow (removeRoute) removes the button
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the routes below a pushed flow (page stack) removes the button
+V17 outerCanPop true whenever routed: KILLED by
+      FAIL  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 absent when the flow is the root
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 a rebuilt stack [home, flow] under the same flow page key shows the button, which pops back home
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the route below a pushed flow (removeRoute) removes the button
+      FAIL  T-0037-AC1 the button follows the routes below the flow T-0037-AC1 removing the routes below a pushed flow (page stack) removes the button
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry shows the button even when the flow is the app root
+V18 local history BackButton only when the flow can be left: KILLED by
+      FAIL  T-0037-AC3 precedence on the flow root T-0037-AC3 a local history entry shows the button even when the flow is the app root
+V19 off-flow first route: pushed check dropped (BackButton when canPop only): SURVIVED
+DONE
