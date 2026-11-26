@@ -643,6 +643,7 @@ void main() {
       expect(host.controller.state.field('email').value, 'a@b.c');
       await tester.enterText(find.byType(TextField).last, 'hello');
       expect(host.controller.state.field('bio').value, 'hello');
+      await tester.pump();
       host.controller.reset();
       await tester.pump();
       expect(_controllerOf(tester, 0).text, '');
@@ -781,6 +782,65 @@ void main() {
       expect(next.hasAction(SemanticsAction.tap), isFalse);
       expect(next.flagsCollection.isButton, isTrue);
       handle.dispose();
+    });
+
+    testWidgets('T-0045-AC3 an enabled Next keeps its tap action', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          McWizardStepper.fromState(
+            _wizard(step: 0),
+            stepLabel: _stepLabel,
+            backLabel: 'Back',
+            nextLabel: 'Next',
+            finishLabel: 'Finish',
+            onBack: () {},
+            onNext: () {},
+            onBlockedNext: () {},
+            blockedHint: _hint,
+          ),
+        ),
+      );
+      final next = _data(tester, find.bySemanticsLabel('Next'));
+      expect(next.hasAction(SemanticsAction.tap), isTrue);
+      expect(next.hint, isNot(_hint));
+      handle.dispose();
+    });
+
+    testWidgets('T-0045-AC3 a field that starts touched never reports it', (
+      tester,
+    ) async {
+      var touched = 0;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: McTheme.light,
+          home: Scaffold(
+            body: Column(
+              children: [
+                McFormTextField(
+                  field: const FieldState<String>(
+                    value: '',
+                    initial: '',
+                    touched: true,
+                  ),
+                  label: 'Name',
+                  onChanged: (_) {},
+                  onTouched: () => touched++,
+                  errorMessage: _message,
+                ),
+                const TextField(),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.byType(TextField).first);
+      await tester.pump();
+      await tester.tap(find.byType(TextField).last);
+      await tester.pump();
+      expect(touched, 0);
     });
 
     testWidgets('T-0045-AC3 a disabled Next without a callback ignores taps', (

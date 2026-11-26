@@ -211,6 +211,11 @@ if [[ -f "$(dirname "$0")/mutations_ds.sh" ]]; then
   source "$(dirname "$0")/mutations_ds.sh"
 fi
 
+if [[ -f "$(dirname "$0")/mutations_review.sh" ]]; then
+  # shellcheck disable=SC1091
+  source "$(dirname "$0")/mutations_review.sh"
+fi
+
 say ""
 say "killed=$killed survived=$survived not-applied=$notapplied"
 if (( survived + notapplied > 0 )); then say "SURVIVORS: ${SURVIVORS[*]}"; exit 1; fi

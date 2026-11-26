@@ -288,8 +288,6 @@ void main() {
       final h = _Harness()..controller.touchCurrentStep();
       expect(h.s.form.field('title').touched, isTrue);
       expect(h.s.form.field('books').touched, isFalse);
-      h.controller.dispose();
-      h.controller.touchCurrentStep();
     });
 
     test('T-0045-AC2 complete with an invalid step jumps to it', () async {

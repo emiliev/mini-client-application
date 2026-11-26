@@ -135,11 +135,8 @@ final class WizardController<R> {
 
   /// Marks the current step's fields as touched, so their errors show. The
   /// UI calls it when the user taps a disabled Next.
-  void touchCurrentStep() {
-    if (!_disposed) {
+  void touchCurrentStep() =>
       _form.touchAll(names: _state.stepFields[_state.stepIndex]);
-    }
-  }
 
   /// Goes to the previous step; its values are as the user left them.
   /// Returns whether it moved.
