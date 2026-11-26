@@ -206,6 +206,24 @@ void main() {
     );
   });
 
+  test('T-0041-AC8 the route targets build each flow with the wiring '
+      'navigator', () async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseWiringDIInitializer(),
+    ]);
+    final router = ref.attach(GoRouter(routes: universeRoutes));
+    addTearDown(router.dispose);
+
+    final targets = diContainer<RouteTargets>();
+    expect(
+      targets.characters().navigator,
+      same(diContainer<CharactersListNavigator>()),
+    );
+    expect(targets.characterDetails(7).id, 7);
+  });
+
   test('T-0033-AC2 every AppLocations entry equals its typed route', () {
     final drift = <String, ({String location, String route})>{
       'characters': (
