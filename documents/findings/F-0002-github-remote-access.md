@@ -24,3 +24,6 @@ The project's remote is the **private** GitHub repo `emiliev/mini-client-applica
 - The remote lives in the shared `.git/config`, so every worktree sees `origin`.
 - PR-based integration from the CLI needs `gh auth login` or `GH_TOKEN`, which is a PO action (Q-005). Until then the PO opens PRs in the GitHub UI, or the TL merges locally.
 - CI on a private repo uses the account's GitHub Actions minutes. Keep the T-0005 workflows lean.
+
+## Update 2026-11-26
+- Large pushes (for example 160 golden PNGs in T-0044) fail over HTTPS with `unable to rewind rpc post data - try increasing http.postBuffer`. The TL worktree now sets `git config http.postBuffer 524288000`, and the retried push succeeded. Set it in any clone that pushes.
