@@ -199,7 +199,7 @@ flutter_gen_l10n(
     nullable_getter = False,
     output_class = "ReadingListEditorL10n",
     output_localization_file = "reading_list_editor_l10n.dart",
-    template_arb_file = "reading_list_editor_en.arb",
+    template_arb_file = "library_reading_list_editor_en.arb",
 )
 
 filegroup(

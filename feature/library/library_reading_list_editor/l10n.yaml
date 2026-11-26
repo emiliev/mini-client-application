@@ -1,7 +1,7 @@
 # IDE and `fvm flutter gen-l10n` baseline only. The Bazel rule ignores this file
 # (rules_flutter §6); BUILD.bazel carries the same settings.
 arb-dir: lib/src/l10n
-template-arb-file: reading_list_editor_en.arb
+template-arb-file: library_reading_list_editor_en.arb
 output-localization-file: reading_list_editor_l10n.dart
 output-class: ReadingListEditorL10n
 output-dir: lib/src/l10n
