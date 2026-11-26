@@ -16,6 +16,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0047](T-0047-fixtures-library.md) | `mc_fixtures_library`: reading lists CRUD with auth (P1-09 subset) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0038, T-0039 | `fleet/T-0047-fixtures-library` |
 
+| [T-0048](T-0048-reading-list-editor-exemplar.md) | **`library_reading_list_editor` exemplar** (FW, P1-20): 3-step wizard, flow result returned to the caller, `library_wiring` | Ready | Engineer (Opus) / Verifier (Opus) | T-0045, T-0047 | `fleet/T-0048-reading-list-editor` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
