@@ -6,6 +6,40 @@
       100826,
       100892
     ],
+    "characters": [
+      {
+        "id": 100227,
+        "name": "Velvet Weaver",
+        "thumbnail": {
+          "path": "mock-asset://characters/007",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "id": 100654,
+        "name": "Iron Engineer",
+        "thumbnail": {
+          "path": "mock-asset://characters/001",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "id": 100826,
+        "name": "Umber Inventor",
+        "thumbnail": {
+          "path": "mock-asset://characters/009",
+          "variant": "portrait_medium"
+        }
+      },
+      {
+        "id": 100892,
+        "name": "Gale Keeper",
+        "thumbnail": {
+          "path": "mock-asset://characters/002",
+          "variant": "portrait_medium"
+        }
+      }
+    ],
     "cover": {
       "path": "mock-asset://characters/016",
       "variant": "portrait_large"

@@ -1,0 +1,17 @@
+VERIFIER parked before release: [PUT v1/me/favourites/comic/501500]
+VERIFIER request POST /v1/auth/sign-in auth=none
+VERIFIER request GET /v1/comics/501500 auth=Bearer mc-access-u-100-1
+VERIFIER request GET /v1/me/favourites/comic/501500 auth=Bearer mc-access-u-100-1
+VERIFIER request POST /v1/auth/sign-out auth=none
+VERIFIER request PUT /v1/me/favourites/comic/501500 auth=none
+  PASS  zz_verifier_probe Verifier probes at e053e45 (not committed) Q1 a sign-out between the PUT being queued and sent
+VERIFIER parked before release: [PUT v1/me/favourites/comic/501500]
+VERIFIER request POST /v1/auth/sign-in auth=none
+VERIFIER request GET /v1/comics/501500 auth=Bearer mc-access-u-100-1
+VERIFIER request GET /v1/me/favourites/comic/501500 auth=Bearer mc-access-u-100-1
+VERIFIER request POST /v1/auth/sign-in auth=none
+VERIFIER request PUT /v1/me/favourites/comic/501500 auth=Bearer mc-access-u-101-2
+VERIFIER request GET /v1/me/favourites/comic/501500 auth=Bearer mc-access-u-101-2
+Expected: <404>
+  Actual: <200>
+  FAIL  zz_verifier_probe Verifier probes at e053e45 (not committed) Q2 another user signs in between the PUT being queued and sent

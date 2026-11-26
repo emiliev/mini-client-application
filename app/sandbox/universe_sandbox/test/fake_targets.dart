@@ -5,6 +5,9 @@ import 'package:universe_wiring/universe_wiring.dart';
 class NoNavigator implements CharactersListNavigator {
   @override
   void openCharacter(CharacterId id) {}
+
+  @override
+  void openComic(ComicId id) {}
 }
 
 class FakeList extends CharactersListFlow {
@@ -15,7 +18,7 @@ class FakeList extends CharactersListFlow {
       const SizedBox(key: Key('fake.characters'));
 }
 
-class FakeTargets implements RouteTargets {
+class FakeTargets implements UniverseRouteTargets {
   @override
   CharactersListFlow characters() => FakeList();
 

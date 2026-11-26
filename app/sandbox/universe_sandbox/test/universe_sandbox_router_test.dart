@@ -13,7 +13,7 @@ void main() {
     await resetDIContainer();
     await initializeDIContainer([
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(FakeTargets());
+        getIt.registerSingleton<UniverseRouteTargets>(FakeTargets());
       }),
     ]);
   });

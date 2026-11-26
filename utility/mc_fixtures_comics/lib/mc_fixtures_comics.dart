@@ -2,6 +2,7 @@ export 'package:mc_fixtures_comics/src/data/links.dart'
     show characterIdBase, characterIdCount, coverImageCount, coverImageSet;
 export 'package:mc_fixtures_comics/src/data/universe.dart'
     show
+        CharacterRef,
         ComicRecord,
         ComicUniverse,
         CreatorCredit,

@@ -1,8 +1,9 @@
 /// The ID contract with the other fixture domains (T-0038). The comics
-/// package must stay pure Dart, so it cannot import `mc_fixtures_characters`
-/// or `mc_fixtures_media` (both pull in Flutter). It states what it relies on
-/// here instead, and the provider-contract test checks every constant against
-/// the real packages: a drift fails a test, not a user.
+/// package must stay pure Dart, so it cannot import `mc_fixtures_media`
+/// (Flutter). It states what it relies on here instead, and the
+/// provider-contract test checks every constant against the real packages: a
+/// drift fails a test, not a user. Since T-0041 `mc_fixtures_characters` is
+/// pure Dart and the detail's cast summary reads it directly.
 library;
 
 /// The first character id in `mc_fixtures_characters` (`idBase`).

@@ -148,6 +148,25 @@ flutter_test(
     ],
 )
 
+# T-0041: comics_details in the full app (route, preview link, cast link).
+flutter_test(
+    name = "comic_route_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/comic_route_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_monitoring",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # --- The app (manual, R14) --------------------------------------------------
 # The app rule carries no DartInfo, so its sources are listed again (as
 # spike/hello does) instead of depending on :mini_client_lib.

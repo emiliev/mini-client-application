@@ -2,6 +2,7 @@
 # pure-Dart handlers (R3).
 load("@rules_dart//dart:defs.bzl", "dart_library")
 load("@rules_flutter//flutter:defs.bzl", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -10,16 +11,20 @@ _LANG = "3.13"
 dart_library(
     name = "mc_fixtures_characters",
     package_name = "mc_fixtures_characters",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = _LANG,
+    # Pure Dart (T-0041): the art set's size is a constant, checked against
+    # mc_fixtures_media by provider_contract_test, so mc_fixtures_comics can
+    # depend on this package.
     deps = [
-        "//utility/mc_fixtures_media",
+        "//utility/mc_media",
         "//utility/mc_mocked_backend",
     ],
 )
 
 _TEST_DEPS = [
     ":mc_fixtures_characters",
+    "//utility/mc_media",
     "//utility/mc_fixtures_media",
     "//utility/mc_mocked_backend",
     "@pub_deps//:dio",

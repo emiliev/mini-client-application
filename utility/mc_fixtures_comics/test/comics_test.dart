@@ -304,6 +304,7 @@ void main() {
           'series',
           'creators',
           'characterIds',
+          'characters', // T-0041: the cast summary
           'price',
           'pageCount',
           'variants',

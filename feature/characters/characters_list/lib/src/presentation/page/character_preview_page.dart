@@ -1,6 +1,8 @@
 import 'package:characters_list/src/domain/model/character.dart';
 import 'package:characters_list/src/l10n/characters_list_l10n.dart';
 import 'package:characters_list/src/presentation/bloc/character_preview_bloc.dart';
+import 'package:characters_list/src/presentation/bloc/related_comics_bloc.dart';
+import 'package:characters_list/src/presentation/widget/related_comics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
@@ -15,9 +17,14 @@ const characterPreviewTitleKey = ValueKey<String>(
   'characters_list.preview.title',
 );
 
+/// Key of the preview's character art (the related comics below it have
+/// covers of their own), for tests.
+const characterPreviewArtKey = ValueKey<String>('characters_list.preview.art');
+
 /// The in-flow preview of one character (a flow page, not a route): its art,
-/// its name and "See full profile", which leaves the feature. The flow keys
-/// it by the character's id, so another character gets a new page and bloc.
+/// its name, "See full profile" and the comics it appears in, each of which
+/// leaves the feature. The flow keys it by the character's id, so another
+/// character gets a new page and blocs.
 class CharacterPreviewPage extends StatelessWidget {
   const CharacterPreviewPage({required this.character, super.key});
 
@@ -26,9 +33,17 @@ class CharacterPreviewPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          context.di<CharacterPreviewBloc>(parameter: character),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) =>
+              context.di<CharacterPreviewBloc>(parameter: character),
+        ),
+        BlocProvider(
+          create: (context) =>
+              context.di<RelatedComicsBloc>(parameter: character),
+        ),
+      ],
       child: const _CharacterPreviewContent(),
     );
   }
@@ -47,20 +62,33 @@ class _CharacterPreviewContent extends StatelessWidget {
           titleKey: characterPreviewTitleKey,
         ),
         body: ListView(
-          padding: McInsets.screen,
+          padding: McInsets.vertical,
           children: [
-            McImage(
-              image: character.image,
-              variant: ImageVariant.portraitLarge,
-            ),
-            const McGap.lg(),
-            McButton(
-              label: l10n.charactersListPreviewSeeFullProfile,
-              expand: true,
-              onPressed: () => context.read<CharacterPreviewBloc>().add(
-                const CharacterPreviewEvent.seeFullProfile(),
+            Padding(
+              padding: McInsets.horizontal,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  McImage(
+                    key: characterPreviewArtKey,
+                    image: character.image,
+                    variant: ImageVariant.portraitLarge,
+                  ),
+                  const McGap.lg(),
+                  McButton(
+                    label: l10n.charactersListPreviewSeeFullProfile,
+                    expand: true,
+                    onPressed: () => context.read<CharacterPreviewBloc>().add(
+                      const CharacterPreviewEvent.seeFullProfile(),
+                    ),
+                  ),
+                ],
               ),
             ),
+            const McGap.lg(),
+            // Full width: the section header and the rows bring their own
+            // insets (DS lists are edge to edge).
+            const RelatedComics(),
           ],
         ),
       ),

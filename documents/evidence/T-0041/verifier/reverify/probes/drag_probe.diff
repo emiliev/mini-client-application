@@ -1,0 +1,62 @@
+diff --git a/app/wiring/publishing_wiring/test/routes_test.dart b/app/wiring/publishing_wiring/test/routes_test.dart
+index 1d22c3f..cbbc306 100644
+--- a/app/wiring/publishing_wiring/test/routes_test.dart
++++ b/app/wiring/publishing_wiring/test/routes_test.dart
+@@ -420,6 +420,57 @@ void main() {
+       hasLength(drift.length + groupOnly.length),
+     );
+   });
++
++  mcTestWidgets('VERIFIER PROBE busy: drag and fling; idle: fling', (
++    tester,
++  ) async {
++    await _boot(tester);
++    final backend = McTestSession.current.backend
++      ..hold('POST /v1/auth/sign-in');
++    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
++    await tester.pumpAndSettle();
++    await tester.tap(find.byKey(fixtureSignInButtonKey));
++    await tester.pump();
++    await tester.drag(find.byKey(fixtureSignInSheetKey), const Offset(0, 500));
++    await tester.pumpAndSettle();
++    // ignore: avoid_print
++    print(
++      'VERIFIER busy drag: sheet stays = '
++      '${find.byKey(fixtureSignInSheetKey).evaluate().isNotEmpty}',
++    );
++    await tester.fling(
++      find.byKey(fixtureSignInSheetKey),
++      const Offset(0, 700),
++      4000,
++    );
++    await tester.pumpAndSettle();
++    // ignore: avoid_print
++    print(
++      'VERIFIER busy fling: sheet stays = '
++      '${find.byKey(fixtureSignInSheetKey).evaluate().isNotEmpty}',
++    );
++    await backend.release('POST /v1/auth/sign-in');
++    await _settleRealIo(tester);
++    // ignore: avoid_print
++    print('VERIFIER busy answer: ${await answer}');
++
++    await tester.runAsync(() => diContainer<SessionWriter>().signOut());
++    await tester.pumpAndSettle();
++    final idle = diContainer<ComicsDetailsNavigator>().requestSignIn();
++    await tester.pumpAndSettle();
++    await tester.fling(
++      find.byKey(fixtureSignInSheetKey),
++      const Offset(0, 700),
++      4000,
++    );
++    await tester.pumpAndSettle();
++    // ignore: avoid_print
++    print(
++      'VERIFIER idle fling: sheet gone = '
++      '${find.byKey(fixtureSignInSheetKey).evaluate().isEmpty}, '
++      'answer ${await idle}',
++    );
++  });
+ }
+ 
+ class _SignedOut implements SessionReader {

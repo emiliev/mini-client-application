@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_feature_flow/testing.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_media/mc_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -36,6 +37,8 @@ const charactersGridKey = ValueKey<String>('characters_list.grid');
 const characterPreviewTitleKey = ValueKey<String>(
   'characters_list.preview.title',
 );
+const relatedComicsKey = ValueKey<String>('characters_list.preview.comics');
+const characterPreviewArtKey = ValueKey<String>('characters_list.preview.art');
 
 /// What the flow state selects, as the tests see it.
 typedef FlowStateView = ({
@@ -98,6 +101,24 @@ CharacterRecord characterNamed(String name) => [
   ..._paged45,
 ].firstWhere((c) => c.name == name);
 
+/// The comics of `comics.default` (seed 42), for the preview's related
+/// comics (T-0041).
+final ComicUniverse comicUniverse = ComicUniverse(42);
+
+/// What the preview lists for [name]: the first 5 comics in title order.
+List<ComicRecord> relatedComicsOf(String name) =>
+    comicUniverse.comicsOfCharacter(characterNamed(name).id).take(5).toList();
+
+/// The comic of `comics.default` titled [title].
+ComicRecord comicTitled(String title) =>
+    comicUniverse.byTitle.firstWhere((c) => c.title == title);
+
+/// The preview page's own scrollable.
+Finder previewScrollable() => find.ancestor(
+  of: find.byKey(relatedComicsKey),
+  matching: find.byType(Scrollable),
+);
+
 /// What every test host provides above a flow: the bundled-art resolver and
 /// the fixture asset bundle (the app root does this in production, T-0033).
 Widget charactersTestHost(Widget flow, {AssetBundle? bundle}) => McMediaScope(
@@ -125,4 +146,7 @@ AssetImage bundledArtFor(ApiImage image) {
 }
 
 /// Called once per suite by the BDD aggregator (`mc_bdd_tests(setup = ...)`).
-void bddSetUpAll() => charactersFixtureSets.forEach(McFixtureSets.register);
+void bddSetUpAll() {
+  charactersFixtureSets.forEach(McFixtureSets.register);
+  comicsFixtureSets.forEach(McFixtureSets.register);
+}

@@ -4,9 +4,10 @@ import 'package:universe_wiring/src/routes/route_targets.dart';
 
 /// Builds each route's flow from the feature barrels (R15: unannotated, so no
 /// generator reads it).
-class RouteTargetsImpl implements RouteTargets {
-  const RouteTargetsImpl({required CharactersListNavigator charactersList})
-    : _charactersList = charactersList;
+class UniverseRouteTargetsImpl implements UniverseRouteTargets {
+  const UniverseRouteTargetsImpl({
+    required CharactersListNavigator charactersList,
+  }) : _charactersList = charactersList;
 
   final CharactersListNavigator _charactersList;
 

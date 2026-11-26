@@ -48,6 +48,8 @@ void main() {
       'CharactersListFlow',
       'CharactersListNavigator',
       'CharacterId',
+      // T-0041: openComic's argument.
+      'ComicId',
     });
     expect(
       RegExp(r'^library\b', multiLine: true).hasMatch(barrel),

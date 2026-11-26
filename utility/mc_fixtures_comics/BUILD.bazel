@@ -3,6 +3,7 @@
 # use Flutter and the other fixture domains to check the cross-links.
 load("@rules_dart//dart:defs.bzl", "dart_library")
 load("@rules_flutter//flutter:defs.bzl", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//visibility:public"])
 
@@ -11,9 +12,11 @@ _LANG = "3.13"
 dart_library(
     name = "mc_fixtures_comics",
     package_name = "mc_fixtures_comics",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = _LANG,
     deps = [
+        # Pure Dart since T-0041: the detail's cast summary reads it.
+        "//utility/mc_fixtures_characters",
         "//utility/mc_media",
         "//utility/mc_mocked_backend",
     ],

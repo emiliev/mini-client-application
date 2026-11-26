@@ -19,7 +19,7 @@ class CharactersRoute extends GoRouteData with $CharactersRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      diContainer<RouteTargets>().characters();
+      diContainer<UniverseRouteTargets>().characters();
 }
 
 /// `/characters/:id`: the character's details (a placeholder for now).
@@ -30,5 +30,5 @@ class CharacterDetailsRoute extends GoRouteData with $CharacterDetailsRoute {
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      diContainer<RouteTargets>().characterDetails(id);
+      diContainer<UniverseRouteTargets>().characterDetails(id);
 }

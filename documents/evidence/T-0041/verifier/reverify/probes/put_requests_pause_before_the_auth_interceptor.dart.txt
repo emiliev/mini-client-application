@@ -1,0 +1,35 @@
+import 'dart:async';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+/// T-0041 Verifier probe (not committed): parks every PUT in front of all
+/// other interceptors (so before mc_api_auth reads the session) until
+/// `the paused request goes on`.
+final Expando<Completer<void>> verifierGate = Expando('verifier gate');
+final Expando<List<String>> verifierParked = Expando('verifier parked');
+
+Future<void> putRequestsPauseBeforeTheAuthInterceptor(
+  WidgetTester tester,
+) async {
+  final session = McTestSession.current;
+  if (!session.containerInitialized) {
+    await McTestContainer.initialize(session);
+  }
+  final gate = verifierGate[session] = Completer<void>();
+  final parked = verifierParked[session] = <String>[];
+  diContainer<Dio>().interceptors.insert(
+    0,
+    InterceptorsWrapper(
+      onRequest: (options, handler) {
+        if (options.method != 'PUT') {
+          return handler.next(options);
+        }
+        parked.add('${options.method} ${options.path}');
+        unawaited(gate.future.then((_) => handler.next(options)));
+      },
+    ),
+  );
+}

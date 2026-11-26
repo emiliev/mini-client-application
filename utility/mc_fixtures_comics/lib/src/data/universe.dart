@@ -1,3 +1,4 @@
+import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_fixtures_comics/src/data/links.dart';
 import 'package:mc_fixtures_comics/src/data/vocabulary.dart';
 import 'package:mc_media/mc_media.dart';
@@ -41,6 +42,27 @@ final class CreatorCredit {
   Map<String, Object?> toJson() => {'id': id, 'name': name, 'role': role};
 }
 
+/// A character in a comic's cast, as the detail summarises it (T-0041): the
+/// id, name and thumbnail `mc_fixtures_characters` serves for the same seed,
+/// so a client needs no request per character.
+final class CharacterRef {
+  const CharacterRef({
+    required this.id,
+    required this.name,
+    required this.thumbnail,
+  });
+
+  final int id;
+  final String name;
+  final ApiImage thumbnail;
+
+  Map<String, Object?> toJson() => {
+    'id': id,
+    'name': name,
+    'thumbnail': thumbnail.toJson(),
+  };
+}
+
 /// A cover variant of a comic.
 final class VariantRecord {
   const VariantRecord({required this.label, required this.cover});
@@ -66,6 +88,7 @@ final class ComicRecord {
     required this.pageCount,
     required this.creators,
     required this.characterIds,
+    required this.characters,
     required this.variants,
   });
 
@@ -83,6 +106,9 @@ final class ComicRecord {
 
   /// Ids in `mc_fixtures_characters`, ascending.
   final List<int> characterIds;
+
+  /// The same cast, in the same order, with names and thumbnails.
+  final List<CharacterRef> characters;
   final List<VariantRecord> variants;
 
   /// The list shape: what a comic card needs.
@@ -102,6 +128,7 @@ final class ComicRecord {
     'series': {'id': seriesId, 'title': seriesTitle},
     'creators': [for (final c in creators) c.toJson()],
     'characterIds': characterIds,
+    'characters': [for (final c in characters) c.toJson()],
     'price': {'amountCents': priceCents, 'currency': 'USD'},
     'pageCount': pageCount,
     'variants': [for (final v in variants) v.toJson()],
@@ -160,6 +187,9 @@ final class SeriesRecord {
 final class ComicUniverse {
   ComicUniverse(int seed) {
     final root = SplitMix64(seed).fork('comics');
+    // The cast comes from the characters domain of the same seed. Names and
+    // thumbnails do not depend on the clock.
+    final cast = CharacterUniverse(seed, defaultMockClock);
     final creators = <CreatorCredit>[
       for (var c = 0; c < creatorCount; c++)
         CreatorCredit(
@@ -190,6 +220,7 @@ final class ComicUniverse {
           issue: k,
           startYear: startYear,
           creators: creators,
+          cast: cast,
         );
         comics.add(comic);
         ids.add(comic.id);
@@ -231,6 +262,7 @@ final class ComicUniverse {
           pageCount: 32,
           creators: const [],
           characterIds: const [],
+          characters: const [],
           variants: const [],
         ),
     ];
@@ -288,6 +320,7 @@ final class ComicUniverse {
     required int issue,
     required int startYear,
     required List<CreatorCredit> creators,
+    required CharacterUniverse cast,
   }) {
     final roles = 2 + rng.nextInt(creatorRoles.length - 1);
     final credits = [
@@ -302,6 +335,7 @@ final class ComicUniverse {
     while (links.length < linkCount) {
       links.add(characterIdBase + rng.nextInt(characterIdCount));
     }
+    final ids = links.toList()..sort();
     final labels = <String>{};
     final variantCount = rng.nextInt(3);
     while (labels.length < variantCount) {
@@ -324,7 +358,14 @@ final class ComicUniverse {
       priceCents: 299 + 100 * rng.nextInt(4),
       pageCount: 24 + 8 * rng.nextInt(5),
       creators: credits,
-      characterIds: (links.toList()..sort()),
+      characterIds: ids,
+      characters: [
+        for (final id in ids)
+          () {
+            final c = cast.find(id)!;
+            return CharacterRef(id: c.id, name: c.name, thumbnail: c.thumbnail);
+          }(),
+      ],
       variants: [
         for (final label in labels)
           VariantRecord(

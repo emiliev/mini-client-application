@@ -1,14 +1,33 @@
 load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 # Public until the P3-06 package_group exists (follow-up: restrict to layers).
 package(default_visibility = ["//visibility:public"])
 
 dart_library(
     name = "mc_formatters",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = "3.13",
     package_name = "mc_formatters",
-    deps = ["@pub_deps//:intl"],
+    deps = [
+        "//utility/mc_di",
+        "@pub_deps//:get_it",
+        "@pub_deps//:intl",
+    ],
+)
+
+# T-0041: its own process, so intl's locale data starts unloaded.
+dart_test(
+    name = "formatters_di_initializer_test",
+    size = "small",
+    language_version = "3.13",
+    main = "test/formatters_di_initializer_test.dart",
+    package_name = "mc_formatters",
+    deps = [
+        ":mc_formatters",
+        "//utility/mc_di",
+        "@pub_deps//:test",
+    ],
 )
 
 dart_test(

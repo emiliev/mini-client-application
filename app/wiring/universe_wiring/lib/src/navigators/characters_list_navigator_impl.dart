@@ -5,7 +5,9 @@ import 'package:characters_list/characters_list.dart';
 import 'package:injectable/injectable.dart';
 import 'package:universe_wiring/src/routes/characters_routes.dart';
 
-/// characters_list's way out of the feature: its intents become typed routes.
+/// characters_list's way out of the feature: its intents become routes. A
+/// character is this group's (a typed route); a comic is the publishing
+/// group's, so it goes through `AppLocations` (plan 01 §4.2).
 /// It holds the [RouterRef], not a router, and asks for the live router at
 /// each call, so after the app's router is replaced (a detach, a new boot) it
 /// still pushes to the one on screen.
@@ -20,5 +22,10 @@ class CharactersListNavigatorImpl implements CharactersListNavigator {
     unawaited(
       _routerRef.router.push(CharacterDetailsRoute(id: id.value).location),
     );
+  }
+
+  @override
+  void openComic(ComicId id) {
+    unawaited(_routerRef.router.push(AppLocations.comic(id.value)));
   }
 }

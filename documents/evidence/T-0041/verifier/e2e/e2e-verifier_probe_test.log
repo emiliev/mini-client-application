@@ -1,0 +1,140 @@
+# e2e_ios.sh: T-0041 verifier on mc-T-0041-verifier-55504 (3B1DECB4-D73B-4EA7-B901-9CA02414D89B)
+# cwd: /tmp/mc-T-0041-verifier-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.U9uoNZ/screenshots/4-verifier_probe_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/verifier_probe_test.dart -d 3B1DECB4-D73B-4EA7-B901-9CA02414D89B
+
+Resolving dependencies in `/private/tmp/mc-T-0041-verifier-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0041-verifier-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            9.5s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64714/e3zb39u07mM=/
+VMServiceFlutterDriver: Isolate found with number: 2250003223628551
+VMServiceFlutterDriver: Isolate 2250003223628551 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: verifier probe: back navigation, sheet drag while signing in, two pages of one comic
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501267 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501267 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _SigningIn
+flutter: [debug] POST /v1/auth/sign-in -> 200
+flutter: [warning] GET /v1/me/favourites/comic/501267 failed: 404
+flutter: [debug] ComicFavouriteBloc: _Toggle _SigningIn -> _Ready
+flutter: [debug] PUT /v1/me/favourites/comic/501267 -> 200
+flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _Ready
+flutter: VERIFIER sheet present after Back while busy: true
+flutter:
+flutter: Warning: A call to drag() with finder "Found 1 widget with key [<'publishing.sign_in.sheet'>]: [
+flutter:   SafeArea-[<'publishing.sign_in.sheet'>](avoid left padding, avoid top padding, avoid right padding, avoid bottom padding, dependencies: [MediaQuery]),
+flutter: ]" derived an Offset (Offset(201.0, 802.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: The finder corresponds to this RenderBox: RenderPadding#b0a9a relayoutBoundary=up7
+flutter: The hit test result at that offset is: HitTestResult(_RenderListTile#900ff@Offset(185.0, 0.0), RenderPadding#274f0@Offset(201.0, 0.0), RenderPadding#9a7e3@Offset(201.0, 0.0), RenderSemanticsAnnotations#e517d@Offset(201.0, 0.0), RenderPointerListener#946da@Offset(201.0, 0.0), RenderSemanticsAnnotations#26c81@Offset(201.0, 0.0), RenderMouseRegion#995da@Offset(201.0, 0.0), RenderSemanticsAnnotations#afdb7@Offset(201.0, 0.0), RenderFlex#a970f@Offset(201.0, 224.0), RenderFlex#bc97b@Offset(201.0, 280.0), RenderRepaintBoundary#f946d@Offset(201.0, 280.0), RenderIndexedSemantics#c8b7d@Offset(201.0, 280.0), RenderSliverList@(mainAxis: 684.0257731974125, crossAxis: 201.0), RenderSliverPadding@(mainAxis: 684.0257731974125, crossAxis: 201.0), RenderViewport#bc2d5@Offset(201.0, 684.0), RenderIgnorePointer#1b1cc@Offset(201.0, 684.0), RenderSemanticsAnnotations#bb6cd@Offset(201.0, 684.0), RenderPointerListener#62226@Offset(201.0, 684.0), RenderSemanticsGestureHandler#2b032@Offset(201.0, 684.0), RenderPointe<…>
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.drag (package:flutter_test/src/controller.dart:1604:7)
+flutter: #3      main.<anonymous closure> (file:///private/tmp/mc-T-0041-verifier-e2e/app/mini_client/integration_test/verifier_probe_test.dart:85:18)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "drag()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter: VERIFIER sheet present after drag while busy: false
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Timed out after 0:00:30.000000 waiting for the favourite saved even though the sheet was dragged
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      fail (package:matcher/src/expect/expect.dart:187:31)
+flutter: #1      pumpUntil (package:mc_e2e_utils/mc_e2e_utils.dart:39:7)
+flutter: <asynchronous suspension>
+flutter: #2      main.<anonymous closure> (file:///private/tmp/mc-T-0041-verifier-e2e/app/mini_client/integration_test/verifier_probe_test.dart:91:5)
+flutter: <asynchronous suspension>
+flutter: #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   verifier probe: back navigation, sheet drag while signing in, two pages of one comic
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:41 +0: verifier probe: back navigation, sheet drag while signing in, two pages of one comic [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: verifier probe: back navigation, sheet drag while signing in, two pages of one comic
+flutter:
+flutter: 00:41 +0 -1: (tearDownAll)
+flutter: 00:41 +1 -1: Some tests failed.
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.U9uoNZ/screenshots/4-verifier_probe_test/v01_back_to_preview.png (298108)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.U9uoNZ/screenshots/4-verifier_probe_test/v02_back_to_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.U9uoNZ/screenshots/4-verifier_probe_test/v03_after_drag_while_signing_in.png (316904)
+Failure Details:
+Failure in method: verifier probe: back navigation, sheet drag while signing in, two pages of one comic
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Timed out after 0:00:30.000000 waiting for the favourite saved
+even though the sheet was dragged
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      pumpUntil (package:mc_e2e_utils/mc_e2e_utils.dart:39:7)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///private/tmp/mc-T-0041-verifier-e2e/app/mini_client/integration_test/verifier_probe_test.dart:91:5)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+The test description was:
+  verifier probe: back navigation, sheet drag while signing in,
+  two pages of one comic
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1

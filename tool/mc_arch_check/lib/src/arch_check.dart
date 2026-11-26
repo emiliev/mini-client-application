@@ -416,8 +416,11 @@ Iterable<Violation> _checkRoutes(_FileContext ctx) sync* {
 
 Iterable<Violation> _checkRouteTargets(_FileContext ctx) sync* {
   for (final declaration in ctx.unit.declarations) {
+    // `RouteTargets` or a group's own (`UniverseRouteTargets`,
+    // `PublishingRouteTargets`): the app imports every wiring's barrel, so
+    // each group prefixes its name (T-0041).
     if (declaration is! ClassDeclaration ||
-        declaration.namePart.typeName.lexeme != 'RouteTargets') {
+        !declaration.namePart.typeName.lexeme.endsWith('RouteTargets')) {
       continue;
     }
     for (final member
@@ -433,8 +436,9 @@ Iterable<Violation> _checkRouteTargets(_FileContext ctx) sync* {
         yield Violation(
           'R15',
           ctx.rel,
-          'RouteTargets.${member.name.lexeme} returns $type; a route builds a '
-              '*Flow, never a page or another widget',
+          '${declaration.namePart.typeName.lexeme}.${member.name.lexeme} '
+              'returns $type; a route builds a *Flow, never a page or another '
+              'widget',
         );
       }
     }

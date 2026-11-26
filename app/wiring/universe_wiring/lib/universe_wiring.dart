@@ -12,7 +12,7 @@ export 'package:universe_wiring/src/flows/character_details_placeholder_flow.dar
 export 'package:universe_wiring/src/routes/characters_routes.dart'
     show CharacterDetailsRoute, CharactersRoute;
 export 'package:universe_wiring/src/routes/route_targets.dart'
-    show RouteTargets;
+    show UniverseRouteTargets;
 
 /// The universe group's routes (characters; teams and locations later).
 List<RouteBase> get universeRoutes => <RouteBase>[...charactersRoutes];

@@ -48,6 +48,7 @@ dev_dependencies:
     sdk: flutter
   mc_analysis: any
   mc_fixtures_characters: any
+  mc_fixtures_comics: any
   mc_fixtures_media: any
   mc_mocked_backend: any
   mc_test_steps: any

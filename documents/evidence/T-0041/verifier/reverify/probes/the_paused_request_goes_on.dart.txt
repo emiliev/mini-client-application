@@ -1,0 +1,14 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import 'put_requests_pause_before_the_auth_interceptor.dart';
+
+/// T-0041 Verifier probe (not committed).
+Future<void> thePausedRequestGoesOn(WidgetTester tester) async {
+  final session = McTestSession.current;
+  // ignore: avoid_print
+  print('VERIFIER parked before release: ${verifierParked[session]}');
+  expect(verifierParked[session], isNotEmpty, reason: 'a PUT was parked');
+  verifierGate[session]!.complete();
+  await mcSettle(tester);
+}

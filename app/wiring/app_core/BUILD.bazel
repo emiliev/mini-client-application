@@ -1,5 +1,6 @@
 # T-0021 (P1-16): app_core, the shared app layer (plan 01 §3.4).
 load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//app:__subpackages__"])
 
@@ -16,7 +17,10 @@ _DEPS = [
     "//utility/mc_ds_media",
     "//utility/mc_ds_theme",
     "//utility/mc_event_bus",
+    "//utility/mc_formatters",
     "//utility/mc_fixtures_characters",
+    "//utility/mc_fixtures_comics",
+    "//utility/mc_fixtures_identity",
     "//utility/mc_fixtures_media",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
@@ -32,7 +36,7 @@ _DEPS = [
 flutter_library(
     name = "app_core",
     package_name = "app_core",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = _LANG,
     deps = _DEPS,
 )
@@ -45,11 +49,11 @@ flutter_library(
     main = "test/%s.dart" % t,
     deps = _DEPS + [
         ":app_core",
-        "//utility/mc_fixtures_identity",
         "@pub_deps//:flutter_test",
     ],
 ) for t in [
     "boot_test",
     "links_and_hooks_test",
     "router_ref_and_scheme_test",
+    "formatters_root_test",
 ]]

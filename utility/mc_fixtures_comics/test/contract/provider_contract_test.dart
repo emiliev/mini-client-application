@@ -145,6 +145,46 @@ void main() {
       expect(links, greaterThan(5000));
     });
 
+    for (final seed in [42, 7]) {
+      test('T-0041-AC1 seed $seed: every served cast summary equals what the '
+          'characters domain serves for that id', () async {
+        final dio = MockBackend(
+          seed: seed,
+          domains: [const ComicsMockDomain(), const CharactersMockDomain()],
+        ).createDio();
+        final comics = ComicUniverse(seed).byTitle;
+        // Every comic in the record, and the served JSON of a sample.
+        for (final comic in comics) {
+          expect(
+            [for (final c in comic.characters) c.id],
+            comic.characterIds,
+            reason: '${comic.title}: the summary lists characterIds, in order',
+          );
+        }
+        var checked = 0;
+        for (final comic in comics.where((c) => c.id % 37 == 0)) {
+          final detail = (await dio.get<Map<String, Object?>>(
+            '/v1/comics/${comic.id}',
+          )).data!;
+          final cast = (detail['characters']! as List)
+              .cast<Map<String, Object?>>();
+          expect([for (final c in cast) c['id']], detail['characterIds']);
+          for (final member in cast) {
+            final served = (await dio.get<Map<String, Object?>>(
+              '/v1/characters/${member['id']}',
+            )).data!;
+            expect(member, {
+              'id': served['id'],
+              'name': served['name'],
+              'thumbnail': served['thumbnail'],
+            }, reason: '${comic.title} -> ${member['id']}');
+            checked++;
+          }
+        }
+        expect(checked, greaterThan(150));
+      });
+    }
+
     test('T-0038-AC3: a seed other than 42 still links to real characters', () {
       final known = {
         for (final c in CharacterUniverse(7, defaultMockClock).byName) c.id,

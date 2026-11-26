@@ -6,5 +6,9 @@
   "charactersListEmptyMessage": "Neue Figuren erscheinen hier.",
   "charactersListErrorTitle": "Figuren konnten nicht geladen werden",
   "charactersListLoadMoreFailed": "Weitere Figuren konnten nicht geladen werden.",
-  "charactersListPreviewSeeFullProfile": "Vollständiges Profil ansehen"
+  "charactersListPreviewSeeFullProfile": "Vollständiges Profil ansehen",
+  "charactersListPreviewComics": "Comics",
+  "charactersListPreviewComicsLoading": "Comics werden geladen",
+  "charactersListPreviewComicsEmpty": "Noch keine Comics.",
+  "charactersListPreviewComicsFailed": "Comics konnten nicht geladen werden."
 }

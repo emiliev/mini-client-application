@@ -48,8 +48,13 @@ Future<void> iSeeTheCharacterPreviewFor(
     reason: 'the preview page is keyed by the selected id',
   );
 
+  // The character's own art in this preview's Scaffold (the related comics
+  // below it show covers of their own, T-0041).
   final art = find.descendant(
-    of: find.ancestor(of: title, matching: find.byType(Scaffold)),
+    of: find.descendant(
+      of: find.ancestor(of: title, matching: find.byType(Scaffold)),
+      matching: find.byKey(characterPreviewArtKey),
+    ),
     matching: find.byType(Image),
   );
   expect(tester.widget<Image>(art).image, bundledArtFor(record.thumbnail));

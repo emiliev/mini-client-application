@@ -16,7 +16,7 @@ class _FakeList extends CharactersListFlow {
       const SizedBox(key: Key('fake.characters'));
 }
 
-class _Targets implements RouteTargets {
+class _Targets implements UniverseRouteTargets {
   @override
   CharactersListFlow characters() =>
       _FakeList(navigator: diContainer<CharactersListNavigator>());
@@ -47,7 +47,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     final router = ref.attach(
@@ -81,7 +81,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     final router = ref.attach(
@@ -120,7 +120,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     GoRouter build() => GoRouter(
@@ -151,6 +151,42 @@ void main() {
     expect(find.text('Character details 2'), findsOneWidget);
   });
 
+  testWidgets('T-0041-AC5 openComic pushes the comic location of the '
+      'publishing group', (tester) async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseNavigatorsDIInitializer(),
+      McDIInitializer((getIt, _) {
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
+      }),
+    ]);
+    // publishing_wiring owns `/comics/:id`; a wiring never imports another
+    // wiring, so a stand-in answers the location.
+    final router = ref.attach(
+      GoRouter(
+        initialLocation: AppLocations.characters,
+        routes: [
+          ...universeRoutes,
+          GoRoute(
+            path: '/comics/:id',
+            builder: (context, state) =>
+                Text('comic ${state.pathParameters['id']}'),
+          ),
+        ],
+      ),
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    diContainer<CharactersListNavigator>().openComic(const ComicId(501267));
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.toString(), AppLocations.comic(501267));
+    expect(find.text('comic 501267'), findsOneWidget);
+    expect(router.canPop(), isTrue, reason: 'a push: Back returns to the list');
+  });
+
   test('T-0033-AC1 the wiring initializer resolves the route targets and the '
       'navigator', () async {
     final ref = RouterRef();
@@ -162,12 +198,30 @@ void main() {
     final router = ref.attach(GoRouter(routes: universeRoutes));
     addTearDown(router.dispose);
 
-    expect(diContainer<RouteTargets>(), isA<RouteTargets>());
+    expect(diContainer<UniverseRouteTargets>(), isA<UniverseRouteTargets>());
     expect(
       diContainer<CharactersListNavigator>(),
       same(diContainer<CharactersListNavigator>()),
       reason: 'a lazy singleton',
     );
+  });
+
+  test('T-0041-AC8 the route targets build each flow with the wiring '
+      'navigator', () async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseWiringDIInitializer(),
+    ]);
+    final router = ref.attach(GoRouter(routes: universeRoutes));
+    addTearDown(router.dispose);
+
+    final targets = diContainer<UniverseRouteTargets>();
+    expect(
+      targets.characters().navigator,
+      same(diContainer<CharactersListNavigator>()),
+    );
+    expect(targets.characterDetails(7).id, 7);
   });
 
   test('T-0033-AC2 every AppLocations entry equals its typed route', () {
