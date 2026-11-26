@@ -94,19 +94,19 @@ m V-required-blank $VAL $V 'value.trim().isEmpty' 'value.isEmpty'
 m V-required-iterable $VAL $V '(value is Iterable<Object?> && value.isEmpty) ||' 'false ||'
 m V-required-map $VAL $V '(value is Map<Object?, Object?> && value.isEmpty);' 'false;'
 m V-required-code $VAL $V 'empty ? const FieldError(ValidationCode.required) : null' 'empty ? const FieldError(ValidationCode.invalid) : null'
-m V-minlength-boundary $VAL $V 'value.length >= min' 'value.length > min'
-m V-minlength-empty $VAL $V 'value == null || value.isEmpty || value.length >= min' 'value == null || value.length >= min'
+m V-minlength-boundary $VAL $V 'value.characters.length >= min' 'value.characters.length > min'
+m V-minlength-empty $VAL $V 'value == null || value.isEmpty || value.characters.length >= min' 'value == null || value.characters.length >= min'
 m V-minlength-limit $VAL $V 'FieldError(ValidationCode.tooShort, min: min)' 'FieldError(ValidationCode.tooShort)'
-m V-maxlength-boundary $VAL $V 'value.length <= max' 'value.length < max'
+m V-maxlength-boundary $VAL $V 'value.characters.length <= max' 'value.characters.length < max'
 m V-maxlength-limit $VAL $V 'FieldError(ValidationCode.tooLong, max: max)' 'FieldError(ValidationCode.tooLong)'
-m V-pattern-whole $VAL $V 'match != null && match.end == value.length' 'match != null'
-m V-pattern-empty $VAL $V 'if (value == null || value.isEmpty) {
-      return null;
-    }
-    final match' 'if (value == null) {
-      return null;
-    }
-    final match'
+m V-pattern-whole $VAL $V 'return anchored.hasMatch(value) ? null : FieldError(code);' 'return null;'
+m V-pattern-empty $VAL $V '      if (value == null || value.isEmpty) {
+        return null;
+      }
+      return anchored' '      if (value == null) {
+        return null;
+      }
+      return anchored'
 m V-pattern-code $VAL $V 'FieldError(code);' 'FieldError(ValidationCode.patternMismatch);'
 m V-range-below $VAL $V 'if (min != null && value < min) {' 'if (min != null && value <= min) {'
 m V-range-above $VAL $V 'if (max != null && value > max) {' 'if (max != null && value >= max) {'
@@ -140,7 +140,7 @@ m F-cross-revalidate $FORM $FC 'e.value.withError(_specs[e.key]!.check(e.value.v
 m F-touch-names $FORM $FC 'e.key: targets.contains(e.key) ? e.value.touch() : e.value,' 'e.key: e.value.touch(),'
 m F-touch-emit $FORM $FC 'if (!_sameFields(next)) {' 'if (true) {'
 m F-set-unknown $FORM $FC '    _spec(name);
-    _emit(' '    _emit('
+    if (_state.isSubmitting) {' '    if (_state.isSubmitting) {'
 m F-dup-names $FORM $FC 'if (map.containsKey(f.name)) {' 'if (false) {'
 m F-reset-guard $FORM $FC 'if (_state.isSubmitting) {
       return;
@@ -178,25 +178,26 @@ m F-disposed-emit $FORM $FC 'if (!_disposed) {
 
 # --- wizard (AC2, P1-14 AC4) ---
 m W-next-blocked $WIZ $WC 'if (!_state.isCurrentStepValid) {
-      _form.touchAll' 'if (false) {
-      _form.touchAll'
-m W-next-touch $WIZ $WC '      _form.touchAll(names: _state.stepFields[_state.stepIndex]);' ''
+      touchCurrentStep' 'if (false) {
+      touchCurrentStep'
+m W-next-touch $WIZ $WC '      touchCurrentStep();
+      return false;' '      return false;'
 m W-next-touch-all $WIZ $WC '_form.touchAll(names: _state.stepFields[_state.stepIndex]);' '_form.touchAll();'
-m W-next-last $WIZ $WC 'if (_disposed || _state.isLast || _state.isCompleting) {' 'if (_disposed || _state.isCompleting) {'
-m W-next-completing $WIZ $WC 'if (_disposed || _state.isLast || _state.isCompleting) {' 'if (_disposed || _state.isLast) {'
+m W-next-last $WIZ $WC '        _state.isLast ||
+' ''
+m W-next-completing $WIZ $WC '        _state.isCompleting ||
+' ''
 m W-back-guard $WIZ $WC 'if (_disposed || !_state.canGoBack) {' 'if (_disposed) {'
 m W-back-completing $WIZ $WC 'bool get canGoBack => !isFirst && !isCompleting && !isCompleted;' 'bool get canGoBack => !isFirst;'
 m W-step-errors $WIZ $WC 'for (final name in stepFields[index])' 'for (final name in stepFields[0])'
 m W-is-last $WIZ $WC 'bool get isLast => stepIndex == stepCount - 1;' 'bool get isLast => stepIndex == stepCount;'
-m W-can-next $WIZ $WC 'bool get canGoNext => !isLast && isCurrentStepValid && !isCompleting;' 'bool get canGoNext => !isLast && !isCompleting;'
-m W-can-complete $WIZ $WC 'isLast && isCurrentStepValid && !isCompleting && !isCompleted;' 'isLast && !isCompleting && !isCompleted;'
+m W-can-next $WIZ $WC '      !isLast && isCurrentStepValid && !isCompleting && !isCompleted;' '      !isLast && !isCompleting && !isCompleted;'
+m W-can-complete $WIZ $WC '      isLast && isCurrentStepValid && !isCompleting && !isCompleted;' '      isLast && !isCompleting && !isCompleted;'
 m W-complete-once $WIZ $WC 'if (_disposed || _state.isCompleting || _state.isCompleted) {
       return null;' 'if (_disposed || _state.isCompleting) {
       return null;'
-m W-complete-touch $WIZ $WC '    _form.touchAll();
-    for (var i' '    for (var i'
 m W-complete-jump $WIZ $WC '        _goTo(i);
-        return null;' '        return null;'
+' ''
 m W-complete-validate $WIZ $WC '      if (!_state.isStepValid(i)) {' '      if (false) {'
 m W-empty-steps $WIZ $WC 'if (steps.isEmpty) {' 'if (false) {'
 m W-keeps-step $WIZ $WC 'void _onForm(McFormState form) => _emit(_build(form, _state.stepIndex));' 'void _onForm(McFormState form) => _emit(_build(form, 0));'

@@ -5,13 +5,18 @@ KILLED       V-required-blank -> //utility/mc_forms:validators_test
 KILLED       V-required-iterable -> //utility/mc_forms:validators_test
 KILLED       V-required-map -> //utility/mc_forms:validators_test
 KILLED       V-required-code -> //utility/mc_forms:validators_test
-KILLED       V-minlength-boundary -> //utility/mc_forms:validators_test
-KILLED       V-minlength-empty -> //utility/mc_forms:validators_test
+count=0
+NOT APPLIED  V-minlength-boundary (utility/mc_forms/lib/src/validators.dart)
+count=0
+NOT APPLIED  V-minlength-empty (utility/mc_forms/lib/src/validators.dart)
 KILLED       V-minlength-limit -> //utility/mc_forms:validators_test
-KILLED       V-maxlength-boundary -> //utility/mc_forms:validators_test
+count=0
+NOT APPLIED  V-maxlength-boundary (utility/mc_forms/lib/src/validators.dart)
 KILLED       V-maxlength-limit -> //utility/mc_forms:validators_test
-KILLED       V-pattern-whole -> //utility/mc_forms:validators_test
-KILLED       V-pattern-empty -> //utility/mc_forms:validators_test
+count=0
+NOT APPLIED  V-pattern-whole (utility/mc_forms/lib/src/validators.dart)
+count=0
+NOT APPLIED  V-pattern-empty (utility/mc_forms/lib/src/validators.dart)
 KILLED       V-pattern-code -> //utility/mc_forms:validators_test
 KILLED       V-range-below -> //utility/mc_forms:validators_test
 KILLED       V-range-above -> //utility/mc_forms:validators_test
@@ -36,7 +41,8 @@ KILLED       F-visible-errors -> //utility/mc_forms:form_controller_test
 KILLED       F-cross-revalidate -> //utility/mc_forms:form_controller_test
 KILLED       F-touch-names -> //utility/mc_forms:form_controller_test
 KILLED       F-touch-emit -> //utility/mc_forms:form_controller_test
-KILLED       F-set-unknown -> //utility/mc_forms:form_controller_test
+count=0
+NOT APPLIED  F-set-unknown (utility/mc_forms/lib/src/form_controller.dart)
 KILLED       F-dup-names -> //utility/mc_forms:form_controller_test
 KILLED       F-reset-guard -> //utility/mc_forms:form_controller_test
 KILLED       F-reset-values -> //utility/mc_forms:form_controller_test
@@ -49,20 +55,27 @@ KILLED       F-submit-failure -> //utility/mc_forms:form_controller_test
 KILLED       F-submit-result -> //utility/mc_forms:form_controller_test
 KILLED       F-edit-clears-failure -> //utility/mc_forms:form_controller_test
 KILLED       F-disposed-emit -> //utility/mc_forms:form_controller_test
-KILLED       W-next-blocked -> //utility/mc_forms:wizard_controller_test
-KILLED       W-next-touch -> //utility/mc_forms:wizard_controller_test
+count=0
+NOT APPLIED  W-next-blocked (utility/mc_forms/lib/src/wizard_controller.dart)
+SURVIVED     W-next-touch -> //utility/mc_forms:wizard_controller_test (bazel exit 1)
 KILLED       W-next-touch-all -> //utility/mc_forms:wizard_controller_test
-KILLED       W-next-last -> //utility/mc_forms:wizard_controller_test
-KILLED       W-next-completing -> //utility/mc_forms:wizard_controller_test
+count=0
+NOT APPLIED  W-next-last (utility/mc_forms/lib/src/wizard_controller.dart)
+count=0
+NOT APPLIED  W-next-completing (utility/mc_forms/lib/src/wizard_controller.dart)
 KILLED       W-back-guard -> //utility/mc_forms:wizard_controller_test
 KILLED       W-back-completing -> //utility/mc_forms:wizard_controller_test
 KILLED       W-step-errors -> //utility/mc_forms:wizard_controller_test
 KILLED       W-is-last -> //utility/mc_forms:wizard_controller_test
-KILLED       W-can-next -> //utility/mc_forms:wizard_controller_test
-KILLED       W-can-complete -> //utility/mc_forms:wizard_controller_test
+count=0
+NOT APPLIED  W-can-next (utility/mc_forms/lib/src/wizard_controller.dart)
+count=2
+NOT APPLIED  W-can-complete (utility/mc_forms/lib/src/wizard_controller.dart)
 KILLED       W-complete-once -> //utility/mc_forms:wizard_controller_test
-KILLED       W-complete-touch -> //utility/mc_forms:wizard_controller_test
-KILLED       W-complete-jump -> //utility/mc_forms:wizard_controller_test
+count=0
+NOT APPLIED  W-complete-touch (utility/mc_forms/lib/src/wizard_controller.dart)
+count=0
+NOT APPLIED  W-complete-jump (utility/mc_forms/lib/src/wizard_controller.dart)
 KILLED       W-complete-validate -> //utility/mc_forms:wizard_controller_test
 KILLED       W-empty-steps -> //utility/mc_forms:wizard_controller_test
 KILLED       W-keeps-step -> //utility/mc_forms:wizard_controller_test
@@ -84,11 +97,13 @@ KILLED       T-live -> //utility/mc_ds_forms:forms_test
 KILLED       T-label -> //utility/mc_ds_forms:forms_test
 KILLED       T-segments -> //utility/mc_ds_forms:forms_test
 KILLED       T-back-wired -> //utility/mc_ds_forms:forms_test
-KILLED       T-next-wired -> //utility/mc_ds_forms:forms_test
+count=0
+NOT APPLIED  T-next-wired (utility/mc_ds_forms/lib/src/mc_wizard_stepper.dart)
 KILLED       G-header -> //utility/mc_ds_forms:forms_test
 KILLED       G-description -> //utility/mc_ds_forms:forms_test
 KILLED       F-visible -> //utility/mc_ds_forms:forms_test
-KILLED       F-sync -> //utility/mc_ds_forms:forms_test
+count=0
+NOT APPLIED  F-sync (utility/mc_ds_forms/lib/src/mc_form_text_field.dart)
 KILLED       F-touch -> //utility/mc_ds_forms:forms_test
 KILLED       F-initial -> //utility/mc_ds_forms:forms_test
 KILLED       F-message -> //utility/mc_ds_forms:forms_test
@@ -96,6 +111,34 @@ KILLED       F-changed -> //utility/mc_ds_forms:forms_test
 KILLED       GOLD-segment-colour -> //utility/mc_ds_forms:golden_test
 KILLED       GOLD-bar-border -> //utility/mc_ds_forms:golden_test
 KILLED       GOLD-group-gap -> //utility/mc_ds_forms:golden_test
+KILLED       R-pattern-group -> //utility/mc_forms:validators_test
+KILLED       R-pattern-start -> //utility/mc_forms:validators_test
+KILLED       R-pattern-end -> //utility/mc_forms:validators_test
+KILLED       R-pattern-case -> //utility/mc_forms:validators_test
+KILLED       R-pattern-dotall -> //utility/mc_forms:validators_test
+KILLED       R-min-graphemes -> //utility/mc_forms:validators_test
+KILLED       R-max-graphemes -> //utility/mc_forms:validators_test
+KILLED       R-set-submitting -> //utility/mc_forms:form_controller_test
+KILLED       R-fieldof-value -> //utility/mc_forms:form_controller_test
+KILLED       R-fieldof-touched -> //utility/mc_forms:form_controller_test
+KILLED       R-complete-touch-first -> //utility/mc_forms:wizard_controller_test
+KILLED       R-can-next-completed -> //utility/mc_forms:wizard_controller_test
+KILLED       R-next-completed -> //utility/mc_forms:wizard_controller_test
+KILLED       R-touch-current -> //utility/mc_forms:wizard_controller_test
+KILLED       R-scope-busy -> //utility/mc_ds_forms:forms_test
+KILLED       R-blocked-busy -> //utility/mc_ds_forms:forms_test
+KILLED       R-blocked-hint-scaffold -> //utility/mc_ds_forms:forms_test
+KILLED       R-blocked-hint-stepper -> //utility/mc_ds_forms:forms_test
+KILLED       R-blocked-active -> //utility/mc_ds_forms:forms_test
+KILLED       R-blocked-completing -> //utility/mc_ds_forms:forms_test
+KILLED       R-group-enabled -> //utility/mc_ds_forms:forms_test
+KILLED       R-scope-narrow -> //utility/mc_ds_forms:forms_test
+KILLED       R-field-enabled -> //utility/mc_ds_forms:forms_test
+KILLED       R-sync-guard -> //utility/mc_ds_forms:forms_test
+KILLED       R-selection -> //utility/mc_ds_forms:forms_test
+KILLED       R-reported -> //utility/mc_ds_forms:forms_test
+KILLED       R-reported-rearm -> //utility/mc_ds_forms:forms_test
+KILLED       R-reported-init -> //utility/mc_ds_forms:forms_test
 
-killed=96 survived=0 not-applied=0
-ALL MUTATIONS KILLED
+killed=108 survived=1 not-applied=15
+SURVIVORS: V-minlength-boundary(not applied) V-minlength-empty(not applied) V-maxlength-boundary(not applied) V-pattern-whole(not applied) V-pattern-empty(not applied) F-set-unknown(not applied) W-next-blocked(not applied) W-next-touch W-next-last(not applied) W-next-completing(not applied) W-can-next(not applied) W-can-complete(not applied) W-complete-touch(not applied) W-complete-jump(not applied) T-next-wired(not applied) F-sync(not applied)

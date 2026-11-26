@@ -709,6 +709,19 @@ void main() {
       expect(_controllerOf(tester, 0).selection.baseOffset, 2);
     });
 
+    testWidgets('T-0045-AC3 a value set before any edit puts the cursor last', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _fieldApp(const FieldState<String>(value: 'a', initial: '')),
+      );
+      await tester.pumpWidget(
+        _fieldApp(const FieldState<String>(value: 'xyz', initial: '')),
+      );
+      expect(_controllerOf(tester, 0).text, 'xyz');
+      expect(_controllerOf(tester, 0).selection.baseOffset, 3);
+    });
+
     testWidgets('T-0045-AC3 a changed value keeps a clamped cursor', (
       tester,
     ) async {

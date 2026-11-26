@@ -40,3 +40,4 @@ m R-reported-rearm $DT $FT '      _reported = false;
     // Only' '    }
     // Only'
 m R-reported-init $DT $FT 'late bool _reported = widget.field.touched;' 'late bool _reported = false;'
+m R-selection-invalid $DT $FT ': TextSelection.collapsed(offset: value.length),' ': const TextSelection.collapsed(offset: 0),'

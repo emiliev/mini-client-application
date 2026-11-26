@@ -29,13 +29,15 @@ m T-segments $DT $WS 'color: i <= currentStep' 'color: i < currentStep'
 m T-back-wired $DT $WS 'onPressed: onBack,
                         expand' 'onPressed: onNext,
                         expand'
-m T-next-wired $DT $WS 'onPressed: onNext,
-                        expand' 'onPressed: onBack,
-                        expand'
+m T-next-wired $DT $WS '                          onPressed: onNext,
+                          expand' '                          onPressed: onBack,
+                          expand'
 m G-header $DT $FG 'header: true,' 'header: false,'
 m G-description $DT $FG 'if (description != null) ...[' 'if (false) ...['
 m F-visible $DT $FT 'final error = widget.field.visibleError;' 'final error = widget.field.error;'
-m F-sync $DT $FT 'if (value != _controller.text) {' 'if (false) {'
+m F-sync $DT $FT '      text: value,
+      selection:' '      text: current.text,
+      selection:'
 m F-touch $DT $FT '      _hadFocus = true;' '      _hadFocus = false;'
 m F-initial $DT $FT 'text: widget.field.value ?? '"''"',' 'text: '"''"','
 m F-message $DT $FT 'errorText: error == null ? null : widget.errorMessage(error),' 'errorText: null,'

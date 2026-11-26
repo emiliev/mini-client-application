@@ -13,6 +13,6 @@
 | coverage >= 90 % (mc_forms and mc_ds_forms) | PASS |
 
 - tests: Executed 0 out of 123 tests: 123 tests pass.
-- coverage: == utility/mc_forms TOTAL 246/246 100.0% == utility/mc_ds_forms TOTAL 143/143 100.0% (threshold 90 %)
+- coverage: == utility/mc_forms TOTAL 266/266 100.0% == utility/mc_ds_forms TOTAL 194/195 99.5% (threshold 90 %)
 
 **PASS T-0045-AC4-gates**
