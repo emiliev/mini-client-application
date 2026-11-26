@@ -62,16 +62,14 @@ class McAppBar extends StatelessWidget implements PreferredSizeWidget {
       centerTitle: true,
       scrolledUnderElevation: 0,
       titleTextStyle: McTypeScale.headline.copyWith(color: p.onSurface),
+      // `AppBar` marks its title as a semantics header itself.
       title: largeTitle
           ? null
-          : Semantics(
-              header: true,
-              child: Text(
-                title,
-                key: titleKey,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
+          : Text(
+              title,
+              key: titleKey,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
       bottom: largeTitle
           ? PreferredSize(

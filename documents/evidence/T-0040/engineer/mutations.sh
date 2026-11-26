@@ -45,8 +45,8 @@ EOF
   git diff --quiet -- "$LIB" || { echo "RESTORE FAILED"; rc=1; }
 }
 
-mutate "title not a header (app bar)" $LIB/mc_app_bar.dart \
-  "s.replace('Semantics(\n              header: true,', 'Semantics(\n              header: false,')"
+mutate "large title not a header" $LIB/mc_app_bar.dart \
+  "s.replace('Semantics(\n            header: true,', 'Semantics(\n            header: false,')"
 mutate "section title not a header" $LIB/mc_section_header.dart \
   "s.replace('header: true', 'header: false')"
 mutate "tab not selectable (selected flag dropped)" $LIB/mc_tab_bar.dart \
@@ -58,7 +58,7 @@ mutate "tab min size below 44" $LIB/mc_tab_bar.dart \
 mutate "tab bar always fills (no scroll)" $LIB/mc_tab_bar.dart \
   "s.replace('scrollDirection: Axis.horizontal,', 'scrollDirection: Axis.vertical,')"
 mutate "selected tab not revealed" $LIB/mc_tab_bar.dart \
-  "s.replace('alignment: 0.5,', 'alignment: 0.5,\n          duration: Duration.zero,').replace('Scrollable.ensureVisible(', 'Future<void>.value(')"
+  "s.replace('_reveal(Duration.zero);', '').replace('_reveal(McMotion.normal);', '')"
 mutate "leading ignored" $LIB/mc_app_bar.dart \
   "s.replace('leading: leading,', '')"
 mutate "large title scale uncapped" $LIB/mc_app_bar.dart \

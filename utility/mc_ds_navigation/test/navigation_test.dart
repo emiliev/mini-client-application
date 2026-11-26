@@ -81,6 +81,26 @@ void main() {
     }
   });
 
+  testWidgets('T-0040-AC1 the large title stays inside its band at 3x', (
+    tester,
+  ) async {
+    mcSetSurface(tester, 375, 600);
+    await tester.pumpWidget(
+      _page(
+        scale: 3,
+        appBar: const McAppBar(
+          title: 'Characters',
+          largeTitle: true,
+          titleKey: Key('title'),
+        ),
+      ),
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('title'))).height,
+      lessThanOrEqualTo(McAppBar.largeTitleExtent),
+    );
+  });
+
   testWidgets('T-0040-AC1 the large title adds a fixed band to the height', (
     tester,
   ) async {
