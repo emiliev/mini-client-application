@@ -1,5 +1,6 @@
 # T-0021 (P1-16): app_core, the shared app layer (plan 01 §3.4).
 load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//app:__subpackages__"])
 
@@ -35,7 +36,7 @@ _DEPS = [
 flutter_library(
     name = "app_core",
     package_name = "app_core",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = _LANG,
     deps = _DEPS,
 )

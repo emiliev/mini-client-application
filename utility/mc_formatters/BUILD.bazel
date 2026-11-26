@@ -1,11 +1,12 @@
 load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 # Public until the P3-06 package_group exists (follow-up: restrict to layers).
 package(default_visibility = ["//visibility:public"])
 
 dart_library(
     name = "mc_formatters",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = "3.13",
     package_name = "mc_formatters",
     deps = [

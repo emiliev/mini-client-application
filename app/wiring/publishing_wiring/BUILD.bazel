@@ -12,6 +12,7 @@
 load("@rules_dart//dart:defs.bzl", "dart_codegen")
 load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_package")
 load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//app:__subpackages__"])
 
@@ -112,10 +113,9 @@ flutter_library(
     package_name = _PKG,
     srcs = glob(
         ["lib/**/*.dart"],
-        exclude = [
-            "**/*.g.dart",
-            "**/*.config.dart",
-        ],
+        # `tool/ide_sync` writes the generated files beside their sources for
+        # the IDE; Bazel builds its own copies.
+        exclude = MC_GENERATED_DART,
     ) + _CODEGEN,
     language_version = _LANG,
     deps = _DEPS,

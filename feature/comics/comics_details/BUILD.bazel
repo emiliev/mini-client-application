@@ -23,7 +23,7 @@
 load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
 load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_package")
 load("@rules_flutter//flutter:defs.bzl", "flutter_gen_l10n", "flutter_library", "flutter_test")
-load("//tool/bazel:defs.bzl", "mc_bdd_tests")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART", "mc_bdd_tests")
 
 package(default_visibility = ["//visibility:private"])
 
@@ -64,10 +64,7 @@ _PURE_SRCS = glob(
         "lib/src/navigator/**/*.dart",
         "lib/src/presentation/bloc/**/*.dart",
     ],
-    exclude = [
-        "**/*.g.dart",
-        "**/*.freezed.dart",
-    ],
+    exclude = MC_GENERATED_DART,
 )
 
 # Generator input only (V3-18): never a dep of the package library or a test.
@@ -240,14 +237,9 @@ flutter_library(
     name = "comics_details",
     srcs = glob(
         ["lib/**/*.dart"],
-        # `fvm flutter pub get` writes the l10n outputs beside the ARBs for
-        # the IDE; Bazel builds its own copies (:_l10n).
-        exclude = [
-            "lib/src/l10n/*_l10n*.dart",
-            "**/*.g.dart",
-            "**/*.freezed.dart",
-            "**/*.config.dart",
-        ],
+        # `tool/ide_sync` and `fvm flutter pub get` write the generated files
+        # beside their sources for the IDE; Bazel builds its own copies.
+        exclude = MC_GENERATED_DART,
     ) + _CODEGEN,
     language_version = _LANG,
     package_name = _PKG,
