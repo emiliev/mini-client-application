@@ -21,6 +21,6 @@
 | coverage >= 90 % (touched packages) | PASS |
 
 - tests: Executed 1 out of 111 tests: 111 tests pass.
-- coverage: == feature/comics/comics_details TOTAL 376/376 100.0% == app/wiring/publishing_wiring TOTAL 93/93 100.0% == feature/characters/characters_list TOTAL 219/219 100.0% == app/wiring/universe_wiring TOTAL 39/39 100.0% == utility/mc_formatters TOTAL 29/29 100.0% == utility/mc_fixtures_comics TOTAL 244/247 98.8% == utility/mc_fixtures_characters TOTAL 126/130 96.9% (threshold 90 %)
+- coverage: == feature/comics/comics_details TOTAL 388/388 100.0% == app/wiring/publishing_wiring TOTAL 95/95 100.0% == feature/characters/characters_list TOTAL 221/221 100.0% == app/wiring/universe_wiring TOTAL 39/39 100.0% == utility/mc_formatters TOTAL 29/29 100.0% == utility/mc_fixtures_comics TOTAL 244/247 98.8% == utility/mc_fixtures_characters TOTAL 126/130 96.9% (threshold 90 %)
 
 **PASS T-0041-AC8-gates**
