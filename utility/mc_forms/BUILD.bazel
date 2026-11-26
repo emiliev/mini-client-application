@@ -1,0 +1,68 @@
+# T-0045 (U20): the forms kit. Pure Dart (R15), no mixins, no codegen.
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+package(default_visibility = ["//visibility:public"])
+
+_PKG = "mc_forms"
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_api_errors",
+    "//utility/mc_prelude",
+    "@pub_deps//:characters",
+]
+
+dart_library(
+    name = "mc_forms",
+    package_name = _PKG,
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_forms",
+    "@pub_deps//:test",
+]
+
+# T-0045-AC1: every validator rule and composition, solitary (R6 exception).
+dart_test(
+    name = "validators_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/validators_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
+    name = "form_controller_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/form_controller_test.dart",
+    deps = _TEST_DEPS,
+)
+
+# T-0045-AC2 (P1-14 AC4): wizard steps, errors per step, completion once.
+dart_test(
+    name = "wizard_controller_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/wizard_controller_test.dart",
+    deps = _TEST_DEPS,
+)
+
+# T-0045-AC4: lib imports no Flutter and declares no mixins.
+dart_test(
+    name = "purity_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    package_name = _PKG,
+    language_version = _LANG,
+    main = "test/purity_test.dart",
+    deps = ["@pub_deps//:test"],
+)
