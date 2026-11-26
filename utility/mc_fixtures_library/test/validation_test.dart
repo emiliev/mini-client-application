@@ -298,4 +298,102 @@ void main() {
     );
     expect(visibilities, ['private', 'public']);
   });
+
+  group('T-0048-AC2 lengths count grapheme clusters, as the form does', () {
+    // A flag is two code points (regional indicators) but one character.
+    const flag = '\u{1F1E9}\u{1F1EA}';
+    // "e" plus a combining acute accent: two code points, one character.
+    const accented = 'é';
+
+    test('T-0048-AC2 a name of 60 flags is valid, 61 is too long', () async {
+      await _accepts('name', flag * 60);
+      await _rejects('name', flag * 61, 'invalid_name');
+      await _accepts('name', accented * 60);
+      await _rejects('name', accented * 61, 'invalid_name');
+    });
+
+    test(
+      'T-0048-AC2 a description of 280 flags is valid, 281 is too long',
+      () async {
+        await _accepts('description', flag * 280);
+        await _rejects('description', flag * 281, 'invalid_description');
+      },
+    );
+  });
+
+  group("T-0048-AC2 duplicate_name: a user's list names are unique", () {
+    test('T-0048-AC2 creating a list with a name the user has is refused, '
+        'case-insensitively after trimming', () async {
+      for (final name in [
+        'Weekend Reads',
+        '  weekend reads ',
+        'WEEKEND READS',
+      ]) {
+        final dio = jsonDio(libraryBackend());
+        final response = await _send(
+          dio,
+          _Route.create,
+          _valid()..['name'] = name,
+        );
+        _expectError(response, 'duplicate_name', reason: name);
+        final error = response.data!['error']! as Map;
+        expect(error['parameter'], 'name');
+        expect(error['listId'], 'l-2');
+        // Nothing was created and no id was taken.
+        final ok = await _send(dio, _Route.create, _valid());
+        expect(ok.data!['id'], 'l-5', reason: name);
+      }
+    });
+
+    test("T-0048-AC2 another user's list name is free", () async {
+      _expectOk(
+        await _send(
+          jsonDio(libraryBackend()),
+          _Route.create,
+          _valid()..['name'] = 'Collector Shortlist',
+        ),
+      );
+    });
+
+    test('T-0048-AC2 renaming to another of the lists is refused; keeping '
+        'the own name is not', () async {
+      final dio = jsonDio(libraryBackend());
+      final taken = await _send(
+        dio,
+        _Route.update,
+        _valid()..['name'] = 'someday',
+      );
+      _expectError(taken, 'duplicate_name');
+      final first = (await call<Map<String, Object?>>(
+        dio,
+        'GET',
+        '/v1/me/lists/l-1',
+        headers: bearer(reader),
+      )).data!;
+      expect(first['name'], 'Spider-Verse Starter', reason: 'unchanged');
+      _expectOk(
+        await _send(
+          dio,
+          _Route.update,
+          _valid()..['name'] = ' spider-verse starter ',
+        ),
+      );
+    });
+
+    test(
+      'T-0048-AC2 a malformed name is reported before a duplicate one',
+      () async {
+        _expectError(
+          await _send(
+            jsonDio(libraryBackend()),
+            _Route.create,
+            _valid()
+              ..['name'] = 'Weekend Reads'
+              ..['visibility'] = 'friends',
+          ),
+          'invalid_visibility',
+        );
+      },
+    );
+  });
 }

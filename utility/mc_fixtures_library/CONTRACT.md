@@ -71,8 +71,9 @@ All failures are `400` with `{"error": {"code", "message", "parameter", ...}}`. 
 | 5 | `too_many_comics` | More than 100 ids | `parameter`, `maxItems: 100` |
 | 6 | `duplicate_comic` | An id appears twice (the first repeated one is named) | `parameter`, `comicId` |
 | 7 | `unknown_comic` | An id is not a comic of `mc_fixtures_comics` (the first unknown one is named) | `parameter`, `comicId` |
+| 8 | `duplicate_name` | The user already has another list of that name, compared case-insensitively after trimming (a list may keep its own name when it is renamed). The one rule a client cannot check on its own (T-0048) | `parameter: "name"`, `listId` (the list that has it) |
 
-Lengths count characters (runes), not UTF-16 units. `POST` checks 0 to 7, `PUT /v1/me/lists/:id` checks 0 to 3, `PUT .../items` checks 0, 4 to 7.
+Lengths count what a reader sees as one character (grapheme clusters, `package:characters`), not runes or UTF-16 units: a flag emoji or an accented letter written as two code points counts once, exactly as the editor's form counts (T-0048). `POST` checks 0 to 8, `PUT /v1/me/lists/:id` checks 0 to 3 and 8, `PUT .../items` checks 0, 4 to 7.
 
 ### Other errors
 
