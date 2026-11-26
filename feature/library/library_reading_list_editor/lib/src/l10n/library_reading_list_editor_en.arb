@@ -58,8 +58,8 @@
     "description": "Error under a name or description that is too long.",
     "placeholders": {"max": {"type": "int"}}
   },
-  "readingListEditorNameRefused": "This name was not accepted. Please change it.",
-  "@readingListEditorNameRefused": {"description": "Error under the name when the server refused it."},
+  "readingListEditorNameRefused": "You already have a list with this name. Please choose another.",
+  "@readingListEditorNameRefused": {"description": "Error under the name when the server refused it: the user already has a list of that name."},
   "readingListEditorDescriptionRefused": "This description was not accepted. Please change it.",
   "@readingListEditorDescriptionRefused": {"description": "Error under the description when the server refused it."},
   "readingListEditorComicsRequired": "Pick at least one comic.",

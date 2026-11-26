@@ -98,8 +98,8 @@ void main() {
   );
 
   mcTestWidgets(
-    'T-0048-AC6 an editor closed while its save is held hands out nothing '
-    'when the save returns',
+    'T-0048-AC6 an editor closed while its save is held hands out no result '
+    'and writes nothing more, but announces what it wrote',
     (tester) async {
       await signIn(tester);
       final open = ValueNotifier<bool>(true);
@@ -134,12 +134,89 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(editorResults(), isEmpty, reason: 'no result after closing');
-      expect(announcedChanges(), isEmpty);
+      // The details were written before the editor closed: still a change
+      // to announce, once (a half-saved edit is not silent).
+      expect(
+        [for (final c in announcedChanges()) c.topic],
+        ['readingLists'],
+      );
       // The flow was gone before the details returned: the items were never
       // sent.
       expect(
         backend.requests.where(
           (r) => matchesRequest(r, 'PUT /v1/me/lists/l-1/items'),
+        ),
+        isEmpty,
+      );
+    },
+  );
+
+  /// Opens the editor under a switch the test flips to take it away again
+  /// (the user leaves: a route change, Back).
+  Future<ValueNotifier<bool>> openRemovable(
+    WidgetTester tester, {
+    String? editing,
+  }) async {
+    final open = ValueNotifier<bool>(true);
+    addTearDown(open.dispose);
+    await initFlow(
+      tester,
+      () => ValueListenableBuilder<bool>(
+        valueListenable: open,
+        builder: (context, isOpen, _) => isOpen
+            ? editorTestHost(editorFlowUnderTest(editing: editing))
+            : const SizedBox.shrink(),
+      ),
+    );
+    return open;
+  }
+
+  mcTestWidgets(
+    'T-0048-AC6 leaving while the list is loading: the late answer adds and '
+    'reports nothing',
+    (tester) async {
+      await signIn(tester);
+      final backend = McTestSession.current.backend
+        ..hold('GET /v1/me/lists/l-1');
+      final open = await openRemovable(tester, editing: 'l-1');
+      await theAppSends(tester, 'GET /v1/me/lists/l-1');
+
+      open.value = false;
+      await tester.pump();
+      await backend.release('GET /v1/me/lists/l-1');
+      await mcSettle(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(McTestSession.current.monitoring.errors, isEmpty);
+      expect(editorResults(), isEmpty);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0048-AC6 leaving while the app signs the user in: the late answer '
+    'adds, reports and sends nothing',
+    (tester) async {
+      final session = McTestSession.current
+        ..backend.useFixtureSet('comics.default')
+        ..backend.useFixtureSet('identity.default')
+        ..backend.useFixtureSet('library.default');
+      await McTestContainer.initialize(session);
+      final open = await openRemovable(tester, editing: 'l-1');
+      await mcSettle(tester);
+      expect(pendingSignIns(), hasLength(1));
+
+      open.value = false;
+      await tester.pump();
+      await iAmSignedInAs(tester, 'reader@mini-client.test');
+      pendingSignIns().removeAt(0).complete(true);
+      await mcSettle(tester);
+
+      expect(tester.takeException(), isNull);
+      expect(session.monitoring.errors, isEmpty);
+      expect(editorResults(), isEmpty);
+      expect(
+        session.backend.requests.where(
+          (r) => r.path.startsWith('/v1/me/lists'),
         ),
         isEmpty,
       );

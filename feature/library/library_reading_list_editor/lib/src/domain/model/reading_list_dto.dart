@@ -119,31 +119,3 @@ abstract class ComicHitDto with _$ComicHitDto {
   factory ComicHitDto.fromJson(Map<String, dynamic> json) =>
       _$ComicHitDtoFromJson(json);
 }
-
-/// The body of every `4xx`: `{"error": {"code", "message", "parameter", ...}}`.
-/// The editor reads it for a `400`, to show the refusal under its field.
-@Freezed(fromJson: true, toJson: true)
-abstract class ApiErrorBodyDto with _$ApiErrorBodyDto {
-  @JsonSerializable(explicitToJson: true)
-  const factory ApiErrorBodyDto({required ApiErrorDto error}) =
-      _ApiErrorBodyDto;
-
-  factory ApiErrorBodyDto.fromJson(Map<String, dynamic> json) =>
-      _$ApiErrorBodyDtoFromJson(json);
-}
-
-/// The `error` object. Extra fields (`maxItems`, `comicId`) are not read.
-@Freezed(fromJson: true, toJson: true)
-abstract class ApiErrorDto with _$ApiErrorDto {
-  const factory ApiErrorDto({
-    required String code,
-    required String message,
-
-    /// The field the error is about (`name`, `comicIds`, `body`); absent for
-    /// errors that are not about a field.
-    String? parameter,
-  }) = _ApiErrorDto;
-
-  factory ApiErrorDto.fromJson(Map<String, dynamic> json) =>
-      _$ApiErrorDtoFromJson(json);
-}

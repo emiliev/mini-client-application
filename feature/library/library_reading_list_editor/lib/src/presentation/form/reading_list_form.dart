@@ -1,5 +1,4 @@
 import 'package:library_reading_list_editor/src/domain/model/reading_list.dart';
-import 'package:library_reading_list_editor/src/domain/model/save_failure.dart';
 import 'package:library_reading_list_editor/src/domain/repository/reading_list_editor_repository.dart';
 import 'package:mc_forms/mc_forms.dart';
 
@@ -10,16 +9,20 @@ abstract final class ReadingListFields {
   static const String visibility = 'visibility';
   static const String comics = 'comics';
 
-  /// The form field that holds [field]'s value.
-  static String of(ListField field) => switch (field) {
-    ListField.name => name,
-    ListField.description => description,
-    ListField.comics => comics,
+  /// The form field a `400`'s `parameter` names (`mc_fixtures_library`
+  /// CONTRACT.md, "Validation"), or null for one the user cannot change (the
+  /// editor only ever sends a valid visibility; `body`).
+  static String? ofParameter(String? parameter) => switch (parameter) {
+    'name' => name,
+    'description' => description,
+    'comicIds' => comics,
+    _ => null,
   };
 }
 
 /// The backend's rules (`mc_fixtures_library` CONTRACT.md, "Validation"),
-/// checked as the user types so a valid wizard is a valid request.
+/// checked as the user types so a valid wizard is a valid request. Lengths
+/// count what a reader sees as one character, on both sides.
 abstract final class ReadingListRules {
   /// A name has 1 to 60 characters after trimming.
   static const int nameMaxLength = 60;
@@ -27,8 +30,9 @@ abstract final class ReadingListRules {
   /// A description has at most 280 characters (not trimmed).
   static const int descriptionMaxLength = 280;
 
-  /// A list has 1 to 100 comics. The backend accepts an empty list; the
-  /// editor asks for at least one (P1-20).
+  /// A list has at most 100 comics. A new list needs at least one (P1-20); an
+  /// edited list only when its comics change, so a list that is empty on the
+  /// backend can still be renamed.
   static const int maxComics = 100;
 }
 
@@ -37,51 +41,12 @@ abstract final class ReadingListSteps {
   static const String details = 'details';
   static const String comics = 'comics';
   static const String review = 'review';
-
-  /// The step whose page shows [field].
-  static int indexOf(ListField field) => switch (field) {
-    ListField.name || ListField.description => 0,
-    ListField.comics => 1,
-  };
 }
 
-/// The values the backend refused (a `400` naming a field, T-0048-AC2), as
-/// a feature rule: a field whose value is still the refused one fails with
-/// the backend's verdict, so the step is invalid, Next and Finish are
-/// blocked and the error shows under the field until the user changes it.
-///
-/// The backend and the kit can disagree. The backend counts runes and the
-/// kit counts what the user sees (grapheme clusters), so a name of 31 flag
-/// emoji passes here and fails there (F-0048 fact 3).
-final class ServerVerdicts {
-  final Map<ListField, ({String value, FieldError error})> _refused = {};
-
-  /// Records that the backend refused [value] (the field's wire form) for
-  /// [field], with [error] to show.
-  void refuse(ListField field, String value, FieldError error) =>
-      _refused[field] = (value: value, error: error);
-
-  /// The rule for [field]: fails while the field's wire form ([wire] of the
-  /// value) is the refused one.
-  Validator<T> rule<T>(ListField field, String Function(T? value) wire) =>
-      (value) {
-        final refused = _refused[field];
-        return refused != null && refused.value == wire(value)
-            ? refused.error
-            : null;
-      };
-}
-
-/// A field's value as the backend sees it: what a verdict is about.
-String wireValueOf(ListField field, Object? value) => switch (field) {
-  ListField.name => _trimmedName(value as String?),
-  ListField.description => (value as String?) ?? '',
-  ListField.comics => _comicKey(value as List<PickedComic>?),
-};
-
-/// What the editor shows for a refused value of [rejection]'s field.
-FieldError verdictFor(SaveRejected rejection) =>
-    rejection.code == 'too_many_comics'
+/// What the editor shows under a field the backend refused (its `error.code`):
+/// the comics' limit, or "this value was not accepted". The only refusal a
+/// valid wizard can meet is `duplicate_name` (the user's names are unique).
+FieldError serverError(String? code) => code == 'too_many_comics'
     ? const FieldError(
         ValidationCode.aboveMax,
         max: ReadingListRules.maxComics,
@@ -89,10 +54,6 @@ FieldError verdictFor(SaveRejected rejection) =>
     : const FieldError(ValidationCode.invalid);
 
 String _trimmedName(String? value) => (value ?? '').trim();
-
-String _comicKey(List<PickedComic>? comics) => [
-  for (final comic in comics ?? const <PickedComic>[]) comic.id.value,
-].join(',');
 
 /// Applies [rule] to the trimmed text, as the backend trims a name.
 Validator<String> _trimmed(Validator<String> rule) =>
@@ -104,13 +65,23 @@ Validator<List<T>> _atMost<T>(int max) =>
     ? FieldError(ValidationCode.aboveMax, max: max)
     : null;
 
+/// At least one comic: always for a new list ([saved] null); for an edited
+/// list only once its comics differ from what the backend holds.
+Validator<List<PickedComic>> _comicsRequired(ReadingList? saved) {
+  final required = Validators.required<List<PickedComic>>();
+  if (saved == null) {
+    return required;
+  }
+  final savedIds = comicIdsOf(saved.comics).join(',');
+  return (value) => comicIdsOf(value ?? const []).join(',') == savedIds
+      ? null
+      : required(value);
+}
+
 /// The three steps over one form: details (name, description, visibility),
 /// comics, and order and review (it reorders the comics field; no fields of
 /// its own). [saved] pre-fills every step in edit mode.
-List<WizardStep> readingListSteps({
-  required ServerVerdicts verdicts,
-  ReadingList? saved,
-}) => [
+List<WizardStep> readingListSteps({ReadingList? saved}) => [
   WizardStep(
     ReadingListSteps.details,
     fields: [
@@ -120,7 +91,6 @@ List<WizardStep> readingListSteps({
         validators: [
           Validators.required<String>(),
           _trimmed(Validators.maxLength(ReadingListRules.nameMaxLength)),
-          verdicts.rule<String>(ListField.name, _trimmedName),
         ],
       ),
       FieldDef<String>(
@@ -128,7 +98,6 @@ List<WizardStep> readingListSteps({
         initial: saved?.description ?? '',
         validators: [
           Validators.maxLength(ReadingListRules.descriptionMaxLength),
-          verdicts.rule<String>(ListField.description, (v) => v ?? ''),
         ],
       ),
       FieldDef<ReadingListVisibility>(
@@ -144,9 +113,8 @@ List<WizardStep> readingListSteps({
         ReadingListFields.comics,
         initial: saved?.comics ?? const [],
         validators: [
-          Validators.required<List<PickedComic>>(),
+          _comicsRequired(saved),
           _atMost<PickedComic>(ReadingListRules.maxComics),
-          verdicts.rule<List<PickedComic>>(ListField.comics, _comicKey),
         ],
       ),
     ],

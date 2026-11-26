@@ -167,23 +167,25 @@ Feature: Create a reading list
 
   @T-0048-AC2
   Scenario: A name the backend refuses takes the wizard back to step 1 with the error under the name
-    # 31 flags are 31 characters to a reader (and to the form) but 62 runes
-    # to the backend, whose limit is 60 runes (F-0048).
+    # The one rule only the backend can check: a reader's list names are
+    # unique (case-insensitive, after trimming), and they have "Weekend Reads".
     Given I am signed in as {'reader@mini-client.test'}
     When I open the reading list editor
-    And I enter {'🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪'} as the name
+    And I enter {' weekend reads '} as the name
     And I tap {'Next'}
-    And I search for {'Amber Chr'}
     And I pick {'Amber Chronicles #1'}
     And I tap {'Next'}
     And I tap {'Create list'}
     Then the backend answered {'POST /v1/me/lists'} with {400}
     And I am on step {1}
-    And the error {'This name was not accepted. Please change it.'} shows under the field {'Name'}
+    And the error {'You already have a list with this name. Please choose another.'} shows under the field {'Name'}
     And the button {'Next'} is disabled
     And the editor has not ended
-    When I enter {'Flags'} as the name
-    Then I don't see {'This name was not accepted. Please change it.'}
+    And the app announced {0} change to {'readingLists'}
+    When I enter {' weekend reads '} as the name
+    Then the error {'You already have a list with this name. Please choose another.'} shows under the field {'Name'}
+    When I enter {'Weekend reads, again'} as the name
+    Then I don't see {'You already have a list with this name. Please choose another.'}
     When I tap {'Next'}
     Then the picked comics are
       | 'title'               |
@@ -193,21 +195,19 @@ Feature: Create a reading list
     Then the backend received {2} requests for {'POST /v1/me/lists'}
     And the editor completed with list {'l-5'}
 
-  @T-0048-AC2
-  Scenario: A description the backend refuses shows the error under the description
+  @T-0048-AC1
+  Scenario: Lengths count what a reader sees, on both sides: sixty flags are a valid name
+    # A flag is two code points; the form and the backend both count it once.
     Given I am signed in as {'reader@mini-client.test'}
     When I open the reading list editor
-    And I enter {'Flags'} as the name
-    And I enter {'🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪'} as the description
-    And I tap {'Next'}
-    And I search for {'Amber Chr'}
+    And I enter {'🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪'} as the name
+    Then I don't see {'Use at most 60 characters.'}
+    When I tap {'Next'}
     And I pick {'Amber Chronicles #1'}
     And I tap {'Next'}
     And I tap {'Create list'}
-    Then the backend answered {'POST /v1/me/lists'} with {400}
-    And I am on step {1}
-    And the error {'This description was not accepted. Please change it.'} shows under the field {'Description (optional)'}
-    And the name field shows {'Flags'}
+    Then the backend answered {'POST /v1/me/lists'} with {201}
+    And the editor completed with list {'l-5'}
 
   @T-0048-AC6
   Scenario: Signed out, the editor asks to sign in first and then opens on step 1

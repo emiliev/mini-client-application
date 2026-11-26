@@ -11,7 +11,6 @@ import 'package:library_reading_list_editor/src/domain/model/reading_list.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_dto.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_id.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_mapper.dart';
-import 'package:library_reading_list_editor/src/domain/model/save_failure.dart';
 import 'package:library_reading_list_editor/src/domain/repository/reading_list_editor_repository.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
@@ -121,20 +120,6 @@ void main() {
         _draft.toItemsDto(),
       );
     });
-
-    test('T-0048-AC7 the 400 body parses, extra fields ignored', () {
-      final body = ApiErrorBodyDto.fromJson({
-        'error': {
-          'code': 'too_many_comics',
-          'message': 'At most 100',
-          'parameter': 'comicIds',
-          'maxItems': 100,
-        },
-      });
-      expect(body.error.code, 'too_many_comics');
-      expect(body.error.parameter, 'comicIds');
-      expect(ApiErrorBodyDto.fromJson(body.toJson()), body);
-    });
   });
 
   group('T-0048-AC3 the repository against the library domain', () {
@@ -216,99 +201,59 @@ void main() {
     );
   });
 
-  group('T-0048-AC2 a 400 maps to the field it names', () {
-    Future<SaveFailure> reject(ReadingListDraft draft) async =>
-        _failure(await _backend().repository.create(draft));
+  group('T-0048-AC2 a refused write is an ApiClientError naming the code '
+      'and the field', () {
+    Future<ApiClientError> reject(ReadingListDraft draft) async =>
+        _failure(await _backend().repository.create(draft)) as ApiClientError;
 
-    test('T-0048-AC2 invalid_name, invalid_description, comics', () async {
-      final name = await reject(_draft.copyWith(name: '🇩🇪' * 31));
-      expect(name, isA<SaveRejected>());
-      expect((name as SaveRejected).field, ListField.name);
-      expect(name.code, 'invalid_name');
-      expect(name.asApiFailure, isA<ApiClientError>());
-      expect((name.asApiFailure as ApiClientError).status, 400);
+    test('T-0048-AC2 duplicate_name: a name the user already has', () async {
+      final error = await reject(_draft.copyWith(name: 'weekend reads'));
+      expect(error.status, 400);
+      expect(error.code, 'duplicate_name');
+      expect(error.parameter, 'name');
+    });
 
-      final description = await reject(
-        _draft.copyWith(description: '🇩🇪' * 141),
-      ) as SaveRejected;
-      expect(description.field, ListField.description);
-      expect(description.code, 'invalid_description');
-
+    test('T-0048-AC2 the comics: a duplicate and too many', () async {
       final duplicate = await reject(
         _draft.copyWith(comicIds: const [ComicId(500060), ComicId(500060)]),
-      ) as SaveRejected;
-      expect(duplicate.field, ListField.comics);
-      expect(duplicate.code, 'duplicate_comic');
-
+      );
+      expect(
+        (duplicate.code, duplicate.parameter),
+        ('duplicate_comic', 'comicIds'),
+      );
       final tooMany = await reject(
         _draft.copyWith(
           comicIds: [for (var i = 0; i < 101; i++) ComicId(500000 + i)],
         ),
-      ) as SaveRejected;
-      expect(tooMany.field, ListField.comics);
-      expect(tooMany.code, 'too_many_comics');
+      );
+      expect(
+        (tooMany.code, tooMany.parameter),
+        ('too_many_comics', 'comicIds'),
+      );
     });
 
-    test(
-      'T-0048-AC2 the error body decides: a field the editor has not, a '
-      'body off the contract, or another status is an ordinary failure',
-      () async {
-        Future<SaveFailure> mapped(int status, Object? data) async {
-          final options = RequestOptions(path: 'v1/me/lists');
-          final api = _ThrowingApi(
-            DioException(
-              requestOptions: options,
-              type: DioExceptionType.badResponse,
-              response: Response<Object?>(
-                requestOptions: options,
-                statusCode: status,
-                data: data,
-              ),
-            ),
-          );
-          return _failure(
-            await ReadingListEditorRepository(api).create(_draft),
-          );
-        }
+    test('T-0048-AC2 a renamed list that takes another list\'s name', () async {
+      final error = _failure(
+        await _backend().repository.updateDetails(
+          const ReadingListId('l-1'),
+          _draft.copyWith(name: 'Someday'),
+        ),
+      ) as ApiClientError;
+      expect((error.code, error.parameter), ('duplicate_name', 'name'));
+    });
 
-        expect(
-          await mapped(400, {
-            'error': {
-              'code': 'invalid_visibility',
-              'message': 'x',
-              'parameter': 'visibility',
-            },
-          }),
-          isA<SaveApiFailure>(),
-        );
-        expect(await mapped(400, 'not json'), isA<SaveApiFailure>());
-        expect(await mapped(400, {'error': 'flat'}), isA<SaveApiFailure>());
-        expect(
-          await mapped(500, {
-            'error': {
-              'code': 'invalid_name',
-              'message': 'x',
-              'parameter': 'name',
-            },
-          }),
-          isA<SaveApiFailure>(),
-        );
-        // The control: the same request with the contract's 400 is a rejection.
-        expect(
-          await mapped(400, {
-            'error': {
-              'code': 'invalid_name',
-              'message': 'x',
-              'parameter': 'name',
-            },
-          }),
-          isA<SaveRejected>(),
-        );
-        final server = await mapped(500, null) as SaveApiFailure;
-        expect(server.failure, isA<ApiServer>());
-        expect(server.asApiFailure, same(server.failure));
-      },
-    );
+    test('T-0048-AC1 names and descriptions are counted as a reader sees '
+        'them: 60 flags are a valid name', () async {
+      final list = _success(
+        await _backend().repository.create(
+          _draft.copyWith(
+            name: '\u{1F1E9}\u{1F1EA}' * 60,
+            description: '\u{1F1E9}\u{1F1EA}' * 280,
+          ),
+        ),
+      );
+      expect(list.id, const ReadingListId('l-5'));
+    });
   });
 
   test('T-0048-AC7 a value outside the contract is malformed', () async {
@@ -327,19 +272,4 @@ void main() {
     );
     expect(() => dto.toDomain(), throwsFormatException);
   });
-}
-
-/// An API whose writes fail with [error] (the repository's error mapping on
-/// its own).
-class _ThrowingApi implements ReadingListEditorApi {
-  _ThrowingApi(this.error);
-
-  final DioException error;
-
-  @override
-  Future<ReadingListDto> createList(CreateReadingListDto body) =>
-      Future.error(error);
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

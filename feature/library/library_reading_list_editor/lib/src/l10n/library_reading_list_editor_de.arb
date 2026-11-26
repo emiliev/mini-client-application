@@ -26,7 +26,7 @@
   "readingListEditorPublic": "Öffentlich",
   "readingListEditorNameRequired": "Gib deiner Liste einen Namen.",
   "readingListEditorTooLong": "Verwende höchstens {max} Zeichen.",
-  "readingListEditorNameRefused": "Dieser Name wurde nicht angenommen. Bitte ändere ihn.",
+  "readingListEditorNameRefused": "Du hast schon eine Liste mit diesem Namen. Bitte wähle einen anderen.",
   "readingListEditorDescriptionRefused": "Diese Beschreibung wurde nicht angenommen. Bitte ändere sie.",
   "readingListEditorComicsRequired": "Wähle mindestens einen Comic aus.",
   "readingListEditorComicsTooMany": "Wähle höchstens {max} Comics aus.",

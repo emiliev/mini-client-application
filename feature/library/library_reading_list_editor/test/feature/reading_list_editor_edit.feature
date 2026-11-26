@@ -159,3 +159,28 @@ Feature: Edit a reading list
     When I pick {'Amber Frontier #1'}
     Then I see {'100 comics picked'}
     And I don't see {'Pick at most 100 comics.'}
+
+  @T-0048-AC3
+  Scenario: A list without comics can still be renamed
+    When I open the reading list editor for {'l-3'}
+    And I tap {'Next'}
+    Then I see {'No comics picked yet'}
+    And I don't see {'Pick at least one comic.'}
+    When I tap {'Back'}
+    And I enter {'Some day'} as the name
+    And I tap {'Next'}
+    And I tap {'Next'}
+    And I tap {'Save changes'}
+    Then the backend received {1} requests for {'PUT /v1/me/lists/l-3'}
+    And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}
+    And the editor completed with list {'l-3'}
+    And list {'l-3'} of {'reader@mini-client.test'} is named {'Some day'}
+
+  @T-0048-AC3
+  Scenario: Removing every comic of a list is not a change the editor saves
+    When I open the reading list editor for {'l-2'}
+    And I tap {'Next'}
+    And I tap {'Amber Chronicles #6'} in the picked comics
+    And I tap {'Amber Chronicles #16'} in the picked comics
+    Then the comics error reads {'Pick at least one comic.'}
+    And the button {'Next'} is disabled

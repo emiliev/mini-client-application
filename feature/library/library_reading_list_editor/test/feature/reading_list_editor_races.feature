@@ -133,7 +133,7 @@ Feature: The editor stays consistent while requests are in flight
     And the backend received {1} requests for {'POST /v1/me/lists'}
     And the backend received {'POST /v1/me/lists'} with a token of {'reader@mini-client.test'}
     And {'collector@mini-client.test'} has {1} reading lists
-    And the app announced {0} change to {'readingLists'}
+    And the app announced {1} change to {'readingLists'}
     When I tap {'Close'}
     Then the editor ended without a list
 
@@ -213,3 +213,17 @@ Feature: The editor stays consistent while requests are in flight
     When the backend releases {'GET /v1/comics?titleStartsWith=Amber Ch'}
     Then I see {'Amber Frontier #1'}
     And I don't see {'Amber Chronicles #3'}
+
+  @T-0048-AC6
+  Scenario: A half-saved edit is announced: the details saved, the comics failed
+    Given the backend fails {'PUT /v1/me/lists/l-1/items'} with {'server_error'}
+    When I open the reading list editor for {'l-1'}
+    And I enter {'Spider-Verse Basics'} as the name
+    And I tap {'Next'}
+    And I tap {'Next'}
+    And I move {'Amber Legacy #1'} up
+    And I tap {'Save changes'}
+    Then the save error reads {'The server had a problem. Please try again later.'}
+    And list {'l-1'} of {'reader@mini-client.test'} is named {'Spider-Verse Basics'}
+    And the app announced {1} change to {'readingLists'}
+    And the editor has not ended

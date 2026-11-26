@@ -5,7 +5,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_id.dart';
-import 'package:library_reading_list_editor/src/domain/model/save_failure.dart';
 import 'package:library_reading_list_editor/src/domain/repository/reading_list_editor_repository.dart';
 import 'package:library_reading_list_editor/src/flow/reading_list_editor_flow_state.dart';
 import 'package:library_reading_list_editor/src/navigator/reading_list_editor_navigator.dart';
@@ -56,10 +55,15 @@ const ApiFailure _stopped = ApiFailure.unauthorized(
 ///   ended session is not handed out: the editor shows `sessionEnded` and
 ///   writes nothing more.
 /// - **The result:** a saved list completes the flow with its id (the
-///   wiring hands it back to the caller, plan 01 §4.3) and announces
-///   `DataChanged('readingLists')` once.
-/// - **The backend's verdicts:** a `400` naming a field goes back to that
-///   field's step and shows the error under it ([ServerVerdicts]).
+///   wiring hands it back to the caller, plan 01 §4.3).
+/// - **The announcement:** a save that wrote anything announces
+///   `DataChanged('readingLists')` once, also when it then failed, or the
+///   session or the editor ended (a half-saved edit is still a change).
+/// - **The backend's verdicts:** a `400` naming a field goes to that field's
+///   step and shows the error under it (`WizardController.reject`).
+/// - **Closed means stopped:** after every await it returns if the bloc was
+///   closed (the user left while a load, a sign-in or a save was in flight),
+///   so nothing is added, emitted or written for a flow that is gone.
 ///
 /// Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never
 /// Flutter, so every generator that reads it runs on analyzer summaries.
@@ -76,9 +80,11 @@ final class ReadingListEditorBloc
   ) : super(const ReadingListEditorState.loading(), monitoring: monitoring) {
     on<ReadingListEditorEvent>(_onEvent);
     _flowChanges = _flow.states.listen(_onFlowState);
-    _sessionChanges = _session.authState.listen(
-      (_) => add(const _SessionChanged()),
-    );
+    _sessionChanges = _session.authState.listen((_) {
+      if (!isClosed) {
+        add(const _SessionChanged());
+      }
+    });
     add(const _Start());
   }
 
@@ -89,7 +95,6 @@ final class ReadingListEditorBloc
   final EventBus _bus;
   late final StreamSubscription<ReadingListEditorFlowState> _flowChanges;
   late final StreamSubscription<AuthStatus> _sessionChanges;
-  final ServerVerdicts _verdicts = ServerVerdicts();
 
   /// Null until the editor has a signed-in session (and, in edit mode, the
   /// list), and again once that session ended.
@@ -102,18 +107,12 @@ final class ReadingListEditorBloc
   /// write, so a save sends only what differs.
   ReadingList? _saved;
 
-  /// The field the last save's `400` named, until the save returned.
-  SaveRejected? _rejection;
-
   /// The last save wrote something (a no-change edit writes nothing, so it
   /// announces nothing).
   bool _wrote = false;
 
   bool _loading = false;
   bool _ended = false;
-
-  /// Set when the flow's container closes the bloc.
-  bool _closing = false;
 
   ReadingListId? get _editing => _flow.state.editing;
 
@@ -190,6 +189,10 @@ final class ReadingListEditorBloc
     if (!_session.isSignedIn) {
       emit(const ReadingListEditorState.signingIn());
       final signedIn = await _navigator.requestSignIn();
+      if (isClosed) {
+        // The user left while the app was signing them in.
+        return;
+      }
       if (!signedIn || !_session.isSignedIn) {
         // The user backed out: the editor closes with no result.
         _flow.complete();
@@ -214,6 +217,10 @@ final class ReadingListEditorBloc
       emit(const ReadingListEditorState.loading());
       final epoch = _epoch;
       final result = await _repository.fetchList(_editing!);
+      if (isClosed) {
+        // The user left while the list was loading.
+        return;
+      }
       if (_session.epoch != epoch) {
         // Read for a session that is gone: not this user's list to show.
         _end(emit);
@@ -237,12 +244,14 @@ final class ReadingListEditorBloc
 
   void _open(ReadingList? saved) {
     final wizard = WizardController<ReadingListId>(
-      steps: readingListSteps(verdicts: _verdicts, saved: saved),
+      steps: readingListSteps(saved: saved),
       onState: _onWizardState,
       onComplete: _save,
     );
     _wizard = wizard;
-    add(_WizardChanged(wizard.state));
+    if (!isClosed) {
+      add(_WizardChanged(wizard.state));
+    }
   }
 
   /// The wizard's step is the flow's: a step change opens or closes step
@@ -251,7 +260,9 @@ final class ReadingListEditorBloc
     if (_flow.state.step != wizard.stepIndex) {
       _flow.update((s) => s.copyWith(step: wizard.stepIndex));
     }
-    add(_WizardChanged(wizard));
+    if (!isClosed) {
+      add(_WizardChanged(wizard));
+    }
   }
 
   /// A step page was popped (a back gesture, the app bar's back): the
@@ -275,26 +286,32 @@ final class ReadingListEditorBloc
       // already running: a double Finish sends one request.
       return;
     }
+    if (_wrote) {
+      // Whatever happens next (a failed second write, an ended session, a
+      // closed editor), what was written is a change to announce.
+      _bus.publish(const DataChanged(readingListsTopic));
+    }
+    if (isClosed) {
+      return;
+    }
     if (_session.epoch != _epoch) {
       // Whatever the save answered, it belongs to a session that is gone.
       _end(emit);
       return;
     }
-    outcome.fold(
-      (id) {
-        if (_wrote) {
-          _bus.publish(const DataChanged(readingListsTopic));
+    outcome.fold(_flow.complete, (error) {
+      // A `400` naming a field the user can change: show it there.
+      if (error case ApiClientError(
+        status: 400,
+        :final code,
+        :final parameter,
+      )) {
+        final field = ReadingListFields.ofParameter(parameter);
+        if (field != null) {
+          wizard.reject(field, serverError(code));
         }
-        _flow.complete(id);
-      },
-      (_) {
-        final rejection = _rejection;
-        _rejection = null;
-        if (rejection != null) {
-          _showVerdict(wizard, rejection);
-        }
-      },
-    );
+      }
+    });
   }
 
   /// The wizard's completion: create, or write what changed. Every write is
@@ -302,7 +319,6 @@ final class ReadingListEditorBloc
   /// checked after each await (a session change, or the flow leaving the
   /// screen, between two writes stops the second).
   Future<Result<ReadingListId, ApiFailure>> _save(FormValues values) async {
-    _rejection = null;
     _wrote = false;
     final epoch = _epoch;
     final draft = readingListDraftOf(values);
@@ -311,7 +327,11 @@ final class ReadingListEditorBloc
       if (!_canWrite(epoch)) {
         return failure(_stopped);
       }
-      return _settle(await _repository.create(draft));
+      final created = await _repository.create(draft);
+      return created.fold((list) {
+        _wrote = true;
+        return success(list.id);
+      }, failure);
     }
     var saved = _saved!;
     if (draft.detailsDifferFrom(saved)) {
@@ -321,7 +341,7 @@ final class ReadingListEditorBloc
       final written = await _repository.updateDetails(editing, draft);
       final list = written.getOrNull();
       if (list == null) {
-        return _settle(written);
+        return failure(written.fold((_) => _stopped, (error) => error));
       }
       _wrote = true;
       saved = _saved = list;
@@ -333,7 +353,7 @@ final class ReadingListEditorBloc
       final written = await _repository.replaceItems(editing, draft);
       final list = written.getOrNull();
       if (list == null) {
-        return _settle(written);
+        return failure(written.fold((_) => _stopped, (error) => error));
       }
       _wrote = true;
       _saved = list;
@@ -341,48 +361,9 @@ final class ReadingListEditorBloc
     return success(editing);
   }
 
-  /// `isClosed` turns true only once running handlers finished (bloc waits
-  /// for them), so a save in flight would not see it: the bloc's own flag
-  /// is set as soon as the flow disposes it.
-  bool _canWrite(int? epoch) => !_closing && _session.epoch == epoch;
-
-  /// The kit completes with an `ApiFailure`; a field the backend refused is
-  /// kept aside and shown once the completion returned.
-  Result<ReadingListId, ApiFailure> _settle(
-    Result<ReadingList, SaveFailure> written,
-  ) => written.fold(
-    (list) {
-      _wrote = true;
-      return success(list.id);
-    },
-    (error) {
-      if (error is SaveRejected) {
-        _rejection = error;
-      }
-      return failure(error.asApiFailure);
-    },
-  );
-
-  /// The backend refused a field: its value now fails a rule (so the step
-  /// is invalid and the error shows under the field), and the wizard goes
-  /// back to the field's step (T-0048-AC2).
-  void _showVerdict(
-    WizardController<ReadingListId> wizard,
-    SaveRejected rejection,
-  ) {
-    final name = ReadingListFields.of(rejection.field);
-    final value = wizard.state.form.field(name).value;
-    _verdicts.refuse(
-      rejection.field,
-      wireValueOf(rejection.field, value),
-      verdictFor(rejection),
-    );
-    // The same value again: the form re-checks every rule, now with the
-    // verdict, and leaves the failed save.
-    wizard.setValue(name, value);
-    final step = ReadingListSteps.indexOf(rejection.field);
-    while (wizard.state.stepIndex > step && wizard.back()) {}
-  }
+  /// The editor is open (`isClosed` turns true as soon as `close()` starts,
+  /// which `close` below calls first) and still in its session.
+  bool _canWrite(int? epoch) => !isClosed && _session.epoch == epoch;
 
   void _onSessionChanged(Emitter<ReadingListEditorState> emit) {
     final epoch = _epoch;
@@ -418,10 +399,12 @@ final class ReadingListEditorBloc
   @override
   @disposeMethod
   Future<void> close() async {
-    _closing = true;
+    // `super.close()` first: it closes the event stream at once, so
+    // `isClosed` is true for every handler still awaiting something.
+    final closed = super.close();
+    _wizard?.dispose();
     await _flowChanges.cancel();
     await _sessionChanges.cancel();
-    _wizard?.dispose();
-    return super.close();
+    return closed;
   }
 }
