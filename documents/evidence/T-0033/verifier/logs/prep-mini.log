@@ -1,0 +1,22 @@
+==> bazel build //app/mini_client:mini_client_lib (runs every generator)
+INFO: Invocation ID: b1e5de66-a769-4730-8451-5adf822c75f1
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/mini_client:mini_client_lib (0 packages loaded, 0 targets configured)
+Analyzing: target //app/mini_client:mini_client_lib (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/mini_client:mini_client_lib (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: Elapsed time: 0.432s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+==> copying the repo to /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini
+==> copying generated files from /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/bin
+    172 generated files
+==> bundling the e2e config as assets/app_config.json
+==> flutter create --platforms=ios (adds the Xcode project; keeps existing files)
+==> flutter pub get
+Deleting old lock-file: `./app/mini_client/pubspec.lock`.
+See https://dart.dev/go/workspaces-stray-files for details.
+E2E_PROJECT=/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client

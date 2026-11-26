@@ -1,0 +1,34 @@
+# T-0033: the universe group's sandbox app (plan 01 §6.3): McApp over
+# universe_wiring alone, opening on the characters list.
+name: universe_sandbox
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  app_core: any
+  flutter:
+    sdk: flutter
+  go_router: 17.5.0
+  mc_di: any
+  universe_wiring: any
+
+dev_dependencies:
+  characters_list: any
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_e2e_utils: any
+  mc_fixtures_characters: any
+  mc_mocked_backend: any
+
+flutter:
+  uses-material-design: true
+  # No `assets:` entry: Bazel bundles assets/app_config.json from
+  # //tool/bazel/config:app_config (BUILD.bazel), as in mini_client.

@@ -1,0 +1,18 @@
+INFO: Invocation ID: 3ec4f5ee-d89e-46d3-8185-e480f4a97e0b
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured).
+[11 / 23] DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 1s disk-cache, worker
+[15 / 23] [Prepa] Checking Dart imports of //app/wiring/universe_wiring:universe_wiring
+[23 / 24] 1 / 1 tests; Testing //app/wiring/universe_wiring:routes_test; 0s disk-cache, darwin-sandbox
+INFO: Found 1 test target...
+INFO: Elapsed time: 8.801s, Critical Path: 8.40s
+INFO: 16 processes: 4 action cache hit, 1 disk cache hit, 8 internal, 3 darwin-sandbox, 4 worker.
+INFO: Build completed successfully, 16 total actions
+//app/wiring/universe_wiring:routes_test                                 PASSED in 0.8s
+
+Executed 1 out of 1 test: 1 test passes.

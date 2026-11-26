@@ -1,0 +1,98 @@
+# e2e_ios.sh: T-0033 verifier on mc-T-0033-verifier-45340 (6FF7B403-B6A0-4AAB-A495-577BE56124FA)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.HUZalX/screenshots/1-verifier_negative_control_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/verifier_negative_control_test.dart -d 6FF7B403-B6A0-4AAB-A495-577BE56124FA
+
+Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini`!
+11 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           15.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:56360/wenEasr2x8Y=/
+VMServiceFlutterDriver: Isolate found with number: 7230170212869651
+VMServiceFlutterDriver: Isolate 7230170212869651 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: exactly one matching candidate
+flutter:   Actual: _TextWidgetFinder:<Found 0 widgets with text "Character details 100487": []>
+flutter:    Which: means none were found but one was expected
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client/integration_test/verifier_negative_control_test.dart:57:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client/integration_test/verifier_negative_control_test.dart line 57
+flutter: The test description was:
+flutter:   T-0033-AC4 home to the characters list, a preview, the full profile placeholder
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:07 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
+flutter:
+flutter: 00:07 +0 -1: (tearDownAll)
+flutter: 00:07 +1 -1: Some tests failed.
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.HUZalX/screenshots/1-verifier_negative_control_test/01_home.png (294321)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.HUZalX/screenshots/1-verifier_negative_control_test/02_characters_list.png (396818)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.HUZalX/screenshots/1-verifier_negative_control_test/03_preview.png (303372)
+Failure Details:
+Failure in method: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Character
+details 100487": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client/integration_test/verifier_negative_control_test.dart:57:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-mini/app/mini_client/integration_test/verifier_negative_control_test.dart line 57
+The test description was:
+  T-0033-AC4 home to the characters list, a preview, the full
+  profile placeholder
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1

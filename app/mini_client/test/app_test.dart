@@ -59,11 +59,17 @@ void main() {
     storage.deleteSync(recursive: true);
   });
 
-  List<McDIInitializer> roots({List<McDIInitializer> extra = const []}) =>
-      rootInitializers(
+  /// The production root list over test config and storage, with the same
+  /// mock domains and router wiring as `appRootInitializers`.
+  List<McDIInitializer> Function(RouterRef) roots({
+    List<McDIInitializer> extra = const [],
+  }) =>
+      (routerRef) => rootInitializers(
         config: () async => _config,
         storageDirectory: storage,
         monitoringSinks: [InMemorySink()],
+        mockDomains: appMockDomains,
+        routerRef: routerRef,
         wirings: [...wiringInitializers, ...extra],
       );
 
@@ -162,8 +168,9 @@ void main() {
       final recording = _Recording();
       var routersCreated = 0;
       var failures = 1;
-      final initializers = [
-        for (final (i, init) in roots().indexed) recording.wrap('root$i', init),
+      final initializers = (RouterRef routerRef) => [
+        for (final (i, init) in roots()(routerRef).indexed)
+          recording.wrap('root$i', init),
         // Last, so the first attempt has registered every root type before
         // it fails: a non-transactional init would then re-register them.
         McDIInitializer((_, _) {
@@ -205,7 +212,7 @@ void main() {
 
       // Each root initializer ran once per attempt, into a fresh container
       // per attempt, and the published root holds attempt 2's instances.
-      expect(recording.runs.keys, hasLength(roots().length));
+      expect(recording.runs.keys, hasLength(roots()(RouterRef()).length));
       for (final MapEntry(:key, :value) in recording.runs.entries) {
         expect(value, hasLength(2), reason: key);
         expect(identical(value[0], value[1]), isFalse, reason: key);
@@ -319,6 +326,22 @@ void main() {
     await tester.tap(find.text('Open placeholder 7'));
     await tester.pumpAndSettle();
     expect(find.text('Placeholder detail 7'), findsOneWidget);
+  });
+
+  testWidgets('T-0033-AC4 the app boots with its own router wired for the '
+      'navigators and the characters domain on the backend', (tester) async {
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    await tester.pumpWidget(MiniClientApp(links: links, initializers: roots()));
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    final router = GoRouter.of(tester.element(find.text('Marvel universe')));
+    expect(diContainer<GoRouter>(), same(router));
+    expect(
+      diContainer<MockBackend>().scenarioNames,
+      contains('characters.empty'),
+    );
   });
 
   testWidgets('an unknown path shows the not-found page', (tester) async {

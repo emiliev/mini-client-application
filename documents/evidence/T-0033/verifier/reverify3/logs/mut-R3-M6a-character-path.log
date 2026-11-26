@@ -1,0 +1,42 @@
+INFO: Invocation ID: c6c0432a-0588-4b1d-905a-b3253a920be4
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured).
+[11 / 26] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 1s disk-cache, worker ... (2 actions running)
+[19 / 26] [Prepa] Checking Dart library imports of @@//app/wiring/universe_wiring:universe_wiring ... (2 actions, 0 running)
+FAIL: //app/wiring/universe_wiring:routes_test (Exit 1) (see /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/wiring/universe_wiring/routes_test/test.log)
+INFO: From Testing //app/wiring/universe_wiring:routes_test:
+==================== Test output for //app/wiring/universe_wiring:routes_test:
+  PASS  T-0033-AC1 the navigator opens CharacterDetailsRoute and the placeholder shows the id
+  PASS  T-0033-AC1 the navigator pushes: Back returns to the list and the router keeps the list as its location
+  PASS  T-0033-AC1 the navigator pushes to the live router after the router was replaced, not to the one it first saw
+  PASS  T-0033-AC1 the wiring initializer resolves the route targets and the navigator
+  FAIL  T-0033-AC2 every AppLocations entry equals its typed route
+        TestFailure: Expected: '/characters/7'
+          Actual: '/character/7'
+           Which: is different.
+                  Expected: /characters/7
+                    Actual: /character/7
+                                      ^
+                   Differ at offset 10
+        character(7)
+
+        package:matcher                                                             expect
+        package:flutter_test/src/widget_tester.dart 473:18                          expect
+        org-dartlang-app:///app/wiring/universe_wiring/test/routes_test.dart 186:7  main.<fn>
+
+
+4 passed, 1 failed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 5.279s, Critical Path: 4.77s
+INFO: 20 processes: 3 action cache hit, 4 disk cache hit, 8 internal, 3 darwin-sandbox, 5 worker.
+INFO: Build completed, 1 test FAILED, 20 total actions
+//app/wiring/universe_wiring:routes_test                                 FAILED in 0.6s
+  /private/tmp/mc-ob-T-0033-verifier/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/wiring/universe_wiring/routes_test/test.log
+
+Executed 1 out of 1 test: 1 fails locally.

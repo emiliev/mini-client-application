@@ -8,4 +8,12 @@ abstract final class AppLocations {
   /// The placeholder detail route (T-0021), the deep-link probe until real
   /// features exist.
   static String placeholder(int id) => '/placeholder/$id';
+
+  /// The characters list (T-0033). Equals `CharactersRoute().location` in
+  /// universe_wiring.
+  static const String characters = '/characters';
+
+  /// One character's details (T-0033), by the `CharacterId` value. Equals
+  /// `CharacterDetailsRoute(id: id).location` in universe_wiring.
+  static String character(int id) => '/characters/$id';
 }

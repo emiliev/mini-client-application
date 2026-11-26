@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:app_core/src/di/mocked_backend_di_initializer.dart';
+import 'package:app_core/src/router/router_ref.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
@@ -21,6 +22,7 @@ List<McDIInitializer> rootInitializers({
   required Directory storageDirectory,
   List<MonitoringSink>? monitoringSinks,
   List<MockDomain> mockDomains = const [],
+  RouterRef? routerRef,
   List<McDIInitializer> wirings = const [],
 }) {
   final backendAdapter = MockBackendHttpAdapter();
@@ -31,6 +33,7 @@ List<McDIInitializer> rootInitializers({
     MockedBackendDIInitializer(adapter: backendAdapter, domains: mockDomains),
     ApiClientDIInitializer(adapter: backendAdapter),
     const EventBusDIInitializer(),
+    if (routerRef != null) RouterDIInitializer(routerRef),
     ...wirings,
   ];
 }

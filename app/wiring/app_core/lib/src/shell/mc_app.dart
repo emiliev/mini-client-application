@@ -4,6 +4,7 @@ import 'package:app_core/src/boot/boot_bloc.dart';
 import 'package:app_core/src/boot/boot_page.dart';
 import 'package:app_core/src/boot/boot_state.dart';
 import 'package:app_core/src/links/pending_links.dart';
+import 'package:app_core/src/router/router_ref.dart';
 import 'package:app_core/src/shell/route_probe.dart';
 
 import 'package:flutter/material.dart';
@@ -34,6 +35,8 @@ class McApp extends StatefulWidget {
     this.themeMode,
     this.title = 'Mini Client',
     this.probe,
+    this.routerRef,
+    this.appBuilder,
     this.bootMonitoring,
     this.abandonBoot = abandonDIContainerInitialization,
     super.key,
@@ -51,6 +54,12 @@ class McApp extends StatefulWidget {
 
   /// Counts route builds and redirects (tests only).
   final McRouteProbe? probe;
+
+  /// Told about the router once it exists, for navigator implementations.
+  final RouterRef? routerRef;
+
+  /// Wraps the routed pages (the media scope). The boot page never sees it.
+  final TransitionBuilder? appBuilder;
 
   /// Where the [BootBloc] reports transitions and boot failures. Root
   /// `Monitoring` doesn't exist until boot succeeds, so this defaults to a
@@ -87,6 +96,7 @@ class _McAppState extends State<McApp> {
     if (state is BootReady && _router == null && mounted) {
       widget.probe?.markReady();
       final router = widget.router(widget.links.take());
+      widget.routerRef?.attach(router);
       setState(() => _router = router);
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // MaterialApp.router has built and go_router observes links now.
@@ -103,6 +113,7 @@ class _McAppState extends State<McApp> {
   void dispose() {
     unawaited(_bootStates?.cancel());
     unawaited(_boot.close());
+    widget.routerRef?.detach();
     _router?.dispose();
     if (widget.themeMode == null) {
       _themeMode.dispose();
@@ -153,6 +164,7 @@ class _McAppState extends State<McApp> {
           highContrastDarkTheme: McTheme.highContrastDarkTheme,
           themeMode: mode,
           routerConfig: router,
+          builder: widget.appBuilder,
         );
       },
     );

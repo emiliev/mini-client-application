@@ -28,28 +28,52 @@ stale="$(grep -rn "mc_media/mc_media_scope\|:mc_media_scope" --include=BUILD.baz
 report "## stale references to the old barrel or library" '```' "${stale:-none}" '```'
 [[ -z "$stale" ]] || rc=1
 
-# No production mc_ds_* target depends on mc_fixtures_*. Positive control: a
-# test target of mc_ds_media does (so a query that cannot see it fails).
+# No production feature or utility target depends on mc_fixtures_* (T-0033
+# widened this from mc_ds_* to every feature and every utility except the
+# fixtures, the mocked backend and the test utilities, which may). Fixtures
+# are allowed under //app/... and in backend code only. Positive control: a
+# test target of mc_ds_media does depend on them, so a query that cannot see
+# fixtures fails. Negative control: a fixtures dependency added to
+# characters_list's BUILD makes the same scan report it.
 bz() { "$BAZELW" ${MC_OUTPUT_BASE:+--output_base="$MC_OUTPUT_BASE"} "$@"; }
 libs=""
-for d in utility/mc_ds_*/; do
+for d in feature/*/*/ utility/mc_*/; do
   pkg="$(basename "$d")"
+  case "$pkg" in
+    mc_fixtures_*|mc_mocked_backend|mc_test_*|mc_e2e_utils|mc_ds_testing|mc_analysis) continue ;;
+  esac
   [[ -f "$d/BUILD.bazel" ]] || continue
-  libs="$libs //utility/$pkg:$pkg"
+  libs="$libs //${d%/}:$pkg"
 done
-fixtures_hits=""
-nlibs=0
-for l in $libs; do
-  out="$(bz cquery "deps($l)" 2>/dev/null | sed 's/ (.*//')"
-  [[ -n "$out" ]] || { report "query for $l returned nothing"; rc=1; continue; }
-  nlibs=$((nlibs + 1))
-  hit="$(grep -E '^@?@?//utility/mc_fixtures_' <<< "$out" | sort -u | head -3 | tr '\n' ' ')"
-  [[ -z "$hit" ]] || fixtures_hits="$fixtures_hits $l -> $hit;"
-done
-report "## production mc_ds_* targets checked ($nlibs): $libs"
+# scan <labels...>: prints "label -> fixtures..." for each that reaches them.
+scan() {
+  local l out hit
+  for l in "$@"; do
+    out="$(bz cquery "deps($l)" 2>/dev/null | sed 's/ (.*//')"
+    if [[ -z "$out" ]]; then echo "$l -> QUERY RETURNED NOTHING"; continue; fi
+    hit="$(grep -E '^@?@?//utility/mc_fixtures_' <<< "$out" | sort -u | head -3 | tr '\n' ' ')"
+    [[ -z "$hit" ]] || echo "$l -> $hit"
+  done
+}
+nlibs="$(wc -w <<< "$libs" | tr -d ' ')"
+# shellcheck disable=SC2086
+fixtures_hits="$(scan $libs)"
+report "## production feature and utility targets checked ($nlibs): $libs"
 report '```' "fixtures dependencies: ${fixtures_hits:-none}" '```'
-[[ -z "$fixtures_hits" && "$nlibs" -ge 6 ]] || rc=1
+[[ -z "$fixtures_hits" && "$nlibs" -ge 20 ]] || rc=1
 control="$(bz cquery "deps(//utility/mc_ds_media:image_test)" 2>/dev/null | sed 's/ (.*//' | grep -E '^@?@?//utility/mc_fixtures_' | sort -u | head -3 | tr '\n' ' ')"
 report "## positive control: //utility/mc_ds_media:image_test (a test) depends on: ${control:-nothing}"
 [[ -n "$control" ]] || rc=1
+
+# Negative control: put a fixtures dependency into characters_list's library.
+build=feature/characters/characters_list/BUILD.bazel
+cp "$build" "$build.orig"
+trap 'mv -f "$build.orig" "$build"' EXIT
+sed -i '' 's|^    "//utility/mc_api_client",$|    "//utility/mc_api_client",\n    "//utility/mc_fixtures_characters",|' "$build"
+neg="$(scan //feature/characters/characters_list:characters_list)"
+mv -f "$build.orig" "$build"
+trap - EXIT
+report "## negative control: a mc_fixtures_characters dependency in characters_list"
+report '```' "${neg:-NOT DETECTED}" '```'
+[[ -n "$neg" && "$neg" != *"QUERY RETURNED NOTHING"* ]] || rc=1
 finish T-0031-AC6 $rc

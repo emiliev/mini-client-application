@@ -1,0 +1,68 @@
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
+import 'package:mini_client/main.dart' as app;
+
+// Verifier probe (scratch copy only): control for the delivery method. The
+// main app's own link after boot (T-0021-AC3 shape) on the simulator.
+Future<void> _pushLink(WidgetTester tester, String location) =>
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', {
+          'location': location,
+          'state': null,
+        }),
+      ),
+      (_) {},
+    );
+
+void main() {
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('verifier warm main-app links', (tester) async {
+    startApp(app.main);
+    await pumpUntil(tester, find.byKey(const Key('home.placeholder')), 'home');
+    String loc() => GoRouter.of(
+      tester.element(find.byType(Navigator).first),
+    ).state.uri.toString();
+    debugPrint('PROBE before push: location=${loc()}');
+    await _pushLink(tester, 'miniclient://app/placeholder/42');
+    await letArtLoad(tester, const Duration(seconds: 3));
+    debugPrint(
+      'PROBE after placeholder push: location=${loc()} '
+      'text=${find.text('Placeholder detail 42').evaluate().length}',
+    );
+    await _pushLink(tester, 'miniclient://app/characters/6');
+    await letArtLoad(tester, const Duration(seconds: 3));
+    debugPrint(
+      'PROBE after characters/6 push: location=${loc()} '
+      'details=${find.byKey(const Key('character.details.placeholder')).evaluate().length}',
+    );
+    await shot(binding, tester, 'rv_06_mini_warm_probe');
+
+    // Now from the characters list (the feature flow on screen).
+    await _pushLink(tester, 'miniclient://app/characters');
+    await letArtLoad(tester, const Duration(seconds: 3));
+    debugPrint(
+      'PROBE after characters push: location=${loc()} '
+      'grid=${find.byKey(charactersGridKey).hitTestable().evaluate().length}',
+    );
+    await _pushLink(tester, 'miniclient://app/placeholder/43');
+    await letArtLoad(tester, const Duration(seconds: 3));
+    debugPrint(
+      'PROBE from the list, placeholder/43 push: location=${loc()} '
+      'text=${find.text('Placeholder detail 43').evaluate().length}',
+    );
+    await _pushLink(tester, 'miniclient://app/characters/8');
+    await letArtLoad(tester, const Duration(seconds: 3));
+    debugPrint(
+      'PROBE then characters/8 push: location=${loc()} '
+      'text=${find.text('Character details 8').evaluate().length}',
+    );
+    await shot(binding, tester, 'rv_07_mini_warm_probe_from_list');
+  });
+}

@@ -1,0 +1,79 @@
+import 'dart:io';
+import 'dart:ui' as ui;
+
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
+import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:mini_client/main.dart' as app;
+
+// Verifier probe (scratch copy only): the R1 repro with hard assertions.
+// Home -> Characters (the flow on screen) -> placeholder/43 -> characters/8,
+// each delivered as the iOS embedder delivers a link: `pushRouteInformation`
+// on `flutter/navigation`, through the engine-facing channel buffers
+// (dart:ui channelBuffers), not straight into a handler.
+Future<void> _engineLink(String location) async {
+  final data = const JSONMethodCodec().encodeMethodCall(
+    MethodCall('pushRouteInformation', {'location': location}),
+  );
+  // What PlatformDispatcher.onPlatformMessage does for an engine message.
+  ui.channelBuffers.push(
+    'flutter/navigation',
+    data,
+    (_) {},
+  );
+}
+
+void main() {
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('verifier R1 repro from the characters list', (tester) async {
+    final first = CharacterUniverse(42, defaultMockClock).byName.first;
+    String loc() => GoRouter.of(
+      tester.element(find.byType(Navigator).first),
+    ).state.uri.toString();
+
+    startApp(app.main);
+    await pumpUntil(tester, find.byKey(const Key('home.placeholder')), 'home');
+    await tester.tap(find.text('Characters'));
+    await pumpUntil(tester, find.text(first.name), 'the list');
+    expect(find.byKey(charactersGridKey), findsOneWidget);
+    debugPrint('PROBE list shown: location=${loc()}');
+
+    await _engineLink('miniclient://app/placeholder/43');
+    await pumpUntil(
+      tester,
+      find.text('Placeholder detail 43'),
+      'placeholder 43 after the flow',
+    );
+    debugPrint('PROBE placeholder/43 shown: location=${loc()}');
+    await shot(binding, tester, 'r3_01_placeholder_43_after_flow');
+
+    await _engineLink('miniclient://app/characters/8');
+    await pumpUntil(
+      tester,
+      find.text('Character details 8'),
+      'character 8 after the flow',
+    );
+    debugPrint('PROBE characters/8 shown: location=${loc()}');
+    await shot(binding, tester, 'r3_02_character_8_after_flow');
+
+    // Real delivery attempt: the runner script runs `simctl openurl` for
+    // miniclient://app/placeholder/44 once it sees this marker.
+    File('${Directory.systemTemp.path}/verifier_openurl_ready').writeAsStringSync('1');
+    debugPrint('PROBE READY_FOR_OPENURL');
+    final deadline = DateTime.now().add(const Duration(seconds: 25));
+    while (DateTime.now().isBefore(deadline) &&
+        find.text('Placeholder detail 44').evaluate().isEmpty) {
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+    debugPrint(
+      'PROBE openurl placeholder/44 reached the app: '
+      '${find.text('Placeholder detail 44').evaluate().isNotEmpty}',
+    );
+  });
+}

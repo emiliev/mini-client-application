@@ -9,6 +9,7 @@ environment:
 
 workspace:
   - app/mini_client
+  - app/sandbox/universe_sandbox
   - app/wiring/account_wiring
   - app/wiring/app_core
   - app/wiring/chronicle_wiring
@@ -42,6 +43,7 @@ workspace:
   - utility/mc_ds_testing
   - utility/mc_ds_theme
   - utility/mc_ds_tokens
+  - utility/mc_e2e_utils
   - utility/mc_event_bus
   - utility/mc_feature_flow
   - utility/mc_formatters

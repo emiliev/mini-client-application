@@ -32,11 +32,16 @@ dev_dependencies:
   dio: ^5.11.0
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   mc_analysis: any
+  mc_e2e_utils: any
   mc_event_bus: any
+  mc_fixtures_characters: any
   mc_mocked_backend: any
   mc_monitoring: any
   mc_storage: any
+  mc_test_utils: any
 
 flutter:
   uses-material-design: true

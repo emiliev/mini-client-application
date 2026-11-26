@@ -1,0 +1,64 @@
+INFO: Invocation ID: 601c9ab9-53fd-46ec-a973-7e736979e98b
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/mini_client:app_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/mini_client:app_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/mini_client:app_test (0 packages loaded, 12 targets configured, 43 aspect applications).
+[1,555 / 1,556] 1 / 1 tests; Testing //app/mini_client:app_test; 1s disk-cache, darwin-sandbox
+INFO: From Testing //app/mini_client:app_test:
+==================== Test output for //app/mini_client:app_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a cold-start link held during boot shows its route once boot succeeds, and no route builder or redirect ran before ready
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a link pushed while boot is held wins and is not seen by the boot navigator
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[error] Bad state: first boot fails
+#0      main.<anonymous closure>.<anonymous closure>.<anonymous closure> (org-dartlang-app:///app/mini_client/test/app_test.dart:178:13)
+#1      McDIInitializer.init (package:mc_di/src/di_initializer.dart:19:51)
+#2      initializeDIContainer (package:mc_di/src/di_container.dart:68:25)
+<asynchronous suspension>
+#3      BootBloc._begin.<anonymous closure> (package:app_core/src/boot/boot_bloc.dart:126:7)
+<asynchronous suspension>
+
+[debug] BootBloc: _BootThrew BootBooting -> BootFailed
+[debug] BootBloc: BootRetried BootFailed -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC5 with the same link and a failing first boot, Retry replays the link once and every root type is registered exactly once
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC3 a miniclient://app/placeholder link delivered on the platform navigation channel to the running app shows that route
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC4 a link delivered between BootReady and the router's first frame is held and forwarded to go_router, not lost
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0021-AC3 a link for another host or scheme shows home, not its path
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  the home placeholder shows the bundled config env
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0033-AC4 the app boots with its own router wired for the navigators and the characters domain on the backend
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  an unknown path shows the not-found page
+  PASS  AppLocations match the typed routes
+  PASS  all 7 wirings are composed
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+VERIFIER location=/characters grid=1 amber=6 notFound=0
+  PASS  VERIFIER roots() boots like production and opens /characters
+
+12 passed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 2.098s, Critical Path: 1.54s
+INFO: 8 processes: 1548 action cache hit, 3 internal, 3 darwin-sandbox, 2 worker.
+INFO: Build completed successfully, 8 total actions
+//app/mini_client:app_test                                               PASSED in 1.2s
+
+Executed 1 out of 1 test: 1 test passes.

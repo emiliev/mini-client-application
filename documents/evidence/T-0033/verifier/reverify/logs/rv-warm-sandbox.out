@@ -1,0 +1,17 @@
+==> Task T-0033, role verifier, project /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox/app/sandbox/universe_sandbox
+==> Evidence dir: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd/documents/evidence/T-0033/verifier/reverify/warm_probe_sandbox
+==> Creating simulator mc-T-0033-verifier-85079 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0033-verifier-85079
+SIMULATOR_UDID=272C04EA-BE81-47C3-ACB6-4CEFC864A0C2
+SIMULATOR_CREATED_AT=1795632128
+==> Booting 272C04EA-BE81-47C3-ACB6-4CEFC864A0C2
+==> Booted in 18 s
+==> Running target 1/1: integration_test/verifier_warm_own_link_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/verifier_warm_own_link_test.dart -d 272C04EA-BE81-47C3-ACB6-4CEFC864A0C2
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd/documents/evidence/T-0033/verifier/reverify/warm_probe_sandbox/e2e-verifier_warm_own_link_test.log
+==>   screenshot rv_04_sandbox_warm_probe.png (downscaled from 1206x2622)
+==> PASS integration_test/verifier_warm_own_link_test.dart (43 s)
+==> Summary: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd/documents/evidence/T-0033/verifier/reverify/warm_probe_sandbox/e2e-summary.md
+==> RESULT: PASS (1 target(s))
+==> Deleted simulator mc-T-0033-verifier-85079 (272C04EA-BE81-47C3-ACB6-4CEFC864A0C2)
+SIMULATOR_DELETED_AT=1795632192

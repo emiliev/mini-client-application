@@ -1,0 +1,76 @@
+# T-0033: the universe sandbox app (plan 01 §6.3): McApp over universe_wiring
+# alone, with its own bundle id.
+#   tool/bazelw build --config=sim //app/sandbox/universe_sandbox:universe_sandbox_ios
+load("@rules_flutter//flutter:defs.bzl", "flutter_application", "flutter_library", "flutter_test")
+load("@rules_flutter//flutter:ios.bzl", "IOS_MINIMUM_OS_VERSION", "flutter_ios_app")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "universe_sandbox"
+
+_LANG = "3.13"
+
+_RUNTIME_DEPS = [
+    "//app/wiring/app_core",
+    "//app/wiring/universe_wiring",
+    "//utility/mc_di",
+    "@pub_deps//:flutter",
+    "@pub_deps//:go_router",
+]
+
+_SRCS = glob(["lib/**/*.dart"])
+
+# R13: the environment's config, selected by --//tool/bazel/config:env and
+# bundled as `assets/app_config.json` (an asset needs this package's key).
+genrule(
+    name = "app_config_asset",
+    srcs = ["//tool/bazel/config:app_config"],
+    outs = ["assets/app_config.json"],
+    cmd = "cp $< $@",
+)
+
+flutter_library(
+    name = "universe_sandbox_lib",
+    package_name = _PKG,
+    srcs = _SRCS,
+    language_version = _LANG,
+    deps = _RUNTIME_DEPS,
+)
+
+[flutter_test(
+    name = t,
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = ["test/fake_targets.dart"],
+    main = "test/%s.dart" % t,
+    deps = _RUNTIME_DEPS + [
+        ":universe_sandbox_lib",
+        "//feature/characters/characters_list",
+        "@pub_deps//:flutter_test",
+    ],
+) for t in [
+    "universe_sandbox_links_test",
+    "universe_sandbox_router_test",
+]]
+
+# The app (manual, R14). The app rule carries no DartInfo, so its sources are
+# listed again, as in //app/mini_client.
+flutter_application(
+    name = "universe_sandbox_app",
+    package_name = _PKG,
+    language_version = _LANG,
+    srcs = [s for s in _SRCS if s != "lib/main.dart"],
+    main = "lib/main.dart",
+    assets = [":app_config_asset"],
+    min_os_version = IOS_MINIMUM_OS_VERSION,
+    tags = ["manual"],
+    deps = _RUNTIME_DEPS + ["@rules_flutter//flutter:material_icons"],
+)
+
+flutter_ios_app(
+    name = "universe_sandbox_ios",
+    application = ":universe_sandbox_app",
+    bundle_id = "com.emiliev.miniclient.sandbox.universe",
+    tags = ["manual"],
+)

@@ -1,0 +1,92 @@
+# e2e_ios.sh: T-0033 verifier on mc-T-0033-verifier-30013 (AAE45055-625E-4FA5-A3B1-FED85D3EFCDF)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.RRKnJy/screenshots/1-characters_link_after_flow_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d AAE45055-625E-4FA5-A3B1-FED85D3EFCDF
+
+Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini`!
+11 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            8.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52432/eKvezAjZq7k=/
+VMServiceFlutterDriver: Isolate found with number: 6524858882410543
+VMServiceFlutterDriver: Isolate 6524858882410543 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0033-AC4 a link sent to the running app opens its route while the characters list is shown
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Timed out after 0:00:30.000000 waiting for the linked placeholder
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      fail (package:matcher/src/expect/expect.dart:187:31)
+flutter: #1      pumpUntil (package:mc_e2e_utils/mc_e2e_utils.dart:39:7)
+flutter: <asynchronous suspension>
+flutter: #2      main.<anonymous closure> (file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini/app/mini_client/integration_test/characters_link_after_flow_test.dart:29:5)
+flutter: <asynchronous suspension>
+flutter: #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   T-0033-AC4 a link sent to the running app opens its route while the characters list is shown
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:32 +0: T-0033-AC4 a link sent to the running app opens its route while the characters list is shown [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: T-0033-AC4 a link sent to the running app opens its route while the characters list is shown
+flutter:
+flutter: 00:32 +0 -1: (tearDownAll)
+flutter: 00:32 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: T-0033-AC4 a link sent to the running app opens its route while the characters list is shown
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Timed out after 0:00:30.000000 waiting for the linked placeholder
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      pumpUntil (package:mc_e2e_utils/mc_e2e_utils.dart:39:7)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini/app/mini_client/integration_test/characters_link_after_flow_test.dart:29:5)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+The test description was:
+  T-0033-AC4 a link sent to the running app opens its route while
+  the characters list is shown
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1

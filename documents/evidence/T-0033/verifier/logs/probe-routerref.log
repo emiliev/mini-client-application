@@ -1,0 +1,73 @@
+INFO: Invocation ID: 178da306-b14a-45de-ae90-624a4b816b2b
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/wiring/universe_wiring:routes_test (2 packages loaded, 55 targets configured, 20 aspect applications).
+[6,866 / 6,867] 1 / 1 tests; Testing //app/wiring/universe_wiring:routes_test; 0s disk-cache, darwin-sandbox
+INFO: From Testing //app/wiring/universe_wiring:routes_test:
+==================== Test output for //app/wiring/universe_wiring:routes_test:
+  PASS  T-0033-AC1 the navigator opens CharacterDetailsRoute and the placeholder shows the id
+  PASS  T-0033-AC1 the wiring initializer resolves the route targets and the navigator
+  PASS  T-0033-AC2 every AppLocations entry equals its typed route
+Error while creating GoRouter
+Stack trace:
+ #0      RouterRef.router (package:app_core/src/router/router_ref.dart:15:8)
+#1      RouterDIInitializer._init.<anonymous closure>.<anonymous closure> (package:app_core/src/router/router_ref.dart:31:57)
+#2      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:261:44)
+#3      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#4      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#5      GetItHelper.call (package:injectable/src/get_it_helper.dart:49:13)
+#6      GetItInjectableX.init.<anonymous closure> (package:universe_wiring/src/di/di_initializer.config.dart:28:49)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:261:44)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#11     _GetItContainer.call (package:mc_di/src/di_container.dart:231:18)
+#12     main.<anonymous closure> (org-dartlang-app:///app/wiring/universe_wiring/test/routes_test.dart:123:18)
+<asynchronous suspension>
+#13     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#15     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+Error while creating CharactersListNavigator
+Stack trace:
+ #0      RouterRef.router (package:app_core/src/router/router_ref.dart:15:8)
+#1      RouterDIInitializer._init.<anonymous closure>.<anonymous closure> (package:app_core/src/router/router_ref.dart:31:57)
+#2      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:261:44)
+#3      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#4      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#5      GetItHelper.call (package:injectable/src/get_it_helper.dart:49:13)
+#6      GetItInjectableX.init.<anonymous closure> (package:universe_wiring/src/di/di_initializer.config.dart:28:49)
+#7      _ObjectRegistration.getObject (package:get_it/get_it_impl.dart:261:44)
+#8      _GetItImplementation._get (package:get_it/get_it_impl.dart:704:37)
+#9      _GetItImplementation.get (package:get_it/get_it_impl.dart:643:12)
+#10     _GetItImplementation.call (package:get_it/get_it_impl.dart:765:12)
+#11     _GetItContainer.call (package:mc_di/src/di_container.dart:231:18)
+#12     main.<anonymous closure> (org-dartlang-app:///app/wiring/universe_wiring/test/routes_test.dart:123:18)
+<asynchronous suspension>
+#13     Declarer.test.<anonymous closure>.<anonymous closure> (package:test_api/src/backend/declarer.dart:253:15)
+<asynchronous suspension>
+#14     Declarer.test.<anonymous closure> (package:test_api/src/backend/declarer.dart:250:11)
+<asynchronous suspension>
+#15     Invoker._waitForOutstandingCallbacks.<anonymous closure> (package:test_api/src/backend/invoker.dart:318:9)
+<asynchronous suspension>
+
+VERIFIER pre-boot error: StateError: Bad state: The router does not exist yet: it is created when boot is ready, so a navigator may only be used from a route or a callback.
+VERIFIER after attach: resolves
+  PASS  VERIFIER navigator before boot fails clearly, then recovers
+
+4 passed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 1.873s, Critical Path: 0.90s
+INFO: 8 processes: 6859 action cache hit, 3 internal, 3 darwin-sandbox, 2 worker.
+INFO: Build completed successfully, 8 total actions
+//app/wiring/universe_wiring:routes_test                                 PASSED in 0.6s
+
+Executed 1 out of 1 test: 1 test passes.

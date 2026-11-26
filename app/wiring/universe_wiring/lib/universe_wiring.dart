@@ -1,13 +1,18 @@
-import 'package:get_it/get_it.dart';
+// The universe group's app layer (plan 01 §3.4): typed routes, navigator
+// implementations and the DI initializer. Features never see any of it.
 import 'package:go_router/go_router.dart';
-import 'package:mc_di/mc_di.dart';
+import 'package:universe_wiring/src/routes/characters_routes.dart';
 
-/// The universe group (characters, teams, locations)'s routes. Empty until its features exist.
-const List<RouteBase> universeRoutes = <RouteBase>[];
+export 'package:universe_wiring/src/di/di_initializer.dart'
+    show UniverseNavigatorsDIInitializer;
+export 'package:universe_wiring/src/di/universe_wiring_di_initializer.dart'
+    show UniverseWiringDIInitializer;
+export 'package:universe_wiring/src/flows/character_details_placeholder_flow.dart'
+    show CharacterDetailsPlaceholderFlow;
+export 'package:universe_wiring/src/routes/characters_routes.dart'
+    show CharacterDetailsRoute, CharactersRoute;
+export 'package:universe_wiring/src/routes/route_targets.dart'
+    show RouteTargets;
 
-/// Registers the universe group's navigator implementations. None yet.
-class UniverseWiringDIInitializer extends McDIInitializer {
-  const UniverseWiringDIInitializer() : super(_init);
-
-  static void _init(GetIt getIt, String? environment) {}
-}
+/// The universe group's routes (characters; teams and locations later).
+List<RouteBase> get universeRoutes => <RouteBase>[...charactersRoutes];

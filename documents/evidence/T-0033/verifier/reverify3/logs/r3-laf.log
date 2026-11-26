@@ -1,0 +1,29 @@
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: 6f14dd12-7d53-4213-a77f-4643ab647def
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: target //app/mini_client:links_after_flow_test (6 packages loaded, 6 targets configured)
+Analyzing: target //app/mini_client:links_after_flow_test (6 packages loaded, 6 targets configured)
+
+Analyzing: target //app/mini_client:links_after_flow_test (278 packages loaded, 11660 targets configured, 313 aspect applications)
+
+INFO: Analyzed target //app/mini_client:links_after_flow_test (290 packages loaded, 11834 targets configured, 768 aspect applications).
+[9,018 / 12,122] Summarizing Dart library //utility/mc_mocked_backend:mc_mocked_backend; 0s disk-cache ... (7 actions, 0 running)
+INFO: From DartAggregateCodegen @@//app/wiring/universe_wiring:di_config:
+Missing dependencies in universe_wiring/src/di/di_initializer.dart
+
+[CharactersListNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[12,122 / 12,123] Testing //app/mini_client:links_after_flow_test; 0s darwin-sandbox
+INFO: Found 1 test target...
+INFO: Elapsed time: 5.217s, Critical Path: 1.04s
+INFO: 4627 processes: 7496 action cache hit, 70 disk cache hit, 4556 internal, 1 darwin-sandbox.
+INFO: Build completed successfully, 4627 total actions
+//app/mini_client:links_after_flow_test                                  PASSED in 0.7s
+
+Executed 1 out of 1 test: 1 test passes.

@@ -12,8 +12,11 @@ _DEPS = [
     "//utility/mc_di",
     "//utility/mc_ds_feedback",
     "//utility/mc_ds_layout",
+    "//utility/mc_ds_media",
     "//utility/mc_ds_theme",
     "//utility/mc_event_bus",
+    "//utility/mc_fixtures_characters",
+    "//utility/mc_fixtures_media",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
     "//utility/mc_storage",
@@ -45,4 +48,5 @@ flutter_library(
 ) for t in [
     "boot_test",
     "links_and_hooks_test",
+    "router_ref_and_scheme_test",
 ]]

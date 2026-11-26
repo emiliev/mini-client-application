@@ -1,0 +1,28 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
+import 'package:universe_sandbox/main.dart' as app;
+
+// Verifier probe (scratch copy only): a cold start whose initial route is the
+// sandbox's own deep link, set where the iOS embedder puts it
+// (PlatformDispatcher.defaultRouteName), then the real main().
+void main() {
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('verifier cold-start miniclientuniverse://app/characters/5', (
+    tester,
+  ) async {
+    binding.platformDispatcher.defaultRouteNameTestValue =
+        'miniclientuniverse://app/characters/5';
+    startApp(app.main);
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('character.details.placeholder')),
+      'the details placeholder',
+    );
+    expect(find.text('Character details 5'), findsOneWidget);
+    debugPrint('PROBE cold own-scheme: placeholder 5 shown');
+    await shot(binding, tester, 'rv_01_sandbox_cold_link_details_5');
+  });
+}

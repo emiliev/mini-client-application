@@ -1,0 +1,97 @@
+# e2e_ios.sh: T-0033 verifier on mc-T-0033-verifier-69243 (4AF353A3-7009-4289-A5DE-0F0D9689B0F4)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox/app/sandbox/universe_sandbox
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.A9gLnp/screenshots/3-verifier_foreign_link_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/verifier_foreign_link_test.dart -d 4AF353A3-7009-4289-A5DE-0F0D9689B0F4
+
+Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox`!
+11 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           10.7s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:59686/1PMhmSN7bmw=/
+VMServiceFlutterDriver: Isolate found with number: 4863407314352187
+VMServiceFlutterDriver: Isolate 4863407314352187 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: verifier foreign links are refused
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: PROBE cold foreign miniclient://: list shown, no details
+flutter: PROBE warm foreign miniclient://app/characters/6: details=0
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: PROBE warm foreign https://example.com/characters/6: details=0
+flutter: PROBE warm foreign miniclientuniverse://other/characters/6: details=0
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Timed out after 0:00:30.000000 waiting for details 6 (warm own link)
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      fail (package:matcher/src/expect/expect.dart:187:31)
+flutter: #1      pumpUntil (package:mc_e2e_utils/mc_e2e_utils.dart:38:7)
+flutter: <asynchronous suspension>
+flutter: #2      main.<anonymous closure> (file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox/app/sandbox/universe_sandbox/integration_test/verifier_foreign_link_test.dart:56:5)
+flutter: <asynchronous suspension>
+flutter: #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   verifier foreign links are refused
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:37 +0: verifier foreign links are refused [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: verifier foreign links are refused
+flutter:
+flutter: 00:37 +0 -1: (tearDownAll)
+flutter: 00:37 +1 -1: Some tests failed.
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.A9gLnp/screenshots/3-verifier_foreign_link_test/rv_02_sandbox_cold_foreign_link_list.png (396818)
+Failure Details:
+Failure in method: verifier foreign links are refused
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Timed out after 0:00:30.000000 waiting for details 6 (warm own
+link)
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      pumpUntil (package:mc_e2e_utils/mc_e2e_utils.dart:38:7)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/e2e-sandbox/app/sandbox/universe_sandbox/integration_test/verifier_foreign_link_test.dart:56:5)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+The test description was:
+  verifier foreign links are refused
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1
