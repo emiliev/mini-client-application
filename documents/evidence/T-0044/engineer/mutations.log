@@ -40,12 +40,12 @@ AC3 chip selected flag dropped: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 si
 AC3 chip button flag dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 chips are buttons with a selected state)
 AC3 chip exclusive flag dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 chips are buttons with a selected state)
 AC3 chip group not exclusive: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 chips are buttons with a selected state)
-AC3 chip tap target below 44: SURVIVED
+AC3 chip tap target below 44: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 tap targets hold when the text is scaled down)
 AC3 chip disabled has a tap action: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 chips are buttons with a selected state)
 AC3 segment selected flag dropped: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 segmented reports the tapped index)
 AC3 segment button flag dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 segments are buttons in an exclusive group with a selected state)
 AC3 segment group flag dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 segments are buttons in an exclusive group with a selected state)
-AC3 segment tap target below 44: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 every tap target is at least 44 pt)
+AC3 segment tap target below 44: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 tap targets hold when the text is scaled down)
 AC3 stepper group label dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 stepper buttons are named increase and decrease, the group carries the v)
 AC3 stepper group value dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 stepper buttons are named increase and decrease, the group carries the v)
 AC3 stepper number read twice: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 stepper buttons are named increase and decrease, the group carries the v)
@@ -61,4 +61,4 @@ AC1 golden: focused border not primary: KILLED (FAIL  T-0044-AC1 text_field_focu
 AC1 golden: error border not error colour: KILLED (FAIL  T-0044-AC1 text_field_error golden light x1)
 AC1 golden: segmented selection fill hidden: KILLED (FAIL  T-0044-AC1 segmented_2 golden light x1)
 
-SOME MUTATIONS SURVIVED OR FAILED TO APPLY
+ALL MUTATIONS KILLED
