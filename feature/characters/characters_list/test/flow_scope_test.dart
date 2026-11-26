@@ -5,9 +5,10 @@
 // team builds a new flow.
 import 'package:characters_list/characters_list.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_navigation/mc_ds_navigation.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
@@ -94,6 +95,30 @@ void main() {
       expect(error, isA<StateError>());
       expect('$error', contains('RootImport<Monitoring>'));
       expect(find.byKey(charactersGridKey), findsNothing);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0040-AC3 the list page uses McAppBar with McFlowBackButton as leading',
+    (tester) async {
+      McTestSession.current.backend.useFixtureSet('characters.default');
+      await initFlow(
+        tester,
+        () => charactersTestHost(charactersListFlowUnderTest()),
+      );
+      await mcSettle(tester);
+
+      final bar = tester.widget<McAppBar>(find.byType(McAppBar));
+      expect(bar.leading, isA<McFlowBackButton>());
+      // The DS bar draws the flow's widget inside its own AppBar.
+      expect(
+        find.descendant(
+          of: find.byType(AppBar),
+          matching: find.byType(McFlowBackButton),
+        ),
+        findsOneWidget,
+      );
+      expect(find.text('Characters'), findsOneWidget);
     },
   );
 }

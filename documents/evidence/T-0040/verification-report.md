@@ -1,0 +1,135 @@
+# Verification report: T-0040 `mc_ds_navigation` (McAppBar, McTabBar, McSectionHeader)
+
+- **Verifier:** crew: Verifier (a fresh agent; not the implementer)
+- **Date:** 2026-11-26
+- **Branch / commit verified:** `fleet/T-0040-ds-navigation` @ **`1e54ad7`** (detached checkout in the Verifier's own worktree). The merge base is `2f59b74`. `origin/main` has since moved to `8d6022a` (T-0038 merged). `git merge-tree --write-tree origin/main 1e54ad7` is clean, with no conflicts.
+- **Simulator:** `mc-T-0040-verifier-47303`, iPhone 17 Pro, iOS 26.2. `tool/e2e_ios.sh` created and deleted it, and afterwards `xcrun simctl list devices | grep -c mc-T-0040-verifier` gives **0**. The scratch pub copy `/tmp/mc-T-0040-verifier-e2e` is deleted.
+- **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0040-verifier …`, a new output base (it did not exist before), shut down at the end. The shared disk cache is still used, as `.bazelrc` sets.
+- **Verdict: PASS.** All four ACs pass. I recommend fixing **D1** (Major, layout: `McTabBar` stretches to fill any bounded parent, and the tab-bar goldens lock that in) before or straight after the merge. It is a one-line fix plus 16 regenerated goldens, but it falls outside the wording of every AC. The other findings are Minor or nits.
+
+## Gates re-run independently
+| Gate | Command | Result |
+|---|---|---|
+| AC4 gate script | `MC_BAZEL_STARTUP=--output_base=/tmp/mc-ob-T-0040-verifier MC_OUTPUT_BASE=… tool/checks/T-0040-AC4_gates.sh --role verifier` | **PASS** on all 10 gates: `test //...` (characters_list, mc_feature_flow, mc_ds_navigation and third_party/flow_builder uncached; 87/87 targets), `build --config=lint //...`, `mc_arch_check`, `rules_fork.sh check`, `dart format`, `l10n_check`, flow_builder provenance, fixtures closure T-0031-AC6, layering T-0040-AC3, coverage ≥ 90 % |
+| Coverage, with my own parser ([`verifier/cov.py`](verifier/cov.py)) | Union of `DA` lines over every `coverage.dat` per package. It handles both SF forms, excludes generated files, and lists lib files absent from LCOV. | `mc_ds_navigation` **108/108 = 100 %** (app bar 29/29, section header 19/19, tab bar 60/60; only the barrel is absent). `characters_list` 155/155 = 100 % (the absent files are declaration-only: barrel, freezed and retrofit sources, the flow state and the navigator interface). `mc_feature_flow` 165/166 = 99.4 %, the same as on `main` (`feature_flow.dart:217`). The Outcome says 109/109; it is 108 (nit). |
+| Golden determinism (72) | `run //utility/mc_ds_navigation:golden_test -- --update-goldens`, twice, from the new output base | 72 written per run. `git status` is clean, so they are **byte-identical** to the committed PNGs. No two of the 72 are byte-identical to each other (`md5 \| uniq -d` is empty). |
+| T-0031 DS goldens (80) and characters_list (4) | `--update-goldens` for `mc_ds_media` (24), `mc_ds_cards` (24), `mc_ds_lists` (32) and `characters_list` (4) | All byte-identical (tree clean). `git diff --name-status 2f59b74 1e54ad7` modifies no DS PNG. The only modified PNGs are the 4 `characters_list` goldens. |
+| L4 E2E | `tool/e2e_ios.sh --task T-0040 --role verifier` over a `prepare_pub_project.sh` copy: my [`verifier_back_t0040_test.dart`](verifier/verifier_back_t0040_test.dart) plus `characters_journey_test` and `characters_link_after_flow_test` | **3/3 PASS** ([summary](verifier/e2e/e2e-summary.md)) |
+
+## Acceptance criteria
+| AC | Mapped test(s) | Does the test really assert the AC? | Result |
+|---|---|---|---|
+| T-0040-AC1 | `golden_test` (9 components × 4 themes × 2 scales = 72); `navigation_test` groups "T-0040-AC1 no overflow" (1x, 2x, 3x), "large title stays inside its band at 3x", "large title adds a fixed band", plus the AC1 behaviour tests | **Yes.** `mcGoldenMatrix` asserts `takeException() == null` before each match, and the goldens are deterministic. **Mutations:** the token dark `onSurfaceMuted` +1 fails exactly the 4 dark tab-bar goldens (the only users). Section-header padding `lg`→`md` fails all 16 section goldens. Large-title padding `lg`→`md` fails all 16 large-title goldens. See V13 to V18 and V22 below. **Visual:** I viewed 12 goldens. They show real Inter (proportional, weights 600/700) and MaterialIcons glyphs (chevron, search, heart). Long titles ellipsise ("A very long page tit…" at 2x; large: "A very long …"). There are no overflow stripes. HC themes are distinct (pure white or black backgrounds, black or white text, a darker red primary on HC light). **Long title at 2x:** no overflow. One caveat: Flutter's own `AppBar` caps the toolbar title at **1.34x** (`effScale=1.34` in my probe at both 2x and 3x), so the "2x" plain-title golden draws the title at 1.34x (D4). **3x probe:** no exception at 3x; see "What a 3x user sees". **Gap:** see D1 (the tab-bar goldens show an 80/100 pt tall bar). | **PASS** |
+| T-0040-AC2 | `navigation_test` "T-0040-AC2 …": app bar title header (plain and large), section header, tabs (role `tab`, `selected` tristate, label, tap action, exactly 5 children under one `tabBar` node), ≥ 44 pt (8 targets), `meetsGuideline` × 4 themes | **Yes.** **Semantics tree (my dump)** of the plain bar: node `label: "Characters"`, `flags: isHeader, namesRoute`, produced by `AppBar`'s own wrapper (the engineer removed the redundant one, F-0039 fact 3, and the title is still announced as a header). Large bar: `label: "Characters"`, `flags: isHeader`, from `_LargeTitle`'s own `Semantics`, with no `namesRoute` (D5). Exactly one header node per bar. Tabs: `role: tab`, `flags: isButton, hasSelectedState[, isSelected]`, `actions: tap`, labels correct, under `role: tabBar`. **Guidelines (mine, wider than the test):** large title, 5-tab and 2-tab bars and a section header with action, in 4 themes × **1x and 2x**: `iOSTapTargetGuideline`, `labeledTapTargetGuideline` and `textContrastGuideline` give 8/8 PASS. **Mutations:** engineer M1 to M5 and M11, plus mine: V9 (tabBar role dropped), V12 (wrong label) and V19 (`excludeSemantics: false`) are red. V11 (`button: true` dropped) **survives** (D3). | **PASS** |
+| T-0040-AC3 | `tool/checks/T-0040-AC3_layering.sh`; `flow_scope_test` "T-0040-AC3 the list page uses McAppBar with McFlowBackButton as leading"; `navigation_test` "T-0040-AC3 leading slot" (2 tests) | **Yes.** The script PASSes. mc_arch_check is OK, the closure of the lib and both test targets has no `mc_feature_flow`, the positive control finds 5+5 targets, and the 3 built-in negative controls are detected. **My negative controls:** **N1**, a transitive dep through *another DS package* (`mc_ds_navigation → mc_ds_media → mc_feature_flow`, both BUILD edits), gives **FAIL T-0040-AC3** (lib and navigation_test closures hit), while `mc_arch_check` still says OK. That confirms the TL position that a separate script is needed. **N2**, a test-only transitive dep (`mc_test_utils` lib → `mc_feature_flow`), gives **FAIL** (navigation_test and golden_test). **N3**, a pub-mode-only transitive edge (`mc_feature_flow: any` in `mc_ds_layout/pubspec.yaml`), gives **PASS, not detected** (D6, minor). A direct transitive edge through nav's existing deps (layout, theme, tokens, buttons) is impossible: all four are already in `mc_feature_flow`'s own closure, so Bazel would report a cycle. **TL position verified:** `McAppBar.leading` is a plain `Widget?` passed straight to `AppBar.leading` (`mc_app_bar.dart:60`). With `null`, the automatic leading works (test pushes a route and gets `BackButton`, which pops; V20 and V21 are red). The DS has no `mc_feature_flow` in pubspec, BUILD, imports or the cquery closure. `characters_list_page.dart:45-48` is `McAppBar(leading: const McFlowBackButton(), title: …)`; the preview page uses the automatic leading. **T-0032 and T-0037 tests:** `bdd_test` 16/16, including "Going back from the preview keeps the list where I left it [T-0032-AC3]". `flow_back_button_test` 22/22, `flow_scope_test` 4/4, the other `mc_feature_flow` targets and flow_builder all pass uncached. | **PASS** |
+| T-0040-AC4 | `tool/checks/T-0040-AC4_gates.sh`; e2e | **Yes.** The package is registered: root `pubspec.yaml` workspace, BUILD, `pub get --offline` OK, and the lock files are unchanged. Coverage is 100 % by my parser. The fixtures closure (T-0031-AC6) scans `mc_ds_navigation`. All gates pass. **E2E:** on my own simulator, the committed journey and link-after-flow pass. My probe asserts that the list's bar is a `McAppBar` with a `McFlowBackButton` descendant and a `BackButton`, preview → back → list keeps the chevron, and **one tap on the list's back returns home** (no `McAppBar` or `BackButton` there). | **PASS** |
+
+## What a 3x (accessibility) text-scale user sees
+Measured in my probe ([`verifier/verifier_probe_test.dart`](verifier/verifier_probe_test.dart)) on a 375 pt wide screen:
+- **Plain toolbar title:** Flutter's `AppBar` clamps it to 1.34x, so it is 17 × 1.34 ≈ 22.8 pt in a 56 pt toolbar (paragraph 31 pt high), and "A very long page tit…" ellipsises on one line. That is identical at 2x and 3x ([probe_long_plain_x3.png](verifier/probe_long_plain_x3.png)). Nothing overflows or is clipped. The cap comes from Flutter, not the DS, and the Outcome does not mention it (D4).
+- **Large title:** capped at 1.5x, so 32 → 48 pt with a 60 pt line in the 64 pt band (`paragraphSize=60`). The glyphs stay inside the band, so the cap does **not hide a real overflow**. "Characters" fits ([probe_short_large_x3.png](verifier/probe_short_large_x3.png)). The long title shows only **"A very long …"**, three words ([probe_long_large_x3.png](verifier/probe_long_large_x3.png)). Body text at 3x is 45 pt, so the large title is barely bigger than body copy. The full title stays in semantics (VoiceOver reads all of it). My judgment: visible truncation, not hidden overflow. It is iOS-like (UINavigationBar large titles also truncate), but a low-vision user who doesn't use VoiceOver cannot read a long title at all, and Flutter has no Large Content Viewer to fall back on. This is a design choice that needs a PO/TL decision, not an AC failure (D4).
+- **Tabs and section header:** they scale fully. Section titles wrap (4 lines at 2x in `section_header_action`). Five tabs scroll and the selected one is revealed, both on first build (probe: `pixels = max = 345.9`, "Stories" inside 0..320) and on a parent update.
+
+## Mutations
+**Engineer's 12** (`documents/evidence/T-0040/engineer/mutations.sh`, `MC_OB=/tmp/mc-ob-T-0040-verifier`): **12/12 killed**, the same as the engineer's log. The tree was clean afterwards.
+
+**Mine** ([`verifier/mut.sh`](verifier/mut.sh), [`verifier/batch.sh`](verifier/batch.sh)). Each replaces exactly one occurrence, runs `navigation_test` and `golden_test` uncached, restores from a backup, and checks `git diff --quiet`:
+| # | Mutation | Red tests |
+|---|---|---|
+| G1 | token: dark `onSurfaceMuted` `0xFFB4B4BE` → `…BF` | exactly the 4 dark tab-bar goldens |
+| G2 / G3 | section header / large title `start: McSpacing.lg` → `md` | all 16 section goldens / all 16 large-title goldens |
+| V1 | **reveal-selected on first build** removed (`initState`) | 8 `tab_bar_5` goldens (no unit test, but killed) |
+| V2 | reveal on selection change removed (`didUpdateWidget`) | "the selected tab is scrolled into view" |
+| V3 | reveal condition inverted (`selected && oldWidget.selected`) | **none: SURVIVED** (D2) |
+| V4 | **controlled index ignored** (`selected: i == 0`) | "tabs are selectable…", "scrolled into view", 8 `tab_bar_5` goldens |
+| V5 | `onChanged(currentIndex)` instead of `onChanged(i)` | "tapping a tab reports its index" |
+| V6 | **section action not wired** (`onPressed: () {}`) | "the section action fires once" |
+| V7 | section action fires twice | "the section action fires once" |
+| V8 | section header `minHeight: 44` dropped | 4 x1 section goldens (no size assertion) |
+| V9 | `SemanticsRole.tabBar` dropped | "tabs are selectable…" |
+| V10 | tab semantics `onTap` dropped | 7 behaviour/no-overflow tests and the tab goldens (framework assert) |
+| V11 | tab `button: true` dropped | **none: SURVIVED** (D3) |
+| V12 | tab semantics label `'tab'` | "tabs are selectable…" |
+| V13 / V14 | `centerTitle: false` / `titleTextStyle` dropped | app-bar goldens |
+| V15 | plain title `overflow: visible` | 8 `app_bar_long_title` goldens |
+| V16 | large title `display` → `title` | 16 large-title goldens |
+| V17 / V18 | selected tab colour muted / underline never drawn | 16 tab goldens |
+| V19 | tab `excludeSemantics: false` | "tabs are selectable…" |
+| V20 / V21 | null leading → `SizedBox.shrink()` / `automaticallyImplyLeading: false` | "a null leading gives the automatic back button" |
+| V22 | large title not single-line | 8 `app_bar_long_title_large` goldens |
+
+Total: 25 of mine, 23 killed, 2 survived (V3, V11).
+
+**Controlled-index probe:** a tap without a parent update reports `[2]` and leaves the selection on tab 0 (`events.selected = isFalse`, `overview = isTrue`). A parent update to 4 scrolls Stories into view, and back to 0 scrolls to 0. `currentIndex` 7 or −1 selects nothing and raises nothing: there is no assert (nit, D8).
+
+## Changed goldens (`characters_list`, 4 of 4)
+I compared the `origin/main` and branch PNGs pixel by pixel with [`verifier/pngdiff.py`](verifier/pngdiff.py). All four are still 402×874. The only differing pixels are in one row band, **y 19..36**: x 144..257 (1184 px) for the list, empty and error goldens, and x 112..289 (1736 px) for `character_preview`. That band is the toolbar title. Viewed before and after, the title went from regular weight to `McTypeScale.headline` (17 pt, semibold), in the same place, with the same back chevron and toolbar height. The body is pixel-identical, which matches the Outcome.
+
+## Test-integrity audit
+- **Tests deleted, skipped or weakened:** none. `git diff 2f59b74 1e54ad7` removes only the two `AppBar(...)` call sites and `import 'package:flutter/widgets.dart'` (now `material.dart`) in `flow_scope_test.dart`. One test is added there. No `.feature` changes.
+- **Lint suppressions added:** none. The only `+` line mentioning `// ignore` is the Outcome's own sentence.
+- **Golden files updated:** the 4 `characters_list` goldens (above), plus 72 new ones.
+- **Traceability:** every AC has tests whose names carry the ID (name occurrences in tests and checks: AC1 19, AC2 6, AC3 10, AC4 4).
+- **Diff review:** 124 files, all in scope: package, `characters_list` pages and BUILD/pubspec, root workspace entry, two check scripts, F-0039, the task file and engineer evidence. `pubspec.lock` and `MODULE.bazel.lock` are unchanged. `mc_ds_navigation` depends on `mc_ds_layout`, `mc_ds_theme` and `mc_ds_tokens` (plan U32 lists `mc_ds_buttons` too; it is a test dep only, which is fine).
+
+## Visual acceptance
+| Checkpoint | Screenshot | What is visible | Matches AC? |
+|---|---|---|---|
+| e2e list | [verifier/e2e/v02_list_mc_app_bar.png](verifier/e2e/v02_list_mc_app_bar.png) | Back chevron at the left and a centred semibold "Characters" in the new bar, above the 2-column card grid with fixture art | yes |
+| e2e preview | [verifier/e2e/v03_preview.png](verifier/e2e/v03_preview.png) | Automatic back chevron and a semibold "Amber Alchemist" title, art, "See full profile" | yes |
+| e2e home after one tap | [verifier/e2e/v05_home_again.png](verifier/e2e/v05_home_again.png) | Home page ("Mini Client", "Marvel universe", Characters button); no chevron | yes |
+| large title, long, 3x | [verifier/probe_long_large_x3.png](verifier/probe_long_large_x3.png) | "A very long …" at 48 pt inside the band; body "body" at 45 pt | yes (truncation, D4) |
+| tab bar 2, light x1 | [verifier/golden_tab_bar_2.light.x1_stretched.png](verifier/golden_tab_bar_2.light.x1_stretched.png) | Two tabs; the red underline sits at y ≈ 78 pt of an 80 pt surface, so the bar fills the whole surface instead of 48 pt | D1 |
+| also viewed | `app_bar_long_title.light.x2`, `app_bar_long_title_large.highContrastDark.x2`, `tab_bar_5.highContrast.x2`, `tab_bar_5.dark.x1`, `section_header_action.dark.x2`, `app_bar_large_title.highContrast.x1`, `app_bar_actions.dark.x2`, `probe_long_plain_x3`, `probe_short_large_x3`, the committed `02_characters_list`, `01_home`, `04_full_profile_placeholder`, `06_link_after_flow` | real Inter; no clipping or overflow stripes; HC variants distinct; 5 tabs at x1 already scroll ("Overview" partly off the left with "Events" centred) | yes |
+
+## Issues found
+1. **D1 (Major, layout; outside the AC wording) `McTabBar` has no height of its own and fills any bounded parent.** `utility/mc_ds_navigation/lib/src/mc_tab_bar.dart:162` uses `Center(widthFactor: 1, …)` with no `heightFactor`, so each tab grows to the parent's maximum height. Measured: in a `Column` or `ListView` it is 375×48; under `Align(topCenter)` or as a `Scaffold` body it is **375×600**; inside a `SizedBox(height: 200)` it is 375×200. The goldens use `mcGoldenApp`'s `Align`, so all 16 `tab_bar_*` goldens show an **80 pt (x1) / 100 pt (x2)** bar with the underline at the bottom, not the "48 px high" bar the Outcome describes. The semantics tab nodes likewise span the whole body (my tree dump: 544 pt tall tabs). `McTabBar` is also not a `PreferredSizeWidget`, so it cannot go into `AppBar.bottom` without a wrapper, and that is the usual place for a tab bar under the SC exemplar's app bar. **Fix:** `heightFactor: 1` (or a `SizedBox(height: McTabBar.height)`), optionally `implements PreferredSizeWidget`, plus a test that pins the height under a loose bounded parent. Then regenerate the 16 tab goldens.
+2. **D2 (Minor, test gap) "Reveal only on a change" is not pinned.** Mutation V3 (`widget.selected && oldWidget.selected`, `mc_tab_bar.dart:109`) survives. With it, a selected tab re-centres on every parent rebuild, for example a bloc state change while the user has scrolled the bar. The current code is correct. Add a test: scroll the bar by hand, rebuild the parent with the same index, and assert the offset is kept.
+3. **D3 (Minor, test gap) The tab's `button: true` (`mc_tab_bar.dart:137`) is untested.** V11 survives. If the flag is meant for VoiceOver's "button" trait, assert `isButton`; otherwise drop it.
+4. **D4 (Minor, a11y and design; PO/TL decision) Text-scale caps.**
+   - The large title is capped at 1.5x and is single-line. At 3x it is 48 pt against 45 pt body text, and a long title shows three words ("A very long …"). No overflow is hidden (60 pt line in a 64 pt band), and the full text is in semantics.
+   - The plain title is capped at 1.34x by Flutter's `AppBar` (`_kMaxTitleTextScaleFactor`), so the AC1 "long title at 2x" golden really shows the title at 1.34x. Neither F-0039 nor the Outcome mentions this.
+
+   Options: let the large-title band grow to two lines (compute the extent from `MediaQuery.textScalerOf` at the page level), or accept it and record the cap in F-0039.
+5. **D5 (Minor, a11y) The large-title mode loses `namesRoute`.** The toolbar has no title (`mc_app_bar.dart:66-67`) and `_LargeTitle`'s `Semantics` sets only `header: true` (`:102-103`). The plain bar's node has `isHeader, namesRoute`; the large bar's has `isHeader` only. So a large-title page has no route name for screen readers' screen-change announcement. Add `namesRoute: true` to the large title's `Semantics`, as `AppBar` does for its own title.
+6. **D6 (Minor, check gap) `T-0040-AC3_layering.sh` misses a pub-mode-only transitive edge.** N3: `mc_feature_flow: any` in `utility/mc_ds_layout/pubspec.yaml` gives PASS, and `mc_arch_check` is OK too. The risk is low, because the Bazel closure is authoritative and a real Bazel edge from nav's existing deps would be a cycle. It belongs with the follow-up "`mc_ds_*` never depends on `mc_feature_flow`" in `mc_arch_check` (pub-mode closure). Separately, `source_hits` drops any line containing `/// ` anywhere (`T-0040-AC3_layering.sh:47`), so a trailing doc comment hides an import on the same line (nit).
+7. **D7 (Nit) The Outcome and docs.**
+   - Coverage is 108/108, not 109/109.
+   - The `McTabBar` doc says "tabs share the width". In fact each tab keeps its intrinsic width and the `Row` spreads the spare space evenly (`spaceEvenly`), so the tap targets do not share the width. The test "two tabs share the width" only checks which half each label centre falls in.
+8. **D8 (Nit) An out-of-range `currentIndex`** (7 or −1) silently selects no tab. Consider `assert(currentIndex >= 0 && currentIndex < tabs.length)`.
+
+## Notes for the Tech Lead
+- **The TL position holds.** The plain `Widget? leading` slot with `AppBar`'s automatic fallback is in the code. The DS has no `mc_feature_flow` edge in pubspec, BUILD, imports or the cquery closure. `mc_arch_check` cannot see such an edge (N1 passes it), and the script does.
+- The branch is behind `origin/main` by T-0038. `merge-tree` is clean, so the usual merge and re-run of the gates apply.
+- If D1 is fixed in a short round, the re-verification scope is the `mc_tab_bar.dart` change, a height test, the 16 regenerated `tab_bar_*` goldens (look at them), and V3/V11 if D2/D3 are taken. Everything else in this report carries forward.
+- **Evidence:** `documents/evidence/T-0040/verifier/`: the e2e run (`e2e/`), 4 PNGs, the probe sources (`verifier_probe_test.dart`, `verifier_back_t0040_test.dart`), `mut.sh`, `batch.sh`, `cov.py` and `pngdiff.py`. The probe target and files were removed from the package, and the tree is clean apart from this evidence.
+
+## Re-verification at 174effd (Sonnet, narrow)
+
+**Verdict: PASS.** Head `174effd` (`fleet/T-0040-ds-navigation`), checked on a detached worktree. No code changed. One test-quality note (N1) and one coverage note (N2), neither blocking. Evidence: [`reverifier-174effd/e2e/`](reverifier-174effd/e2e/e2e-summary.md).
+
+### Checklist
+| # | Item | Result |
+|---|---|---|
+| 1 | D1 | Tests exist (49 pt in a Column, tall box, page body; 3x keeps 48). Literal mutation "`Center(widthFactor: 1)` without `heightFactor`" **survives** (M1), because the item's `ConstrainedBox(maxHeight: 48)` alone bounds it. Removing `maxHeight` only also survives (M1c). Removing **both** goes red (M1b). The two guards are redundant, the behaviour is pinned (N1). |
+| 2 | Scroll | Mutation to `Scrollable.ensureVisible`: red. Tests: page offset unchanged on build and on tab change; first build does not scroll the page. |
+| 3 | `PreferredSizeWidget` / `bottom` | `preferredSize` 48 → red. Tests for `AppBar.bottom`, `McAppBar.bottom` and with the large title exist. |
+| 4 | Hit area in the former gap | Mutation (no free-space share): red. |
+| 5 | Section header, German label at 3x | Mutation (action no longer `Flexible`): red, `RenderFlex overflowed by 724 pixels`. |
+| 6 | Unbounded width, assert, no Material | Always-scroll mutation: red (Row test crashes). Tests for the `currentIndex` assert and "without a Scaffold" exist and pass (not mutated, to stay within 10). |
+| 7 | High-contrast divider | Alpha mutation: red. |
+| 8 | D2 / D3 / D5 | Reveal-on-any-update: red. `button: true` removed: red. `namesRoute` removed: red. |
+| 9 | D6 layering | `T-0040-AC3_layering.sh` PASS, and its six negative controls are all reported. My own negative: `mc_feature_flow: any` appended to `utility/mc_ds_layout/pubspec.yaml` makes it **FAIL** (rc 1; the file is reported). Restored. This closes D6. |
+| 10 | Goldens | 24 changed vs `1e54ad7`, exactly `tab_bar_2.*` (8), `tab_bar_5.*` (8) and `section_header_action.*` (8). No `characters_list` golden and no T-0031 golden changed. Viewed `tab_bar_2.light.x1` (48 pt bar, divider right below, tabs share the width), `tab_bar_5.highContrast.x2` (full-strength black divider, labels at the 1.5x cap, no overflow) and `section_header_action.dark.x2` (title wraps in about 2/3 width, action beside it). |
+| 11 | Docs | `McAppBar` class doc has the loud "IMPORTANT: pass `leading: const McFlowBackButton()`", the 1.5x large-title cap and Flutter's 1.34 plain-title cap. `McTabBar` doc matches the code (tabs share the width, own scroll controller, 48 + 1 pt). D7 fixed. |
+| 12 | Gates | `T-0040-AC4_gates.sh` PASS: test //... (90 tests), lint, `mc_arch_check`, `rules_fork.sh check`, format, l10n_check, provenance, fixtures closure, layering. Coverage `mc_ds_navigation` 173/186 = 93.0 %, `mc_feature_flow` 99.4 %, `characters_list` 100 %. |
+
+### E2E
+`tool/e2e_ios.sh --task T-0040 --role verifier` (the script only accepts engineer or verifier) on `mc-T-0040-verifier-77118`, iOS 26.2: `characters_journey_test` and `characters_link_after_flow_test` **2/2 PASS**. The simulator was deleted by the script (`simctl list | grep -c mc-T-0040` gives 0). [`02_characters_list.png`](reverifier-174effd/e2e/02_characters_list.png) shows the back chevron at the left and a centred semibold "Characters" in the McAppBar, above the card grid. The scratch pub copy and the Bazel output base were removed or shut down.
+
+### Mutation table (mine, `mc_ds_navigation:navigation_test`, baseline PASS)
+M1 literal D1 SURVIVED; M1b (heightFactor and maxHeight) killed; M1c (maxHeight only) survived; M2 to M10 each killed (one failing test each). Restore verified, tree clean.
+
+### Notes (non-blocking)
+- **N1 (Nit, test) `mc_tab_bar.dart:~318-330`** `heightFactor: 1` and `maxHeight: McTabBar.height` are redundant. Either alone keeps the tab at 48 pt, so the mutation named in the checklist survives while the behaviour is pinned. Keep one, or leave both as defence in depth.
+- **N2 (Nit, coverage)** Uncovered in `mc_tab_bar.dart`: lines 212 to 233 (`_RenderTabRow` intrinsic-size overrides and `computeDryLayout`), 274/276 (`_RenderTabRow` paint and hit-test passthroughs) and 90 (the reveal early return); and `mc_app_bar.dart:83`. These are only reached by a parent that asks for intrinsics or dry layout, for example `IntrinsicHeight` around a tab bar. 93.0 % is above the 90 % bar.

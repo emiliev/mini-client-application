@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
+import 'package:mc_ds_navigation/mc_ds_navigation.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_media/mc_media.dart';
 
@@ -41,8 +42,9 @@ class _CharacterPreviewContent extends StatelessWidget {
     final l10n = CharactersListL10n.of(context);
     return BlocBuilder<CharacterPreviewBloc, Character>(
       builder: (context, character) => Scaffold(
-        appBar: AppBar(
-          title: Text(character.name, key: characterPreviewTitleKey),
+        appBar: McAppBar(
+          title: character.name,
+          titleKey: characterPreviewTitleKey,
         ),
         body: ListView(
           padding: McInsets.screen,

@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mc_ds_cards/mc_ds_cards.dart';
 import 'package:mc_ds_feedback/mc_ds_feedback.dart';
 import 'package:mc_ds_lists/mc_ds_lists.dart';
+import 'package:mc_ds_navigation/mc_ds_navigation.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_l10n_core/mc_l10n_core.dart';
 
@@ -41,10 +42,10 @@ class _CharactersListPageContent extends StatelessWidget {
     final bloc = context.read<CharactersListBloc>();
     void retry() => bloc.add(const CharactersListEvent.retry());
     return Scaffold(
-      appBar: AppBar(
+      appBar: McAppBar(
         // The flow has its own navigator: this leaves the flow from its root page.
         leading: const McFlowBackButton(),
-        title: Text(l10n.charactersListTitle),
+        title: l10n.charactersListTitle,
       ),
       body: BlocBuilder<CharactersListBloc, CharactersListState>(
         builder: (context, state) => state.when(
