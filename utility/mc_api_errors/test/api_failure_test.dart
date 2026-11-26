@@ -140,4 +140,75 @@ void main() {
     const f = ApiFailure.offline();
     expect(identical(ApiFailure.from(f), f), isTrue);
   });
+
+  // T-0048-AC8: the package is now under the coverage gate (it changed for
+  // T-0048); these are the mappings no test exercised before.
+  group('T-0048-AC8 the other Dio outcomes', () {
+    final ro = RequestOptions(path: '/x');
+
+    test('T-0048-AC8 a plain FormatException is malformed', () {
+      expect(
+        ApiFailure.from(const FormatException('bad json')),
+        isA<ApiMalformed>(),
+      );
+    });
+
+    test('T-0048-AC8 cancel, bad certificate and a status below 400', () {
+      expect(
+        ApiFailure.from(
+          DioException.requestCancelled(requestOptions: ro, reason: 'x'),
+        ),
+        isA<ApiUnexpected>().having(
+          (f) => f.message,
+          'message',
+          contains('cancelled'),
+        ),
+      );
+      expect(
+        ApiFailure.from(DioException.badCertificate(requestOptions: ro)),
+        isA<ApiUnexpected>().having(
+          (f) => f.message,
+          'message',
+          contains('certificate'),
+        ),
+      );
+      expect(
+        ApiFailure.from(_bad(302)),
+        isA<ApiUnexpected>().having(
+          (f) => f.message,
+          'message',
+          contains('HTTP 302'),
+        ),
+      );
+    });
+
+    test('T-0048-AC8 an unknown error: its inner failure, or its text', () {
+      const inner = ApiFailure.offline();
+      expect(
+        identical(
+          ApiFailure.from(DioException(requestOptions: ro, error: inner)),
+          inner,
+        ),
+        isTrue,
+      );
+      expect(
+        ApiFailure.from(
+          DioException(requestOptions: ro, error: StateError('boom')),
+        ),
+        isA<ApiUnexpected>().having(
+          (f) => f.message,
+          'message',
+          contains('boom'),
+        ),
+      );
+      expect(
+        ApiFailure.from(DioException(requestOptions: ro, message: 'no inner')),
+        isA<ApiUnexpected>().having((f) => f.message, 'message', 'no inner'),
+      );
+    });
+
+    test('T-0048-AC8 toString names the type and the message', () {
+      expect('${const ApiFailure.timeout('slow')}', 'ApiTimeout(slow)');
+    });
+  });
 }

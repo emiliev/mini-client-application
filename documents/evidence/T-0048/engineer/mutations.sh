@@ -184,7 +184,7 @@ mutate AC4-b "the reading order title is not flexible (overflows at 2x)" $ORDER_
   "s.replace('Expanded(child: Text(comic.title, style: text.bodyLarge)),', 'Text(comic.title, style: text.bodyLarge),')" $BDD
 # --- AC5: the app awaits the result ---------------------------------------
 mutate AC5-a "home does not show the returned list" $HOME_PAGE \
-  "s.replace('    setState(() => _lastList = (id: id, created: created));', '    setState(() => _lastList = id.isEmpty ? (id: id, created: created) : null);')" $APP
+  "s.replace('    setState(() => _lastList = (id: id!, created: created));', '    setState(() => _lastList = id!.isEmpty ? (id: id!, created: created) : null);')" $APP
 mutate AC5-b "the edit location is not encoded" $LOCATIONS \
   "s.replace(\"'/me/lists/\${Uri.encodeComponent(id)}/edit'\", \"'/me/lists/\$id/edit'\")" $ROUTES $RESULTS
 mutate AC5-c "home opens a second editor on a double tap" $HOME_PAGE \
@@ -221,8 +221,8 @@ mutate AC6-l "session change during the load: the old session's list is shown" $
   "s.replace('      if (_session.epoch != epoch) {\n        // Read for a session that is gone', '      if (_session.epoch != epoch && epoch == -1) {\n        // Read for a session that is gone')" $BDD
 mutate AC6-m "a closed editor still writes" $BLOC \
   "s.replace('  bool _canWrite(int? epoch) => !isClosed && _session.epoch == epoch;', '  bool _canWrite(int? epoch) => _session.epoch == epoch;')" $FLOW
-mutate AC6-u "leaving mid-load: the late answer opens the wizard on a closed bloc" $BLOC \
-  "s.replace('      if (isClosed) {\n        // The user left while the list was loading.', '      if (isClosed && _epoch == -1) {\n        // The user left while the list was loading.')" $FLOW
+mutate AC6-u "leaving mid-load: neither the after-await guard nor the guard in _open (the late answer adds to a closed bloc)" $BLOC \
+  "s.replace('    _wizard = wizard;\n    if (!isClosed) {\n      add(_WizardChanged(wizard.state));\n    }', '    _wizard = wizard;\n    add(_WizardChanged(wizard.state));').replace('      if (isClosed) {\n        // The user left while the list was loading.', '      if (isClosed && _epoch == -1) {\n        // The user left while the list was loading.')" $FLOW
 mutate AC6-v "leaving mid-sign-in: the late answer opens the wizard on a closed bloc" $BLOC \
   "s.replace('      if (isClosed) {\n        // The user left while the app was signing them in.', '      if (isClosed && _epoch == -1) {\n        // The user left while the app was signing them in.')" $FLOW
 mutate AC6-w "a half-saved edit is not announced" $BLOC \
