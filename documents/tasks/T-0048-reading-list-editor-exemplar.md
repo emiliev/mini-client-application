@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `1107400`; Verifier PASS `71ec1ac`) |
 | Owner | crew: Engineer (**Opus**: first FW exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar; auth-gated writes) |
 | Branch | `fleet/T-0048-reading-list-editor` |
@@ -180,3 +180,15 @@ Every fix has a `T-0048-ACn` test that fails without it, and a mutation in [muta
 - **Goldens:** none changed (7 pass as they were).
 - AC traceability: [test_names.txt](../evidence/T-0048/engineer/test_names.txt), 131 names (AC1 15, AC2 28, AC3 21, AC4 7, AC5 6, AC6 42, AC7 7, AC8 10).
 
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 4 important bugs: `add` after close, a silent half-save, an empty list that couldn't be edited, and a result lost under an overlay. TL decisions:
+  - kit support for server 400s (`ApiClientError` body, `reject()`);
+  - grapheme counting in the library fixture, plus `duplicate_name`;
+  - the sign-in sheet moves to `app_core`.
+
+  Review round `27d9d39` (57/57 mutations). A single Opus Verifier pass: PASS `71ec1ac`, with 2 Medium defects, both tracked outside this task:
+  - **D1:** a user switch at the right moment still lets a first send use the new user's bearer, because Dio runs each interceptor in a new turn. This is P-083, raised to "before the bricks", and it also affects T-0041.
+  - **D2:** home's New/Edit stop working after a link replaces an open editor (P-092).
+
+  The TL merged `--no-ff`; on the merge result `check` passed, 137/137 tests, lint was clean, `mc_arch_check` reported OK, the fixtures check passed and the sim app built.
+- Follow-ups: P-083 (raised), P-092, P-093, P-091.
