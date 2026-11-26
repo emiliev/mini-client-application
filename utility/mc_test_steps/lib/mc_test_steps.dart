@@ -27,6 +27,7 @@ export 'package:mc_test_steps/src/backend_failure_names.dart';
 export 'package:mc_test_steps/src/data_table.dart';
 export 'package:mc_test_steps/src/environment/i_am_signed_in_as.dart';
 export 'package:mc_test_steps/src/environment/milliseconds_pass.dart';
+export 'package:mc_test_steps/src/environment/the_app_can_no_longer_write_to_storage.dart';
 export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storage.dart';
 export 'package:mc_test_steps/src/environment/the_device_locale_is.dart';
 export 'package:mc_test_steps/src/environment/the_pseudolocale_is_active.dart';

@@ -182,10 +182,10 @@ final class DiscoverySearchBloc
     final version = ++_historyVersion;
     final saved = await _history.add(query);
     if (version == _historyVersion) {
-      saved.forEach((list) {
+      saved.fold((list) {
         _recent = list;
         _refreshHistory(emit);
-      });
+      }, (_) {});
     }
   }
 

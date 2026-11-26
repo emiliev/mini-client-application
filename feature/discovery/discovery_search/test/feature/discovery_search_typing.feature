@@ -143,3 +143,15 @@ Feature: Search as you type
     Then I see {'Search for characters and comics by name.'}
     When I open the search again
     Then I see {'Search for characters and comics by name.'}
+
+  @T-0046-AC6
+  Scenario: A search that cannot be saved still shows its results and keeps the recent searches
+    When I open the search
+    And I type {'amber'}
+    And the app finishes writing to storage
+    Given the app can no longer write to storage
+    When I type {'spi'}
+    And the app finishes writing to storage
+    Then the characters section shows the first {5} characters for {'spi'} with their art
+    When I tap the icon button {'Clear search'}
+    Then the recent searches are {'amber'}

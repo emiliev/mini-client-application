@@ -53,7 +53,9 @@ void main() {
       ),
       'the results for "spi"',
     );
+    // The keyboard takes half the screen; with it gone both sections fit.
     FocusManager.instance.primaryFocus?.unfocus();
+    await letArtLoad(tester, const Duration(seconds: 1));
     expect(find.text('See all 152'), findsOneWidget);
     expect(find.text('See all 400'), findsOneWidget);
     await letArtLoad(tester);

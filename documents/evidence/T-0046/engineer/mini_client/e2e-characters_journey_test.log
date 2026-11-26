@@ -1,0 +1,50 @@
+# e2e_ios.sh: T-0046 engineer on mc-T-0046-engineer-30982 (F759F6A3-E060-4BFC-9047-EF5EDB7A4627)
+# cwd: /tmp/mc-T-0046-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/2-characters_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d F759F6A3-E060-4BFC-9047-EF5EDB7A4627
+
+Waiting for another flutter command to release the startup lock...
+Resolving dependencies in `/private/tmp/mc-T-0046-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0046-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           11.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:65003/HNh3fxpfnRk=/
+VMServiceFlutterDriver: Isolate found with number: 8010651989608783
+VMServiceFlutterDriver: Isolate 8010651989608783 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
+flutter: 00:07 +1: (tearDownAll)
+flutter: 00:07 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/2-characters_journey_test/01_home.png (300465)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/2-characters_journey_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/2-characters_journey_test/03_preview.png (324738)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/2-characters_journey_test/04_full_profile_placeholder.png (222291)
+All tests passed.
+
+# exit code: 0
