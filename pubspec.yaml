@@ -39,6 +39,7 @@ workspace:
   - utility/mc_ds_buttons
   - utility/mc_ds_cards
   - utility/mc_ds_feedback
+  - utility/mc_ds_forms
   - utility/mc_ds_layout
   - utility/mc_ds_lists
   - utility/mc_ds_media
