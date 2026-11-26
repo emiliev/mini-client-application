@@ -43,7 +43,7 @@ class _CharactersListPageContent extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         // The flow has its own navigator, so its root page needs this to leave.
-        leading: context.flowLeading(),
+        leading: const McFlowBackButton(),
         title: Text(l10n.charactersListTitle),
       ),
       body: BlocBuilder<CharactersListBloc, CharactersListState>(

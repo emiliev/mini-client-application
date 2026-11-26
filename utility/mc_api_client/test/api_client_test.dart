@@ -326,7 +326,7 @@ void main() {
 
     test('T-0034-AC4: control: without the slash dio fuses host and path', () {
       // Dio joins baseUrl + path as strings (F-0031 B2); this is what the
-      // assertion above prevents.
+      // trailing slash that `AppConfig` appends prevents.
       final uri = RequestOptions(
         path: 'v1/characters',
         baseUrl: 'https://api.test',

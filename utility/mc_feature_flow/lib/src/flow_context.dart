@@ -71,19 +71,27 @@ extension McFlowContext on BuildContext {
       FlowScope.read(this).container.debugResolveAll();
 }
 
-extension McFlowNavigation on BuildContext {
-  /// The leading widget for a flow page's app bar: a back button that leaves
-  /// the flow, when this page is the flow's root and the navigator the flow
-  /// sits in can pop; null otherwise, so `AppBar` keeps its own automatic
-  /// back button for pages pushed inside the flow.
-  ///
-  /// A flow has its own navigator, so its root page never gets the automatic
-  /// back button, and iOS has no system back key.
-  Widget? flowLeading() {
-    final outer = FlowScope.read(this).outerNavigator;
-    final inner = Navigator.maybeOf(this);
-    if (outer == null || !outer.canPop() || (inner?.canPop() ?? false)) {
-      return null;
+/// The back button of a flow's root page: `AppBar(leading: const
+/// McFlowBackButton())`.
+///
+/// A flow has its own navigator, so its root page never gets `AppBar`'s
+/// automatic back button, and iOS has no system back key. This button decides
+/// for itself every time it builds: it pops the flow (the navigator the flow
+/// sits in) when its own route is the flow's first route and that navigator
+/// can pop, and is empty otherwise (the flow is the app's root).
+///
+/// Use it on the root page only. A page pushed inside the flow keeps the
+/// `AppBar`'s automatic back button, which pops that page; this widget would
+/// replace it with nothing.
+class McFlowBackButton extends StatelessWidget {
+  const McFlowBackButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final outer = FlowScope.read(context).outerNavigator;
+    final isFlowRoot = ModalRoute.of(context)?.isFirst ?? false;
+    if (!isFlowRoot || outer == null || !outer.canPop()) {
+      return const SizedBox.shrink();
     }
     return BackButton(onPressed: () => unawaited(outer.maybePop()));
   }

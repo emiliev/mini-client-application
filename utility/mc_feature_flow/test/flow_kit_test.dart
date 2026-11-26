@@ -505,7 +505,7 @@ void main() {
     expect(controller.state.selected, 'x');
   });
 
-  group('T-0034-AC5 the flow root page can leave the flow', () {
+  group('T-0036-AC2 the flow root page can leave the flow', () {
     Widget flowWithAppBar() => FeatureFlow<_State>(
       state: const _State(),
       onGeneratePages: (s) => [
@@ -514,7 +514,7 @@ void main() {
           child: Builder(
             builder: (context) => Scaffold(
               appBar: AppBar(
-                leading: context.flowLeading(),
+                leading: const McFlowBackButton(),
                 title: const Text('flow root'),
               ),
             ),
@@ -529,7 +529,7 @@ void main() {
       home: home,
     );
 
-    testWidgets('T-0034-AC5 present when pushed, and tapping it pops the '
+    testWidgets('T-0036-AC2 present when pushed, and tapping it pops the '
         'flow', (tester) async {
       await tester.pumpWidget(
         app(
@@ -557,7 +557,7 @@ void main() {
       expect(find.text('open'), findsOneWidget);
     });
 
-    testWidgets('T-0034-AC5 absent when the flow is the root', (tester) async {
+    testWidgets('T-0036-AC2 absent when the flow is the root', (tester) async {
       await tester.pumpWidget(app(flowWithAppBar()));
       await tester.pumpAndSettle();
 
@@ -565,7 +565,7 @@ void main() {
       expect(find.byType(BackButton), findsNothing);
     });
 
-    testWidgets('T-0034-AC5 a page pushed inside the flow keeps the automatic '
+    testWidgets('T-0036-AC2 a page pushed inside the flow keeps the automatic '
         'back button, which pops that page only', (tester) async {
       late FeatureFlowController<_State> controller;
       await tester.pumpWidget(
@@ -585,7 +585,7 @@ void main() {
                               controller = context
                                   .di<FeatureFlowController<_State>>();
                               return Scaffold(
-                                appBar: AppBar(leading: context.flowLeading()),
+                                appBar: AppBar(leading: const McFlowBackButton()),
                               );
                             },
                           ),
@@ -595,10 +595,7 @@ void main() {
                             name: 'detail',
                             child: Builder(
                               builder: (context) => Scaffold(
-                                appBar: AppBar(
-                                  leading: context.flowLeading(),
-                                  title: const Text('detail'),
-                                ),
+                                appBar: AppBar(title: const Text('detail')),
                               ),
                             ),
                           ),
@@ -625,6 +622,90 @@ void main() {
       expect(controller.state.selected, isNull);
       expect(find.text('open'), findsNothing, reason: 'still inside the flow');
     });
+  });
+
+  testWidgets('T-0036-AC1 the back button is present after the root page '
+      'rebuilds under an inner page', (tester) async {
+    late FeatureFlowController<_State> controller;
+    var locale = const Locale('en');
+    late StateSetter setLocale;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (context, setState) {
+          setLocale = setState;
+          return MaterialApp(
+            theme: McTheme.light,
+            locale: locale,
+            supportedLocales: const [Locale('en'), Locale('de')],
+            localizationsDelegates: GlobalMaterialLocalizations.delegates,
+            home: Builder(
+              builder: (context) => Scaffold(
+                body: TextButton(
+                  onPressed: () => Navigator.of(context).push<void>(
+                    MaterialPageRoute(
+                      builder: (_) => FeatureFlow<_State>(
+                        state: const _State(),
+                        onGeneratePages: (s) => [
+                          McFlowPage(
+                            name: 'list',
+                            child: Builder(
+                              builder: (context) {
+                                controller = context
+                                    .di<FeatureFlowController<_State>>();
+                                // Depends on the locale, so a locale change
+                                // rebuilds this page even when covered.
+                                final lang = Localizations.localeOf(
+                                  context,
+                                ).languageCode;
+                                return Scaffold(
+                                  appBar: AppBar(
+                                    leading: const McFlowBackButton(),
+                                    title: Text('flow root $lang'),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                          if (s.selected != null)
+                            McFlowPage(
+                              name: 'detail',
+                              child: Scaffold(
+                                appBar: AppBar(title: const Text('detail')),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    controller.update((_) => const _State('x'));
+    await tester.pumpAndSettle();
+    expect(find.text('detail'), findsOneWidget);
+
+    // The root page rebuilds while the inner page is on top.
+    setLocale(() => locale = const Locale('de'));
+    await tester.pumpAndSettle();
+    expect(find.text('flow root de', skipOffstage: false), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.text('detail'), findsNothing);
+    expect(find.text('flow root de'), findsOneWidget);
+
+    expect(find.byType(BackButton), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('flow root de'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
   });
 
   testWidgets('T-0034-AC1 FlowScope.of outside a flow names the problem', (

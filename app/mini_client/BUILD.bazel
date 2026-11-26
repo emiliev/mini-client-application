@@ -127,7 +127,8 @@ flutter_test(
     ],
 )
 
-# R1 regression (skipped until T-0035): a link after a flow is on screen.
+# R1 regression: a link after a flow is on screen (needs the T-0035 flow_builder
+# patch).
 flutter_test(
     name = "links_after_flow_test",
     size = "small",

@@ -63,7 +63,8 @@ class FeatureFlow<T> extends StatefulWidget {
   final void Function(GetIt scope)? provide;
 
   /// The feature's localisation delegates, installed for the flow's pages.
-  /// Empty: the flow leaves `Localizations` as the host set it.
+  /// Empty: the flow still adds the core and Flutter delegates the host lacks,
+  /// and otherwise sees `Localizations` as the host set it.
   final List<LocalizationsDelegate<Object?>> localizationsDelegates;
 
   final List<RootImport<Object>> rootImports;
