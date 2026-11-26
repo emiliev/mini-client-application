@@ -42,3 +42,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0042](T-0042/verification-report.md) | PASS (Sonnet, re-verified) | `ide_sync`: analyzer 176 → 0 errors, `flutter run` from the checkout, hash-identical `bazel-bin`, e2e regression |
 | [T-0041](T-0041/verification-report.md) | PASS (re-verified after FAIL) | `comics_details`: auth-gated favourite races (P1–P5), real-drag sheet probes, byte identity 12/12 and 14/14, e2e journey and deep links |
 | [T-0043](T-0043/verification-report.md) | PASS (Sonnet, single pass) | Search fixtures: ranking tier mutations, folded-length probes, contract snapshots |
+| [T-0044](T-0044/verification-report.md) | PASS (Sonnet, single pass) | DS inputs: 160 goldens byte-identical, intrinsic-sizing probes, chip tap strip, a11y guidelines |

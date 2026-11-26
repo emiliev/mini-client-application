@@ -3,6 +3,7 @@
 # //utility/mc_paging (the feature debounces; T-0045 builds forms on top);
 # T-0044-AC4 checks it with cquery.
 load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 # Public until the P3-06 package_group exists (follow-up: restrict to layers).
 package(default_visibility = ["//visibility:public"])
@@ -19,7 +20,7 @@ _DEPS = [
 
 flutter_library(
     name = "mc_ds_inputs",
-    srcs = glob(["lib/**/*.dart"]),
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     language_version = _LANG,
     package_name = "mc_ds_inputs",
     deps = _DEPS,

@@ -3,6 +3,7 @@ import 'dart:ui' show Tristate;
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_inputs/mc_ds_inputs.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
@@ -56,6 +57,12 @@ class _HolderState<T> extends State<_Holder<T>> {
   @override
   Widget build(BuildContext context) =>
       widget.builder(value, (v) => setState(() => value = v));
+}
+
+double _contrast(Color a, Color b) {
+  final hi = a.computeLuminance() > b.computeLuminance() ? a : b;
+  final lo = identical(hi, a) ? b : a;
+  return (hi.computeLuminance() + 0.05) / (lo.computeLuminance() + 0.05);
 }
 
 McStepper _stepper({
@@ -308,6 +315,188 @@ void main() {
         expect(controller.offset, 30);
       },
     );
+    testWidgets('T-0044-AC1 a long stepper number scales down to fit', (
+      tester,
+    ) async {
+      mcSetSurface(tester, 375, 600);
+      await tester.pumpWidget(
+        _page(
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 150,
+              child: McStepper(
+                value: 1234567890,
+                onChanged: (_) {},
+                label: 'Quantity',
+                decreaseLabel: 'Less',
+                increaseLabel: 'More',
+                max: 2000000000,
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      final stepper = tester.getRect(find.byType(McStepper));
+      final number = tester.getRect(find.text('1234567890'));
+      expect(number.width, lessThanOrEqualTo(stepper.width - 88));
+    });
+
+    testWidgets(
+      'T-0044-AC1 segment labels are capped at ${McSegmented.labelMaxScale}x '
+      'so five fit a phone at 3x',
+      (tester) async {
+        mcSetSurface(tester, 375, 600);
+        await tester.pumpWidget(
+          _page(
+            McSegmented(
+              segments: [
+                for (final l in ['Alle', 'Helden', 'Größte', 'Neu', 'Mehr'])
+                  McSegment(label: l),
+              ],
+              selectedIndex: 0,
+              onChanged: (_) {},
+            ),
+            scale: 3,
+          ),
+        );
+        final text = tester.widget<Text>(find.text('Helden'));
+        expect(text.textScaler!.scale(10), 10 * McSegmented.labelMaxScale);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  });
+
+  group('T-0044-AC1 intrinsic sizing', () {
+    // A `LayoutBuilder` throws when an ancestor asks for intrinsic sizes
+    // (IntrinsicWidth, IntrinsicHeight, AlertDialog's content).
+    Map<String, Widget Function()> subjects() => {
+      'McTextField': () => McTextField(
+        controller: TextEditingController(text: 'abc'),
+        label: 'Name',
+        helperText: 'Helper',
+      ),
+      'McSearchField': () => McSearchField(
+        controller: TextEditingController(text: 'abc'),
+        label: 'Search',
+        clearLabel: 'Clear',
+      ),
+      'McSegmented': () => McSegmented(
+        segments: const [
+          McSegment(label: 'Grid'),
+          McSegment(label: 'List'),
+        ],
+        selectedIndex: 0,
+        onChanged: (_) {},
+      ),
+      'McChipGroup': () => McChipGroup<String>.multi(
+        options: _options,
+        selected: const {'a'},
+        onChanged: (_) {},
+      ),
+      'McStepper': () => _stepper(value: 2, onChanged: (_) {}),
+    };
+
+    for (final entry in [
+      ('IntrinsicWidth', (Widget w) => IntrinsicWidth(child: w)),
+      ('IntrinsicHeight', (Widget w) => IntrinsicHeight(child: w)),
+      (
+        'AlertDialog',
+        (Widget w) => AlertDialog(content: w, title: const Text('Edit')),
+      ),
+    ]) {
+      testWidgets(
+        'T-0044-AC1 every input lays out under ${entry.$1} without throwing',
+        (tester) async {
+          mcSetSurface(tester, 375, 800);
+          for (final s in subjects().entries) {
+            await tester.pumpWidget(_page(Center(child: entry.$2(s.value()))));
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '${s.key} under ${entry.$1}',
+            );
+          }
+        },
+      );
+    }
+
+    testWidgets(
+      'T-0044-AC1 segmented under IntrinsicWidth keeps equal cells',
+      (tester) async {
+        await tester.pumpWidget(
+          _page(
+            Center(
+              child: IntrinsicWidth(
+                child: McSegmented(
+                  segments: const [
+                    McSegment(label: 'A'),
+                    McSegment(label: 'Much longer'),
+                  ],
+                  selectedIndex: 0,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        final a = tester.getSize(find.widgetWithText(InkWell, 'A')).width;
+        final b = tester
+            .getSize(find.widgetWithText(InkWell, 'Much longer'))
+            .width;
+        expect(a, closeTo(b, 0.01));
+        expect(a, greaterThan(60));
+      },
+    );
+
+    testWidgets('T-0044-AC1 a text field under IntrinsicWidth is 280 pt wide', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _page(
+          Center(
+            child: IntrinsicWidth(
+              child: McTextField(
+                controller: TextEditingController(),
+                label: 'Name',
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(McTextField)).width, 280);
+    });
+
+    testWidgets(
+      'T-0044-AC1 the drawn chip pill, not the 44 pt box, takes the ripple',
+      (tester) async {
+        final seen = <bool>[];
+        await tester.pumpWidget(
+          _page(
+            Center(
+              child: McChip(
+                label: 'Wide label',
+                selected: false,
+                onSelected: seen.add,
+              ),
+            ),
+          ),
+        );
+        final box = tester.getRect(find.byType(McChip));
+        final ink = tester.getRect(
+          find.descendant(
+            of: find.byType(McChip),
+            matching: find.byType(InkWell),
+          ),
+        );
+        expect(box.height, greaterThanOrEqualTo(mcMinTapTarget));
+        expect(ink.height, lessThan(mcMinTapTarget));
+        // A tap in the strip above the pill still selects.
+        await tester.tapAt(Offset(box.center.dx, box.top + 1));
+        expect(seen, [true]);
+      },
+    );
   });
 
   group('T-0044-AC2 behaviour', () {
@@ -332,6 +521,10 @@ void main() {
         await tester.pump();
         expect(clear, findsOneWidget);
         expect(changes, ['hulk']);
+        // Focus is elsewhere when the button is pressed: clearing brings it
+        // back into the field.
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
         await tester.tap(clear);
         await tester.pump();
         expect(c.text, '');
@@ -395,6 +588,29 @@ void main() {
         );
       },
     );
+
+    testWidgets('T-0044-AC2 text field shows a prefix and a tappable suffix', (
+      tester,
+    ) async {
+      var taps = 0;
+      await tester.pumpWidget(
+        _page(
+          McTextField(
+            controller: TextEditingController(),
+            label: 'Password',
+            prefix: const Icon(Icons.lock, key: ValueKey('prefix')),
+            suffix: McIconButton(
+              icon: Icons.visibility,
+              semanticLabel: 'Show password',
+              onPressed: () => taps++,
+            ),
+          ),
+        ),
+      );
+      expect(find.byKey(const ValueKey('prefix')), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Show password'));
+      expect(taps, 1);
+    });
 
     testWidgets(
       'T-0044-AC2 text field is controlled, reports user edits only',
@@ -958,6 +1174,119 @@ void main() {
         handle.dispose();
       },
     );
+
+    testWidgets('T-0044-AC3 tap targets hold when the text is scaled down', (
+      tester,
+    ) async {
+      mcSetSurface(tester, 375, 600);
+      await tester.pumpWidget(
+        _page(
+          Column(
+            children: [
+              McChip(label: 'x', selected: false, onSelected: (_) {}),
+              McSegmented(
+                segments: const [
+                  McSegment(label: 'A'),
+                  McSegment(label: 'B'),
+                ],
+                selectedIndex: 0,
+                onChanged: (_) {},
+              ),
+            ],
+          ),
+          scale: 0.5,
+        ),
+      );
+      for (final f in [
+        find.byType(McChip),
+        find.widgetWithText(InkWell, 'A'),
+        find.widgetWithText(InkWell, 'B'),
+      ]) {
+        final size = tester.getSize(f);
+        expect(
+          size.width >= mcMinTapTarget && size.height >= mcMinTapTarget,
+          isTrue,
+          reason: '$f is $size at 0.5x',
+        );
+      }
+    });
+
+    // The platform's contrast guideline skips text fields, so the colours of
+    // the label, hint, helper, error, counter and the typed text are checked
+    // against the field's fill here, in every theme.
+    for (final variant in McThemeVariant.values) {
+      testWidgets('T-0044-AC3 text field colours reach 4.5:1 ${variant.name}', (
+        tester,
+      ) async {
+        for (final enabled in [true, false]) {
+          for (final error in [null, 'Fehler']) {
+            await tester.pumpWidget(
+              _page(
+                Column(
+                  children: [
+                    McTextField(
+                      controller: TextEditingController(),
+                      label: 'Name',
+                      hint: 'Hint',
+                      helperText: 'Helper',
+                      errorText: error,
+                      maxLength: 10,
+                      enabled: enabled,
+                    ),
+                    McSearchField(
+                      controller: TextEditingController(),
+                      label: 'Search',
+                      clearLabel: 'Clear',
+                      enabled: enabled,
+                    ),
+                  ],
+                ),
+                variant: variant,
+              ),
+            );
+            await tester.pumpAndSettle();
+            for (final d in tester.widgetList<InputDecorator>(
+              find.byType(InputDecorator),
+            )) {
+              final fill = d.decoration.fillColor!;
+              final colours = {
+                'label': d.decoration.labelStyle?.color,
+                'floatingLabel': d.decoration.floatingLabelStyle?.color,
+                'hint': d.decoration.hintStyle?.color,
+                'helper': d.decoration.helperStyle?.color,
+                'counter': d.decoration.counterStyle?.color,
+                'text': d.baseStyle?.color,
+              };
+              for (final e in colours.entries) {
+                if (e.value == null) {
+                  continue;
+                }
+                expect(
+                  _contrast(e.value!, fill),
+                  greaterThanOrEqualTo(4.5),
+                  reason:
+                      '${e.key} on the fill (enabled $enabled, error $error)',
+                );
+              }
+            }
+            for (final t in tester.widgetList<Text>(find.text('Fehler'))) {
+              expect(
+                _contrast(
+                  t.style!.color!,
+                  tester
+                      .widgetList<InputDecorator>(find.byType(InputDecorator))
+                      .first
+                      .decoration
+                      .fillColor!,
+                ),
+                greaterThanOrEqualTo(4.5),
+                reason: 'error text on the fill',
+              );
+            }
+          }
+        }
+      });
+    }
 
     testWidgets('T-0044-AC3 every tap target is at least 44 pt', (
       tester,

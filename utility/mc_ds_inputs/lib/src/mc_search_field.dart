@@ -108,7 +108,8 @@ class _McSearchFieldState extends State<McSearchField> {
                             onPressed: _clear,
                           ),
                   ).copyWith(
-                    fillColor: widget.enabled ? p.surfaceVariant : p.surface,
+                    // Disabled is flat, like the page: the opposite of raised.
+                    fillColor: widget.enabled ? p.surfaceVariant : p.background,
                   ),
             ),
           ),

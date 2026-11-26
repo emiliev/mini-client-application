@@ -1,0 +1,11 @@
+M1_layoutbuilder_back: rc=3 //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M2_chip_no_strip_tap: rc=3 //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M3_search_disabled_surface: rc=3 //utility/mc_ds_inputs:golden_test FAILED in 3.7s 
+M4_stepper_no_clamp_max: rc=3 //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M5_stepper_inc_never_disabled: rc=3 //utility/mc_ds_inputs:golden_test FAILED in 4.0s //utility/mc_ds_inputs:inputs_test FAILED in 2.4s 
+M6_clear_always: rc=3 //utility/mc_ds_inputs:golden_test FAILED in 3.8s //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M7_segment_selected_flag: rc=3 //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M8_chip_multi_no_remove: rc=3 //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M9_clear_no_onchanged: rc=3 //utility/mc_ds_inputs:inputs_test FAILED in 2.5s 
+M10_chip_min_tap: rc=0 
+done
