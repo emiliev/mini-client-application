@@ -1,0 +1,45 @@
+{
+  "body": {
+    "count": 3,
+    "limit": 3,
+    "offset": 0,
+    "results": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/003",
+          "variant": "portrait_large"
+        },
+        "id": 500060,
+        "issueNumber": 1,
+        "releaseDate": "2010-01-05",
+        "seriesId": 400003,
+        "title": "Amber Chronicles #1"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/015",
+          "variant": "portrait_large"
+        },
+        "id": 500069,
+        "issueNumber": 10,
+        "releaseDate": "2010-10-14",
+        "seriesId": 400003,
+        "title": "Amber Chronicles #10"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/003",
+          "variant": "portrait_large"
+        },
+        "id": 500070,
+        "issueNumber": 11,
+        "releaseDate": "2010-11-14",
+        "seriesId": 400003,
+        "title": "Amber Chronicles #11"
+      }
+    ],
+    "total": 2400
+  },
+  "request": "GET /v1/comics?limit=3",
+  "status": 200
+}

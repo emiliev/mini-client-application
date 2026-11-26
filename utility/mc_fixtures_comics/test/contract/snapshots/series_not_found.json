@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "series_not_found",
+      "id": "abc",
+      "message": "No series with id abc"
+    }
+  },
+  "request": "GET /v1/series/abc",
+  "status": 404
+}

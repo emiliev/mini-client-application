@@ -1,0 +1,72 @@
+{
+  "body": {
+    "characterIds": [
+      100227,
+      100654,
+      100826,
+      100892
+    ],
+    "cover": {
+      "path": "mock-asset://characters/016",
+      "variant": "portrait_large"
+    },
+    "creators": [
+      {
+        "id": 300024,
+        "name": "Ada Castell",
+        "role": "writer"
+      },
+      {
+        "id": 300017,
+        "name": "Farid Brook",
+        "role": "penciller"
+      },
+      {
+        "id": 300055,
+        "name": "Hiro Eastwick",
+        "role": "inker"
+      },
+      {
+        "id": 300031,
+        "name": "Hiro Castell",
+        "role": "colorist"
+      },
+      {
+        "id": 300023,
+        "name": "Lev Brook",
+        "role": "letterer"
+      },
+      {
+        "id": 300022,
+        "name": "Kira Brook",
+        "role": "cover_artist"
+      }
+    ],
+    "description": "Issue 1 of Spindle Chronicles: an old debt comes due while a lighthouse keeper who hears the tide count backwards tries to keep a promise.",
+    "id": 500000,
+    "issueNumber": 1,
+    "pageCount": 56,
+    "price": {
+      "amountCents": 599,
+      "currency": "USD"
+    },
+    "releaseDate": "2020-01-12",
+    "series": {
+      "id": 400000,
+      "title": "Spindle Chronicles"
+    },
+    "seriesId": 400000,
+    "title": "Spindle Chronicles #1",
+    "variants": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/011",
+          "variant": "portrait_large"
+        },
+        "label": "Midnight"
+      }
+    ]
+  },
+  "request": "GET /v1/comics/500000",
+  "status": 200
+}

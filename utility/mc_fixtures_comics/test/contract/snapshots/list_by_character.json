@@ -1,0 +1,45 @@
+{
+  "body": {
+    "count": 3,
+    "limit": 3,
+    "offset": 0,
+    "results": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/022",
+          "variant": "portrait_large"
+        },
+        "id": 500823,
+        "issueNumber": 4,
+        "releaseDate": "2021-04-11",
+        "seriesId": 400041,
+        "title": "Cinder Vanguard #4"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/023",
+          "variant": "portrait_large"
+        },
+        "id": 502318,
+        "issueNumber": 19,
+        "releaseDate": "1989-07-08",
+        "seriesId": 400115,
+        "title": "Frost Reckoning #19"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/019",
+          "variant": "portrait_large"
+        },
+        "id": 501846,
+        "issueNumber": 7,
+        "releaseDate": "2019-07-05",
+        "seriesId": 400092,
+        "title": "Gale Gambit #7"
+      }
+    ],
+    "total": 6
+  },
+  "request": "GET /v1/comics?characterId=100000&limit=3",
+  "status": 200
+}

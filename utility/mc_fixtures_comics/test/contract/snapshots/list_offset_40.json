@@ -1,0 +1,34 @@
+{
+  "body": {
+    "count": 2,
+    "limit": 2,
+    "offset": 40,
+    "results": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/017",
+          "variant": "portrait_large"
+        },
+        "id": 501740,
+        "issueNumber": 1,
+        "releaseDate": "2011-01-17",
+        "seriesId": 400087,
+        "title": "Amber Gambit #1"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/011",
+          "variant": "portrait_large"
+        },
+        "id": 501749,
+        "issueNumber": 10,
+        "releaseDate": "2011-10-22",
+        "seriesId": 400087,
+        "title": "Amber Gambit #10"
+      }
+    ],
+    "total": 2400
+  },
+  "request": "GET /v1/comics?offset=40&limit=2",
+  "status": 200
+}
