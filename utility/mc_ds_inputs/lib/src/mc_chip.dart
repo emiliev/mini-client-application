@@ -71,9 +71,10 @@ class McChip extends StatelessWidget {
         inMutuallyExclusiveGroup: exclusive ? true : null,
         onTap: enabled ? () => onSelected!(!selected) : null,
         excludeSemantics: true,
-        child: InkWell(
+        // The whole 44 pt box takes the tap; only the drawn pill ripples.
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
           onTap: enabled ? () => onSelected!(!selected) : null,
-          customBorder: const StadiumBorder(),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minWidth: mcMinTapTarget,
@@ -83,34 +84,40 @@ class McChip extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: McSpacing.xs),
               child: Ink(
                 decoration: ShapeDecoration(color: fill, shape: shape),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: McSpacing.md,
-                  vertical: McSpacing.sm,
-                ),
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 20),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (leading != null) ...[
-                        Icon(
-                          leading,
-                          size: MediaQuery.textScalerOf(context).scale(18),
-                          color: foreground,
-                        ),
-                        const SizedBox(width: McSpacing.xs),
-                      ],
-                      Flexible(
-                        child: Text(
-                          label,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: McTypeScale.label.copyWith(
-                            color: foreground,
+                child: InkWell(
+                  onTap: enabled ? () => onSelected!(!selected) : null,
+                  customBorder: const StadiumBorder(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: McSpacing.md,
+                      vertical: McSpacing.sm,
+                    ),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 20),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (leading != null) ...[
+                            Icon(
+                              leading,
+                              size: MediaQuery.textScalerOf(context).scale(18),
+                              color: foreground,
+                            ),
+                            const SizedBox(width: McSpacing.xs),
+                          ],
+                          Flexible(
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: McTypeScale.label.copyWith(
+                                color: foreground,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),

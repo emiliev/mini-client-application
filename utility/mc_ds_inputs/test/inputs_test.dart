@@ -368,6 +368,137 @@ void main() {
     );
   });
 
+  group('T-0044-AC1 intrinsic sizing', () {
+    // A `LayoutBuilder` throws when an ancestor asks for intrinsic sizes
+    // (IntrinsicWidth, IntrinsicHeight, AlertDialog's content).
+    Map<String, Widget Function()> subjects() => {
+      'McTextField': () => McTextField(
+        controller: TextEditingController(text: 'abc'),
+        label: 'Name',
+        helperText: 'Helper',
+      ),
+      'McSearchField': () => McSearchField(
+        controller: TextEditingController(text: 'abc'),
+        label: 'Search',
+        clearLabel: 'Clear',
+      ),
+      'McSegmented': () => McSegmented(
+        segments: const [
+          McSegment(label: 'Grid'),
+          McSegment(label: 'List'),
+        ],
+        selectedIndex: 0,
+        onChanged: (_) {},
+      ),
+      'McChipGroup': () => McChipGroup<String>.multi(
+        options: _options,
+        selected: const {'a'},
+        onChanged: (_) {},
+      ),
+      'McStepper': () => _stepper(value: 2, onChanged: (_) {}),
+    };
+
+    for (final entry in [
+      ('IntrinsicWidth', (Widget w) => IntrinsicWidth(child: w)),
+      ('IntrinsicHeight', (Widget w) => IntrinsicHeight(child: w)),
+      (
+        'AlertDialog',
+        (Widget w) => AlertDialog(content: w, title: const Text('Edit')),
+      ),
+    ]) {
+      testWidgets(
+        'T-0044-AC1 every input lays out under ${entry.$1} without throwing',
+        (tester) async {
+          mcSetSurface(tester, 375, 800);
+          for (final s in subjects().entries) {
+            await tester.pumpWidget(_page(Center(child: entry.$2(s.value()))));
+            expect(
+              tester.takeException(),
+              isNull,
+              reason: '${s.key} under ${entry.$1}',
+            );
+          }
+        },
+      );
+    }
+
+    testWidgets(
+      'T-0044-AC1 segmented under IntrinsicWidth keeps equal cells',
+      (tester) async {
+        await tester.pumpWidget(
+          _page(
+            Center(
+              child: IntrinsicWidth(
+                child: McSegmented(
+                  segments: const [
+                    McSegment(label: 'A'),
+                    McSegment(label: 'Much longer'),
+                  ],
+                  selectedIndex: 0,
+                  onChanged: (_) {},
+                ),
+              ),
+            ),
+          ),
+        );
+        final a = tester.getSize(find.widgetWithText(InkWell, 'A')).width;
+        final b = tester
+            .getSize(find.widgetWithText(InkWell, 'Much longer'))
+            .width;
+        expect(a, closeTo(b, 0.01));
+        expect(a, greaterThan(60));
+      },
+    );
+
+    testWidgets('T-0044-AC1 a text field under IntrinsicWidth is 280 pt wide', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _page(
+          Center(
+            child: IntrinsicWidth(
+              child: McTextField(
+                controller: TextEditingController(),
+                label: 'Name',
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.getSize(find.byType(McTextField)).width, 280);
+    });
+
+    testWidgets(
+      'T-0044-AC1 the drawn chip pill, not the 44 pt box, takes the ripple',
+      (tester) async {
+        final seen = <bool>[];
+        await tester.pumpWidget(
+          _page(
+            Center(
+              child: McChip(
+                label: 'Wide label',
+                selected: false,
+                onSelected: seen.add,
+              ),
+            ),
+          ),
+        );
+        final box = tester.getRect(find.byType(McChip));
+        final ink = tester.getRect(
+          find.descendant(
+            of: find.byType(McChip),
+            matching: find.byType(InkWell),
+          ),
+        );
+        expect(box.height, greaterThanOrEqualTo(mcMinTapTarget));
+        expect(ink.height, lessThan(mcMinTapTarget));
+        // A tap in the strip above the pill still selects.
+        await tester.tapAt(Offset(box.center.dx, box.top + 1));
+        expect(seen, [true]);
+      },
+    );
+  });
+
   group('T-0044-AC2 behaviour', () {
     testWidgets(
       'T-0044-AC2 search clear button appears only with text and clears',

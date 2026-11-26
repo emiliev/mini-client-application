@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
@@ -7,12 +8,55 @@ import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 /// `Row` without `Expanded`): a `TextField` cannot size itself.
 const double mcFieldUnboundedWidth = 280;
 
-/// Gives [field] a width when the incoming one is unbounded.
-Widget boundedFieldWidth(Widget field) => LayoutBuilder(
-  builder: (context, constraints) => constraints.hasBoundedWidth
-      ? field
-      : SizedBox(width: mcFieldUnboundedWidth, child: field),
-);
+/// Gives [field] a width when the incoming one is unbounded. A render object
+/// rather than a `LayoutBuilder`, which throws when an ancestor asks for
+/// intrinsic sizes (`IntrinsicWidth`, `AlertDialog`).
+Widget boundedFieldWidth(Widget field) => _BoundedFieldWidth(child: field);
+
+class _BoundedFieldWidth extends SingleChildRenderObjectWidget {
+  const _BoundedFieldWidth({required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderBoundedFieldWidth();
+}
+
+class _RenderBoundedFieldWidth extends RenderProxyBox {
+  BoxConstraints _inner(BoxConstraints c) => c.hasBoundedWidth
+      ? c
+      : c.tighten(width: c.constrainWidth(mcFieldUnboundedWidth));
+
+  @override
+  double computeMinIntrinsicWidth(double height) => mcFieldUnboundedWidth;
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => mcFieldUnboundedWidth;
+
+  double _w(double width) => width.isFinite ? width : mcFieldUnboundedWidth;
+
+  @override
+  double computeMinIntrinsicHeight(double width) =>
+      child?.getMinIntrinsicHeight(_w(width)) ?? 0;
+
+  @override
+  double computeMaxIntrinsicHeight(double width) =>
+      child?.getMaxIntrinsicHeight(_w(width)) ?? 0;
+
+  @override
+  Size computeDryLayout(BoxConstraints constraints) =>
+      child?.getDryLayout(_inner(constraints)) ?? constraints.smallest;
+
+  @override
+  void performLayout() {
+    final c = child;
+    if (c == null) {
+      size = constraints.smallest;
+      return;
+    }
+    c.layout(_inner(constraints), parentUsesSize: true);
+    size = c.size;
+  }
+}
 
 /// The border colour for a disabled control. High contrast draws it at full
 /// strength: an alpha would drop it below the contrast the mode promises.
