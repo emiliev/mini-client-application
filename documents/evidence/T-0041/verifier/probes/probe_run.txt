@@ -1,0 +1,5 @@
+  PASS  zz_verifier_probe Verifier probes (not committed) P1 a sign-out during an in-flight PUT
+  PASS  zz_verifier_probe Verifier probes (not committed) P2 a favourite tap during a session refresh
+  PASS  zz_verifier_probe Verifier probes (not committed) P3 a sign-out during the read after sign-in writes nothing
+  PASS  zz_verifier_probe Verifier probes (not committed) P4 another user signing in during the read after sign-in gets no write
+  PASS  zz_verifier_probe Verifier probes (not committed) P5 a switch to another user elsewhere shows that user's flag

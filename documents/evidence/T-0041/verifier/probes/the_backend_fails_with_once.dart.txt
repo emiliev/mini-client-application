@@ -1,0 +1,15 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_steps/mc_test_steps.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+/// Usage: the backend fails {'PUT /x'} with {'unauthorized'} once
+/// (T-0041 Verifier probe, not committed)
+Future<void> theBackendFailsWithOnce(
+  WidgetTester tester,
+  String route,
+  String kind,
+) async => McTestSession.current.backend.fail(
+  route,
+  backendFailureNamed(kind),
+  times: 1,
+);
