@@ -31,6 +31,10 @@ ROUTES=//$PW:routes_test
 CL_BDD=//$CL:bdd_test
 UW_ROUTES=//$UW:routes_test
 APP=//app/mini_client:comic_route_test
+FIX_CONTRACT=//utility/mc_fixtures_comics:provider_contract_test
+ROOT_FMT=//app/wiring/app_core:formatters_root_test
+AUTH_HARNESS=//utility/mc_test_utils:auth_container_test
+ARCHCHECK=//tool/mc_arch_check:arch_check_test
 
 FILES=(
   $CD/lib/comics_details.dart
@@ -49,6 +53,12 @@ FILES=(
   $PW/lib/src/routes/comics_routes.dart
   $PW/lib/src/sign_in/fixture_sign_in_sheet.dart
   $UW/lib/src/navigators/characters_list_navigator_impl.dart
+  utility/mc_test_utils/lib/src/test_container.dart
+  utility/mc_test_utils/lib/src/backend_harness.dart
+  app/wiring/app_core/lib/src/di/root_initializers.dart
+  utility/mc_fixtures_comics/lib/src/data/universe.dart
+  app/mini_client/lib/src/router/app_router.dart
+  tool/mc_arch_check/lib/src/arch_check.dart
 )
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
@@ -62,11 +72,11 @@ trap restore_all EXIT
 # run <targets...>: the test output, one line per test, plus Bazel's summary.
 run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
 
-base="$(run $BDD $FLOW $ARCH $ROUTES $CL_BDD $UW_ROUTES $APP)"
+base="$(run $BDD $FLOW $ARCH $ROUTES $CL_BDD $UW_ROUTES $APP $FIX_CONTRACT $ROOT_FMT $AUTH_HARNESS $ARCHCHECK)"
 if grep -q -E "FAILED|NO STATUS|^ERROR" <<< "$base"; then
   say "BASELINE FAILS"; grep -E "FAILED|^ERROR" <<< "$base" | tee -a "$LOG"; exit 1
 fi
-say "baseline: PASS (7 targets)"
+say "baseline: PASS (11 targets)"
 
 rc=0
 n=0
@@ -113,8 +123,8 @@ SHEET=$PW/lib/src/sign_in/fixture_sign_in_sheet.dart
 # --- AC1: the comic, its facts, credits and cast -------------------------
 mutate AC1-a "price shown as raw minor units" $FACTS \
   "s.replace('formatMoney(comic.price, locale)', \"'\${comic.price.minorUnits}'\")" $BDD
-mutate AC1-b "cast in reverse order" $REPO_ \
-  "s.replace('cast: [...cast.nonNulls]', 'cast: [...cast.nonNulls.toList().reversed]')" $BDD
+mutate AC1-b "cast in reverse order" $MAP \
+  "s.replace('for (final member in characters)', 'for (final member in characters.reversed)')" $BDD
 mutate AC1-c "last credit dropped" $MAP \
   "s.replace('for (final credit in creators)', 'for (final credit in creators.take(creators.length - 1))')" $BDD
 mutate AC1-d "synopsis shows the title" $PAGE \
@@ -126,8 +136,8 @@ mutate AC2-a "unknown comic shown as a failure" $DET \
   "s.replace('failure is ApiNotFound', 'failure is ApiClientError')" $BDD
 mutate AC2-b "Retry does nothing" $PAGE \
   "re.sub(r'onRetry: \(\) => context\.read<ComicDetailsBloc>\(\)\.add\(\s*const ComicDetailsEvent\.load\(\),\s*\)', 'onRetry: () {}', s)" $BDD
-mutate AC2-c "a missing cast member fails the comic" $REPO_ \
-  "s.replace('statusCode == 404', 'statusCode == 499')" $BDD
+mutate AC2-c "a comic's double Retry sends two requests (no in-flight guard)" $DET \
+  "s.replace('        if (_loading) {', '        if (_loading && _flow.state.comicId.value < 0) {')" $BDD
 # --- AC3: the cast and the credits leave through the navigator ------------
 mutate AC3-a "openCharacter with the wrong id" $DET \
   "s.replace('_navigator.openCharacter(id);', '_navigator.openCharacter(CharacterId(id.value + 1));')" $BDD
@@ -151,9 +161,9 @@ mutate AC5-c "a related comic opens the wrong id" $CL/lib/src/presentation/bloc/
   "s.replace('_navigator.openComic(id);', '_navigator.openComic(ComicId(id.value + 1));')" $CL_BDD
 # --- AC6: the favourite and sign-in ----------------------------------------
 mutate AC6-a "signed out, no sign-in asked" $FAV \
-  "s.replace('    if (!_session.isSignedIn) {\n      emit(ComicFavouriteState.ready(favourite: current, saving: true));', \"    if (_session.userId == 'nobody') {\n      emit(ComicFavouriteState.ready(favourite: current, saving: true));\")" $BDD
+  "s.replace('    if (!_session.isSignedIn) {\n      emit(const ComicFavouriteState.signingIn());', \"    if (_session.userId == 'nobody') {\n      emit(const ComicFavouriteState.signingIn());\")" $BDD
 mutate AC6-b "a cancelled sign-in still writes" $FAV \
-  "s.replace('        emit(ComicFavouriteState.ready(favourite: current));\n        return;\n', '        emit(ComicFavouriteState.ready(favourite: current));\n')" $BDD
+  "s.replace('        emit(const ComicFavouriteState.ready(favourite: false));\n        return;\n      }\n      // A new session', '        emit(const ComicFavouriteState.ready(favourite: false));\n      }\n      // A new session')" $BDD
 mutate AC6-c "DataChanged published twice" $FAV \
   "s.replace('_bus.publish(const DataChanged(favouritesTopic));', '_bus..publish(const DataChanged(favouritesTopic))..publish(const DataChanged(favouritesTopic));')" $BDD
 mutate AC6-d "no rollback after a failed write" $FAV \
@@ -167,7 +177,36 @@ mutate AC6-g "no inline error after a failed write" $TOGGLE \
 mutate AC6-h "the wiring answers true without the sheet" $NAV \
   "s.replace('return showFixtureSignInSheet(context, _auth);', 'return true;')" $ROUTES
 mutate AC6-i "the sheet answers true when signing in failed" $SHEET \
-  "s.replace('if (result.getOrNull() != null) {', 'if (result.getOrNull() != null || mounted) {')" $ROUTES
+  "s.replace('    if (ok) {', '    if (ok || mounted) {')" $ROUTES
+# --- Review round (TL items 1, 2, 3, 6 to 11) -------------------------------
+mutate R1-a "test container does not load the formatters" utility/mc_test_utils/lib/src/test_container.dart \
+  "s.replace('    const FormattersDIInitializer(),', '    McDIInitializer((_, _) => const FormattersDIInitializer()),')" $BDD
+mutate R1-b "root list does not load the formatters" app/wiring/app_core/lib/src/di/root_initializers.dart \
+  "s.replace('    const FormattersDIInitializer(),', '    McDIInitializer((_, _) => const FormattersDIInitializer()),')" $ROOT_FMT
+mutate R2-a "the fixture's cast summary out of characterIds order" utility/mc_fixtures_comics/lib/src/data/universe.dart \
+  "s.replace('        for (final id in ids)\n', '        for (final id in ids.reversed)\n')" $FIX_CONTRACT
+mutate R2-b "the feature ignores the cast summary" $MAP \
+  "s.replace('cast: [for (final member in characters) member.toDomain()],', 'cast: const [],')" $BDD
+mutate R3 "a group-prefixed RouteTargets escapes the Flow check" tool/mc_arch_check/lib/src/arch_check.dart \
+  "s.replace(\"!declaration.namePart.typeName.lexeme.endsWith('RouteTargets')\", \"declaration.namePart.typeName.lexeme != 'RouteTargets'\")" $ARCHCHECK
+mutate R6 "the app has no not-found page for a bad id" app/mini_client/lib/src/router/app_router.dart \
+  "re.sub(r'  errorBuilder: \(context, state\) =>\s*NotFoundPage\(location: state\.uri\.toString\(\)\),\n', '', s)" $APP
+mutate R7-a "the sheet closes on the barrier while signing in" $SHEET \
+  "s.replace('canPop: !_busy,', 'canPop: true,')" $ROUTES
+mutate R7-b "a sheet closed mid sign-in answers false" $SHEET \
+  "s.replace('return answer ?? await (attempt.inFlight ?? Future.value(false));', 'return answer ?? false;')" $ROUTES
+mutate R8-a "no re-read for the new session after sign-in" $FAV \
+  "s.replace('if (fresh.getOrElse(() => false)) {', 'if (fresh.getOrElse(() => false) && !_busy) {')" $BDD
+mutate R8-b "the bloc does not follow authState" $FAV \
+  "s.replace('(_) => add(const _SessionChanged()),', '(_) {},')" $BDD
+mutate R8-c "a session change during a tap is not applied after it" $FAV \
+  "s.replace('        }\n        if (_session.epoch != _shownEpoch) {\n          await _load(emit);\n        }\n', '        }\n')" $BDD
+mutate R9 "a double Retry of the related comics sends two requests" $CL/lib/src/presentation/bloc/related_comics_bloc.dart \
+  "s.replace('        if (_loading) {', '        if (_loading && _character.name.isEmpty) {')" $CL_BDD
+mutate R10 "signing in shows the toggle as a favourite" $TOGGLE \
+  "s.replace('signingIn: () => (false, false, null),', 'signingIn: () => (true, false, null),')" $BDD
+mutate R11 "the harness drops the request headers" utility/mc_test_utils/lib/src/backend_harness.dart \
+  "s.replace(\"          for (final e in options.headers.entries) e.key: '\${e.value}',\n\", '')" $BDD $AUTH_HARNESS
 # --- AC7: the barrel and the root imports ----------------------------------
 mutate AC7-a "barrel exports a page" $CD/lib/comics_details.dart \
   "s + \"export 'package:comics_details/src/presentation/page/comic_details_page.dart' show ComicDetailsPage;\n\"" $ARCH
