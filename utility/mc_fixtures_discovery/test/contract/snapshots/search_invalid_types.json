@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_parameter",
+      "message": "Query parameter \"types\" must list only character, comic",
+      "parameter": "types"
+    }
+  },
+  "request": "GET /v1/search?q=spi&types=character,film",
+  "status": 400
+}

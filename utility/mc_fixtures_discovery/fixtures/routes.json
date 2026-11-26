@@ -1,0 +1,11 @@
+{
+  "domain": "discovery",
+  "routes": [
+    "GET /v1/search",
+    "GET /v1/search/suggestions"
+  ],
+  "scenarios": [
+    "discovery.empty",
+    "discovery.server_error"
+  ]
+}

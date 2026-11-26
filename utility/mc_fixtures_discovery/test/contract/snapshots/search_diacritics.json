@@ -1,0 +1,41 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [
+          {
+            "id": 100483,
+            "subtitle": "Harbor Watch",
+            "thumbnail": {
+              "path": "mock-asset://characters/008",
+              "variant": "portrait_medium"
+            },
+            "title": "Spire Alchemist",
+            "type": "character"
+          }
+        ],
+        "total": 38,
+        "type": "character"
+      },
+      {
+        "results": [
+          {
+            "id": 500020,
+            "subtitle": "1993",
+            "thumbnail": {
+              "path": "mock-asset://characters/020",
+              "variant": "portrait_large"
+            },
+            "title": "Spire Chronicles #1",
+            "type": "comic"
+          }
+        ],
+        "total": 200,
+        "type": "comic"
+      }
+    ],
+    "query": "SPÏRE"
+  },
+  "request": "GET /v1/search?q=%20SP%C3%8FRE%20&limit=1",
+  "status": 200
+}

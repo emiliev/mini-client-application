@@ -1,0 +1,30 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [
+          {
+            "id": 100003,
+            "subtitle": "Copper Street Collective",
+            "thumbnail": {
+              "path": "mock-asset://characters/011",
+              "variant": "portrait_medium"
+            },
+            "title": "Spire Warden",
+            "type": "character"
+          }
+        ],
+        "total": 1,
+        "type": "character"
+      },
+      {
+        "results": [],
+        "total": 0,
+        "type": "comic"
+      }
+    ],
+    "query": "Spire Warden"
+  },
+  "request": "GET /v1/search?q=Spire%20Warden",
+  "status": 200
+}

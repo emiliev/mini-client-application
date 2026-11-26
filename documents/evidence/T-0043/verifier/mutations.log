@@ -1,0 +1,12 @@
+Verifier mutations (10), each run with `bazelw test //utility/mc_fixtures_discovery/...`, tree restored after each.
+M1 prefix tier counted as word-prefix: KILLED (ranking_test, search_test)
+M2 word-prefix tier counted as substring: KILLED (ranking_test, search_test)
+M3 title tie-break reversed: KILLED (provider_contract_test, ranking_test, search_test)
+M4 snapshot search_spi.json edited (total 152 -> 153): KILLED (provider_contract_test)
+M6 groups follow the order of `types`: KILLED (search_test)
+R1 folded-length check weakened (bare accents pass): KILLED (search_test)
+R2 word boundary read as a UTF-16 unit: KILLED (ranking_test)
+R3 Latin Extended Additional e-forms dropped from the fold table: KILLED (ranking_test)
+R4 comma-below s dropped from the fold table: KILLED (ranking_test)
+R5 entry type not validated: KILLED (ranking_test)
+Note: first attempts of R1, R2, R5 (`if (false)` and raw-length variants) failed the lint build, so they were redone as lint-clean mutants (mutations-verifier.sh holds the first batch; the redone R1c/R2b/R5b used the same script header with different patterns).
