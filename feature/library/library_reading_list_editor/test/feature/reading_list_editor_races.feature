@@ -199,3 +199,17 @@ Feature: The editor stays consistent while requests are in flight
     Then I see {'You are no longer signed in as before'}
     And I don't see {'Spider-Verse Starter'}
     And I don't see {'Step 1 of 3'}
+
+  @T-0048-AC6
+  Scenario: A slow search that answers after a newer one changes nothing
+    When I open the reading list editor
+    And I enter {'Amber reads'} as the name
+    And I tap {'Next'}
+    Given the backend holds {'GET /v1/comics?titleStartsWith=Amber Ch'}
+    When I search for {'Amber Ch'}
+    And the app sends {'GET /v1/comics?titleStartsWith=Amber Ch'}
+    And I search for {'Amber Fr'}
+    Then I see {'Amber Frontier #1'}
+    When the backend releases {'GET /v1/comics?titleStartsWith=Amber Ch'}
+    Then I see {'Amber Frontier #1'}
+    And I don't see {'Amber Chronicles #3'}
