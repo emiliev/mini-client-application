@@ -6,7 +6,7 @@
 | Version | 0.1.0 |
 | Archive | `https://pub.dev/api/archives/flow_builder-0.1.0.tar.gz` |
 | Archive sha256 | `9e66aa7209e9a31c347bb316abf191d2300db41cd6b7254f89abd4e76d9b3f8d` (the hash `pubspec.lock` held for the hosted copy) |
-| Task | T-0035 (Deep links survive a mounted `FeatureFlow`); finding F-0034 |
+| Task | T-0035 (Deep links survive a mounted `FeatureFlow`), T-0036 (stale `PopScope`); findings F-0034, F-0035 |
 | Licence | MIT, `LICENSE` is byte-identical to the archive |
 | Upstream draft | `documents/upstream/U-X-flow_builder-navigation-channel/README.md` |
 
@@ -29,6 +29,17 @@ nothing. Fixed here, at the kit level, so no feature can trip over it.
 2. An unknown method returns `false` (the framework's answer), not `null`.
 3. A `popRoute` that one of flow_builder's interceptors consumed answers `true`
    (stock: `null`). iOS counts any reply but `true` as unhandled.
+4. (T-0036) **A stale `PopScope(canPop: false)` after a state-driven return.**
+   `_canPop` is `_pages.length > 1 || navigator.canPop()`, and it is read while
+   `FlowBuilder` builds, when the navigator still holds the old routes. After
+   `controller.update` returned the flow to its root, `canPop` stayed true, so the
+   `PopScope(canPop: false)` stayed mounted and swallowed the next pop: the first tap
+   of the flow's back button, or the iOS edge swipe, did nothing. Two changes:
+   `_listener` schedules one post-frame `setState` so `_canPop` is recomputed once the
+   navigator has the new pages, and `_ConditionalPopScope` always mounts the
+   `PopScope` and toggles `canPop` (stock swapped the widget, which re-parented the
+   whole navigator and rebuilt every page, and also hid the stale-state bug).
+   Tests: `flow_kit_test` T-0036-AC1 (button tap, edge swipe).
 
 Not carried over from the archive: `example/`, `test/`, `art/`, `README.md`,
 `coverage_badge.svg`, the upstream `analysis_options.yaml` (it includes

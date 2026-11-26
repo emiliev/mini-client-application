@@ -30,7 +30,7 @@ class _State {
 /// A const-built root page (the exemplar's shape) that rebuilds when
 /// [rebuild] fires, even while covered by an inner page: what a locale change
 /// does to a page that reads its strings. A user pop rebuilds it as well, so
-/// the old `flowLeading()` only broke when the flow returned to the root
+/// the old leading helper only broke when the flow returned to the root
 /// through a state change (`controller.update`), which rebuilds nothing.
 class _RebuildingRoot extends StatefulWidget {
   const _RebuildingRoot();

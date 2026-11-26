@@ -35,8 +35,10 @@ typedef OnGenerateFlowPages<T> = List<McFlowPage> Function(T state);
 /// [flowInitializer]. An unregistered root import fails fast, naming its type.
 /// [provide] registers flow-scoped instances (a navigator the app passes in)
 /// in that container before [flowInitializer] runs; they resolve inside the
-/// flow and nowhere else. [localizationsDelegates] are the feature's own; the
-/// flow adds the core strings and Flutter's own after them.
+/// flow and nowhere else. [localizationsDelegates] are the feature's own. The
+/// flow is always wrapped in `Localizations.override`: it adds the core strings
+/// and Flutter's own delegates after them, only for the types the host does
+/// not provide.
 /// A failing [flowInitializer] shows an error view with Retry and reports the
 /// error to [Monitoring] when the root has one.
 class FeatureFlow<T> extends StatefulWidget {
