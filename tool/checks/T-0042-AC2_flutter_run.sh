@@ -77,7 +77,7 @@ stop_app() {
 t0=$(date +%s)
 if run_app "$WORK/run.log" 900; then
   t1=$(date +%s)
-  report "- the app started: VM service up after $((t1 - t0)) s (first build of a fresh checkout includes Xcode and pods)"
+  report "- the app started: VM service up after $((t1 - t0)) s"
 else
   report "- **FAIL**: the app did not start" '```' "$(tail -25 "$WORK/run.log")" '```'
   stop_app; finish T-0042-AC2 1
@@ -87,7 +87,7 @@ xcrun simctl io "$UDID" screenshot "$WORK/home.png" >/dev/null 2>&1
 sips -Z 1200 "$WORK/home.png" --out "$SHOTS/AC2_home.png" >/dev/null 2>&1
 [[ -s "$SHOTS/AC2_home.png" ]] || { report "- **FAIL**: no screenshot"; rc=1; }
 w="$(sips -g pixelWidth -g pixelHeight "$SHOTS/AC2_home.png" 2>/dev/null | awk '/pixel/ {printf "%s ", $2}')"
-report "- screenshot: \`documents/evidence/T-0042/$ROLE/AC2_home.png\` ($w px)"
+report "- screenshot: \`documents/evidence/T-0042/$ROLE/AC2_home.png\` (width x height: $w)"
 grep -aq 'Flutter DevTools\|Dart VM Service' "$WORK/run.log" || { report "- **FAIL**: no debugger endpoint in the log"; rc=1; }
 
 # Hot reload through the running session.
