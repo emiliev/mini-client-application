@@ -58,6 +58,7 @@ flutter_library(
     "links_and_hooks_test",
     "router_ref_and_scheme_test",
     "formatters_root_test",
+    "app_layer_test",
 ]]
 
 # T-0048: the flow-result helpers.
