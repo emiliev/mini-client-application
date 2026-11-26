@@ -56,6 +56,7 @@ _TEST_DEPS = _DEPS + [
     "isolation_test",
     "init_flow_test",
     "auth_container_test",
+    "formatters_container_test",
 ]]
 
 flutter_test(

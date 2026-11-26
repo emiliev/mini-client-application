@@ -7,6 +7,7 @@
 # to run when a file it mutates has uncommitted edits.
 #
 #   MC_TASK=T-0041 MC_ROLE=engineer documents/evidence/T-0041/engineer/mutations.sh
+#   MC_ONLY="R1-a AC6-b" ...   runs only the named mutations (after the baseline)
 #
 # Output base /tmp/mc-ob-$MC_TASK-$MC_ROLE; log /tmp/mc-$MC_TASK-$MC_ROLE-mutations.log
 # (also printed). Exit 0 only if every mutation was applied and killed.
@@ -34,6 +35,7 @@ APP=//app/mini_client:comic_route_test
 FIX_CONTRACT=//utility/mc_fixtures_comics:provider_contract_test
 ROOT_FMT=//app/wiring/app_core:formatters_root_test
 AUTH_HARNESS=//utility/mc_test_utils:auth_container_test
+FMT_CONTAINER=//utility/mc_test_utils:formatters_container_test
 ARCHCHECK=//tool/mc_arch_check:arch_check_test
 
 FILES=(
@@ -72,11 +74,11 @@ trap restore_all EXIT
 # run <targets...>: the test output, one line per test, plus Bazel's summary.
 run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
 
-base="$(run $BDD $FLOW $ARCH $ROUTES $CL_BDD $UW_ROUTES $APP $FIX_CONTRACT $ROOT_FMT $AUTH_HARNESS $ARCHCHECK)"
+base="$(run $BDD $FLOW $ARCH $ROUTES $CL_BDD $UW_ROUTES $APP $FIX_CONTRACT $ROOT_FMT $AUTH_HARNESS $ARCHCHECK $FMT_CONTAINER)"
 if grep -q -E "FAILED|NO STATUS|^ERROR" <<< "$base"; then
   say "BASELINE FAILS"; grep -E "FAILED|^ERROR" <<< "$base" | tee -a "$LOG"; exit 1
 fi
-say "baseline: PASS (11 targets)"
+say "baseline: PASS (12 targets)"
 
 rc=0
 n=0
@@ -84,6 +86,7 @@ killed=0
 # mutate <id> <description> <file> <python expression on s> <targets...>
 mutate() {
   local id="$1" what="$2" file="$3" expr="$4"; shift 4
+  if [[ -n "${MC_ONLY:-}" && " $MC_ONLY " != *" $id "* ]]; then return; fi
   n=$((n + 1))
   /usr/bin/python3 -I - "$file" "$expr" <<'EOF'
 import re, sys
@@ -180,7 +183,7 @@ mutate AC6-i "the sheet answers true when signing in failed" $SHEET \
   "s.replace('    if (ok) {', '    if (ok || mounted) {')" $ROUTES
 # --- Review round (TL items 1, 2, 3, 6 to 11) -------------------------------
 mutate R1-a "test container does not load the formatters" utility/mc_test_utils/lib/src/test_container.dart \
-  "s.replace('    const FormattersDIInitializer(),', '    McDIInitializer((_, _) => const FormattersDIInitializer()),')" $BDD
+  "s.replace('    const FormattersDIInitializer(),', '    McDIInitializer((_, _) => const FormattersDIInitializer()),')" $FMT_CONTAINER
 mutate R1-b "root list does not load the formatters" app/wiring/app_core/lib/src/di/root_initializers.dart \
   "s.replace('    const FormattersDIInitializer(),', '    McDIInitializer((_, _) => const FormattersDIInitializer()),')" $ROOT_FMT
 mutate R2-a "the fixture's cast summary out of characterIds order" utility/mc_fixtures_comics/lib/src/data/universe.dart \
