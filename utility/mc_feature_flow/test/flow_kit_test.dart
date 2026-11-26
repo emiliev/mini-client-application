@@ -27,6 +27,26 @@ class _State {
   final String? selected;
 }
 
+/// A const-built root page (the exemplar's shape) that rebuilds on a locale
+/// change even while covered, because it depends on the locale.
+class _LocaleRoot extends StatelessWidget {
+  const _LocaleRoot({required this.onController});
+
+  final void Function(FeatureFlowController<_State>) onController;
+
+  @override
+  Widget build(BuildContext context) {
+    onController(context.di<FeatureFlowController<_State>>());
+    final lang = Localizations.localeOf(context).languageCode;
+    return Scaffold(
+      appBar: AppBar(
+        leading: const McFlowBackButton(),
+        title: Text('flow root $lang'),
+      ),
+    );
+  }
+}
+
 class _Strings {
   const _Strings(this.hello);
 
@@ -585,7 +605,9 @@ void main() {
                               controller = context
                                   .di<FeatureFlowController<_State>>();
                               return Scaffold(
-                                appBar: AppBar(leading: const McFlowBackButton()),
+                                appBar: AppBar(
+                                  leading: const McFlowBackButton(),
+                                ),
                               );
                             },
                           ),
@@ -648,22 +670,8 @@ void main() {
                         onGeneratePages: (s) => [
                           McFlowPage(
                             name: 'list',
-                            child: Builder(
-                              builder: (context) {
-                                controller = context
-                                    .di<FeatureFlowController<_State>>();
-                                // Depends on the locale, so a locale change
-                                // rebuilds this page even when covered.
-                                final lang = Localizations.localeOf(
-                                  context,
-                                ).languageCode;
-                                return Scaffold(
-                                  appBar: AppBar(
-                                    leading: const McFlowBackButton(),
-                                    title: Text('flow root $lang'),
-                                  ),
-                                );
-                              },
+                            child: _LocaleRoot(
+                              onController: (c) => controller = c,
                             ),
                           ),
                           if (s.selected != null)

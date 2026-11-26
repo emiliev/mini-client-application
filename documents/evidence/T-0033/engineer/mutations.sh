@@ -8,6 +8,7 @@ set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 cd "$REPO"
 OB="${MC_OB:-/tmp/mc-ob-T-0033-engineer}"
+LOG="${MC_LOG:-/tmp/mc-T-0033-engineer-mutations.log}"
 rc=0
 current=""
 restore() { [ -n "$current" ] && [ -f "$current.mut-orig" ] && mv -f "$current.mut-orig" "$current"; current=""; }
@@ -30,10 +31,12 @@ PY
   then
     echo "MUTATION $name: INVALID (text not found)"; rc=1; restore; return
   fi
-  if tool/bazelw --output_base="$OB" test "$@" >/tmp/mc-mut.log 2>&1; then
+  if tool/bazelw --output_base="$OB" test "$@" >"$LOG" 2>&1; then
     echo "MUTATION $name: SURVIVED (tests passed)  [$*]"; rc=1
+  elif grep -a -q 'Build did NOT complete' "$LOG"; then
+    echo "MUTATION $name: COMPILE ERROR (not killed by a test)  [$*]"; rc=1
   else
-    echo "MUTATION $name: killed by $(grep -a -E '^//.*FAILED' /tmp/mc-mut.log | sed 's/ .*//' | tr '\n' ' ')"
+    echo "MUTATION $name: killed by $(grep -a -E '^//.*FAILED' "$LOG" | sed 's/ .*//' | tr '\n' ' ')"
   fi
   restore
 }
@@ -53,9 +56,15 @@ mutate "scheme: the sandbox installs its links with the default scheme" \
   "PendingLinks.install(binding, scheme: sandboxLinkScheme)" "PendingLinks.install(binding)" \
   //app/sandbox/universe_sandbox:universe_sandbox_links_test
 
+# `go` returns void, so a bare rename would not compile (killed by the
+# compiler, not by a test). Wrapping it keeps the code compiling, so only the
+# routes_test assertion can kill it.
 mutate "navigator: push becomes go" \
   app/wiring/universe_wiring/lib/src/navigators/characters_list_navigator_impl.dart \
-  "_routerRef.router.push(" "_routerRef.router.go(" \
+  "_routerRef.router.push(CharacterDetailsRoute(id: id.value).location)" \
+  "Future<void>.sync(
+        () => _routerRef.router.go(CharacterDetailsRoute(id: id.value).location),
+      )" \
   //app/wiring/universe_wiring:routes_test
 
 mutate "RouterRef.detach does nothing" \
