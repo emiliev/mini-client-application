@@ -111,27 +111,6 @@ void main() {
       expect(canonicalJson(dto.toJson()), canonicalJson(json));
       expect(dto.toDomain().groups.first.hits.single.subtitle, isNull);
     });
-
-    test(
-      'T-0046-AC7: the suggestions answer round-trips byte for byte',
-      () async {
-        final api = DiscoverySearchApi(_dio);
-        final dto = await api.suggestions('spi');
-
-        expect(dto.query, 'spi');
-        expect(dto.suggestions, [
-          'Spindle Alchemist',
-          'Spindle Artisan',
-          'Spindle Bard',
-          'Spindle Beacon',
-          'Spindle Captain',
-        ]);
-        expect(
-          canonicalJson(dto.toJson()),
-          canonicalJson(await _get('v1/search/suggestions?q=spi')),
-        );
-      },
-    );
   });
 
   group('T-0046-AC1 the repository and the mapper', () {
@@ -139,7 +118,7 @@ void main() {
         'typed ids and the served art', () async {
       final results = (await _repository().search('spi')).getOrElse(
         () => fail('the search failed'),
-      );
+      )!;
       final served = SearchResponseDto.fromJson(
         await _get('v1/search?q=spi&limit=$searchPageSize'),
       );
@@ -211,7 +190,7 @@ void main() {
       () async {
         final results = (await _repository().search('zzzz')).getOrElse(
           () => fail('the search failed'),
-        );
+        )!;
 
         expect(results.isEmpty, isTrue);
         expect([for (final g in results.groups) g.total], [0, 0]);
@@ -226,12 +205,29 @@ void main() {
         isA<ApiServer>().having((f) => f.status, 'status', 500),
       );
 
-      final tooShort = await _repository().search('s');
+      // A 400 other than "query too short" stays a failure.
+      final rejecting = MockBackend(domains: [const DiscoveryMockDomain()])
+        ..addFailure(
+          const FailureRule('GET', '/v1/search', FailureKind.http(400)),
+        );
+      final rejected = await _repository(rejecting.createDio()).search('spi');
       expect(
-        tooShort.fold((_) => null, (f) => f),
+        rejected.fold((_) => null, (f) => f),
         isA<ApiClientError>().having((f) => f.status, 'status', 400),
       );
     });
+
+    for (final query in ['s', 'é', 'e\u0301', '\u0301\u0301']) {
+      test('T-0046-AC2: the backend\'s "query too short" for '
+          '${query.runes.map((r) => 'U+${r.toRadixString(16)}').join(' ')} '
+          'is no result, not a failure', () async {
+        final backend = _backend();
+        final result = await _repository(backend.createDio()).search(query);
+
+        expect(result.fold((r) => r, (f) => fail('a failure: $f')), isNull);
+        expect(backend.recentTraffic.single.status, 400);
+      });
+    }
 
     test('T-0046-AC7: values outside the contract are malformed', () {
       Map<String, dynamic> withResult(Map<String, dynamic> change) {
@@ -265,6 +261,34 @@ void main() {
           }),
         ).toDomain(),
         throwsFormatException,
+      );
+      Map<String, dynamic> withGroups(List<String> types) {
+        final json = _example();
+        json['groups'] = [
+          for (final type in types)
+            {'type': type, 'total': 0, 'results': <Object>[]},
+        ];
+        return json;
+      }
+
+      for (final types in [
+        ['comic', 'character'],
+        ['character'],
+        ['character', 'character'],
+        ['character', 'comic', 'comic'],
+        <String>[],
+      ]) {
+        expect(
+          () => SearchResponseDto.fromJson(withGroups(types)).toDomain(),
+          throwsFormatException,
+          reason: 'groups $types',
+        );
+      }
+      expect(
+        SearchResponseDto.fromJson(
+          withGroups(['character', 'comic']),
+        ).toDomain().isEmpty,
+        isTrue,
       );
       final badGroup = _example();
       (badGroup['groups'] as List<dynamic>).last = {

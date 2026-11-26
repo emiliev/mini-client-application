@@ -4,7 +4,7 @@ import 'package:mc_storage/mc_storage.dart';
 
 /// The `FileStore` key of the recent searches. Every flow instance reads and
 /// writes the same key, so the list survives the flow (and the app).
-const String searchHistoryKey = 'discovery_search.history';
+const String searchHistoryStoreKey = 'discovery_search.history';
 
 /// How many recent searches are kept.
 const int searchHistoryCap = 10;
@@ -18,5 +18,5 @@ abstract class DiscoverySearchModule {
   /// same key read and write independently, which the kit accepts.
   @lazySingleton
   SearchHistory searchHistory(FileStore store) =>
-      SearchHistory(store, cap: searchHistoryCap, key: searchHistoryKey);
+      SearchHistory(store, cap: searchHistoryCap, key: searchHistoryStoreKey);
 }

@@ -93,7 +93,7 @@ enum SearchFilter {
     comics => type == SearchType.comic,
   };
 
-  /// The filter that shows only [type] ("See all" on a group).
+  /// The filter that shows only [type] ("Show 20" on a group).
   static SearchFilter only(SearchType type) => switch (type) {
     SearchType.character => characters,
     SearchType.comic => comics,

@@ -56,8 +56,8 @@ void main() {
     // The keyboard takes half the screen; with it gone both sections fit.
     FocusManager.instance.primaryFocus?.unfocus();
     await letArtLoad(tester, const Duration(seconds: 1));
-    expect(find.text('See all 152'), findsOneWidget);
-    expect(find.text('See all 400'), findsOneWidget);
+    expect(find.text('Characters (152)'), findsOneWidget);
+    expect(find.text('Comics (400)'), findsOneWidget);
     await letArtLoad(tester);
     await shot(binding, tester, '32_search_results_grouped');
 

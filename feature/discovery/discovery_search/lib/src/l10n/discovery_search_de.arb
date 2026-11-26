@@ -6,7 +6,9 @@
   "discoverySearchFilterAll": "Alle",
   "discoverySearchCharacters": "Figuren",
   "discoverySearchComics": "Comics",
-  "discoverySearchSeeAll": "Alle {count} anzeigen",
+  "discoverySearchCharactersSection": "Figuren ({count})",
+  "discoverySearchComicsSection": "Comics ({count})",
+  "discoverySearchShowMore": "{shown} zeigen",
   "discoverySearchShowing": "{shown} von {total} angezeigt",
   "discoverySearchSearching": "Suche läuft",
   "discoverySearchEmptyTitle": "Keine Treffer",
@@ -16,5 +18,6 @@
   "discoverySearchErrorTitle": "Die Suche ist fehlgeschlagen",
   "discoverySearchRecent": "Letzte Suchen",
   "discoverySearchClearRecent": "Löschen",
+  "discoverySearchClearFailed": "Deine letzten Suchen konnten nicht gelöscht werden. Bitte versuche es erneut.",
   "discoverySearchNoRecent": "Suche Figuren und Comics nach ihrem Namen."
 }

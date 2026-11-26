@@ -59,6 +59,34 @@ final class DebouncedQuery {
     });
   }
 
+  /// Searches [text] now, without waiting for a pause: a query the user did
+  /// not type (a tapped recent search, a linked query). It cancels a pending
+  /// search, then behaves as [update] would once the delay had passed: the
+  /// trimmed text fires [onSearch] unless it equals the query last searched,
+  /// and a blank text clears (only after a search fired). Because it records
+  /// the query as searched, a later [update] to the same text does not search
+  /// it again. Does nothing after [dispose].
+  void submit(String text) {
+    if (_disposed) {
+      return;
+    }
+    _timer?.cancel();
+    _timer = null;
+    final query = text.trim();
+    if (query.isEmpty) {
+      if (_searched != null) {
+        _searched = null;
+        onClear();
+      }
+      return;
+    }
+    if (query == _searched) {
+      return;
+    }
+    _searched = query;
+    onSearch(query);
+  }
+
   /// Cancels a pending search and ignores later updates.
   void dispose() {
     _disposed = true;

@@ -22,8 +22,4 @@ abstract class DiscoverySearchApi {
     @Query('q') String q, {
     @Query('limit') int? limit,
   });
-
-  /// The best 5 distinct titles across types for [q].
-  @GET('v1/search/suggestions')
-  Future<SuggestionsDto> suggestions(@Query('q') String q);
 }

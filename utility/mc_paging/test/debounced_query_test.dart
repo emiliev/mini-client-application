@@ -171,6 +171,62 @@ void main() {
     expect(clears, 0);
   });
 
+  test('T-0046-AC6: submit searches at once and cancels a pending search', () {
+    sut
+      ..update('lok')
+      ..submit('  loki ');
+
+    expect(searches, ['loki']);
+    clock.advance(const Duration(seconds: 1));
+    expect(searches, ['loki'], reason: 'the pending "lok" was cancelled');
+    expect(clears, 0);
+  });
+
+  test(
+    'T-0046-AC6: submit of the query last searched does not search again',
+    () {
+      sut.update('loki');
+      clock.advance(const Duration(milliseconds: 300));
+      sut.submit('loki ');
+
+      expect(searches, ['loki']);
+    },
+  );
+
+  test('T-0046-AC6: an update to the submitted query does not search again, '
+      'and a blank update after it clears', () {
+    sut
+      ..submit('thor')
+      ..update('thor');
+    clock.advance(const Duration(seconds: 1));
+    expect(searches, ['thor']);
+
+    sut.update('');
+    expect(clears, 1);
+    sut.update('thor');
+    clock.advance(const Duration(milliseconds: 300));
+    expect(searches, ['thor', 'thor'], reason: 'searched again after a clear');
+  });
+
+  test('T-0046-AC6: a blank submit clears only after a search fired', () {
+    sut.submit('  ');
+    expect(clears, 0);
+
+    sut
+      ..submit('hulk')
+      ..submit(' ');
+    expect(clears, 1);
+    expect(searches, ['hulk']);
+  });
+
+  test('T-0046-AC6: submit after dispose does nothing', () {
+    sut
+      ..dispose()
+      ..submit('loki');
+
+    expect(searches, isEmpty);
+  });
+
   test('T-0030-AC4: the default timer fires after the delay (fake async)', () {
     fakeAsync((async) {
       final found = <String>[];

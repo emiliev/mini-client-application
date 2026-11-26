@@ -19,14 +19,15 @@ const searchFiltersKey = ValueKey<String>('discovery_search.filters');
 ValueKey<String> searchSectionKey(SearchType type) =>
     ValueKey<String>('discovery_search.section.${type.wireName}');
 
-/// How many results of each type show under "All"; "See all" shows the rest
+/// How many results of each type show under "All"; "Show 20" shows the rest
 /// of the loaded page.
 const int allFilterPreviewCount = 5;
 
 /// The type chips over the results, grouped by type in the backend's order
 /// (characters, then comics). Under "All" each group shows its first
-/// [allFilterPreviewCount] results and a "See all" that picks its chip; under
-/// one type, that group's whole first page.
+/// [allFilterPreviewCount] results and a "Show 20" that picks its chip (it
+/// promises only what is loaded; the title has the total); under one type,
+/// that group's whole first page.
 class SearchResultsView extends StatelessWidget {
   const SearchResultsView({
     required this.query,
@@ -102,10 +103,14 @@ class SearchResultsView extends StatelessWidget {
       McSectionHeader(
         key: searchSectionKey(group.type),
         title: switch (group.type) {
-          SearchType.character => l10n.discoverySearchCharacters,
-          SearchType.comic => l10n.discoverySearchComics,
+          SearchType.character => l10n.discoverySearchCharactersSection(
+            group.total,
+          ),
+          SearchType.comic => l10n.discoverySearchComicsSection(group.total),
         },
-        actionLabel: more ? l10n.discoverySearchSeeAll(group.total) : null,
+        actionLabel: more
+            ? l10n.discoverySearchShowMore(group.hits.length)
+            : null,
         onAction: more
             ? () => bloc.add(
                 DiscoverySearchEvent.filterChanged(

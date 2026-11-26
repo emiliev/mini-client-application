@@ -9,6 +9,7 @@ library;
 export 'package:mc_test_steps/src/assertions/i_dont_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see_the_texts.dart';
+export 'package:mc_test_steps/src/assertions/no_error_was_reported.dart';
 export 'package:mc_test_steps/src/assertions/nothing_overflows.dart';
 export 'package:mc_test_steps/src/assertions/the_button_is_disabled.dart';
 export 'package:mc_test_steps/src/assertions/the_field_reads.dart';

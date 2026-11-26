@@ -59,13 +59,15 @@ class _DiscoverySearchPageContentState
     DiscoverySearchEvent.queryChanged(text),
   );
 
-  /// A recent search goes back into the field and is searched as if typed.
+  /// A recent search goes back into the field and is searched at once.
   void _searchAgain(String query) {
     _controller.value = TextEditingValue(
       text: query,
       selection: TextSelection.collapsed(offset: query.length),
     );
-    _changed(query);
+    context.read<DiscoverySearchBloc>().add(
+      DiscoverySearchEvent.submitted(query),
+    );
   }
 
   @override
@@ -103,8 +105,11 @@ class _DiscoverySearchPageContentState
           Expanded(
             child: BlocBuilder<DiscoverySearchBloc, DiscoverySearchState>(
               builder: (context, state) => state.when(
-                idle: (history) =>
-                    SearchHistoryView(history: history, onPick: _searchAgain),
+                idle: (history, clearFailed) => SearchHistoryView(
+                  history: history,
+                  clearFailed: clearFailed,
+                  onPick: _searchAgain,
+                ),
                 searching: (_) =>
                     McLoading(semanticLabel: l10n.discoverySearchSearching),
                 results: (query, results, filter) => SearchResultsView(

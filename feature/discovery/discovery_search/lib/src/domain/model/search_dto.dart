@@ -72,15 +72,3 @@ abstract class SearchImageDto with _$SearchImageDto {
   factory SearchImageDto.fromJson(Map<String, dynamic> json) =>
       _$SearchImageDtoFromJson(json);
 }
-
-/// `GET /v1/search/suggestions`: the best 5 distinct titles across types.
-@Freezed(fromJson: true, toJson: true)
-abstract class SuggestionsDto with _$SuggestionsDto {
-  const factory SuggestionsDto({
-    required String query,
-    required List<String> suggestions,
-  }) = _SuggestionsDto;
-
-  factory SuggestionsDto.fromJson(Map<String, dynamic> json) =>
-      _$SuggestionsDtoFromJson(json);
-}

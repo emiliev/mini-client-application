@@ -9,13 +9,23 @@
   "discoverySearchFilterAll": "All",
   "@discoverySearchFilterAll": {"description": "Type chip: show characters and comics."},
   "discoverySearchCharacters": "Characters",
-  "@discoverySearchCharacters": {"description": "Type chip and section title: the characters among the results."},
+  "@discoverySearchCharacters": {"description": "Type chip: show only the characters among the results."},
   "discoverySearchComics": "Comics",
-  "@discoverySearchComics": {"description": "Type chip and section title: the comics among the results."},
-  "discoverySearchSeeAll": "See all {count}",
-  "@discoverySearchSeeAll": {
-    "description": "Action beside a section title: shows only that section, with all its loaded results. count is the number of matches.",
+  "@discoverySearchComics": {"description": "Type chip: show only the comics among the results."},
+  "discoverySearchCharactersSection": "Characters ({count})",
+  "@discoverySearchCharactersSection": {
+    "description": "Section title above the characters among the results; count is the number of matches.",
     "placeholders": {"count": {"type": "int"}}
+  },
+  "discoverySearchComicsSection": "Comics ({count})",
+  "@discoverySearchComicsSection": {
+    "description": "Section title above the comics among the results; count is the number of matches.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "discoverySearchShowMore": "Show {shown}",
+  "@discoverySearchShowMore": {
+    "description": "Action beside a section title: shows only that section, with all its loaded results (shown of them; the title has the total).",
+    "placeholders": {"shown": {"type": "int"}}
   },
   "discoverySearchShowing": "Showing {shown} of {total}",
   "@discoverySearchShowing": {
@@ -47,6 +57,8 @@
   "@discoverySearchRecent": {"description": "Section title above the recent searches."},
   "discoverySearchClearRecent": "Clear",
   "@discoverySearchClearRecent": {"description": "Action beside the recent searches: forgets them all."},
+  "discoverySearchClearFailed": "Your recent searches could not be cleared. Please try again.",
+  "@discoverySearchClearFailed": {"description": "Inline error below the recent searches after Clear failed; they are still there."},
   "discoverySearchNoRecent": "Search for characters and comics by name.",
   "@discoverySearchNoRecent": {"description": "Shown instead of the recent searches when there are none."}
 }

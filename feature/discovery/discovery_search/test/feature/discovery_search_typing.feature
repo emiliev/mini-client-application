@@ -106,15 +106,18 @@ Feature: Search as you type
     And the backend received {2} requests for {'GET /v1/search'}
 
   @T-0046-AC6
-  Scenario: Tapping a recent search searches it again
+  Scenario: Tapping a recent search searches it at once
     When I open the search
     And I search for each of {'amber, spi'}
     And the app finishes writing to storage
     And I open the search again
-    And I tap {'amber'}
-    Then the field reads {'amber'}
-    And the characters section shows the first {5} characters for {'amber'} with their art
-    And the backend received {2} requests for {'GET /v1/search?q=amber'}
+    And I tap the recent search {'amber'}
+    Then the backend received {2} requests for {'GET /v1/search?q=amber'}
+    And the field reads {'amber'}
+    When {0} milliseconds pass
+    Then the characters section shows the first {5} characters for {'amber'} with their art
+    When {300} milliseconds pass
+    Then the backend received {2} requests for {'GET /v1/search?q=amber'}
 
   @T-0046-AC6
   Scenario: Clear forgets the recent searches, also for the next search flow
@@ -155,3 +158,45 @@ Feature: Search as you type
     Then the characters section shows the first {5} characters for {'spi'} with their art
     When I tap the icon button {'Clear search'}
     Then the recent searches are {'amber'}
+
+  @T-0046-AC6
+  Scenario: A save that fails while the stored searches are still being read keeps them
+    When I open the search
+    And I type {'amber'}
+    And the app finishes writing to storage
+    # A new flow reads the stored searches while its linked query is searched
+    # and its save fails.
+    And I open the search for {'spi'} without waiting
+    Given the app can no longer write to storage
+    When the app finishes writing to storage
+    Then the characters section shows the first {5} characters for {'spi'} with their art
+    When I tap the icon button {'Clear search'}
+    Then the recent searches are {'amber'}
+
+  @T-0046-AC6
+  Scenario: A Clear that fails keeps the recent searches and says so
+    When I open the search
+    And I search for each of {'amber, spi'}
+    And the app finishes writing to storage
+    And I open the search again
+    Given the app can no longer write to storage
+    When I tap {'Clear'}
+    And the app finishes writing to storage
+    Then the recent searches are {'spi, amber'}
+    And I see {'Your recent searches could not be cleared. Please try again.'}
+    When I open the search again
+    Then the recent searches are {'spi, amber'}
+    And I don't see {'Your recent searches could not be cleared. Please try again.'}
+
+  @T-0046-AC4 @l10n
+  Scenario: A Clear that fails explains itself in German
+    Given the device locale is {'de'}
+    When I open the search
+    And I type {'amber'}
+    And the app finishes writing to storage
+    And I open the search again
+    Given the app can no longer write to storage
+    When I tap {'Löschen'}
+    And the app finishes writing to storage
+    Then I see {'Deine letzten Suchen konnten nicht gelöscht werden. Bitte versuche es erneut.'}
+    And nothing overflows

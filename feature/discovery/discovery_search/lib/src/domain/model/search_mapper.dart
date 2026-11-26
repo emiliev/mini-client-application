@@ -5,14 +5,27 @@ import 'package:discovery_search/src/domain/model/search_results.dart';
 import 'package:mc_media/mc_media.dart';
 
 /// Wire to domain. A value the contract does not allow (an unknown result
-/// type or image variant, a result in the wrong group) throws a
-/// [FormatException], which the repository's `apiCall` turns into
-/// `ApiMalformed`.
+/// type or image variant, a result in the wrong group, groups other than
+/// exactly `character` then `comic`) throws a [FormatException], which the
+/// repository's `apiCall` turns into `ApiMalformed`.
 extension SearchResponseDtoMapper on SearchResponseDto {
-  SearchResults toDomain() => SearchResults(
-    query: query,
-    groups: [for (final group in groups) group.toDomain()],
-  );
+  SearchResults toDomain() {
+    final mapped = [for (final group in groups) group.toDomain()];
+    final types = [for (final group in mapped) group.type];
+    // The feature asks for every type, so the contract answers one group
+    // per type, always in [SearchType] order.
+    const expected = SearchType.values;
+    final inOrder =
+        types.length == expected.length &&
+        types.indexed.every((e) => e.$2 == expected[e.$1]);
+    if (!inOrder) {
+      throw FormatException(
+        'Expected the groups ${SearchType.values.map((t) => t.wireName)}, '
+        'got ${types.map((t) => t.wireName)}',
+      );
+    }
+    return SearchResults(query: query, groups: mapped);
+  }
 }
 
 extension SearchGroupDtoMapper on SearchGroupDto {

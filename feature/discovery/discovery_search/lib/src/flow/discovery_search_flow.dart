@@ -28,19 +28,24 @@ class DiscoverySearchFlow extends StatelessWidget {
 
   final DiscoverySearchNavigator navigator;
 
-  /// Starts the search with this text in the field, searched once typing
-  /// would have paused. Null opens on the recent searches.
+  /// Starts the search with this text in the field, searched at once. Null
+  /// or blank opens on the recent searches, with the keyboard up.
   final String? initialQuery;
+
+  /// [initialQuery], with a blank one as none (`/search?q=`).
+  String? get _query => initialQuery == null || initialQuery!.trim().isEmpty
+      ? null
+      : initialQuery;
 
   @override
   Widget build(BuildContext context) => FeatureFlow<DiscoverySearchFlowState>(
-    key: ValueKey(initialQuery),
+    key: ValueKey(_query),
     flowInitializer: const DiscoverySearchDIInitializer(),
     rootImports: discoverySearchRootImports,
     provide: (scope) =>
         scope.registerSingleton<DiscoverySearchNavigator>(navigator),
     localizationsDelegates: const [DiscoverySearchL10n.delegate],
-    state: DiscoverySearchFlowState(initialQuery: initialQuery),
+    state: DiscoverySearchFlowState(initialQuery: _query),
     onGeneratePages: (state) => [
       McFlowPage(
         name: 'search',

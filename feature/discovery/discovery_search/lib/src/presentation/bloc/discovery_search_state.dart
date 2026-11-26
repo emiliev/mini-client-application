@@ -5,9 +5,12 @@ part of 'discovery_search_bloc.dart';
 @freezed
 sealed class DiscoverySearchState with _$DiscoverySearchState {
   /// Nothing is searched: the field is empty, or its text is too short. The
-  /// recent searches show, most recent first.
-  const factory DiscoverySearchState.idle({required List<String> history}) =
-      _Idle;
+  /// recent searches show, most recent first. [clearFailed] when the last
+  /// Clear could not remove them (they still show).
+  const factory DiscoverySearchState.idle({
+    required List<String> history,
+    @Default(false) bool clearFailed,
+  }) = _Idle;
 
   /// [query]'s request is in flight.
   const factory DiscoverySearchState.searching({required String query}) =

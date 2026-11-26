@@ -104,7 +104,7 @@ void main() {
     }
     final de = File('${target.path}/discovery_search_de.arb');
     final json = jsonDecode(de.readAsStringSync()) as Map<String, dynamic>
-      ..remove('discoverySearchSeeAll');
+      ..remove('discoverySearchShowMore');
     de.writeAsStringSync(jsonEncode(json));
 
     expect(
@@ -113,7 +113,7 @@ void main() {
         allOf(
           contains('discovery_search'),
           contains('de'),
-          contains('discoverySearchSeeAll'),
+          contains('discoverySearchShowMore'),
         ),
       ),
     );

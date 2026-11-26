@@ -1,5 +1,6 @@
 import 'package:discovery_search/discovery_search.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_inputs/mc_ds_inputs.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
@@ -92,7 +93,11 @@ Future<void> letStorageFinish(WidgetTester tester) async {
 
 /// Opens a new search flow (a new flow instance: the previous one, if any,
 /// is unmounted first) and lets it read the recent searches.
-Future<void> openSearch(WidgetTester tester, {String? initialQuery}) async {
+Future<void> openSearch(
+  WidgetTester tester, {
+  String? initialQuery,
+  bool wait = true,
+}) async {
   if (McTestSession.current.containerInitialized) {
     await tester.pumpWidget(const SizedBox.shrink());
   }
@@ -100,7 +105,57 @@ Future<void> openSearch(WidgetTester tester, {String? initialQuery}) async {
     tester,
     () => searchTestHost(searchFlowUnderTest(initialQuery: initialQuery)),
   );
-  await letStorageFinish(tester);
+  if (wait) {
+    await letStorageFinish(tester);
+  } else {
+    // No fake time passes (zero-delay timers, as Dio's, still run) and no
+    // real I/O completes: the history read is still on its way, and
+    // whatever the flow sent at once has been sent.
+    await tester.pump(Duration.zero);
+  }
+}
+
+/// The header of the [type] section has the action [label], drawn whole: a
+/// label ellipsised by the header's width would read as something else.
+Future<void> expectSectionAction(
+  WidgetTester tester,
+  String type,
+  String label,
+) async {
+  final text = find.descendant(
+    of: find.byKey(searchSectionKey(type)),
+    matching: find.text(label),
+  );
+  expect(text, findsOneWidget, reason: 'the $type section offers "$label"');
+  final paragraph = tester.renderObject<RenderParagraph>(text);
+  expect(
+    paragraph.didExceedMaxLines,
+    isFalse,
+    reason: '"$label" is shown whole, not ellipsised',
+  );
+}
+
+/// Whether the search field has the keyboard focus.
+bool searchFieldFocused(WidgetTester tester) =>
+    tester.widget<EditableText>(searchField()).focusNode.hasFocus;
+
+/// Taps the result row titled [title] ([times] taps within one frame).
+Future<void> tapResult(
+  WidgetTester tester,
+  String title, {
+  int times = 1,
+}) async {
+  final row = find.descendant(
+    of: find.byKey(searchResultsKey),
+    matching: find.text(title),
+  );
+  await tester.scrollUntilVisible(row, 200, scrollable: resultsScrollable());
+  await mcSettle(tester);
+  expect(row.hitTestable(), findsOneWidget, reason: 'one "$title" row');
+  for (var i = 0; i < times; i++) {
+    await tester.tap(row.hitTestable());
+  }
+  await mcSettle(tester);
 }
 
 /// The one search field.

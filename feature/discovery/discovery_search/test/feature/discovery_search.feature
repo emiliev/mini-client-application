@@ -16,8 +16,10 @@ Feature: Search characters and comics
     And the results show the characters section, then the comics section
     And the characters section shows the first {5} characters for {'spi'} with their art
     And the comics section shows the first {5} comics for {'spi'} with their art
-    And I see {'See all 152'}
-    And I see {'See all 400'}
+    And I see {'Characters (152)'}
+    And I see {'Comics (400)'}
+    And the characters section offers {'Show 20'}
+    And the comics section offers {'Show 20'}
 
   @T-0046-AC1 @T-0046-AC6
   Scenario: A type chip shows one type's whole first page and sends no request
@@ -38,10 +40,10 @@ Feature: Search characters and comics
     And the backend received {1} requests for {'GET /v1/search'}
 
   @T-0046-AC1
-  Scenario: See all on a section picks its chip
+  Scenario: Show more on a section picks its chip
     When I open the search
     And I type {'spi'}
-    And I tap {'See all 400'}
+    And I tap the action of the comics section
     Then the results show only the comics section
     And the chip {'Comics'} is selected
     And the chip {'All'} is not selected
@@ -62,7 +64,9 @@ Feature: Search characters and comics
     And I type {'Spire Warden'}
     Then the characters section shows the first {1} characters for {'Spire Warden'} with their art
     And I see {'No comics match “Spire Warden”.'}
-    And I don't see {'See all 1'}
+    And I see {'Characters (1)'}
+    And I see {'Comics (0)'}
+    And I don't see {'Show 1'}
     And nothing overflows
 
   @T-0046-AC2
@@ -140,12 +144,54 @@ Feature: Search characters and comics
     And I tap the result {'Spindle Chronicles #1'}
     Then the app was asked to open comic {'Spindle Chronicles #1'}
 
-  @T-0046-AC5
-  Scenario: A search opened with a query searches it once typing would have paused
-    When I open the search for {'spi'}
-    Then the field reads {'spi'}
-    And the characters section shows the first {5} characters for {'spi'} with their art
+  @T-0046-AC5 @T-0046-AC6
+  Scenario: A search opened with a query searches it at once
+    When I open the search for {'spi'} without waiting
+    Then the backend received {1} requests for {'GET /v1/search?q=spi'}
+    And the field reads {'spi'}
+    And the field does not have the keyboard focus
+    When {0} milliseconds pass
+    Then the characters section shows the first {5} characters for {'spi'} with their art
     And the backend received {1} requests for {'GET /v1/search?q=spi'}
+
+  @T-0046-AC5
+  Scenario: A search opened with a blank query opens on the recent searches, ready to type
+    When I open the search for {'  '}
+    Then I see {'Search for characters and comics by name.'}
+    And the field has the keyboard focus
+    And the backend received {0} requests for {'GET /v1/search'}
+
+  @T-0046-AC2
+  Scenario Outline: A query the backend counts as too short shows the recent searches, not a failure
+    When I open the search
+    And I type {<query>}
+    Then I see {'Search for characters and comics by name.'}
+    And I don't see {'The search failed'}
+    And I don't see {'Retry'}
+    And no error was reported
+    And the backend received {<requests>} requests for {'GET /v1/search'}
+
+    Examples:
+      | query           | requests |
+      | 'é'             | 0        |
+      | 'e\u0301'       | 1        |
+      | '\u0301\u0301' | 1        |
+
+  @T-0046-AC3
+  Scenario: A double tap on a result hands it over once
+    When I open the search
+    And I type {'spi'}
+    And I tap the result {'Spindle Alchemist'} twice in quick succession
+    Then the app was asked to open character {'Spindle Alchemist'}
+
+  @T-0046-AC3
+  Scenario: A result can be opened again once the first open has settled
+    When I open the search
+    And I type {'spi'}
+    And I tap the result {'Spindle Alchemist'}
+    And {500} milliseconds pass
+    And I tap the result {'Spindle Alchemist'}
+    Then the app was asked to open character {'Spindle Alchemist'} {2} times
 
   @T-0046-AC4 @l10n
   Scenario: In German the field, the chips and the sections are German
@@ -158,8 +204,9 @@ Feature: Search characters and comics
     Then I see {'Alle'}
     And I see {'Figuren'}
     And I see {'Comics'}
-    And I see {'Alle 152 anzeigen'}
-    And I see {'Alle 400 anzeigen'}
+    And I see {'Figuren (152)'}
+    And I see {'Comics (400)'}
+    And the characters section offers {'20 zeigen'}
     When I filter by {'Figuren'}
     And I scroll the results to the end
     Then I see {'20 von 152 angezeigt'}
@@ -196,7 +243,8 @@ Feature: Search characters and comics
     Then I see {'[Šéàŕçĥ ƀóŕ çĥàŕàçţéŕš àñð çóɱíçš ƀý ñàɱé. ~~~~~~~~~~~~~~~~]'}
     And nothing overflows
     When I type {'spi'}
-    Then I see {'[Šéé àļļ 152 ~~~]'}
+    Then I see {'[Çĥàŕàçţéŕš (152) ~~~~~]'}
+    And the characters section offers {'[Šĥóŵ 20 ~~]'}
     And nothing overflows
     When I filter by {'[Çóɱíçš ~~]'}
     And I scroll the results to the end

@@ -20,17 +20,25 @@ part 'discovery_search_state.dart';
 const Duration searchDebounce = Duration(milliseconds: 300);
 
 /// The shortest query the backend searches (`mc_fixtures_discovery`
-/// CONTRACT.md); a shorter one sends no request.
+/// CONTRACT.md); a shorter one sends no request. The backend counts after
+/// folding accents away, so it may still answer "too short" for a query the
+/// client counts as long enough; that answer shows the recent searches too.
 const int minQueryLength = 2;
+
+/// How long after opening a result a second open is ignored: the second tap
+/// of a double tap. By then the opened page covers the results.
+const Duration openGuard = Duration(milliseconds: 500);
 
 /// The search page's bloc: turns the field's edits into one debounced
 /// request per pause, shows only the latest query's answer, remembers the
 /// queries that found something, and hands a tapped result over to the app
 /// through the navigator, which only blocs call (plan 01 §4.1).
 ///
-/// - **Debounce:** `mc_paging`'s `DebouncedQuery` ([searchDebounce]). A
-///   query shorter than [minQueryLength] shows the recent searches and sends
-///   nothing.
+/// - **Debounce:** `mc_paging`'s `DebouncedQuery` ([searchDebounce]) for what
+///   is typed; a tapped recent search and the flow's initial query are
+///   searched at once (`submit`). A query shorter than [minQueryLength]
+///   sends nothing, and one the backend finds too short shows the recent
+///   searches as well, never a failure.
 /// - **The latest query wins:** every search, clear and too-short query
 ///   starts a new generation; an answer from an older generation is dropped,
 ///   so a slow answer for "sp" never replaces the one for "spi", and clearing
@@ -41,7 +49,10 @@ const int minQueryLength = 2;
 ///   (most recent first, no duplicates, at most 10). A search that found
 ///   something is saved; the list is read once when the bloc starts, so it
 ///   survives the flow. Each history change has a version, and only the
-///   latest one's answer is shown.
+///   latest one's answer is shown. A save that fails reads the list again;
+///   a clear that fails puts the list back and says so.
+/// - **One open per tap:** a second open within [openGuard] is ignored, so
+///   a double tap hands the result over once.
 ///
 /// Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never
 /// Flutter, so every generator that reads it runs on analyzer summaries.
@@ -60,9 +71,9 @@ final class DiscoverySearchBloc
       ) {
     on<DiscoverySearchEvent>(_onEvent);
     add(const _LoadHistory());
-    // A flow opened with a query searches it as if it had been typed.
+    // A flow opened with a query (a link) searches it at once.
     if (_flow.state.initialQuery case final query?) {
-      _query.update(query);
+      _query.submit(query);
     }
   }
 
@@ -89,6 +100,9 @@ final class DiscoverySearchBloc
 
   SearchFilter _filter = SearchFilter.all;
 
+  /// Runs for [openGuard] after a result was opened.
+  Timer? _openGuard;
+
   Future<void> _onEvent(
     DiscoverySearchEvent event,
     Emitter<DiscoverySearchState> emit,
@@ -98,6 +112,8 @@ final class DiscoverySearchBloc
         // Debounced: `_Search` or `_Cleared` comes back when typing pauses
         // (or at once for an empty field).
         _query.update(text);
+      case _Submitted(:final text):
+        _query.submit(text);
       case _Search(:final query):
         await _search(query, emit);
       case _Cleared():
@@ -114,6 +130,10 @@ final class DiscoverySearchBloc
           emit(shown.copyWith(filter: filter));
         }
       case _Open(:final hit):
+        if (_openGuard?.isActive ?? false) {
+          return;
+        }
+        _openGuard = Timer(openGuard, () {});
         switch (hit) {
           case CharacterHit(:final id):
             _navigator.openCharacter(id);
@@ -128,10 +148,21 @@ final class DiscoverySearchBloc
           _refreshHistory(emit);
         }
       case _ClearHistory():
-        _historyVersion++;
+        final previous = _recent;
+        final version = ++_historyVersion;
         _recent = const [];
         _refreshHistory(emit);
-        await _history.clear();
+        final cleared = await _history.clear();
+        final failed = cleared.fold((_) => false, (_) => true);
+        if (failed && version == _historyVersion) {
+          // Nothing was removed: the list is still what it was.
+          _recent = previous;
+          if (state is _Idle) {
+            emit(
+              DiscoverySearchState.idle(history: previous, clearFailed: true),
+            );
+          }
+        }
     }
   }
 
@@ -152,6 +183,11 @@ final class DiscoverySearchBloc
     }
     final found = result.fold(
       (results) {
+        if (results == null) {
+          // The backend counts the query as too short (after folding).
+          _showHistory(emit);
+          return false;
+        }
         emit(
           results.isEmpty
               ? DiscoverySearchState.empty(query: query)
@@ -181,11 +217,16 @@ final class DiscoverySearchBloc
   ) async {
     final version = ++_historyVersion;
     final saved = await _history.add(query);
+    if (version != _historyVersion) {
+      return;
+    }
+    // A failed save changed nothing on disk; read what is there, because
+    // this save's version dropped the list the bloc read when it started.
+    final list =
+        saved.getOrNull() ?? (await _history.load()).getOrElse(() => const []);
     if (version == _historyVersion) {
-      saved.fold((list) {
-        _recent = list;
-        _refreshHistory(emit);
-      }, (_) {});
+      _recent = list;
+      _refreshHistory(emit);
     }
   }
 
@@ -202,6 +243,7 @@ final class DiscoverySearchBloc
   @override
   Future<void> close() {
     _query.dispose();
+    _openGuard?.cancel();
     return super.close();
   }
 }

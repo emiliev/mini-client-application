@@ -10,7 +10,10 @@ sealed class DiscoverySearchEvent {
   /// The field's text changed (every edit, the clear button included).
   const factory DiscoverySearchEvent.queryChanged(String text) = _QueryChanged;
 
-  /// A type chip was chosen (or a group's "See all").
+  /// A query to search at once, not typed: a tapped recent search.
+  const factory DiscoverySearchEvent.submitted(String text) = _Submitted;
+
+  /// A type chip was chosen (or a group's "Show 20").
   const factory DiscoverySearchEvent.filterChanged(SearchFilter filter) =
       _FilterChanged;
 
@@ -26,6 +29,12 @@ sealed class DiscoverySearchEvent {
 
 final class _QueryChanged extends DiscoverySearchEvent {
   const _QueryChanged(this.text);
+
+  final String text;
+}
+
+final class _Submitted extends DiscoverySearchEvent {
+  const _Submitted(this.text);
 
   final String text;
 }

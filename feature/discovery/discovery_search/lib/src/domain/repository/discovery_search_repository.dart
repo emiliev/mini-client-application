@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:discovery_search/src/domain/api/discovery_search_api.dart';
 import 'package:discovery_search/src/domain/model/search_mapper.dart';
 import 'package:discovery_search/src/domain/model/search_results.dart';
@@ -10,6 +11,10 @@ import 'package:mc_prelude/mc_prelude.dart';
 /// every group. Paging further is a later feature (a "see all" page).
 const int searchPageSize = 20;
 
+/// The backend's answer for a query that is too short to search
+/// (`mc_fixtures_discovery` CONTRACT.md, "Errors").
+const String queryTooShortCode = 'query_too_short';
+
 /// Search results as values, never exceptions. Stateless (Tide): which
 /// query is on screen, and what was searched before, live in the bloc and in
 /// the search history.
@@ -20,8 +25,32 @@ class DiscoverySearchRepository {
   final DiscoverySearchApi _api;
 
   /// The first [searchPageSize] matches of each type for [query], characters
-  /// first. A query the backend rejects (`400`) is an `ApiClientError`.
-  Future<Result<SearchResults, ApiFailure>> search(String query) => apiCall(
-    () async => (await _api.search(query, limit: searchPageSize)).toDomain(),
-  );
+  /// first.
+  ///
+  /// **Null** when the backend finds the query too short to search
+  /// (`400 query_too_short`). The backend counts characters after folding
+  /// accents away, so a query the client counts as long enough can still be
+  /// too short ("e" plus a combining accent, two bare accents); the client
+  /// does not copy the backend's fold table, it takes the backend's word.
+  Future<Result<SearchResults?, ApiFailure>> search(String query) =>
+      apiCall(() async {
+        try {
+          return (await _api.search(query, limit: searchPageSize)).toDomain();
+        } on DioException catch (e) {
+          if (_isQueryTooShort(e.response)) {
+            return null;
+          }
+          rethrow;
+        }
+      });
+
+  static bool _isQueryTooShort(Response<Object?>? response) {
+    if (response?.statusCode != 400) {
+      return false;
+    }
+    final body = response!.data;
+    return body is Map &&
+        body['error'] is Map &&
+        (body['error'] as Map)['code'] == queryTooShortCode;
+  }
 }
