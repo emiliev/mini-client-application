@@ -33,3 +33,22 @@ coverage/
 **/lib/src/l10n/*_l10n_[a-z]*.dart
 .bazelrc.user.tmp
 **/.flutter-plugins-dependencies
+
+# tool/ide_sync (T-0042) writes into the source tree for the IDE and
+# `flutter run`; none of it may be committed. Bazel never reads it (see
+# tool/checks/T-0042-AC4_safety.sh).
+# R13: the environment's config, as `ide_sync --env <env>` bundles it.
+app/**/assets/app_config.json
+# The Xcode project `flutter run` needs, from `flutter create --platforms=ios`
+# (apps carry only the Bazel runner files, F-0032), and what flutter writes.
+**/ios/Runner.xcodeproj/
+**/ios/Runner.xcworkspace/
+**/ios/RunnerTests/
+**/ios/Flutter/AppFrameworkInfo.plist
+**/ios/Flutter/Debug.xcconfig
+**/ios/Flutter/Release.xcconfig
+**/ios/Runner/Runner-Bridging-Header.h
+**/ios/Runner/Assets.xcassets/LaunchImage.imageset/
+**/ios/Podfile
+**/ios/Podfile.lock
+.metadata

@@ -106,6 +106,8 @@ cp "$REPO/tool/bazel/config/$ENVNAME.json" "$OUT/$APP/assets/app_config.json"
 import sys
 path = sys.argv[1]
 text = open(path).read()
+if "assets/app_config.json" in text:
+    sys.exit(0)  # already declared by the pubspec (T-0042): a second `assets:` key is a YAML duplicate
 marker = "flutter:\n  uses-material-design: true\n"
 if marker not in text:
     sys.exit("pubspec has no 'flutter: uses-material-design' block to extend")

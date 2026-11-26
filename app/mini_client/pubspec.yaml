@@ -46,6 +46,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  # No `assets:` entry: Bazel bundles assets/app_config.json from
-  # //tool/bazel/config:app_config (BUILD.bazel). Pub / IDE mode gets it once
-  # `tool/ide_sync` exists (plan 01 §3.4).
+  # Pub / IDE mode only (`flutter run`): `tool/ide_sync --env <env>` writes
+  # this git-ignored file. Bazel never reads this list: it bundles
+  # assets/app_config.json from //tool/bazel/config:app_config (BUILD.bazel).
+  assets:
+    - assets/app_config.json
