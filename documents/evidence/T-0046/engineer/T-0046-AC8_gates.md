@@ -16,7 +16,7 @@
 | T-0046-AC7_gen_l10n_parity | PASS |
 | coverage >= 90 % (touched packages) | PASS |
 
-- tests: Executed 0 out of 134 tests: 134 tests pass.
-- coverage: == feature/discovery/discovery_search TOTAL 294/294 100.0% == app/wiring/discovery_wiring TOTAL 22/22 100.0% == app/wiring/app_core TOTAL 243/285 85.3% UNDER 90 (exempt, pre-existing): app/wiring/app_core (threshold 90 %)
+- tests: Executed 4 out of 134 tests: 134 tests pass.
+- coverage: == feature/discovery/discovery_search TOTAL 333/333 100.0% == app/wiring/discovery_wiring TOTAL 22/22 100.0% == app/wiring/app_core TOTAL 243/285 85.3% UNDER 90 (exempt, pre-existing): app/wiring/app_core (threshold 90 %)
 
 **PASS T-0046-AC8-gates**
