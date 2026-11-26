@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-26 `33da9c3`; Verifier PASS `9702082`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (fixtures; ADR-0011) |
 | Branch | `fleet/T-0043-fixtures-discovery` |
@@ -63,3 +63,6 @@ Decisions:
 - `tool/checks/T-0043-AC5_gates.sh` is the T-0038 gates script adapted; it sits outside the task's listed edit scope, as the T-0038 one did.
 - No lock file changed. No `// ignore:`, no test skipped, deleted or weakened.
 - 2026-11-26: Review round (Engineer). Fixed: q length is measured on the folded text (two bare accents and `e` + accent are 400); the word boundary reads the previous code point, not a UTF-16 unit; the fold table now covers comma-below, Vietnamese and Latin Extended Additional (no built-in NFD), with CONTRACT.md naming exactly what folds; `SearchEntry` throws `ArgumentError` on an unknown type; CONTRACT.md says only the pure-Dart `mc_media` is used; the gates script header is corrected and its restore trap is installed before the BUILD copy. 5 new mutations, 38/38 killed. Nothing new on origin/main.
+
+## Merge (TL)
+- 2026-11-26: Review-first (ADR-0011). `/code-review` found one important bug (the minimum length was checked on the raw `q`, so an accent-only query folded to "" and matched every entry) and 7 nits. Fix round `996fb5e` (38/38 mutations). Single Sonnet Verifier pass, PASS `9702082` (about 88k tokens, no defects; the format-gate failure in a worktree without `pub get` is environmental, P-085). The TL merged `--no-ff`; on the merge result `check` passed, 115/115 tests, lint was clean, `mc_arch_check` reported OK and the fixtures check passed.

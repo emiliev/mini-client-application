@@ -11,7 +11,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
-| [T-0043](T-0043-fixtures-discovery.md) | `mc_fixtures_discovery`: global search across characters and comics (P1-10 subset) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0038 | `fleet/T-0043-fixtures-discovery` |
 | [T-0044](T-0044-ds-inputs.md) | `mc_ds_inputs`: text and search fields, chips, segmented, stepper | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0040 | `fleet/T-0044-ds-inputs` |
 | [T-0045](T-0045-forms-kit.md) | `mc_forms` + `mc_ds_forms`: validators, form state, wizard steps (P1-14 AC4) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0044 | `fleet/T-0045-forms-kit` |
 
@@ -22,6 +21,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0043](T-0043-fixtures-discovery.md) | `mc_fixtures_discovery`: global search (characters and comics), deterministic tiers, diacritic folding, suggestions | merged; Verifier [PASS](../evidence/T-0043/verification-report.md) (Sonnet, single pass) |
 | [T-0041](T-0041-comics-details-exemplar.md) | **`comics_details`, the SC exemplar** (P1-18): sections, auth-gated favourite, `publishing_wiring`, comics deep link | merged; Verifier [PASS](../evidence/T-0041/verification-report.md) (re-verified after FAIL); F-0040 |
 | [T-0042](T-0042-ide-sync.md) | **`tool/ide_sync`**: Bazel-generated code in the checkout, so the IDE, `flutter run`, debugging and hot reload work (P3-10) | merged; Verifier [PASS](../evidence/T-0042/verification-report.md) (Sonnet, re-verified); F-0041 |
 | [T-0039](T-0039-session-and-auth.md) | Auth slice: `mc_session` (epoch), `mc_api_auth` (bearer, single refresh, no cross-account replay), `mc_fixtures_identity` (sign-in, favourites) | merged; Verifier [PASS](../evidence/T-0039/verification-report.md) (re-verified after FAIL); F-0038 |
