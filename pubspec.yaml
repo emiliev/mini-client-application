@@ -20,6 +20,7 @@ workspace:
   - app/wiring/universe_wiring
   - feature/characters/characters_list
   - feature/comics/comics_details
+  - feature/library/library_reading_list_editor
   - spike/api_envelope
   - spike/bdd_sample
   - spike/di_sample

@@ -19,6 +19,7 @@ export 'package:mc_test_steps/src/backend/the_backend_holds.dart';
 export 'package:mc_test_steps/src/backend/the_backend_received.dart';
 export 'package:mc_test_steps/src/backend/the_backend_received_requests_for.dart';
 export 'package:mc_test_steps/src/backend/the_backend_received_with_the_bearer_of.dart';
+export 'package:mc_test_steps/src/backend/the_backend_received_with_the_body.dart';
 export 'package:mc_test_steps/src/backend/the_backend_recovers.dart';
 export 'package:mc_test_steps/src/backend/the_backend_releases.dart';
 export 'package:mc_test_steps/src/backend/the_backend_serves.dart';
