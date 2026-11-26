@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0047 merges and a slot is free) |
+| Status | In Progress |
 | Owner | crew: Engineer (**Opus**: first FW exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar; auth-gated writes) |
 | Branch | `fleet/T-0048-reading-list-editor` |
@@ -72,4 +72,4 @@ On submit, the flow completes with the new or updated list id, and **the wiring 
 - **T-0048-AC8 (gates):** coverage ≥ 90 %; `test //...`, lint, `mc_arch_check`, `rules_fork.sh check`, format and `l10n_check` pass; every check traces to a `T-0048-ACn`.
 
 ## Log
-- 2026-11-26: Created (TL).
+- 2026-11-26: Created (TL); dispatched after T-0047 merged.
