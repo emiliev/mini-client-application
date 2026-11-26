@@ -6,7 +6,7 @@
 | Version | 0.1.0 |
 | Archive | `https://pub.dev/api/archives/flow_builder-0.1.0.tar.gz` |
 | Archive sha256 | `9e66aa7209e9a31c347bb316abf191d2300db41cd6b7254f89abd4e76d9b3f8d` (the hash `pubspec.lock` held for the hosted copy) |
-| Task | T-0035 (Deep links survive a mounted `FeatureFlow`), T-0036 (stale `PopScope`); findings F-0034, F-0035 |
+| Task | T-0035 (Deep links survive a mounted `FeatureFlow`), T-0036 (stale `PopScope`), T-0037 (the same, after a parent-driven update); findings F-0034, F-0035 |
 | Licence | MIT, `LICENSE` is byte-identical to the archive |
 | Upstream draft | `documents/upstream/U-X-flow_builder-navigation-channel/README.md` |
 
@@ -20,7 +20,7 @@ nothing. Fixed here, at the kit level, so no feature can trip over it.
 
 ## What differs from the archive
 `lib/` equals the archive except for the diff in
-[`0001-forward-pushRouteInformation.patch`](0001-forward-pushRouteInformation.patch)
+[`0001-navigation-channel-and-popscope.patch`](0001-navigation-channel-and-popscope.patch)
 (`diff -u` of `lib/flow_builder.dart`; the other files of `lib/` are unchanged):
 
 1. `_handleSystemNavigation` handles `pushRouteInformation` by passing its
@@ -40,6 +40,16 @@ nothing. Fixed here, at the kit level, so no feature can trip over it.
    `PopScope` and toggles `canPop` (stock swapped the widget, which re-parented the
    whole navigator and rebuilt every page, and also hid the stale-state bug).
    Tests: `flow_kit_test` T-0036-AC1 (button tap, edge swipe).
+5. (T-0037) **The same recompute after a parent-driven update.** `didUpdateWidget`
+   replaces `_pages` when the parent passes a new `state` (or `controller`), and has the
+   same stale read: going from two pages back to one left `PopScope(canPop: false)`
+   mounted, so the next pop did nothing. It now calls the same post-frame recompute
+   (`_recomputeCanPopAfterFrame`, shared with `_listener`) in both branches. Test:
+   `flow_back_button_test` T-0037-AC4 (a `FlowBuilder` driven by `state:`).
+
+The patch file is named for its content (navigation channel and pop scope), not for its
+first change; `tool/checks/T-0035-AC4_provenance.sh` also requires that it is the only
+`*.patch` in this directory.
 
 Not carried over from the archive: `example/`, `test/`, `art/`, `README.md`,
 `coverage_badge.svg`, the upstream `analysis_options.yaml` (it includes

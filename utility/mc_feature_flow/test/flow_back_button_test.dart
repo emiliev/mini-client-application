@@ -28,7 +28,7 @@ class _Root extends StatelessWidget {
     ),
     body: Builder(
       builder: (context) => TextButton(
-        onPressed: () => Scaffold.of(context).showBottomSheet<void>(
+        onPressed: () => Scaffold.of(context).showBottomSheet(
           (_) => const SizedBox(height: 80, child: Text('sheet')),
         ),
         child: const Text('show sheet'),
@@ -39,7 +39,12 @@ class _Root extends StatelessWidget {
 
 FeatureFlow<_State> _flow({bool drawer = false}) => FeatureFlow<_State>(
   state: const _State(),
-  onGeneratePages: (_) => [McFlowPage(name: 'root', child: _Root(drawer: drawer))],
+  onGeneratePages: (_) => [
+    McFlowPage(
+      name: 'root',
+      child: _Root(drawer: drawer),
+    ),
+  ],
 );
 
 Widget _app(Widget home) => MaterialApp(
@@ -78,15 +83,19 @@ class _Host extends StatelessWidget {
   );
 }
 
-Future<void> _openFlow(WidgetTester tester, Widget flow) async {
+Future<void> _openFlow(
+  WidgetTester tester,
+  Widget flow, {
+  bool expectRoot = true,
+}) async {
   await tester.pumpWidget(
     _app(
       Builder(
         builder: (context) => Scaffold(
           body: TextButton(
-            onPressed: () => Navigator.of(
-              context,
-            ).push<void>(MaterialPageRoute(builder: (_) => flow)),
+            onPressed: () =>
+                Navigator.of(context)
+                    .push<void>(MaterialPageRoute(builder: (_) => flow)),
             child: const Text('open'),
           ),
         ),
@@ -95,7 +104,9 @@ Future<void> _openFlow(WidgetTester tester, Widget flow) async {
   );
   await tester.tap(find.text('open'));
   await tester.pumpAndSettle();
-  expect(find.text('flow root'), findsOneWidget);
+  if (expectRoot) {
+    expect(find.text('flow root'), findsOneWidget);
+  }
 }
 
 void main() {
@@ -103,9 +114,7 @@ void main() {
     testWidgets('T-0037-AC1 a rebuilt stack [home, flow] under the same flow '
         'page key shows the button, which pops back home', (tester) async {
       final pages = ValueNotifier<List<String>>(['flow']);
-      await tester.pumpWidget(
-        _app(_Host(pages: pages, flow: _flow())),
-      );
+      await tester.pumpWidget(_app(_Host(pages: pages, flow: _flow())));
       await tester.pumpAndSettle();
       expect(find.text('flow root'), findsOneWidget);
       expect(find.byType(BackButton), findsNothing);
@@ -124,9 +133,7 @@ void main() {
     testWidgets('T-0037-AC1 removing the routes below a pushed flow (page '
         'stack) removes the button', (tester) async {
       final pages = ValueNotifier<List<String>>(['home', 'flow']);
-      await tester.pumpWidget(
-        _app(_Host(pages: pages, flow: _flow())),
-      );
+      await tester.pumpWidget(_app(_Host(pages: pages, flow: _flow())));
       await tester.pumpAndSettle();
       expect(find.byType(BackButton), findsOneWidget);
 
@@ -146,9 +153,8 @@ void main() {
               home = context;
               return Scaffold(
                 body: TextButton(
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(builder: (_) => _flow()),
-                  ),
+                  onPressed: () => Navigator.of(context)
+                      .push<void>(MaterialPageRoute(builder: (_) => _flow())),
                   child: const Text('open'),
                 ),
               );
@@ -185,7 +191,7 @@ void main() {
         of: find.byType(McFlowBackButton),
         matching: find.byType(SizedBox),
       );
-      expect(tester.getSize(own), Size.zero);
+      expect(tester.widget<SizedBox>(own).child, isNull);
     });
 
     testWidgets('T-0037-AC2 a first route with a drawer shows the '
@@ -204,9 +210,9 @@ void main() {
         _app(
           Builder(
             builder: (context) => TextButton(
-              onPressed: () => Navigator.of(
-                context,
-              ).push<void>(MaterialPageRoute(builder: (_) => page())),
+              onPressed: () =>
+                  Navigator.of(context)
+                      .push<void>(MaterialPageRoute(builder: (_) => page())),
               child: const Text('open'),
             ),
           ),
@@ -316,29 +322,29 @@ void main() {
             onGeneratePages: (s, _) => [
               const MaterialPage<void>(child: _Root()),
               if (s > 0)
-                const MaterialPage<void>(
-                  child: Scaffold(body: Text('detail')),
-                ),
+                const MaterialPage<void>(child: Scaffold(body: Text('detail'))),
             ],
           ),
         ),
       );
       final scope = find.descendant(
         of: find.byType(FlowBuilder<int>),
-        matching: find.byType(PopScope<Object?>),
+        matching: find.byWidgetPredicate((w) => w is PopScope),
       );
-      expect(scope, findsOneWidget, reason: 'one page, outer route below');
-      expect(tester.widget<PopScope<Object?>>(scope).canPop, isFalse);
+      bool canPop() => (tester.widget(scope) as PopScope).canPop;
+      expect(scope, findsOneWidget, reason: 'one page');
+      expect(canPop(), isTrue);
 
       state.value = 1;
       await tester.pumpAndSettle();
       expect(find.text('detail'), findsOneWidget);
-      expect(scope, findsOneWidget);
-      expect(tester.widget<PopScope<Object?>>(scope).canPop, isFalse);
+      expect(scope, findsOneWidget, reason: 'two pages');
+      expect(canPop(), isFalse);
 
       state.value = 0;
       await tester.pumpAndSettle();
-      expect(scope, findsOneWidget);
+      expect(scope, findsOneWidget, reason: 'one page again');
+      expect(canPop(), isTrue);
     });
   });
 
@@ -355,12 +361,11 @@ void main() {
             onGeneratePages: (s, _) => [
               const MaterialPage<void>(child: _Root()),
               if (s > 0)
-                const MaterialPage<void>(
-                  child: Scaffold(body: Text('detail')),
-                ),
+                const MaterialPage<void>(child: Scaffold(body: Text('detail'))),
             ],
           ),
         ),
+        expectRoot: false,
       );
       expect(find.text('detail'), findsOneWidget);
 

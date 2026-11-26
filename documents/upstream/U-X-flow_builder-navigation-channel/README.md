@@ -38,7 +38,7 @@ await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
 // expected: setNewRoutePath('/x');  actual: never called
 ```
 
-Our fix is small (see `third_party/flow_builder/0001-forward-pushRouteInformation.patch`
+Our fix is small (see `third_party/flow_builder/0001-navigation-channel-and-popscope.patch`
 in the mini-client repo): handle `pushRouteInformation` by passing `location` to
 `WidgetsBinding.instance.handlePushRoute`, and answer an unknown method with `false`.
 
@@ -63,3 +63,10 @@ in `build`. When the flow's state moves back to a single page through
 flow afterwards, so the next pop (a back button's `maybePop`, or the iOS edge swipe) is
 swallowed. We recompute `_canPop` in a post-frame `setState` after each state update, and
 mount the `PopScope` always (`canPop: !condition`) instead of swapping the widget.
+
+The same stale read exists in `didUpdateWidget`: when the parent passes a new `state` (or
+`controller`), `_pages` is replaced and `build` reads `_canPop` before the navigator has the
+new routes, so going from two pages to one leaves `PopScope(canPop: false)` mounted and the
+next pop is swallowed. The fix is the same post-frame `setState` as in `_listener` (mini-client
+T-0037, patch change 5); a test is a `FlowBuilder(state: n, ...)` inside a pushed route whose
+`n` goes from 1 to 0, followed by a `popRoute`.

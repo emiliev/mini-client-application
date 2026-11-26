@@ -846,9 +846,15 @@ void main() {
     });
 
     testWidgets('T-0036-AC2 outside any route it is empty', (tester) async {
-      await tester.pumpWidget(const SizedBox(child: McFlowBackButton()));
+      await tester.pumpWidget(const Align(child: McFlowBackButton()));
       expect(find.byType(BackButton), findsNothing);
-      expect(find.byType(SizedBox), findsWidgets);
+      // The widget's own output, not the wrapper: an empty box.
+      final own = find.descendant(
+        of: find.byType(McFlowBackButton),
+        matching: find.byType(SizedBox),
+      );
+      expect(own, findsOneWidget);
+      expect(tester.getSize(own), Size.zero);
     });
   });
 
