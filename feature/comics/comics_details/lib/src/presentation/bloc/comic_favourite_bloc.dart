@@ -36,7 +36,9 @@ const String favouritesTopic = 'favourites';
 ///   refresh included) shows "not a favourite". A change during a tap is
 ///   applied when the tap settles.
 ///
-/// Every saved write publishes `DataChanged('favourites')` once.
+/// Every saved write publishes `DataChanged('favourites')` once, and a
+/// `DataChanged('favourites')` from anyone else (another page of the same
+/// comic) reads the flag again.
 @injectable
 final class ComicFavouriteBloc
     extends McBloc<ComicFavouriteEvent, ComicFavouriteState> {
@@ -52,6 +54,9 @@ final class ComicFavouriteBloc
     _sessionChanges = _session.authState.listen(
       (_) => add(const _SessionChanged()),
     );
+    _favouriteChanges = _bus
+        .onDataChanged(favouritesTopic)
+        .listen((_) => add(const _FavouritesChanged()));
     add(const ComicFavouriteEvent.load());
   }
 
@@ -61,6 +66,11 @@ final class ComicFavouriteBloc
   final SessionReader _session;
   final EventBus _bus;
   late final StreamSubscription<AuthStatus> _sessionChanges;
+  late final StreamSubscription<DataChanged> _favouriteChanges;
+
+  /// This bloc's own announcements still to arrive on the bus: each comes
+  /// back to its publisher too, and is not a reason to read again.
+  int _ownAnnouncements = 0;
 
   /// True from a tap until its sign-in and write settled.
   bool _busy = false;
@@ -78,6 +88,14 @@ final class ComicFavouriteBloc
     switch (event) {
       case _Load():
         await _load(emit);
+      case _FavouritesChanged():
+        // Another page (or feature) wrote a favourite: read the flag again,
+        // so two pages of the same comic agree.
+        if (_ownAnnouncements > 0) {
+          _ownAnnouncements--;
+        } else if (!_busy) {
+          await _load(emit);
+        }
       case _SessionChanged():
         // During a tap the tap's own ending re-checks the session.
         if (!_busy && _session.epoch != _shownEpoch) {
@@ -138,6 +156,12 @@ final class ComicFavouriteBloc
       // A new session: its own flag decides, never the signed-out view.
       final epoch = _session.epoch;
       final fresh = await _repository.isFavourite(_comicId);
+      if (_session.epoch != epoch) {
+        // The session changed during the read (a sign-out, another user):
+        // the answer belongs to a session that is gone, so nothing is
+        // written. The tap's ending reloads for the current session.
+        return;
+      }
       _shownEpoch = epoch;
       final failure = fresh.fold<ApiFailure?>((_) => null, (error) => error);
       if (failure != null) {
@@ -160,6 +184,7 @@ final class ComicFavouriteBloc
     result.fold(
       (saved) {
         emit(ComicFavouriteState.ready(favourite: saved));
+        _ownAnnouncements++;
         _bus.publish(const DataChanged(favouritesTopic));
       },
       (error) => emit(
@@ -171,6 +196,7 @@ final class ComicFavouriteBloc
   @override
   Future<void> close() async {
     await _sessionChanges.cancel();
+    await _favouriteChanges.cancel();
     return super.close();
   }
 }

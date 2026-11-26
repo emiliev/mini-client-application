@@ -25,3 +25,8 @@ final class _Toggle extends ComicFavouriteEvent {
 final class _SessionChanged extends ComicFavouriteEvent {
   const _SessionChanged();
 }
+
+/// Internal: someone else announced `DataChanged('favourites')` on the bus.
+final class _FavouritesChanged extends ComicFavouriteEvent {
+  const _FavouritesChanged();
+}

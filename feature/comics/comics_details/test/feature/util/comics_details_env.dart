@@ -85,6 +85,10 @@ const comicCastKey = ValueKey<String>('comics_details.cast');
 const comicCoverPageImageKey = ValueKey<String>('comics_details.cover.image');
 const favouriteErrorKey = ValueKey<String>('comics_details.favourite.error');
 
+/// The key of page [n] in `I open comic {id} on two pages` (a test host
+/// key, not a feature key).
+ValueKey<String> comicPageKey(int n) => ValueKey<String>('test.comic.page.$n');
+
 /// The details page's own scrollable.
 Finder comicBodyScrollable() => find.descendant(
   of: find.byKey(comicDetailsBodyKey),

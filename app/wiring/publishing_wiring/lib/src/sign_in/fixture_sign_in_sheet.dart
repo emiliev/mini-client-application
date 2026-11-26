@@ -8,6 +8,7 @@ import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 const fixtureSignInSheetKey = Key('publishing.sign_in.sheet');
 const fixtureSignInButtonKey = Key('publishing.sign_in.confirm');
 const fixtureSignInCancelKey = Key('publishing.sign_in.cancel');
+const fixtureSignInDragGuardKey = Key('publishing.sign_in.drag_guard');
 
 /// TEMPORARY (P-044): the app's answer to a feature's `requestSignIn()`
 /// until a real sign-in feature exists. A bottom sheet that signs the first
@@ -18,8 +19,9 @@ const fixtureSignInCancelKey = Key('publishing.sign_in.cancel');
 /// sign in. Its copy is English only, as befits a stand-in.
 ///
 /// The answer is the real outcome however the sheet closes: while a sign-in
-/// is under way the sheet refuses a back gesture or a barrier tap
-/// (`PopScope`), and if it is closed anyway (a drag, a route change), the
+/// is under way the sheet refuses a back gesture, a barrier tap (`PopScope`)
+/// and a drag down (its content claims vertical drags), and if it is closed
+/// anyway (a route change), the
 /// sign-in that is already running decides, so a user who ends up signed in
 /// is never reported as having backed out.
 Future<bool> showFixtureSignInSheet(BuildContext context, AuthApi auth) async {
@@ -91,51 +93,58 @@ class _FixtureSignInSheetState extends State<FixtureSignInSheet> {
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
     final user = FixtureSignInSheet.user;
-    // No back gesture or barrier tap while signing in.
+    // No back gesture, barrier tap or drag down while signing in. The
+    // bottom sheet's own drag recogniser sits above this content; claiming
+    // vertical drags here wins the gesture arena, so the sheet stays put.
     return PopScope(
       canPop: !_busy,
-      child: SafeArea(
-        key: fixtureSignInSheetKey,
-        child: Padding(
-          padding: McInsets.screen,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text('Sign in', style: text.titleLarge),
-              const McGap.sm(),
-              Text(
-                'Sign in as ${user.displayName} (${user.email}) to keep your '
-                'favourites.',
-                style: text.bodyLarge,
-              ),
-              if (_failed) ...[
+      child: GestureDetector(
+        key: fixtureSignInDragGuardKey,
+        behavior: HitTestBehavior.opaque,
+        onVerticalDragStart: _busy ? (_) {} : null,
+        child: SafeArea(
+          key: fixtureSignInSheetKey,
+          child: Padding(
+            padding: McInsets.screen,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text('Sign in', style: text.titleLarge),
                 const McGap.sm(),
                 Text(
-                  'Signing in failed. Please try again.',
-                  style: text.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.error,
+                  'Sign in as ${user.displayName} (${user.email}) to keep your '
+                  'favourites.',
+                  style: text.bodyLarge,
+                ),
+                if (_failed) ...[
+                  const McGap.sm(),
+                  Text(
+                    'Signing in failed. Please try again.',
+                    style: text.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
                   ),
+                ],
+                const McGap.lg(),
+                McButton(
+                  key: fixtureSignInButtonKey,
+                  label: 'Sign in',
+                  expand: true,
+                  onPressed: _busy ? null : _signIn,
+                ),
+                const McGap.sm(),
+                McButton(
+                  key: fixtureSignInCancelKey,
+                  label: 'Not now',
+                  variant: McButtonVariant.tertiary,
+                  expand: true,
+                  onPressed: _busy
+                      ? null
+                      : () => Navigator.of(context).pop(false),
                 ),
               ],
-              const McGap.lg(),
-              McButton(
-                key: fixtureSignInButtonKey,
-                label: 'Sign in',
-                expand: true,
-                onPressed: _busy ? null : _signIn,
-              ),
-              const McGap.sm(),
-              McButton(
-                key: fixtureSignInCancelKey,
-                label: 'Not now',
-                variant: McButtonVariant.tertiary,
-                expand: true,
-                onPressed: _busy
-                    ? null
-                    : () => Navigator.of(context).pop(false),
-              ),
-            ],
+            ),
           ),
         ),
       ),

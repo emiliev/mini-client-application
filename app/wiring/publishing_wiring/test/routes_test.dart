@@ -210,12 +210,44 @@ void main() {
     expect(await tester.binding.handlePopRoute(), isTrue);
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
+    // Not now is disabled, and tapping it does nothing.
+    final notNow = find.descendant(
+      of: find.byKey(fixtureSignInCancelKey),
+      matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
+    );
+    expect(tester.widget<ButtonStyleButton>(notNow).enabled, isFalse);
+    await tester.tap(find.byKey(fixtureSignInCancelKey));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
+    // A real drag down does not move the sheet away either.
+    await tester.drag(find.byKey(fixtureSignInSheetKey), const Offset(0, 600));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      find.byKey(fixtureSignInSheetKey),
+      findsOneWidget,
+      reason: 'the drag is refused while signing in',
+    );
 
     await backend.release('POST /v1/auth/sign-in');
     await _settleRealIo(tester);
 
     expect(await answer, isTrue);
     expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
+  });
+
+  mcTestWidgets('T-0041-AC6 requestSignIn: idle, a drag down dismisses the '
+      'sheet and answers false (the control for the busy drag)', (
+    tester,
+  ) async {
+    await _boot(tester);
+
+    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+    await tester.pumpAndSettle();
+    await tester.drag(find.byKey(fixtureSignInSheetKey), const Offset(0, 600));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+    expect(await answer, isFalse);
   });
 
   mcTestWidgets('T-0041-AC6 requestSignIn: a sheet closed while signing in '
@@ -228,7 +260,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(fixtureSignInButtonKey));
     await tester.pump();
-    // Closed anyway, as a drag down does: a pop that no PopScope is asked.
+    // Closed anyway, by a route change: a pop that no PopScope is asked.
     Navigator.of(tester.element(find.byKey(fixtureSignInSheetKey))).pop();
     await tester.pumpAndSettle();
     expect(find.byKey(fixtureSignInSheetKey), findsNothing);
