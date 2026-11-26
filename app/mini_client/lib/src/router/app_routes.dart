@@ -27,6 +27,7 @@ class HomeRoute extends GoRouteData with $HomeRoute {
       onOpenPlaceholder: (id) => PlaceholderRoute(id: id).go(context),
       // A push, so Back returns home (the list is not a child of home).
       onOpenCharacters: () => unawaited(context.push(AppLocations.characters)),
+      onOpenSearch: () => unawaited(context.push(AppLocations.search())),
     );
   }
 }

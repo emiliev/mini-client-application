@@ -20,4 +20,12 @@ abstract final class AppLocations {
   /// One comic (T-0041), by the `ComicId` value. Equals
   /// `ComicDetailsRoute(id: id).location` in publishing_wiring.
   static String comic(int id) => '/comics/$id';
+
+  /// The search (T-0046), starting with [query] when given (encoded as a
+  /// query parameter). Equals `SearchRoute(q: query).location` in
+  /// discovery_wiring.
+  static String search([String? query]) => Uri(
+    path: '/search',
+    queryParameters: query == null ? null : {'q': query},
+  ).toString();
 }

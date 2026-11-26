@@ -8,6 +8,7 @@ class HomePlaceholderPage extends StatelessWidget {
     required this.env,
     required this.onOpenPlaceholder,
     required this.onOpenCharacters,
+    required this.onOpenSearch,
     super.key,
   });
 
@@ -15,6 +16,7 @@ class HomePlaceholderPage extends StatelessWidget {
   final String env;
   final ValueChanged<int> onOpenPlaceholder;
   final VoidCallback onOpenCharacters;
+  final VoidCallback onOpenSearch;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,8 @@ class HomePlaceholderPage extends StatelessWidget {
           Text('Config: env=$env', style: text.labelLarge),
           const McGap.xl(),
           McButton(label: 'Characters', onPressed: onOpenCharacters),
+          const McGap.md(),
+          McButton(label: 'Search', onPressed: onOpenSearch),
           const McGap.md(),
           McButton(
             label: 'Open placeholder 7',
