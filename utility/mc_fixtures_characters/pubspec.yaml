@@ -9,10 +9,11 @@ environment:
   flutter: ^3.47.7
 
 dependencies:
-  mc_fixtures_media: any
+  mc_media: any
   mc_mocked_backend: any
 
 dev_dependencies:
+  mc_fixtures_media: any
   dio: ^5.9.0
   flutter_test:
     sdk: flutter

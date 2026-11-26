@@ -42,10 +42,12 @@ closure() { bzw cquery "deps($1)" 2>/dev/null | sed 's/ (.*//'; }
 deps="$(closure //utility/mc_fixtures_comics:mc_fixtures_comics)"
 n="$(grep -c . <<< "$deps")"
 hits="$(grep -E "$FLUTTER" <<< "$deps" | sort -u | head -5)"
-control="$(closure //utility/mc_fixtures_characters:mc_fixtures_characters | grep -E "$FLUTTER" | sort -u | head -3)"
+# T-0041 made mc_fixtures_characters pure Dart (mc_fixtures_comics now
+# depends on it), so the positive control is the Flutter-bound media package.
+control="$(closure //utility/mc_fixtures_media:mc_fixtures_media | grep -E "$FLUTTER" | sort -u | head -3)"
 report "# T-0038-AC4: pure Dart, registered, covered" "" \
   "## closure of mc_fixtures_comics ($n targets)" '```' "Flutter markers: ${hits:-none}" '```' \
-  "## positive control: mc_fixtures_characters" '```' "Flutter markers: ${control:-none}" '```'
+  "## positive control: mc_fixtures_media" '```' "Flutter markers: ${control:-none}" '```'
 if [[ "$n" -ge 100 && -z "$hits" && -n "$control" ]]; then rows+=("| pure-Dart closure | PASS |"); else rows+=("| pure-Dart closure | **FAIL** |"); ok=0; fi
 
 # 2. registration

@@ -14,6 +14,8 @@ dart_library(
     srcs = glob(["lib/**/*.dart"]),
     language_version = _LANG,
     deps = [
+        # Pure Dart since T-0041: the detail's cast summary reads it.
+        "//utility/mc_fixtures_characters",
         "//utility/mc_media",
         "//utility/mc_mocked_backend",
     ],

@@ -149,4 +149,9 @@ void main() {
       expect(seen.length, greaterThan(24));
     });
   });
+
+  test('T-0041-AC1 characterArtCount equals the bundled characters art set, '
+      'so the pure-Dart constant cannot drift', () {
+    expect(characterArtCount, placeholderSets['characters']);
+  });
 }

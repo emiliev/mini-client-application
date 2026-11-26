@@ -1,8 +1,14 @@
 import 'dart:math' as math;
 
 import 'package:mc_fixtures_characters/src/data/vocabulary.dart';
-import 'package:mc_fixtures_media/mc_fixtures_media.dart';
+import 'package:mc_media/mc_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+
+/// How many pictures the bundled `characters` art set holds
+/// (`placeholderSets['characters']` in `mc_fixtures_media`). A constant, so
+/// this package stays pure Dart and the comics fixture can read the cast
+/// (T-0041); a provider-contract test checks it against the media package.
+const int characterArtCount = 24;
 
 /// How many characters the universe holds.
 const int characterCount = 1500;
@@ -86,7 +92,7 @@ final class CharacterUniverse {
   /// through the bundled `characters` art. No randomness: every field is a
   /// function of the index.
   CharacterUniverse.synthetic(int count, DateTime clock) {
-    final images = placeholderSets['characters']!;
+    const images = characterArtCount;
     final width = math.max(2, '$count'.length);
     byName = List.unmodifiable([
       for (var i = 0; i < count; i++)
@@ -140,7 +146,7 @@ final class CharacterUniverse {
       thumbnail: ApiImage(
         path:
             'mock-asset://characters/'
-            '${rng.nextInt(placeholderSets['characters']!).toString().padLeft(3, '0')}',
+            '${rng.nextInt(characterArtCount).toString().padLeft(3, '0')}',
         variant: ImageVariant.portraitMedium,
       ),
       powers: (chosen.toList()..sort()),

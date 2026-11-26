@@ -53,6 +53,7 @@ A bad query value gives `400` with `{"error": {"code": "invalid_parameter", "mes
 | `series` | `{id, title}`, the same series as `seriesId` |
 | `creators` | 2 to 6 credits `{id, name, role}`; roles come in order `writer`, `penciller`, `inker`, `colorist`, `letterer`, `cover_artist`, and `writer` and `penciller` are always present |
 | `characterIds` | 1 to 6 ids in `mc_fixtures_characters`, ascending (see Cross-links) |
+| `characters` | the same cast, same order, as `{id, name, thumbnail}`: exactly the `id`, `name` and `thumbnail` that `GET /v1/characters/:id` serves for the same seed, so a client shows the cast with no request per character (T-0041) |
 | `price` | `{amountCents, currency}`; `currency` is `USD`; 299 to 599 |
 | `pageCount` | 24 to 56, in steps of 8 |
 | `variants` | 0 to 2 cover variants `{label, cover}` with distinct labels |
@@ -78,7 +79,8 @@ Every cover, series cover and variant cover is an `ApiImage`: `path` plus `varia
 ## Cross-links
 
 - `characterIds` are ids in `mc_fixtures_characters`: `100000` to `101499` (1,500 characters). `GET /v1/comics?characterId=<id>` is the reverse lookup.
-- This package is pure Dart, so it does not import `mc_fixtures_characters` or `mc_fixtures_media` (both carry Flutter). `lib/src/data/links.dart` states the ID range and the art set instead, and the provider-contract test checks each constant against the real packages.
+- `characters` is built from `mc_fixtures_characters`' own universe for the backend's seed. That package is pure Dart since T-0041 (its art-set size is a constant checked against `mc_fixtures_media`), so this one imports it; a provider-contract test compares every summary with the served character, for two seeds.
+- This package is pure Dart, so it does not import `mc_fixtures_media` (Flutter). `lib/src/data/links.dart` states the ID range and the art set instead, and the provider-contract test checks each constant against the real packages.
 
 ## Test-facing facts (seed 42)
 
@@ -93,7 +95,7 @@ Every cover, series cover and variant cover is an `ApiImage`: `path` plus `varia
 | `characterId=100000` | 6 comics |
 | `offset=40&limit=2` | `Amber Frontier #1` and `#2` (ids `501500`, `501501`): the 21st to 40th are `Amber Crossing #1` to `#20` |
 | `GET /v1/comics/500000` | `Spindle Chronicles #1`, series `400000` |
-| Independent of the seed | comic ids, issue numbers, comic titles, series ids and titles, series cover and `comicIds`, creator pool ids and names, and the synthetic sets. Everything else (descriptions, years, release dates, prices, page counts, credits, `characterIds`, variants, comic covers) depends on it |
+| Independent of the seed | comic ids, issue numbers, comic titles, series ids and titles, series cover and `comicIds`, creator pool ids and names, and the synthetic sets. Everything else (descriptions, years, release dates, prices, page counts, credits, `characterIds` and `characters`, variants, comic covers) depends on it |
 
 ## Scenarios
 
