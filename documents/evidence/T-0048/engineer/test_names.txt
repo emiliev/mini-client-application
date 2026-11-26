@@ -1,0 +1,100 @@
+app/mini_client/reading_list_route_test: T-0048-AC3 home opens the created list in the editor, which returns the same id once saved
+app/mini_client/reading_list_route_test: T-0048-AC5 the link miniclient://app/me/lists/new opens the editor (after the sign-in it asks for)
+app/mini_client/reading_list_route_test: T-0048-AC6 home awaits the editor and shows the list id the wiring returned
+app/mini_client/reading_list_route_test: T-0048-AC6 leaving the editor by Back gives home nothing
+app/wiring/app_core/app_layer_test: T-0048-AC5 the app serves the library domain
+app/wiring/app_core/app_layer_test: T-0048-AC8 the cross-group locations
+app/wiring/app_core/app_layer_test: T-0048-AC8 the media scope builder wraps the app, or nothing
+app/wiring/app_core/app_layer_test: T-0048-AC8 the probe scope notifies only for another probe
+app/wiring/app_core/app_layer_test: T-0048-AC8 the route probe counts builds and redirects, and those before ready
+app/wiring/app_core/app_layer_test: T-0048-AC8 the sandbox stub names the location it does not host
+app/wiring/app_core/app_layer_test: T-0048-AC8 without a probe, recording does nothing
+app/wiring/app_core/flow_results_test: T-0048-AC5 the reading-list locations
+app/wiring/app_core/flow_results_test: T-0048-AC6 AppFlows.editReadingList pushes the edit location and completes with the id
+app/wiring/app_core/flow_results_test: T-0048-AC6 a flow that ends without a result, and Back, give the caller null
+app/wiring/app_core/flow_results_test: T-0048-AC6 a route opened by a deep link (nothing below it) goes home when it completes
+app/wiring/app_core/flow_results_test: T-0048-AC6 completing after the route left the tree does nothing
+app/wiring/app_core/flow_results_test: T-0048-AC6 the caller awaits AppFlows.createReadingList and gets the result the flow completed with
+app/wiring/app_core/flow_results_test: T-0048-AC6 with a dialog above the route, completing pops nothing
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn before the router shows anything answers false
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: Not now answers false and sends nothing
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: Sign in signs the fixture user in, says why, and answers true
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: a failed sign-in keeps the sheet open with an error
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: a sheet closed while signing in answers the real outcome
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: already signed in answers true without a sheet
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: idle, a drag down dismisses the sheet and answers false
+app/wiring/app_core/sign_in_sheet_test: T-0048-AC6 requestFixtureSignIn: while signing in, the barrier, Back, Not now and a drag do not close the sheet
+app/wiring/library_wiring/routes_test: T-0048-AC3 the edit route builds the editor for its id and returns that id
+app/wiring/library_wiring/routes_test: T-0048-AC5 every AppLocations entry of the group equals its typed route
+app/wiring/library_wiring/routes_test: T-0048-AC5 the deep link /me/lists/new opens the editor, and finishing it goes home
+app/wiring/library_wiring/routes_test: T-0048-AC6 an editor that ends without a list gives the caller null
+app/wiring/library_wiring/routes_test: T-0048-AC6 requestSignIn shows the shared sheet with the library's reason, and answers its outcome
+app/wiring/library_wiring/routes_test: T-0048-AC6 requestSignIn: signed in answers true without a sheet
+app/wiring/library_wiring/routes_test: T-0048-AC6 the wiring initializer resolves the route targets, whose flows carry the navigator and map the feature's result
+app/wiring/library_wiring/routes_test: T-0048-AC6 the wiring returns the new list id to the caller that awaits AppFlows.createReadingList
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list A description the backend refuses shows the error under the description [T-0048-AC2]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list A failed save shows an inline error with Retry, and Retry resends once with nothing lost [T-0048-AC2]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list A name the backend refuses takes the wizard back to step 1 with the error under the name [T-0048-AC2]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list An invalid step keeps Next disabled, and a tap on it shows why [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Search narrows the comics, says when nothing matches, and recovers from a failure [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Signed out, backing out of sign-in closes the editor with no result [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Signed out, the editor asks to sign in first and then opens on step 1 [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Sixty characters, trimmed, are a valid name [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list The details follow the backend's rules ('   ', '', 'Give your list a name.', 'Name') [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list The details follow the backend's rules ('Ok', 'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd', 'Use at most 280 characters.', 'Description (optional)') [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list The details follow the backend's rules ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '', 'Use at most 60 characters.', 'Name') [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list The name is sent trimmed, a private list is the default, and a picked comic can be dropped again [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_create Create a reading list Three steps create a list with the comics in the chosen order [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list holds at most 100 comics [T-0048-AC1]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list that fails to load explains the problem, and Retry recovers [T-0048-AC3 T-0048-AC2]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list that is not the reader's shows that it was not found ('l-4') [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A list that is not the reader's shows that it was not found ('l-999') [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A new name sends only the details [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list A new order sends only the items [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Details and comics that both changed are both sent, the details first [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Editing loads the list and fills in every step [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list Saving without a change sends nothing and completes with the same id [T-0048-AC3]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_edit Edit a reading list When the details saved and the comics failed, Retry sends only the comics [T-0048-AC3 T-0048-AC2]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In German a list that is not the reader's is &quot;not found&quot; [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In German every step, label, message and button is German [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In German, editing and the states around it are German [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In the pseudo-locale nothing overflows on any step at &lt;scale&gt;x (1) [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In the pseudo-locale nothing overflows on any step at &lt;scale&gt;x (2) [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In the pseudo-locale the states outside the wizard fit at &lt;scale&gt;x (1) [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_l10n The reading list editor speaks the reader's language In the pseudo-locale the states outside the wizard fit at &lt;scale&gt;x (2) [T-0048-AC4]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A double Create sends one POST and completes once [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A double Save sends each changed part once [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A session change while the list loads shows no list of the old session [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A sign-out before Finish ends the editing and sends nothing [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A sign-out during the save writes nothing more and hands out no list [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight A slow search that answers after a newer one changes nothing [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in between the two writes of an edit stops the second [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in during the save gets nothing written, and the list is not handed out [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight Going back by the button and by the swipe keeps every step's values [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight Going back while a search is held, its late answer changes nothing [T-0048-AC6]
+feature/library/library_reading_list_editor/bdd_test: reading_list_editor_races The editor stays consistent while requests are in flight While the save runs the buttons are off, going back is refused and nothing is lost [T-0048-AC6]
+feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a 400 maps to the field it names T-0048-AC2 invalid_name, invalid_description, comics
+feature/library/library_reading_list_editor/contract_test: T-0048-AC2 a 400 maps to the field it names T-0048-AC2 the error body decides: a field the editor has not, a body off the contract, or another status is an ordinary failure
+feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC1 create answers the new list with its id
+feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC1 searchComics: a prefix narrows, an empty query lists all
+feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC3 another user's list and an unknown id are not found
+feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC3 fetchList maps the list and its items in order
+feature/library/library_reading_list_editor/contract_test: T-0048-AC3 the repository against the library domain T-0048-AC3 updateDetails and replaceItems answer the saved list
+feature/library/library_reading_list_editor/contract_test: T-0048-AC7 a value outside the contract is malformed
+feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 GET /v1/comics results round-trip byte for byte
+feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 GET /v1/me/lists/:id round-trips byte for byte
+feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 the 400 body parses, extra fields ignored
+feature/library/library_reading_list_editor/contract_test: T-0048-AC7 the DTOs against the served JSON T-0048-AC7 the write bodies have exactly the contract keys
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC1 a search result is one accessible toggle: its label says what a tap does, it reports whether it is picked, and it can be tapped
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC3 a different list builds a new flow that loads that list
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC6 an editor closed while its save is held hands out nothing when the save returns
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC7 a root without a forwarded type fails naming it
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC7 every step page uses McAppBar with McFlowBackButton as leading
+feature/library/library_reading_list_editor/flow_scope_test: T-0048-AC7 the flow's container resolves every registration
+feature/library/library_reading_list_editor/golden_test: T-0048-AC1 golden: step 1, details filled in
+feature/library/library_reading_list_editor/golden_test: T-0048-AC1 golden: step 2, comics picked
+feature/library/library_reading_list_editor/golden_test: T-0048-AC2 golden: step 3, a failed save
+feature/library/library_reading_list_editor/golden_test: T-0048-AC3 golden: a list that is not the reader's
+feature/library/library_reading_list_editor/golden_test: T-0048-AC3 golden: step 3, the reading order of a list
+feature/library/library_reading_list_editor/golden_test: T-0048-AC6 golden: step 1, a blocked Next shows the error
+feature/library/library_reading_list_editor/golden_test: T-0048-AC6 golden: the session ended
