@@ -81,9 +81,11 @@ class AuthApi {
       return Future.value(failure(const ApiFailure.unauthorized('No session')));
     }
     return apiCall(
-      () async => _tokens(await _post('/v1/auth/refresh', {
-        'refreshToken': token,
-      })),
+      () async => _tokens(
+        await _post('/v1/auth/refresh', {
+          'refreshToken': token,
+        }),
+      ),
     );
   }
 

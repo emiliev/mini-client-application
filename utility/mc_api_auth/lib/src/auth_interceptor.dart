@@ -41,7 +41,8 @@ class AuthInterceptor extends Interceptor {
     if (options.extra[skipAuthKey] != true) {
       final ours = options.extra[_applied] == true;
       final token = _reader.accessToken;
-      if (token != null && (ours || !options.headers.containsKey('Authorization'))) {
+      if (token != null &&
+          (ours || !options.headers.containsKey('Authorization'))) {
         options.headers['Authorization'] = '$_prefix$token';
         options.extra[_applied] = true;
       } else if (token == null && ours) {

@@ -25,6 +25,7 @@ dart_library(
     size = "small",
     package_name = "mc_api_auth",
     language_version = "3.13",
+    srcs = ["test/rig.dart"],
     main = "test/%s.dart" % t,
     deps = _DEPS + [
         ":mc_api_auth",

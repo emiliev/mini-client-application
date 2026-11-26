@@ -22,7 +22,7 @@ Opaque strings with a fixed shape, so a test can mint one without signing in:
 | Access | `mc-access-<userId>-<n>` | the user exists and `n` is a number. `mc-access-<userId>-expired` is the expired form |
 | Refresh | `mc-refresh-<userId>-<n>` | the user exists, `n` is a number and the token was not used or signed out before |
 
-`n` comes from one counter per backend (1, 2, 3, ...), so a request sequence always yields the same tokens. `expiresIn` is always `900` (seconds); the mock does not run a clock, so "expired" is only the `expired` form. A token that survives an app restart is still accepted: the check looks at the shape, not at remembered state (the backend starts empty on each launch).
+`n` comes from one counter per backend (1, 2, 3, ...), so a request sequence always yields the same tokens. The counter skips a number whose refresh token the backend already revoked: the backend starts empty on every launch, so a session saved by an earlier run can hold `mc-refresh-u-100-1` while a fresh counter would mint that same string again (the first refresh with it therefore returns number 2). `expiresIn` is always `900` (seconds); the mock does not run a clock, so "expired" is only the `expired` form. A token that survives an app restart is still accepted: the check looks at the shape, not at remembered state (the backend starts empty on each launch).
 
 Refresh tokens **rotate**: a refresh token works once. A second refresh with the same token is `401`. This is deliberate, so a client that refreshes twice in parallel fails visibly.
 

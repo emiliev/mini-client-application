@@ -29,19 +29,21 @@ void main() {
   Future<Session> open() => Session.restore(store, bus: bus);
 
   group('T-0039-AC4 persistence', () {
-    test('T-0039-AC4 a new instance on the same store restores the session',
-        () async {
-      final first = await open();
-      await first.signIn(userId: 'u-1', tokens: _tokens);
+    test(
+      'T-0039-AC4 a new instance on the same store restores the session',
+      () async {
+        final first = await open();
+        await first.signIn(userId: 'u-1', tokens: _tokens);
 
-      final second = await open();
+        final second = await open();
 
-      expect(second.status, AuthStatus.signedIn);
-      expect(second.isSignedIn, isTrue);
-      expect(second.userId, 'u-1');
-      expect(second.accessToken, 'access-1');
-      expect(second.refreshToken, 'refresh-1');
-    });
+        expect(second.status, AuthStatus.signedIn);
+        expect(second.isSignedIn, isTrue);
+        expect(second.userId, 'u-1');
+        expect(second.accessToken, 'access-1');
+        expect(second.refreshToken, 'refresh-1');
+      },
+    );
 
     test('T-0039-AC4 updated tokens survive a new instance', () async {
       final first = await open();
@@ -66,26 +68,30 @@ void main() {
       expect(session.refreshToken, isNull);
     });
 
-    test('T-0039-AC4 sign-out is saved: a new instance is signed out',
-        () async {
-      final first = await open();
-      await first.signIn(userId: 'u-1', tokens: _tokens);
-      await first.signOut();
+    test(
+      'T-0039-AC4 sign-out is saved: a new instance is signed out',
+      () async {
+        final first = await open();
+        await first.signIn(userId: 'u-1', tokens: _tokens);
+        await first.signOut();
 
-      expect((await open()).status, AuthStatus.signedOut);
-    });
+        expect((await open()).status, AuthStatus.signedOut);
+      },
+    );
 
-    test('T-0039-AC4 a corrupt store reads as signed out and heals on sign-in',
-        () async {
-      _writeRaw(dir, '{broken');
+    test(
+      'T-0039-AC4 a corrupt store reads as signed out and heals on sign-in',
+      () async {
+        _writeRaw(dir, '{broken');
 
-      final session = await open();
-      expect(session.status, AuthStatus.signedOut);
+        final session = await open();
+        expect(session.status, AuthStatus.signedOut);
 
-      await session.signIn(userId: 'u-1', tokens: _tokens);
+        await session.signIn(userId: 'u-1', tokens: _tokens);
 
-      expect((await open()).accessToken, 'access-1');
-    });
+        expect((await open()).accessToken, 'access-1');
+      },
+    );
 
     test('T-0039-AC4 a value of the wrong shape reads as signed out', () async {
       for (final raw in [
@@ -113,28 +119,34 @@ void main() {
       expect((await store.read('session')).getOrNull(), isNull);
     });
 
-    test('T-0039-AC4 a fast sign-in then sign-out leaves the store signed out',
-        () async {
-      final session = await open();
+    test(
+      'T-0039-AC4 a fast sign-in then sign-out leaves the store signed out',
+      () async {
+        final session = await open();
 
-      final a = session.signIn(userId: 'u-1', tokens: _tokens);
-      final b = session.signOut();
-      await Future.wait([a, b]);
+        final a = session.signIn(userId: 'u-1', tokens: _tokens);
+        final b = session.signOut();
+        await Future.wait([a, b]);
 
-      expect(session.status, AuthStatus.signedOut);
-      expect((await open()).status, AuthStatus.signedOut);
-    });
+        expect(session.status, AuthStatus.signedOut);
+        expect((await open()).status, AuthStatus.signedOut);
+      },
+    );
 
-    test('T-0039-AC4 a save failure is a value; memory keeps the change',
-        () async {
-      final blocked = File('${dir.path}/blocked')..writeAsStringSync('x');
-      final session = await Session.restore(FileStore(Directory(blocked.path)));
+    test(
+      'T-0039-AC4 a save failure is a value; memory keeps the change',
+      () async {
+        final blocked = File('${dir.path}/blocked')..writeAsStringSync('x');
+        final session = await Session.restore(
+          FileStore(Directory(blocked.path)),
+        );
 
-      final result = await session.signIn(userId: 'u-1', tokens: _tokens);
+        final result = await session.signIn(userId: 'u-1', tokens: _tokens);
 
-      expect(result.fold((_) => 'ok', (f) => f), isA<StorageFailure>());
-      expect(session.isSignedIn, isTrue);
-    });
+        expect(result.fold((_) => 'ok', (f) => f), isA<StorageFailure>());
+        expect(session.isSignedIn, isTrue);
+      },
+    );
 
     test('T-0039-AC4 a custom key keeps two sessions apart', () async {
       final a = await Session.restore(store, key: 'a');
@@ -146,22 +158,24 @@ void main() {
   });
 
   group('T-0039-AC2 events and state', () {
-    test('T-0039-AC2 sign-in and sign-out publish SessionChanged and the stream',
-        () async {
-      final session = await open();
-      final states = <AuthStatus>[];
-      session.authState.listen(states.add);
+    test(
+      'T-0039-AC2 sign-in and sign-out publish SessionChanged and the stream',
+      () async {
+        final session = await open();
+        final states = <AuthStatus>[];
+        session.authState.listen(states.add);
 
-      await session.signIn(userId: 'u-1', tokens: _tokens);
-      await session.signOut();
-      await pumpEventQueue();
+        await session.signIn(userId: 'u-1', tokens: _tokens);
+        await session.signOut();
+        await pumpEventQueue();
 
-      expect(states, [AuthStatus.signedIn, AuthStatus.signedOut]);
-      expect(events, const [
-        SessionChanged(AuthStatus.signedIn),
-        SessionChanged(AuthStatus.signedOut),
-      ]);
-    });
+        expect(states, [AuthStatus.signedIn, AuthStatus.signedOut]);
+        expect(events, const [
+          SessionChanged(AuthStatus.signedIn),
+          SessionChanged(AuthStatus.signedOut),
+        ]);
+      },
+    );
 
     test('T-0039-AC2 a token refresh publishes nothing', () async {
       final session = await open();
@@ -187,19 +201,21 @@ void main() {
       expect(events, isEmpty);
     });
 
-    test('T-0039-AC2 updateTokens after a sign-out cannot revive the session',
-        () async {
-      final session = await open();
-      await session.signIn(userId: 'u-1', tokens: _tokens);
-      await session.signOut();
+    test(
+      'T-0039-AC2 updateTokens after a sign-out cannot revive the session',
+      () async {
+        final session = await open();
+        await session.signIn(userId: 'u-1', tokens: _tokens);
+        await session.signOut();
 
-      await session.updateTokens(
-        const AuthTokens(accessToken: 'late', refreshToken: 'late'),
-      );
+        await session.updateTokens(
+          const AuthTokens(accessToken: 'late', refreshToken: 'late'),
+        );
 
-      expect(session.status, AuthStatus.signedOut);
-      expect((await open()).status, AuthStatus.signedOut);
-    });
+        expect(session.status, AuthStatus.signedOut);
+        expect((await open()).status, AuthStatus.signedOut);
+      },
+    );
 
     test('T-0039-AC2 the state changes before the save finishes', () async {
       final session = await open();
@@ -210,20 +226,22 @@ void main() {
       await saving;
     });
 
-    test('T-0039-AC2 a session without a bus works, and dispose closes the stream',
-        () async {
-      final session = await Session.restore(store);
-      var done = false;
-      session.authState.listen((_) {}, onDone: () => done = true);
+    test(
+      'T-0039-AC2 a session without a bus works, and dispose closes the stream',
+      () async {
+        final session = await Session.restore(store);
+        var done = false;
+        session.authState.listen((_) {}, onDone: () => done = true);
 
-      await session.signIn(userId: 'u-1', tokens: _tokens);
-      await session.dispose();
-      await session.signOut();
-      await pumpEventQueue();
+        await session.signIn(userId: 'u-1', tokens: _tokens);
+        await session.dispose();
+        await session.signOut();
+        await pumpEventQueue();
 
-      expect(done, isTrue);
-      expect(session.status, AuthStatus.signedOut);
-    });
+        expect(done, isTrue);
+        expect(session.status, AuthStatus.signedOut);
+      },
+    );
 
     test('T-0039-AC2 SessionChanged compares by status', () {
       expect(

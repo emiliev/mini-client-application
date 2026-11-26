@@ -12,8 +12,14 @@ const String _revokedKey = 'identity.revokedRefresh';
 
 String _favouritesKey(String userId) => 'identity.favourites.$userId';
 
-int _nextToken(MockContext context) {
-  final n = (context.store[_counterKey] as int? ?? 0) + 1;
+/// The next token number. It skips numbers whose refresh token this backend
+/// already revoked: a session saved by an earlier run (the backend starts
+/// empty on each launch) may hold such a token.
+int _nextToken(MockContext context, String userId) {
+  var n = context.store[_counterKey] as int? ?? 0;
+  do {
+    n++;
+  } while (_revoked(context).contains(mintRefreshToken(userId, n)));
   context.store[_counterKey] = n;
   return n;
 }
@@ -58,9 +64,7 @@ Map<String, Object?> _tokenBody(String userId, int n, {bool expired = false}) =>
 /// scenario); the refresh token is good.
 MockHandler signIn({bool expired = false}) => (request, context) {
   final body = request.body;
-  if (body is! Map ||
-      body['email'] is! String ||
-      body['password'] is! String) {
+  if (body is! Map || body['email'] is! String || body['password'] is! String) {
     return _invalidBody('Expected {"email": string, "password": string}');
   }
   final email = (body['email'] as String).trim().toLowerCase();
@@ -79,7 +83,7 @@ MockHandler signIn({bool expired = false}) => (request, context) {
   }
   return MockResponse.ok({
     'user': user.toJson(),
-    ..._tokenBody(user.id, _nextToken(context), expired: expired),
+    ..._tokenBody(user.id, _nextToken(context, user.id), expired: expired),
   });
 };
 
@@ -100,7 +104,7 @@ MockResponse refresh(MockRequest request, MockContext context) {
     );
   }
   _revoked(context).add(token);
-  return MockResponse.ok(_tokenBody(user.id, _nextToken(context)));
+  return MockResponse.ok(_tokenBody(user.id, _nextToken(context, user.id)));
 }
 
 /// `POST /v1/auth/sign-out` with an optional `{refreshToken}` to revoke. It

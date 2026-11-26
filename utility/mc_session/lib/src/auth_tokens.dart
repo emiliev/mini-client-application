@@ -5,10 +5,12 @@ final class AuthTokens {
 
   /// Null unless [json] is a map with two non-empty string tokens.
   static AuthTokens? fromJson(Object? json) {
-    if (json case {
-      'accessToken': final String access,
-      'refreshToken': final String refresh,
-    } when access.isNotEmpty && refresh.isNotEmpty) {
+    if (json
+        case {
+          'accessToken': final String access,
+          'refreshToken': final String refresh,
+        }
+        when access.isNotEmpty && refresh.isNotEmpty) {
       return AuthTokens(accessToken: access, refreshToken: refresh);
     }
     return null;

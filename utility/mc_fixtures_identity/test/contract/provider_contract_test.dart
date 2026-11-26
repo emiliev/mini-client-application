@@ -54,19 +54,21 @@ void main() {
       expect(files, {for (final k in snapshotCases.keys) '$k.json'});
     });
 
-    test('T-0039-AC3: the route manifest, the domain and the scenarios agree',
-        () {
-      final manifest =
-          jsonDecode(
-                File('${identity.path}/fixtures/routes.json').readAsStringSync(),
-              )
-              as Map<String, Object?>;
-      final backend = MockBackend(domains: [const IdentityMockDomain()]);
-      expect([for (final r in backend.router.routes) r.key], manifest['routes']);
-      expect(IdentityMockDomain.routeManifest, manifest['routes']);
-      expect(backend.scenarioNames.toList()..sort(), manifest['scenarios']);
-      expect(identityFixtureSets.keys, manifest['sets']);
-    });
+    test(
+      'T-0039-AC3: the route manifest, the domain and the scenarios agree',
+      () {
+        final manifest = jsonDecode(
+          File('${identity.path}/fixtures/routes.json').readAsStringSync(),
+        ) as Map<String, Object?>;
+        final backend = MockBackend(domains: [const IdentityMockDomain()]);
+        expect([
+          for (final r in backend.router.routes) r.key,
+        ], manifest['routes']);
+        expect(IdentityMockDomain.routeManifest, manifest['routes']);
+        expect(backend.scenarioNames.toList()..sort(), manifest['scenarios']);
+        expect(identityFixtureSets.keys, manifest['sets']);
+      },
+    );
 
     test('T-0039-AC3: CONTRACT.md documents every route, scenario and set', () {
       final doc = File('${identity.path}/CONTRACT.md').readAsStringSync();

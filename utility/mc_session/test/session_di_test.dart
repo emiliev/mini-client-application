@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:get_it/get_it.dart';
-import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
@@ -25,46 +24,52 @@ void main() {
     return getIt;
   }
 
-  test('T-0039-AC5 the initializer registers one session under three types',
-      () async {
-    final getIt = await boot();
+  test(
+    'T-0039-AC5 the initializer registers one session under three types',
+    () async {
+      final getIt = await boot();
 
-    final session = getIt<Session>();
+      final session = getIt<Session>();
 
-    expect(getIt<SessionReader>(), same(session));
-    expect(getIt<SessionWriter>(), same(session));
-    expect(session.isSignedIn, isFalse);
-    await getIt.reset();
-  });
+      expect(getIt<SessionReader>(), same(session));
+      expect(getIt<SessionWriter>(), same(session));
+      expect(session.isSignedIn, isFalse);
+      await getIt.reset();
+    },
+  );
 
-  test('T-0039-AC4 the registered session restores across a boot and publishes',
-      () async {
-    final first = await boot();
-    final events = <SessionChanged>[];
-    first<EventBus>().on<SessionChanged>().listen(events.add);
-    await first<SessionWriter>().signIn(
-      userId: 'u-1',
-      tokens: const AuthTokens(accessToken: 'a', refreshToken: 'r'),
-    );
-    await pumpEventQueue();
-    await first.reset();
+  test(
+    'T-0039-AC4 the registered session restores across a boot and publishes',
+    () async {
+      final first = await boot();
+      final events = <SessionChanged>[];
+      first<EventBus>().on<SessionChanged>().listen(events.add);
+      await first<SessionWriter>().signIn(
+        userId: 'u-1',
+        tokens: const AuthTokens(accessToken: 'a', refreshToken: 'r'),
+      );
+      await pumpEventQueue();
+      await first.reset();
 
-    final second = await boot();
+      final second = await boot();
 
-    expect(events, const [SessionChanged(AuthStatus.signedIn)]);
-    expect(second<SessionReader>().userId, 'u-1');
-    await second.reset();
-  });
+      expect(events, const [SessionChanged(AuthStatus.signedIn)]);
+      expect(second<SessionReader>().userId, 'u-1');
+      await second.reset();
+    },
+  );
 
-  test('T-0039-AC5 the session needs storage and the event bus first',
-      () async {
-    final getIt = GetIt.asNewInstance();
+  test(
+    'T-0039-AC5 the session needs storage and the event bus first',
+    () async {
+      final getIt = GetIt.asNewInstance();
 
-    await expectLater(
-      Future<void>.sync(() => const SessionDIInitializer().init(getIt)),
-      throwsA(anything),
-    );
-  });
+      await expectLater(
+        Future<void>.sync(() => const SessionDIInitializer().init(getIt)),
+        throwsA(anything),
+      );
+    },
+  );
 }
 
 Future<void> pumpEventQueue() async {
