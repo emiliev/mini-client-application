@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch when T-0032's barrel and navigator are final) |
+| Status | Done (merged 2026-11-26 `36e6739`; Verifier PASS `d0bfe43`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh), with iOS simulator e2e |
 | Branch | `fleet/T-0033-universe-wiring` |
@@ -143,3 +143,8 @@ Merged `origin/main` (df117bd; flow_builder vendored). `MODULE.bazel.lock` confl
 - `links_after_flow_test` (R1) is un-skipped and passes.
 - R1 on the simulator: `mini_client/integration_test/characters_link_after_flow_test.dart` (the list is shown, then `pushLink` sends `miniclient://app/placeholder/42` as iOS does on `flutter/navigation`; the placeholder shows; screenshot `mini_client/06_link_after_flow.png`) and `sandbox/integration_test/characters_sandbox_link_after_flow_test.dart` (its own scheme; `sandbox/03_sandbox_link_after_flow.png`). `pushLink` lives in `mc_e2e_utils`.
 - Gates: `T-0033-AC5_gates.sh` PASS (84 tests); mutations 9 of 9 killed; e2e through `tool/e2e_ios.sh`: mini_client 3 of 3 and sandbox 3 of 3 PASS, screenshots refreshed, no simulator left.
+
+## Merge (TL)
+- 2026-11-25/26: Verifier PASS `51e1c1a` with two major tooling defects (`prepare_pub_project.sh` failed from a fresh output base; the fixtures check covered only `mc_ds_*`). `/code-review` found the sandbox deep-link scheme mismatch (important). Fix round 1 `61535d2`: a configurable `LinkScheme`, exact-output e2e prep, a 23-target fixtures check, `push` pinned, `mc_e2e_utils`, `RouterRef.detach`. Re-verify **FAIL** `abbbb27` on R1: flow_builder 0.1.0 took over `flutter/navigation`, so running-app deep links died once a flow mounted. Fixed at kit level in T-0035. Fix round 2 `ad8b82e`: R2 (the navigator resolves the router at call time) and R3 (sandbox file-drop start link). Fix round 3 `6a3692b`: merged T-0035, un-skipped the R1 tests, added after-flow link e2e. Final re-verify PASS `d0bfe43` (84/84, e2e 4/4 + 6/6, mutations 9/9; reverting the T-0035 hunk makes the R1 test fail). The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 84/84 tests, lint was clean, `mc_arch_check` reported OK, both `--config=sim` app builds succeeded and the fixtures check passed.
+- Known gap G1: `simctl openurl` on a running app stops at SpringBoard's confirmation prompt, so a real native delivery of a live link isn't automated (P-042). The Dart path (`flutter/navigation` `pushRouteInformation`) is covered.
+- Follow-ups: P-076, P-077.

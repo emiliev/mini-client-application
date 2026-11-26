@@ -118,6 +118,11 @@ Questions for PO: <only direction-level, or "none">
 - Every agent that runs Bazel uses a **unique output base named for its task and role**: `tool/bazelw --output_base=/tmp/mc-ob-T-XXXX-<role> …` (or each worktree's default output base, which Bazel derives from the workspace path). Never use a generic name such as `/tmp/mc-verify`.
 - _Lesson 2026-11-24:_ two Verifiers shared one output base, and one's `bazel shutdown` killed the other's server mid-run.
 
+## Scratch files (all crew)
+- The session scratchpad is shared between agents. Every agent works in **its own subfolder** named for its task and role (`<scratchpad>/T-XXXX-<role>/`), or under `/tmp/mc-<task>-<role>-*` via `mktemp -d`. Never write a generic name at the scratchpad root (`mut.sh`, `probe.dart`), and never run a script you didn't just write.
+- Fixed log paths such as `/tmp/mc-mut.log` collide across agents too: include the task and role in the name.
+- _Lesson 2026-11-26:_ the T-0035 Verifier overwrote the T-0033 Verifier's `mut.sh` at the scratchpad root. The T-0033 Verifier then ran it, and its restore step wrote into the T-0035 worktree. The file ended up byte-identical to HEAD, and T-0035 was already merged, so nothing was lost.
+
 ## Resuming crew agents (TL)
 - A crew agent must **never run in the Tech Lead's worktree** (`/Users/emililiev/orca/workspaces/mini-client/tang`). When resuming an agent whose worktree was never created, tell it to create its own worktree first (`git worktree add <repo>/.claude/worktrees/<name> -b fleet/T-XXXX-… origin/main`) and `cd` there, **not** to `git switch` in its current directory.
 - After every resume, the TL checks `git -C <TL worktree> branch --show-current` is still `continue-previous-work`.

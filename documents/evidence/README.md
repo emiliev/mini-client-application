@@ -33,3 +33,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0032](T-0032/verification-report.md) | PASS (re-verified after FAIL) | `characters_list`: BDD mutations, in-flow vs pushed-route probes, 11/11 byte identity, cutoff, conformance review |
 | [T-0034](T-0034/verification-report.md) | PASS (re-verified after review fixes) | Kit fixes: release probe with asserts off, host delegate override, back-button mutations, byte identity 11/11 |
 | [T-0035](T-0035/verification-report.md) | PASS (re-verified after review fixes) | flow_builder channel fix: stock vs patched, framework baseline, provenance negatives, T-0033 R1 repro |
+| [T-0033](T-0033/verification-report.md) | PASS (3 rounds) | **The first feature in the app on the simulator**: home → Characters → preview → profile, deep links before and after a flow, sandbox scheme |
