@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (handed off 2026-11-27) |
+| Status | In Progress |
 | Owner | crew: Engineer (**Opus**: first FW exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar; auth-gated writes) |
 | Branch | `fleet/T-0048-reading-list-editor` |
