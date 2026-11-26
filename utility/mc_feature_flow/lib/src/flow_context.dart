@@ -15,6 +15,7 @@ class FlowScope extends InheritedWidget {
     this.controller,
     this.outerNavigator,
     this.outerCanPop = false,
+    this.flowNavigatorObserver,
     super.key,
   });
 
@@ -33,6 +34,17 @@ class FlowScope extends InheritedWidget {
   /// when the routes below the flow change (a router `go`, a deep-link stack
   /// rebuild, `pushAndRemoveUntil`).
   final bool outerCanPop;
+
+  /// An observer attached to the flow's own navigator, so the scope knows
+  /// which `Navigator` is the flow's ([isFlowNavigator]).
+  final NavigatorObserver? flowNavigatorObserver;
+
+  /// Whether [navigator] is the flow's own navigator. A scope built without an
+  /// observer (a test double) cannot tell and says yes.
+  bool isFlowNavigator(NavigatorState? navigator) {
+    final observer = flowNavigatorObserver;
+    return observer == null || identical(observer.navigator, navigator);
+  }
 
   /// The nearest scope without depending on it: the flow's container never
   /// changes while its scope lives, so a lookup in a lifecycle that cannot
@@ -98,9 +110,11 @@ extension McFlowContext on BuildContext {
 ///
 /// On the root page of a flow (the first route of the flow's navigator), in
 /// this order:
-/// 1. A local history entry (`route.willHandlePopInternally`, for example a
-///    `showBottomSheet` or a `LocalHistoryEntry`): a plain `BackButton`, which
-///    removes the entry and stays in the flow.
+/// 1. A local history entry that implies dismissal (`route.willHandlePopInternally`
+///    and `route.impliesAppBarDismissal`, for example a `showBottomSheet`): a
+///    plain `BackButton`, which removes the entry and stays in the flow. A
+///    drawer's own entry does not imply dismissal, so an open drawer does not
+///    turn the leading into a back arrow (as in `AppBar`).
 /// 2. A drawer: a `DrawerButton`, as `AppBar` does.
 /// 3. The flow can be left (a route below it in the outer navigator): a
 ///    `BackButton` that calls `maybePop` on the outer navigator, so the outer
@@ -126,9 +140,15 @@ class McFlowBackButton extends StatelessWidget {
       return const SizedBox.shrink();
     }
     final hasDrawer = Scaffold.maybeOf(context)?.hasDrawer ?? false;
-    final scope = route.isFirst ? FlowScope.maybeOf(context) : null;
+    // The flow-root branch is for the first route of the flow's own
+    // navigator; the first route of a navigator nested in a flow page follows
+    // the AppBar's default logic.
+    final flowScope = route.isFirst ? FlowScope.maybeOf(context) : null;
+    final scope = flowScope != null && flowScope.isFlowNavigator(route.navigator)
+        ? flowScope
+        : null;
     if (scope != null) {
-      if (route.willHandlePopInternally) {
+      if (route.willHandlePopInternally && route.impliesAppBarDismissal) {
         return const BackButton();
       }
       if (hasDrawer) {

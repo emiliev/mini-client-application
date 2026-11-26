@@ -6,7 +6,7 @@
 | Version | 0.1.0 |
 | Archive | `https://pub.dev/api/archives/flow_builder-0.1.0.tar.gz` |
 | Archive sha256 | `9e66aa7209e9a31c347bb316abf191d2300db41cd6b7254f89abd4e76d9b3f8d` (the hash `pubspec.lock` held for the hosted copy) |
-| Task | T-0035 (Deep links survive a mounted `FeatureFlow`), T-0036 (stale `PopScope`), T-0037 (the same, after a parent-driven update); findings F-0034, F-0035 |
+| Task | T-0035 (Deep links survive a mounted `FeatureFlow`), T-0036 (stale `PopScope`), T-0037 (the same, after a parent-driven update); findings F-0034, F-0035, F-0036 |
 | Licence | MIT, `LICENSE` is byte-identical to the archive |
 | Upstream draft | `documents/upstream/U-X-flow_builder-navigation-channel/README.md` |
 
