@@ -33,6 +33,6 @@ negative control (dep added to characters_list): //feature/characters/characters
 
 - discovery tests, uncached: Executed 4 out of 4 tests: 4 tests pass.
 - test //...: Executed 0 out of 115 tests: 115 tests pass.
-- mc_fixtures_discovery coverage: TOTAL 143/147 97.3% (threshold 90 %)
+- mc_fixtures_discovery coverage: TOTAL 155/159 97.5% (threshold 90 %)
 
 **PASS T-0043-AC5-gates**
