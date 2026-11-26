@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0036-flow-back-button` |
@@ -30,3 +30,17 @@ Before the P1-24 bricks copy the exemplar, change the flow root's back button fr
 
 ## Log
 - 2026-11-26: Created and dispatched (TL).
+- 2026-11-26: Engineer: implemented `McFlowBackButton`, removed `flowLeading`, fixed the stale comments and the mutation script, ran the gates (Engineer).
+
+## Outcome
+Branch `fleet/T-0036-flow-back-button`. Details: [F-0035](../findings/F-0035-flow-back-button.md). Evidence: `documents/evidence/T-0036/engineer/`.
+
+| AC | Evidence |
+|---|---|
+| T-0036-AC1 | `flow_kit_test` "T-0036-AC1 the back button is present after the root page rebuilds under an inner page" (const root, rebuilt while an inner page is on top). Negative control `AC1_negative_control.sh` puts the old `flowLeading()` back: the test FAILS (`Found 0 widgets with type "BackButton"`), log in `AC1_negative_control.log`. |
+| T-0036-AC2 | The three T-0034-AC5 tests, renamed `T-0036-AC2 ...` with every assertion kept: present and pops the flow when pushed, absent at the app's root, and an inner page keeps the automatic back button (that page's `AppBar` now has no `leading`, since the widget is for the root page only). |
+| T-0036-AC3 | No `flowLeading` in code (only history in docs/evidence). `feature_flow.dart` doc, `api_client_test.dart` comment and `app/mini_client/BUILD.bazel` comment fixed. `mutations.sh` run: all 9 mutations killed by a test, push-to-go by `universe_wiring:routes_test` (`mutations_T-0033.log`). Gates: `T-0036-AC3_gates.md`; T-0032 byte-identity and cutoff: `T-0032-AC6_*.md`. |
+
+Gates: test //..., lint, mc_arch_check, rules_fork.sh check, format, l10n_check, flow_builder provenance, coverage (mc_feature_flow 99.3 %, characters_list 100 %) all PASS. `T-0035-AC4_gates.sh` also lists its one-off "lock delta vs 6e7eaaf" gate, which FAILS by design now (the lock files are untouched by this task); it is not a T-0036 gate.
+
+Notes for the handoff: no test deleted, skipped or weakened, no `// ignore:` added. Edits outside the listed files: only `documents/evidence/T-0033/engineer/mutations.sh` (the mutation script, in scope) and the characters_list page comment.

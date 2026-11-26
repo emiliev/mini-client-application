@@ -42,7 +42,7 @@ class _CharactersListPageContent extends StatelessWidget {
     void retry() => bloc.add(const CharactersListEvent.retry());
     return Scaffold(
       appBar: AppBar(
-        // The flow has its own navigator, so its root page needs this to leave.
+        // The flow has its own navigator: this leaves the flow from its root page.
         leading: const McFlowBackButton(),
         title: Text(l10n.charactersListTitle),
       ),
