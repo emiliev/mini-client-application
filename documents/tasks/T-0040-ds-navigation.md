@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-26 `77af6ac`; Verifier PASS `582b5e1`, re-verify PASS `12bf1db`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0040-ds-navigation` |
@@ -78,3 +78,7 @@ Merged `582b5e1` (fast-forward) and `origin/main` (T-0038); `pub get` changed no
 - D4 and the default leading: documented on `McAppBar` (loudly: flow pages must pass `leading: const McFlowBackButton()`) and in F-0039 facts 7 to 12.
 - Gates: [ac4-gates.md](../evidence/T-0040/engineer/ac4-gates.md) all PASS, 90/90 tests, coverage `mc_ds_navigation` 93.0 %. e2e PASS on a fresh simulator `mc-T-0040-engineer-68211` (deleted, 0 left).
 - **Goldens changed (24 of 72, all looked at; before/after in `documents/evidence/T-0040/engineer/fix-round/`):** `tab_bar_2.*` (8) and `tab_bar_5.*` (8): the divider now sits right under the 48 pt tabs, the high-contrast divider is full strength, the 2x variants render labels at the 1.5x cap, and the tab fills share the width. `section_header_action.*` (8): the title gets 2/3 of the free width and the action is flexible, so the long title wraps in a narrower column. The `characters_list` goldens did not change.
+
+## Merge (TL)
+- 2026-11-26: Verifier (Opus) PASS `582b5e1`, with major defect D1 (the tab bar stretched to its parent's height). `/code-review` found an important bug (`Scrollable.ensureVisible` scrolled every ancestor) and nits. Fix round `174effd`. Under ADR-0011 the fix round was re-verified by a **Sonnet narrow re-verifier**: PASS `12bf1db`, using about 89k tokens against 200–300k for the Opus runs. TL decisions: a plain `leading` slot, with the bricks always passing `McFlowBackButton`; a 1.5× cap on the large title and the tab labels. The TL merged `--no-ff`; on the merge result `check` passed, 90/90 tests, lint was clean, `mc_arch_check` reported OK, and the layering and fixtures checks passed.
+- Nits left: `heightFactor: 1` and the tab item's `maxHeight` are redundant (both together are pinned); the custom row's intrinsic and dry-layout overrides are untested (coverage 93 %); add the "`mc_ds_*` never depends on `mc_feature_flow`" rule to `mc_arch_check` itself (P-079).

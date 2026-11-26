@@ -9,7 +9,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 | [T-0039](T-0039-session-and-auth.md) | Auth slice: `mc_session`, `mc_api_auth`, `mc_fixtures_identity` (P1-05 AC2) | **In Progress** | Engineer (Sonnet) | T-0020, T-0023 | `fleet/T-0039-session-and-auth` |
-| [T-0040](T-0040-ds-navigation.md) | `mc_ds_navigation`: `McAppBar`, `McTabBar`, `McSectionHeader` | **In Progress** | Engineer (Sonnet) | T-0037 | `fleet/T-0040-ds-navigation` |
 
 | [T-0041](T-0041-comics-details-exemplar.md) | **`comics_details` exemplar** (SC, P1-18): sections, auth-gated favourite, publishing wiring | Ready | Engineer (Opus) / Verifier (Opus) | T-0039, T-0040 | `fleet/T-0041-comics-details` |
 
@@ -20,6 +19,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0040](T-0040-ds-navigation.md) | `mc_ds_navigation`: `McAppBar` (large title, `bottom`), `McTabBar`, `McSectionHeader`; `characters_list` on `McAppBar` | merged; Verifier [PASS](../evidence/T-0040/verification-report.md) (re-verified, Sonnet narrow); F-0039 |
 | [T-0038](T-0038-fixtures-comics.md) | `mc_fixtures_comics`: 2,400 comics, series, creators, variants (P1-08 subset) | merged; Verifier [PASS](../evidence/T-0038/verification-report.md) (re-verified after review fixes) |
 | [T-0037](T-0037-flow-back-button-hardening.md) | `McFlowBackButton` hardened: outer-route changes, safe outside flows, local-history/drawer precedence, nested navigators, flow_builder patch change 5 | merged; Verifier [PASS](../evidence/T-0037/verification-report.md) (re-verified after review fixes); F-0036 |
 | [T-0036](T-0036-flow-back-button.md) | `McFlowBackButton` + flow_builder stale-`PopScope` fix (P-074, P-076) | merged; Verifier [PASS](../evidence/T-0036/verification-report.md) (re-verified after FAIL); F-0035 |
