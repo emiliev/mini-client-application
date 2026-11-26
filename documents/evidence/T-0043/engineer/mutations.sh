@@ -79,7 +79,7 @@ mutate "T5 word-prefix tier removed (counts as substring)" $IDX \
 mutate "T6 substring tier removed (counts as word-prefix)" $IDX \
   "var tier = MatchTier.substring;" "var tier = MatchTier.wordPrefix;"
 mutate "T7 word boundary not checked" $IDX \
-  "if (_notWordChar.hasMatch(foldedTitle[at - 1])) {" "if (_notWordChar.hasMatch(foldedTitle[at - 1]) || at > 0) {"
+  "if (_notWordChar.hasMatch(_runeBefore(foldedTitle, at))) {" "if (_notWordChar.hasMatch(_runeBefore(foldedTitle, at)) || at > 0) {"
 mutate "T8 a later boundary occurrence is not looked for" $IDX \
   "at = foldedTitle.indexOf(foldedQuery, at + 1);" "at = -1;"
 
@@ -111,7 +111,7 @@ mutate "F4 whitespace not collapsed" $NORM \
 
 # --- review round fixes ------------------------------------------------
 mutate "R1 minimum length checked on the raw q, not the folded one" $H \
-  "foldText(q).runes.length < minQueryLength" "q.runes.length < minQueryLength"
+  "foldText(q).runes.length < minQueryLength" "q.runes.length < minQueryLength && foldText(q).isNotEmpty"
 mutate "R2 word boundary read as a UTF-16 unit" $IDX \
   "if (isLow && index >= 2) {" "if (isLow && index >= 2 && index < 0) {"
 mutate "R3 comma-below s not folded" $NORM \

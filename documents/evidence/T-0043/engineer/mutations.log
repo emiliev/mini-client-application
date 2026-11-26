@@ -12,7 +12,8 @@ baseline PASS
 === T6 substring tier removed (counts as word-prefix)
     KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
 === T7 word boundary not checked
-    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+pattern not found: if (_notWordChar.hasMatch(foldedTitle[at - 1])) {
+    PATTERN NOT FOUND
 === T8 a later boundary occurrence is not looked for
     KILLED by: //utility/mc_fixtures_discovery:ranking_test 
 === B1 title tie-break removed
@@ -30,9 +31,21 @@ baseline PASS
 === F2 diacritics not folded
     KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
 === F3 combining marks kept
-    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
 === F4 whitespace not collapsed
     KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== R1 minimum length checked on the raw q, not the folded one
+    BUILD ERROR (does not count as killed)
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a68329beebfbc9495/utility/mc_fixtures_discovery/BUILD.bazel:12:13: Analyzing Dart sources of //utility/mc_fixtures_discovery:mc_fixtures_discovery against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on dart_library rule target //utility/mc_fixtures_discovery:mc_fixtures_discovery) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+warning - utility/mc_fixtures_discovery/lib/src/handlers/search_handlers.dart:2:8 - Unused import: 'package:mc_fixtures_discovery/src/search/normalize.dart'. Try removing the import directive. - unused_import
+=== R2 word boundary read as a UTF-16 unit
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== R3 comma-below s not folded
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== R4 Vietnamese a with circumflex and acute not folded
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== R5 entry type not validated
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
 === H1 groups follow the order of types
     KILLED by: //utility/mc_fixtures_discovery:search_test 
 === H2 total counts only the page
@@ -66,4 +79,4 @@ baseline PASS
 === D4 comics index missing
     KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
 
-killed=33 survived=0 broken=0
+killed=36 survived=0 broken=2
