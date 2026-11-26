@@ -41,6 +41,7 @@ workspace:
   - utility/mc_ds_layout
   - utility/mc_ds_lists
   - utility/mc_ds_media
+  - utility/mc_ds_navigation
   - utility/mc_ds_testing
   - utility/mc_ds_theme
   - utility/mc_ds_tokens

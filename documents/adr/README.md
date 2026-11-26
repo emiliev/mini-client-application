@@ -19,6 +19,7 @@ An ADR captures **one** significant decision: the context, the options weighed, 
 | [0008](0008-bazel-with-ai-rules.md) | Build with Bazel using ai_rules_dart / ai_rules_flutter | Accepted | 2026-11-23 |
 | [0009](0009-exemplar-first-generation-and-loc.md) | Exemplar-first code generation and the LOC metric | Accepted (LOC pending Q-010) | 2026-11-23 |
 | [0010](0010-testing-tiers-and-coverage.md) | Tide testing tiers, BDD traceability, 90 % coverage | Accepted | 2026-11-23 |
+| [0011](0011-model-tiers-and-review-first.md) | Crew model tiers, and code review before verification | Accepted | 2026-11-26 |
 
 ## Expected upcoming ADRs
 | Topic | Comes from |

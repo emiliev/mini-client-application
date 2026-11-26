@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-26 `77af6ac`; Verifier PASS `582b5e1`, re-verify PASS `12bf1db`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0040-ds-navigation` |
@@ -31,3 +31,54 @@ The DS navigation pieces every archetype uses, so features stop hand-rolling `Ap
 
 ## Log
 - 2026-11-26: Created and dispatched (TL).
+- 2026-11-26: Engineer built `utility/mc_ds_navigation`, switched `characters_list` to `McAppBar`, and ran the gates, the mutations and the mini_client e2e. Handed off.
+
+## Outcome
+**Status:** Done, ready for verification. Branch `fleet/T-0040-ds-navigation`.
+
+### Leading-slot design (and why)
+`McAppBar.leading` is a plain `Widget?` slot, as `AppBar` has. The feature or brick passes `leading: const McFlowBackButton()`; the DS knows nothing about flows. A leading-builder contract was rejected: `McFlowBackButton` is already a self-deciding widget (it reads the route, the drawer and `FlowScope` itself on every build), so a builder adds an indirection with nothing to build from. With `leading: null` the bar falls back to `AppBar`'s automatic back, close or drawer button, so a page pushed inside a flow needs nothing. Layering: `mc_ds_navigation` depends on `mc_ds_theme`, `mc_ds_tokens` and `mc_ds_layout` only, so `mc_arch_check` stays satisfied and a utility never reaches the sibling that owns navigation state. `mc_arch_check` itself allows utility to utility edges, so AC3 is enforced by `tool/checks/T-0040-AC3_layering.sh` (F-0039 fact 5).
+
+### What was built
+- `McAppBar` (title as a header, `leading`, `actions`, `largeTitle`, `titleKey`). The large title is a fixed 64 px band, single line, ellipsis, text scale capped at 1.5 (a deliberate design choice, the band has a fixed height because `PreferredSizeWidget` cannot read the text scale).
+- `McTabBar` and `McTab`: controlled (`currentIndex`, `onChanged`), tabs share the width when they fit and scroll when they do not, the selected tab is revealed, `tabBar` and `tab` semantics roles, 48 px high, at least 44 px wide.
+- `McSectionHeader`: header title (wraps), optional action (44 px).
+- `characters_list`: the list page uses `McAppBar(leading: const McFlowBackButton())`, the preview page uses `McAppBar(titleKey: ...)` with the automatic leading.
+
+### AC to evidence
+| AC | Evidence |
+|---|---|
+| AC1 | `utility/mc_ds_navigation/test/golden_test.dart`: 9 components x 4 themes x 2 scales = 72 goldens (plain, actions, large title, long title, long large title; tab bar 2 and 5 with one selected; section header with and without action), all looked at; samples in `documents/evidence/T-0040/engineer/goldens/navigation/`. No-overflow tests at 1x, 2x and 3x in `navigation_test.dart` ("T-0040-AC1 long titles at ...", "...stays inside its band at 3x", "...scrolled into view", ...) |
+| AC2 | `navigation_test.dart` "T-0040-AC2 ...": app bar and section titles are headers, tabs have role `tab`, `selected` and their labels under a `tabBar` node whose children are exactly the tabs, every target at least 44 pt (8 targets counted), and `meetsGuideline(iOSTapTargetGuideline, labeledTapTargetGuideline, textContrastGuideline)` in all 4 themes |
+| AC3 | `tool/checks/T-0040-AC3_layering.sh` ([report](../evidence/T-0040/engineer/ac3-layering.md)): `mc_arch_check` OK; no `mc_feature_flow` in the closure of the library or either test target; positive control (characters_list sees both packages); negative controls (a BUILD dep, a pubspec dep and a Dart import are each reported). `flow_scope_test.dart` "T-0040-AC3 the list page uses McAppBar with McFlowBackButton as leading". All T-0032 and T-0037 tests still pass |
+| AC4 | `tool/checks/T-0040-AC4_gates.sh` ([report](../evidence/T-0040/engineer/ac4-gates.md)): `test //...` 87/87 (touched packages uncached), lint, `mc_arch_check`, `rules_fork.sh check`, format, l10n_check, provenance, the fixtures closure check (T-0031-AC6, scans every `utility/mc_*`), layering; coverage `mc_ds_navigation` 100 % (109/109), `characters_list` 100 %. e2e on a fresh simulator `mc-T-0040-engineer-<pid>` (deleted, 0 left): journey and link-after-flow PASS, [summary](../evidence/T-0040/engineer/mini_client/e2e-summary.md); [02_characters_list.png](../evidence/T-0040/engineer/mini_client/02_characters_list.png) shows the new bar with the flow back button |
+
+Mutations ([script](../evidence/T-0040/engineer/mutations.sh), [log](../evidence/T-0040/engineer/mutations.log)): 12 mutations of the package, all killed by a failing test. The first run found two weak spots (the app bar title wrapper was redundant because `AppBar` already adds the header, so it was removed; the large-title scale cap was not asserted), both fixed.
+
+### `characters_list` goldens that changed (4 of 4), all looked at
+`characters_list_loaded`, `characters_list_error`, `characters_list_empty`, `character_preview`: only the app bar title changed, from the default regular weight to `McTypeScale.headline` (17 pt, semibold, `onSurface`). Same position, height and back arrow; the body is pixel-identical (before and after in `documents/evidence/T-0040/engineer/goldens/{before,after}/`).
+
+### Test integrity
+No test deleted, skipped or weakened; no `// ignore:`. One test added to `characters_list/test/flow_scope_test.dart` (AC3) and the four goldens above regenerated.
+
+### Notes
+- `pubspec.yaml` (root workspace) gained `utility/mc_ds_navigation`; `pubspec.lock` and `MODULE.bazel.lock` did not change. `origin/main` had no new commits at handoff, so no merge was needed.
+- Decisions: none needing an ADR. Finding: [F-0039](../findings/F-0039-ds-navigation-semantics-and-layering.md).
+- Follow-ups: add the rule "`mc_ds_*` never depends on `mc_feature_flow`" to `mc_arch_check` (F-0039 fact 5); the 5-tab bottom shell bar and breadcrumbs stay out of scope; Android tap-target guideline (48 dp) not checked (iOS first).
+
+## Fix round (after Verifier PASS `582b5e1` and the code review)
+Merged `582b5e1` (fast-forward) and `origin/main` (T-0038); `pub get` changed no lock. Every fix has a `T-0040-ACn` test that a mutation of the fix kills ([mutations.log](../evidence/T-0040/engineer/mutations.log): 28 of 28 killed; the first run found one survivor, a mutation that did not change behaviour, because the `Align` I had added was not what fixed D1, so it was removed).
+- D1: each tab is exactly 48 pt (`Center` gets `heightFactor`, `maxHeight` 48), the bar 48 + 1 pt divider (the border takes no room, so it is padded in). Tests: 49 pt in a Column, in a tall box, as a page body, at 3x. Label scale capped at 1.5.
+- Reveal scrolls only the bar's own row (own `ScrollController`, `position.ensureVisible`), only when the index changes. Tests: page offset unchanged on build and on change in a `ListView`; a same-index parent rebuild does not snap the bar.
+- `McTabBar` is a `PreferredSizeWidget`; `McAppBar.bottom` added (with the large title too). Tests under `McAppBar`, large `McAppBar` and `AppBar.bottom`.
+- Fitting tabs share the free width (`_TabRow`), so taps in gaps select a tab; doc fixed (D7). Unbounded width: no scroll view, no crash (test in a `Row`). `currentIndex` is asserted (D8). `Material(transparency)` inside, so no `Scaffold` is needed (test). High-contrast divider has no alpha (test).
+- `McSectionHeader`: the action is `Flexible` with an ellipsis (title `flex: 2`); test with a long German label at 3x.
+- D2/D3 pinned (same-index rebuild; `button` flag). D5: the large title names the route (semantics test).
+- D6: the layering script scans every `mc_ds_*` pubspec and BUILD file, ignores only whole-line comments, and has six negative controls ([report](../evidence/T-0040/engineer/ac3-layering.md)). The mutation script refuses to run when the package's `lib` has uncommitted edits.
+- D4 and the default leading: documented on `McAppBar` (loudly: flow pages must pass `leading: const McFlowBackButton()`) and in F-0039 facts 7 to 12.
+- Gates: [ac4-gates.md](../evidence/T-0040/engineer/ac4-gates.md) all PASS, 90/90 tests, coverage `mc_ds_navigation` 93.0 %. e2e PASS on a fresh simulator `mc-T-0040-engineer-68211` (deleted, 0 left).
+- **Goldens changed (24 of 72, all looked at; before/after in `documents/evidence/T-0040/engineer/fix-round/`):** `tab_bar_2.*` (8) and `tab_bar_5.*` (8): the divider now sits right under the 48 pt tabs, the high-contrast divider is full strength, the 2x variants render labels at the 1.5x cap, and the tab fills share the width. `section_header_action.*` (8): the title gets 2/3 of the free width and the action is flexible, so the long title wraps in a narrower column. The `characters_list` goldens did not change.
+
+## Merge (TL)
+- 2026-11-26: Verifier (Opus) PASS `582b5e1`, with major defect D1 (the tab bar stretched to its parent's height). `/code-review` found an important bug (`Scrollable.ensureVisible` scrolled every ancestor) and nits. Fix round `174effd`. Under ADR-0011 the fix round was re-verified by a **Sonnet narrow re-verifier**: PASS `12bf1db`, using about 89k tokens against 200–300k for the Opus runs. TL decisions: a plain `leading` slot, with the bricks always passing `McFlowBackButton`; a 1.5× cap on the large title and the tab labels. The TL merged `--no-ff`; on the merge result `check` passed, 90/90 tests, lint was clean, `mc_arch_check` reported OK, and the layering and fixtures checks passed.
+- Nits left: `heightFactor: 1` and the tab item's `maxHeight` are redundant (both together are pinned); the custom row's intrinsic and dry-layout overrides are untested (coverage 93 %); add the "`mc_ds_*` never depends on `mc_feature_flow`" rule to `mc_arch_check` itself (P-079).
