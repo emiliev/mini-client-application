@@ -193,7 +193,7 @@ mutate AC6-h "nothing is saved" $BLOC \
 mutate AC6-i "a search that found nothing is saved too" $BLOC \
   "s.replace('        return !results.isEmpty;', '        return true;')" $BDD
 mutate AC6-j "a save that finishes after a clear is shown (no version check)" $BLOC \
-  "s.replace('    final saved = await _history.add(query);\n    if (version != _historyVersion) {', '    final saved = await _history.add(query);\n    if (version < 0) {')" $BDD
+  "s.replace('    if (version == _historyVersion) {\n      _recent = list;', '    if (version > 0) {\n      _recent = list;')" $BDD
 mutate AC6-k "Clear does not clear the storage" $BLOC \
   "s.replace('final cleared = await _history.clear();', 'final cleared = await _history.load();')" $BDD
 mutate AC6-l "a tapped recent search waits for the debounce" $BLOC \

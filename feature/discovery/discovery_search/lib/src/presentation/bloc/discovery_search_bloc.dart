@@ -217,13 +217,11 @@ final class DiscoverySearchBloc
   ) async {
     final version = ++_historyVersion;
     final saved = await _history.add(query);
-    if (version != _historyVersion) {
-      return;
-    }
     // A failed save changed nothing on disk; read what is there, because
     // this save's version dropped the list the bloc read when it started.
     final list =
         saved.getOrNull() ?? (await _history.load()).getOrElse(() => const []);
+    // Shown only if nothing changed the list since (a later save, a clear).
     if (version == _historyVersion) {
       _recent = list;
       _refreshHistory(emit);
