@@ -29,6 +29,7 @@ export 'package:mc_test_steps/src/environment/i_am_signed_in_as.dart';
 export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storage.dart';
 export 'package:mc_test_steps/src/environment/the_device_locale_is.dart';
 export 'package:mc_test_steps/src/environment/the_pseudolocale_is_active.dart';
+export 'package:mc_test_steps/src/environment/the_text_scale_is.dart';
 export 'package:mc_test_steps/src/interaction/i_pull_to_refresh.dart';
 export 'package:mc_test_steps/src/interaction/i_swipe_back.dart';
 export 'package:mc_test_steps/src/interaction/i_tap.dart';

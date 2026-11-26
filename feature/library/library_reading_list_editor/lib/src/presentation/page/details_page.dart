@@ -65,8 +65,10 @@ class _DetailsPageContent extends StatelessWidget {
           body: state.when(
             loading: () =>
                 McLoading(semanticLabel: l10n.readingListEditorLoading),
-            signingIn: () =>
-                McLoading(semanticLabel: l10n.readingListEditorSigningIn),
+            signingIn: () => McEmptyView(
+              title: l10n.readingListEditorSignInTitle,
+              message: l10n.readingListEditorSignInMessage,
+            ),
             notFound: () => McEmptyView(
               title: l10n.readingListEditorNotFoundTitle,
               message: l10n.readingListEditorNotFoundMessage,
