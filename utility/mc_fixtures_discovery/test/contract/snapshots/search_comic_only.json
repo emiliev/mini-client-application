@@ -1,0 +1,45 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [
+          {
+            "id": 500060,
+            "subtitle": "2010",
+            "thumbnail": {
+              "path": "mock-asset://characters/003",
+              "variant": "portrait_large"
+            },
+            "title": "Amber Chronicles #1",
+            "type": "comic"
+          },
+          {
+            "id": 500069,
+            "subtitle": "2010",
+            "thumbnail": {
+              "path": "mock-asset://characters/015",
+              "variant": "portrait_large"
+            },
+            "title": "Amber Chronicles #10",
+            "type": "comic"
+          },
+          {
+            "id": 500070,
+            "subtitle": "2010",
+            "thumbnail": {
+              "path": "mock-asset://characters/003",
+              "variant": "portrait_large"
+            },
+            "title": "Amber Chronicles #11",
+            "type": "comic"
+          }
+        ],
+        "total": 11,
+        "type": "comic"
+      }
+    ],
+    "query": "amber chronicles #1"
+  },
+  "request": "GET /v1/search?q=amber%20chronicles%20%231&types=comic&limit=3",
+  "status": 200
+}

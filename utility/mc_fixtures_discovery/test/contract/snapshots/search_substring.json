@@ -1,0 +1,35 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [
+          {
+            "id": 101446,
+            "subtitle": "Harbor Watch",
+            "thumbnail": {
+              "path": "mock-asset://characters/009",
+              "variant": "portrait_medium"
+            },
+            "title": "Amber Bard",
+            "type": "character"
+          },
+          {
+            "id": 100726,
+            "subtitle": "The Undertow",
+            "thumbnail": {
+              "path": "mock-asset://characters/004",
+              "variant": "portrait_medium"
+            },
+            "title": "Amber Guardian",
+            "type": "character"
+          }
+        ],
+        "total": 160,
+        "type": "character"
+      }
+    ],
+    "query": "ard"
+  },
+  "request": "GET /v1/search?q=ard&types=character&limit=2",
+  "status": 200
+}
