@@ -77,9 +77,6 @@ final class FormController {
   void touchAll({Iterable<String>? names}) {
     final targets = (names ?? _specs.keys).toSet();
     targets.forEach(_spec);
-    if (_state.isSubmitting) {
-      return;
-    }
     final next = {
       for (final e in _state.fields.entries)
         e.key: targets.contains(e.key) ? e.value.touch() : e.value,

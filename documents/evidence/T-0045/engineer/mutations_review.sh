@@ -1,6 +1,6 @@
 # Sourced by mutations.sh: mutations for the code-review round (T-0045).
 RV=$F/lib/src/validators.dart
-m R-pattern-group $VAL $RV "r'(?<![\\s\\S])(?:' + regex.pattern + r')(?![\\s\\S])" "r'(?<![\\s\\S])' + regex.pattern + r'(?![\\s\\S])'"
+m R-pattern-group $VAL $RV "r'(?<![\\s\\S])(?:' + regex.pattern + r')(?![\\s\\S])'" "r'(?<![\\s\\S])' + regex.pattern + r'(?![\\s\\S])'"
 m R-pattern-start $VAL $RV "r'(?<![\\s\\S])(?:'" "r'(?:'"
 m R-pattern-end $VAL $RV "r')(?![\\s\\S])'" "r')'"
 m R-pattern-case $VAL $RV 'caseSensitive: regex.isCaseSensitive,' 'caseSensitive: true,'
@@ -11,10 +11,6 @@ m R-set-submitting $FORM $FC '    _spec(name);
     if (_state.isSubmitting) {
       return;
     }' '    _spec(name);'
-m R-touch-submitting $FORM $FC '    targets.forEach(_spec);
-    if (_state.isSubmitting) {
-      return;
-    }' '    targets.forEach(_spec);'
 m R-fieldof-value $FORM $FST 'value: f.value as T?,' 'value: null,'
 m R-fieldof-touched $FORM $FST 'touched: f.touched,' 'touched: false,'
 m R-complete-touch-first $WIZ $WC '        touchCurrentStep();

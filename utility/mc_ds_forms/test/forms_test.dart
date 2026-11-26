@@ -913,6 +913,9 @@ void main() {
       await tester.pumpWidget(page(busy: true, onSubmit: () {}));
       await tester.tap(find.text('Saving'), warnIfMissed: false);
       expect(blockedTaps, 1, reason: 'busy is not blocked, it is working');
+      await tester.pumpWidget(page(busy: true));
+      await tester.tap(find.text('Saving'), warnIfMissed: false);
+      expect(blockedTaps, 1, reason: 'busy without onSubmit is not blocked');
       var submits = 0;
       await tester.pumpWidget(page(onSubmit: () => submits++));
       await tester.tap(find.text('Save'));

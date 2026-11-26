@@ -225,13 +225,16 @@ void main() {
     });
 
     test('T-0045-AC2 fieldOf returns the field typed', () {
-      final m = _make()..controller.setValue('email', 'ab');
+      final m = _make()
+        ..controller.setValue('email', 'ab')
+        ..controller.touch('email');
       final FieldState<String> typed = m.controller.state.fieldOf<String>(
         'email',
       );
       expect(typed.value, 'ab');
       expect(typed.error, const FieldError(ValidationCode.tooShort, min: 3));
-      expect(typed.touched, isFalse);
+      expect(typed.touched, isTrue);
+      expect(m.controller.state.fieldOf<String>('password').touched, isFalse);
       expect(
         () => m.controller.state.fieldOf<int>('email'),
         throwsA(isA<TypeError>()),
