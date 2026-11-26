@@ -57,3 +57,14 @@ Notes for the Verifier and TL:
 4. `outerCanPop` is `!route.isFirst`, not `outer.canPop()` (which counts local history on the first route).
 5. Provenance now also requires exactly one `*.patch` (negative in `provenance_extra_patch_negative.md`). Patch renamed to `0001-navigation-channel-and-popscope.patch`; `VENDORED.md` and the upstream draft updated.
 6. New Bazel target `flow_back_button_test`; no pubspec or lock changes.
+
+### Review round (after Verifier PASS `72dfd8c`)
+Each item has a `T-0037-ACn` test in `flow_back_button_test` that fails without it (mutations R1 to R5 in `mutations.sh`; 21 mutations, all killed, `mutations_T-0037.log`).
+1. **Open drawer** no longer turns the leading into a back arrow: the root branch needs `willHandlePopInternally && impliesAppBarDismissal`. Tests: drawer (opening, open, closing, closed) and `endDrawer`-only; the real `showBottomSheet` tests still give the plain back. (AC3, R1)
+2. **`isFirst` pinned** by the VP8 scenario (app-root flow, outer route with a local history entry). Swapping to `route.canPop` or `Navigator.canPop()` is killed. (AC1, R2)
+3. **Nested navigators:** `FlowScope.flowNavigatorObserver` / `isFlowNavigator`; the flow-root branch needs `route.navigator` to be the flow's own. Test: first route of a navigator nested in a flow page gets no flow back. (AC3, R3)
+4. **Rebuild scope:** `_FlowScopeHost` holds the `ModalRoute` dependency; a dialog above the flow rebuilds no `FlowBuilder` (counted with `debugOnRebuildDirtyWidget`). (AC1, R4)
+5. **`impliesAppBarDismissal` outside a flow** pinned: a history entry that does not imply dismissal gives no back; `route.canPop` alone is killed. (AC2, R5)
+6. **`T-0036-AC3_gates.sh`:** only the `--output_base=` value is taken from `MC_BAZEL_STARTUP`; MISSING paths are relative to `GREP_ROOT`; no `MC_TASK=T-0036` export (each mutation script gets its own `MC_TASK`).
+7. **`VENDORED.md`** Task row lists F-0036. F-0036 facts 10 to 13 added.
+Gates: `T-0036-AC3_gates.md` PASS in full. e2e: 3 of 3 PASS on `mc-T-0037-engineer-2286`, deleted (0 left). No test deleted or skipped, no `// ignore:`. The D3 mutation texts in `mutations.sh` were updated for the new condition.
