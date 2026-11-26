@@ -380,6 +380,41 @@ void main() {
       expect(find.text('open'), findsOneWidget);
     });
 
+    testWidgets('T-0037-AC4 a FlowBuilder whose parent swaps its controller '
+        'accepts the next pop after two pages become one', (tester) async {
+      final two = FlowController<int>(1);
+      final one = FlowController<int>(0);
+      addTearDown(two.dispose);
+      addTearDown(one.dispose);
+      final controller = ValueNotifier<FlowController<int>>(two);
+      await _openFlow(
+        tester,
+        ValueListenableBuilder<FlowController<int>>(
+          valueListenable: controller,
+          builder: (context, value, _) => FlowBuilder<int>(
+            controller: value,
+            onGeneratePages: (s, _) => [
+              const MaterialPage<void>(child: _Root()),
+              if (s > 0)
+                const MaterialPage<void>(child: Scaffold(body: Text('detail'))),
+            ],
+          ),
+        ),
+        expectRoot: false,
+      );
+      expect(find.text('detail'), findsOneWidget);
+
+      controller.value = one;
+      await tester.pumpAndSettle();
+      expect(find.text('detail'), findsNothing);
+      expect(find.text('flow root'), findsOneWidget);
+
+      await sendNavigation(tester, 'popRoute');
+      await tester.pumpAndSettle();
+      expect(find.text('flow root'), findsNothing);
+      expect(find.text('open'), findsOneWidget);
+    });
+
     testWidgets('T-0037-AC4 outside any route the widget renders an empty '
         'box of its own', (tester) async {
       await tester.pumpWidget(const Align(child: McFlowBackButton()));
