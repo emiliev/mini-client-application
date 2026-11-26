@@ -9,19 +9,24 @@ import 'package:mc_storage/mc_storage.dart';
 /// [SessionWriter]. List `StorageDIInitializer` and `EventBusDIInitializer`
 /// first.
 ///
-/// Reading the saved session is real file I/O. When the storage directory is
-/// missing or empty (a first launch, and every widget test with a fresh temp
-/// directory) nothing can be saved, so the read is skipped: that keeps boot
+/// Reading the saved session is real file I/O. When the session's own file
+/// does not exist (a first launch, and every widget test with a fresh temp
+/// directory) nothing can be restored, so the read is skipped: that keeps boot
 /// free of I/O, which a `testWidgets` body under fake async cannot await
-/// (F-0038).
+/// (F-0038). Other saved keys do not matter. If the check itself fails, the
+/// session is read the normal way, which reports a bad store as signed out.
 class SessionDIInitializer extends McDIInitializer {
   const SessionDIInitializer() : super(_init);
 
   static Future<void> _init(GetIt getIt, String? environment) async {
     final store = getIt<FileStore>();
     final bus = getIt<EventBus>();
-    final dir = store.directory;
-    final nothingSaved = !dir.existsSync() || dir.listSync().isEmpty;
+    bool nothingSaved;
+    try {
+      nothingSaved = !store.existsSync(Session.defaultKey);
+    } on Object {
+      nothingSaved = false;
+    }
     final session = nothingSaved
         ? Session.empty(store, bus: bus)
         : await Session.restore(store, bus: bus);

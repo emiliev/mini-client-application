@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
@@ -16,6 +17,7 @@ final class ProbeDomain implements MockDomain {
 
   /// Completes the request held by `GET /v1/gated`.
   final Completer<void> gate = Completer<void>();
+  int _cappedCalls = 0;
 
   @override
   String get name => 'probe';
@@ -36,6 +38,14 @@ final class ProbeDomain implements MockDomain {
         (request, context) =>
             MockResponse.error(401, 'unauthenticated', 'Never signed in'),
       )
+      // 401 for its first 5 calls, then 500: a refresh/replay loop ends
+      // with an assertion instead of a timeout.
+      ..get('/v1/always-401-capped', (request, context) {
+        _cappedCalls++;
+        return _cappedCalls <= 5
+            ? MockResponse.error(401, 'unauthenticated', 'Never signed in')
+            : MockResponse.error(500, 'capped', 'The loop ran too long');
+      })
       // Looks at the token when the request arrives, then waits for [gate]:
       // a request that was sent with an old token but is answered late.
       ..get('/v1/gated', (request, context) async {
@@ -128,6 +138,18 @@ final class Rig {
       if (t.path == path) t.status,
   ];
 
+  /// A second [Dio] with the production interceptors and the auth interceptor
+  /// over [adapter], on this rig's session.
+  (Dio, AuthApi) dioOver(
+    HttpClientAdapter adapter, {
+    Duration retryDelay = Duration.zero,
+  }) {
+    final d = createApiDio(adapter: adapter, retryDelay: retryDelay);
+    final a = AuthApi(d, session, session);
+    d.interceptors.add(AuthInterceptor(d, session, session, a));
+    return (d, a);
+  }
+
   Future<void> settle() async {
     for (var i = 0; i < 10; i++) {
       await Future<void>.delayed(Duration.zero);
@@ -139,4 +161,69 @@ final class Rig {
     await session.dispose();
     dir.deleteSync(recursive: true);
   }
+}
+
+/// Holds requests to [heldPath] on a gate: before the server sees them
+/// ([holdResponse] false) or after it answered ([holdResponse] true).
+final class GatedAdapter implements HttpClientAdapter {
+  GatedAdapter(this.inner, this.heldPath, {this.holdResponse = false});
+
+  final HttpClientAdapter inner;
+  final String heldPath;
+  final bool holdResponse;
+  final Completer<void> gate = Completer<void>();
+  final Completer<void> arrived = Completer<void>();
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    if (!options.path.endsWith(heldPath)) {
+      return inner.fetch(options, requestStream, cancelFuture);
+    }
+    if (holdResponse) {
+      final response = await inner.fetch(options, requestStream, cancelFuture);
+      _arrive();
+      await gate.future;
+      return response;
+    }
+    _arrive();
+    await gate.future;
+    return inner.fetch(options, requestStream, cancelFuture);
+  }
+
+  void _arrive() {
+    if (!arrived.isCompleted) {
+      arrived.complete();
+    }
+  }
+
+  @override
+  void close({bool force = false}) => inner.close(force: force);
+}
+
+/// Throws [error] for every request to [path].
+final class ThrowingAdapter implements HttpClientAdapter {
+  ThrowingAdapter(this.inner, this.path, this.error);
+
+  final HttpClientAdapter inner;
+  final String path;
+  final DioException Function(RequestOptions) error;
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    if (options.path.endsWith(path)) {
+      throw error(options);
+    }
+    return inner.fetch(options, requestStream, cancelFuture);
+  }
+
+  @override
+  void close({bool force = false}) => inner.close(force: force);
 }

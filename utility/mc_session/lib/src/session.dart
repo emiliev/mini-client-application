@@ -18,13 +18,16 @@ import 'package:mc_storage/mc_storage.dart';
 /// The store is plain JSON in the app's support directory. That is enough for
 /// a mock identity; a real one must move the tokens to the Keychain.
 final class Session implements SessionReader, SessionWriter {
+  /// The store key the session lives under unless another is given.
+  static const String defaultKey = 'session';
+
   Session._(this._store, this._bus, this._key, this._current);
 
   /// Opens the session saved under [key], if any.
   static Future<Session> restore(
     FileStore store, {
     EventBus? bus,
-    String key = 'session',
+    String key = defaultKey,
   }) async {
     final read = await store.read(key);
     return Session._(store, bus, key, read.fold(_decode, (_) => null));
@@ -35,7 +38,7 @@ final class Session implements SessionReader, SessionWriter {
   factory Session.empty(
     FileStore store, {
     EventBus? bus,
-    String key = 'session',
+    String key = defaultKey,
   }) => Session._(store, bus, key, null);
 
   static _Active? _decode(Object? json) {
@@ -56,6 +59,7 @@ final class Session implements SessionReader, SessionWriter {
       StreamController<AuthStatus>.broadcast();
 
   _Active? _current;
+  int _epoch = 0;
   Future<void> _tail = Future<void>.value();
 
   @override
@@ -75,6 +79,9 @@ final class Session implements SessionReader, SessionWriter {
   String? get refreshToken => _current?.tokens.refreshToken;
 
   @override
+  int get epoch => _epoch;
+
+  @override
   Stream<AuthStatus> get authState => _changes.stream;
 
   @override
@@ -83,15 +90,22 @@ final class Session implements SessionReader, SessionWriter {
     required AuthTokens tokens,
   }) {
     final active = _Active(userId, tokens);
+    final changed = _current?.userId != userId;
     _current = active;
-    _announce(AuthStatus.signedIn);
+    _epoch++;
+    if (changed) {
+      _announce(AuthStatus.signedIn);
+    }
     return _enqueue(() => _store.write(_key, active.toJson()));
   }
 
   @override
-  Future<Result<void, StorageFailure>> updateTokens(AuthTokens tokens) {
+  Future<Result<void, StorageFailure>> updateTokens(
+    AuthTokens tokens, {
+    int? epoch,
+  }) {
     final current = _current;
-    if (current == null) {
+    if (current == null || (epoch != null && epoch != _epoch)) {
       return Future.value(success(null));
     }
     final active = _Active(current.userId, tokens);
@@ -100,10 +114,14 @@ final class Session implements SessionReader, SessionWriter {
   }
 
   @override
-  Future<Result<void, StorageFailure>> signOut() {
+  Future<Result<void, StorageFailure>> signOut({int? ifEpoch}) {
+    if (ifEpoch != null && ifEpoch != _epoch) {
+      return Future.value(success(null));
+    }
     final wasSignedIn = _current != null;
     _current = null;
     if (wasSignedIn) {
+      _epoch++;
       _announce(AuthStatus.signedOut);
     }
     return _enqueue(() => _store.delete(_key));

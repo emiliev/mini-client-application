@@ -74,6 +74,24 @@ void main() {
     },
   );
 
+  test('T-0039-AC4 other saved keys alone boot signed out', () async {
+    await FileStore(dir).write('search_history', ['x']);
+
+    final getIt = await boot();
+
+    expect(getIt<SessionReader>().isSignedIn, isFalse);
+    await getIt.reset();
+  });
+
+  test('T-0039-AC4 a storage path that is a file boots signed out', () async {
+    final file = File('${dir.path}/not-a-dir')..writeAsStringSync('x');
+
+    final getIt = await boot(Directory(file.path));
+
+    expect(getIt<SessionReader>().isSignedIn, isFalse);
+    await getIt.reset();
+  });
+
   test('T-0039-AC4 a directory with other saved keys still restores', () async {
     await FileStore(dir).write('search_history', ['x']);
     await FileStore(dir).write('session', {

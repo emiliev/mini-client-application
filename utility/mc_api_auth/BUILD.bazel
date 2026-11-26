@@ -38,6 +38,7 @@ dart_library(
 ) for t in [
     "auth_interceptor_test",
     "auth_api_test",
+    "auth_races_test",
 ]]
 
 # AC5 (R15): lib imports no Flutter.

@@ -7,6 +7,7 @@ package(default_visibility = ["//visibility:public"])
 _LANG = "3.13"
 
 _DEPS = [
+    "//utility/mc_api_auth",
     "//utility/mc_api_client",
     "//utility/mc_config",
     "//utility/mc_di",
@@ -15,6 +16,7 @@ _DEPS = [
     "//utility/mc_event_bus",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
+    "//utility/mc_session",
     "//utility/mc_storage",
     "@pub_deps//:dio",
     "@pub_deps//:flutter",
@@ -35,6 +37,7 @@ flutter_library(
 _TEST_DEPS = _DEPS + [
     ":mc_test_utils",
     "//utility/mc_feature_flow",
+    "//utility/mc_fixtures_identity",
 ]
 
 [flutter_test(
@@ -51,6 +54,7 @@ _TEST_DEPS = _DEPS + [
     "harness_test",
     "isolation_test",
     "init_flow_test",
+    "auth_container_test",
 ]]
 
 flutter_test(

@@ -37,6 +37,12 @@ abstract interface class SessionReader {
   /// Null when signed out.
   String? get refreshToken;
 
+  /// Which session this is: it changes on every sign-in and every sign-out,
+  /// and not on a token refresh. Work started for one session (a refresh, a
+  /// request) passes its epoch back to apply or replay only while the same
+  /// session is still current.
+  int get epoch;
+
   /// Each change of [status], in order. A broadcast stream: it has no replay,
   /// so read [status] for the current value.
   Stream<AuthStatus> get authState;
@@ -48,8 +54,10 @@ abstract interface class SessionReader {
 /// already sees it, and returns when the change is saved. A save failure is
 /// returned as a value; the in-memory state stays as changed.
 abstract interface class SessionWriter {
-  /// Starts a session (replacing any current one) and publishes
-  /// `SessionChanged(signedIn)`.
+  /// Starts a session (replacing any current one) and starts a new epoch.
+  /// Publishes `SessionChanged(signedIn)` when the session was signed out or
+  /// belonged to another user; a repeat sign-in of the same user only
+  /// replaces the tokens, so listeners do not refresh twice.
   Future<Result<void, StorageFailure>> signIn({
     required String userId,
     required AuthTokens tokens,
@@ -57,9 +65,16 @@ abstract interface class SessionWriter {
 
   /// Swaps the tokens after a refresh. No event. A no-op when signed out, so
   /// a refresh that lands after a sign-out cannot bring the session back.
-  Future<Result<void, StorageFailure>> updateTokens(AuthTokens tokens);
+  /// With [epoch] it is also a no-op unless that session is still current, so
+  /// a refresh that lands after another user signed in cannot overwrite them.
+  Future<Result<void, StorageFailure>> updateTokens(
+    AuthTokens tokens, {
+    int? epoch,
+  });
 
   /// Ends the session and publishes `SessionChanged(signedOut)` if one was
   /// active. Always clears the store, so it also heals a corrupt value.
-  Future<Result<void, StorageFailure>> signOut();
+  /// With [ifEpoch] it does nothing unless that session is still current, so
+  /// a rejected refresh of an old session cannot sign out a new one.
+  Future<Result<void, StorageFailure>> signOut({int? ifEpoch});
 }

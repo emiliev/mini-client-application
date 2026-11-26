@@ -1,11 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 import 'package:mc_test_utils/src/session.dart';
 
@@ -40,7 +42,8 @@ final class ExternalDouble<T extends Object> {
 /// The test root container (Tide's `TestContainer`, TD-02).
 ///
 /// It mirrors the production root list of `app_core`'s `rootInitializers`
-/// (config, monitoring, storage, mocked backend, API client, event bus), with
+/// (config, monitoring, storage, event bus, session, mocked backend, API
+/// client, API auth), with
 /// doubles only at the edges: `MockMonitoring`, the session's
 /// `McBackendHarness` transport, a temporary storage directory and a fixed
 /// config. The real `Dio` with its interceptors runs over the harness.
@@ -67,6 +70,8 @@ abstract final class McTestContainer {
       (getIt, _) => getIt.registerSingleton<Monitoring>(session.monitoring),
     ),
     StorageDIInitializer(session.storageDirectory),
+    const EventBusDIInitializer(),
+    const SessionDIInitializer(),
     McDIInitializer(
       (getIt, _) =>
           getIt.registerSingleton<MockBackend>(session.backend.backend),
@@ -77,7 +82,7 @@ abstract final class McTestContainer {
       // what the tests observe.
       retryDelay: Duration.zero,
     ),
-    const EventBusDIInitializer(),
+    const ApiAuthDIInitializer(),
     ...wirings,
     for (final external in externals) external.toInitializer(),
   ];

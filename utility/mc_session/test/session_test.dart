@@ -263,6 +263,116 @@ void main() {
     });
   });
 
+  group('T-0039-AC2 sessions have epochs', () {
+    test(
+      'T-0039-AC2 the epoch changes on sign-in and sign-out, not on a refresh',
+      () async {
+        final session = await open();
+        final start = session.epoch;
+
+        await session.signIn(userId: 'u-1', tokens: _tokens);
+        final signedIn = session.epoch;
+        await session.updateTokens(
+          const AuthTokens(accessToken: 'a2', refreshToken: 'r2'),
+        );
+        final refreshed = session.epoch;
+        await session.signOut();
+        final signedOut = session.epoch;
+        await session.signOut();
+
+        expect(signedIn, isNot(start));
+        expect(refreshed, signedIn);
+        expect(signedOut, isNot(refreshed));
+        expect(
+          session.epoch,
+          signedOut,
+          reason: 'signing out twice is one change',
+        );
+      },
+    );
+
+    test('T-0039-AC2 updateTokens for an old epoch changes nothing', () async {
+      final session = await open();
+      await session.signIn(userId: 'u-1', tokens: _tokens);
+      final old = session.epoch;
+      await session.signOut();
+      await session.signIn(
+        userId: 'u-2',
+        tokens: const AuthTokens(accessToken: 'b', refreshToken: 'b-r'),
+      );
+
+      await session.updateTokens(
+        const AuthTokens(accessToken: 'late', refreshToken: 'late'),
+        epoch: old,
+      );
+
+      expect(session.userId, 'u-2');
+      expect(session.accessToken, 'b');
+      expect((await open()).accessToken, 'b');
+    });
+
+    test('T-0039-AC2 updateTokens for the current epoch applies', () async {
+      final session = await open();
+      await session.signIn(userId: 'u-1', tokens: _tokens);
+
+      await session.updateTokens(
+        const AuthTokens(accessToken: 'a2', refreshToken: 'r2'),
+        epoch: session.epoch,
+      );
+
+      expect(session.accessToken, 'a2');
+    });
+
+    test(
+      'T-0039-AC2 signOut for an old epoch does not end the new session',
+      () async {
+        final session = await open();
+        await session.signIn(userId: 'u-1', tokens: _tokens);
+        final old = session.epoch;
+        await session.signOut();
+        await session.signIn(userId: 'u-2', tokens: _tokens);
+        await pumpEventQueue();
+        events.clear();
+
+        await session.signOut(ifEpoch: old);
+        await pumpEventQueue();
+
+        expect(session.userId, 'u-2');
+        expect(events, isEmpty);
+        expect((await open()).userId, 'u-2');
+      },
+    );
+
+    test('T-0039-AC2 signOut for the current epoch ends the session', () async {
+      final session = await open();
+      await session.signIn(userId: 'u-1', tokens: _tokens);
+
+      await session.signOut(ifEpoch: session.epoch);
+
+      expect(session.isSignedIn, isFalse);
+    });
+
+    test('T-0039-AC2 a repeat sign-in of the same user announces nothing, another user does', () async {
+      final session = await open();
+      await session.signIn(userId: 'u-1', tokens: _tokens);
+      await pumpEventQueue();
+      events.clear();
+
+      await session.signIn(
+        userId: 'u-1',
+        tokens: const AuthTokens(accessToken: 'again', refreshToken: 'r'),
+      );
+      await pumpEventQueue();
+      final repeat = [...events];
+      await session.signIn(userId: 'u-2', tokens: _tokens);
+      await pumpEventQueue();
+
+      expect(repeat, isEmpty);
+      expect(session.accessToken, 'access-1');
+      expect(events, const [SessionChanged(AuthStatus.signedIn)]);
+    });
+  });
+
   group('T-0039-AC4 AuthTokens', () {
     test('T-0039-AC4 round-trips JSON and hides secrets in toString', () {
       expect(AuthTokens.fromJson(_tokens.toJson()), _tokens);

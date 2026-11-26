@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:mc_api_auth/src/auth_api.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
@@ -8,16 +10,26 @@ import 'package:mc_session/mc_session.dart';
 ///
 /// - Signed out, a request carries no `Authorization` header (one the caller
 ///   set itself is left alone, and its 401 is never refreshed).
+/// - A request remembers the session it was sent for (`SessionReader.epoch`).
+///   Everything that happens later is done only while that session is still
+///   current: a refresh outcome is applied to it alone, and a 401 is replayed
+///   only for it. After a sign-out, or a sign-in as someone else, the 401
+///   reaches the caller untouched, so a request of user A is never repeated
+///   with user B's token. A retry of A's request (by the retry interceptor)
+///   after such a change is failed as unauthorized instead of being sent.
 /// - A 401 for a request that carried our token starts one refresh. Every
 ///   other request that gets a 401 while it runs waits for that same refresh.
 ///   A 401 that arrives after the refresh finished sees a newer token than
 ///   the one it sent, so it is just replayed.
-/// - A replay that gets a 401 again is not refreshed again.
-/// - When the server rejects the refresh (a 4xx, a malformed answer or no
-///   refresh token), the session is cleared (`SessionChanged(signedOut)`)
-///   and the original 401 reaches the caller as [ApiFailure.unauthorized].
-///   When the refresh cannot be tried (offline, timeout, 5xx) the session is
-///   kept and the caller sees that failure instead.
+/// - A replay that gets a 401 again is not refreshed again. Only 401 refreshes
+///   (a 403 does not). A body that cannot be sent twice (a `Stream`) is never
+///   replayed, so its 401 is not refreshed either; a `FormData` is cloned.
+/// - When the server definitely rejects the refresh (`ApiUnauthorized`, a 4xx
+///   other than 408 and 429, or a malformed answer), the session is cleared
+///   (`SessionChanged(signedOut)`) and the original 401 reaches the caller as
+///   [ApiFailure.unauthorized]. Any other failure (offline, timeout, 5xx, 429,
+///   an unexpected error such as a dropped socket or a cancel) means "refresh
+///   unavailable": the session is kept and the caller sees that failure.
 ///
 /// Install it after the retry interceptor, so a replayed request passes
 /// through every interceptor again.
@@ -26,6 +38,7 @@ class AuthInterceptor extends Interceptor {
 
   /// Set on a request once we put the bearer on it.
   static const _applied = 'mc_api_auth.applied';
+  static const _epoch = 'mc_api_auth.epoch';
   static const _replayed = 'mc_api_auth.replayed';
   static const _prefix = 'Bearer ';
 
@@ -34,19 +47,30 @@ class AuthInterceptor extends Interceptor {
   final SessionWriter _writer;
   final AuthApi _api;
 
-  Future<_Refresh>? _refreshing;
+  _InFlight? _refreshing;
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (options.extra[skipAuthKey] != true) {
       final ours = options.extra[_applied] == true;
       final token = _reader.accessToken;
+      if (ours && options.extra[_epoch] != _reader.epoch && token != null) {
+        // A retry of a request that was sent for another session.
+        return handler.reject(
+          DioException(
+            requestOptions: options,
+            type: DioExceptionType.unknown,
+            error: const ApiFailure.unauthorized('The session changed'),
+          ),
+        );
+      }
       if (token != null &&
           (ours || !options.headers.containsKey('Authorization'))) {
         options.headers['Authorization'] = '$_prefix$token';
         options.extra[_applied] = true;
+        options.extra[_epoch] = _reader.epoch;
       } else if (token == null && ours) {
-        // A replay after a sign-out must not carry the old token.
+        // A retry after a sign-out must not carry the old token.
         options.headers.remove('Authorization');
         options.extra[_applied] = false;
       }
@@ -60,17 +84,20 @@ class AuthInterceptor extends Interceptor {
     ErrorInterceptorHandler handler,
   ) async {
     final options = err.requestOptions;
+    final epoch = options.extra[_epoch];
     if (err.response?.statusCode != 401 ||
         options.extra[_applied] != true ||
         options.extra[_replayed] == true ||
-        !_reader.isSignedIn) {
+        options.data is Stream ||
+        epoch is! int ||
+        epoch != _reader.epoch) {
       return handler.next(err);
     }
     final sent = _bearer(options);
     if (sent != null && sent == _reader.accessToken) {
-      final outcome = await (_refreshing ??= _refresh());
+      final outcome = await _refreshFor(epoch);
       switch (outcome) {
-        case _SignedOut():
+        case _Rejected():
           return handler.next(err);
         case _Unavailable(:final failure):
           return handler.next(
@@ -84,12 +111,21 @@ class AuthInterceptor extends Interceptor {
         case _Refreshed():
           break;
       }
+      if (epoch != _reader.epoch) {
+        // Signed out, or someone else signed in, while we waited.
+        return handler.next(err);
+      }
     }
-    // Either we just refreshed, or another request already had.
     try {
       handler.resolve(
         await _dio.fetch<Object?>(
-          options.copyWith(extra: {...options.extra, _replayed: true}),
+          options.copyWith(
+            // A FormData is single-use: the replay gets its own copy.
+            data: options.data is FormData
+                ? (options.data as FormData).clone()
+                : options.data,
+            extra: {...options.extra, _replayed: true},
+          ),
         ),
       );
     } on DioException catch (e) {
@@ -97,30 +133,48 @@ class AuthInterceptor extends Interceptor {
     }
   }
 
-  Future<_Refresh> _refresh() async {
-    try {
-      final result = await _api.refresh();
-      return await result.fold<Future<_Refresh>>(
-        (tokens) async {
-          await _writer.updateTokens(tokens);
-          return const _Refreshed();
-        },
-        (failure) async {
-          if (failure is ApiOffline ||
-              failure is ApiTimeout ||
-              failure is ApiServer) {
-            return _Unavailable(failure);
-          }
-          await _writer.signOut();
-          return const _SignedOut();
-        },
-      );
-    } finally {
-      // The next 401 that still carries a stale token starts a fresh refresh
-      // only if the session did not change, so clearing here is safe.
-      _refreshing = null;
+  /// The one refresh for session [epoch]: later 401s of that session share it.
+  Future<_Refresh> _refreshFor(int epoch) {
+    final current = _refreshing;
+    if (current != null && current.epoch == epoch) {
+      return current.future;
     }
+    final flight = _InFlight(epoch, _refresh(epoch));
+    _refreshing = flight;
+    unawaited(
+      flight.future.whenComplete(() {
+        if (identical(_refreshing, flight)) {
+          _refreshing = null;
+        }
+      }),
+    );
+    return flight.future;
   }
+
+  Future<_Refresh> _refresh(int epoch) async {
+    final result = await _api.refresh();
+    return result.fold<Future<_Refresh>>(
+      (tokens) async {
+        // Applied only while the session it was made for is current.
+        await _writer.updateTokens(tokens, epoch: epoch);
+        return const _Refreshed();
+      },
+      (failure) async {
+        if (_rejects(failure)) {
+          await _writer.signOut(ifEpoch: epoch);
+          return const _Rejected();
+        }
+        return _Unavailable(failure);
+      },
+    );
+  }
+
+  /// A definite "no" from the server, as opposed to "could not ask".
+  static bool _rejects(ApiFailure failure) => switch (failure) {
+    ApiUnauthorized() || ApiMalformed() => true,
+    ApiClientError(:final status) => status != 408 && status != 429,
+    _ => false,
+  };
 
   static String? _bearer(RequestOptions options) {
     final header = options.headers['Authorization'];
@@ -128,6 +182,13 @@ class AuthInterceptor extends Interceptor {
         ? header.substring(_prefix.length)
         : null;
   }
+}
+
+final class _InFlight {
+  _InFlight(this.epoch, this.future);
+
+  final int epoch;
+  final Future<_Refresh> future;
 }
 
 sealed class _Refresh {
@@ -138,8 +199,8 @@ final class _Refreshed extends _Refresh {
   const _Refreshed();
 }
 
-final class _SignedOut extends _Refresh {
-  const _SignedOut();
+final class _Rejected extends _Refresh {
+  const _Rejected();
 }
 
 final class _Unavailable extends _Refresh {
