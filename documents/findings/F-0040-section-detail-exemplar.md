@@ -1,0 +1,39 @@
+# F-0040: The section/detail exemplar: a kit gap in date formatting, sociable tests of an auth-gated write, and what the BDD steps have to know
+
+- **Date:** 2026-11-26
+- **Author:** crew: Engineer (T-0041)
+- **Type:** Lesson / library behaviour
+- **Related:** T-0041, P1-18, F-0031, F-0033, F-0038, F-0039, plan 01 §3.3, §3.4, §4.2, R15, R17, R30, ADR-0010
+
+## Summary
+`comics_details` is the second exemplar (SC): one comic in sections, with a favourite that asks the app to sign in. **No codegen shim failed on a real-world case**; all 12 freezed, json, retrofit and injectable outputs and the 3 gen-l10n files equal build_runner's or the CLI's. One kit gap needed a marked workaround: `mc_formatters` needs its date symbols loaded, and no root initializer loads them (fact 1, TL decision). The rest are facts the bricks and their tests need: how to test an awaited `requestSignIn()` under fake async, how to prove a request carried the bearer, why sections below the fold are not in the tree, and a `$` in a Gherkin string.
+
+## Facts
+1. **Kit gap: nothing loads the date symbols (marked workaround).** `formatDate(date, 'de')` throws `LocaleDataException` until `initializeFormatters()` ran. Plan 01 §3.4's root list has `L10nCoreDIInitializer`, which does not exist (`app_core` says so), and `McTestContainer` mirrors the root list, so neither the app nor the tests load them. `ComicsDetailsDIInitializer._init` awaits `initializeFormatters()` before `getIt.init`, marked `WORKAROUND (F-0040 fact 1)`. It is idempotent and synchronous in effect (intl's `initializeDateFormatting` fills its maps and returns `Future.value()`). **TL decision:** a root `FormattersDIInitializer` (or the planned `L10nCoreDIInitializer`) in `rootInitializers` and `McTestContainer`, or a self-initialising `mc_formatters`; then the feature's initializer goes back to Tide's verbatim shape. Neither package was T-0041's to edit.
+2. **Codegen: real cases the shims handled with no change.**
+   - retrofit: `@Path` parameters, `PUT` and `DELETE`, five endpoints on one API, a DTO file with eight `@Freezed(fromJson: true, toJson: true)` classes (nested objects, `List<int>`, lists of objects, `explicitToJson`);
+   - injectable: a six-parameter bloc constructor whose root types (`SessionReader`, `EventBus`) come from two other packages, and an init file that imports a third package (`init_deps` gains `mc_formatters`);
+   - freezed: a union case with a positional `ApiFailure`, a required named field and a `@Default`, `@Implements<McFailureState>()` on two cases of one union, and a flow state holding a same-package freezed type (deep `copyWith` compiles, as F-0031 fact 10 said);
+   - go_router_builder: two route libraries in one wiring, each with its own `$appRoutes` (they are separate libraries, so the names never meet; each library wraps its list in a getter);
+   - a bloc body edit re-runs only that bloc's freezed action and the injectable shards; the aggregate is a cache hit and retrofit and json do not run (`T-0041-AC7_cutoff.md`).
+3. **Testing an awaited `requestSignIn()` under fake async.** Signing in writes the session to a real file, which a `testWidgets` body cannot await (F-0038 fact 1). The navigator mock therefore answers `requestSignIn()` with a pending `Completer`; the step `signing in succeeds as {...}` signs the fixture user in through the real `AuthApi` inside `tester.runAsync`, then completes it with true. While the completer is pending a scenario can assert that the feature waits (no request, the toggle disabled). The wiring's own sheet test alternates `runAsync(delay)` and `pumpAndSettle` until the sheet closes (`_settleRealIo`).
+4. **Proving "the PUT carried the bearer".** The harness's `RecordedRequest` has no headers and the backend's `TrafficEntry` neither. The feature's test env appends a recording `Interceptor` to the shared `Dio` after the container is built; it runs after the auth interceptor, so it sees the request as the backend gets it, and it changes nothing. The step `the app sent {route} with the bearer of {user}` checks every such request carries the session's own token, of that user's fixture shape. The generic step `the backend answered {route} with {200}` reads the engine's traffic log: the favourites routes answer 401 without a valid bearer, so a 200 is a second, independent proof. A `headers` field on `RecordedRequest` (mc_test_utils) would make the recorder unnecessary (follow-up).
+5. **A hold before the page settles starves it.** With a `the backend holds {...}` active, `mcSettle` pumps two frames instead of settling. A hold set before `I open comic` left the favourite's `GET` unanswered, so the first tap was ignored (the toggle was still loading). Set holds after the page has settled.
+6. **Sections below the fold are not in the tree.** `ListView(children: [...])` builds its children lazily, like a builder. The cast row sits about 1,100 px down, so a step that asserts it must scroll first (`scrollComicUntilVisible`). A card in a horizontal row inside it may still be half off screen: `ensureVisible` before a tap.
+7. **A `$` in a Gherkin string literal is Dart interpolation.** The BDD generator copies `{'...'}` into a Dart single-quoted string, so `{'$3.99'}` would not compile. Write `{'\$3.99'}`.
+8. **intl puts a non-breaking space in German prices.** `formatMoney(Money(399, usd), 'de')` is `3,99 $`. The fact step compares with non-breaking and narrow spaces read as plain spaces, so the feature file can say `{'3,99 \$'}`.
+9. **The retry interceptor retries a `PUT`.** It is idempotent, so a failing favourite write is sent three times (the client's own retries, `retryDelay` zero in tests). "A double tap sends one request" is therefore asserted on the successful path.
+10. **The detail has only character ids.** `GET /v1/comics/:id` lists `characterIds`, not names or art, so the cast section fetches `GET /v1/characters/:id` for each (1 to 6 requests, in parallel). A member the backend no longer knows (`404`) is left out; any other failure fails the page, and Retry reloads it. An embedded cast summary in the comics contract would save those requests (TL / contract decision).
+11. **Shared names across wirings.** The app imports every wiring's barrel side by side. universe_wiring exports `RouteTargets`; a second wiring exporting the same name is harmless until something names it, then ambiguous. publishing_wiring's is `PublishingRouteTargets`. The bricks should prefix the group (and universe_wiring's could follow).
+12. **Plain `testWidgets` runs on an 800 x 600 surface.** The app-level test (`mini_client:comic_route_test`) sets `mcReferenceSurface`, as `mcTestWidgets` does; otherwise a tap at y = 616 misses with only a warning.
+13. **A DS widget under a bare `MaterialApp` asserts.** `McButton` reads `McThemeExtension`; the wiring's sheet test builds `MaterialApp.router(theme: McTheme.of(...))`.
+
+## Evidence
+- `documents/evidence/T-0041/engineer/T-0041-AC7_byte_identity.md` (12 of 12 EQUAL), `T-0041-AC7_gen_l10n_parity.md` (3 of 3 identical after `dart format`), `T-0041-AC7_cutoff.md`, `T-0041-AC7_generated_not_committed.md`.
+- Fact 5: the first BDD run of "Signed in, the toggle flips at once ..." failed with `Found 0 widgets with text "Remove from favourites"`; moving the hold after `I open comic` fixed it.
+- Fact 12: `Warning: A call to tap() ... derived an Offset (Offset(76.0, 616.0)) that would not hit test`.
+
+## Implications / actions
+- TL decision on fact 1 before the bricks copy the initializer.
+- Bricks: per-group `RouteTargets` names (fact 11); `ensureVisible` and scroll-first steps for section pages (fact 6); holds after settle (fact 5); the pending-completer navigator mock for any intent that returns a `Future` (fact 3).
+- Follow-ups: `RecordedRequest.headers` in mc_test_utils (fact 4); the cast contract (fact 10).
