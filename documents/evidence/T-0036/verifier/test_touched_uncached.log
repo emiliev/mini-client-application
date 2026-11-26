@@ -1,0 +1,10 @@
+//feature/characters/characters_list:architecture_test                   PASSED in 0.3s
+//feature/characters/characters_list:bdd_test                            PASSED in 2.3s
+//feature/characters/characters_list:contract_test                       PASSED in 0.4s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.1s
+//feature/characters/characters_list:golden_test                         PASSED in 1.2s
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 1.1s
+//utility/mc_feature_flow:flow_kit_test                                  PASSED in 1.4s
+//utility/mc_feature_flow:flow_navigation_channel_test                   PASSED in 0.9s
+//utility/mc_feature_flow:framework_navigation_baseline_test             PASSED in 0.7s
+Executed 9 out of 9 tests: 9 tests pass.

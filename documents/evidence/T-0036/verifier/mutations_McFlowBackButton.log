@@ -1,0 +1,20 @@
+M M1 isFirst check dropped: COMPILE ERROR
+M M2 canPop check dropped: killed by //feature/characters/characters_list:golden_test //utility/mc_feature_flow:flow_kit_test 
+        FAIL  T-0032-AC1 golden: the first page loaded
+        FAIL  T-0032-AC2 golden: the first page failed
+        FAIL  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 absent when the flow is the root
+        FAIL  golden: the empty catalogue
+M M3 pops the inner navigator: COMPILE ERROR
+M M4 always empty: COMPILE ERROR
+M M5 isFirst -> isCurrent: SURVIVED
+M M6 maybePop -> pop (ignores PopScope): SURVIVED
+M M7 no route counts as root: SURVIVED
+M M8 canPop read from the inner navigator: killed by //utility/mc_feature_flow:flow_kit_test 
+        FAIL  T-0036-AC1 the back button is present after the root page rebuilds under an inner page
+        FAIL  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 present when pushed, and tapping it pops the flow
+M M1b isFirst ignored (any route counts as root): SURVIVED
+M M3b pops the inner navigator: killed by //utility/mc_feature_flow:flow_kit_test 
+        FAIL  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 present when pushed, and tapping it pops the flow
+M M4b root check inverted: killed by //utility/mc_feature_flow:flow_kit_test 
+        FAIL  T-0036-AC1 the back button is present after the root page rebuilds under an inner page
+        FAIL  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 present when pushed, and tapping it pops the flow
