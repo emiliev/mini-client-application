@@ -8,6 +8,10 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
+| [T-0038](T-0038-fixtures-comics.md) | `mc_fixtures_comics`: comics mock domain (P1-08 subset) | **In Progress** | Engineer (Sonnet) | T-0018 | `fleet/T-0038-fixtures-comics` |
+| [T-0039](T-0039-session-and-auth.md) | Auth slice: `mc_session`, `mc_api_auth`, `mc_fixtures_identity` (P1-05 AC2) | **In Progress** | Engineer (Sonnet) | T-0020, T-0023 | `fleet/T-0039-session-and-auth` |
+| [T-0040](T-0040-ds-navigation.md) | `mc_ds_navigation`: `McAppBar`, `McTabBar`, `McSectionHeader` | **In Progress** | Engineer (Sonnet) | T-0037 | `fleet/T-0040-ds-navigation` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
