@@ -1,0 +1,12 @@
+{
+  "domain": "comics",
+  "routes": [
+    "GET /v1/comics",
+    "GET /v1/comics/:id",
+    "GET /v1/series/:id"
+  ],
+  "scenarios": [
+    "comics.empty",
+    "comics.server_error"
+  ]
+}
