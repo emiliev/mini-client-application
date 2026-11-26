@@ -108,6 +108,17 @@ final class ComicRecord {
   };
 }
 
+/// Title order: by series title, then by issue number (so `#2` comes before
+/// `#10`), then by id. A total, stable order.
+int compareByTitle(ComicRecord a, ComicRecord b) {
+  final bySeries = a.seriesTitle.compareTo(b.seriesTitle);
+  if (bySeries != 0) {
+    return bySeries;
+  }
+  final byIssue = a.issueNumber.compareTo(b.issueNumber);
+  return byIssue != 0 ? byIssue : a.id.compareTo(b.id);
+}
+
 /// One invented series.
 final class SeriesRecord {
   const SeriesRecord({
@@ -155,7 +166,7 @@ final class ComicUniverse {
           id: creatorIdBase + c,
           name:
               '${creatorFirstNames[c % creatorFirstNames.length]} '
-              '${creatorLastNames[(c ~/ creatorFirstNames.length) % creatorLastNames.length]}',
+              '${creatorLastNames[c % creatorLastNames.length]}',
           role: '',
         ),
     ];
@@ -239,11 +250,7 @@ final class ComicUniverse {
 
   void _init(List<ComicRecord> comics, List<SeriesRecord> series) {
     // Title order, with the id as tie-break: a stable total order.
-    final sorted = [...comics]
-      ..sort((a, b) {
-        final byTitle = a.title.compareTo(b.title);
-        return byTitle != 0 ? byTitle : a.id.compareTo(b.id);
-      });
+    final sorted = [...comics]..sort(compareByTitle);
     byTitle = List.unmodifiable(sorted);
     _comics = {for (final c in comics) c.id: c};
     _series = {for (final s in series) s.id: s};

@@ -71,7 +71,10 @@ void main() {
       for (final path in _endpoints) {
         final response = await _res(dio, path);
         expect(response.statusCode, 500, reason: path);
-        expect(response.data!['error'], containsPair('code', 'server_error'));
+        expect(
+        response.data!['error'],
+        containsPair('code', 'injected_failure'),
+      );
       }
       expect(const FailingComicsDomain().scenarios, isEmpty);
     },
@@ -131,4 +134,19 @@ void main() {
       ]);
     },
   );
+
+  test('T-0038-AC2 the server_error set and scenario answer the same body',
+      () async {
+    final scenario = MockBackend(domains: [const ComicsMockDomain()])
+      ..useScenario('comics.server_error');
+    final set = _dio('comics.server_error');
+    for (final path in _endpoints) {
+      final a = await _res(scenario.createDio(), path);
+      final b = await _res(set, path);
+      expect(a.statusCode, 500, reason: path);
+      expect(b.statusCode, a.statusCode, reason: path);
+      expect(b.data, a.data, reason: path);
+      expect((b.data!['error']! as Map)['code'], 'injected_failure');
+    }
+  });
 }

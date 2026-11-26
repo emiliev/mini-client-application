@@ -157,24 +157,35 @@ void main() {
     test(
       'T-0038-AC3: a characterId filter finds a real character\'s comics',
       () async {
-        final character = CharacterUniverse(42, defaultMockClock).byName.first;
+        // 100000 is linked from six comics (CONTRACT.md); a character with no
+        // comics would make this test pass without checking anything.
+        const characterId = 100000;
+        final expected = {
+          for (final c in ComicUniverse(42).byTitle)
+            if (c.characterIds.contains(characterId)) c.id,
+        };
+        expect(expected, hasLength(6));
         final dio = MockBackend(
           domains: [const ComicsMockDomain(), const CharactersMockDomain()],
         ).createDio();
         final page = await dio.get<Map<String, Object?>>(
           '/v1/comics',
-          queryParameters: {'characterId': character.id, 'limit': 100},
+          queryParameters: {'characterId': characterId, 'limit': 100},
         );
         final detail = await dio.get<Map<String, Object?>>(
-          '/v1/characters/${character.id}',
+          '/v1/characters/$characterId',
         );
-        expect(detail.data!['id'], character.id);
-        for (final c
-            in (page.data!['results']! as List).cast<Map<String, Object?>>()) {
+        expect(detail.data!['id'], characterId);
+        expect(page.data!['total'], greaterThan(0));
+        expect(page.data!['total'], expected.length);
+        final results = (page.data!['results']! as List)
+            .cast<Map<String, Object?>>();
+        expect({for (final c in results) c['id']}, expected);
+        for (final c in results) {
           final comic = await dio.get<Map<String, Object?>>(
             '/v1/comics/${c['id']}',
           );
-          expect(comic.data!['characterIds'], contains(character.id));
+          expect(comic.data!['characterIds'], contains(characterId));
         }
       },
     );
@@ -229,6 +240,31 @@ void main() {
         ),
         throwsA(isA<UnresolvedImageException>()),
       );
+    });
+  });
+
+  group('T-0038-AC3 vocabulary', () {
+    test('T-0038-AC3: no series title uses a trademarked single word', () {
+      final titles = {for (final s in ComicUniverse(42).allSeries) s.title};
+      expect(titles, hasLength(seriesCount));
+      for (final banned in const ['Gambit', 'Iron']) {
+        expect(
+          titles.where((t) => t.contains(banned)),
+          isEmpty,
+          reason: banned,
+        );
+      }
+    });
+
+    test('T-0038-AC3: the whole creator pool is reachable, all 10 surnames', () {
+      final names = <String>{};
+      for (final c in ComicUniverse(42).byTitle) {
+        for (final credit in c.creators) {
+          names.add(credit.name);
+        }
+      }
+      expect(names, hasLength(creatorCount));
+      expect({for (final n in names) n.split(' ').last}, hasLength(10));
     });
   });
 }

@@ -164,9 +164,14 @@ MockResponse emptyComicDetail(MockRequest request, MockContext context) =>
 MockResponse emptySeriesDetail(MockRequest request, MockContext context) =>
     _seriesNotFound(context.params['id']!);
 
-/// The `server_error` set: a plain 500 body in the engine's error shape.
+/// The `server_error` set: the exact body the `comics.server_error`
+/// scenario's `FailureRule` produces, so both fail the same way.
 MockResponse serverError(MockRequest request, MockContext context) =>
-    MockResponse.error(500, 'server_error', 'The comics service is down');
+    MockResponse.error(
+      500,
+      'injected_failure',
+      'Injected HTTP 500 for ${request.routeKey}',
+    );
 
 /// The paginated envelope every list endpoint shares.
 Map<String, Object?> pageEnvelope({
@@ -183,8 +188,8 @@ Map<String, Object?> pageEnvelope({
 };
 
 final Map<String, int Function(ComicRecord, ComicRecord)> _orders = {
-  'title': (a, b) => _tie(a.title.compareTo(b.title), a, b),
-  '-title': (a, b) => _tie(b.title.compareTo(a.title), a, b),
+  'title': compareByTitle,
+  '-title': (a, b) => _tie(compareByTitle(b, a), a, b),
   'releaseDate': (a, b) => _tie(a.releaseDate.compareTo(b.releaseDate), a, b),
   '-releaseDate': (a, b) => _tie(b.releaseDate.compareTo(a.releaseDate), a, b),
 };

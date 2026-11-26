@@ -15,7 +15,7 @@ const List<String> seriesWords = [
   'Frost',
   'Gale',
   'Hollow',
-  'Iron',
+  'Slate',
   'Jade',
 ];
 
@@ -27,7 +27,7 @@ const List<String> seriesNouns = [
   'Harbor',
   'Requiem',
   'Frontier',
-  'Gambit',
+  'Crossing',
   'Orbit',
   'Reckoning',
 ];
