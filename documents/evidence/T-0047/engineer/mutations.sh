@@ -155,7 +155,10 @@ mutate "S4 server_error set misses a route" $DOM "for (final route in libraryRou
 mutate "S5 server_error scenario misses a route" $DOM "for (final route in libraryRouteManifest)
           FailureRule(" "for (final route in libraryRouteManifest.skip(1))
           FailureRule("
-mutate "S6 empty set is seeded through the default handlers" $DOM "_handlers(ComicUniverse(environment.seed), seed: false)," "_handlers(ComicUniverse(environment.seed), seed: true),"
+mutate "S6 empty set is seeded through the default handlers" $DOM "        router,
+        _handlers(seed: false)," "        router,
+        _handlers(seed: true),"
+mutate "S7 empty scenario is seeded" $DOM "overrides: _handlers(seed: false)," "overrides: _handlers(seed: true),"
 # --- review round -------------------------------------------------------
 mutate "R1 comics are always the seed-42 universe" $H "_universes[seed] ??= ComicUniverse(seed);" "_universes[seed] ??= ComicUniverse(42);"
 mutate "R2 the empty state shares the default id space" $H "const int emptyFirstNumber = 1001;" "const int emptyFirstNumber = 1;"
