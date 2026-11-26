@@ -1,0 +1,5 @@
+baseline: PASS (8 targets)
+AC3-a a character result carries the wrong id: KILLED (FAIL  discovery_search Search characters and comics Typing a name shows its characters, then its comics, in the backend's ranking [T-0046-AC1])
+AC6-i a search that found nothing is saved too: KILLED (FAIL  discovery_search_typing Search as you type The searches that found something are remembered, most recent first, without repeats, at most 10 [T-0046-AC6])
+
+2 of 2 mutations killed by a failing test
