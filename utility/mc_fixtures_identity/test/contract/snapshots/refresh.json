@@ -1,0 +1,10 @@
+{
+  "body": {
+    "accessToken": "mc-access-u-100-1",
+    "expiresIn": 900,
+    "refreshToken": "mc-refresh-u-100-1",
+    "tokenType": "Bearer"
+  },
+  "request": "POST /v1/auth/refresh",
+  "status": 200
+}

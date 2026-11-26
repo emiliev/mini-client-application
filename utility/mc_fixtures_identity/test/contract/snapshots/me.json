@@ -1,0 +1,10 @@
+{
+  "body": {
+    "displayName": "Rhea Reader",
+    "email": "reader@mini-client.test",
+    "favouriteCount": 2,
+    "id": "u-100"
+  },
+  "request": "GET /v1/me",
+  "status": 200
+}

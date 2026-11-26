@@ -1,0 +1,25 @@
+name: mc_api_auth
+description: Bearer token interceptor with one shared refresh on 401 and a forced sign-out, plus the sign-in call (T-0039, U17).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  dio: ^5.11.0
+  get_it: ^8.0.0
+  mc_api_client: any
+  mc_api_errors: any
+  mc_di: any
+  mc_prelude: any
+  mc_session: any
+
+dev_dependencies:
+  mc_analysis: any
+  mc_event_bus: any
+  mc_fixtures_identity: any
+  mc_mocked_backend: any
+  mc_storage: any
+  test: ^1.25.0

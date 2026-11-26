@@ -1,0 +1,9 @@
+{
+  "body": {
+    "favourite": false,
+    "id": "100000",
+    "kind": "character"
+  },
+  "request": "DELETE /v1/me/favourites/character/100000",
+  "status": 200
+}

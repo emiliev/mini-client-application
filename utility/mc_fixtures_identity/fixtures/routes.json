@@ -1,0 +1,21 @@
+{
+  "domain": "identity",
+  "routes": [
+    "POST /v1/auth/sign-in",
+    "POST /v1/auth/refresh",
+    "POST /v1/auth/sign-out",
+    "GET /v1/me",
+    "GET /v1/me/favourites/:kind/:id",
+    "PUT /v1/me/favourites/:kind/:id",
+    "DELETE /v1/me/favourites/:kind/:id"
+  ],
+  "scenarios": [
+    "identity.expired_token",
+    "identity.server_error"
+  ],
+  "sets": [
+    "identity.default",
+    "identity.empty",
+    "identity.server_error"
+  ]
+}

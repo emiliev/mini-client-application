@@ -1,0 +1,19 @@
+name: mc_session
+description: The signed-in session. Reader and writer ports, a token store on mc_storage, an auth-state stream and SessionChanged (T-0039, U08).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  get_it: ^8.0.0
+  mc_di: any
+  mc_event_bus: any
+  mc_prelude: any
+  mc_storage: any
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

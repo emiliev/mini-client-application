@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_parameter",
+      "message": "kind must be one of character, comic, event, series",
+      "parameter": "kind"
+    }
+  },
+  "request": "PUT /v1/me/favourites/pony/1",
+  "status": 400
+}
