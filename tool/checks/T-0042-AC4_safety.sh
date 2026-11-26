@@ -114,7 +114,8 @@ else fail "3. outputs identical with and without a sync" "$(diff "$work/A.hashes
 
 # After B is hashed (this build adds its own outputs to bazel-bin): a build with
 # a planted file in a package without the exclusion runs actions.
-printf '// planted: git-ignored, like a synced file\n' >"$REPO/$PLANT"
+# Unique content, so an earlier run's cached action cannot hide the effect.
+printf '// planted: git-ignored, like a synced file (%s)\n' "$$-$(date +%s)" >"$REPO/$PLANT"
 bzw build //utility/mc_prelude/... >"$work/plant_build.log" 2>&1
 if executed "$work/plant_build.log"; then pass "3. negative control (planted file in a build)" "the build ran actions, so 'no action' is a real signal"
 else fail "3. negative control (planted file in a build)" "the build with the planted file ran nothing: the byte-identity check cannot fail"; fi
