@@ -11,6 +11,7 @@ _LANG = "3.13"
 _DEPS = [
     "//utility/mc_api_errors",
     "//utility/mc_prelude",
+    "@pub_deps//:characters",
 ]
 
 dart_library(

@@ -58,6 +58,38 @@ void main() {
     });
   });
 
+  group('T-0045-AC1 lengths count user-perceived characters', () {
+    final tenEmoji = '\u{1F600}' * 10;
+
+    test('T-0045-AC1 ten emoji are valid for maxLength(10)', () {
+      expect(tenEmoji.length, 20, reason: 'UTF-16 units');
+      expect(Validators.maxLength(10)(tenEmoji), isNull);
+      expect(
+        Validators.maxLength(10)('${tenEmoji}x'),
+        _err(ValidationCode.tooLong, max: 10),
+      );
+    });
+
+    test('T-0045-AC1 combining marks and joined emoji count once', () {
+      const accented = 'e\u0301e\u0301'; // two letters, four units
+      expect(
+        Validators.minLength(3)(accented),
+        _err(ValidationCode.tooShort, min: 3),
+      );
+      expect(Validators.minLength(2)(accented), isNull);
+      const family = '\u{1F468}\u200D\u{1F469}\u200D\u{1F467}';
+      expect(Validators.maxLength(1)(family), isNull);
+    });
+
+    test('T-0045-AC1 minLength counts emoji once', () {
+      expect(
+        Validators.minLength(11)(tenEmoji),
+        _err(ValidationCode.tooShort, min: 11),
+      );
+      expect(Validators.minLength(10)(tenEmoji), isNull);
+    });
+  });
+
   group('T-0045-AC1 pattern', () {
     final rule = Validators.pattern(RegExp('[a-z]+'));
 
@@ -75,6 +107,44 @@ void main() {
       expect(rule(''), isNull);
       expect(rule(null), isNull);
     });
+
+    test('T-0045-AC1 alternation matches the whole text, not a prefix', () {
+      final rule = Validators.pattern(RegExp('a|ab'));
+      expect(rule('ab'), isNull);
+      expect(rule('a'), isNull);
+      expect(rule('abc'), _err(ValidationCode.patternMismatch));
+    });
+
+    test('T-0045-AC1 a lazy quantifier matches the whole text', () {
+      final rule = Validators.pattern(RegExp(r'\d+?'));
+      expect(rule('123'), isNull);
+      expect(rule('12a'), _err(ValidationCode.patternMismatch));
+    });
+
+    test('T-0045-AC1 the pattern flags are kept', () {
+      expect(
+        Validators.pattern(RegExp('[a-z]+', caseSensitive: false))('AB'),
+        isNull,
+      );
+      expect(
+        Validators.pattern(RegExp('[a-z]+'))('AB'),
+        _err(ValidationCode.patternMismatch),
+      );
+      expect(Validators.pattern(RegExp('a.b', dotAll: true))('a\nb'), isNull);
+      expect(
+        Validators.pattern(RegExp('a.b'))('a\nb'),
+        _err(ValidationCode.patternMismatch),
+      );
+    });
+
+    test(
+      'T-0045-AC1 a multiLine pattern does not match a single line of many',
+      () {
+        final rule = Validators.pattern(RegExp('[a-z]+', multiLine: true));
+        expect(rule('ab\ncd'), _err(ValidationCode.patternMismatch));
+        expect(rule('ab'), isNull);
+      },
+    );
 
     test('T-0045-AC1 a custom code is used', () {
       final custom = Validators.pattern(

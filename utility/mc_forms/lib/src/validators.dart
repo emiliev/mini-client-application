@@ -1,3 +1,4 @@
+import 'package:characters/characters.dart';
 import 'package:mc_forms/src/field_error.dart';
 import 'package:mc_forms/src/field_spec.dart';
 import 'package:mc_forms/src/form_values.dart';
@@ -17,17 +18,19 @@ abstract final class Validators {
     return empty ? const FieldError(ValidationCode.required) : null;
   };
 
-  /// Text of fewer than [min] characters fails with
+  /// Text of fewer than [min] characters (user-perceived: an emoji or an
+  /// accented letter counts once, as `TextField.maxLength` counts) fails with
   /// [ValidationCode.tooShort].
   static Validator<String> minLength(int min) =>
-      (value) => value == null || value.isEmpty || value.length >= min
-      ? null
-      : FieldError(ValidationCode.tooShort, min: min);
+      (value) =>
+          value == null || value.isEmpty || value.characters.length >= min
+          ? null
+          : FieldError(ValidationCode.tooShort, min: min);
 
   /// Text of more than [max] characters fails with
   /// [ValidationCode.tooLong].
   static Validator<String> maxLength(int max) =>
-      (value) => value == null || value.length <= max
+      (value) => value == null || value.characters.length <= max
       ? null
       : FieldError(ValidationCode.tooLong, max: max);
 
@@ -36,13 +39,24 @@ abstract final class Validators {
   static Validator<String> pattern(
     RegExp regex, {
     ValidationCode code = ValidationCode.patternMismatch,
-  }) => (value) {
-    if (value == null || value.isEmpty) {
-      return null;
-    }
-    final match = regex.matchAsPrefix(value);
-    return match != null && match.end == value.length ? null : FieldError(code);
-  };
+  }) {
+    // Anchored with look-arounds, not `^` and `$`, which a multiLine flag
+    // would turn into line anchors. The group makes alternation (`a|ab`) and
+    // lazy quantifiers (`\d+?`) match the whole text.
+    final anchored = RegExp(
+      r'(?<![\s\S])(?:' + regex.pattern + r')(?![\s\S])',
+      multiLine: regex.isMultiLine,
+      caseSensitive: regex.isCaseSensitive,
+      unicode: regex.isUnicode,
+      dotAll: regex.isDotAll,
+    );
+    return (value) {
+      if (value == null || value.isEmpty) {
+        return null;
+      }
+      return anchored.hasMatch(value) ? null : FieldError(code);
+    };
+  }
 
   /// A number outside `[min, max]` fails with [ValidationCode.belowMin] or
   /// [ValidationCode.aboveMax]. Both limits are inclusive. A null value

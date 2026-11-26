@@ -247,6 +247,51 @@ void main() {
       expect(h.s.canComplete, isTrue);
     });
 
+    test('T-0045-AC2 complete touches only the first invalid step', () async {
+      final h = _Harness();
+      h.controller.setValue('agree', true);
+      expect(await h.controller.complete(), isNull);
+      expect(h.s.stepIndex, 0);
+      expect(h.s.form.field('title').touched, isTrue);
+      expect(h.s.form.field('books').touched, isFalse);
+      expect(h.s.form.field('agree').touched, isFalse);
+    });
+
+    test('T-0045-AC2 next is blocked once the wizard completed', () async {
+      final h = _Harness()..fillAll();
+      h.controller
+        ..next()
+        ..next();
+      await h.controller.complete();
+      expect(h.s.isCompleted, isTrue);
+      h.controller.setValue('agree', true);
+      expect(h.s.canGoNext, isFalse);
+      // Rewind is not possible either, so force the state: a wizard of two
+      // steps completed from the first step.
+      final c = WizardController<int>(
+        steps: [
+          const WizardStep('a', fields: [FieldDef<String>('a', initial: 'x')]),
+          const WizardStep('b', fields: [FieldDef<String>('b', initial: 'y')]),
+        ],
+        onState: (_) {},
+        onComplete: (_) async => success(1),
+      );
+      await c.complete();
+      expect(c.state.stepIndex, 0);
+      expect(c.state.isCompleted, isTrue);
+      expect(c.state.canGoNext, isFalse);
+      expect(c.next(), isFalse);
+      expect(c.state.stepIndex, 0);
+    });
+
+    test('T-0045-AC2 touchCurrentStep touches only the current step', () {
+      final h = _Harness()..controller.touchCurrentStep();
+      expect(h.s.form.field('title').touched, isTrue);
+      expect(h.s.form.field('books').touched, isFalse);
+      h.controller.dispose();
+      h.controller.touchCurrentStep();
+    });
+
     test('T-0045-AC2 complete with an invalid step jumps to it', () async {
       final h = _Harness()..fillStep0();
       h.controller

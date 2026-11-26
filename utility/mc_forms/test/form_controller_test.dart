@@ -202,6 +202,46 @@ void main() {
       expect(calls, 1);
     });
 
+    test('T-0045-AC2 edits during a submit are ignored', () async {
+      final m = _make();
+      _fill(m.controller);
+      final gate = Completer<Result<int, ApiFailure>>();
+      FormValues? submitted;
+      final run = m.controller.submit<int>((values) {
+        submitted = values;
+        return gate.future;
+      });
+      final before = m.states.length;
+      m.controller
+        ..setValue('email', 'changed@b.c')
+        ..touch('email')
+        ..touchAll();
+      expect(m.states, hasLength(before), reason: 'nothing was emitted');
+      expect(m.controller.state.field('email').value, 'a@b.c');
+      gate.complete(success(1));
+      await run;
+      expect(m.controller.state.values.toMap(), submitted!.toMap());
+      expect(m.controller.state.submitStatus, SubmitStatus.succeeded);
+    });
+
+    test('T-0045-AC2 fieldOf returns the field typed', () {
+      final m = _make()..controller.setValue('email', 'ab');
+      final FieldState<String> typed = m.controller.state.fieldOf<String>(
+        'email',
+      );
+      expect(typed.value, 'ab');
+      expect(typed.error, const FieldError(ValidationCode.tooShort, min: 3));
+      expect(typed.touched, isFalse);
+      expect(
+        () => m.controller.state.fieldOf<int>('email'),
+        throwsA(isA<TypeError>()),
+      );
+      expect(
+        () => m.controller.state.fieldOf<String>('nope'),
+        throwsArgumentError,
+      );
+    });
+
     test('T-0045-AC2 reset is ignored while submitting', () async {
       final m = _make();
       _fill(m.controller);

@@ -43,10 +43,14 @@ final class FormController {
 
   McFormState get state => _state;
 
-  /// Sets a value, re-checks the form and clears a failed submit. Throws an
+  /// Sets a value, re-checks the form and clears a failed submit. Ignored
+  /// while a submit runs, so the form ends as it was submitted. Throws an
   /// [ArgumentError] for an unknown field.
   void setValue(String name, Object? value) {
     _spec(name);
+    if (_state.isSubmitting) {
+      return;
+    }
     _emit(
       _revalidate(
         {
@@ -73,6 +77,9 @@ final class FormController {
   void touchAll({Iterable<String>? names}) {
     final targets = (names ?? _specs.keys).toSet();
     targets.forEach(_spec);
+    if (_state.isSubmitting) {
+      return;
+    }
     final next = {
       for (final e in _state.fields.entries)
         e.key: targets.contains(e.key) ? e.value.touch() : e.value,

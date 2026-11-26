@@ -61,7 +61,8 @@ final class WizardState<R> {
   ApiFailure? get failure => form.submitFailure;
 
   /// Next is available: a step after this one, valid, and not completing.
-  bool get canGoNext => !isLast && isCurrentStepValid && !isCompleting;
+  bool get canGoNext =>
+      !isLast && isCurrentStepValid && !isCompleting && !isCompleted;
 
   /// The last step is valid and nothing runs: a submit is allowed.
   bool get canComplete =>
@@ -118,15 +119,26 @@ final class WizardController<R> {
   /// fields (their errors show) and stays. Returns whether it advanced; on
   /// the last step it does nothing (use [complete]).
   bool next() {
-    if (_disposed || _state.isLast || _state.isCompleting) {
+    if (_disposed ||
+        _state.isLast ||
+        _state.isCompleting ||
+        _state.isCompleted) {
       return false;
     }
     if (!_state.isCurrentStepValid) {
-      _form.touchAll(names: _state.stepFields[_state.stepIndex]);
+      touchCurrentStep();
       return false;
     }
     _goTo(_state.stepIndex + 1);
     return true;
+  }
+
+  /// Marks the current step's fields as touched, so their errors show. The
+  /// UI calls it when the user taps a disabled Next.
+  void touchCurrentStep() {
+    if (!_disposed) {
+      _form.touchAll(names: _state.stepFields[_state.stepIndex]);
+    }
   }
 
   /// Goes to the previous step; its values are as the user left them.
@@ -147,10 +159,10 @@ final class WizardController<R> {
     if (_disposed || _state.isCompleting || _state.isCompleted) {
       return null;
     }
-    _form.touchAll();
     for (var i = 0; i < _state.stepCount; i++) {
       if (!_state.isStepValid(i)) {
         _goTo(i);
+        touchCurrentStep();
         return null;
       }
     }

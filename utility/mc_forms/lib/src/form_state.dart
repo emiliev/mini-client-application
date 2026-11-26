@@ -36,6 +36,18 @@ final class McFormState {
       fields[name] ??
       (throw ArgumentError.value(name, 'name', 'unknown field'));
 
+  /// The field [name] typed as [T] (what a bound widget takes). Throws an
+  /// [ArgumentError] for an unknown field and a [TypeError] on a mismatch.
+  FieldState<T> fieldOf<T>(String name) {
+    final f = field(name);
+    return FieldState<T>(
+      value: f.value as T?,
+      initial: f.initial as T?,
+      error: f.error,
+      touched: f.touched,
+    );
+  }
+
   /// Every current error, touched or not.
   Map<String, FieldError> get errors => {
     for (final e in fields.entries)
