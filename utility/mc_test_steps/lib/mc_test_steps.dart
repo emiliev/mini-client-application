@@ -10,6 +10,7 @@ export 'package:mc_test_steps/src/assertions/i_dont_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see_the_texts.dart';
 export 'package:mc_test_steps/src/assertions/nothing_overflows.dart';
+export 'package:mc_test_steps/src/backend/the_app_sends.dart';
 export 'package:mc_test_steps/src/backend/the_backend_answered_with.dart';
 export 'package:mc_test_steps/src/backend/the_backend_fails_with.dart';
 export 'package:mc_test_steps/src/backend/the_backend_holds.dart';

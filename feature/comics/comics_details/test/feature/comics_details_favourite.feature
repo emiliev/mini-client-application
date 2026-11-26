@@ -197,6 +197,7 @@ Feature: Favourite a comic
     And {'reader@mini-client.test'} has comic {501500} among their favourites
     And the backend holds {'GET /v1/me/favourites/comic/501500'}
     When I open comic {501500}
+    And the app sends {'GET /v1/me/favourites/comic/501500'}
     Then the backend received {1} requests for {'GET /v1/me/favourites/comic/501500'}
     When the session ends elsewhere
     And the backend releases {'GET /v1/me/favourites/comic/501500'}
