@@ -35,7 +35,7 @@ It syncs again within a few seconds of saving a Dart, ARB, `pubspec` or `BUILD.b
 | `pubspec.yaml` of any package | `tool/ide_sync` (it runs `fvm flutter pub get`), then restart `flutter run` |
 | Switched branch | `tool/ide_sync` (stale generated files of the old branch are deleted via `.dart_tool/mc_ide_sync.manifest`) |
 | One package only | `tool/ide_sync feature/characters/characters_list` |
-| Want the tree free of generated files | `tool/ide_sync --clean` |
+| Want the tree free of what ide_sync wrote | `tool/ide_sync --clean` (generated Dart, config asset and the Xcode scaffolding it created; not gen-l10n, which `flutter pub get` writes and `git clean -fdX` removes, nor `Pods/` or `build/`) |
 
 Other options: `--link` (symlinks into the Bazel output base instead of copies), `--no-pub`. `tool/ide_sync --help` lists them all.
 

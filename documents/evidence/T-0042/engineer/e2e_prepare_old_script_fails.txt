@@ -1,0 +1,1 @@
+Old prepare_pub_project.sh (f6cab52) on the new pubspec: 'Error on line 53, column 3: Duplicate mapping key. assets:' (flutter create fails).

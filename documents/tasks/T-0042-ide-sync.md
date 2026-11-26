@@ -69,3 +69,16 @@ Bazel generates all codegen into `bazel-bin/`, and nothing generated is committe
   - gen-l10n output is not synced; Flutter writes it (F-0041 fact 2).
 - **Test integrity:** no test deleted, skipped or weakened; no `// ignore:`. The characters_list and mc_paging architecture tests read the same sources as before (the globs only gained exclusions).
 - **Follow-ups for the TL:** (1) buildgen (P2) should emit `exclude = MC_GENERATED_DART` in every generated BUILD; (2) T-0041's BUILD needs the same exclusion before merge, else `T-0042-AC4_safety.sh` and the build fail on a synced tree; (3) the `fvm flutter` baselines (plan 03 §7.3, `--dest`) were not built: `ide_sync` writes into the checkout only; (4) `ide_sync` could replace the listing in `prepare_pub_project.sh`; (5) plan 03 §7.1 describes `--dest <tree>`; this task used `MC_IDE_SYNC_ROOT` for tests instead.
+
+### Review round (code review: 7 important, 3 cheap)
+1. `prepare_pub_project.sh` now adds `assets:` only when the pubspec lacks it (the old script on the new pubspec fails: `e2e_prepare_old_script_fails.txt`). `T-0033-e2e_prepare.sh` PASS (`T-0042-...` copy `T-0033-e2e_prepare.md`) and `tool/e2e_ios.sh` journey `characters_journey_test` PASS on my own simulator (`e2e/`).
+2. `place()` removes its temp file and fails on a failed write, copy and link (AC5 test 15, read-only directory).
+3. The cquery path is used as printed, never `ls bazel-out/*/bin | head -1` (test 16, a stale copy in a config that sorts first).
+4. `missing` and `skipped` are cleared at the start of every sync (test 17, two cases, in watch mode).
+5. Every Xcode item is checked against `.gitignore` before the first is written (test 18; template hook `MC_IDE_SYNC_IOS_TEMPLATE`).
+6. The watch fingerprint and the fswatch filter include `pubspec.yaml`, `l10n.yaml` and the config dir (test 20, a config edit refreshes `app_config.json`).
+7. The watch baseline is taken before the first sync (test 20, `MC_IDE_SYNC_TEST_DELAY`).
+8. The Xcode scaffolding is recorded in `.dart_tool/mc_ide_sync.scaffold` and removed by `--clean` (test 19); README says gen-l10n is left alone.
+9. The `manual` tag is matched as a whole tag (`T-0042-AC3` step e, real Bazel: `manual_check` is synced, `manual` is not).
+10. `ide_sync` reads `MC_GENERATED_DART` from `tool/bazel/defs.bzl` for its sync filter and the watch filter (so a hand-named `lib/src/app.config.dart` is a source; test 16 and 20).
+Each fix was mutation-checked: reverting it makes its test fail (`review_mutations.txt`; item 9 by hand: the unanchored regex fails AC3 step e).
