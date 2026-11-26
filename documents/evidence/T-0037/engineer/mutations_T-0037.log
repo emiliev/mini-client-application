@@ -3,10 +3,8 @@ MUTATION D1: FeatureFlow reads the outer navigator without a dependency: killed 
 MUTATION D1: the button never reads outerCanPop (root always shows back): killed by //utility/mc_feature_flow:flow_back_button_test //utility/mc_feature_flow:flow_kit_test 
 MUTATION D2: the scope lookup throws outside a flow: killed by //utility/mc_feature_flow:flow_back_button_test 
 MUTATION D2: no DrawerButton outside a flow / off the root: killed by //utility/mc_feature_flow:flow_back_button_test //utility/mc_feature_flow:flow_kit_test 
-mutation text not found in utility/mc_feature_flow/lib/src/flow_context.dart: if (route.willHandlePopInternally) {
-MUTATION D3: local history ignored on the flow root: INVALID (text not found)
-mutation text not found in utility/mc_feature_flow/lib/src/flow_context.dart: if (route.willHandlePopInternally) {
-MUTATION D3: a drawer beats a local history entry: INVALID (text not found)
+MUTATION D3: local history ignored on the flow root: killed by //utility/mc_feature_flow:flow_back_button_test 
+MUTATION D3: a drawer beats a local history entry: killed by //utility/mc_feature_flow:flow_back_button_test 
 MUTATION D3: no DrawerButton on the flow root: killed by //utility/mc_feature_flow:flow_back_button_test 
 MUTATION D3: root back button pops instead of maybePop (R-1): killed by //utility/mc_feature_flow:flow_back_button_test 
 MUTATION flow_builder: PopScope not always mounted (R-3): killed by //utility/mc_feature_flow:flow_back_button_test 
