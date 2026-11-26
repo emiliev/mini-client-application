@@ -10,8 +10,8 @@ import 'package:mini_client/main.dart' as app;
 const _comicTitle = ValueKey<String>('comics_details.title');
 const _comicBody = ValueKey<String>('comics_details.body');
 const _cast = ValueKey<String>('comics_details.cast');
-const _signInSheet = Key('publishing.sign_in.sheet');
-const _signInConfirm = Key('publishing.sign_in.confirm');
+const _signInSheet = Key('app.sign_in.sheet');
+const _signInConfirm = Key('app.sign_in.confirm');
 
 /// The scrollable of the comic page.
 Finder _comicScrollable() => find

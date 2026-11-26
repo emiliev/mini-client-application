@@ -20,9 +20,6 @@ dependencies:
   injectable: 3.0.0
   mc_api_auth: any
   mc_di: any
-  mc_ds_buttons: any
-  mc_ds_layout: any
-  mc_fixtures_identity: any
   mc_session: any
 
 dev_dependencies:
@@ -30,4 +27,5 @@ dev_dependencies:
     sdk: flutter
   mc_analysis: any
   mc_ds_theme: any
+  mc_fixtures_identity: any
   mc_test_utils: any

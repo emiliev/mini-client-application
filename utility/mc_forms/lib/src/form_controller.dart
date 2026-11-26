@@ -1,4 +1,5 @@
 import 'package:mc_api_errors/mc_api_errors.dart';
+import 'package:mc_forms/src/field_error.dart';
 import 'package:mc_forms/src/field_spec.dart';
 import 'package:mc_forms/src/field_state.dart';
 import 'package:mc_forms/src/form_state.dart';
@@ -35,6 +36,9 @@ final class FormController {
 
   final Map<String, FieldSpec> _specs;
 
+  /// Errors the server gave, by field, until that field's value changes.
+  final Map<String, FieldError> _rejected = {};
+
   /// Called with every new state.
   final void Function(McFormState state) onState;
 
@@ -51,6 +55,10 @@ final class FormController {
     if (_state.isSubmitting) {
       return;
     }
+    if (_state.fields[name]!.value != value) {
+      // A new value is a new question: the server's verdict was on the old.
+      _rejected.remove(name);
+    }
     _emit(
       _revalidate(
         {
@@ -62,6 +70,31 @@ final class FormController {
                     touched: e.value.touched,
                   )
                 : e.value,
+        },
+        failed: _state.submitStatus == SubmitStatus.failed
+            ? SubmitStatus.idle
+            : null,
+      ),
+    );
+  }
+
+  /// The server refused [name]'s value (a `400` naming that field) with
+  /// [error]. The field shows [error] (it is touched) and the form is invalid
+  /// until the field's value changes; a failed submit goes back to idle, as
+  /// after an edit, so the error under the field replaces it. A rule of the
+  /// field that fails as well wins. Ignored while a submit runs. Throws an
+  /// [ArgumentError] for an unknown field.
+  void reject(String name, FieldError error) {
+    _spec(name);
+    if (_state.isSubmitting) {
+      return;
+    }
+    _rejected[name] = error;
+    _emit(
+      _revalidate(
+        {
+          for (final e in _state.fields.entries)
+            e.key: e.key == name ? e.value.touch() : e.value,
         },
         failed: _state.submitStatus == SubmitStatus.failed
             ? SubmitStatus.idle
@@ -86,12 +119,13 @@ final class FormController {
     }
   }
 
-  /// Back to the initial values: untouched, no submit outcome. Does nothing
-  /// while a submit runs.
+  /// Back to the initial values: untouched, no submit outcome, no server
+  /// errors. Does nothing while a submit runs.
   void reset() {
     if (_state.isSubmitting) {
       return;
     }
+    _rejected.clear();
     final values = FormValues({
       for (final e in _specs.entries) e.key: e.value.initial,
     });
@@ -167,7 +201,9 @@ final class FormController {
     });
     final checked = {
       for (final e in fields.entries)
-        e.key: e.value.withError(_specs[e.key]!.check(e.value.value, values)),
+        e.key: e.value.withError(
+          _specs[e.key]!.check(e.value.value, values) ?? _rejected[e.key],
+        ),
     };
     return failed == null
         ? _state.withFields(checked)

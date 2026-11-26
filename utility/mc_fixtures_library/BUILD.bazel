@@ -18,6 +18,7 @@ dart_library(
         "//utility/mc_fixtures_comics",
         "//utility/mc_fixtures_identity",
         "//utility/mc_mocked_backend",
+        "@pub_deps//:characters",
     ],
 )
 

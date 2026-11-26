@@ -1,0 +1,51 @@
+ide_sync: query: codegen targets under the workspace
+ide_sync: build: 83 codegen targets
+ide_sync: wrote app/mini_client/lib/src/router/app_routes.g.dart
+ide_sync: wrote app/wiring/library_wiring/lib/src/di/di_initializer.config.dart
+ide_sync: wrote app/wiring/library_wiring/lib/src/routes/reading_lists_routes.g.dart
+ide_sync: wrote app/wiring/publishing_wiring/lib/src/di/di_initializer.config.dart
+ide_sync: wrote app/wiring/publishing_wiring/lib/src/routes/comics_routes.g.dart
+ide_sync: wrote app/wiring/publishing_wiring/lib/src/routes/creators_routes.g.dart
+ide_sync: wrote app/wiring/universe_wiring/lib/src/di/di_initializer.config.dart
+ide_sync: wrote app/wiring/universe_wiring/lib/src/routes/characters_routes.g.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/di/di_initializer.config.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/domain/api/characters_list_api.g.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/domain/model/character.freezed.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/domain/model/character_dto.freezed.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/domain/model/character_dto.g.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/domain/model/related_comic.freezed.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/flow/characters_list_flow_state.freezed.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.freezed.dart
+ide_sync: wrote feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.freezed.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/di/di_initializer.config.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/domain/api/comics_details_api.g.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/domain/model/comic.freezed.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/domain/model/comic_dto.freezed.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/domain/model/comic_dto.g.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/flow/comics_details_flow_state.freezed.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/presentation/bloc/comic_details_bloc.freezed.dart
+ide_sync: wrote feature/comics/comics_details/lib/src/presentation/bloc/comic_favourite_bloc.freezed.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/di/di_initializer.config.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/domain/api/reading_list_editor_api.g.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/domain/model/reading_list.freezed.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/domain/model/reading_list_dto.freezed.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/domain/model/reading_list_dto.g.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/flow/reading_list_editor_flow_state.freezed.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/presentation/bloc/comic_picker_bloc.freezed.dart
+ide_sync: wrote feature/library/library_reading_list_editor/lib/src/presentation/bloc/reading_list_editor_bloc.freezed.dart
+ide_sync: wrote spike/api_envelope/lib/src/api_page.g.dart
+ide_sync: wrote spike/api_envelope/lib/src/api_response.g.dart
+ide_sync: wrote spike/di_sample/lib/src/di/di_initializer.config.dart
+ide_sync: wrote spike/hello/lib/src/counter_state.freezed.dart
+ide_sync: wrote spike/hello/lib/src/routes.g.dart
+ide_sync: wrote spike/retrofit_api/lib/src/character_dto.freezed.dart
+ide_sync: wrote spike/retrofit_api/lib/src/character_dto.g.dart
+ide_sync: wrote spike/retrofit_api/lib/src/characters_api.g.dart
+ide_sync: wrote utility/mc_api_client/lib/src/api_page.g.dart
+ide_sync: wrote utility/mc_paging/lib/src/paged_state.freezed.dart
+ide_sync: wrote utility/mc_paging/test/support/holder_state.freezed.dart
+ide_sync: wrote app/mini_client/assets/app_config.json
+ide_sync: wrote app/sandbox/universe_sandbox/assets/app_config.json
+ide_sync: flutter create --platforms=ios for mini_client (Xcode project, git-ignored)
+ide_sync: flutter create --platforms=ios for universe_sandbox (Xcode project, git-ignored)
+IDE_SYNC copied=46 unchanged=0 removed=0 skipped=0 total=46

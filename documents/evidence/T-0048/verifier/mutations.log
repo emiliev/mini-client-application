@@ -1,0 +1,48 @@
+baseline: PASS (14 targets)
+AC1-b the comics are sent in reverse order: KILLED (FAIL  reading_list_editor_create Create a reading list Three steps create a list with the comics in the chosen order [T-0048-AC1])
+AC1-d a name may have 61 characters: KILLED (FAIL  reading_list_editor_create Create a reading list The details follow the backend's rules ('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', '', 'Use at most 60 characters.', 'Name') [T-0048-AC1])
+AC2-c a refused field is not rejected on the wizard: KILLED (FAIL  reading_list_editor_create Create a reading list A name the backend refuses takes the wizard back to step 1 with the error under the name [T-0048-AC2])
+AC2-i library: lengths count runes again: KILLED (FAIL  T-0048-AC2 lengths count grapheme clusters, as the form does T-0048-AC2 a name of 60 flags is valid, 61 is too long)
+AC3-a an unchanged list still sends the details: KILLED (FAIL  reading_list_editor_edit Edit a reading list Saving without a change sends nothing and completes with the same id [T-0048-AC3])
+AC3-g edit mode always needs a comic (an empty list cannot be renamed): KILLED (FAIL  reading_list_editor_edit Edit a reading list A list without comics can still be renamed [T-0048-AC3])
+AC5-c home opens a second editor on a double tap: KILLED (FAIL  T-0048-AC5 a double tap on New reading list opens one editor)
+AC6-e the route pops without the result: KILLED (FAIL  T-0048-AC6 the wiring returns the new list id to the caller that awaits AppFlows.createReadingList)
+AC6-f the route pops whatever is on top: KILLED (FAIL  T-0048-AC6 a result that arrives under a dialog is kept, and the caller gets it once the dialog closed)
+AC6-t a result under an overlay is dropped: KILLED (FAIL  T-0048-AC6 a result that arrives under a dialog is kept, and the caller gets it once the dialog closed)
+AC6-h double submit: the save runs outside the wizard's one-completion guard: KILLED (FAIL  reading_list_editor_create Create a reading list A failed save shows an inline error with Retry, and Retry resends once with nothing lost [T-0048-AC2])
+AC6-i user switch during the save: the result is handed out anyway: KILLED (FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in during the save gets nothing written, and the list is not handed out [T-0048-AC6])
+AC6-j user switch between two writes: the second is sent anyway: KILLED (FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in between the two writes of an edit stops the second [T-0048-AC6])
+AC6-k sign-out before Finish does not end the editing: KILLED (FAIL  reading_list_editor_l10n The reading list editor speaks the reader's language In German, editing and the states around it are German [T-0048-AC4])
+AC6-l session change during the load: the old session's list is shown: KILLED (FAIL  reading_list_editor_races The editor stays consistent while requests are in flight A session change while the list loads shows no list of the old session [T-0048-AC6])
+AC6-m a closed editor still writes: KILLED (FAIL  T-0048-AC6 an editor closed while its save is held hands out no result and writes nothing more, but announces what it wrote)
+AC6-u leaving mid-load: neither the after-await guard nor the guard in _open (the late answer adds to a closed bloc): KILLED (FAIL  T-0048-AC6 leaving while the list is loading: the late answer adds and reports nothing)
+AC6-v leaving mid-sign-in: the late answer opens the wizard on a closed bloc: KILLED (FAIL  T-0048-AC6 leaving while the app signs the user in: the late answer adds, reports and sends nothing)
+AC6-w a half-saved edit is not announced: KILLED (FAIL  T-0048-AC6 an editor closed while its save is held hands out no result and writes nothing more, but announces what it wrote)
+AC6-o going back: the review page can be popped while saving: KILLED (FAIL  reading_list_editor_races The editor stays consistent while requests are in flight While the save runs the buttons are off, going back is refused and nothing is lost [T-0048-AC6])
+V01 create: the epoch pre-check before the POST is removed: SURVIVED
+V02 edit: the pre-check before the details PUT is removed: SURVIVED
+V03 a closed editor announces nothing (publish moved after the isClosed return): KILLED (FAIL  T-0048-AC6 an editor closed while its save is held hands out no result and writes nothing more, but announces what it wrote)
+V04 flow result: a deep-linked route pops instead of going home: KILLED (FAIL  T-0048-AC6 a route opened by a deep link (nothing below it) goes home when it completes)
+V05 flow result: a second completion while pending overrides the first: KILLED (FAIL  T-0048-AC6 a result that arrives under a dialog is kept, and the caller gets it once the dialog closed)
+V06 flow result: nothing delivers once the overlay closes: KILLED (FAIL  T-0048-AC6 a result that arrives under a dialog is kept, and the caller gets it once the dialog closed)
+V07 home: the awaiting flag is never cleared: KILLED (FAIL  T-0048-AC3 home opens the created list in the editor, which returns the same id once saved)
+V08 kit: WizardController.reject while completing is not ignored: SURVIVED
+V09 kit: FormController.reject leaves a failed submit failed: KILLED (00:00 +21 -1: T-0048-AC2 a server-side error goes to its step T-0048-AC2 reject goes back to the field's step and shows the error there; a new value clears it [E])
+V10 kit: reset keeps the server errors: SURVIVED
+V11 kit: an error body sent as JSON text is ignored: KILLED (00:00 +3 -1: T-0048-AC2 a 4xx keeps the code and parameter of its error body T-0048-AC2 a JSON text body, and a body without a parameter [E])
+V12 kit: the parameter is dropped: KILLED (00:00 +2 -1: T-0048-AC2 a 4xx keeps the code and parameter of its error body T-0048-AC2 a map body [E])
+V13 library: a renamed list may not keep its own name: KILLED (FAIL  T-0048-AC2 duplicate_name: a user's list names are unique T-0048-AC2 renaming to another of the lists is refused; keeping the own name is not)
+V14 library: names compared case-sensitively: KILLED (FAIL  T-0048-AC2 duplicate_name: a user's list names are unique T-0048-AC2 creating a list with a name the user has is refused, case-insensitively after trimming)
+V15 library: the description counts runes: KILLED (FAIL  T-0048-AC2 lengths count grapheme clusters, as the form does T-0048-AC2 a description of 280 flags is valid, 281 is too long)
+V16 kit: maxLength counts runes (60 flags fail the form): KILLED (FAIL  reading_list_editor_create Create a reading list Lengths count what a reader sees, on both sides: sixty flags are a valid name [T-0048-AC1])
+V17 an ended session does not return to the first page: KILLED (FAIL  reading_list_editor_l10n The reading list editor speaks the reader's language In German, editing and the states around it are German [T-0048-AC4])
+V18 the details write is not counted as written: KILLED (FAIL  T-0048-AC6 an editor closed while its save is held hands out no result and writes nothing more, but announces what it wrote)
+V19 the sign-in gate trusts the navigator's true without a session: SURVIVED
+V20 the load guard against a double Retry is removed: SURVIVED
+V21 a refused description is mapped to no field: SURVIVED
+V22 too_many_comics shows the generic error: SURVIVED
+V23 the session listener adds after close: SURVIVED
+V24 an ended session's late save result is handed out (ended state ignored in _submit): KILLED (FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in during the save gets nothing written, and the list is not handed out [T-0048-AC6])
+V25 description rule not applied in the form: KILLED (FAIL  reading_list_editor_create Create a reading list The details follow the backend's rules ('Ok', 'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd', 'Use at most 280 characters.', 'Description (optional)') [T-0048-AC1])
+
+36 of 45 mutations killed by a failing test

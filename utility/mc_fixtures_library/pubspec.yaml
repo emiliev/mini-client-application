@@ -9,6 +9,7 @@ environment:
   flutter: ^3.47.7
 
 dependencies:
+  characters: ^1.4.0
   mc_fixtures_comics: any
   mc_fixtures_identity: any
   mc_mocked_backend: any

@@ -1,0 +1,5 @@
+baseline: PASS (14 targets)
+AC5-a home does not show the returned list: KILLED (FAIL  T-0048-AC6 home awaits the editor and shows the list id the wiring returned)
+AC6-u leaving mid-load: neither the after-await guard nor the guard in _open (the late answer adds to a closed bloc): KILLED (FAIL  T-0048-AC6 leaving while the list is loading: the late answer adds and reports nothing)
+
+2 of 2 mutations killed by a failing test

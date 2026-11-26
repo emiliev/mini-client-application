@@ -16,8 +16,6 @@ export 'package:publishing_wiring/src/routes/creators_routes.dart'
     show CreatorDetailsRoute;
 export 'package:publishing_wiring/src/routes/route_targets.dart'
     show PublishingRouteTargets;
-export 'package:publishing_wiring/src/sign_in/fixture_sign_in_sheet.dart'
-    show fixtureSignInButtonKey, fixtureSignInCancelKey, fixtureSignInSheetKey;
 
 /// The publishing group's routes (comics and creators; series later).
 List<RouteBase> get publishingRoutes => <RouteBase>[

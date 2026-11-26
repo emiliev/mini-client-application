@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 /// Why a call to the backend failed. A sealed family so a feature maps each
@@ -56,7 +58,8 @@ sealed class ApiFailure implements Exception {
           return ApiServer(status, detail);
         }
         if (status >= 400) {
-          return ApiClientError(status, detail);
+          final body = _errorBody(e.response?.data);
+          return ApiClientError(status, detail, body?.code, body?.parameter);
         }
         return ApiUnexpected('HTTP $status: $detail');
       case DioExceptionType.cancel:
@@ -75,6 +78,29 @@ sealed class ApiFailure implements Exception {
           inner == null ? detail : '${inner.runtimeType}: $inner',
         );
     }
+  }
+
+  /// The `{"error": {"code", "parameter", ...}}` body the mocked backend's
+  /// domains send with a `4xx`, as a map or as JSON text; null for any other
+  /// body.
+  static ({String code, String? parameter})? _errorBody(Object? data) {
+    Object? decoded = data;
+    if (data is String) {
+      try {
+        decoded = jsonDecode(data);
+      } on FormatException {
+        return null;
+      }
+    }
+    final error = decoded is Map ? decoded['error'] : null;
+    if (error is! Map || error['code'] is! String) {
+      return null;
+    }
+    final parameter = error['parameter'];
+    return (
+      code: error['code'] as String,
+      parameter: parameter is String ? parameter : null,
+    );
   }
 
   @override
@@ -98,10 +124,26 @@ final class ApiNotFound extends ApiFailure {
 }
 
 /// Any 4xx other than 401 and 404 (400, 403, 409, 422, 429, ...).
+///
+/// [code] and [parameter] come from the response's error body
+/// (`{"error": {"code": "invalid_name", "parameter": "name"}}`), so a feature
+/// can show a server-side validation error under the field it names (T-0048);
+/// both are null when the body has no such shape.
 final class ApiClientError extends ApiFailure {
-  const ApiClientError(this.status, [super.message = 'Request rejected']);
+  const ApiClientError(
+    this.status, [
+    super.message = 'Request rejected',
+    this.code,
+    this.parameter,
+  ]);
 
   final int status;
+
+  /// The body's `error.code` (`invalid_name`, `duplicate_name`, ...).
+  final String? code;
+
+  /// The body's `error.parameter`: the request field the error is about.
+  final String? parameter;
 }
 
 final class ApiServer extends ApiFailure {
