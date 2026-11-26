@@ -1,0 +1,20 @@
+{
+  "@@locale": "en_XA",
+  "discoverySearchTitle": "[Šéàŕçĥ ~~]",
+  "discoverySearchFieldLabel": "[Šéàŕçĥ çĥàŕàçţéŕš àñð çóɱíçš ~~~~~~~~~~~]",
+  "discoverySearchClearQuery": "[Çļéàŕ šéàŕçĥ ~~~~~]",
+  "discoverySearchFilterAll": "[Àļļ ~]",
+  "discoverySearchCharacters": "[Çĥàŕàçţéŕš ~~~~]",
+  "discoverySearchComics": "[Çóɱíçš ~~]",
+  "discoverySearchSeeAll": "[Šéé àļļ {count} ~~~]",
+  "discoverySearchShowing": "[Šĥóŵíñĝ {shown} óƀ {total} ~~~~~]",
+  "discoverySearchSearching": "[Šéàŕçĥíñĝ ~~~~]",
+  "discoverySearchEmptyTitle": "[Ñó ŕéšúļţš ~~~~]",
+  "discoverySearchEmptyMessage": "[Ñóţĥíñĝ ɱàţçĥéš “{query}”. Çĥéçķ ţĥé šþéļļíñĝ óŕ ţŕý àñóţĥéŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~~~~~]",
+  "discoverySearchNoCharacters": "[Ñó çĥàŕàçţéŕš ɱàţçĥ “{query}”. ~~~~~~~~~]",
+  "discoverySearchNoComics": "[Ñó çóɱíçš ɱàţçĥ “{query}”. ~~~~~~~~]",
+  "discoverySearchErrorTitle": "[Ţĥé šéàŕçĥ ƀàíļéð ~~~~~~~]",
+  "discoverySearchRecent": "[Ŕéçéñţ šéàŕçĥéš ~~~~~~]",
+  "discoverySearchClearRecent": "[Çļéàŕ ~~]",
+  "discoverySearchNoRecent": "[Šéàŕçĥ ƀóŕ çĥàŕàçţéŕš àñð çóɱíçš ƀý ñàɱé. ~~~~~~~~~~~~~~~~]"
+}

@@ -1,0 +1,52 @@
+{
+  "@@locale": "en",
+  "discoverySearchTitle": "Search",
+  "@discoverySearchTitle": {"description": "Title of the search page."},
+  "discoverySearchFieldLabel": "Search characters and comics",
+  "@discoverySearchFieldLabel": {"description": "Placeholder and accessible name of the search field."},
+  "discoverySearchClearQuery": "Clear search",
+  "@discoverySearchClearQuery": {"description": "Accessible name of the button that empties the search field."},
+  "discoverySearchFilterAll": "All",
+  "@discoverySearchFilterAll": {"description": "Type chip: show characters and comics."},
+  "discoverySearchCharacters": "Characters",
+  "@discoverySearchCharacters": {"description": "Type chip and section title: the characters among the results."},
+  "discoverySearchComics": "Comics",
+  "@discoverySearchComics": {"description": "Type chip and section title: the comics among the results."},
+  "discoverySearchSeeAll": "See all {count}",
+  "@discoverySearchSeeAll": {
+    "description": "Action beside a section title: shows only that section, with all its loaded results. count is the number of matches.",
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "discoverySearchShowing": "Showing {shown} of {total}",
+  "@discoverySearchShowing": {
+    "description": "Below a section that shows fewer results than it has matches.",
+    "placeholders": {"shown": {"type": "int"}, "total": {"type": "int"}}
+  },
+  "discoverySearchSearching": "Searching",
+  "@discoverySearchSearching": {"description": "Screen-reader label while a search is in flight."},
+  "discoverySearchEmptyTitle": "No results",
+  "@discoverySearchEmptyTitle": {"description": "Title when a search found nothing."},
+  "discoverySearchEmptyMessage": "Nothing matches “{query}”. Check the spelling or try another name.",
+  "@discoverySearchEmptyMessage": {
+    "description": "Message below the no-results title.",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "discoverySearchNoCharacters": "No characters match “{query}”.",
+  "@discoverySearchNoCharacters": {
+    "description": "In the characters section when only comics matched.",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "discoverySearchNoComics": "No comics match “{query}”.",
+  "@discoverySearchNoComics": {
+    "description": "In the comics section when only characters matched.",
+    "placeholders": {"query": {"type": "String"}}
+  },
+  "discoverySearchErrorTitle": "The search failed",
+  "@discoverySearchErrorTitle": {"description": "Title when a search fails; the reason and Retry follow."},
+  "discoverySearchRecent": "Recent searches",
+  "@discoverySearchRecent": {"description": "Section title above the recent searches."},
+  "discoverySearchClearRecent": "Clear",
+  "@discoverySearchClearRecent": {"description": "Action beside the recent searches: forgets them all."},
+  "discoverySearchNoRecent": "Search for characters and comics by name.",
+  "@discoverySearchNoRecent": {"description": "Shown instead of the recent searches when there are none."}
+}
