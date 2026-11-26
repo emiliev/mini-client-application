@@ -1,7 +1,6 @@
 baseline (behaviour and semantics tests): PASS
 baseline (goldens): PASS
-MUTATION DID NOT CHANGE THE FILE
-AC1 unbounded width not handled: NOT APPLIED
+AC1 unbounded width not handled: KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 an unbounded width (Row without Expanded) does not throw)
 AC1 chip label not flexible (overflows at 3x): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 every widget with long German labels at 1.0x does not overflow)
 AC1 segment label not flexible (overflows): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 every widget with long German labels at 1.0x does not overflow)
 AC1 segment label scale uncapped: KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 segment labels are capped at 1.5x so five fit a phone at 3x)
@@ -67,4 +66,4 @@ AC1 golden: focused border not primary: KILLED (FAIL  T-0044-AC1 text_field_focu
 AC1 golden: error border not error colour: KILLED (FAIL  T-0044-AC1 text_field_error golden light x1)
 AC1 golden: segmented selection fill hidden: KILLED (FAIL  T-0044-AC1 segmented_2 golden light x1)
 
-SOME MUTATIONS SURVIVED OR FAILED TO APPLY
+ALL MUTATIONS KILLED
