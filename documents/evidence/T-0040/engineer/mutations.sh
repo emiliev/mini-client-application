@@ -88,7 +88,8 @@ mutate "reveal scrolls every ancestor" $TAB \
   "re.sub(r'_controller\.position\.ensureVisible\(\s*object,', 'Scrollable.ensureVisible(_keys[widget.currentIndex].currentContext!,', s)"
 mutate "reveal on every parent rebuild" $TAB \
   "s.replace('if (widget.currentIndex != oldWidget.currentIndex) {', 'if (widget.currentIndex != oldWidget.currentIndex || widget.tabs.isNotEmpty) {')"
-mutate "tab bar fills a tall parent (no height factor)" $TAB "s.replace('heightFactor: 1,\n      child: Material(', 'child: Material(')"
+mutate "tab bar fills a tall parent (no Align)" $TAB \
+  "re.sub(r'return Align\(\s*alignment: AlignmentDirectional\.topCenter,\s*heightFactor: 1,', 'return ConstrainedBox(constraints: const BoxConstraints(),', s)"
 mutate "divider not padded in (48 pt, not 49)" $TAB \
   "re.sub(r'child: Padding\(\s*padding: const EdgeInsets\.only\(bottom: McTabBar\.dividerHeight\),\s*child: LayoutBuilder', 'child: Padding(padding: EdgeInsets.zero, child: LayoutBuilder', s)"
 mutate "tabs do not share the free width" $TAB \
