@@ -206,6 +206,45 @@ void main() {
       expect(seen.length, greaterThan(24));
     });
 
+    for (final seed in [42, 7]) {
+      test('T-0047-AC4 seed $seed: the library.empty scenario answers what '
+          'the empty set answers, with the comics endpoint\'s titles and '
+          'covers', () async {
+        final scenario = MockBackend(
+          seed: seed,
+          domains: [const LibraryMockDomain(), const ComicsMockDomain()],
+        )..useScenario('library.empty');
+        final set = MockBackend(
+          seed: seed,
+          domains: [const EmptyLibraryDomain(), const ComicsMockDomain()],
+        );
+        final ids = [
+          for (var i = 0; i < 40; i++) ComicUniverse(seed).byTitle[i * 37].id,
+        ];
+        Future<Map<String, Object?>> create(MockBackend b) async =>
+            (await call<Map<String, Object?>>(
+              jsonDio(b),
+              'POST',
+              '/v1/me/lists',
+              body: {'name': 'E', 'visibility': 'private', 'comicIds': ids},
+              headers: bearer(reader),
+            )).data!;
+        final fromScenario = await create(scenario);
+        expect(canonicalJson(fromScenario), canonicalJson(await create(set)));
+        final comics = jsonDio(scenario);
+        for (final item
+            in (fromScenario['items']! as List).cast<Map<String, Object?>>()) {
+          final comic = (await call<Map<String, Object?>>(
+            comics,
+            'GET',
+            '/v1/comics/${item['id']}',
+          )).data!;
+          expect(item['title'], comic['title'], reason: '$item');
+          expect(item['thumbnail'], comic['cover'], reason: '$item');
+        }
+      });
+    }
+
     test('T-0047-AC4: the resolver rejects a thumbnail outside the set '
         '(negative control)', () {
       const resolver = BundledImageResolver();

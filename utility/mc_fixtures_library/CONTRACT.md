@@ -39,7 +39,7 @@ The machine-readable list is `fixtures/routes.json`; a test keeps it, the domain
 
 ### `POST /v1/me/lists`
 
-Body `{"name": string, "description"?: string, "visibility": "private"|"public", "comicIds": [int]}`; `comicIds` may be empty. `201` with the new list in the `GET /v1/me/lists/:id` shape (so `id` is in the body). Ids are `l-<n>` from one counter per backend (seeded lists take `l-1` to `l-4`, so the first new list is `l-5` in the default set and `l-1` in the empty one). The name is stored trimmed.
+Body `{"name": string, "description"?: string, "visibility": "private"|"public", "comicIds": [int]}`; `comicIds` may be empty. `201` with the new list in the `GET /v1/me/lists/:id` shape (so `id` is in the body). Ids are `l-<n>` from one counter per backend (seeded lists take `l-1` to `l-4`, so the first new list is `l-5` in the default set). The empty state (the `library.empty` set and scenario) has its own id space starting at `l-1001`, so switching the scenario off never leaves a created id that names a seeded list). The name is stored trimmed.
 
 ### `PUT /v1/me/lists/:id`
 
@@ -57,11 +57,13 @@ Every write sets `updatedAt` to the fixed clock plus one second per write on thi
 
 ## Validation
 
+**Coupling to the comics domain.** The library validates `comicIds` and renders items against its own `ComicUniverse(seed)` from `mc_fixtures_comics` (the backend's seed), not against whichever comics domain is serving. With `ComicsMockDomain` the two agree. With `comics.empty` or `SyntheticComicsDomain` (a different catalogue) a list can hold comics that `GET /v1/comics/:id` does not serve, or the reverse, so a feature test that needs the links to resolve serves the library with the default comics set.
+
 All failures are `400` with `{"error": {"code", "message", "parameter", ...}}`. Checks run in the order below and the first failure is the answer; a rejected write changes nothing and takes no id.
 
 | Order | `error.code` | Rule | Extra fields |
 |---|---|---|---|
-| 0 | `invalid_body` | The body is not a JSON object | |
+| 0 | `invalid_body` | The body is not a JSON object | `parameter: "body"` |
 | 1 | `invalid_name` | `name` missing, not a string, or not 1 to 60 characters after trimming | `parameter: "name"` |
 | 2 | `invalid_description` | `description` present, not null, and not a string of at most 280 characters (not trimmed) | `parameter: "description"` |
 | 3 | `invalid_visibility` | `visibility` is not exactly `private` or `public` | `parameter: "visibility"` |
@@ -96,7 +98,7 @@ Lengths count characters (runes), not UTF-16 units. `POST` checks 0 to 7, `PUT /
 
 | Name | Effect |
 |---|---|
-| `library.empty` | The routes keep validating and authenticating, but start with no lists for either user (its own state, so it is empty even after the default set was used). Items resolve against the seed-42 comics |
+| `library.empty` | The routes keep validating and authenticating, but start with no lists for either user (its own state, so it is empty even after the default set was used). Its ids are in the empty id space (`l-1001`...). Items resolve against the comics of the backend's own seed, so titles and thumbnails equal `GET /v1/comics/:id` on any seed |
 | `library.server_error` | Every route fails with `500` (`injected_failure`) |
 
 ## Fixture sets
@@ -106,7 +108,7 @@ Named sets for feature tests (plan 05 §3.4), exported as `libraryFixtureSets`. 
 | Set | Cast | Test-facing facts |
 |---|---|---|
 | `library.default` | `LibraryMockDomain` | See the table above |
-| `library.empty` | `EmptyLibraryDomain` | no lists for anyone; first created id is `l-1`; auth and validation unchanged; no scenarios |
+| `library.empty` | `EmptyLibraryDomain` | no lists for anyone; first created id is `l-1001`; auth and validation unchanged; no scenarios |
 | `library.server_error` | `FailingLibraryDomain` | all six routes answer `500` with `error.code` `injected_failure`, the same body as the scenario (whatever the auth); no scenarios |
 
 ## Snapshots

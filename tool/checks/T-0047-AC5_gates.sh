@@ -22,7 +22,17 @@ cd "$REPO"
 MIN="${MC_COVERAGE_MIN:-90}"
 FLUTTER='sky_engine|flutter_ios_engine|pub_deps__flutter[_a-z]*//|pub_deps__flutter_test|@@rules_flutter|//flutter:'
 work="$(mktemp -d)"
-trap 'rm -rf "$work"' EXIT
+# Both negative controls edit a tracked BUILD file (Bazel needs the real
+# label). Backups live in $work, the restore trap is installed before any
+# edit, and every restore is verified with cmp (a mismatch fails the check).
+lib_build=utility/mc_fixtures_library/BUILD.bazel
+build=feature/characters/characters_list/BUILD.bazel
+restore() {  # restore <file> <backup>
+  [[ -f "$2" ]] || return 0
+  cp -f "$2" "$1"
+  cmp -s "$1" "$2"
+}
+trap 'restore "$lib_build" "$work/lib_build.bak"; restore "$build" "$work/build.bak"; rm -rf "$work"' EXIT
 rows=()
 fails=()
 ok=1
@@ -50,16 +60,13 @@ report "# T-0047-AC5: pure Dart, registered, covered" "" \
   "## closure of mc_fixtures_library ($n targets)" '```' "Flutter markers: ${hits:-none}" '```' \
   "## positive control: mc_fixtures_media" '```' "Flutter markers: ${control:-none}" '```'
 # Negative control: add the Flutter-bound media package to the library's own
-# BUILD and the closure must show Flutter markers. The restore trap is
-# installed before the file is touched.
-lib_build=utility/mc_fixtures_library/BUILD.bazel
-trap '[[ -f "$lib_build.orig" ]] && mv -f "$lib_build.orig" "$lib_build"; rm -rf "$work"' EXIT
-cp "$lib_build" "$lib_build.orig"
+# BUILD and the closure must show Flutter markers.
+cp "$lib_build" "$work/lib_build.bak"
 python3 -I -c 'import sys;p=sys.argv[1];s=open(p).read();t="\"//utility/mc_mocked_backend\",\n    ],";assert t in s;open(p,"w").write(s.replace(t,"\"//utility/mc_mocked_backend\",\n        \"//utility/mc_fixtures_media\",\n    ],",1))' "$lib_build"
 neg_hits="$(closure //utility/mc_fixtures_library:mc_fixtures_library | grep -E "$FLUTTER" | sort -u | head -3)"
-mv -f "$lib_build.orig" "$lib_build"
-report "## negative control: a Flutter-bound dependency added to the library" '```' "Flutter markers: ${neg_hits:-NOT DETECTED}" '```'
-if [[ "$n" -ge 50 && -z "$hits" && -n "$control" && -n "$neg_hits" ]]; then rows+=("| pure-Dart closure | PASS |"); else rows+=("| pure-Dart closure | **FAIL** |"); ok=0; fi
+restored=1; restore "$lib_build" "$work/lib_build.bak" && cmp -s "$lib_build" <(git show "HEAD:$lib_build") || restored=0
+report "## negative control: a Flutter-bound dependency added to the library" '```' "Flutter markers: ${neg_hits:-NOT DETECTED}" "BUILD restored byte-for-byte: $([[ $restored == 1 ]] && echo yes || echo NO)" '```'
+if [[ "$restored" == 1 && "$n" -ge 50 && -z "$hits" && -n "$control" && -n "$neg_hits" ]]; then rows+=("| pure-Dart closure | PASS |"); else rows+=("| pure-Dart closure | **FAIL** |"); ok=0; fi
 
 # 2. registration
 if grep -qx '  - utility/mc_fixtures_library' pubspec.yaml; then rows+=("| workspace registration | PASS |"); else rows+=("| workspace registration | **FAIL** |"); ok=0; fi
@@ -87,18 +94,14 @@ nlibs="$(wc -w <<< "$libs" | tr -d ' ')"
 # shellcheck disable=SC2086
 found="$(scan $libs)"
 pos="$(closure //utility/mc_fixtures_library:library_test | grep -E '^@?@?//utility/mc_fixtures_library' | sort -u | head -2 | tr '\n' ' ')"
-build=feature/characters/characters_list/BUILD.bazel
-# The restore trap is installed before the file is touched, so an interrupt
-# between the copy and the edit cannot leave the real BUILD changed.
-trap '[[ -f "$build.orig" ]] && mv -f "$build.orig" "$build"; [[ -f "$lib_build.orig" ]] && mv -f "$lib_build.orig" "$lib_build"; rm -rf "$work"' EXIT
-cp "$build" "$build.orig"
+cp "$build" "$work/build.bak"
 sed -i '' 's|^    "//utility/mc_api_client",$|    "//utility/mc_api_client",\n    "//utility/mc_fixtures_library",|' "$build"
 neg="$(scan //feature/characters/characters_list:characters_list)"
-mv -f "$build.orig" "$build"
+restored2=1; restore "$build" "$work/build.bak" && cmp -s "$build" <(git show "HEAD:$build") || restored2=0
 report "## fixtures check ($nlibs production targets scanned)" '```' \
   "library dependencies: ${found:-none}" "positive control (its own test): ${pos:-nothing}" \
-  "negative control (dep added to characters_list): ${neg:-NOT DETECTED}" '```'
-if [[ -z "$found" && "$nlibs" -ge 20 && -n "$pos" && -n "$neg" && "$neg" != *"QUERY RETURNED NOTHING"* ]]; then
+  "negative control (dep added to characters_list): ${neg:-NOT DETECTED}" "BUILD restored byte-for-byte: $([[ $restored2 == 1 ]] && echo yes || echo NO)" '```'
+if [[ "$restored2" == 1 && -z "$found" && "$nlibs" -ge 20 && -n "$pos" && -n "$neg" && "$neg" != *"QUERY RETURNED NOTHING"* ]]; then
   rows+=("| fixtures check | PASS |")
 else
   rows+=("| fixtures check | **FAIL** |"); ok=0

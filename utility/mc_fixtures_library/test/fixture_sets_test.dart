@@ -13,6 +13,9 @@ Future<Response<Map<String, Object?>>> _get(Dio dio, String path) =>
 
 List<Call> _calls() => everyRoute('l-1');
 
+/// The first id number of the empty state (CONTRACT.md, Scenarios).
+const int emptyStart = 1001;
+
 void main() {
   test('T-0047-AC4 the fixture sets are default, empty, server_error', () {
     expect(libraryFixtureSets.keys, [
@@ -74,7 +77,11 @@ void main() {
         headers: bearer(reader),
       );
       expect(created.statusCode, 201);
-      expect(created.data!['id'], 'l-1');
+      expect(
+        created.data!['id'],
+        'l-$emptyStart',
+        reason: 'the empty state has its own id space',
+      );
       expect(
         (await _get(dio, '/v1/me/lists')).data!['lists']! as List,
         hasLength(1),
@@ -170,5 +177,37 @@ void main() {
     );
     backend.useScenario('library.empty');
     expect((await _get(dio, '/v1/me/lists')).data, {'lists': <Object?>[]});
+  });
+
+  test('T-0047-AC4 switching library.empty off never aliases a created id '
+      'onto a seeded list', () async {
+    final backend = MockBackend(domains: [const LibraryMockDomain()]);
+    final dio = jsonDio(backend);
+    backend.useScenario('library.empty');
+    final created = await call<Map<String, Object?>>(
+      dio,
+      'POST',
+      '/v1/me/lists',
+      body: {'name': 'Mine', 'visibility': 'private', 'comicIds': <int>[]},
+      headers: bearer(reader),
+    );
+    final id = created.data!['id']! as String;
+    expect(['l-1', 'l-2', 'l-3', 'l-4'], isNot(contains(id)));
+    backend.useScenario(null);
+    final seeded = await _get(dio, '/v1/me/lists');
+    expect((seeded.data!['lists']! as List).map((l) => (l as Map)['id']), [
+      'l-1',
+      'l-2',
+      'l-3',
+    ]);
+    expect((await _get(dio, '/v1/me/lists/$id')).statusCode, 404);
+    final next = await call<Map<String, Object?>>(
+      dio,
+      'POST',
+      '/v1/me/lists',
+      body: {'name': 'Next', 'visibility': 'private', 'comicIds': <int>[]},
+      headers: bearer(reader),
+    );
+    expect(next.data!['id'], 'l-5');
   });
 }

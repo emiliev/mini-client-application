@@ -234,6 +234,11 @@ void main() {
           headers: bearer(reader),
         );
         _expectError(response, 'invalid_body', reason: route.name);
+        expect(
+          (response.data!['error']! as Map)['parameter'],
+          'body',
+          reason: route.name,
+        );
       }
     });
 

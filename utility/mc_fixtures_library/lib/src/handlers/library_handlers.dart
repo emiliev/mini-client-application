@@ -8,6 +8,17 @@ import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 const String _stateKey = 'library.state';
 const String _emptyStateKey = 'library.state.empty';
 
+/// The first list number of the empty state. Its ids start here, apart from
+/// the default set's `l-1`..., so switching `library.empty` off never leaves a
+/// user-created id that names a seeded list.
+const int emptyFirstNumber = 1001;
+
+final Map<int, ComicUniverse> _universes = {};
+
+/// The comics of [seed], as `ComicsMockDomain` serves them (built once per
+/// seed, at request time, so a scenario follows the backend's own seed).
+ComicUniverse comicsFor(int seed) => _universes[seed] ??= ComicUniverse(seed);
+
 /// The comics the seeded lists hold, as positions in title order (so they
 /// never depend on how ids are numbered).
 const List<List<int>> _seedItems = [
@@ -33,7 +44,7 @@ LibraryState _state(
   final byUser = <String, List<ReadingList>>{
     for (final user in fixtureUsers) user.id: <ReadingList>[],
   };
-  var next = 1;
+  var next = seed ? 1 : emptyFirstNumber;
   if (seed) {
     void make(
       String user,
@@ -170,6 +181,7 @@ final MockResponse _notAnObject = MockResponse.error(
   400,
   'invalid_body',
   'Expected a JSON object',
+  extra: {'parameter': 'body'},
 );
 
 ReadingList? _find(LibraryState state, String user, String id) {
@@ -205,8 +217,9 @@ int _byUpdated(ReadingList a, ReadingList b) {
 }
 
 /// `GET /v1/me/lists`: the user's lists, most recently updated first.
-MockHandler listLists(ComicUniverse universe, {required bool seed}) =>
+MockHandler listLists({required bool seed}) =>
     _authed((user, request, context) {
+      final universe = comicsFor(context.seed);
       final lists = [
         ..._state(context, universe, seed: seed).listsByUser[user.id]!,
       ]..sort(_byUpdated);
@@ -216,18 +229,19 @@ MockHandler listLists(ComicUniverse universe, {required bool seed}) =>
     });
 
 /// `GET /v1/me/lists/:id`.
-MockHandler getList(ComicUniverse universe, {required bool seed}) =>
-    _authed((user, request, context) {
-      final id = context.params['id']!;
-      final list = _find(_state(context, universe, seed: seed), user.id, id);
-      return list == null
-          ? _notFound(id)
-          : MockResponse.ok(_detail(list, universe));
-    });
+MockHandler getList({required bool seed}) => _authed((user, request, context) {
+  final universe = comicsFor(context.seed);
+  final id = context.params['id']!;
+  final list = _find(_state(context, universe, seed: seed), user.id, id);
+  return list == null
+      ? _notFound(id)
+      : MockResponse.ok(_detail(list, universe));
+});
 
 /// `POST /v1/me/lists` with `{name, description?, visibility, comicIds}`.
-MockHandler createList(ComicUniverse universe, {required bool seed}) =>
+MockHandler createList({required bool seed}) =>
     _authed((user, request, context) {
+      final universe = comicsFor(context.seed);
       final body = request.body;
       if (body is! Map) {
         return _notAnObject;
@@ -255,8 +269,9 @@ MockHandler createList(ComicUniverse universe, {required bool seed}) =>
 
 /// `PUT /v1/me/lists/:id` with `{name, description?, visibility}`. The items
 /// are left as they are; an absent description clears it.
-MockHandler updateList(ComicUniverse universe, {required bool seed}) =>
+MockHandler updateList({required bool seed}) =>
     _authed((user, request, context) {
+      final universe = comicsFor(context.seed);
       final id = context.params['id']!;
       final state = _state(context, universe, seed: seed);
       final list = _find(state, user.id, id);
@@ -283,8 +298,9 @@ MockHandler updateList(ComicUniverse universe, {required bool seed}) =>
     });
 
 /// `PUT /v1/me/lists/:id/items` with `{comicIds}`: the new order, exactly.
-MockHandler replaceItems(ComicUniverse universe, {required bool seed}) =>
+MockHandler replaceItems({required bool seed}) =>
     _authed((user, request, context) {
+      final universe = comicsFor(context.seed);
       final id = context.params['id']!;
       final state = _state(context, universe, seed: seed);
       final list = _find(state, user.id, id);
@@ -306,8 +322,9 @@ MockHandler replaceItems(ComicUniverse universe, {required bool seed}) =>
     });
 
 /// `DELETE /v1/me/lists/:id`: `204`, or `404` for an unknown or foreign id.
-MockHandler deleteList(ComicUniverse universe, {required bool seed}) =>
+MockHandler deleteList({required bool seed}) =>
     _authed((user, request, context) {
+      final universe = comicsFor(context.seed);
       final id = context.params['id']!;
       final state = _state(context, universe, seed: seed);
       final list = _find(state, user.id, id);

@@ -1,5 +1,5 @@
 #!/bin/bash
-# T-0047 engineer mutation checks: each mutation of the discovery package must
+# T-0047 engineer mutation checks: each mutation of the library package must
 # turn at least one test red (a mutation that survives, or that fails to
 # build, fails this script). Every validation rule, the auth check, ownership and each write are pinned one by one.
 #
@@ -156,6 +156,11 @@ mutate "S5 server_error scenario misses a route" $DOM "for (final route in libra
           FailureRule(" "for (final route in libraryRouteManifest.skip(1))
           FailureRule("
 mutate "S6 empty set is seeded through the default handlers" $DOM "_handlers(ComicUniverse(environment.seed), seed: false)," "_handlers(ComicUniverse(environment.seed), seed: true),"
+# --- review round -------------------------------------------------------
+mutate "R1 comics are always the seed-42 universe" $H "_universes[seed] ??= ComicUniverse(seed);" "_universes[seed] ??= ComicUniverse(42);"
+mutate "R2 the empty state shares the default id space" $H "const int emptyFirstNumber = 1001;" "const int emptyFirstNumber = 1;"
+mutate "R3 invalid_body carries no parameter" $H "  extra: {'parameter': 'body'},
+" ""
 echo
 echo "killed=$killed survived=$survived broken=$broken"
 git status --short "$P"

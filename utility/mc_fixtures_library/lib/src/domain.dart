@@ -1,4 +1,3 @@
-import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_library/src/handlers/library_handlers.dart'
     as handlers;
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -15,16 +14,13 @@ const List<String> libraryRouteManifest = [
   'DELETE /v1/me/lists/:id',
 ];
 
-Map<String, MockHandler> _handlers(
-  ComicUniverse universe, {
-  required bool seed,
-}) => {
-  'GET /v1/me/lists': handlers.listLists(universe, seed: seed),
-  'GET /v1/me/lists/:id': handlers.getList(universe, seed: seed),
-  'POST /v1/me/lists': handlers.createList(universe, seed: seed),
-  'PUT /v1/me/lists/:id': handlers.updateList(universe, seed: seed),
-  'PUT /v1/me/lists/:id/items': handlers.replaceItems(universe, seed: seed),
-  'DELETE /v1/me/lists/:id': handlers.deleteList(universe, seed: seed),
+Map<String, MockHandler> _handlers({required bool seed}) => {
+  'GET /v1/me/lists': handlers.listLists(seed: seed),
+  'GET /v1/me/lists/:id': handlers.getList(seed: seed),
+  'POST /v1/me/lists': handlers.createList(seed: seed),
+  'PUT /v1/me/lists/:id': handlers.updateList(seed: seed),
+  'PUT /v1/me/lists/:id/items': handlers.replaceItems(seed: seed),
+  'DELETE /v1/me/lists/:id': handlers.deleteList(seed: seed),
 };
 
 void _register(MockRouter router, Map<String, MockHandler> byRoute) {
@@ -48,13 +44,13 @@ final class LibraryMockDomain implements MockDomain {
 
   @override
   void register(MockRouter router, MockDomainEnvironment environment) =>
-      _register(router, _handlers(ComicUniverse(environment.seed), seed: true));
+      _register(router, _handlers(seed: true));
 
   @override
   Map<String, MockScenario> get scenarios => {
     'library.empty': MockScenario(
       'library.empty',
-      overrides: _handlers(ComicUniverse(42), seed: false),
+      overrides: _handlers(seed: false),
     ),
     'library.server_error': MockScenario(
       'library.server_error',
@@ -82,7 +78,7 @@ final class EmptyLibraryDomain implements MockDomain {
   void register(MockRouter router, MockDomainEnvironment environment) =>
       _register(
         router,
-        _handlers(ComicUniverse(environment.seed), seed: false),
+        _handlers(seed: false),
       );
 
   @override
