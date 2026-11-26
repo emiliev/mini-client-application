@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Review |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0037-flow-back-button-hardening` |
@@ -36,3 +36,24 @@ The P1-24 bricks will put `McFlowBackButton` on every generated page, so it has 
 
 ## Log
 - 2026-11-26: Created and dispatched (TL) from the T-0036 review and Verifier residuals.
+- 2026-11-26: Engineer: implemented the four TL decisions, patch change 5, tests, mutation script, gates, e2e (Engineer).
+
+## Outcome
+Branch `fleet/T-0037-flow-back-button-hardening`. Finding: [F-0036](../findings/F-0036-flow-back-button-hardening.md). Evidence: `documents/evidence/T-0037/engineer/`.
+
+| AC | Evidence |
+|---|---|
+| T-0037-AC1 | `flow_back_button_test`: three "T-0037-AC1" tests (rebuilt stack `[home, flow]` under the same page key; pages `[home, flow]` to `[flow]`; `removeRoute` below a pushed flow). `AC1_negative_control.sh` puts T-0036's `flow_context.dart` and `feature_flow.dart` (b8f152c) back: all 3 FAIL (`AC1_negative_control.log`). |
+| T-0037-AC2 | Three "T-0037-AC2" tests: first route with no drawer builds empty without an error, with a drawer shows `DrawerButton`, a pushed route outside a flow keeps the automatic back. |
+| T-0037-AC3 | Six precedence tests (local history wins, also over a drawer, also at the app root; drawer on a pushed root; drawer on an app-root flow; otherwise the flow button; outer `PopScope` respected) plus the test pinning flow_builder's always-mounted `PopScope`. |
+| T-0037-AC4 | `FlowBuilder` driven by `state:` and, separately, by a swapped `controller:`, accepts the next `popRoute`. The outside-any-route test asserts the widget's own `SizedBox` (under an `Align`). `AC4_gates_missing_file_negative.md` shows `T-0036-AC3_gates.sh` failing on a missing file (planted-phrase negative and positive control beside it). Gates: `T-0036-AC3_gates.md` PASS (test //..., lint, mc_arch_check, rules_fork check, format, l10n_check, provenance, coverage >= 90 %, T-0032 byte-identity and cutoff, mutations). e2e: `e2e/e2e-summary.md`, 3 targets PASS on `mc-T-0037-engineer-75705`, deleted (0 left). |
+
+TL decisions, each killed by a mutation (`mutations_T-0037.log`, 15 mutations, all killed): D1 (2 mutations + never-reads-outerCanPop), D2 (2), D3 (4, including `pop` instead of `maybePop`), flow_builder (always-mounted scope, change 5 in both `didUpdateWidget` branches, change 4).
+
+Notes for the Verifier and TL:
+1. **Moved/changed tests:** `flow_kit_test` "T-0036-AC2 outside any route it is empty" now wraps in `Align` (not `SizedBox`) and asserts the widget's own `SizedBox` has zero size; stricter, not weaker. No test deleted, skipped, or `// ignore:` added.
+2. **T-0036 `mutations.sh` superseded:** its old texts (`outer.canPop()`, `if (route.isFirst) {`) no longer exist. Its still-meaningful mutations are re-expressed in the T-0037 script; `T-0036-AC3_gates.sh` runs T-0033's and T-0037's scripts. The T-0036 file is untouched.
+3. **Behaviour change (D3, intended):** a pushed flow root with a drawer now shows `DrawerButton`, not the back button.
+4. `outerCanPop` is `!route.isFirst`, not `outer.canPop()` (which counts local history on the first route).
+5. Provenance now also requires exactly one `*.patch` (negative in `provenance_extra_patch_negative.md`). Patch renamed to `0001-navigation-channel-and-popscope.patch`; `VENDORED.md` and the upstream draft updated.
+6. New Bazel target `flow_back_button_test`; no pubspec or lock changes.
