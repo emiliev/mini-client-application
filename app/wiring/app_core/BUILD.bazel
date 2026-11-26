@@ -17,6 +17,8 @@ _DEPS = [
     "//utility/mc_ds_theme",
     "//utility/mc_event_bus",
     "//utility/mc_fixtures_characters",
+    "//utility/mc_fixtures_comics",
+    "//utility/mc_fixtures_identity",
     "//utility/mc_fixtures_media",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
@@ -45,7 +47,6 @@ flutter_library(
     main = "test/%s.dart" % t,
     deps = _DEPS + [
         ":app_core",
-        "//utility/mc_fixtures_identity",
         "@pub_deps//:flutter_test",
     ],
 ) for t in [

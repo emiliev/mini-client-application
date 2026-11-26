@@ -119,12 +119,19 @@ Feature: A comic's page
     Then I see {'Amber Vanguard'}
 
   @T-0041-AC4 @l10n
-  Scenario: In German a failed and an unknown comic are German
+  Scenario: In German a failed comic explains itself in German
     Given the device locale is {'de'}
     And the backend fails {'GET /v1/comics/501500'} with {'server_error'}
     When I open comic {501500}
     Then I see {'Das Comic konnte nicht geladen werden'}
     And I see {'Erneut versuchen'}
+
+  @T-0041-AC4 @l10n
+  Scenario: In German an unknown comic says so in German
+    Given the device locale is {'de'}
+    When I open comic {999999}
+    Then I see {'Comic nicht gefunden'}
+    And I see {'Dieses Comic gibt es nicht oder nicht mehr.'}
 
   @T-0041-AC4 @l10n
   Scenario: The pseudo-locale renders every section without overflow
@@ -137,8 +144,7 @@ Feature: A comic's page
     Then I see {'[Çĥàŕàçţéŕš ~~~~]'}
     And I see {'[Çóvéŕ àŕţíšţ ~~~~]'}
     And nothing overflows
-    When I scroll the comic until I see {'Amber Frontier #1'}
-    And I tap the cover
+    When I tap the cover
     Then I see the cover page of comic {501500}
     And nothing overflows
 

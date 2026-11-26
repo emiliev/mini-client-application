@@ -18,9 +18,8 @@ Future<void> theFactReads(
   expect(labelText, findsOneWidget, reason: 'one fact is labelled "$label"');
   final row = find.ancestor(of: labelText, matching: find.byType(Row)).first;
   final texts = [
-    for (final element in find
-        .descendant(of: row, matching: find.byType(Text))
-        .evaluate())
+    for (final element
+        in find.descendant(of: row, matching: find.byType(Text)).evaluate())
       plainSpaces((element.widget as Text).data!),
   ];
   expect(texts, [label, plainSpaces(value)], reason: 'the "$label" fact');

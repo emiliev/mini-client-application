@@ -27,6 +27,8 @@ dependencies:
   mc_ds_theme: any
   mc_event_bus: any
   mc_fixtures_characters: any
+  mc_fixtures_comics: any
+  mc_fixtures_identity: any
   mc_fixtures_media: any
   mc_mocked_backend: any
   mc_monitoring: any
@@ -34,7 +36,6 @@ dependencies:
   mc_storage: any
 
 dev_dependencies:
-  mc_fixtures_identity: any
   flutter_test:
     sdk: flutter
   mc_analysis: any

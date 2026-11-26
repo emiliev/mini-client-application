@@ -70,8 +70,12 @@ class _FactRow extends StatelessWidget {
               ),
             ),
             const McGap.md(),
-            Flexible(
-              child: Text(value, textAlign: TextAlign.end, style: text.bodyLarge),
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                style: text.bodyLarge,
+              ),
             ),
           ],
         ),

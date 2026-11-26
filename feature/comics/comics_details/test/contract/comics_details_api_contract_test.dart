@@ -13,7 +13,6 @@ import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_formatters/mc_formatters.dart';
-import 'package:mc_media/mc_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
 /// The CONTRACT.md list example's summary fields, with the detail fields the
@@ -73,12 +72,18 @@ void main() {
           variant: 'portrait_large',
         ),
       );
-      expect(dto.series, const SeriesRefDto(id: 400003, title: 'Amber Chronicles'));
-      expect(dto.creators.last, const CreditDto(
-        id: 300002,
-        name: 'Bruno Castell',
-        role: 'cover_artist',
-      ));
+      expect(
+        dto.series,
+        const SeriesRefDto(id: 400003, title: 'Amber Chronicles'),
+      );
+      expect(
+        dto.creators.last,
+        const CreditDto(
+          id: 300002,
+          name: 'Bruno Castell',
+          role: 'cover_artist',
+        ),
+      );
       expect(dto.characterIds, [100001, 100002]);
       expect(dto.price, const PriceDto(amountCents: 399, currency: 'USD'));
       expect(dto.pageCount, 32);
@@ -112,15 +117,25 @@ void main() {
       expect(comic.pageCount, record.pageCount);
       expect(comic.releaseDate, record.releaseDate);
       expect(comic.releaseDate.isUtc, isTrue);
-      expect([for (final c in comic.creators) (c.id, c.name, c.role.wireName)], [
-        for (final c in record.creators) (CreatorId(c.id), c.name, c.role),
-      ]);
+      expect(
+        [for (final c in comic.creators) (c.id, c.name, c.role.wireName)],
+        [
+          for (final c in record.creators) (CreatorId(c.id), c.name, c.role),
+        ],
+      );
     });
 
     test('T-0041-AC7: every role of the contract maps', () {
       expect(
         [for (final r in CreatorRole.values) r.wireName],
-        ['writer', 'penciller', 'inker', 'colorist', 'letterer', 'cover_artist'],
+        [
+          'writer',
+          'penciller',
+          'inker',
+          'colorist',
+          'letterer',
+          'cover_artist',
+        ],
       );
       for (final role in CreatorRole.values) {
         expect(CreatorRole.fromWire(role.wireName), role);
@@ -135,19 +150,23 @@ void main() {
       }
 
       expect(
-        () => with_((j) => j['creators'] = [
-          {'id': 1, 'name': 'x', 'role': 'editor'},
-        ]).toDomain(cast: const []),
+        () => with_(
+          (j) => j['creators'] = [
+            {'id': 1, 'name': 'x', 'role': 'editor'},
+          ],
+        ).toDomain(cast: const []),
         throwsFormatException,
       );
       expect(
-        () => with_((j) => j['price'] = {'amountCents': 1, 'currency': 'XTS'})
-            .toDomain(cast: const []),
+        () =>
+            with_((j) => j['price'] = {'amountCents': 1, 'currency': 'XTS'})
+                .toDomain(cast: const []),
         throwsFormatException,
       );
       expect(
-        () => with_((j) => j['cover'] = {'path': 'x', 'variant': 'poster'})
-            .toDomain(cast: const []),
+        () =>
+            with_((j) => j['cover'] = {'path': 'x', 'variant': 'poster'})
+                .toDomain(cast: const []),
         throwsFormatException,
       );
       for (final day in ['2020-1-12', '2020-02-30', '12.01.2020', '']) {
@@ -181,7 +200,10 @@ void main() {
       final put = FavouriteDto.fromJson(
         (await _dio.put<Map<String, dynamic>>(path, options: options)).data!,
       );
-      expect(put, const FavouriteDto(kind: 'comic', id: '501500', favourite: true));
+      expect(
+        put,
+        const FavouriteDto(kind: 'comic', id: '501500', favourite: true),
+      );
       final get = FavouriteDto.fromJson(await _get(path, bearer: token));
       expect(get.favourite, isTrue);
       final delete = FavouriteDto.fromJson(

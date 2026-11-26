@@ -48,10 +48,10 @@ Feature: Favourite a comic
   @T-0041-AC6
   Scenario: Signed in, the toggle flips at once and a failed write rolls it back
     Given I am signed in as {'reader@mini-client.test'}
-    And the backend holds {'PUT /v1/me/favourites/comic/501500'}
-    And the backend fails {'PUT /v1/me/favourites/comic/501500'} with {'server_error'}
     When I open comic {501500}
-    And I tap {'Add to favourites'}
+    Given the backend holds {'PUT /v1/me/favourites/comic/501500'}
+    And the backend fails {'PUT /v1/me/favourites/comic/501500'} with {'server_error'}
+    When I tap {'Add to favourites'}
     Then I see {'Remove from favourites'}
     When the backend releases {'PUT /v1/me/favourites/comic/501500'}
     Then I see {'Add to favourites'}

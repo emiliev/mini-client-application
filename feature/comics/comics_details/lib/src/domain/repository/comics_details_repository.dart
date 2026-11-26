@@ -45,10 +45,11 @@ class ComicsDetailsRepository {
     ComicId id, {
     required bool favourite,
   }) => apiCall(
-    () async => (favourite
-            ? await _api.putFavourite(id.value)
-            : await _api.deleteFavourite(id.value))
-        .favourite,
+    () async =>
+        (favourite
+                ? await _api.putFavourite(id.value)
+                : await _api.deleteFavourite(id.value))
+            .favourite,
   );
 
   static Future<T?> _orNullWhenNotFound<T extends Object>(

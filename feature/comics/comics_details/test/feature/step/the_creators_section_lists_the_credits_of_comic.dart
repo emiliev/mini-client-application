@@ -18,13 +18,15 @@ Future<void> theCreatorsSectionListsTheCreditsOfComic(
   // Bring the whole section on screen, so every row is built.
   await scrollComicUntilVisible(
     tester,
-    find.descendant(of: section, matching: find.text(record.creators.last.name)),
+    find.descendant(
+      of: section,
+      matching: find.text(record.creators.last.name),
+    ),
   );
 
   final texts = [
-    for (final element in find
-        .descendant(of: section, matching: find.byType(Text))
-        .evaluate())
+    for (final element
+        in find.descendant(of: section, matching: find.byType(Text)).evaluate())
       (element.widget as Text).data,
   ];
   expect(texts, [

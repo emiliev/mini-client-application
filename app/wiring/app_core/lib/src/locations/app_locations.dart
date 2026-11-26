@@ -16,4 +16,8 @@ abstract final class AppLocations {
   /// One character's details (T-0033), by the `CharacterId` value. Equals
   /// `CharacterDetailsRoute(id: id).location` in universe_wiring.
   static String character(int id) => '/characters/$id';
+
+  /// One comic (T-0041), by the `ComicId` value. Equals
+  /// `ComicDetailsRoute(id: id).location` in publishing_wiring.
+  static String comic(int id) => '/comics/$id';
 }
