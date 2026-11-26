@@ -51,6 +51,9 @@ fail() { rc=1; row "$1" "**FAIL**" "$2"; }
 
 report "# T-0042-AC3: incremental and stale handling" ""
 
+# 0. after a `bazel test` the analysis cache holds the targets in a test
+# transition's configuration; cquery then names paths this build did not make.
+bzw test //utility/mc_api_client/... >/dev/null 2>&1
 sync --env dev
 [[ "$(field "$SYNC_SUMMARY" total)" -gt 0 ]] || { report "no outputs synced: $SYNC_LOG"; finish T-0042-AC3 1; }
 base_total=$(field "$SYNC_SUMMARY" total)

@@ -46,5 +46,33 @@
 | 13. an unknown option is refused (exit 2) | PASS |
 | 13. an unknown package is refused (exit 2) | PASS |
 | 14. --watch re-syncs within 5 s of a source edit | PASS |
+| 15. an unwritable directory fails the sync (copy mode, exit 1) | PASS |
+| 15. and says which file | PASS |
+| 15. an unwritable directory fails the sync (--link, exit 1) | PASS |
+| 15. no .tmp file is left behind | PASS |
+| 15. the same sync succeeds once the directory is writable | PASS |
+| 16. the file cquery printed is used, not a stale copy from another configuration | PASS |
+| 16. a lib/src/di/*.config.dart is synced | PASS |
+| 16. a hand-named lib/src/app.config.dart is not (same patterns as MC_GENERATED_DART) | PASS |
+| 16. .g.part and external outputs are not synced | PASS |
+| 16. an output cquery lists but that is not on disk fails the sync | PASS |
+| 16. the shared pattern list is MC_GENERATED_DART (defs.bzl names every synced glob) | PASS |
+| 16. with another MC_GENERATED_DART nothing of ours is synced (the list drives the script) | PASS |
+| 17. a refused sync, then a good one: it succeeds | PASS |
+| 17. and counts skipped=1, not the failed run's skip added again | PASS |
+| 17. a missing output, then it appears: the next sync succeeds (the missing flag is cleared) | PASS |
+| 18. a bootstrap item that is not git-ignored fails the run (non-zero) | PASS |
+| 18. REFUSED names it | PASS |
+| 18. nothing was written (not even the ignored items before it) | PASS |
+| 18. with only ignored items the bootstrap writes them | PASS |
+| 18. and git status stays clean | PASS |
+| 19. the scaffolding is recorded | PASS |
+| 19. --clean deletes the Xcode project and the bridging header | PASS |
+| 19. --clean keeps the tracked runner file and removes the scaffold list | PASS |
+| 20. --watch: a config edit refreshes app_config.json within 5 s | PASS |
+| 20. --watch: a pubspec.yaml edit triggers a sync | PASS |
+| 20. --watch: a hand-written lib/src/app.config.dart is a source (not a generated pattern) | PASS |
+| 20. --watch: a generated lib/src/di/x.config.dart does not trigger one | PASS |
+| 20. --watch: an edit made during the first sync triggers another (baseline taken first) | PASS |
 
 **PASS T-0042-AC5-script-tests**

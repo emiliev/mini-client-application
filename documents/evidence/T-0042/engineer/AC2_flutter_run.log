@@ -15,54 +15,25 @@ Downloading packages...
 Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-afd656b434c84427a`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
-Launching lib/main.dart on mc-T-0042-engineer-59626 in debug mode...
-Failed to index action parameter: <WFSpotlightSearchResultTypePickerParameter: 0x100ed1c50> due to ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState)
-Failed to index action parameter: <WFDynamicTagFieldParameter: 0x600003d15860> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter)
-Failed to index action parameter: <WFDynamicTagFieldParameter: 0x600003d17480> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter)
-Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d7ce10> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
-Running Xcode build...                                          
+Launching lib/main.dart on mc-T-0042-engineer-31879 in debug mode...
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d932a0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d50e10> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+Failed to index action parameter: <WFMailSenderPickerParameter: 0x1049ab1d0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingIntentDescription
+Failed to check availability in Spotlight for action is.workflow.actions.sendemail: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001181620 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.mobilemail, IS=false}}}
+Failed to check availability in Spotlight for action com.apple.facetime.facetime: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600000c99560 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
 is.workflow.actions.useractivity.open WFOpenUserActivityAction: Skipped because: [donation-based action]
-Failed to index action parameter: <WFMailSenderPickerParameter: 0x100975da0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingIntentDescription
-Failed to check availability in Spotlight for action is.workflow.actions.sendemail: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x6000011324f0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.mobilemail, IS=false}}}
-Failed to check availability in Spotlight for action is.workflow.actions.lightroom.import: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001107540 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.adobe.lrmobile, IS=false}}}
-Failed to index action parameter: <WFMediaPickerParameter: 0x600003702700> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFMediaPickerParameter)
+Running Xcode build...                                          
 is.workflow.actions.conditional WFConditionalAction: Skipped because: [control flow]
-Failed to check availability in Spotlight for action is.workflow.actions.workout.end: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001144000 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.SessionTrackerApp, IS=false}}}
-Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x60000371eb80> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
-Failed to index action parameter: <WFPosterPickerParameter: 0x600003707c00> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
-Failed to check availability in Spotlight for action com.apple.facetime.facetime: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001142eb0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
-is.workflow.actions.repeat.each WFForEachRepeatAction: Skipped because: [control flow]
-Failed to index action parameter: <WFContentArrayParameter: 0x6000039911e0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFContentArrayParameter)
-Failed to check availability in Spotlight for action is.workflow.actions.workout.start: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x60000116a3a0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.SessionTrackerApp, IS=false}}}
-Failed to check availability in Spotlight for action com.apple.mobilephone.call: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x60000116c4b0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
-Failed to index action parameter: <WFInputTypeParameter: 0x100ddf670> due to ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState)
-Failed to index action parameter: <WFInputSurfaceParameter: 0x600003723180> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFInputSurfaceParameter)
-is.workflow.actions.choosefrommenu WFChooseFromMenuAction: Skipped because: [control flow]
-Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003758d80> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
-Failed to index action parameter: <WFHomeAccessoryPickerParameter: 0x60000375d200> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeAccessoryPickerParameter)
-is.workflow.actions.repeat.count WFFiniteRepeatAction: Skipped because: [control flow]
-Failed to index action parameter: <WFTagFieldParameter: 0x600003b538e0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFTagFieldParameter)
-Failed to index action parameter: <WFPhotoItemCollectionParameter: 0x6000039b5e10> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPhotoItemCollectionParameter)
-Failed to index action parameter: <WFPosterPickerParameter: 0x600003764900> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
-Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x60000374ef40> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
-Failed to index action parameter: <WFSSHKeyParameter: 0x600003768e40> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSSHKeyParameter)
-is.workflow.actions.sirikit.donation.handle WFHandleDonatedIntentAction: Skipped because: [donation-based action]
-Failed to index action parameter: <WFFontPickerParameter: 0x600003751800> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFFontPickerParameter)
-Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003752700> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
-Failed to index action parameter: <WFHomeServicePickerParameter: 0x600003753000> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeServicePickerParameter)
-Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d912c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
 Indexed: 1128
 Errored: 0
 Skipped: [donation-based action: 2, control flow: 4]
    donation-based action: 2
    control flow: 4
-Finished in 17.233585s
+Finished in 13.293052s
 -[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
-Xcode build done.                                            7.4s
+Xcode build done.                                            7.3s
 [IMPORTANT:flutter/shell/platform/darwin/graphics/FlutterDarwinContextMetalImpeller.mm(45)] Using the Impeller rendering backend (Metal).
-flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-Syncing files to device mc-T-0042-engineer-59626...                 22ms
+Syncing files to device mc-T-0042-engineer-31879...                 18ms
 
 Flutter run key commands.
 r Hot reload. 🔥🔥🔥
@@ -72,10 +43,12 @@ d Detach (terminate "flutter run" but leave application running).
 c Clear the screen
 q Quit (terminate the application on the device).
 
-A Dart VM Service on mc-T-0042-engineer-59626 is available at: http://127.0.0.1:59049/Ept6Z92BgOQ=/
-The Flutter DevTools debugger and profiler on mc-T-0042-engineer-59626 is available at: http://127.0.0.1:59049/Ept6Z92BgOQ=/devtools/?uri=ws://127.0.0.1:59049/Ept6Z92BgOQ=/ws
+A Dart VM Service on mc-T-0042-engineer-31879 is available at: http://127.0.0.1:62816/DMnTldwZqYU=/
+The Flutter DevTools debugger and profiler on mc-T-0042-engineer-31879 is available at: http://127.0.0.1:62816/DMnTldwZqYU=/devtools/?uri=ws://127.0.0.1:62816/DMnTldwZqYU=/ws
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
 
 Performing hot reload...                                        
-Reloaded 0 libraries in 67ms (compile: 4 ms, reload: 0 ms, reassemble: 34 ms).
+Reloaded 0 libraries in 93ms (compile: 11 ms, reload: 0 ms, reassemble: 28 ms).
 
 Application finished.

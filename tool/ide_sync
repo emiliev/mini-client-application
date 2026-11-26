@@ -23,8 +23,9 @@
 #   1. `bazel query` the codegen targets (dart_codegen, dart_aggregate_codegen;
 #      not the manual negative targets and not the BDD tests,
 #      which only ever live in bazel-out) and `bazel build` them.
-#   2. `bazel cquery --output=files` lists their outputs (the approach of
-#      tool/e2e/prepare_pub_project.sh); only generated Dart is kept
+#   2. The build's event stream lists their outputs (cquery, as in
+#      tool/e2e/prepare_pub_project.sh, can name another configuration after a
+#      `bazel test`; F-0041); only generated Dart is kept
 #      (.g.dart, .freezed.dart, .config.dart). gen-l10n output is left to
 #      `fvm flutter pub get` (step 6), which writes it beside the ARBs.
 #   3. Guards, before anything is written: every target path must be git-ignored
@@ -116,11 +117,11 @@ SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 
 # --- 1 and 2: the list of "<absolute source>\t<relative dest>" ------------------
-# cquery_to_list <exec root> <cquery --output=files> <out>: the generated Dart
+# outputs_to_list <exec root> <the build's output paths> <out>: the generated Dart
 # among the printed outputs, each as the exact `bazel-out/<config>/bin/<rel>`
-# path cquery printed (never a glob over configurations, which could pick a
+# path the build reported (never a glob over configurations, which could pick a
 # stale copy another configuration left behind).
-cquery_to_list() {
+outputs_to_list() {
   local exec=$1 files=$2 out=$3 path rel src bad=0
   : >"$out"
   while IFS= read -r path; do
@@ -140,8 +141,8 @@ list_outputs() {  # list_outputs <out file>
     cp "$MC_IDE_SYNC_LIST" "$out"
     return 0
   fi
-  if [ -n "${MC_IDE_SYNC_CQUERY_FILES:-}" ]; then  # tests: no Bazel
-    cquery_to_list "${MC_IDE_SYNC_EXEC:?}" "$MC_IDE_SYNC_CQUERY_FILES" "$out"
+  if [ -n "${MC_IDE_SYNC_OUTPUT_PATHS:-}" ]; then  # tests: no Bazel
+    outputs_to_list "${MC_IDE_SYNC_EXEC:?}" "$MC_IDE_SYNC_OUTPUT_PATHS" "$out"
     return $?
   fi
   local scope
@@ -158,14 +159,41 @@ list_outputs() {  # list_outputs <out file>
     { cat "$SCRATCH/query.err" >&2; return 1; }
   [ -s "$SCRATCH/labels.txt" ] || { log "no codegen target under ${PKGS[*]:-the workspace}"; : >"$out"; return 0; }
   log "build: $(wc -l <"$SCRATCH/labels.txt" | tr -d ' ') codegen targets"
+  # The outputs come from the build's own event stream, not from `cquery`:
+  # after a `bazel test` the analysis cache also holds the targets in a test
+  # transition's configuration, and cquery then prints that configuration's
+  # paths (which this build did not make). The stream names exactly the files
+  # this build produced, at their exact `bazel-out/<config>/bin/...` paths.
   bzl build --remote_download_outputs=all --keep_going --target_pattern_file="$SCRATCH/labels.txt" \
+    --build_event_json_file="$SCRATCH/bep.json" \
     >/dev/null 2>"$SCRATCH/build.err" || { tail -30 "$SCRATCH/build.err" >&2; return 1; }
-  { printf 'set('; tr '\n' ' ' <"$SCRATCH/labels.txt"; printf ')\n'; } >"$SCRATCH/set.query"
-  bzl cquery --query_file="$SCRATCH/set.query" --output=files \
-    2>"$SCRATCH/cquery.err" >"$SCRATCH/files.txt" || { cat "$SCRATCH/cquery.err" >&2; return 1; }
+  /usr/bin/python3 -I - "$SCRATCH/bep.json" >"$SCRATCH/files.txt" <<'PY' || { log "cannot read the build event stream"; return 1; }
+import json, sys
+sets, tops = {}, []
+for line in open(sys.argv[1]):
+    e = json.loads(line)
+    ident = e.get("id", {})
+    if "namedSet" in ident:
+        sets[ident["namedSet"]["id"]] = e["namedSetOfFiles"]
+    elif "targetCompleted" in ident:
+        for g in e.get("completed", {}).get("outputGroup", []):
+            tops += [s["id"] for s in g.get("fileSets", [])]
+seen, out = set(), set()
+def walk(i):
+    if i in seen or i not in sets:
+        return
+    seen.add(i)
+    for f in sets[i].get("files", []):
+        out.add("/".join(f.get("pathPrefix", []) + [f["name"]]))
+    for s in sets[i].get("fileSets", []):
+        walk(s["id"])
+for i in tops:
+    walk(i)
+print("\n".join(sorted(out)))
+PY
   local exec
   exec="$(bzl info execution_root 2>/dev/null)" || return 1
-  cquery_to_list "$exec" "$SCRATCH/files.txt" "$out"
+  outputs_to_list "$exec" "$SCRATCH/files.txt" "$out"
 }
 
 # --- helpers ------------------------------------------------------------------

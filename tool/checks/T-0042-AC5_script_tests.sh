@@ -245,7 +245,7 @@ bazel-out/zzz-real/bin/feature/f/lib/src/app.config.dart
 bazel-out/zzz-real/bin/feature/f/lib/src/domain/z.json_serializable.g.part
 bazel-out/zzz-real/bin/external/x/lib/e.g.dart
 EOF
-cq() { LOG="$(MC_IDE_SYNC_ROOT="$Q" MC_IDE_SYNC_CQUERY_FILES="$T/cquery.txt" MC_IDE_SYNC_EXEC="$EX" MC_IDE_SYNC_NO_IOS=1 "$SYNC" --no-pub "$@" 2>&1)"; RC=$?; SUM="$(grep -a '^IDE_SYNC' <<< "$LOG" | tail -1)"; }
+cq() { LOG="$(MC_IDE_SYNC_ROOT="$Q" MC_IDE_SYNC_OUTPUT_PATHS="$T/cquery.txt" MC_IDE_SYNC_EXEC="$EX" MC_IDE_SYNC_NO_IOS=1 "$SYNC" --no-pub "$@" 2>&1)"; RC=$?; SUM="$(grep -a '^IDE_SYNC' <<< "$LOG" | tail -1)"; }
 cq
 expect "16. the file cquery printed is used, not a stale copy from another configuration" grep -q '^// real' "$Q/feature/f/lib/src/domain/z.g.dart"
 expect "16. a lib/src/di/*.config.dart is synced" test -f "$Q/feature/f/lib/src/di/x.config.dart"
@@ -259,7 +259,7 @@ expect "16. the shared pattern list is MC_GENERATED_DART (defs.bzl names every s
 printf 'MC_GENERATED_DART = [\n    "**/*.freezed.dart",\n]\n' >"$T/defs.bzl"
 sed -i '' '/missing.g.dart/d' "$T/cquery.txt"
 Q2="$(new_repo cquery2)"
-LOG="$(MC_IDE_SYNC_DEFS="$T/defs.bzl" MC_IDE_SYNC_ROOT="$Q2" MC_IDE_SYNC_CQUERY_FILES="$T/cquery.txt" MC_IDE_SYNC_EXEC="$EX" MC_IDE_SYNC_NO_IOS=1 "$SYNC" --no-pub 2>&1)"
+LOG="$(MC_IDE_SYNC_DEFS="$T/defs.bzl" MC_IDE_SYNC_ROOT="$Q2" MC_IDE_SYNC_OUTPUT_PATHS="$T/cquery.txt" MC_IDE_SYNC_EXEC="$EX" MC_IDE_SYNC_NO_IOS=1 "$SYNC" --no-pub 2>&1)"
 expect "16. with another MC_GENERATED_DART nothing of ours is synced (the list drives the script)" test "$(field "$(grep -a '^IDE_SYNC' <<< "$LOG")" total)" = 0
 
 # --- 17. (item 4) a failed sync does not poison the next one in watch mode -------------------
@@ -282,7 +282,7 @@ expect "17. and counts skipped=1, not the failed run's skip added again" grep -q
 V2="$(new_repo poison2)"
 EX2="$T/exec2"; mkdir -p "$EX2/bazel-out/c/bin/feature/f/lib/src/domain"
 printf 'bazel-out/c/bin/feature/f/lib/src/domain/m.g.dart\n' >"$T/cq2.txt"
-start_watch "$V2" "$T/poison2.log" "MC_IDE_SYNC_CQUERY_FILES=$T/cq2.txt" "MC_IDE_SYNC_EXEC=$EX2" --
+start_watch "$V2" "$T/poison2.log" "MC_IDE_SYNC_OUTPUT_PATHS=$T/cq2.txt" "MC_IDE_SYNC_EXEC=$EX2" --
 W2=$LAST_WATCH
 waitfor 10 grep -q 'did not produce' "$T/poison2.log"
 printf '// m\n' >"$EX2/bazel-out/c/bin/feature/f/lib/src/domain/m.g.dart"
