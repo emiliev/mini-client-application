@@ -2,12 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 
+/// Keys of the home's reading-list entry, for tests and the e2e journey.
+const newReadingListKey = Key('home.reading_list.new');
+const readingListResultKey = Key('home.reading_list.result');
+const editReadingListKey = Key('home.reading_list.edit');
+
 /// The home placeholder until the discovery features exist (P1-17+).
-class HomePlaceholderPage extends StatelessWidget {
+///
+/// Its "New reading list" entry is the first caller of a flow that ends with
+/// a result (plan 01 §4.3, T-0048): it awaits [onNewReadingList] (the
+/// editor's route, pushed through `AppFlows`) and shows the list it returns.
+class HomePlaceholderPage extends StatefulWidget {
   const HomePlaceholderPage({
     required this.env,
     required this.onOpenPlaceholder,
     required this.onOpenCharacters,
+    required this.onNewReadingList,
+    required this.onEditReadingList,
     super.key,
   });
 
@@ -16,9 +27,32 @@ class HomePlaceholderPage extends StatelessWidget {
   final ValueChanged<int> onOpenPlaceholder;
   final VoidCallback onOpenCharacters;
 
+  /// Opens the editor on a new list; completes with its id, or null.
+  final Future<String?> Function() onNewReadingList;
+
+  /// Opens the editor on list `id`; completes with the id once saved.
+  final Future<String?> Function(String id) onEditReadingList;
+
+  @override
+  State<HomePlaceholderPage> createState() => _HomePlaceholderPageState();
+}
+
+class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
+  /// The list the editor last returned, and whether it was new.
+  ({String id, bool created})? _lastList;
+
+  Future<void> _await(Future<String?> editor, {required bool created}) async {
+    final id = await editor;
+    if (!mounted || id == null) {
+      return;
+    }
+    setState(() => _lastList = (id: id, created: created));
+  }
+
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final last = _lastList;
     return Scaffold(
       key: const Key('home.placeholder'),
       appBar: AppBar(title: const Text('Mini Client')),
@@ -43,13 +77,37 @@ class HomePlaceholderPage extends StatelessWidget {
             style: text.bodyMedium!.copyWith(fontWeight: FontWeight.w700),
           ),
           const McGap.lg(),
-          Text('Config: env=$env', style: text.labelLarge),
+          Text('Config: env=${widget.env}', style: text.labelLarge),
           const McGap.xl(),
-          McButton(label: 'Characters', onPressed: onOpenCharacters),
+          McButton(label: 'Characters', onPressed: widget.onOpenCharacters),
+          const McGap.md(),
+          McButton(
+            key: newReadingListKey,
+            label: 'New reading list',
+            onPressed: () => _await(widget.onNewReadingList(), created: true),
+          ),
+          if (last != null) ...[
+            const McGap.sm(),
+            Text(
+              last.created
+                  ? 'List created: ${last.id}'
+                  : 'List saved: ${last.id}',
+              key: readingListResultKey,
+              style: text.titleMedium,
+            ),
+            const McGap.sm(),
+            McButton(
+              key: editReadingListKey,
+              label: 'Edit list ${last.id}',
+              variant: McButtonVariant.secondary,
+              onPressed: () =>
+                  _await(widget.onEditReadingList(last.id), created: false),
+            ),
+          ],
           const McGap.md(),
           McButton(
             label: 'Open placeholder 7',
-            onPressed: () => onOpenPlaceholder(7),
+            onPressed: () => widget.onOpenPlaceholder(7),
           ),
         ],
       ),
