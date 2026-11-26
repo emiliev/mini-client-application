@@ -29,7 +29,15 @@ final class SearchEntry {
     required this.title,
     required this.thumbnail,
     this.subtitle,
-  }) : folded = foldText(title);
+  }) : folded = foldText(title) {
+    if (!searchTypes.contains(type)) {
+      throw ArgumentError.value(
+        type,
+        'type',
+        'must be one of ${searchTypes.join(', ')}',
+      );
+    }
+  }
 
   final int id;
   final String type;
@@ -59,6 +67,20 @@ final class SearchMatch {
 
 final RegExp _notWordChar = RegExp(r'[^\p{L}\p{N}]', unicode: true);
 
+/// The code point that ends right before [index] (a surrogate pair is one
+/// character, not two code units).
+String _runeBefore(String text, int index) {
+  final unit = text.codeUnitAt(index - 1);
+  final isLow = unit >= 0xDC00 && unit <= 0xDFFF;
+  if (isLow && index >= 2) {
+    final high = text.codeUnitAt(index - 2);
+    if (high >= 0xD800 && high <= 0xDBFF) {
+      return text.substring(index - 2, index);
+    }
+  }
+  return text[index - 1];
+}
+
 /// How [foldedTitle] matches [foldedQuery], or null when it does not. Both
 /// arguments must come from [foldText].
 MatchTier? matchTier(String foldedTitle, String foldedQuery) {
@@ -74,7 +96,7 @@ MatchTier? matchTier(String foldedTitle, String foldedQuery) {
   }
   var tier = MatchTier.substring;
   while (at >= 0) {
-    if (_notWordChar.hasMatch(foldedTitle[at - 1])) {
+    if (_notWordChar.hasMatch(_runeBefore(foldedTitle, at))) {
       tier = MatchTier.wordPrefix;
       break;
     }

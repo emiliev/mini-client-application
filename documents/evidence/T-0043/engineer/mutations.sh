@@ -109,6 +109,18 @@ mutate "F4 whitespace not collapsed" $NORM \
       out.write('');
     }"
 
+# --- review round fixes ------------------------------------------------
+mutate "R1 minimum length checked on the raw q, not the folded one" $H \
+  "foldText(q).runes.length < minQueryLength" "q.runes.length < minQueryLength"
+mutate "R2 word boundary read as a UTF-16 unit" $IDX \
+  "if (isLow && index >= 2) {" "if (isLow && index >= 2 && index < 0) {"
+mutate "R3 comma-below s not folded" $NORM \
+  "'s': 'śŝşšșṡṣṥṧṩ'," "'s': 'śŝşšṡṣṥṧṩ',"
+mutate "R4 Vietnamese a with circumflex and acute not folded" $NORM \
+  "'a': 'àáâãäåāăąǎạảấầ" "'a': 'àáâãäåāăąǎạảầ"
+mutate "R5 entry type not validated" $IDX \
+  "if (!searchTypes.contains(type)) {" "if (!searchTypes.contains(type) && type.isEmpty) {"
+
 # --- handlers ----------------------------------------------------------
 mutate "H1 groups follow the order of types" $H \
   "for (final type in searchTypes)

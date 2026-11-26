@@ -3,8 +3,8 @@
 # and no production target reaches it; plus the repo gates.
 #   1. closure of //utility/mc_fixtures_discovery:mc_fixtures_discovery has no Flutter
 #      markers (as T-0030-AC7). Positive control: the closure of
-#      //utility/mc_fixtures_characters has them (via mc_fixtures_media), so a
-#      query that cannot see Flutter fails the check.
+#      //utility/mc_fixtures_media has them, so a query that cannot see
+#      Flutter fails the check.
 #   2. workspace registration in the root pubspec.yaml
 #   3. fixtures check: no production feature or utility target reaches it
 #      (T-0031-AC6 scan). Positive control: its own test target does.
@@ -77,8 +77,10 @@ nlibs="$(wc -w <<< "$libs" | tr -d ' ')"
 found="$(scan $libs)"
 pos="$(closure //utility/mc_fixtures_discovery:search_test | grep -E '^@?@?//utility/mc_fixtures_discovery' | sort -u | head -2 | tr '\n' ' ')"
 build=feature/characters/characters_list/BUILD.bazel
+# The restore trap is installed before the file is touched, so an interrupt
+# between the copy and the edit cannot leave the real BUILD changed.
+trap '[[ -f "$build.orig" ]] && mv -f "$build.orig" "$build"; rm -rf "$work"' EXIT
 cp "$build" "$build.orig"
-trap 'mv -f "$build.orig" "$build" 2>/dev/null; rm -rf "$work"' EXIT
 sed -i '' 's|^    "//utility/mc_api_client",$|    "//utility/mc_api_client",\n    "//utility/mc_fixtures_discovery",|' "$build"
 neg="$(scan //feature/characters/characters_list:characters_list)"
 mv -f "$build.orig" "$build"

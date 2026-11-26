@@ -17,7 +17,7 @@ The machine-readable list is `fixtures/routes.json`; a test keeps it, the domain
 
 | Query | Type | Default | Rule |
 |---|---|---|---|
-| `q` | string | none | trimmed; at least 2 characters after trimming (counted as characters, not bytes); a missing `q` counts as empty |
+| `q` | string | none | trimmed; at least 2 characters after trimming and folding (counted as characters, not bytes; a lone `é`, or bare combining accents that fold to nothing, is too short); a missing `q` counts as empty |
 | `types` | list | `character,comic` | comma-separated, each exactly `character` or `comic` (lower case, spaces around an entry are ignored); anything else, an empty entry or an empty value is a `400`; repeats collapse |
 | `limit` | int | 20 | 1 to 100; applies to each group, not to the whole answer |
 
@@ -49,7 +49,7 @@ Checks run in the order `q`, `types`, `limit`; the first failure is the answer. 
 
 ### Matching and ranking
 
-Matching ignores case and diacritics: both the query and the title are lower-cased, their accents removed (`é` is `e`, `ß` is `ss`, `æ` is `ae`) and every run of whitespace made one space. The query is matched against the whole title. A title matches in the **first** of these tiers that applies:
+Matching ignores case and diacritics: both the query and the title are lower-cased, their accents removed (`é` is `e`, `ß` is `ss`, `æ` is `ae`, `ș` is `s`; the folded set is exactly Latin-1, Latin Extended-A, comma-below `ș` and `ț`, the Vietnamese letters and Latin Extended Additional, and combining marks U+0300 to U+036F are dropped; any other script is compared as it is) and every run of whitespace made one space. The query is matched against the whole title. A title matches in the **first** of these tiers that applies:
 
 | Tier | Rule | Example for `q=alp` |
 |---|---|---|
@@ -84,7 +84,7 @@ Every error has `{"error": {"code", "message", ...}}`.
 
 ## Images
 
-Thumbnails are the same `ApiImage` values the characters and comics domains serve: `mock-asset://characters/<id>` with `id` from `000` to `023` and variant `portrait_medium` (characters) or `portrait_large` (comics). `BundledImageResolver` turns them into bundled assets (1x, 2x, 3x). This package is pure Dart and imports no media package; the provider-contract test resolves every thumbnail against the real asset files.
+Thumbnails are the same `ApiImage` values the characters and comics domains serve: `mock-asset://characters/<id>` with `id` from `000` to `023` and variant `portrait_medium` (characters) or `portrait_large` (comics). `BundledImageResolver` turns them into bundled assets (1x, 2x, 3x). This package is pure Dart: it uses only the pure-Dart `mc_media` (for `ApiImage`) and does not import `mc_fixtures_media`; the provider-contract test resolves every thumbnail against the real asset files.
 
 ## Test-facing facts (seed 42)
 

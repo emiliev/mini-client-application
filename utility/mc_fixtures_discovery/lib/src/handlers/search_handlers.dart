@@ -1,4 +1,5 @@
 import 'package:mc_fixtures_discovery/src/search/index.dart';
+import 'package:mc_fixtures_discovery/src/search/normalize.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
 const int defaultLimit = 20;
@@ -80,7 +81,9 @@ MockHandler suggestions(SearchIndex index) => (request, context) {
 
 ({String? value, MockResponse? error}) _query(MockRequest request) {
   final q = (request.query['q'] ?? '').trim();
-  if (q.runes.length < minQueryLength) {
+  // Measured on the folded text: a bare accent folds to nothing, and a
+  // letter with a mark is one character.
+  if (foldText(q).runes.length < minQueryLength) {
     return (
       value: null,
       error: MockResponse.error(

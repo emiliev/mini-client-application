@@ -470,6 +470,11 @@ void main() {
       '/v1/search?q=%20s%20',
       '/v1/search?q=%20%20%20',
       '/v1/search?q=%C3%A9',
+      '/v1/search?q=%CC%81%CC%81',
+      '/v1/search?q=e%CC%81',
+      '/v1/search?q=%20%CC%81%20',
+      '/v1/search/suggestions?q=%CC%81%CC%81',
+      '/v1/search/suggestions?q=e%CC%81',
       '/v1/search/suggestions',
       '/v1/search/suggestions?q=a',
     ]) {

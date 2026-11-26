@@ -30,6 +30,26 @@ void main() {
       expect(foldText('Café'), 'cafe');
     });
 
+    test(
+      'T-0043-AC2: comma-below, Vietnamese and Extended Additional fold',
+      () {
+        expect(foldText('Știința'), 'stiinta');
+        expect(foldText('ŞŢ ȘȚ'), 'st st');
+        expect(foldText('Việt Nam Ấn Độ'), 'viet nam an do');
+        expect(foldText('Trường Đại học Ươ'), 'truong dai hoc uo');
+        expect(foldText('ḍṛṭ Ẅẃ Ỹ'), 'drt ww y');
+        expect(_ranked('stiinta', [_entry(1, 'Știința')]), ['character:1']);
+      },
+    );
+
+    test('T-0043-AC2: an entry with an unknown type is refused', () {
+      expect(
+        () => _entry(1, 'Alpha', type: 'film'),
+        throwsA(isA<ArgumentError>()),
+      );
+      expect(() => _entry(1, 'Alpha', type: 'comic'), returnsNormally);
+    });
+
     test('T-0043-AC2: whitespace runs collapse and the ends are trimmed', () {
       expect(foldText('  Spire \t  Warden  '), 'spire warden');
     });
@@ -61,6 +81,14 @@ void main() {
         matchTier('the zamber chronicles', 'amber chr'),
         MatchTier.substring,
       );
+    });
+
+    test('T-0043-AC2: a non-BMP letter before the match is not a boundary', () {
+      // U+1D49C (a letter) is two UTF-16 units; the low one alone looks like
+      // a non-letter.
+      expect(matchTier('\u{1D49C}alp', 'alp'), MatchTier.substring);
+      expect(matchTier('\u{1D49C} alp', 'alp'), MatchTier.wordPrefix);
+      expect(matchTier('x\u{1D49C}alp', 'alp'), MatchTier.substring);
     });
 
     test('T-0043-AC2: a word boundary is any non-letter, non-digit', () {

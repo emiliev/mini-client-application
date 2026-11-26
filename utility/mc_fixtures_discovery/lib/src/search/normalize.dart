@@ -1,28 +1,38 @@
 /// Text folding for matching: case and diacritics are ignored.
 library;
 
-/// Latin letters with marks, grouped by the text they fold to. [foldText]
-/// lower-cases first, so only lower-case forms are listed.
+/// Latin letters with marks, grouped by the text they fold to. Dart has no
+/// built-in NFD, so this table is the whole story: Latin-1, Latin Extended-A,
+/// comma-below ș and ț, the Vietnamese letters and Latin Extended Additional
+/// (U+1E00 to U+1EFF). Combining marks are dropped as well, so a decomposed
+/// accent folds like a composed one. [foldText] lower-cases first, so only
+/// lower-case forms are listed.
 const Map<String, String> _folds = {
-  'a': 'àáâãäåāăąǎ',
-  'c': 'çćĉċč',
-  'd': 'ďđ',
-  'e': 'èéêëēĕėęě',
-  'g': 'ĝğġģ',
-  'h': 'ĥħ',
-  'i': 'ìíîïĩīĭįı',
+  'a': 'àáâãäåāăąǎạảấầẩẫậắằẳẵặḁẚ',
+  'b': 'ḃḅḇ',
+  'c': 'çćĉċčḉ',
+  'd': 'ďđḋḍḏḑḓ',
+  'e': 'èéêëēĕėęěẹẻẽếềểễệḕḗḙḛḝ',
+  'f': 'ḟ',
+  'g': 'ĝğġģḡ',
+  'h': 'ĥħḣḥḧḩḫẖ',
+  'i': 'ìíîïĩīĭįıỉịḭḯ',
   'j': 'ĵ',
-  'k': 'ķ',
-  'l': 'ĺļľŀł',
-  'n': 'ñńņňŉ',
-  'o': 'òóôõöøōŏőǒ',
-  'r': 'ŕŗř',
-  's': 'śŝşš',
-  't': 'ţťŧ',
-  'u': 'ùúûüũūŭůűųǔ',
-  'w': 'ŵ',
-  'y': 'ýÿŷ',
-  'z': 'źżž',
+  'k': 'ķḱḳḵ',
+  'l': 'ĺļľŀłḷḹḻḽ',
+  'm': 'ḿṁṃ',
+  'n': 'ñńņňŉṅṇṉṋ',
+  'o': 'òóôõöøōŏőǒơọỏốồổỗộớờởỡợṍṏṑṓ',
+  'p': 'ṕṗ',
+  'r': 'ŕŗřṙṛṝṟ',
+  's': 'śŝşšșṡṣṥṧṩ',
+  't': 'ţťŧțṫṭṯṱẗ',
+  'u': 'ùúûüũūŭůűųǔưụủứừửữựṳṵṷṹṻ',
+  'v': 'ṽṿ',
+  'w': 'ŵẁẃẅẇẉẘ',
+  'x': 'ẋẍ',
+  'y': 'ýÿŷỳỵỷỹẏẙ',
+  'z': 'źżžẑẓẕ',
   'ss': 'ß',
   'ae': 'æ',
   'oe': 'œ',
