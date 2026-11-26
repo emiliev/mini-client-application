@@ -1,17 +1,12 @@
-# T-0035-AC4: gates and coverage
+# T-0036-AC3: gates, greps and mutations
 
 | Gate | Result |
 |---|---|
-| test //... (touched packages uncached) | PASS |
-| build --config=lint //... | PASS |
-| mc_arch_check | PASS |
-| rules_fork.sh check | PASS |
-| dart format | PASS |
-| l10n_check | PASS |
-| flow_builder provenance (evergreen) | PASS |
-| coverage >= 90 % (touched packages) | PASS |
+| gates (T-0035-AC4_gates.sh) | PASS |
+| T-0032 byte identity | PASS |
+| T-0032 cutoff | PASS |
+| mutation scripts (every mutation killed by a test) | PASS |
+| no flowLeading in code | PASS |
+| stale comments fixed | PASS |
 
-- tests: Executed 5 out of 84 tests: 84 tests pass.
-- coverage: == utility/mc_feature_flow TOTAL 143/144 99.3% == feature/characters/characters_list TOTAL 155/155 100.0% (threshold 90 %)
-
-**PASS T-0035-AC4-gates**
+**PASS T-0036-AC3-gates**
