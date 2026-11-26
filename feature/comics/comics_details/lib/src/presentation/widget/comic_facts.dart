@@ -3,6 +3,7 @@ import 'package:comics_details/src/l10n/comics_details_l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_formatters/mc_formatters.dart';
 
 /// Key of the facts section, for tests.
@@ -57,7 +58,7 @@ class _FactRow extends StatelessWidget {
     final text = Theme.of(context).textTheme;
     return MergeSemantics(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: McSpacing.sm),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
