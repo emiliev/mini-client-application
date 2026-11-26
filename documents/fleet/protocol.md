@@ -34,12 +34,15 @@ sequenceDiagram
     E->>E: implement + tests (each AC → test) on fleet/T-XXXX-slug
     E->>E: tool/verify.sh (L0–L3) + e2e (L4) for feature tasks
     E-->>TL: handoff report + evidence
-    par independent checks
-        TL->>V: verification brief
-        V->>V: re-run gates · audit tests vs ACs · e2e · screenshots
-        V-->>TL: verification report (PASS/FAIL per AC)
-    and
-        TL->>TL: /code-review on the diff
+    TL->>TL: /code-review on the diff (ADR-0011: review first)
+    TL->>E: accepted review findings (one fix round)
+    E-->>TL: fixed branch
+    TL->>V: verification brief (tier: Opus or Sonnet, set in the task file)
+    V->>V: re-run gates · audit tests vs ACs · mutations · e2e · screenshots
+    V-->>TL: verification report (PASS/FAIL per AC)
+    opt Verifier FAIL
+        TL->>E: fix round
+        TL->>V: narrow re-verification (Sonnet, failed items + gates)
     end
     TL->>TL: merge --no-ff → re-run tool/verify.sh on merge result → push origin/main
     TL->>D: BOARD, STATUS, journal, indexes, evidence links
@@ -113,6 +116,22 @@ Questions for PO: <only direction-level, or "none">
 | UX intent and product trade-offs | Code structure, testing and verification approach |
 | Anything that costs money, involves a third-party account, or installs large software on the PO's machine | Tooling, lints, CI configuration |
 | Publishing and store releases | Task breakdown and sequencing; merging and pushing to `origin` (delegated, Q-005) |
+
+## Model tiers (ADR-0011)
+- **Tech Lead:** Opus. `/code-review` (medium) runs on every task, **before** the Verifier.
+- **Engineers:** Sonnet by default. Opus for rules and codegen patches, vendored third-party code, the first exemplar of each archetype, and any task the TL marks high risk.
+- **Verifiers:** tier set in the task file.
+  - **Opus:** exemplars, rules and codegen patches, vendored code, concurrency and security (auth, sessions, money), kits the bricks copy (`mc_feature_flow`, `McFlowBackButton`), and app navigation changes.
+  - **Sonnet:** everything else. A Sonnet Verifier's scope is every AC, the gates, at most 10 targeted mutations, and e2e only when an AC needs it.
+- **Re-verification after a FAIL:** Sonnet, on a narrow checklist (the failed items plus the gates). Use Opus only when the failure is itself in an Opus-tier area.
+- **Haiku:** mechanical work only:
+  - bulk generated modules verified by the generators' own checks;
+  - lock re-resolution and merging `origin/main`;
+  - re-running existing e2e scripts;
+  - evidence and index chores.
+  
+  Haiku never verifies and never writes or changes behaviour tests.
+- Every task file's header names its **Engineer model** and **Verifier tier**.
 
 ## Bazel output bases (all crew)
 - Every agent that runs Bazel uses a **unique output base named for its task and role**: `tool/bazelw --output_base=/tmp/mc-ob-T-XXXX-<role> …` (or each worktree's default output base, which Bazel derives from the workspace path). Never use a generic name such as `/tmp/mc-verify`.
