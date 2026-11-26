@@ -20,4 +20,15 @@ abstract final class AppLocations {
   /// One comic (T-0041), by the `ComicId` value. Equals
   /// `ComicDetailsRoute(id: id).location` in publishing_wiring.
   static String comic(int id) => '/comics/$id';
+
+  /// The reading-list editor on a new list (T-0048). Equals
+  /// `NewReadingListRoute().location` in library_wiring. It ends with a
+  /// result: push it through `AppFlows.createReadingList`.
+  static const String newReadingList = '/me/lists/new';
+
+  /// The reading-list editor on list [id] (T-0048). Equals
+  /// `EditReadingListRoute(id: id).location` in library_wiring. It ends with
+  /// a result: push it through `AppFlows.editReadingList`.
+  static String editReadingList(String id) =>
+      '/me/lists/${Uri.encodeComponent(id)}/edit';
 }

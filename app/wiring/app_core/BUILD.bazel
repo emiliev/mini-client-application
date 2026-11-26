@@ -12,6 +12,7 @@ _DEPS = [
     "//utility/mc_bloc_kit",
     "//utility/mc_config",
     "//utility/mc_di",
+    "//utility/mc_ds_buttons",
     "//utility/mc_ds_feedback",
     "//utility/mc_ds_layout",
     "//utility/mc_ds_media",
@@ -21,6 +22,7 @@ _DEPS = [
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_comics",
     "//utility/mc_fixtures_identity",
+    "//utility/mc_fixtures_library",
     "//utility/mc_fixtures_media",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
@@ -57,3 +59,32 @@ flutter_library(
     "router_ref_and_scheme_test",
     "formatters_root_test",
 ]]
+
+# T-0048: the flow-result helpers.
+flutter_test(
+    name = "flow_results_test",
+    size = "small",
+    package_name = "app_core",
+    language_version = _LANG,
+    main = "test/flow_results_test.dart",
+    deps = _DEPS + [
+        ":app_core",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0048: the fixture sign-in sheet the wirings share (moved from
+# publishing_wiring), over the test root and the identity fixtures.
+flutter_test(
+    name = "sign_in_sheet_test",
+    size = "small",
+    package_name = "app_core",
+    data = ["//utility/mc_ds_theme:fonts"],
+    language_version = _LANG,
+    main = "test/sign_in_sheet_test.dart",
+    deps = _DEPS + [
+        ":app_core",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter_test",
+    ],
+)
