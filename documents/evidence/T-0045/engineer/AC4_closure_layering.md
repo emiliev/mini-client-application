@@ -1,6 +1,6 @@
 # T-0045-AC4: closure and layering
 
-## closure of //utility/mc_forms:mc_forms (1374 targets)
+## closure of //utility/mc_forms:mc_forms (1332 targets)
 ```
 Flutter markers: none
 ```
