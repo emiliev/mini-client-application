@@ -165,21 +165,25 @@ class _McTabBarState extends State<McTabBar> {
               bottom: BorderSide(color: divider, width: McTabBar.dividerHeight),
             ),
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) => constraints.hasBoundedWidth
-                ? SingleChildScrollView(
-                    controller: _controller,
-                    scrollDirection: Axis.horizontal,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minWidth: constraints.maxWidth,
+          // A border takes no room, so the divider's height is padded in.
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: McTabBar.dividerHeight),
+            child: LayoutBuilder(
+              builder: (context, constraints) => constraints.hasBoundedWidth
+                  ? SingleChildScrollView(
+                      controller: _controller,
+                      scrollDirection: Axis.horizontal,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          minWidth: constraints.maxWidth,
+                        ),
+                        child: row,
                       ),
-                      child: row,
-                    ),
-                  )
-                // Unbounded: as wide as the tabs; a horizontal scroll view
-                // cannot be given an infinite width.
-                : row,
+                    )
+                  // Unbounded: as wide as the tabs; a horizontal scroll view
+                  // cannot be given an infinite width.
+                  : row,
+            ),
           ),
         ),
       ),

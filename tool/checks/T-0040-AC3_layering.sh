@@ -42,9 +42,15 @@ closure_hits() {
   done
 }
 # source_hits: pubspec and Dart files of the package that name mc_feature_flow.
+#   - every utility/mc_ds_* pubspec (a dependency declared there and nowhere
+#     else still breaks the layering), and every mc_ds_* BUILD file;
+#   - mc_ds_navigation's Dart files.
+# Only whole-line comments (`//...`, `#...`) are ignored, so an import with a
+# trailing comment is still reported.
 source_hits() {
-  grep -rn "mc_feature_flow" "$PKG/pubspec.yaml" "$PKG/lib" "$PKG/test" 2>/dev/null \
-    | grep -v "^[^:]*:[0-9]*:\s*//" | grep -v "/// " || true
+  grep -rn "mc_feature_flow" utility/mc_ds_*/pubspec.yaml utility/mc_ds_*/BUILD.bazel \
+    "$PKG/lib" "$PKG/test" 2>/dev/null \
+    | grep -vE '^[^:]+:[0-9]+:[[:space:]]*(//|#)' || true
 }
 
 # --- 2. the closure and the sources are clean --------------------------------
@@ -77,12 +83,34 @@ sed -i '' "1i\\
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 " "$dart"
 neg_dart="$(source_hits)"
+cp "$dart.orig" "$dart"
+# An import with a trailing doc comment must not be hidden by a line filter.
+sed -i '' "1i\\
+import 'package:mc_feature_flow/mc_feature_flow.dart'; /// layering
+" "$dart"
+neg_trailing="$(source_hits)"
+cp "$dart.orig" "$dart"
+# A dependency declared only in the pubspec of ANOTHER mc_ds_* package.
+other_pub=utility/mc_ds_buttons/pubspec.yaml
+other_build=utility/mc_ds_buttons/BUILD.bazel
+cp "$other_pub" "$other_pub.orig"; cp "$other_build" "$other_build.orig"
+restore_other() { mv -f "$other_pub.orig" "$other_pub"; mv -f "$other_build.orig" "$other_build"; }
+trap 'restore; restore_other' EXIT
+sed -i '' 's|^  mc_ds_theme: any$|  mc_ds_theme: any\n  mc_feature_flow: any|' "$other_pub"
+neg_other_pub="$(source_hits)"
+cp "$other_pub.orig" "$other_pub"
+sed -i '' 's|^    "//utility/mc_ds_theme",$|    "//utility/mc_ds_theme",\n    "//utility/mc_feature_flow",|' "$other_build"
+neg_other_build="$(source_hits)"
+restore_other
 restore; trap - EXIT
 report "## negative controls (each must be reported)" '```' \
-  "BUILD dep:     ${neg_build:-NOT DETECTED}" \
-  "pubspec dep:   ${neg_pub:-NOT DETECTED}" \
-  "Dart import:   ${neg_dart:-NOT DETECTED}" '```'
-for n in "$neg_build" "$neg_pub" "$neg_dart"; do
+  "BUILD dep:               ${neg_build:-NOT DETECTED}" \
+  "pubspec dep:             ${neg_pub:-NOT DETECTED}" \
+  "Dart import:             ${neg_dart:-NOT DETECTED}" \
+  "import + trailing ///:   ${neg_trailing:-NOT DETECTED}" \
+  "other ds pubspec only:   ${neg_other_pub:-NOT DETECTED}" \
+  "other ds BUILD only:     ${neg_other_build:-NOT DETECTED}" '```'
+for n in "$neg_build" "$neg_pub" "$neg_dart" "$neg_trailing" "$neg_other_pub" "$neg_other_build"; do
   [[ -n "$n" && "$n" != *"QUERY RETURNED NOTHING"* ]] || bad
 done
 
