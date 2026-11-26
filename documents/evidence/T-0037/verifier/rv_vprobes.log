@@ -1,0 +1,5 @@
+00:00 +10: VPROBE1 list filter foo, push, swipe back keeps foo
+00:00 +11: VPROBE2 in-place change inside detail, back gives pre-push
+00:00 +12: VPROBE3 push push back back restores each level, re-push ok
+00:00 +13: VPROBE4 same-depth page replace, then swipe: pages match state
+00:00 +14: All tests passed!

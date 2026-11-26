@@ -519,6 +519,223 @@ void main() {
       expect(find.byType(CloseButton), findsOneWidget);
     });
   });
+
+  group('round 2 (4fa44d7)', () {
+    Future<void> phases(WidgetTester tester, String what) async {
+      // opening, open, closing, closed: never a BackButton
+      final scaffold = tester.state<ScaffoldState>(
+        find.byType(Scaffold).last,
+      );
+      final leading = <String>[];
+      String cur() => back.evaluate().isNotEmpty
+          ? 'back'
+          : find.byType(DrawerButton).evaluate().isNotEmpty
+          ? 'drawer'
+          : 'none';
+      if (what == 'drawer') {
+        scaffold.openDrawer();
+      } else {
+        scaffold.openEndDrawer();
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      leading.add('opening:${cur()}');
+      await tester.pumpAndSettle();
+      leading.add('open:${cur()}');
+      final route = ModalRoute.of(
+        tester.element(find.byType(McFlowBackButton)),
+      )!;
+      leading.add('willHandle:${route.willHandlePopInternally}');
+      leading.add('implies:${route.impliesAppBarDismissal}');
+      if (what == 'drawer') {
+        scaffold.closeDrawer();
+      } else {
+        scaffold.closeEndDrawer();
+      }
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      leading.add('closing:${cur()}');
+      await tester.pumpAndSettle();
+      leading.add('closed:${cur()}');
+      debugPrint('VP19 $what RESULT $leading');
+      expect(leading.where((s) => s.endsWith(':back')), isEmpty);
+    }
+
+    Widget root2({bool drawer = false, bool endDrawer = false}) =>
+        FeatureFlow<_S>(
+          state: const _S(),
+          onGeneratePages: (_) => [
+            McFlowPage(
+              name: 'root',
+              child: Scaffold(
+                drawer: drawer ? const Drawer() : null,
+                endDrawer: endDrawer ? const Drawer() : null,
+                appBar: AppBar(
+                  leading: const McFlowBackButton(),
+                  title: const Text('vroot'),
+                ),
+                body: const _Body(),
+              ),
+            ),
+          ],
+        );
+
+    testWidgets('VP19a pushed flow root with a drawer: phases', (tester) async {
+      await openPushed(tester, root2(drawer: true));
+      await phases(tester, 'drawer');
+      expect(find.byType(DrawerButton), findsOneWidget);
+    });
+
+    testWidgets('VP19b app-root flow with a drawer: phases', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: McTheme.light,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          home: root2(drawer: true),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await phases(tester, 'drawer');
+    });
+
+    testWidgets('VP19c pushed flow root, endDrawer only: phases; flow back '
+        'stays the outer back', (tester) async {
+      await openPushed(tester, root2(endDrawer: true));
+      expect(back, findsOneWidget, reason: 'flow back before');
+      final scaffold = tester.state<ScaffoldState>(find.byType(Scaffold).last);
+      scaffold.openEndDrawer();
+      await tester.pumpAndSettle();
+      // The flow back (outer maybePop) is fine while an endDrawer is open:
+      // it is not the local-entry plain back. Record what shows.
+      final route = ModalRoute.of(
+        tester.element(find.byType(McFlowBackButton)),
+      )!;
+      debugPrint(
+        'VP19c RESULT open: back=${back.evaluate().length} '
+        'willHandle=${route.willHandlePopInternally} '
+        'implies=${route.impliesAppBarDismissal}',
+      );
+      scaffold.closeEndDrawer();
+      await tester.pumpAndSettle();
+      expect(back, findsOneWidget, reason: 'flow back after');
+      await tester.tap(back);
+      await tester.pumpAndSettle();
+      expect(find.text('vopen'), findsOneWidget, reason: 'leaves the flow');
+    });
+
+    testWidgets('VP19d app-root flow, endDrawer only: never a back', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: McTheme.light,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          home: root2(endDrawer: true),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await phases(tester, 'end');
+    });
+
+    testWidgets('VP20 drawer root + real showBottomSheet: plain back removes '
+        'the sheet, stays, DrawerButton again', (tester) async {
+      await openPushed(tester, root2(drawer: true));
+      await tester.tap(find.text('vshow sheet'));
+      await tester.pumpAndSettle();
+      expect(find.text('vsheet'), findsOneWidget);
+      expect(back, findsOneWidget);
+      expect(find.byType(DrawerButton), findsNothing);
+      await tester.tap(back);
+      await tester.pumpAndSettle();
+      expect(find.text('vsheet'), findsNothing);
+      expect(find.text('vroot'), findsOneWidget);
+      expect(find.text('vopen'), findsNothing);
+      expect(find.byType(DrawerButton), findsOneWidget);
+    });
+
+    testWidgets('VP21 nested navigator: first route gets nothing, second '
+        'route back pops only the nested route', (tester) async {
+      late BuildContext nestedCtx;
+      await openPushed(
+        tester,
+        FeatureFlow<_S>(
+          state: const _S(),
+          onGeneratePages: (_) => [
+            McFlowPage(
+              name: 'root',
+              child: Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (c) {
+                    nestedCtx = c;
+                    return Scaffold(
+                      appBar: AppBar(
+                        leading: const McFlowBackButton(),
+                        title: const Text('vnested1'),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      expect(find.text('vnested1'), findsOneWidget);
+      expect(back, findsNothing, reason: 'AppBar default: nothing');
+      unawaited(
+        Navigator.of(nestedCtx).push<void>(
+          MaterialPageRoute(
+            builder: (_) => Scaffold(
+              appBar: AppBar(
+                leading: const McFlowBackButton(),
+                title: const Text('vnested2'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(back, findsOneWidget);
+      await tester.tap(back);
+      await tester.pumpAndSettle();
+      expect(find.text('vnested1'), findsOneWidget);
+      expect(find.text('vopen'), findsNothing, reason: 'still in the flow');
+    });
+
+    testWidgets('VP22 rebuild scope: a dialog above the flow rebuilds no '
+        'FlowBuilder and no root page; removeRoute still hides the button', (
+      tester,
+    ) async {
+      final home = await openPushed(tester, vflow());
+      final flowCtx = tester.element(find.byType(FeatureFlow<_S>));
+      var flowBuilders = 0;
+      debugOnRebuildDirtyWidget = (e, _) {
+        if (e.widget.runtimeType.toString().startsWith('FlowBuilder')) {
+          flowBuilders++;
+        }
+      };
+      addTearDown(() => debugOnRebuildDirtyWidget = null);
+      final builds = rootBuilds;
+      unawaited(
+        showDialog<void>(
+          context: flowCtx,
+          builder: (_) => const AlertDialog(title: Text('vdialog')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      Navigator.of(flowCtx).pop();
+      await tester.pumpAndSettle();
+      debugPrint(
+        'VP22 RESULT flowBuilderRebuilds=$flowBuilders '
+        'rootBuilds=${rootBuilds - builds}',
+      );
+      expect(flowBuilders, 0);
+      expect(back, findsOneWidget);
+      Navigator.of(home).removeRoute(ModalRoute.of(home)!);
+      await tester.pumpAndSettle();
+      expect(back, findsNothing, reason: 'outerCanPop still updates');
+    });
+  });
 }
 
 void unawaited(Future<void>? f) {}

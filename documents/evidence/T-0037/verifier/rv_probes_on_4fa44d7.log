@@ -1,0 +1,39 @@
+00:00 +0: loading /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a23fd7f7ae6d56c1d/utility/mc_feature_flow/test/zz_verifier_t0037_probe_test.dart
+00:00 +0: VP1 GoRouter go [flow] -> [home, flow] same page key (same flow instance)
+00:00 +1: VP2 GoRouter go [home, flow] -> [flow] same key (same flow instance)
+00:00 +2: VP3 deep link via flutter/navigation [flow] -> [home, flow] (same flow instance)
+00:00 +3: VP4 deep link via flutter/navigation [home, flow] -> [flow] (same flow instance)
+00:00 +4: VP1 GoRouter go [flow] -> [home, flow] same page key (new flow instance each build)
+00:00 +5: VP2 GoRouter go [home, flow] -> [flow] same key (new flow instance each build)
+00:00 +6: VP3 deep link via flutter/navigation [flow] -> [home, flow] (new flow instance each build)
+00:00 +7: VP4 deep link via flutter/navigation [home, flow] -> [flow] (new flow instance each build)
+00:00 +8: VP5 pushed flow, then removeRouteBelow(flow): button goes
+00:00 +9: VP6 pushAndRemoveUntil a flow with nothing kept below: no button after the transition
+00:00 +10: VP7 pushed flow then [home] removed by pushAndRemoveUntil of a route that is popped later (flow first again)
+00:00 +11: isFirst vs canPop VP8 app-root flow whose outer route has a local history entry: outer.canPop() is true, !isFirst false, button hidden
+00:00 +12: isFirst vs canPop VP9 app-root flow with a dialog route above it in the outer navigator: outer.canPop() true, isFirst true
+00:00 +13: isFirst vs canPop VP10 edge: pushed flow, outer route holds a local history entry, then the route below is removed: is the button stale?
+VP10 RESULT outerCanPop=true backButtons=1
+VP10 AFTER TAP still in flow=1 outerCanPop=false backButtons=0
+00:00 +14: AC3 precedence with a LocalHistoryEntry VP11 pushed flow, LocalHistoryEntry on the root page: BackButton removes the entry and stays in the flow
+00:00 +15: AC3 precedence with a LocalHistoryEntry VP12 drawer + LocalHistoryEntry on a pushed root: the entry wins (BackButton, not DrawerButton)
+00:00 +16: AC3 precedence with a LocalHistoryEntry VP13 app-root flow with a LocalHistoryEntry: BackButton, which removes it
+00:00 +17: AC3 precedence with a LocalHistoryEntry VP14 real showBottomSheet on a pushed root, no drawer: back closes the sheet, stays in the flow
+00:00 +18: VP18 design note: a nested (non-flow) Navigator on the flow's second page; its first route's button
+VP18 RESULT backButtons=0 after tap: page1=0 nested=1 home=0
+00:00 +19: AC2 outside a flow VP15 first route, no flow, no drawer: empty, no error
+00:00 +20: AC2 outside a flow VP16 first route, no flow, drawer: DrawerButton opens it
+00:00 +21: AC2 outside a flow VP17 pushed route, no flow: automatic back pops it; fullscreen dialog gets CloseButton
+00:00 +22: round 2 (4fa44d7) VP19a pushed flow root with a drawer: phases
+VP19 drawer RESULT [opening:drawer, open:drawer, willHandle:true, implies:false, closing:drawer, closed:drawer]
+00:00 +23: round 2 (4fa44d7) VP19b app-root flow with a drawer: phases
+VP19 drawer RESULT [opening:drawer, open:drawer, willHandle:true, implies:false, closing:drawer, closed:drawer]
+00:00 +24: round 2 (4fa44d7) VP19c pushed flow root, endDrawer only: phases; flow back stays the outer back
+VP19c RESULT open: back=1 willHandle=true implies=false
+00:00 +25: round 2 (4fa44d7) VP19d app-root flow, endDrawer only: never a back
+VP19 end RESULT [opening:none, open:none, willHandle:true, implies:false, closing:none, closed:none]
+00:00 +26: round 2 (4fa44d7) VP20 drawer root + real showBottomSheet: plain back removes the sheet, stays, DrawerButton again
+00:01 +27: round 2 (4fa44d7) VP21 nested navigator: first route gets nothing, second route back pops only the nested route
+00:01 +28: round 2 (4fa44d7) VP22 rebuild scope: a dialog above the flow rebuilds no FlowBuilder and no root page; removeRoute still hides the button
+VP22 RESULT flowBuilderRebuilds=0 rootBuilds=0
+00:01 +29: All tests passed!
