@@ -59,7 +59,7 @@ The form and wizard kit for the FW exemplar (P1-20, `library_reading_list_editor
 | AC4 | `//utility/mc_forms:purity_test`; `tool/checks/T-0045-AC4_closure_layering.sh` ([report](../evidence/T-0045/engineer/AC4_closure_layering.md), with positive and negative controls); `tool/checks/T-0045-AC4_gates.sh` ([report](../evidence/T-0045/engineer/gates.md)) |
 
 ### Gates
-`test //...` 119/119; `build --config=lint //...`; `mc_arch_check`; `rules_fork.sh check`; `dart format`; `l10n_check`; fixtures closure (T-0031-AC6); closure and layering (T-0045-AC4): all PASS. Coverage (union of per-target LCOV): `mc_forms` 246/246 = 100 %, `mc_ds_forms` 143/143 = 100 %. Mutations: 96 (63 + 6 for `mc_forms`, 27 for `mc_ds_forms`), all killed; `documents/evidence/T-0045/engineer/mutations.sh` (with `mutations_ds.sh`) refuses a dirty tree. Locks are unchanged: first-party packages are not in `pubspec.lock`, and `MODULE.bazel.lock` did not change.
+`test //...` 123/123; `build --config=lint //...`; `mc_arch_check`; `rules_fork.sh check`; `dart format`; `l10n_check`; fixtures closure (T-0031-AC6); closure and layering (T-0045-AC4): all PASS. Coverage (union of per-target LCOV): `mc_forms` 246/246 = 100 %, `mc_ds_forms` 143/143 = 100 %. Mutations: 96 (63 + 6 for `mc_forms`, 27 for `mc_ds_forms`), all killed; `documents/evidence/T-0045/engineer/mutations.sh` (with `mutations_ds.sh`) refuses a dirty tree. Locks are unchanged: first-party packages are not in `pubspec.lock`, and `MODULE.bazel.lock` did not change.
 
 ### Public API
 **`package:mc_forms/mc_forms.dart`** (pure Dart, no mixins; depends on `mc_api_errors` and `mc_prelude`)

@@ -73,9 +73,9 @@ KILLED       S-busy-blocks -> //utility/mc_ds_forms:forms_test
 KILLED       S-busy-label -> //utility/mc_ds_forms:forms_test
 KILLED       S-spinner -> //utility/mc_ds_forms:forms_test
 KILLED       S-error-live -> //utility/mc_ds_forms:forms_test
-SURVIVED     S-error-hidden -> //utility/mc_ds_forms:forms_test (bazel exit 1)
+KILLED       S-error-hidden -> //utility/mc_ds_forms:forms_test
 KILLED       S-keyboard -> //utility/mc_ds_forms:forms_test
-SURVIVED     S-scroll-stays -> //utility/mc_ds_forms:forms_test (bazel exit 0)
+KILLED       S-scroll-stays -> //utility/mc_ds_forms:forms_test
 KILLED       T-state-next -> //utility/mc_ds_forms:forms_test
 KILLED       T-state-finish -> //utility/mc_ds_forms:forms_test
 KILLED       T-state-label -> //utility/mc_ds_forms:forms_test
@@ -97,5 +97,5 @@ KILLED       GOLD-segment-colour -> //utility/mc_ds_forms:golden_test
 KILLED       GOLD-bar-border -> //utility/mc_ds_forms:golden_test
 KILLED       GOLD-group-gap -> //utility/mc_ds_forms:golden_test
 
-killed=94 survived=2 not-applied=0
-SURVIVORS: S-error-hidden S-scroll-stays
+killed=96 survived=0 not-applied=0
+ALL MUTATIONS KILLED

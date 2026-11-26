@@ -1,6 +1,6 @@
 # T-0045-AC4: closure and layering
 
-## closure of //utility/mc_forms:mc_forms (1332 targets)
+## closure of //utility/mc_forms:mc_forms (1374 targets)
 ```
 Flutter markers: none
 ```
@@ -33,7 +33,7 @@ Flutter import in mc_forms lib: purity_test failed as expected
 ```
 ## mc_arch_check: PASS
 ```
-INFO: Build completed successfully, 916 total actions
+INFO: Build completed successfully, 1 total action
 INFO: Running command line: bazel-bin/tool/mc_arch_check/bin
 mc_arch_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a25992cfaaed7dd76)
 ```
