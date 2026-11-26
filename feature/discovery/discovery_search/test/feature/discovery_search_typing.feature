@@ -91,7 +91,7 @@ Feature: Search as you type
   @T-0046-AC6
   Scenario: The searches that found something are remembered, most recent first, without repeats, at most 10
     When I open the search
-    And I search for each of {'spi, amber, zzzz, chron, ard, co, spire, marble, bard, ma, neon, frost, spi'}
+    And I search for each of {'spi, amber, chron, ard, co, spire, marble, bard, ma, zzzz, neon, frost, spi'}
     And the app finishes writing to storage
     And I tap the icon button {'Clear search'}
     Then the recent searches are {'spi, frost, neon, ma, bard, marble, spire, co, ard, chron'}

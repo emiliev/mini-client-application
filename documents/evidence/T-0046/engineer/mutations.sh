@@ -144,8 +144,8 @@ mutate AC2-d "a double Retry sends two requests (the state check comes too late)
 mutate AC2-e "a server failure reads as a generic one" $FAIL_MSG \
   "s.replace('ApiServer() => core.errorServer,', '')" $BDD
 # --- AC3: results leave through the navigator ------------------------------
-mutate AC3-a "openCharacter with the wrong id" $BLOC \
-  "s.replace('_navigator.openCharacter(id);', '_navigator.openCharacter(CharacterId(id.value + 1));')" $BDD
+mutate AC3-a "a character result carries the wrong id" $MAP \
+  "s.replace('id: CharacterId(id),', 'id: CharacterId(id + 1),')" $BDD
 mutate AC3-b "openComic twice" $BLOC \
   "s.replace('_navigator.openComic(id);', '_navigator..openComic(id)..openComic(id);')" $BDD
 mutate AC3-c "the wiring sends a comic to the character location" $NAV \
