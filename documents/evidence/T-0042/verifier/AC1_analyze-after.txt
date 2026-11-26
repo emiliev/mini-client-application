@@ -1,0 +1,8 @@
+Analyzing app, feature, utility, spike, third_party, l10n_check, mc_arch_check...
+
+   info - third_party/flow_builder/lib/flow_builder.dart:202:11 - 'onPopPage' is deprecated and shouldn't be used. Use onDidRemovePage instead. This feature was deprecated after v3.16.0-17.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - third_party/flow_builder/lib/flow_builder.dart:212:19 - 'onPopInvoked' is deprecated and shouldn't be used. Override onPopInvokedWithResult instead. This feature was deprecated after v3.22.0-12.0.pre. Try replacing the use of the deprecated member with the replacement. - deprecated_member_use
+   info - utility/mc_fixtures_characters/tool/update_snapshots.dart:28:22 - Statement should be on a separate line. Try moving the statement to a new line. - always_put_control_body_on_new_line
+   info - utility/mc_fixtures_comics/tool/update_snapshots.dart:28:22 - Statement should be on a separate line. Try moving the statement to a new line. - always_put_control_body_on_new_line
+
+4 issues found.
