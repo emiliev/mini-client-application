@@ -69,7 +69,8 @@ report "## positive control: characters_list closure holds mc_feature_flow ($has
 # --- 4. negative controls (each edit is undone) -------------------------------
 build="$PKG/BUILD.bazel"; pub="$PKG/pubspec.yaml"
 dart="$PKG/lib/src/mc_chip.dart"; tdart="$PKG/test/inputs_test.dart"
-for f in "$build" "$pub" "$dart" "$tdart"; do cp "$f" "$f.orig"; done
+snap="$(mktemp -d)"
+for f in "$build" "$pub" "$dart" "$tdart"; do cp "$f" "$f.orig"; cp "$f" "$snap/$(echo "$f" | tr / _)"; done
 restore() { for f in "$build" "$pub" "$dart" "$tdart"; do [[ -f "$f.orig" ]] && mv -f "$f.orig" "$f"; done; }
 trap restore EXIT
 neg=()
@@ -101,5 +102,10 @@ report "## negative controls (each must be reported)" '```' "${neg[@]}" '```'
 for n in "${neg[@]}"; do
   [[ "$n" != *"NOT DETECTED"* && "$n" != *"QUERY RETURNED NOTHING"* ]] || bad
 done
-if ! git diff --quiet -- "$build" "$pub" "$dart" "$tdart"; then report "## RESTORE FAILED: the package differs from HEAD after the controls"; bad; fi
+for f in "$build" "$pub" "$dart" "$tdart"; do
+  if ! cmp -s "$f" "$snap/$(echo "$f" | tr / _)" || [[ -e "$f.orig" ]]; then
+    report "## RESTORE FAILED: $f differs from its snapshot after the controls"; bad
+  fi
+done
+rm -rf "$snap"
 finish T-0044-AC4-layering $rc

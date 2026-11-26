@@ -269,18 +269,13 @@ class _RenderSegmentRow extends RenderBox
         widths.add(layoutChild(c, loose).width);
       }
     }
+    // The height comes from intrinsics: a first layout under a loose height
+    // would let a centred label take all of it.
     var height = 0.0;
     for (var i = 0; i < n; i++) {
-      final size = layoutChild(
-        kids[i],
-        BoxConstraints(
-          minWidth: widths[i],
-          maxWidth: widths[i],
-          maxHeight: constraints.maxHeight,
-        ),
-      );
-      height = math.max(height, size.height);
+      height = math.max(height, kids[i].getMaxIntrinsicHeight(widths[i]));
     }
+    height = constraints.constrainHeight(height);
     var x = 0.0;
     for (var i = 0; i < n; i++) {
       layoutChild(

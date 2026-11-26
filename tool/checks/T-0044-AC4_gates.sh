@@ -10,7 +10,8 @@
 #      and third_party/: vendored code keeps upstream's formatting)
 #   6. run //tool/l10n_check:bin over the repo
 #   7. coverage of mc_ds_inputs and mc_ds_navigation >= MC_COVERAGE_MIN
-#      (default 90, ADR-0010): `bazel coverage //feature/...`, then the union
+#      (default 90, ADR-0010): `bazel coverage` of //utility/mc_ds_inputs/... and
+#      //utility/mc_ds_navigation/..., then the union
 #      of the per-target LCOV (tool/checks/merge_lcov.py)
 #   tool/checks/T-0044-AC4_gates.sh [--out FILE] [--role R]
 # MC_BAZEL_STARTUP holds extra Bazel startup options (e.g. --output_base=...).
