@@ -11,6 +11,10 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
+| [T-0043](T-0043-fixtures-discovery.md) | `mc_fixtures_discovery`: global search across characters and comics (P1-10 subset) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0038 | `fleet/T-0043-fixtures-discovery` |
+| [T-0044](T-0044-ds-inputs.md) | `mc_ds_inputs`: text and search fields, chips, segmented, stepper | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0040 | `fleet/T-0044-ds-inputs` |
+| [T-0045](T-0045-forms-kit.md) | `mc_forms` + `mc_ds_forms`: validators, form state, wizard steps (P1-14 AC4) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0044 | `fleet/T-0045-forms-kit` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
