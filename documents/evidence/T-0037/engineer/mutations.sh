@@ -122,4 +122,25 @@ mutate "T-0036: fullscreen dialog gets a BackButton" $BTN \
   "? const BackButton()
           : const BackButton();"
 
+# --- review round (T-0037 round 2) --------------------------------------------
+mutate "R1: an open drawer's own history entry counts (willHandlePopInternally alone)" $BTN \
+  "if (route.willHandlePopInternally && route.impliesAppBarDismissal) {" \
+  "if (route.willHandlePopInternally) {"
+mutate "R2: outerCanPop from route.canPop instead of isFirst" $FLOW \
+  "outerCanPop: route != null && !route.isFirst," \
+  "outerCanPop: route != null && route.canPop,"
+mutate "R2: outerCanPop from Navigator.canPop() instead of isFirst" $FLOW \
+  "outerCanPop: route != null && !route.isFirst," \
+  "outerCanPop: Navigator.maybeOf(context)?.canPop() ?? false,"
+mutate "R3: a nested navigator's first route takes the flow-root branch" $BTN \
+  "flowScope != null && flowScope.isFlowNavigator(route.navigator)" \
+  "flowScope != null"
+mutate "R4: the flow navigator depends on the outer route again" $FLOW \
+  "          return _FlowScopeHost(" \
+  "          ModalRoute.of(context);
+          return _FlowScopeHost("
+mutate "R5: outside a flow, canPop without impliesAppBarDismissal" $BTN \
+  "if (route.impliesAppBarDismissal && route.canPop) {" \
+  "if (route.canPop) {"
+
 exit "$rc"

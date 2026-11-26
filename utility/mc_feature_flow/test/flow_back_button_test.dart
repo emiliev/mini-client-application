@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flow_builder/flow_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -15,37 +17,48 @@ class _State {
 /// can rebuild it. [drawer] gives its Scaffold a drawer; its body has a button
 /// that shows a persistent bottom sheet (a local history entry).
 class _Root extends StatelessWidget {
-  const _Root({this.drawer = false});
+  const _Root({this.drawer = false, this.endDrawer = false});
 
   final bool drawer;
+  final bool endDrawer;
 
   @override
   Widget build(BuildContext context) => Scaffold(
     drawer: drawer ? const Drawer() : null,
+    endDrawer: endDrawer ? const Drawer() : null,
     appBar: AppBar(
       leading: const McFlowBackButton(),
       title: const Text('flow root'),
     ),
     body: Builder(
-      builder: (context) => TextButton(
-        onPressed: () => Scaffold.of(context).showBottomSheet(
-          (_) => const SizedBox(height: 80, child: Text('sheet')),
-        ),
-        child: const Text('show sheet'),
+      builder: (context) => Column(
+        children: [
+          TextButton(
+            onPressed: () => Scaffold.of(context).openEndDrawer(),
+            child: const Text('end drawer'),
+          ),
+          TextButton(
+            onPressed: () => Scaffold.of(context).showBottomSheet(
+              (_) => const SizedBox(height: 80, child: Text('sheet')),
+            ),
+            child: const Text('show sheet'),
+          ),
+        ],
       ),
     ),
   );
 }
 
-FeatureFlow<_State> _flow({bool drawer = false}) => FeatureFlow<_State>(
-  state: const _State(),
-  onGeneratePages: (_) => [
-    McFlowPage(
-      name: 'root',
-      child: _Root(drawer: drawer),
-    ),
-  ],
-);
+FeatureFlow<_State> _flow({bool drawer = false, bool endDrawer = false}) =>
+    FeatureFlow<_State>(
+      state: const _State(),
+      onGeneratePages: (_) => [
+        McFlowPage(
+          name: 'root',
+          child: _Root(drawer: drawer, endDrawer: endDrawer),
+        ),
+      ],
+    );
 
 Widget _app(Widget home) => MaterialApp(
   theme: McTheme.light,
@@ -432,6 +445,142 @@ void main() {
           matching: find.byType(IconButton),
         ),
         findsNothing,
+      );
+    });
+  });
+
+  group('T-0037 review round', () {
+    testWidgets('T-0037-AC3 an open drawer keeps the DrawerButton while it '
+        'opens, is open and closes (its own history entry is ignored)', (
+      tester,
+    ) async {
+      await _openFlow(tester, _flow(drawer: true));
+      expect(find.byType(DrawerButton), findsOneWidget);
+
+      await tester.tap(find.byType(DrawerButton));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(BackButton), findsNothing, reason: 'opening');
+      await tester.pumpAndSettle();
+      expect(find.byType(DrawerButton), findsOneWidget, reason: 'open');
+      expect(find.byType(BackButton), findsNothing);
+
+      await tester.tapAt(const Offset(780, 300));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(DrawerButton), findsOneWidget, reason: 'closing');
+      expect(find.byType(BackButton), findsNothing);
+      await tester.pumpAndSettle();
+      expect(find.byType(DrawerButton), findsOneWidget, reason: 'closed');
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('T-0037-AC3 an open endDrawer does not turn the leading into '
+        'a back arrow', (tester) async {
+      await tester.pumpWidget(_app(_flow(endDrawer: true)));
+      await tester.pumpAndSettle();
+      expect(find.byType(BackButton), findsNothing);
+
+      await tester.tap(find.text('end drawer'));
+      await tester.pumpAndSettle();
+      expect(find.byType(BackButton), findsNothing, reason: 'open');
+
+      await tester.tapAt(const Offset(20, 300));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(BackButton), findsNothing, reason: 'closing');
+      await tester.pumpAndSettle();
+      expect(find.byType(BackButton), findsNothing, reason: 'closed');
+    });
+
+    testWidgets('T-0037-AC1 an app-root flow whose own outer route holds a '
+        'local history entry has no button (isFirst, not canPop)', (
+      tester,
+    ) async {
+      await tester.pumpWidget(_app(_flow()));
+      await tester.pumpAndSettle();
+      final flow = tester.element(find.byType(FeatureFlow<_State>));
+      ModalRoute.of(flow)!.addLocalHistoryEntry(LocalHistoryEntry());
+      await tester.pumpAndSettle();
+
+      expect(Navigator.of(flow).canPop(), isTrue, reason: 'canPop says yes');
+      expect(find.text('flow root'), findsOneWidget);
+      expect(find.byType(BackButton), findsNothing, reason: 'nothing below');
+    });
+
+    testWidgets('T-0037-AC3 the first route of a navigator nested in a flow '
+        'page follows the AppBar default, not the flow root branch', (
+      tester,
+    ) async {
+      await _openFlow(
+        tester,
+        FeatureFlow<_State>(
+          state: const _State(),
+          onGeneratePages: (_) => [
+            McFlowPage(
+              name: 'root',
+              child: Scaffold(
+                body: Navigator(
+                  onGenerateRoute: (_) => MaterialPageRoute<void>(
+                    builder: (_) => Scaffold(
+                      appBar: AppBar(
+                        leading: const McFlowBackButton(),
+                        title: const Text('nested'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        expectRoot: false,
+      );
+      expect(find.text('nested'), findsOneWidget);
+      expect(find.byType(BackButton), findsNothing);
+      expect(find.byType(DrawerButton), findsNothing);
+    });
+
+    testWidgets('T-0037-AC2 outside a flow a history entry that does not '
+        'imply dismissal gives no back button (as AppBar)', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          Scaffold(
+            appBar: AppBar(
+              leading: const McFlowBackButton(),
+              title: const Text('p'),
+            ),
+          ),
+        ),
+      );
+      final page = tester.element(find.text('p'));
+      ModalRoute.of(
+        page,
+      )!.addLocalHistoryEntry(LocalHistoryEntry(impliesAppBarDismissal: false));
+      await tester.pumpAndSettle();
+
+      expect(ModalRoute.of(page)!.canPop, isTrue);
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('T-0037-AC1 a route pushed above the flow does not rebuild '
+        'the flow navigator', (tester) async {
+      await _openFlow(tester, _flow());
+      final rebuilt = <String>[];
+      debugOnRebuildDirtyWidget = (element, _) =>
+          rebuilt.add(element.widget.runtimeType.toString());
+      addTearDown(() => debugOnRebuildDirtyWidget = null);
+
+      unawaited(
+        showDialog<void>(
+          context: tester.element(find.byType(FeatureFlow<_State>)),
+          builder: (_) => const AlertDialog(title: Text('dialog')),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('dialog'), findsOneWidget);
+      expect(rebuilt, isNotEmpty);
+      expect(
+        rebuilt.where((t) => t.startsWith('FlowBuilder')),
+        isEmpty,
+        reason: 'only the scope host republishes; got $rebuilt',
       );
     });
   });

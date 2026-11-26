@@ -19,7 +19,7 @@ set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO"
 export MC_BAZEL_STARTUP="${MC_BAZEL_STARTUP:---output_base=/tmp/mc-ob-T-0036-$ROLE}"
-export MC_TASK=T-0036 MC_ROLE="$ROLE"
+export MC_ROLE="$ROLE"
 GREP_ROOT="${MC_GREP_ROOT:-$REPO}"
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
@@ -44,7 +44,7 @@ no_stale_comments() {
   # stale <file> <fixed-string> <what>: a file that is missing is a failure
   # (a moved or renamed file must not silently pass the check).
   stale() {
-    if [[ ! -f "$1" ]]; then hits+="$1: MISSING (cannot check '$3')"$'\n'
+    if [[ ! -f "$1" ]]; then hits+="${1#"$GREP_ROOT"/}: MISSING (cannot check '$3')"$'\n'
     elif grep -qF -- "$2" "$1"; then hits+="${1#$GREP_ROOT/}: $3"$'\n'; fi
   }
   f="$GREP_ROOT/utility/mc_feature_flow/lib/src/feature_flow.dart"
@@ -56,8 +56,11 @@ no_stale_comments() {
 }
 mutations() {
   # Both scripts use the gates' own Bazel output base.
-  export MC_OB="${MC_BAZEL_STARTUP#--output_base=}"
-  documents/evidence/T-0033/engineer/mutations.sh &&
+  # Only the --output_base= value of MC_BAZEL_STARTUP (it may hold other options).
+  local ob=""
+  [[ "$MC_BAZEL_STARTUP" =~ --output_base=([^[:space:]]+) ]] && ob="${BASH_REMATCH[1]}"
+  [[ -z "$ob" ]] || export MC_OB="$ob"
+  MC_TASK=T-0033 MC_ROLE="$ROLE" documents/evidence/T-0033/engineer/mutations.sh &&
     MC_TASK=T-0037 MC_ROLE="$ROLE" documents/evidence/T-0037/engineer/mutations.sh
 }
 if [[ -z "${MC_ONLY_GREPS:-}" ]]; then

@@ -144,7 +144,8 @@ class McFlowBackButton extends StatelessWidget {
     // navigator; the first route of a navigator nested in a flow page follows
     // the AppBar's default logic.
     final flowScope = route.isFirst ? FlowScope.maybeOf(context) : null;
-    final scope = flowScope != null && flowScope.isFlowNavigator(route.navigator)
+    final scope =
+        flowScope != null && flowScope.isFlowNavigator(route.navigator)
         ? flowScope
         : null;
     if (scope != null) {
