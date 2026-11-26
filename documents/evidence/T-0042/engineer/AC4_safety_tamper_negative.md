@@ -1,6 +1,6 @@
 # T-0042-AC4: tool/ide_sync is safe
 
-(MC_AC4_TAMPER: appended a line to `bazel-bin/app/mini_client/_stage.dart_analyze.summary.proj/src/app/mini_client/lib/src/pages/placeholder_pages.dart` before hashing)
+(MC_AC4_TAMPER: appended a line to `bazel-bin/app/mini_client/_stage.dart_analyzer_summary.sum` before hashing)
 
 | Check | Result | Detail |
 |---|---|---|
@@ -13,7 +13,7 @@
 | 2b. negative control (planted .g.dart in a package without the exclusion) | PASS | the query reports it |
 | B. synced: build and test //... | PASS | both pass |
 | 3. synced tree runs 0 actions and 0 tests | PASS | Executed 0 out of 101 tests: 101 tests pass. |
-| 3. every unsynced output is in the synced run with the same hash | **FAIL** | missing or different: bazel-bin/app/mini_client/_stage.dart_analyze.summary.proj/src/app/mini_client/lib/src/pages/placeholder_pages.dart bazel-bin/app/mini_client/_stage.dart_analyzer_summary.summary_root/lib/src/pages/placeholder_pages.dart bazel-bin/app/mini_client/app_routes_go_router_part.pkg_roots.40d1f20316956e24/mini__client/lib/src/pages/placeholder_pages.dart bazel-bin/app/mini_client/mini_client_lib.dart_analyze.format.proj/src/app/mini_client/lib/src/pages/placeholder_pages.dart bazel-bin/app/mini_client/mini_client_lib.dart_analyze.summary.proj/src/app/mini_client/lib/src/pages/placeholder_pages.dart |
+| 3. every unsynced output is in the synced run with the same hash | **FAIL** | missing or different: bazel-bin/app/mini_client/_stage.dart_analyzer_summary.sum |
 | 3. negative control (planted file in a build) | PASS | the build ran actions, so 'no action' is a real signal |
 
 Files only in the synced run (0): none
