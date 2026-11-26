@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0041 engineer on mc-T-0041-engineer-1275 (FCBD2881-0961-4039-89B9-D46D82C58671)
+# e2e_ios.sh: T-0041 engineer on mc-T-0041-engineer-4918 (5B897ED7-0FE7-4925-903E-BB2645BEAB3B)
 # cwd: /tmp/mc-T-0041-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.hSsehn/screenshots/2-comic_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d FCBD2881-0961-4039-89B9-D46D82C58671
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/2-comic_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d 5B897ED7-0FE7-4925-903E-BB2645BEAB3B
 
 Resolving dependencies in `/private/tmp/mc-T-0041-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0041-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                            9.3s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54001/xlhGGmHyBFw=/
-VMServiceFlutterDriver: Isolate found with number: 8374729980005099
-VMServiceFlutterDriver: Isolate 8374729980005099 is runnable.
+Xcode build done.                                           11.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:60917/YX8XPDY1mR4=/
+VMServiceFlutterDriver: Isolate found with number: 5279486882559195
+VMServiceFlutterDriver: Isolate 5279486882559195 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0041-AC5 the deep link miniclient://app/comics/501500 opens the comic page
@@ -33,23 +33,71 @@ flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
 flutter: [debug] GET /v1/comics/501500 -> 200
-flutter: [debug] GET /v1/characters/100366 -> 200
-flutter: [debug] GET /v1/characters/100661 -> 200
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
 flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
 flutter: [debug] GET /v1/comics/500000 -> 200
-flutter: [debug] GET /v1/characters/100227 -> 200
-flutter: [debug] GET /v1/characters/100654 -> 200
-flutter: [debug] GET /v1/characters/100826 -> 200
-flutter: [debug] GET /v1/characters/100892 -> 200
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
 VMServiceFlutterDriver: request_data message is taking a long time to complete...
 flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
-flutter: 00:08 +1: (tearDownAll)
-flutter: 00:08 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.hSsehn/screenshots/2-comic_deeplink_test/18_deep_link_comic.png (373589)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.hSsehn/screenshots/2-comic_deeplink_test/19_link_to_running_app_comic.png (375532)
-All tests passed.
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: exactly one matching candidate
+flutter:   Actual: _TextWidgetFinder:<Found 0 widgets with text "Nothing lives at /comics/abc": []>
+flutter:    Which: means none were found but one was expected
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///private/tmp/mc-T-0041-engineer-e2e/app/mini_client/integration_test/comic_deeplink_test.dart:61:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///private/tmp/mc-T-0041-engineer-e2e/app/mini_client/integration_test/comic_deeplink_test.dart line 61
+flutter: The test description was:
+flutter:   T-0041-AC5 the deep link miniclient://app/comics/501500 opens the comic page
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:09 +0: T-0041-AC5 the deep link miniclient://app/comics/501500 opens the comic page [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: T-0041-AC5 the deep link miniclient://app/comics/501500 opens the comic page
+flutter:
+flutter: 00:09 +0 -1: (tearDownAll)
+flutter: 00:09 +1 -1: Some tests failed.
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/2-comic_deeplink_test/18_deep_link_comic.png (373589)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/2-comic_deeplink_test/19_link_to_running_app_comic.png (375532)
+Failure Details:
+Failure in method: T-0041-AC5 the deep link miniclient://app/comics/501500 opens the comic page
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "Nothing
+lives at /comics/abc": []>
+   Which: means none were found but one was expected
 
-# exit code: 0
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///private/tmp/mc-T-0041-engineer-e2e/app/mini_client/integration_test/comic_deeplink_test.dart:61:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///private/tmp/mc-T-0041-engineer-e2e/app/mini_client/integration_test/comic_deeplink_test.dart line 61
+The test description was:
+  T-0041-AC5 the deep link miniclient://app/comics/501500 opens
+  the comic page
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1

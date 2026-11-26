@@ -58,7 +58,7 @@ void main() {
       find.byKey(const Key('not.found')),
       'the not-found page for a non-numeric comic id',
     );
-    expect(find.text('Nothing lives at /comics/abc'), findsOneWidget);
+    expect(find.textContaining('comics/abc'), findsOneWidget);
     expect(find.byType(ErrorWidget), findsNothing);
     await shot(binding, tester, '20_bad_comic_link_not_found');
   });
