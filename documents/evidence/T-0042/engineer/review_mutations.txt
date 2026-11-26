@@ -1,0 +1,8 @@
+2_place_swallow KILLED ['| 15. an unwritable directory fails the sync (copy mode, exit 1) | **FAIL** |', '| 15. and says which file | **FAIL** |', '| 15. an unwritable directory fails the sync (--link, exit 1) | **FAIL** |']
+3_ls_head KILLED ['| 16. the file cquery printed is used, not a stale copy from another configuration | **FAIL** |']
+4_no_reset KILLED ["| 17. and counts skipped=1, not the failed run's skip added again | **FAIL** |"]
+5_write_before_guard KILLED ['| 18. a bootstrap item that is not git-ignored fails the run (non-zero) | **FAIL** |', '| 18. nothing was written (not even the ignored items before it) | **FAIL** |']
+6_fingerprint KILLED ['| 20. --watch: a config edit refreshes app_config.json within 5 s | **FAIL** |', '| 20. --watch: a pubspec.yaml edit triggers a sync | **FAIL** |']
+7_baseline_after KILLED ['| 20. --watch: an edit made during the first sync triggers another (baseline taken first) | **FAIL** |']
+8_clean_scaffold KILLED ['| 19. --clean deletes the Xcode project and the bridging header | **FAIL** |', '| 19. --clean keeps the tracked runner file and removes the scaffold list | **FAIL** |']
+10_hardcoded_re KILLED ['| 20. --watch: a hand-written lib/src/app.config.dart is a source (not a generated pattern) | **FAIL** |']

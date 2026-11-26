@@ -19,6 +19,9 @@ MODEL="$PKG/lib/src/domain/model/character.dart"
 GEN="$PKG/lib/src/domain/model/character.freezed.dart"
 TMPMODEL="$PKG/lib/src/domain/model/t0042_tmp.dart"
 TMPGEN="$PKG/lib/src/domain/model/t0042_tmp.freezed.dart"
+TAGGED="$PKG/lib/src/domain/model/t0042_tag.dart"
+TAGGEDGEN="$PKG/lib/src/domain/model/t0042_tag.freezed.dart"
+MANUALGEN="$PKG/lib/src/domain/model/t0042_manual.freezed.dart"
 BUILD="$PKG/BUILD.bazel"
 rc=0
 rows=()
@@ -26,7 +29,7 @@ WATCH_PID=""
 cleanup() {
   [[ -z "$WATCH_PID" ]] || { kill "$WATCH_PID" 2>/dev/null; wait "$WATCH_PID" 2>/dev/null; pkill -P "$WATCH_PID" 2>/dev/null; }
   git checkout -q -- "$MODEL" "$BUILD" 2>/dev/null
-  rm -f "$TMPMODEL" "$TMPGEN"
+  rm -f "$TMPMODEL" "$TMPGEN" "$TAGGED" "$TAGGEDGEN" "$MANUALGEN" "$PKG/lib/src/domain/model/t0042_manual.dart"
 }
 trap cleanup EXIT
 [[ -z "$(git status --porcelain --untracked-files=no -- "$MODEL" "$BUILD")" ]] || { echo "refusing: $MODEL or $BUILD has uncommitted changes" >&2; exit 2; }
@@ -121,6 +124,42 @@ if [[ "$(field "$SYNC_SUMMARY" removed)" == 1 && ! -e "$REPO/$TMPGEN" ]] && ! gr
    && [[ "$(field "$SYNC_SUMMARY" total)" == "$base_total" ]]; then
   row "c. remove the model" PASS "removed=1, the synced file and its manifest line are gone, ${SYNC_SECS}s"
 else fail "c. remove the model" "$SYNC_SUMMARY; file exists: $([[ -e "$REPO/$TMPGEN" ]] && echo yes || echo no)"; fi
+
+# e. the `manual` tag is matched as a whole tag: `manual_check` is synced, `manual` is not
+for n in tag manual; do
+  cat > "$REPO/$PKG/lib/src/domain/model/t0042_$n.dart" <<DART
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 't0042_$n.freezed.dart';
+
+@freezed
+abstract class T0042$n with _\$T0042$n {
+  const factory T0042$n({required String name}) = _T0042$n;
+}
+DART
+done
+for pair in "tag:manual_check" "manual:manual"; do
+  n=${pair%%:*}; tg=${pair#*:}
+  cat >> "$REPO/$BUILD" <<BZL
+
+dart_codegen(
+    name = "_t0042_${n}_freezed",
+    package_name = _PKG,
+    src = "lib/src/domain/model/t0042_$n.dart",
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    language_version = _LANG,
+    output_suffixes = [".freezed.dart"],
+    tags = ["$tg"],
+    deps = ["@pub_deps//:freezed_annotation"],
+)
+BZL
+done
+sync --env dev
+if [[ -f "$REPO/$TAGGEDGEN" && ! -e "$REPO/$MANUALGEN" ]]; then
+  row "e. tag matching is anchored" PASS "tags=[manual_check] is synced; tags=[manual] is not"
+else fail "e. tag matching is anchored" "manual_check synced: $([[ -f "$REPO/$TAGGEDGEN" ]] && echo yes || echo no); manual synced: $([[ -e "$REPO/$MANUALGEN" ]] && echo yes || echo no)"; fi
+rm -f "$REPO/$PKG/lib/src/domain/model/t0042_tag.dart" "$REPO/$PKG/lib/src/domain/model/t0042_manual.dart"; git checkout -q -- "$BUILD"
+sync --env dev
 
 # d. watch
 log="$(mktemp)"
