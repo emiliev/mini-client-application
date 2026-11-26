@@ -1,0 +1,29 @@
+INFO: Invocation ID: e4d9b6e8-8586-4998-acd5-d4ffc4b99ebb
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+Analyzing: target //app/wiring/universe_wiring:routes_test (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //app/wiring/universe_wiring:routes_test (0 packages loaded, 3 targets configured, 7 aspect applications).
+[41 / 42] 1 / 1 tests; Testing //app/wiring/universe_wiring:routes_test; 0s disk-cache, darwin-sandbox
+INFO: From Testing //app/wiring/universe_wiring:routes_test:
+==================== Test output for //app/wiring/universe_wiring:routes_test:
+  PASS  T-0033-AC1 the navigator opens CharacterDetailsRoute and the placeholder shows the id
+  PASS  T-0033-AC1 the navigator pushes: Back returns to the list and the router keeps the list as its location
+  PASS  T-0033-AC1 the navigator pushes to the live router after the router was replaced, not to the one it first saw
+  PASS  T-0033-AC1 the wiring initializer resolves the route targets and the navigator
+  PASS  T-0033-AC2 every AppLocations entry equals its typed route
+VERIFIER same instance=true second.location=/characters/9 placeholder9=1
+VERIFIER after final detach: Bad state: The router does not exist yet: it is created when boot is ready, so a navigator may only be used from a route or a callback.
+  PASS  VERIFIER navigator after detach and re-attach
+
+6 passed
+================================================================================
+INFO: Found 1 test target...
+INFO: Elapsed time: 1.493s, Critical Path: 0.95s
+INFO: 24 processes: 12 action cache hit, 10 disk cache hit, 9 internal, 3 darwin-sandbox, 2 worker.
+INFO: Build completed successfully, 24 total actions
+//app/wiring/universe_wiring:routes_test                                 PASSED in 0.6s
+
+Executed 1 out of 1 test: 1 test passes.

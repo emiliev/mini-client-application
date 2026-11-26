@@ -1,0 +1,52 @@
+# e2e_ios.sh: T-0033 verifier on mc-T-0033-verifier-23379 (3C03893C-E76F-456A-8225-4E8DA22BE147)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9XrEi/screenshots/4-verifier_warm_link_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/verifier_warm_link_test.dart -d 3C03893C-E76F-456A-8225-4E8DA22BE147
+
+Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3/mini`!
+11 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            9.0s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50957/Uq88zGAskXY=/
+VMServiceFlutterDriver: Isolate found with number: 5602395869716583
+VMServiceFlutterDriver: Isolate 5602395869716583 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: verifier warm main-app links
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: PROBE before push: location=/
+flutter: PROBE after placeholder push: location=miniclient://app/placeholder/42 text=1
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: PROBE after characters/6 push: location=miniclient://app/characters/6 details=1
+flutter: PROBE after characters push: location=miniclient://app/characters grid=1
+flutter: PROBE from the list, placeholder/43 push: location=miniclient://app/placeholder/43 text=1
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: PROBE then characters/8 push: location=miniclient://app/characters/8 text=1
+flutter: 00:16 +1: (tearDownAll)
+flutter: 00:16 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9XrEi/screenshots/4-verifier_warm_link_test/rv_06_mini_warm_probe.png (212747)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9XrEi/screenshots/4-verifier_warm_link_test/rv_07_mini_warm_probe_from_list.png (213007)
+All tests passed.
+
+# exit code: 0

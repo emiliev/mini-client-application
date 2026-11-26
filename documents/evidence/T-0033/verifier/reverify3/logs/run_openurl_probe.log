@@ -1,0 +1,5 @@
+udid=E84A8889-1098-46D3-86C3-EE4E1BAD898F
+marker seen; simctl openurl miniclient://app/placeholder/44
+openurl exit=0
+screenshot exit=0
+E2E_EXIT=0

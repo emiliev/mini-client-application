@@ -1,0 +1,25 @@
+#!/bin/bash
+# vmut.sh <name> <file> <from> <to> <bazel args...>: T-0033 Verifier only.
+# Applies one literal mutation in the Verifier's worktree, runs the targets,
+# restores the file from a private backup, reports.
+set -u
+W=/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd
+V=/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3
+LOGS=$W/documents/evidence/T-0033/verifier/reverify3/logs
+cd "$W" || exit 9
+name=$1 file=$2 from=$3 to=$4; shift 4
+[ -f "$W/$file" ] || { echo "$name: no such file $file"; exit 9; }
+cp "$W/$file" "$V/vmut.bak"
+/usr/bin/python3 -I - "$W/$file" "$from" "$to" <<'PY' || { echo "$name: PATTERN NOT FOUND"; cp "$V/vmut.bak" "$W/$file"; exit 9; }
+import sys
+p, f, t = sys.argv[1:4]
+s = open(p).read()
+if f not in s:
+    sys.exit(1)
+open(p, 'w').write(s.replace(f, t, 1))
+PY
+tool/bazelw --output_base=/tmp/mc-ob-T-0033-verifier test "$@" > "$LOGS/mut-$name.log" 2>&1
+rc=$?
+cp "$V/vmut.bak" "$W/$file"
+echo "== $name: bazel exit=$rc"
+grep -E "PASSED|FAILED|NO STATUS" "$LOGS/mut-$name.log" | head -5

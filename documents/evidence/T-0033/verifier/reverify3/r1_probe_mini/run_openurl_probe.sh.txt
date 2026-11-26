@@ -1,0 +1,37 @@
+#!/bin/bash
+# Runs verifier_r1_repro_test through tool/e2e_ios.sh and, once the test
+# signals readiness, tries a real delivery: `simctl openurl` while the app
+# runs, plus a simctl screenshot of what the simulator shows.
+set -u
+cd /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a7d7b3473200bf2cd
+V=/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/verifier-T0033-r3
+EV="$PWD/documents/evidence/T-0033/verifier/reverify3/r1_probe_mini"
+mkdir -p "$EV"
+OUT="$V/r1-probe.out"
+tool/e2e_ios.sh --task T-0033 --role verifier --project "$V/mini/app/mini_client" \
+  --target integration_test/verifier_r1_repro_test.dart --evidence-dir "$EV" >"$OUT" 2>&1 &
+pid=$!
+udid=""
+for _ in $(seq 1 900); do
+  udid=$(sed -n 's/^SIMULATOR_UDID=//p' "$OUT" | head -1)
+  [ -n "$udid" ] && break
+  sleep 1
+done
+echo "udid=$udid"
+done_url=0
+for _ in $(seq 1 900); do
+  kill -0 $pid 2>/dev/null || break
+  if [ -n "$udid" ] && [ $done_url -eq 0 ] &&
+     find "$HOME/Library/Developer/CoreSimulator/Devices/$udid/data/Containers/Data/Application" \
+       -maxdepth 3 -name verifier_openurl_ready 2>/dev/null | grep -q .; then
+    echo "marker seen; simctl openurl miniclient://app/placeholder/44"
+    xcrun simctl openurl "$udid" 'miniclient://app/placeholder/44'; echo "openurl exit=$?"
+    sleep 4
+    xcrun simctl io "$udid" screenshot "$EV/r3_03_simctl_after_openurl_raw.png" >/dev/null 2>&1
+    echo "screenshot exit=$?"
+    done_url=1
+  fi
+  sleep 1
+done
+wait $pid
+echo "E2E_EXIT=$?"
