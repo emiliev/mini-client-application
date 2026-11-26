@@ -22,7 +22,8 @@ negative control (dep added to characters_list): //feature/characters/characters
 | pure-Dart closure | PASS |
 | workspace registration | PASS |
 | fixtures check | PASS |
-| test //... (comics uncached) | PASS |
+| test comics (uncached) | PASS |
+| test //... | PASS |
 | build --config=lint //... | PASS |
 | mc_arch_check | PASS |
 | rules_fork.sh check | PASS |
@@ -30,7 +31,8 @@ negative control (dep added to characters_list): //feature/characters/characters
 | l10n_check | PASS |
 | coverage >= 90 % | PASS |
 
-- tests: Executed 0 out of 88 tests: 88 tests pass.
-- mc_fixtures_comics coverage: TOTAL 228/232 98.3% (threshold 90 %)
+- comics tests, uncached: Executed 3 out of 3 tests: 3 tests pass.
+- test //...: Executed 0 out of 88 tests: 88 tests pass.
+- mc_fixtures_comics coverage: TOTAL 231/234 98.7% (threshold 90 %)
 
 **PASS T-0038-AC4-gates**
