@@ -1,15 +1,14 @@
 baseline (behaviour and semantics tests): PASS
 baseline (goldens): PASS
-MUTATION DID NOT CHANGE THE FILE
-AC1 unbounded width not handled: NOT APPLIED
+AC1 unbounded width not handled: KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 an unbounded width (Row without Expanded) does not throw)
 AC1 chip label not flexible (overflows at 3x): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 every widget with long German labels at 1.0x does not overflow)
 AC1 segment label not flexible (overflows): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 every widget with long German labels at 1.0x does not overflow)
 AC1 segment label scale uncapped: KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 segment labels are capped at 1.5x so five fit a phone at 3x)
-AC1 stepper number does not scale down (overflow): SURVIVED
+AC1 stepper number does not scale down (overflow): KILLED (FAIL  T-0044-AC1 no overflow T-0044-AC1 a long stepper number scales down to fit)
 AC2 search clear always visible: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search clear button appears only with text and clears)
 AC2 search clear does not call onChanged(''): KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search clear button appears only with text and clears)
 AC2 search clear does not empty the field: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search clear button appears only with text and clears)
-AC2 search clear drops the focus: SURVIVED
+AC2 search clear drops the focus: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search clear button appears only with text and clears)
 AC2 search action is not 'search': KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search field submits and reacts to the controller)
 AC2 search onSubmitted dropped: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search field submits and reacts to the controller)
 AC2 search autofocus dropped: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search field submits and reacts to the controller)
@@ -32,21 +31,8 @@ AC2 stepper increase never disabled: KILLED (FAIL  T-0044-AC2 behaviour T-0044-A
 AC2 stepper ignores step: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 stepper clamps at min and max and disables buttons)
 AC2 stepper valueText ignored: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 stepper with no handler is disabled and a value outside the range steps )
 AC2 segmented reports the selected index: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 segmented reports the tapped index)
-AC2 segmented tap ignored when disabled: SURVIVED
 AC3 error not a live region: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 text field has a label and announces its error)
-Could not format because the source could not be parsed:
-
-line 64, column 12 of utility/mc_ds_inputs/lib/src/field_style.dart: Expected to find ':'.
-   ╷
-64 │           ),
-   │            ^
-   ╵
-line 64, column 12 of utility/mc_ds_inputs/lib/src/field_style.dart: Expected an identifier.
-   ╷
-64 │           ),
-   │            ^
-   ╵
-AC3 error text dropped: SURVIVED
+AC3 error text dropped: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 text field shows helper, error replaces it, counter, obscure, action)
 AC3 text field label dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 text field has a label and announces its error)
 AC3 search label dropped: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 search field is a labelled text field)
 AC3 clear button unlabelled: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC2 search clear button appears only with text and clears)
@@ -68,7 +54,7 @@ AC3 stepper increase label dropped: KILLED (FAIL  T-0044-AC2 behaviour T-0044-AC
 AC3 disabled outline dimmed in high contrast: KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 disabled outlines are not dimmed in high contrast)
 AC3 selected text colour invisible (contrast): KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 meetsGuideline (tap target, label, contrast) light)
 AC3 chip selected text invisible (contrast): KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 meetsGuideline (tap target, label, contrast) light)
-AC3 muted hint colour too faint (contrast): SURVIVED
+AC3 muted hint colour too faint (contrast): KILLED (FAIL  T-0044-AC3 semantics T-0044-AC3 text field colours reach 4.5:1 light)
 AC1 golden: selected chip fill removed: KILLED (FAIL  T-0044-AC1 chip_states golden light x1)
 AC1 golden: disabled selected text invisible: KILLED (FAIL  T-0044-AC1 chip_states golden light x1)
 AC1 golden: focused border not primary: KILLED (FAIL  T-0044-AC1 text_field_focused golden light x1)

@@ -1044,6 +1044,42 @@ void main() {
       },
     );
 
+    testWidgets('T-0044-AC3 tap targets hold when the text is scaled down', (
+      tester,
+    ) async {
+      mcSetSurface(tester, 375, 600);
+      await tester.pumpWidget(
+        _page(
+          Column(
+            children: [
+              McChip(label: 'x', selected: false, onSelected: (_) {}),
+              McSegmented(
+                segments: const [
+                  McSegment(label: 'A'),
+                  McSegment(label: 'B'),
+                ],
+                selectedIndex: 0,
+                onChanged: (_) {},
+              ),
+            ],
+          ),
+          scale: 0.5,
+        ),
+      );
+      for (final f in [
+        find.byType(McChip),
+        find.widgetWithText(InkWell, 'A'),
+        find.widgetWithText(InkWell, 'B'),
+      ]) {
+        final size = tester.getSize(f);
+        expect(
+          size.width >= mcMinTapTarget && size.height >= mcMinTapTarget,
+          isTrue,
+          reason: '$f is $size at 0.5x',
+        );
+      }
+    });
+
     // The platform's contrast guideline skips text fields, so the colours of
     // the label, hint, helper, error, counter and the typed text are checked
     // against the field's fill here, in every theme.
