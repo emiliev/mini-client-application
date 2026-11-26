@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-26 `05bb5c7`; Verifier PASS `c2e77cd`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (kits; ADR-0011) |
 | Branch | `fleet/T-0045-forms-kit` |
@@ -101,3 +101,7 @@ All items fixed in one round, each with a `T-0045-AC1/2/3` test shown to fail wi
 9. Gates script header names the packages.
 
 Golden changes: the 8 `form_scaffold_busy.*` goldens (4 themes x 2 scales), because bound fields are now disabled while busy (the fields show the disabled fill). I looked at light x1 and highContrastDark x2: fields greyed, spinner and "Saving" unchanged. No other golden changed. Evidence re-run on the merge of `origin/main`: gates PASS, coverage 266/266 and 195/195, 124/124 mutations killed.
+
+## Merge (TL)
+- 2026-11-26: Review-first (ADR-0011). `/code-review` found 6 important bugs: `McFormTextField` couldn't bind to the controller's `FieldState<Object?>`; `pattern` used prefix matching; an invalid step gave no visible reason; edits were accepted during submit; lengths counted UTF-16 units; a stale value reset the cursor. TL decision (P1-20 AC6): Next stays disabled, and a blocked tap reveals the step's errors (`onBlockedNext` → `touchCurrentStep`). Review round `20eb7cc` (124/124 mutations). A single Sonnet Verifier pass gave PASS `c2e77cd` (about 88k tokens). The TL merged `--no-ff`; on the merge result `check` passed, 123/123 tests, lint was clean, `mc_arch_check` reported OK and the fixtures check passed.
+- Follow-up: P-086.
