@@ -1,0 +1,5 @@
+package:mc_fixtures_comics/src/data/universe.dart: 133/133 missed=[]
+package:mc_fixtures_comics/src/domain.dart: 19/22 missed=[29, 66, 82]
+package:mc_fixtures_comics/src/fixture_sets.dart: 4/4 missed=[]
+package:mc_fixtures_comics/src/handlers/comics_handlers.dart: 75/75 missed=[]
+TOTAL 231/234 = 98.7%
