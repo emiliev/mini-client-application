@@ -204,6 +204,8 @@ mutate R8-b "the bloc does not follow authState" $FAV \
   "s.replace('(_) => add(const _SessionChanged()),', '(_) {},')" $BDD
 mutate R8-c "a session change during a tap is not applied after it" $FAV \
   "s.replace('        }\n        if (_session.epoch != _shownEpoch) {\n          await _load(emit);\n        }\n', '        }\n')" $BDD
+mutate R8-d "a read that outlived its session is shown" $FAV \
+  "s.replace('    if (_session.epoch != epoch) {\n      return _load(emit);\n    }\n', '')" $BDD
 mutate R9 "a double Retry of the related comics sends two requests" $CL/lib/src/presentation/bloc/related_comics_bloc.dart \
   "s.replace('        if (_loading) {', '        if (_loading && _character.name.isEmpty) {')" $CL_BDD
 mutate R10 "signing in shows the toggle as a favourite" $TOGGLE \

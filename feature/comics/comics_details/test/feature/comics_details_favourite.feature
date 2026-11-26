@@ -179,3 +179,26 @@ Feature: Favourite a comic
     And the user is signed out
     And the backend received {1} requests for {'POST /v1/auth/refresh'}
     And the app announced {0} change to {'favourites'}
+
+  @T-0041-AC6
+  Scenario: Signed out, a failed read after sign-in writes nothing and says so
+    When I open comic {501500}
+    And I tap {'Add to favourites'}
+    Given the backend fails {'GET /v1/me/favourites/comic/501500'} with {'server_error'}
+    When signing in succeeds as {'reader@mini-client.test'}
+    Then I see {'Your favourites could not be checked.'}
+    And I see {'Add to favourites'}
+    And the backend received {0} requests for {'PUT /v1/me/favourites/comic/501500'}
+    And the app announced {0} change to {'favourites'}
+
+  @T-0041-AC6
+  Scenario: A sign-out while the flag is being read shows the signed-out view
+    Given I am signed in as {'reader@mini-client.test'}
+    And {'reader@mini-client.test'} has comic {501500} among their favourites
+    And the backend holds {'GET /v1/me/favourites/comic/501500'}
+    When I open comic {501500}
+    And the session ends elsewhere
+    And the backend releases {'GET /v1/me/favourites/comic/501500'}
+    Then I see {'Add to favourites'}
+    And I don't see {'Remove from favourites'}
+    And the user is signed out

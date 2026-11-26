@@ -34,4 +34,13 @@ void main() {
     expect(formatCompact(1200, 'en'), '1.2K');
     expect(formatNumber(1234567.5, 'de'), '1.234.567,5');
   });
+
+  test('T-0041-AC8 Money is a value: equal by amount and currency', () {
+    const a = Money(399, Currency.usd);
+    expect(a, const Money(399, Currency.usd));
+    expect(a.hashCode, const Money(399, Currency.usd).hashCode);
+    expect(a, isNot(const Money(399, Currency.eur)));
+    expect(a, isNot(const Money(400, Currency.usd)));
+    expect('$a', 'Money(399, USD)');
+  });
 }
