@@ -39,7 +39,7 @@ gate() {  # gate <name> <command...>: runs it, records PASS/FAIL and its log tai
     fails+=("" "### $name failed" "" '```' "$(plain "$log" | grep -a -v '^\[' | tail -25)" '```')
   fi
 }
-uncached=(//feature/library/library_reading_list_editor/... //app/... //utility/mc_test_steps/... //tool/l10n_check/...)
+uncached=(//feature/library/library_reading_list_editor/... //app/... //utility/mc_test_steps/... //tool/l10n_check/... //utility/mc_forms/... //utility/mc_ds_forms/... //utility/mc_api_errors/... //utility/mc_fixtures_library/...)
 tests() {
   bzw test --nocache_test_results "${uncached[@]}" && bzw test //...
 }
@@ -58,7 +58,7 @@ gate "relative API paths (T-0034-AC4)" "$REPO/tool/checks/T-0034-AC4_relative_pa
 for check in T-0048-AC7_matches_build_runner T-0048-AC7_cutoff T-0048-AC7_generated_not_committed T-0048-AC7_gen_l10n_parity; do
   gate "$check" "$REPO/tool/checks/$check.sh"
 done
-PKGS=(feature/library/library_reading_list_editor app/wiring/library_wiring app/wiring/app_core app/wiring/publishing_wiring)
+PKGS=(feature/library/library_reading_list_editor app/wiring/library_wiring app/wiring/app_core app/wiring/publishing_wiring utility/mc_forms utility/mc_api_errors utility/mc_fixtures_library)
 EXEMPT="${MC_COVERAGE_EXEMPT-}"
 coverage() {
   local pkg rc=0
