@@ -1,0 +1,13 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+/// T-0041 Verifier probe (not committed): prints what reached the backend.
+Future<void> iReportTheBackendRequests(WidgetTester tester) async {
+  for (final r in McTestSession.current.backend.requests) {
+    final auth = r.headers['Authorization'] ?? r.headers['authorization'];
+    // ignore: avoid_print
+    print(
+      'VERIFIER request ${r.routeKey} auth=${auth == null ? 'none' : auth.substring(0, auth.length.clamp(0, 30))}',
+    );
+  }
+}
