@@ -15,12 +15,14 @@ Flutter markers: @flutter_sky_engine//:sky_engine
 Flutter markers: @flutter_sky_engine//:sky_engine
 @flutter_sky_engine//sky_engine:lib/_embedder.yaml
 @flutter_sky_engine//sky_engine:lib/_empty.dart
+BUILD restored byte-for-byte: yes
 ```
 ## fixtures check (28 production targets scanned)
 ```
 library dependencies: none
 positive control (its own test): //utility/mc_fixtures_library:lib/mc_fixtures_library.dart //utility/mc_fixtures_library:lib/src/data/reading_list.dart 
 negative control (dep added to characters_list): //feature/characters/characters_list:characters_list -> //utility/mc_fixtures_library:lib/mc_fixtures_library.dart //utility/mc_fixtures_library:lib/src/data/reading_list.dart //utility/mc_fixtures_library:lib/src/domain.dart 
+BUILD restored byte-for-byte: yes
 ```
 
 | Gate | Result |
@@ -38,7 +40,7 @@ negative control (dep added to characters_list): //feature/characters/characters
 | coverage >= 90 % | PASS |
 
 - library tests, uncached: Executed 4 out of 4 tests: 4 tests pass.
-- test //...: Executed 22 out of 121 tests: 121 tests pass.
-- mc_fixtures_library coverage: TOTAL 187/190 98.4% (threshold 90 %)
+- test //...: Executed 0 out of 121 tests: 121 tests pass.
+- mc_fixtures_library coverage: TOTAL 194/197 98.5% (threshold 90 %)
 
 **PASS T-0047-AC5-gates**
