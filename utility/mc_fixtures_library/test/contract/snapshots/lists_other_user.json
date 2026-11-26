@@ -1,0 +1,16 @@
+{
+  "body": {
+    "lists": [
+      {
+        "description": "Keepers.",
+        "id": "l-4",
+        "itemCount": 3,
+        "name": "Collector Shortlist",
+        "updatedAt": "2025-12-27T00:00:00.000Z",
+        "visibility": "public"
+      }
+    ]
+  },
+  "request": "GET /v1/me/lists as u-101",
+  "status": 200
+}

@@ -1,0 +1,21 @@
+# T-0047 (P1-09 subset, U44): the reading-lists domain of the mocked backend (R3: data plus small pure-Dart handlers).
+name: mc_fixtures_library
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  mc_fixtures_comics: any
+  mc_fixtures_identity: any
+  mc_mocked_backend: any
+
+dev_dependencies:
+  dio: ^5.9.0
+  flutter_test:
+    sdk: flutter
+  mc_fixtures_media: any
+  mc_media: any

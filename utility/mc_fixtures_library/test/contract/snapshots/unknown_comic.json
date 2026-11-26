@@ -1,0 +1,18 @@
+{
+  "body": {
+    "error": {
+      "code": "unknown_comic",
+      "comicId": 12345,
+      "message": "comic 12345 does not exist",
+      "parameter": "comicIds"
+    }
+  },
+  "request": "PUT /v1/me/lists/l-1/items as u-100",
+  "requestBody": {
+    "comicIds": [
+      500000,
+      12345
+    ]
+  },
+  "status": 400
+}
