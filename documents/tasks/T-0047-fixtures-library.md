@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-26 `c2d36f6`; Verifier PASS `4a89257`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (fixtures; ADR-0011) |
 | Branch | `fleet/T-0047-fixtures-library` |
@@ -74,3 +74,6 @@ Test integrity: no tests deleted, skipped or weakened; no `// ignore:`. Globs us
 5. Order-0 `invalid_body` carries `parameter: "body"`; snapshot updated; asserted in `T-0047-AC3 a body that is not an object is invalid_body`.
 6. Gates script: backups in the scratch dir, restore trap installed before the edits, restores verified with `cmp` against `HEAD`; "discovery" slip fixed in the `mutations.sh` header.
 Mutations R1 to R3 and S7 added (58/58 killed).
+
+## Merge (TL)
+- 2026-11-26: Review-first (ADR-0011). `/code-review` found one important bug: the `library.empty` scenario was hard-wired to seed 42. It also found 5 nits. Review round `35a9be6` (58/58 mutations). A single Sonnet Verifier pass gave PASS `4a89257` (about 90k tokens; two real users signed in through identity probes; 10/10 mutations killed). The TL merged `--no-ff`; on the merge result `check` passed, 127/127 tests, lint was clean, `mc_arch_check` reported OK and the fixtures check passed.

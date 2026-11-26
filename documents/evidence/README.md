@@ -44,3 +44,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0043](T-0043/verification-report.md) | PASS (Sonnet, single pass) | Search fixtures: ranking tier mutations, folded-length probes, contract snapshots |
 | [T-0044](T-0044/verification-report.md) | PASS (Sonnet, single pass) | DS inputs: 160 goldens byte-identical, intrinsic-sizing probes, chip tap strip, a11y guidelines |
 | [T-0045](T-0045/verification-report.md) | PASS (Sonnet, single pass) | Forms kit: pattern and grapheme probes, blocked-Next semantics, 56 goldens byte-identical |
+| [T-0047](T-0047/verification-report.md) | PASS (Sonnet, single pass) | Library fixtures: two-user CRUD probes, validation boundaries, a seed-following scenario |
