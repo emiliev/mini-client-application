@@ -1,4 +1,4 @@
-baseline: PASS (12 targets)
+baseline: PASS (13 targets)
 AC1-a price shown as raw minor units: KILLED (FAIL  comics_details A comic's page The facts are formatted for English [T-0041-AC1])
 AC1-b cast in reverse order: KILLED (FAIL  comics_details A comic's page The creators and characters sections list the comic's credits [T-0041-AC1])
 AC1-c last credit dropped: KILLED (FAIL  comics_details A comic's page The creators and characters sections list the comic's credits [T-0041-AC1])
@@ -13,7 +13,7 @@ AC3-c the wiring sends a character to the comic location: KILLED (FAIL  T-0041-A
 AC4-a dates and prices always in English: KILLED (FAIL  comics_details A comic's page In German the sections and the formats are German [T-0041-AC4])
 AC4-b German favourite label left in English: KILLED (FAIL  comics_details_favourite Favourite a comic In German the favourite labels and its error are German [T-0041-AC4])
 AC4-c header text column not flexible (overflows): KILLED (FAIL  comics_details_favourite Favourite a comic Signed out, the favourite waits for sign-in and then saves it [T-0041-AC6])
-AC5-a comic route path drifts from AppLocations: KILLED (FAIL  T-0041-AC5 the link miniclient://app/comics/501500 opens the comic page over the app mock domains)
+AC5-a comic route path drifts from AppLocations: KILLED (FAIL  T-0041-AC5 the comic route builds the comic flow for its id)
 AC5-b openComic pushes the character location: KILLED (FAIL  T-0041-AC5 openComic pushes the comic location of the publishing group)
 AC5-c a related comic opens the wrong id: KILLED (FAIL  characters_list_related_comics A character's comics A related comic hands over to the app exactly once [T-0041-AC5])
 AC6-a signed out, no sign-in asked: KILLED (FAIL  comics_details_favourite Favourite a comic Signed out, the favourite waits for sign-in and then saves it [T-0041-AC6])
@@ -40,7 +40,15 @@ R8-d a read that outlived its session is shown: KILLED (FAIL  comics_details_fav
 R9 a double Retry of the related comics sends two requests: KILLED (FAIL  characters_list_related_comics A character's comics A double Retry of the related comics sends one request [T-0041-AC5])
 R10 signing in shows the toggle as a favourite: KILLED (FAIL  comics_details_favourite Favourite a comic Signed out, the favourite waits for sign-in and then saves it [T-0041-AC6])
 R11 the harness drops the request headers: KILLED (FAIL  T-0041-AC6 the harness records each request with its headers, the bearer the auth interceptor added included)
+F1 a session change during the post-sign-in read still writes: KILLED (FAIL  comics_details_favourite Favourite a comic A sign-out during the read after sign-in writes nothing [T-0041-AC6])
+F2 Not now stays enabled while signing in (Verifier V14): KILLED (FAIL  T-0041-AC6 requestSignIn: while signing in, the barrier and Back do not close the sheet)
+F3 the sheet can be dragged away while signing in: KILLED (FAIL  T-0041-AC6 requestSignIn: while signing in, the barrier and Back do not close the sheet)
+F4 the toggle stays enabled during the write (Verifier V12): KILLED (FAIL  comics_details_favourite Favourite a comic Signed in, the toggle flips at once and a failed write rolls it back [T-0041-AC6])
+F5-a the bloc ignores DataChanged('favourites') from another page: KILLED (FAIL  comics_details_favourite Favourite a comic Two pages of the same comic agree after one of them writes [T-0041-AC6])
+F5-b the bloc reloads after its own announcement: KILLED (FAIL  comics_details_favourite Favourite a comic Two pages of the same comic agree after one of them writes [T-0041-AC6])
+F6-a a related comic shows no cover: KILLED (FAIL  characters_list_related_comics A character's comics The preview lists the comics the character appears in [T-0041-AC5])
+F6-b the facts rows lose their spacing token: KILLED (FAIL  T-0041-AC1 golden: the comic loaded, top)
 AC7-a barrel exports a page: KILLED (00:00 +0 -1: T-0041-AC7 the barrel exports only the flow, the navigator and their argument types, each with show [E])
 AC7-b SessionReader not forwarded (Session instead): KILLED (FAIL  T-0041-AC7 the flow's container resolves every registration)
 
-43 of 43 mutations killed by a failing test
+51 of 51 mutations killed by a failing test
