@@ -81,3 +81,15 @@ New package; nothing deleted, skipped or weakened; no `// ignore:`; no existing 
 - Finding [F-0043](../findings/F-0043-ds-inputs-gotchas.md). Decisions: none needing an ADR. `pubspec.lock` and `MODULE.bazel.lock` did not change. `origin/main` (T-0043) merged cleanly.
 - The text field's hint shows only while the field is focused and empty, as Flutter draws it; the empty golden shows the label as the placeholder.
 - Follow-ups: five segments at 2x and 3x break words in narrow cells ("Hel / den"), which is legal but plain; a feature with long labels should use fewer segments or a chip group. A "show password" suffix and a date field are for `mc_ds_forms` (T-0045). Android tap targets (48 dp) are not checked (iOS first).
+
+## Review round (after `/code-review`)
+No signature changed.
+1. **Intrinsic sizing (important).** `boundedFieldWidth` is now a small render object (`RenderProxyBox`, 280 pt fallback, intrinsic width 280) and `McSegmented` uses its own row render object (equal cells when bounded, natural widths when not, intrinsic width = widest cell x count, height from intrinsics). No `LayoutBuilder` is left. Tests "T-0044-AC1 every input lays out under IntrinsicWidth / IntrinsicHeight / AlertDialog" cover all five widgets, plus equal cells under `IntrinsicWidth` and a 280 pt field. The unbounded-width tests stay green. A first version stretched the segmented control in a loose body (its height came from a layout under a loose height); the existing "does not stretch" test caught it, and the height now comes from intrinsics.
+2. `BUILD.bazel`: the library glob excludes `MC_GENERATED_DART`.
+3. `McSearchField` disabled fill is `background` (flat), not `surface` (raised).
+4. Chip: a `GestureDetector` takes the tap on the whole 44 pt box; the `InkWell` is inside the drawn pill (`Ink`), so only the pill ripples. Test: the `InkWell` is under 44 pt, the box is 44 pt, and a tap in the strip above the pill selects.
+5. Gates script header names the utility packages.
+6. Layering script checks the restore with `cmp` against snapshots taken before the controls.
+
+**Goldens changed (4 of 160, all looked at):** `search_field_disabled.{light,dark}.{x1,x2}`: the field now has the page's flat background with the lighter outline and muted text, so it reads as disabled; high-contrast variants are unchanged (surface equals background there). Chip goldens are unchanged (the ripple is not in them).
+Mutations: 65 of 65 killed (6 added or replaced for this round, [log](../evidence/T-0044/engineer/mutations.log)). Gates and layering PASS; coverage `mc_ds_inputs` 95.6 % (325/340), `mc_ds_navigation` 93.0 %. `origin/main` had nothing new.
