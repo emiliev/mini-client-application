@@ -27,24 +27,40 @@ class _State {
   final String? selected;
 }
 
-/// A const-built root page (the exemplar's shape) that rebuilds on a locale
-/// change even while covered, because it depends on the locale.
-class _LocaleRoot extends StatelessWidget {
-  const _LocaleRoot({required this.onController});
+/// A const-built root page (the exemplar's shape) that rebuilds when
+/// [rebuild] fires, even while covered by an inner page: what a locale change
+/// does to a page that reads its strings.
+class _RebuildingRoot extends StatefulWidget {
+  const _RebuildingRoot();
 
-  final void Function(FeatureFlowController<_State>) onController;
+  static final rebuild = ValueNotifier<int>(0);
 
   @override
-  Widget build(BuildContext context) {
-    onController(context.di<FeatureFlowController<_State>>());
-    final lang = Localizations.localeOf(context).languageCode;
-    return Scaffold(
-      appBar: AppBar(
-        leading: const McFlowBackButton(),
-        title: Text('flow root $lang'),
-      ),
-    );
+  State<_RebuildingRoot> createState() => _RebuildingRootState();
+}
+
+class _RebuildingRootState extends State<_RebuildingRoot> {
+  @override
+  void initState() {
+    super.initState();
+    _RebuildingRoot.rebuild.addListener(_onRebuild);
   }
+
+  @override
+  void dispose() {
+    _RebuildingRoot.rebuild.removeListener(_onRebuild);
+    super.dispose();
+  }
+
+  void _onRebuild() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      leading: const McFlowBackButton(),
+      title: Text('flow root ${_RebuildingRoot.rebuild.value}'),
+    ),
+  );
 }
 
 class _Strings {
@@ -648,72 +664,55 @@ void main() {
 
   testWidgets('T-0036-AC1 the back button is present after the root page '
       'rebuilds under an inner page', (tester) async {
-    late FeatureFlowController<_State> controller;
-    var locale = const Locale('en');
-    late StateSetter setLocale;
+    _RebuildingRoot.rebuild.value = 0;
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (context, setState) {
-          setLocale = setState;
-          return MaterialApp(
-            theme: McTheme.light,
-            locale: locale,
-            supportedLocales: const [Locale('en'), Locale('de')],
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            home: Builder(
-              builder: (context) => Scaffold(
-                body: TextButton(
-                  onPressed: () => Navigator.of(context).push<void>(
-                    MaterialPageRoute(
-                      builder: (_) => FeatureFlow<_State>(
-                        state: const _State(),
-                        onGeneratePages: (s) => [
-                          McFlowPage(
-                            name: 'list',
-                            child: _LocaleRoot(
-                              onController: (c) => controller = c,
-                            ),
-                          ),
-                          if (s.selected != null)
-                            McFlowPage(
-                              name: 'detail',
-                              child: Scaffold(
-                                appBar: AppBar(title: const Text('detail')),
-                              ),
-                            ),
-                        ],
+      _app(
+        Builder(
+          builder: (context) => TextButton(
+            onPressed: () => Navigator.of(context).push<void>(
+              MaterialPageRoute(
+                builder: (_) => FeatureFlow<_State>(
+                  state: const _State(),
+                  onGeneratePages: (s) => [
+                    const McFlowPage(name: 'list', child: _RebuildingRoot()),
+                    if (s.selected != null)
+                      McFlowPage(
+                        name: 'detail',
+                        child: Scaffold(
+                          appBar: AppBar(title: const Text('detail')),
+                        ),
                       ),
-                    ),
-                  ),
-                  child: const Text('open'),
+                  ],
                 ),
               ),
             ),
-          );
-        },
+            child: const Text('open'),
+          ),
+        ),
       ),
     );
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
-    controller.update((_) => const _State('x'));
+    FeatureFlowController<_State> controller() => tester
+        .element(find.byType(_RebuildingRoot, skipOffstage: false))
+        .di<FeatureFlowController<_State>>();
+    controller().update((_) => const _State('x'));
     await tester.pumpAndSettle();
     expect(find.text('detail'), findsOneWidget);
 
-    // The root page rebuilds while the inner page is on top.
-    setLocale(() => locale = const Locale('de'));
+    // The root page rebuilds while the inner page is on top (what a locale
+    // change does to the exemplar's list).
+    _RebuildingRoot.rebuild.value = 1;
     await tester.pumpAndSettle();
-    expect(find.text('flow root de', skipOffstage: false), findsOneWidget);
+    expect(find.text('flow root 1', skipOffstage: false), findsOneWidget);
 
-    await tester.tap(find.byType(BackButton).last);
+    controller().update((_) => const _State());
     await tester.pumpAndSettle();
     expect(find.text('detail'), findsNothing);
-    expect(find.text('flow root de'), findsOneWidget);
+    expect(find.text('flow root 1'), findsOneWidget);
 
+    // Tapping it is T-0036-AC2's case; here the point is that it is there.
     expect(find.byType(BackButton), findsOneWidget);
-    await tester.tap(find.byType(BackButton));
-    await tester.pumpAndSettle();
-    expect(find.text('flow root de'), findsNothing);
-    expect(find.text('open'), findsOneWidget);
   });
 
   testWidgets('T-0034-AC1 FlowScope.of outside a flow names the problem', (
