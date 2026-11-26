@@ -103,3 +103,33 @@ I compared the `origin/main` and branch PNGs pixel by pixel with [`verifier/pngd
 - The branch is behind `origin/main` by T-0038. `merge-tree` is clean, so the usual merge and re-run of the gates apply.
 - If D1 is fixed in a short round, the re-verification scope is the `mc_tab_bar.dart` change, a height test, the 16 regenerated `tab_bar_*` goldens (look at them), and V3/V11 if D2/D3 are taken. Everything else in this report carries forward.
 - **Evidence:** `documents/evidence/T-0040/verifier/`: the e2e run (`e2e/`), 4 PNGs, the probe sources (`verifier_probe_test.dart`, `verifier_back_t0040_test.dart`), `mut.sh`, `batch.sh`, `cov.py` and `pngdiff.py`. The probe target and files were removed from the package, and the tree is clean apart from this evidence.
+
+## Re-verification at 174effd (Sonnet, narrow)
+
+**Verdict: PASS.** Head `174effd` (`fleet/T-0040-ds-navigation`), checked on a detached worktree. No code changed. One test-quality note (N1) and one coverage note (N2), neither blocking. Evidence: [`reverifier-174effd/e2e/`](reverifier-174effd/e2e/e2e-summary.md).
+
+### Checklist
+| # | Item | Result |
+|---|---|---|
+| 1 | D1 | Tests exist (49 pt in a Column, tall box, page body; 3x keeps 48). Literal mutation "`Center(widthFactor: 1)` without `heightFactor`" **survives** (M1), because the item's `ConstrainedBox(maxHeight: 48)` alone bounds it. Removing `maxHeight` only also survives (M1c). Removing **both** goes red (M1b). The two guards are redundant, the behaviour is pinned (N1). |
+| 2 | Scroll | Mutation to `Scrollable.ensureVisible`: red. Tests: page offset unchanged on build and on tab change; first build does not scroll the page. |
+| 3 | `PreferredSizeWidget` / `bottom` | `preferredSize` 48 → red. Tests for `AppBar.bottom`, `McAppBar.bottom` and with the large title exist. |
+| 4 | Hit area in the former gap | Mutation (no free-space share): red. |
+| 5 | Section header, German label at 3x | Mutation (action no longer `Flexible`): red, `RenderFlex overflowed by 724 pixels`. |
+| 6 | Unbounded width, assert, no Material | Always-scroll mutation: red (Row test crashes). Tests for the `currentIndex` assert and "without a Scaffold" exist and pass (not mutated, to stay within 10). |
+| 7 | High-contrast divider | Alpha mutation: red. |
+| 8 | D2 / D3 / D5 | Reveal-on-any-update: red. `button: true` removed: red. `namesRoute` removed: red. |
+| 9 | D6 layering | `T-0040-AC3_layering.sh` PASS, and its six negative controls are all reported. My own negative: `mc_feature_flow: any` appended to `utility/mc_ds_layout/pubspec.yaml` makes it **FAIL** (rc 1; the file is reported). Restored. This closes D6. |
+| 10 | Goldens | 24 changed vs `1e54ad7`, exactly `tab_bar_2.*` (8), `tab_bar_5.*` (8) and `section_header_action.*` (8). No `characters_list` golden and no T-0031 golden changed. Viewed `tab_bar_2.light.x1` (48 pt bar, divider right below, tabs share the width), `tab_bar_5.highContrast.x2` (full-strength black divider, labels at the 1.5x cap, no overflow) and `section_header_action.dark.x2` (title wraps in about 2/3 width, action beside it). |
+| 11 | Docs | `McAppBar` class doc has the loud "IMPORTANT: pass `leading: const McFlowBackButton()`", the 1.5x large-title cap and Flutter's 1.34 plain-title cap. `McTabBar` doc matches the code (tabs share the width, own scroll controller, 48 + 1 pt). D7 fixed. |
+| 12 | Gates | `T-0040-AC4_gates.sh` PASS: test //... (90 tests), lint, `mc_arch_check`, `rules_fork.sh check`, format, l10n_check, provenance, fixtures closure, layering. Coverage `mc_ds_navigation` 173/186 = 93.0 %, `mc_feature_flow` 99.4 %, `characters_list` 100 %. |
+
+### E2E
+`tool/e2e_ios.sh --task T-0040 --role verifier` (the script only accepts engineer or verifier) on `mc-T-0040-verifier-77118`, iOS 26.2: `characters_journey_test` and `characters_link_after_flow_test` **2/2 PASS**. The simulator was deleted by the script (`simctl list | grep -c mc-T-0040` gives 0). [`02_characters_list.png`](reverifier-174effd/e2e/02_characters_list.png) shows the back chevron at the left and a centred semibold "Characters" in the McAppBar, above the card grid. The scratch pub copy and the Bazel output base were removed or shut down.
+
+### Mutation table (mine, `mc_ds_navigation:navigation_test`, baseline PASS)
+M1 literal D1 SURVIVED; M1b (heightFactor and maxHeight) killed; M1c (maxHeight only) survived; M2 to M10 each killed (one failing test each). Restore verified, tree clean.
+
+### Notes (non-blocking)
+- **N1 (Nit, test) `mc_tab_bar.dart:~318-330`** `heightFactor: 1` and `maxHeight: McTabBar.height` are redundant. Either alone keeps the tab at 48 pt, so the mutation named in the checklist survives while the behaviour is pinned. Keep one, or leave both as defence in depth.
+- **N2 (Nit, coverage)** Uncovered in `mc_tab_bar.dart`: lines 212 to 233 (`_RenderTabRow` intrinsic-size overrides and `computeDryLayout`), 274/276 (`_RenderTabRow` paint and hit-test passthroughs) and 90 (the reveal early return); and `mc_app_bar.dart:83`. These are only reached by a parent that asks for intrinsics or dry layout, for example `IntrinsicHeight` around a tab bar. 93.0 % is above the 90 % bar.
