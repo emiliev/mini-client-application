@@ -11,6 +11,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0039](T-0039-session-and-auth.md) | Auth slice: `mc_session`, `mc_api_auth`, `mc_fixtures_identity` (P1-05 AC2) | **In Progress** | Engineer (Sonnet) | T-0020, T-0023 | `fleet/T-0039-session-and-auth` |
 | [T-0040](T-0040-ds-navigation.md) | `mc_ds_navigation`: `McAppBar`, `McTabBar`, `McSectionHeader` | **In Progress** | Engineer (Sonnet) | T-0037 | `fleet/T-0040-ds-navigation` |
 
+| [T-0041](T-0041-comics-details-exemplar.md) | **`comics_details` exemplar** (SC, P1-18): sections, auth-gated favourite, publishing wiring | Ready | Engineer (Opus) / Verifier (Opus) | T-0039, T-0040 | `fleet/T-0041-comics-details` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
