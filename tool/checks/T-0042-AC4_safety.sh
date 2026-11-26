@@ -107,7 +107,11 @@ bzw test //... >"$work/B_test.log" 2>&1
 b_test_rc=$?
 # Negative control hook (verifier runs): change one real output before it is hashed.
 if [[ -n "${MC_AC4_TAMPER:-}" ]]; then
-  victim="$(cut -f1 "$work/A.hashes" | grep -m1 '\.dart$' || true)"
+  # A regular file that Bazel made (never a symlink: that would write into a source).
+  victim=""
+  while IFS= read -r f; do
+    if [[ -f "$REPO/$f" && ! -L "$REPO/$f" ]]; then victim="$f"; break; fi
+  done < <(cut -f1 "$work/A.hashes" | grep -E '\.(dill|sum)$')
   if [[ -n "$victim" ]]; then chmod u+w "$REPO/$victim"; printf 'tampered\n' >>"$REPO/$victim"; fi
   report "(MC_AC4_TAMPER: appended a line to \`$victim\` before hashing)" ""
 fi
