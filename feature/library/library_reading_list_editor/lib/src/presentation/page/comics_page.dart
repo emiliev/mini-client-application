@@ -96,63 +96,85 @@ class _ComicsBody extends StatelessWidget {
     );
     final picked = field.value ?? const <PickedComic>[];
     final error = field.visibleError;
+    // The picked comics scroll with the results, so a long list of picks
+    // never squeezes the results off the screen. The error sits right under
+    // the count, above the picks, so it shows however many there are.
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Padding(
-          padding: McInsets.screen,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              McSearchField(
-                controller: query,
-                label: l10n.readingListEditorSearchLabel,
-                clearLabel: l10n.readingListEditorSearchClear,
-                onChanged: (text) => context.read<ComicPickerBloc>().add(
-                  ComicPickerEvent.queryChanged(text),
+          padding: McInsets.screen.copyWith(bottom: 0),
+          child: McSearchField(
+            controller: query,
+            label: l10n.readingListEditorSearchLabel,
+            clearLabel: l10n.readingListEditorSearchClear,
+            onChanged: (text) => context.read<ComicPickerBloc>().add(
+              ComicPickerEvent.queryChanged(text),
+            ),
+          ),
+        ),
+        Expanded(
+          child: CustomScrollView(
+            key: comicResultsKey,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverPadding(
+                padding: McInsets.screen,
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        l10n.readingListEditorPickedCount(picked.length),
+                        style: Theme.of(context).textTheme.titleSmall,
+                      ),
+                      if (error != null) ...[
+                        const McGap.xs(),
+                        FieldErrorText(
+                          key: comicsErrorKey,
+                          fieldErrorMessage(
+                            ReadingListFields.comics,
+                            error,
+                            l10n,
+                          ),
+                        ),
+                      ],
+                      if (picked.isNotEmpty) ...[
+                        const McGap.xs(),
+                        McChipGroup<PickedComic>.multi(
+                          key: pickedComicsKey,
+                          options: [
+                            for (final comic in picked)
+                              McChipOption(value: comic, label: comic.title),
+                          ],
+                          selected: picked.toSet(),
+                          // Tapping a picked chip deselects it: it leaves
+                          // the list.
+                          onChanged: (kept) {
+                            for (final comic in picked) {
+                              if (!kept.contains(comic)) {
+                                editor.add(
+                                  ReadingListEditorEvent.comicToggled(comic),
+                                );
+                              }
+                            }
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-              const McGap.md(),
-              Text(
-                l10n.readingListEditorPickedCount(picked.length),
-                style: Theme.of(context).textTheme.titleSmall,
-              ),
-              if (picked.isNotEmpty) ...[
-                const McGap.xs(),
-                McChipGroup<PickedComic>.multi(
-                  key: pickedComicsKey,
-                  options: [
-                    for (final comic in picked)
-                      McChipOption(value: comic, label: comic.title),
-                  ],
-                  selected: picked.toSet(),
-                  // Tapping a picked chip deselects it: it leaves the list.
-                  onChanged: (kept) {
-                    for (final comic in picked) {
-                      if (!kept.contains(comic)) {
-                        editor.add(ReadingListEditorEvent.comicToggled(comic));
-                      }
-                    }
-                  },
-                ),
-              ],
-              if (error != null) ...[
-                const McGap.xs(),
-                FieldErrorText(
-                  key: comicsErrorKey,
-                  fieldErrorMessage(ReadingListFields.comics, error, l10n),
-                ),
-              ],
+              _Results(picked: picked),
             ],
           ),
         ),
-        Expanded(child: _Results(picked: picked)),
       ],
     );
   }
 }
 
-/// The search results, each a toggle.
+/// The search results, each a toggle: a sliver of the step's scroll view.
 class _Results extends StatelessWidget {
   const _Results({required this.picked});
 
@@ -166,22 +188,29 @@ class _Results extends StatelessWidget {
     final ids = {for (final comic in picked) comic.id};
     return BlocBuilder<ComicPickerBloc, ComicPickerState>(
       builder: (context, state) => state.when(
-        loading: (_) =>
-            McLoading(semanticLabel: l10n.readingListEditorSearching),
-        empty: (query) => McEmptyView(
-          title: l10n.readingListEditorSearchLabel,
-          message: l10n.readingListEditorNoResults(query),
+        loading: (_) => SliverFillRemaining(
+          hasScrollBody: false,
+          child: McLoading(semanticLabel: l10n.readingListEditorSearching),
         ),
-        failure: (error, _, _) => McErrorView(
-          title: l10n.readingListEditorSearchErrorTitle,
-          message: failureMessage(error, core),
-          retryLabel: core.commonRetry,
-          onRetry: () => context.read<ComicPickerBloc>().add(
-            const ComicPickerEvent.retry(),
+        empty: (query) => SliverFillRemaining(
+          hasScrollBody: false,
+          child: McEmptyView(
+            title: l10n.readingListEditorSearchLabel,
+            message: l10n.readingListEditorNoResults(query),
           ),
         ),
-        results: (_, comics) => ListView.builder(
-          key: comicResultsKey,
+        failure: (error, _, _) => SliverFillRemaining(
+          hasScrollBody: false,
+          child: McErrorView(
+            title: l10n.readingListEditorSearchErrorTitle,
+            message: failureMessage(error, core),
+            retryLabel: core.commonRetry,
+            onRetry: () => context.read<ComicPickerBloc>().add(
+              const ComicPickerEvent.retry(),
+            ),
+          ),
+        ),
+        results: (_, comics) => SliverList.builder(
           itemCount: comics.length,
           itemBuilder: (context, i) {
             final comic = comics[i];

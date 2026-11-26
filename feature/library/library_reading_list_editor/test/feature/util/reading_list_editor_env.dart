@@ -189,6 +189,24 @@ List<String> readingOrder(WidgetTester tester) {
   return [for (final row in rows) row.title];
 }
 
+/// Any widget of the editor's flow, on screen or not (an anchor for
+/// [editorFlowState]).
+Finder editorAnchor() => find.byType(Scaffold, skipOffstage: false);
+
+/// Scrolls step 2 back to its top (where the picked comics are), as a
+/// reader does after picking further down the results.
+Future<void> scrollComicsToTop(WidgetTester tester) async {
+  final scrollable = find.descendant(
+    of: find.byKey(comicResultsKey),
+    matching: find.byType(Scrollable),
+  );
+  if (scrollable.evaluate().isEmpty) {
+    return;
+  }
+  tester.state<ScrollableState>(scrollable.first).position.jumpTo(0);
+  await tester.pump();
+}
+
 /// What the flow state holds, as the tests see it.
 typedef FlowStateView = ({ReadingListId? editing, int step});
 

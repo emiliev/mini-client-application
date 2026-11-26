@@ -104,6 +104,10 @@ final class ReadingListEditorBloc
   /// The field the last save's `400` named, until the save returned.
   SaveRejected? _rejection;
 
+  /// The last save wrote something (a no-change edit writes nothing, so it
+  /// announces nothing).
+  bool _wrote = false;
+
   bool _loading = false;
   bool _ended = false;
 
@@ -144,6 +148,9 @@ final class ReadingListEditorBloc
               if (c.id != comic.id) c,
             if (!picked) comic,
           ]);
+          // A pick is the field's interaction (a text field's is its blur):
+          // from now on its error shows.
+          wizard.touch(ReadingListFields.comics);
         }
       case _ComicMoved(:final from, :final to):
         if (wizard != null) {
@@ -271,7 +278,9 @@ final class ReadingListEditorBloc
     }
     outcome.fold(
       (id) {
-        _bus.publish(const DataChanged(readingListsTopic));
+        if (_wrote) {
+          _bus.publish(const DataChanged(readingListsTopic));
+        }
         _flow.complete(id);
       },
       (_) {
@@ -289,6 +298,7 @@ final class ReadingListEditorBloc
   /// await (a session change between two writes stops the second).
   Future<Result<ReadingListId, ApiFailure>> _save(FormValues values) async {
     _rejection = null;
+    _wrote = false;
     final epoch = _epoch;
     final draft = readingListDraftOf(values);
     final editing = _editing;
@@ -308,6 +318,7 @@ final class ReadingListEditorBloc
       if (list == null) {
         return _settle(written);
       }
+      _wrote = true;
       saved = _saved = list;
     }
     if (draft.itemsDifferFrom(saved)) {
@@ -319,6 +330,7 @@ final class ReadingListEditorBloc
       if (list == null) {
         return _settle(written);
       }
+      _wrote = true;
       _saved = list;
     }
     return success(editing);
@@ -328,12 +340,18 @@ final class ReadingListEditorBloc
   /// kept aside and shown once the completion returned.
   Result<ReadingListId, ApiFailure> _settle(
     Result<ReadingList, SaveFailure> written,
-  ) => written.fold((list) => success(list.id), (error) {
-    if (error is SaveRejected) {
-      _rejection = error;
-    }
-    return failure(error.asApiFailure);
-  });
+  ) => written.fold(
+    (list) {
+      _wrote = true;
+      return success(list.id);
+    },
+    (error) {
+      if (error is SaveRejected) {
+        _rejection = error;
+      }
+      return failure(error.asApiFailure);
+    },
+  );
 
   /// The backend refused a field: its value now fails a rule (so the step
   /// is invalid and the error shows under the field), and the wizard goes

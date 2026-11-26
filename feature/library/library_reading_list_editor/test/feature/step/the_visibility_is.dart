@@ -1,3 +1,5 @@
+import 'dart:ui' show Tristate;
+
 import 'package:flutter_test/flutter_test.dart';
 
 import '../util/reading_list_editor_env.dart';
@@ -13,7 +15,7 @@ Future<void> theVisibilityIs(WidgetTester tester, String label) async {
   expect(segment, findsOneWidget, reason: 'a segment "$label"');
   expect(
     tester.getSemantics(segment).flagsCollection.isSelected,
-    isTrue,
+    Tristate.isTrue,
     reason: '"$label" is selected',
   );
 }
