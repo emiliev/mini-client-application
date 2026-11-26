@@ -202,3 +202,97 @@ All screenshots are 552×1200. The script downscaled them from 1206×2622.
 2. **R2 (minor)**, `app/wiring/universe_wiring/lib/src/navigators/characters_list_navigator_impl.dart:9-13`: the lazy-singleton navigator keeps the router it was built with, so `RouterRef.detach` doesn't reach it.
 3. **R3 (minor)**, `app/sandbox/universe_sandbox/lib/main.dart`: there is no e2e file-drop start link (mini_client's `main()` has one), so on-sim sandbox cold links can only be driven through `defaultRouteName`.
 4. Carried over from the first pass, not in scope: D5 (no back button on the list pushed from home) and the card's reserved subtitle area (DS).
+
+---
+
+## Re-verification at 6a3692b
+
+- **Commit verified:** `fleet/T-0033-universe-wiring` @ `6a3692b` (detached, own worktree). It contains abbbb27, fix round 2 (ad8b82e: R2, R3), and the merge of `origin/main` df117bd, which brings in T-0035's vendored flow_builder.
+- **Bazel:** `/tmp/mc-ob-T-0033-verifier`, shut down at the end.
+- **Simulators:** each was created and deleted by `tool/e2e_ios.sh`:
+  - `mc-T-0033-verifier-<pid>`: the R1 repro with `openurl`, the full mini_client run (`-23379`), the full sandbox run (`-25721`), the R3 mutation (`-29147`) and the R1 negative (`-30013`).
+  - None was left over at either resume, and `xcrun simctl list devices | grep -c mc-T-0033` → `0` at the end.
+- **Verdict:** **PASS**. Every T-0033 AC passes, R1 to R3 are fixed and each fix has a test that fails without it, and every gate is green. There is one remaining gap, G1 (below), which is tooling and not a blocker.
+
+### 1. R1 in the running app: FIXED
+- **Repro with hard assertions, on the sim.** `verifier_r1_repro_test` ([source](verifier/reverify3/r1_probe_mini/verifier_r1_repro_test.dart.txt), [log](verifier/reverify3/r1_probe_mini/e2e-verifier_r1_repro_test.log)).
+  - Steps: home → Characters (the flow on screen) → `miniclient://app/placeholder/43` → `miniclient://app/characters/8`.
+  - Each link goes through **`dart:ui` `channelBuffers.push('flutter/navigation', …)`**, the path `PlatformDispatcher.onPlatformMessage` takes for an engine message. The payload is `{location}` only, as iOS sends it.
+  - Result: `placeholder/43 shown: location=miniclient://app/placeholder/43`, then `characters/8 shown: location=miniclient://app/characters/8`, so both routes show ([placeholder 43](verifier/reverify3/r1_probe_mini/r3_01_placeholder_43_after_flow.png), [character 8](verifier/reverify3/r1_probe_mini/r3_02_character_8_after_flow.png)).
+- **My earlier probes, unchanged.** These are what found R1.
+  - mini_client `verifier_warm_link_test`: from the list, `placeholder/43` gives `text=1` and `characters/8` gives `text=1`. Before, both were `0`.
+  - Sandbox `verifier_warm_own_link_test`: `miniclientuniverse://app/characters/6` gives `details=1`, and the plain path `/characters/7` gives `text7=1` ([screenshot](verifier/reverify3/sandbox/rv_04_sandbox_warm_probe.png)).
+  - Sandbox `verifier_foreign_link_test` now passes end to end. With live links working, its refusals carry weight: `miniclient://app/…`, `https://example.com/…` and `miniclientuniverse://other/…` show no details, and the own scheme then opens details 6.
+- **The engineer's e2e tests:** `characters_link_after_flow_test` (mini_client) and `characters_sandbox_link_after_flow_test` both PASS ([06_link_after_flow](verifier/reverify3/mini_client/06_link_after_flow.png): "Placeholder detail 42" over the list; [03_sandbox_link_after_flow](verifier/reverify3/sandbox/03_sandbox_link_after_flow.png): "Character details 100486").
+- **Is `pushLink` faithful?** `mc_e2e_utils.pushLink` uses `defaultBinaryMessenger.handlePlatformMessage('flutter/navigation', pushRouteInformation{location, state: null})`.
+  - **It is faithful for the Dart side, which is where R1 lived.** It calls whichever handler is currently registered on `flutter/navigation`, and flow_builder had replaced that handler. My `channelBuffers` probe, without `state` and through the engine-facing buffer, behaves the same.
+  - It does **not** exercise the native leg: Info.plist's URL scheme and `FlutterDeepLinkingEnabled`, the scene delegate's `openURL`, and the engine encoding the call.
+- **Real delivery path: none.**
+  - While the app was running, the probe signalled readiness and the runner ([script](verifier/reverify3/r1_probe_mini/run_openurl_probe.sh.txt), [log](verifier/reverify3/logs/run_openurl_probe.log)) ran `xcrun simctl openurl <udid> miniclient://app/placeholder/44`, which returned exit 0.
+  - The app never received the link (`reached the app: false`). [`r3_03_simctl_after_openurl.png`](verifier/reverify3/r1_probe_mini/r3_03_simctl_after_openurl.png) shows SpringBoard's **"Open in “Mini Client”?" Cancel / Open** alert over "Character details 8", exactly F-0020.
+  - The file-drop hook only covers cold start, so the native leg of a live link stays unverified on the simulator. This is **G1** (P-042).
+- **On-device negative.** Stock `flow_builder-0.1.0/lib/flow_builder.dart` swapped into the scratch copy only: `characters_link_after_flow_test` **FAILs** ("Timed out … waiting for the linked placeholder", exit 1; [log](verifier/reverify3/logs/r1-neg.out)).
+
+### 2. `links_after_flow_test` (un-skipped): PASS, and it fails without the fix
+- `test --nocache_test_results //app/mini_client:links_after_flow_test` → PASS ([log](verifier/reverify3/logs/r3-laf.log)). There is no `skip:` left. The comment at `app/mini_client/BUILD.bazel:130` still says "skipped until T-0035" (N1).
+- **Revert only the T-0035 hunk** (`case 'pushRouteInformation': return _pushRouteInformation(…)`) → **FAIL** ([log](verifier/reverify3/logs/r3-laf-revert-hunk.log)).
+- **The whole stock upstream file** → **FAIL** ([log](verifier/reverify3/logs/r3-laf-upstream.log)).
+- The vendored file was restored, and `git status` is clean.
+- The vendored lib differs from pub.dev's 0.1.0 by exactly `0001-forward-pushRouteInformation.patch`: the new case, `default → false`, the intercepted pop answering `true`, and `_pushRouteInformation`.
+
+### 3. R2: FIXED
+My earlier probe, rerun ([log](verifier/reverify3/logs/r3-probe-detach.log)):
+- attach r1, resolve the navigator, then detach and dispose r1, then attach r2.
+- Result: the same navigator instance, `second.location=/characters/9`, "Character details 9" shown, and pop returns to `/characters`.
+- After a final detach, `openCharacter` throws the clear `StateError`.
+
+The navigator now holds `RouterRef` and reads `.router` per call (`characters_list_navigator_impl.dart`). The engineer's test "pushes to the live router after the router was replaced" passes, and the mutation that restores first-router caching is killed.
+
+### 4. R3: FIXED
+- `characters_sandbox_link_test` (file drop `miniclientuniverse://app/characters/<id>`) PASS on the sim ([02_sandbox_start_link](verifier/reverify3/sandbox/02_sandbox_start_link.png): back arrow, "Character details 100486").
+- **On-device mutation:** with `links.offer(link)` commented out in the scratch copy's sandbox `main.dart`, the test **FAILs** (timed out, exit 1; [log](verifier/reverify3/logs/r3-mut.out)).
+
+### 5. Merge review: clean
+- **`MODULE.bazel.lock` vs main df117bd**, structural JSON diff ([log](verifier/reverify3/logs/module-lock-vs-main.txt)):
+  - Only **added** repos: `pub_deps__{integration_test,flutter_driver,platform,process,sync_http,webdriver}` and their android and facts entries.
+  - **76** `packages` / `lock_packages` lists gain exactly those 6 names and lose none.
+  - One `recordedInputs` entry changes: the `pubspec.lock` hash.
+  - No version or sha256 of an existing repo changed.
+- **`pubspec.lock` vs main:** it adds only `flutter_driver`, `fuchsia_remote_debug_protocol`, `integration_test` (SDK), `platform 3.2.0`, `process 5.0.6`, `sync_http 0.3.1` and `webdriver 3.2.0`.
+- **`fvm flutter pub get --enforce-lockfile`:** exit 0, "Got dependencies!", and the tree stays clean ([log](verifier/reverify3/logs/r3-pubget.log)).
+
+### 6. Gates, mutations and the full e2e
+- **`T-0033-AC5_gates.sh`:** **PASS**, all 8 gates (uncached T-0033 tests, then `test //...` at **84/84**; lint; `mc_arch_check`; `rules_fork.sh check`; format; `l10n_check`; fixtures closure; both `--config=sim` app builds) ([report](verifier/reverify3/T-0033-AC5_gates.md)).
+  - `universe_wiring` now depends on `app_core` in production (for `RouterRef`). That fits plan 01 §4.2, where wirings reach other groups through `app_core`, and the arch check passes.
+- **`documents/evidence/T-0033/engineer/mutations.sh`:** **9/9 killed** ([log](verifier/reverify3/logs/mutations.log)). Its "push becomes go" mutation (`_routerRef.router.go(` inside `unawaited`) does not compile, because `go` returns `void`, so it is killed by a build failure rather than a test (N2).
+- **My own mutations** (private script, [logs](verifier/reverify3/logs/)): push→go at test level (`unawaited(Future.sync(() => …go(…)))`), the wrong id, and `AppLocations.character` → `/character/$id` were all **killed** by `routes_test` test failures.
+- **Full e2e via `tool/e2e_ios.sh`, all targets:**
+  - **mini_client 4/4 PASS:** journey 24 s, deep link 30 s, link-after-flow 19 s, and my warm probe 33 s ([summary](verifier/reverify3/mini_client/e2e-summary.md)).
+  - **sandbox 6/6 PASS:** sandbox 23 s, start link 18 s, link-after-flow 31 s, and my cold, foreign and warm probes ([summary](verifier/reverify3/sandbox/e2e-summary.md)).
+
+### Screenshots (all ≤ 1200 px, viewed)
+| File | What is visible |
+|---|---|
+| `reverify3/mini_client/01_home.png` | home, `Config: env=e2e`, Characters / Open placeholder 7 |
+| `reverify3/mini_client/02_characters_list.png` | the grid **now with a back arrow** (T-0034 fixed D5), and shorter cards (the subtitle reserve is gone) |
+| `reverify3/mini_client/03_preview.png` | "Amber Alchemist" preview, "See full profile" |
+| `reverify3/mini_client/04_full_profile_placeholder.png` | "Character details 100486" |
+| `reverify3/mini_client/05_deep_link_characters.png` | the grid as the start screen, no back arrow (cold link) |
+| `reverify3/mini_client/06_link_after_flow.png` | "Placeholder 42 / Deep link: miniclient://app/placeholder/42", reached from the list |
+| `reverify3/sandbox/01_sandbox_characters.png` | the sandbox grid with art |
+| `reverify3/sandbox/02_sandbox_start_link.png` | "Character details 100486" (file-drop start link) |
+| `reverify3/sandbox/03_sandbox_link_after_flow.png` | "Character details 100486" (live link over the list) |
+| `reverify3/sandbox/rv_04_sandbox_warm_probe.png` | "Character details 7" (plain-path live link) |
+| `reverify3/r1_probe_mini/r3_01…`, `r3_02…` | "Placeholder detail 43", then "Character details 8" |
+| `reverify3/r1_probe_mini/r3_03_simctl_after_openurl.png` | the SpringBoard "Open in “Mini Client”?" alert (G1) |
+
+### Issues at 6a3692b
+1. **G1 (minor, tooling; P-042)**: the harness has no real path for a link to a running app. `simctl openurl` stops at SpringBoard's prompt (screenshot above), so the native leg of live deep links isn't verified on the simulator. The Dart side is covered by `pushRouteInformation` on `flutter/navigation`, through both the registered handler and `channelBuffers`. No new tooling was built, as instructed.
+2. **N1 (nit)**: `app/mini_client/BUILD.bazel:130` still reads "R1 regression (skipped until T-0035)". The test is no longer skipped.
+3. **N2 (nit)**: in `documents/evidence/T-0033/engineer/mutations.sh`, "push becomes go" is killed by a compile error, not a test. The script also writes a fixed `/tmp/mc-mut.log`, so two runs at once would collide. The test-level variant is killed (above).
+
+### Process note: shared scratchpad
+- The session scratchpad is shared between fleet agents. My first-round helper `scratchpad/mut.sh` had been overwritten by the T-0035 Verifier's script, which targets `.claude/worktrees/agent-a2fe366999ee7848d`.
+- When I invoked it once by name (21:33), its argument handling failed before any test ran. Its "restore" step then copied `scratchpad/flow_builder.patched.dart` onto that worktree's `third_party/flow_builder/lib/flow_builder.dart`.
+- A read-only `cmp` afterwards shows that file is **byte-identical to the committed vendored file**, so its content is what its HEAD holds. I made no other change there.
+- After that I used only `scratchpad/verifier-T0033-r3/`. The fleet should give each agent its own scratch subdirectory.
