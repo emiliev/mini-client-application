@@ -1,6 +1,6 @@
 # T-0042-AC1: the analyzer on a fresh clone, before and after tool/ide_sync
 
-Fresh clone of `ef5f85b37c986525e5b03c03e353cf623d2a0f0b`, workspace packages: `app feature utility spike third_party tool/l10n_check tool/mc_arch_check`.
+Fresh clone of `bc961e8eb9f9a7c90885141e1741f7ea5ce2456a`, workspace packages: `app feature utility spike third_party tool/l10n_check tool/mc_arch_check`.
 
 ## Before the sync: 176 errors, 11 warnings
 ```
@@ -24,7 +24,7 @@ Examples:
 
 - before: errors about missing generated parts, as expected
 
-## tool/ide_sync --env dev (fresh output base, warm disk cache): exit 0 in 11 s
+## tool/ide_sync --env dev (fresh output base, warm disk cache): exit 0 in 9 s
 ```
 ide_sync: wrote app/sandbox/universe_sandbox/assets/app_config.json
 ide_sync: flutter create --platforms=ios for mini_client (Xcode project, git-ignored)

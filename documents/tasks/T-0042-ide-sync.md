@@ -82,3 +82,4 @@ Bazel generates all codegen into `bazel-bin/`, and nothing generated is committe
 9. The `manual` tag is matched as a whole tag (`T-0042-AC3` step e, real Bazel: `manual_check` is synced, `manual` is not).
 10. `ide_sync` reads `MC_GENERATED_DART` from `tool/bazel/defs.bzl` for its sync filter and the watch filter (so a hand-named `lib/src/app.config.dart` is a source; test 16 and 20).
 Each fix was mutation-checked: reverting it makes its test fail (`review_mutations.txt`; item 9 by hand: the unanchored regex fails AC3 step e).
+A fifth finding of the round (not in the review): `cquery` can name another configuration after a `bazel test`; `ide_sync` now reads the outputs from the build event stream (F-0041 fact 5; `T-0042-AC3` step 0 runs a test first).

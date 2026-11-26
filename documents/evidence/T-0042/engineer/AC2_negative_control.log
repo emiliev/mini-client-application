@@ -15,7 +15,7 @@ Downloading packages...
 Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-afd656b434c84427a`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
-Launching lib/main.dart on mc-T-0042-engineer-31879 in debug mode...
+Launching lib/main.dart on mc-T-0042-engineer-55214 in debug mode...
 Running Xcode build...                                          
 Xcode build done.                                            3.8s
 Failed to build iOS app
@@ -27,7 +27,7 @@ Error output from Xcode build:
 Xcode's output:
 ↳
     Writing result bundle at path:
-    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.uHQDeF/flutter_ios_build_temp_dirpIhuRa/temporary_xcresult_bundle
+    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.ACj7x1/flutter_ios_build_temp_dir2BinOE/temporary_xcresult_bundle
 
     No file or variants found for asset: assets/app_config.json.
 
@@ -38,4 +38,4 @@ Xcode's output:
     note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
 
 Could not build the application for the simulator.
-Error launching application on mc-T-0042-engineer-31879.
+Error launching application on mc-T-0042-engineer-55214.
