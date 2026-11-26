@@ -1,0 +1,83 @@
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:comics_details/src/domain/model/character_id.dart';
+import 'package:comics_details/src/domain/model/comic.dart';
+import 'package:comics_details/src/domain/model/creator_id.dart';
+import 'package:comics_details/src/domain/repository/comics_details_repository.dart';
+import 'package:comics_details/src/flow/comics_details_flow_state.dart';
+import 'package:comics_details/src/navigator/comics_details_navigator.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:injectable/injectable.dart';
+import 'package:mc_api_errors/mc_api_errors.dart';
+import 'package:mc_bloc_kit/mc_bloc_kit.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
+
+part 'comic_details_bloc.freezed.dart';
+part 'comic_details_event.dart';
+part 'comic_details_state.dart';
+
+/// The details page's bloc: loads the comic the flow opened on (and its
+/// cast), opens its cover inside the flow, and hands a tapped character or
+/// creator over to the app through the navigator, which only blocs call
+/// (plan 01 §4.1).
+///
+/// Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never
+/// Flutter, so every generator that reads it runs on analyzer summaries.
+@injectable
+final class ComicDetailsBloc
+    extends McBloc<ComicDetailsEvent, ComicDetailsState> {
+  ComicDetailsBloc(
+    this._repository,
+    this._flow,
+    this._navigator,
+    Monitoring monitoring,
+  ) : super(const ComicDetailsState.loading(), monitoring: monitoring) {
+    on<ComicDetailsEvent>(_onEvent);
+    add(const ComicDetailsEvent.load());
+  }
+
+  final ComicsDetailsRepository _repository;
+  final FeatureFlowController<ComicsDetailsFlowState> _flow;
+  final ComicsDetailsNavigator _navigator;
+
+  /// True while a load is in flight: a second Retry tap does not start a
+  /// second request.
+  bool _loading = false;
+
+  Future<void> _onEvent(
+    ComicDetailsEvent event,
+    Emitter<ComicDetailsState> emit,
+  ) async {
+    switch (event) {
+      case _Load():
+        if (_loading) {
+          return;
+        }
+        _loading = true;
+        try {
+          emit(const ComicDetailsState.loading());
+          final result = await _repository.fetchComic(_flow.state.comicId);
+          emit(
+            result.fold(
+              ComicDetailsState.success,
+              (failure) => failure is ApiNotFound
+                  ? const ComicDetailsState.notFound()
+                  : ComicDetailsState.failure(failure),
+            ),
+          );
+        } finally {
+          _loading = false;
+        }
+      case _OpenCover():
+        // One cover page at a time, and only for a loaded comic.
+        if (state case _Success(:final comic) when _flow.state.cover == null) {
+          _flow.update((s) => s.copyWith(cover: comic));
+        }
+      case _OpenCharacter(:final id):
+        _navigator.openCharacter(id);
+      case _OpenCreator(:final id):
+        _navigator.openCreator(id);
+    }
+  }
+}

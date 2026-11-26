@@ -1,0 +1,379 @@
+# T-0041 (P1-18): `comics_details`, the SC exemplar feature (plan 01 §3.3).
+# Phase D's buildgen emits this file; until then it is written by hand. It has
+# the shape of characters_list's (T-0032), the LD exemplar.
+# No per-package analysis_options.yaml: the root file applies (F-0021).
+#
+# Every generator runs as a Bazel action; nothing generated is committed:
+#   freezed      comic, comic_dto, flow state, both bloc states
+#   json         comic_dto                      (over its freezed output)
+#   retrofit     comics_details_api             (fork patch 0001)
+#   injectable   4 shards + di_initializer.config.dart (fork patch 0002)
+#   gen-l10n     lib/src/l10n/comics_details_l10n*.dart
+#   BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
+#
+# Staging (plan 03 §3.4, §4.7). Generators read only Flutter-free libraries
+# (R15): `_stage` holds the hand-written pure files. Two lanes are narrower so
+# that a body edit in a bloc re-runs neither the retrofit part nor the
+# injectable aggregate (T-0041-AC7):
+#   - the retrofit and json actions see only the DTO file and its freezed
+#     output (`_stage_dto`), never `_stage`;
+#   - the injectable aggregate sees only the init file and the shards; a bloc
+#     edit re-runs the shards (all of them, F-0028 §5) but they come out
+#     byte-identical, so the aggregate is an action-cache hit.
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_package")
+load("@rules_flutter//flutter:defs.bzl", "flutter_gen_l10n", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "mc_bdd_tests")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "comics_details"
+
+_LANG = "3.13"  # the pubspec floor; codegen equals build_runner only with it (F-0011)
+
+_INIT = "lib/src/di/di_initializer.dart"
+
+# Pure-Dart deps of the hand-written, generator-read files.
+_PURE_DEPS = [
+    "//utility/mc_api_client",
+    "//utility/mc_api_errors",
+    "//utility/mc_bloc_kit",
+    "//utility/mc_di",
+    "//utility/mc_event_bus",
+    "//utility/mc_formatters",
+    "//utility/mc_media",
+    "//utility/mc_monitoring",
+    "//utility/mc_prelude",
+    "//utility/mc_session",
+    "@pub_deps//:bloc",
+    "@pub_deps//:dio",
+    "@pub_deps//:freezed_annotation",
+    "@pub_deps//:get_it",
+    "@pub_deps//:injectable",
+    "@pub_deps//:json_annotation",
+    "@pub_deps//:retrofit",
+]
+
+# The Flutter-free hand-written files: domain, navigator, flow state, blocs and
+# the root-import list. Pages, widgets, the flow widget and l10n are Flutter.
+_PURE_SRCS = glob(
+    [
+        "lib/src/di/flow_scope.dart",
+        "lib/src/domain/**/*.dart",
+        "lib/src/flow/comics_details_flow_state.dart",
+        "lib/src/navigator/**/*.dart",
+        "lib/src/presentation/bloc/**/*.dart",
+    ],
+    exclude = [
+        "**/*.g.dart",
+        "**/*.freezed.dart",
+    ],
+)
+
+# Generator input only (V3-18): never a dep of the package library or a test.
+dart_library(
+    name = "_stage",
+    package_name = _PKG,
+    srcs = _PURE_SRCS,
+    language_version = _LANG,
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
+    deps = _PURE_DEPS,
+)
+
+# --- freezed ----------------------------------------------------------------
+_FREEZED = {
+    "comic": "lib/src/domain/model/comic.dart",
+    "comic_dto": "lib/src/domain/model/comic_dto.dart",
+    "flow_state": "lib/src/flow/comics_details_flow_state.dart",
+    "details_bloc": "lib/src/presentation/bloc/comic_details_bloc.dart",
+    "favourite_bloc": "lib/src/presentation/bloc/comic_favourite_bloc.dart",
+}
+
+[dart_codegen(
+    name = "_%s_freezed" % name,
+    package_name = _PKG,
+    src = src,
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    language_version = _LANG,
+    output_suffixes = [".freezed.dart"],
+    # The DTO imports only annotations, so its lane stays narrow.
+    deps = [
+        "@pub_deps//:freezed_annotation",
+        "@pub_deps//:json_annotation",
+    ] if name == "comic_dto" else [":_stage"],
+) for name, src in _FREEZED.items()]
+
+# --- comic_dto: json over the freezed output --------------------------------
+dart_library(
+    name = "_stage_dto",
+    package_name = _PKG,
+    srcs = [
+        "lib/src/domain/model/comic_dto.dart",
+        ":_comic_dto_freezed",
+    ],
+    language_version = _LANG,
+    # The json part comes in the next stage, so this library doesn't analyze.
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
+    deps = [
+        "@pub_deps//:freezed_annotation",
+        "@pub_deps//:json_annotation",
+    ],
+)
+
+dart_codegen(
+    name = "_comic_dto_json_part",
+    package_name = _PKG,
+    src = "lib/src/domain/model/comic_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/json_serializable:shim",
+    language_version = _LANG,
+    output_suffixes = [".json_serializable.g.part"],
+    deps = [":_stage_dto"],
+)
+
+dart_codegen(
+    name = "_comic_dto_g",
+    package_name = _PKG,
+    src = "lib/src/domain/model/comic_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    language_version = _LANG,
+    output_suffixes = [".g.dart"],
+    parts = [":_comic_dto_json_part"],
+)
+
+# --- comics_details_api: retrofit (fork patch 0001) -------------------------
+dart_codegen(
+    name = "_comics_details_api_retrofit_part",
+    package_name = _PKG,
+    src = "lib/src/domain/api/comics_details_api.dart",
+    generator_bin = "@rules_dart//dart/ext/retrofit:shim",
+    language_version = _LANG,
+    output_suffixes = [".retrofit.g.part"],
+    deps = [
+        ":_stage_dto",
+        "@pub_deps//:dio",
+        "@pub_deps//:injectable",
+        "@pub_deps//:retrofit",
+    ],
+)
+
+dart_codegen(
+    name = "_comics_details_api_g",
+    package_name = _PKG,
+    src = "lib/src/domain/api/comics_details_api.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    language_version = _LANG,
+    output_suffixes = [".g.dart"],
+    parts = [":_comics_details_api_retrofit_part"],
+)
+
+# --- injectable (fork patch 0002) -------------------------------------------
+injectable_package(
+    name = "di_config",
+    srcs = [
+        "lib/src/domain/api/comics_details_api.dart",
+        "lib/src/domain/repository/comics_details_repository.dart",
+        "lib/src/presentation/bloc/comic_details_bloc.dart",
+        "lib/src/presentation/bloc/comic_favourite_bloc.dart",
+    ],
+    init = _INIT,
+    init_deps = [
+        "//utility/mc_di",
+        "//utility/mc_formatters",
+    ],
+    language_version = _LANG,
+    package_name = _PKG,
+    shard_deps = [":_stage"],
+)
+
+# --- gen-l10n ---------------------------------------------------------------
+# Outputs land beside the ARBs; the rule ignores l10n.yaml, so these attributes
+# mirror it (IDE / pub path: `flutter: generate: true`, F-0023).
+flutter_gen_l10n(
+    name = "_l10n",
+    arbs = glob(["lib/src/l10n/*.arb"]),
+    nullable_getter = False,
+    output_class = "ComicsDetailsL10n",
+    output_localization_file = "comics_details_l10n.dart",
+    template_arb_file = "comics_details_en.arb",
+)
+
+filegroup(
+    name = "arbs",
+    srcs = glob(["lib/src/l10n/*.arb"]),
+    visibility = ["//tool/l10n_check:__pkg__"],
+)
+
+_CODEGEN = [
+    ":_comic_freezed",
+    ":_comic_dto_freezed",
+    ":_comic_dto_g",
+    ":_comics_details_api_g",
+    ":_flow_state_freezed",
+    ":_details_bloc_freezed",
+    ":_favourite_bloc_freezed",
+    ":di_config",
+    ":_l10n",
+]
+
+# --- the package library ----------------------------------------------------
+_FLUTTER_DEPS = [
+    "//utility/mc_ds_buttons",
+    "//utility/mc_ds_cards",
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_media",
+    "//utility/mc_ds_navigation",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "//utility/mc_feature_flow",
+    "//utility/mc_l10n_core",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_bloc",
+    "@pub_deps//:flutter_localizations",
+    "@pub_deps//:intl",
+]
+
+flutter_library(
+    name = "comics_details",
+    srcs = glob(
+        ["lib/**/*.dart"],
+        # `fvm flutter pub get` writes the l10n outputs beside the ARBs for
+        # the IDE; Bazel builds its own copies (:_l10n).
+        exclude = [
+            "lib/src/l10n/*_l10n*.dart",
+            "**/*.g.dart",
+            "**/*.freezed.dart",
+            "**/*.config.dart",
+        ],
+    ) + _CODEGEN,
+    language_version = _LANG,
+    package_name = _PKG,
+    visibility = ["//visibility:public"],
+    deps = _PURE_DEPS + _FLUTTER_DEPS,
+)
+
+# --- tests (R6: BDD + contract + l10n + golden; no solitary unit tests) -----
+_TEST_DEPS = [
+    "//utility/mc_api_auth",
+    "//utility/mc_di",
+    "//utility/mc_ds_cards",
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_media",
+    "//utility/mc_ds_navigation",
+    "//utility/mc_event_bus",
+    "//utility/mc_feature_flow",
+    "//utility/mc_fixtures_characters",
+    "//utility/mc_fixtures_comics",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_media",
+    "//utility/mc_mocked_backend",
+    "//utility/mc_session",
+    "@pub_deps//:dio",
+    "@pub_deps//:mocktail",
+]
+
+mc_bdd_tests(
+    name = "bdd_test",
+    data = ["//utility/mc_fixtures_media:asset_files"],
+    features = glob(["test/feature/*.feature"]),
+    language_version = _LANG,
+    lib = ":comics_details",
+    package_name = _PKG,
+    setup = "test/feature/util/comics_details_env.dart",
+    steps = glob([
+        "test/feature/step/**/*.dart",
+        "test/feature/util/*.dart",
+    ]),
+    deps = _TEST_DEPS,
+)
+
+# The DTOs against the fixture JSON (the one src/ importer, R7).
+flutter_test(
+    name = "contract_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/comics_details_api_contract_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":comics_details",
+        "//utility/mc_fixtures_characters",
+        "//utility/mc_fixtures_comics",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_formatters",
+        "//utility/mc_media",
+        "//utility/mc_mocked_backend",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R17: the hand-written root imports resolve every registration of the flow.
+flutter_test(
+    name = "flow_scope_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    language_version = _LANG,
+    main = "test/flow_scope_test.dart",
+    package_name = _PKG,
+    deps = _TEST_DEPS + [
+        ":comics_details",
+        "//utility/mc_monitoring",
+        "//utility/mc_storage",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ] + glob(["test/golden/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden/comics_details_golden_test.dart",
+    package_name = _PKG,
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS + [
+        ":comics_details",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R4 and R15 conformance. The list of generator-read files is written from the
+# same glob as :_stage, so the check cannot drift from the staging library.
+genrule(
+    name = "_pure_srcs_list",
+    outs = ["test/architecture/pure_srcs.txt"],
+    cmd = "cat > $@ <<'EOF'\n" + "\n".join(_PURE_SRCS) + "\nEOF",
+)
+
+dart_test(
+    name = "architecture_test",
+    size = "small",
+    data = [
+        "lib/comics_details.dart",
+        ":_pure_srcs_list",
+    ] + _PURE_SRCS,
+    language_version = _LANG,
+    main = "test/architecture/architecture_test.dart",
+    package_name = _PKG,
+    deps = ["@pub_deps//:test"],
+)
