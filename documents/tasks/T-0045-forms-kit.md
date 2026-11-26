@@ -45,3 +45,45 @@ The form and wizard kit for the FW exemplar (P1-20, `library_reading_list_editor
 
 ## Log
 - 2026-11-26: Created and dispatched (TL).
+- 2026-11-26: Engineer: `mc_forms` first (pure Dart, no mixins; validators, `FieldState`, `McFormState`, `FormController`, `WizardController`), then `mc_ds_forms` on a merge of the T-0044 WIP branch (`McTextField` from `mc_ds_inputs`). One real survivor round per package (equivalent mutants removed, five tests added, one dead guard deleted). Handoff.
+
+## Outcome
+**Handed off** for verification on `fleet/T-0045-forms-kit`. Evidence: `documents/evidence/T-0045/engineer/` (gates, closure and layering report, full mutation run, mutation scripts). Design record and gotchas: [F-0045](../findings/F-0045-forms-kit-design.md).
+
+### AC to test map
+| AC | Tests (names contain the ID) |
+|---|---|
+| AC1 | `//utility/mc_forms:validators_test` (every rule at its boundary, empty and null, each composition, `matches` and `requiredWhen`, typed codes, `FieldDef` order); `form_controller_test` (cross-field error follows the other field) |
+| AC2 | `//utility/mc_forms:wizard_controller_test` (errors per step, invalid step blocks `next` and touches only its fields, `back` restores values and touched, complete once, double complete one run, jump to first invalid step, failure and retry, dispose); `form_controller_test` (submit once, double submit, failure, `Error` propagates) |
+| AC3 | `//utility/mc_ds_forms:forms_test` (Next disabled on an invalid step and the error under the field after blur, busy blocks taps, "Step n of m" announced as a live region, errors announced, 44 pt targets and the three `meetsGuideline` checks, no overflow at 1x, 2x, 3x with long German labels); `//utility/mc_ds_forms:golden_test` (7 components x 4 themes x 2 scales = 56 goldens) |
+| AC4 | `//utility/mc_forms:purity_test`; `tool/checks/T-0045-AC4_closure_layering.sh` ([report](../evidence/T-0045/engineer/AC4_closure_layering.md), with positive and negative controls); `tool/checks/T-0045-AC4_gates.sh` ([report](../evidence/T-0045/engineer/gates.md)) |
+
+### Gates
+`test //...` 119/119; `build --config=lint //...`; `mc_arch_check`; `rules_fork.sh check`; `dart format`; `l10n_check`; fixtures closure (T-0031-AC6); closure and layering (T-0045-AC4): all PASS. Coverage (union of per-target LCOV): `mc_forms` 246/246 = 100 %, `mc_ds_forms` 143/143 = 100 %. Mutations: 96 (63 + 6 for `mc_forms`, 27 for `mc_ds_forms`), all killed; `documents/evidence/T-0045/engineer/mutations.sh` (with `mutations_ds.sh`) refuses a dirty tree. Locks are unchanged: first-party packages are not in `pubspec.lock`, and `MODULE.bazel.lock` did not change.
+
+### Public API
+**`package:mc_forms/mc_forms.dart`** (pure Dart, no mixins; depends on `mc_api_errors` and `mc_prelude`)
+- `ValidationCode` (enum: `required`, `tooShort`, `tooLong`, `patternMismatch`, `belowMin`, `aboveMax`, `mismatch`, `invalid`) and `FieldError(code, {min, max})`.
+- `Validator<T>`, `CrossValidator<T>`, `FieldSpec`, `FieldDef<T>(name, {initial, validators, crossValidators})`.
+- `Validators`: `required`, `minLength`, `maxLength`, `pattern`, `range`, `compose`, and the cross-field `matches(otherField)`, `requiredWhen(condition)`.
+- `FieldState<T>` (`value`, `initial`, `error`, `touched`, `dirty`, `visibleError`), `McFormState` (`fields`, `isValid`, `errors`, `visibleErrors`, `values`, `submitStatus`, `submitFailure`, `submitResult`), `SubmitStatus`, `FormValues` (`get<T>(name)`).
+- `FormController({fields, onState})`: `setValue`, `touch`, `touchAll({names})`, `reset`, `submit<R>(action)` returning `Result<R, ApiFailure>?` (null when invalid, already submitting or disposed), `dispose`. `SubmitAction<R>`.
+- `WizardStep(id, {fields})`, `WizardController<R>({steps, onState, onComplete})`: `setValue`, `touch`, `next()`, `back()`, `complete()`, `dispose`; `WizardState<R>`: `stepIndex`, `stepCount`, `stepId`, `isFirst`, `isLast`, `stepErrors(i)`, `isStepValid(i)`, `isCurrentStepValid`, `canGoNext`, `canGoBack`, `canComplete`, `isCompleting`, `isCompleted`, `result`, `failure`, `form`.
+
+**`package:mc_ds_forms/mc_ds_forms.dart`** (Flutter; no `mc_feature_flow`)
+- `McFormScaffold({body, submitLabel, busyLabel, onSubmit, isSubmitting, errorText, appBar})`: scrolling body, sticky bar (enabled, disabled, busy, error).
+- `McWizardStepper({currentStep, stepCount, stepLabel, backLabel, nextLabel, onBack, onNext})` and `McWizardStepper.fromState(WizardState, {stepLabel, backLabel, nextLabel, finishLabel, onBack, onNext})`.
+- `McFieldGroup({title, description, children})`, `McFormTextField({field, label, onChanged, onTouched, errorMessage, ...})` over `McTextField`; `McErrorMessage`, `McStepLabel` typedefs.
+
+### Deviations and decisions for the TL
+1. **`McFormState`, not `FormState`** (name clash with Flutter's; F-0045 item 1).
+2. **`mc_forms` depends on `mc_api_errors` and `mc_prelude`, not `mc_bloc_kit`** (as `mc_paging`): the controllers take an `onState` callback, and `submit` / `complete` use `Result<R, ApiFailure>` like `PageFetcher`.
+3. **Wizard Next is disabled when invalid** (AC3), so the "next doesn't advance and the errors become visible" path (AC2) is reached through the controller (`next()`), and through blur and `complete()` in the UI. A feature that wants the tap to reveal errors can pass an `onNext` that calls `next()` and stay enabled; the stepper does not forbid it.
+4. **`mc_ds_forms` is built on a merge of `fleet/T-0044-ds-inputs` at `8255837` (WIP).** T-0044 was not on `main`. Once it merges, `git merge origin/main` removes the difference; only `McTextField` is used. The workspace `pubspec.yaml` conflict (adjacent lines) was resolved by keeping both entries.
+5. **Own layering and closure script** (`tool/checks/T-0045-AC4_closure_layering.sh`) rather than editing `T-0040-AC3_layering.sh`: T-0044 also extends that one, and two edits would conflict. It scans the same things for `mc_ds_forms` and adds the `mc_forms` purity closure with negative controls.
+6. No tests deleted, skipped or weakened; no `// ignore:`; no golden updated from an earlier state (all 56 are new). The findings index (`findings/README.md`) is not updated (TL-owned); F-0045 is new.
+
+### Follow-ups
+- `mc_ds_forms` has one bound widget (`McFormTextField`); bound switches, chips and steppers (over `mc_ds_inputs`) come when the FW exemplar needs them.
+- Async validators and date fields are out of scope, as written.
+
