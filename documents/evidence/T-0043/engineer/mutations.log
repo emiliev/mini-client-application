@@ -1,0 +1,69 @@
+baseline PASS
+=== T1 tier order reversed
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== T2 tier ignored in the ranking
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== T3 exact tier removed (exact counts as prefix)
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== T4 prefix tier removed (prefix counts as word-prefix)
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== T5 word-prefix tier removed (counts as substring)
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== T6 substring tier removed (counts as word-prefix)
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== T7 word boundary not checked
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== T8 a later boundary occurrence is not looked for
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== B1 title tie-break removed
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== B2 title compared folded, not as written
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== B3 type tie-break removed
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== B4 id tie-break removed
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== B5 id tie-break descending
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== F1 case not folded
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== F2 diacritics not folded
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== F3 combining marks kept
+    KILLED by: //utility/mc_fixtures_discovery:ranking_test 
+=== F4 whitespace not collapsed
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:ranking_test //utility/mc_fixtures_discovery:search_test 
+=== H1 groups follow the order of types
+    KILLED by: //utility/mc_fixtures_discovery:search_test 
+=== H2 total counts only the page
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H3 minimum query length 1
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H4 q not trimmed
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H5 unknown types accepted
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H6 limit upper bound off by one
+    KILLED by: //utility/mc_fixtures_discovery:search_test 
+=== H7 limit lower bound off by one
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H8 suggestions give 6
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H9 suggestions repeat a title
+    KILLED by: //utility/mc_fixtures_discovery:search_test 
+=== H10 server_error set body differs from the scenario
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test 
+=== H11 query echoed in lower case
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== H12 default limit 10
+    KILLED by: //utility/mc_fixtures_discovery:search_test 
+=== D1 empty set serves the full index
+    KILLED by: //utility/mc_fixtures_discovery:fixture_sets_test 
+=== D2 comic thumbnail is the wrong image
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test 
+=== D3 character index skips the last half
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+=== D4 comics index missing
+    KILLED by: //utility/mc_fixtures_discovery:provider_contract_test //utility/mc_fixtures_discovery:search_test 
+
+killed=33 survived=0 broken=0
