@@ -19,3 +19,9 @@ final class _Load extends ComicFavouriteEvent {
 final class _Toggle extends ComicFavouriteEvent {
   const _Toggle();
 }
+
+/// Internal: `SessionReader.authState` changed (a sign-in or a sign-out,
+/// here or anywhere else in the app).
+final class _SessionChanged extends ComicFavouriteEvent {
+  const _SessionChanged();
+}

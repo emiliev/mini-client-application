@@ -28,6 +28,10 @@ abstract class ComicDto with _$ComicDto {
     required SeriesRefDto series,
     required List<CreditDto> creators,
     required List<int> characterIds,
+
+    /// The cast, in `characterIds` order, with what a card shows (T-0041):
+    /// no request per character.
+    required List<CastMemberDto> characters,
     required PriceDto price,
     required int pageCount,
     required List<VariantDto> variants,
@@ -93,8 +97,8 @@ abstract class VariantDto with _$VariantDto {
       _$VariantDtoFromJson(json);
 }
 
-/// `GET /v1/characters/:id`, read for the cast section: only the fields a
-/// cast card needs (the detail has more, which the reader ignores).
+/// One entry of the detail's `characters`: a cast member as the characters
+/// domain serves it (`id`, `name`, `thumbnail`).
 @Freezed(fromJson: true, toJson: true)
 abstract class CastMemberDto with _$CastMemberDto {
   @JsonSerializable(explicitToJson: true)

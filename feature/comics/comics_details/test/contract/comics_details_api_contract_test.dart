@@ -29,6 +29,10 @@ const _contractExample = '''
     {"id": 300002, "name": "Bruno Castell", "role": "cover_artist"}
   ],
   "characterIds": [100001, 100002],
+  "characters": [
+    {"id": 100001, "name": "Amber Bard", "thumbnail": {"path": "mock-asset://characters/004", "variant": "portrait_medium"}},
+    {"id": 100002, "name": "Amber Cipher", "thumbnail": {"path": "mock-asset://characters/005", "variant": "portrait_medium"}}
+  ],
   "price": {"amountCents": 399, "currency": "USD"},
   "pageCount": 32,
   "variants": [
@@ -85,6 +89,17 @@ void main() {
         ),
       );
       expect(dto.characterIds, [100001, 100002]);
+      expect(
+        dto.characters.last,
+        const CastMemberDto(
+          id: 100002,
+          name: 'Amber Cipher',
+          thumbnail: ImageDto(
+            path: 'mock-asset://characters/005',
+            variant: 'portrait_medium',
+          ),
+        ),
+      );
       expect(dto.price, const PriceDto(amountCents: 399, currency: 'USD'));
       expect(dto.pageCount, 32);
       expect(dto.variants.single.label, 'Midnight');
@@ -106,7 +121,7 @@ void main() {
       final record = ComicUniverse(42).findComic(501500)!;
       final comic = ComicDto.fromJson(
         await _get('/v1/comics/501500'),
-      ).toDomain(cast: const []);
+      ).toDomain();
 
       expect(comic.id, const ComicId(501500));
       expect(comic.title, record.title);
@@ -154,24 +169,24 @@ void main() {
           (j) => j['creators'] = [
             {'id': 1, 'name': 'x', 'role': 'editor'},
           ],
-        ).toDomain(cast: const []),
+        ).toDomain(),
         throwsFormatException,
       );
       expect(
         () =>
             with_((j) => j['price'] = {'amountCents': 1, 'currency': 'XTS'})
-                .toDomain(cast: const []),
+                .toDomain(),
         throwsFormatException,
       );
       expect(
         () =>
             with_((j) => j['cover'] = {'path': 'x', 'variant': 'poster'})
-                .toDomain(cast: const []),
+                .toDomain(),
         throwsFormatException,
       );
       for (final day in ['2020-1-12', '2020-02-30', '12.01.2020', '']) {
         expect(
-          () => with_((j) => j['releaseDate'] = day).toDomain(cast: const []),
+          () => with_((j) => j['releaseDate'] = day).toDomain(),
           throwsFormatException,
           reason: day,
         );
@@ -180,47 +195,66 @@ void main() {
     });
   });
 
-  group('T-0041-AC7 CastMemberDto and FavouriteDto against the fixtures', () {
-    test('T-0041-AC7: a served character reads as a cast member', () async {
-      final record = CharacterUniverse(42, defaultMockClock).byName.first;
-      final member = CastMemberDto.fromJson(
-        await _get('/v1/characters/${record.id}'),
-      ).toDomain();
+  group(
+    'T-0041-AC7 the cast summary and FavouriteDto against the fixtures',
+    () {
+      test('T-0041-AC1: the served cast summary maps to the characters '
+          "fixture's cast, with no request per character", () async {
+        final characters = CharacterUniverse(42, defaultMockClock);
+        final comic = ComicDto.fromJson(
+          await _get('/v1/comics/501500'),
+        ).toDomain();
 
-      expect(member.id, CharacterId(record.id));
-      expect(member.name, record.name);
-      expect(member.image, record.thumbnail);
-    });
+        expect(comic.cast, hasLength(2));
+        for (final (i, member) in comic.cast.indexed) {
+          final record = characters.find(
+            ComicUniverse(42).findComic(501500)!.characterIds[i],
+          )!;
+          expect(member.id, CharacterId(record.id));
+          expect(member.name, record.name);
+          expect(member.image, record.thumbnail);
+        }
+      });
 
-    test('T-0041-AC7: the favourite answers parse for every method', () async {
-      final token = mintAccessToken(fixtureUsers.first.id, 1);
-      final options = Options(headers: {'Authorization': 'Bearer $token'});
-      const path = '/v1/me/favourites/comic/501500';
+      test(
+        'T-0041-AC7: the favourite answers parse for every method',
+        () async {
+          final token = mintAccessToken(fixtureUsers.first.id, 1);
+          final options = Options(headers: {'Authorization': 'Bearer $token'});
+          const path = '/v1/me/favourites/comic/501500';
 
-      final put = FavouriteDto.fromJson(
-        (await _dio.put<Map<String, dynamic>>(path, options: options)).data!,
+          final put = FavouriteDto.fromJson(
+            (await _dio.put<Map<String, dynamic>>(
+              path,
+              options: options,
+            )).data!,
+          );
+          expect(
+            put,
+            const FavouriteDto(kind: 'comic', id: '501500', favourite: true),
+          );
+          final get = FavouriteDto.fromJson(await _get(path, bearer: token));
+          expect(get.favourite, isTrue);
+          final delete = FavouriteDto.fromJson(
+            (await _dio.delete<Map<String, dynamic>>(
+              path,
+              options: options,
+            )).data!,
+          );
+          expect(delete.favourite, isFalse);
+          expect(
+            () => _get(path, bearer: token),
+            throwsA(
+              isA<DioException>().having(
+                (e) => e.response?.statusCode,
+                'status',
+                404,
+              ),
+            ),
+            reason: 'not a favourite is a 404',
+          );
+        },
       );
-      expect(
-        put,
-        const FavouriteDto(kind: 'comic', id: '501500', favourite: true),
-      );
-      final get = FavouriteDto.fromJson(await _get(path, bearer: token));
-      expect(get.favourite, isTrue);
-      final delete = FavouriteDto.fromJson(
-        (await _dio.delete<Map<String, dynamic>>(path, options: options)).data!,
-      );
-      expect(delete.favourite, isFalse);
-      expect(
-        () => _get(path, bearer: token),
-        throwsA(
-          isA<DioException>().having(
-            (e) => e.response?.statusCode,
-            'status',
-            404,
-          ),
-        ),
-        reason: 'not a favourite is a 404',
-      );
-    });
-  });
+    },
+  );
 }

@@ -3,8 +3,9 @@ Feature: A comic's page
   synopsis, the facts, the creators and the cast, each leading on.
 
   Background:
+    # Only the comics domain: the cast comes in the detail (T-0041), and the
+    # strict harness fails any request to a route nothing serves.
     Given the backend serves {'comics.default'}
-    And the backend serves {'characters.default'}
 
   @T-0041-AC1 @smoke
   Scenario: The comic shows its cover, title, issue and synopsis
@@ -33,15 +34,8 @@ Feature: A comic's page
     And the characters section lists the cast of comic {501500}
     And I see {'Amber Vanguard'}
     And I see {'Prism Engineer'}
-    And the backend received {1} requests for {'GET /v1/characters/100366'}
-    And the backend received {1} requests for {'GET /v1/characters/100661'}
-
-  Scenario: A character the backend no longer knows is left out of the cast
-    Given the backend fails {'GET /v1/characters/100366'} with {'not_found'}
-    When I open comic {501500}
-    And I scroll the comic to the end
-    Then I see {'Prism Engineer'}
-    And I don't see {'Amber Vanguard'}
+    And the backend received {1} requests for {'GET /v1/comics/501500'}
+    And the backend received {0} requests for {'GET /v1/characters/:id'}
 
   @T-0041-AC2
   Scenario Outline: A failed comic explains the problem and retries
@@ -62,13 +56,14 @@ Feature: A comic's page
       | 'malformed'    | 'Something went wrong.'                             |
 
   @T-0041-AC2
-  Scenario: A failed cast member fails the comic, and Retry recovers
-    Given the backend fails {'GET /v1/characters/100661'} with {'server_error'}
+  Scenario: A double Retry sends one request
+    Given the backend fails {'GET /v1/comics/501500'} with {'malformed'}
     When I open comic {501500}
     Then I see {'The comic could not be loaded'}
     When the backend recovers
-    And I tap {'Retry'}
-    Then the characters section lists the cast of comic {501500}
+    And I tap {'Retry'} twice in quick succession
+    Then I see the header of comic {501500} with its bundled cover
+    And the backend received {2} requests for {'GET /v1/comics/501500'}
 
   @T-0041-AC2
   Scenario: An unknown comic shows that it was not found

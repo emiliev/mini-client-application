@@ -25,6 +25,7 @@ class FavouriteToggle extends StatelessWidget {
         );
         final (favourite, enabled, error) = state.when(
           loading: () => (false, false, null),
+          signingIn: () => (false, false, null),
           ready: (favourite, saving) => (favourite, !saving, null),
           loadFailed: (_, _) => (
             false,

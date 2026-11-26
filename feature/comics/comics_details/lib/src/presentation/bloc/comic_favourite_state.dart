@@ -6,8 +6,12 @@ sealed class ComicFavouriteState with _$ComicFavouriteState {
   /// Reading the flag (signed in only); the toggle waits.
   const factory ComicFavouriteState.loading() = _Loading;
 
-  /// The toggle shows [favourite]. [saving] while a sign-in or a write is in
-  /// flight; [favourite] is then already the value being written.
+  /// The app is signing someone in for this tap (`requestSignIn()`); the
+  /// toggle waits and still offers to add.
+  const factory ComicFavouriteState.signingIn() = _SigningIn;
+
+  /// The toggle shows [favourite]. [saving] while a write is in flight;
+  /// [favourite] is then already the value being written (optimistic).
   const factory ComicFavouriteState.ready({
     required bool favourite,
     @Default(false) bool saving,

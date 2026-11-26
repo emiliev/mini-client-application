@@ -20,9 +20,7 @@ final List<String> _art = [
 /// Opens comic [id] with every placeholder picture decoded first, so the
 /// first frame draws the art (F-0030).
 Future<void> _open(WidgetTester tester, int id) async {
-  McTestSession.current.backend
-    ..useFixtureSet('comics.default')
-    ..useFixtureSet('characters.default');
+  McTestSession.current.backend..useFixtureSet('comics.default');
   final bundle = McFixtureAssetBundle();
   await mcPrecacheFixtureImages(tester, bundle, _art);
   await ensureComicsContainer();

@@ -16,19 +16,11 @@ class ComicsDetailsRepository {
 
   final ComicsDetailsApi _api;
 
-  /// The comic with its cast. The cast members are fetched in parallel; one
-  /// the backend no longer knows (`404`) is left out, any other failure fails
-  /// the whole comic. An unknown comic is [ApiNotFound].
-  Future<Result<Comic, ApiFailure>> fetchComic(ComicId id) => apiCall(() async {
-    final dto = await _api.getComic(id.value);
-    final cast = await Future.wait([
-      for (final characterId in dto.characterIds)
-        _orNullWhenNotFound(
-          () async => (await _api.getCharacter(characterId)).toDomain(),
-        ),
-    ]);
-    return dto.toDomain(cast: [...cast.nonNulls]);
-  });
+  /// The comic with its cast, in one request: the detail carries the cast
+  /// summary (T-0041), so there is no request per character. An unknown
+  /// comic is [ApiNotFound].
+  Future<Result<Comic, ApiFailure>> fetchComic(ComicId id) =>
+      apiCall(() async => (await _api.getComic(id.value)).toDomain());
 
   /// Whether the signed-in user has the comic among their favourites. The
   /// backend answers `404` for "not a favourite".

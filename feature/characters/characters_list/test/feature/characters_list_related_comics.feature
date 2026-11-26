@@ -35,6 +35,19 @@ Feature: A character's comics
     And I tap {'Retry'}
     Then I see the related comics of {'Amber Alchemist'}
 
+  @T-0041-AC5
+  Scenario: A double Retry of the related comics sends one request
+    Given the backend serves {'comics.default'}
+    And the backend fails {'GET /v1/comics'} with {'malformed'}
+    When I open the characters list
+    And I tap {'Amber Alchemist'}
+    Then I see {'Comics could not be loaded.'}
+    When the backend recovers
+    And I scroll the preview until I see {'Retry'}
+    And I tap {'Retry'} twice in quick succession
+    Then I see the related comics of {'Amber Alchemist'}
+    And the backend received {2} requests for {'GET /v1/comics'}
+
   Scenario: A character in no comic says so
     Given the backend serves {'comics.empty'}
     When I open the characters list

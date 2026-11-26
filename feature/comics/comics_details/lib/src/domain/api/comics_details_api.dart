@@ -20,10 +20,6 @@ abstract class ComicsDetailsApi {
   @GET('v1/comics/{id}')
   Future<ComicDto> getComic(@Path('id') int id);
 
-  /// One member of the cast (the characters domain serves it).
-  @GET('v1/characters/{id}')
-  Future<CastMemberDto> getCharacter(@Path('id') int id);
-
   /// `200` when the comic is a favourite of the signed-in user, `404` when
   /// it is not. Needs the bearer.
   @GET('v1/me/favourites/comic/{id}')

@@ -30,12 +30,17 @@ final class RecordedRequest {
     required this.method,
     required this.path,
     this.query = const {},
+    this.headers = const {},
     this.body,
   });
 
   final String method;
   final String path;
   final Map<String, String> query;
+
+  /// The headers as the request left the app: after every interceptor of
+  /// the `Dio` ran (the auth interceptor's bearer included), as strings.
+  final Map<String, String> headers;
   final Object? body;
 
   /// `GET /v1/characters`.
@@ -348,6 +353,9 @@ class _HarnessAdapter implements HttpClientAdapter {
         method: method,
         path: path,
         query: query,
+        headers: {
+          for (final e in options.headers.entries) e.key: '${e.value}',
+        },
         body: options.data,
       ),
     );

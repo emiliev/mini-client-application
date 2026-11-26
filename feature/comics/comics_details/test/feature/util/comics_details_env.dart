@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:comics_details/comics_details.dart';
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
@@ -28,7 +27,6 @@ final Expando<List<Completer<bool>>> _signIns = Expando(
   'comics_details sign-ins',
 );
 final Expando<List<DataChanged>> _changes = Expando('comics_details changes');
-final Expando<List<SentRequest>> _sent = Expando('comics_details sent');
 
 /// The running test's navigator mock: one per test, keyed by its session, so
 /// nothing leaks between scenarios. `void` methods need no stub;
@@ -55,36 +53,11 @@ List<Completer<bool>> pendingSignIns() =>
 /// Every `DataChanged` published on the bus since the comic opened.
 List<DataChanged> announcedChanges() => _changes[McTestSession.current] ??= [];
 
-/// One request as it left the app: after every interceptor of the shared
-/// `Dio` ran, the auth interceptor's bearer included.
-typedef SentRequest = ({String method, String path, String? authorization});
-
-/// Every request the app sent since the comic opened.
-List<SentRequest> sentRequests() => _sent[McTestSession.current] ??= [];
-
-/// Appended last to the shared `Dio`, so it sees each request as the backend
-/// gets it. It only records; it changes nothing.
-class _SentRequestRecorder extends Interceptor {
-  _SentRequestRecorder(this._sent);
-
-  final List<SentRequest> _sent;
-
-  @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    _sent.add((
-      method: options.method.toUpperCase(),
-      path: options.uri.path,
-      authorization: options.headers['Authorization'] as String?,
-    ));
-    handler.next(options);
-  }
-}
-
 final Expando<bool> _observed = Expando('comics_details observers');
 
 /// The test root, once per test: the production-shaped container (unless an
 /// earlier step such as `I am signed in as` made it), plus a listener on the
-/// bus and the request recorder. Called by `I open comic`.
+/// bus. Called by `I open comic`.
 Future<void> ensureComicsContainer() async {
   final session = McTestSession.current;
   if (!session.containerInitialized) {
@@ -99,7 +72,6 @@ Future<void> ensureComicsContainer() async {
     changes.add,
   );
   addTearDown(subscription.cancel);
-  diContainer<Dio>().interceptors.add(_SentRequestRecorder(sentRequests()));
 }
 
 /// The feature's string keys (plan 05 §3.5: steps find by key, never by type

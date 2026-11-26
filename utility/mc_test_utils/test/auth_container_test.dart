@@ -50,4 +50,41 @@ void main() {
       expect(response!.statusCode, 401);
     },
   );
+
+  mcTestWidgets(
+    'T-0041-AC6 the harness records each request with its headers, the '
+    'bearer the auth interceptor added included',
+    (tester) async {
+      McTestSession.current.backend.useFixtureSet('identity.default');
+      await McTestContainer.initialize(McTestSession.current);
+      final backend = McTestSession.current.backend;
+
+      await tester.runAsync(
+        () => McTestContainer.dio.get<Object?>(
+          '/v1/me',
+          options: Options(validateStatus: (_) => true),
+        ),
+      );
+      expect(backend.requests.last.headers, isNot(contains('Authorization')));
+
+      await tester.runAsync(() async {
+        await diContainer<AuthApi>().signIn(
+          email: 'reader@mini-client.test',
+          password: 'marvelous',
+        );
+        await McTestContainer.dio.get<Object?>('/v1/me');
+      });
+
+      final me = backend.requests.last;
+      expect(me.routeKey, 'GET /v1/me');
+      expect(
+        me.headers['Authorization'],
+        'Bearer ${diContainer<SessionReader>().accessToken}',
+      );
+      expect(
+        me.headers['Authorization'],
+        startsWith('Bearer mc-access-u-100-'),
+      );
+    },
+  );
 }

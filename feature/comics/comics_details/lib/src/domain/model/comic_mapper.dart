@@ -11,8 +11,8 @@ import 'package:mc_media/mc_media.dart';
 /// [FormatException], which the repository's `apiCall` turns into
 /// `ApiMalformed`.
 extension ComicDtoMapper on ComicDto {
-  /// The comic with its [cast], which the backend serves separately.
-  Comic toDomain({required List<CastMember> cast}) => Comic(
+  /// The comic, with the cast summary the detail carries.
+  Comic toDomain() => Comic(
     id: ComicId(id),
     title: title,
     issueNumber: issueNumber,
@@ -29,7 +29,7 @@ extension ComicDtoMapper on ComicDto {
           role: CreatorRole.fromWire(credit.role),
         ),
     ],
-    cast: cast,
+    cast: [for (final member in characters) member.toDomain()],
   );
 }
 

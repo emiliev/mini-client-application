@@ -23,13 +23,18 @@ const String favouritesTopic = 'favourites';
 
 /// The favourite toggle's bloc.
 ///
-/// - **Signed out:** a tap asks the app to sign in and waits for it
-///   (`requestSignIn()`). On true the favourite is saved; on false nothing
-///   changes and no request is made.
+/// - **Signed out:** a tap means "add it". It asks the app to sign in and
+///   waits (`requestSignIn()`). On false nothing changes and no request is
+///   made. On true it first reads the flag for the new session: if that user
+///   already has the comic, nothing is written; otherwise it is saved.
 /// - **Signed in:** a tap flips the toggle at once (optimistic), then writes;
 ///   a failed write flips it back and shows an inline error.
 /// - **One at a time:** a tap while a sign-in or a write is in flight is
 ///   ignored, so a double tap sends one request.
+/// - **The session decides:** it follows `SessionReader.authState`. A
+///   sign-in elsewhere reloads the flag for that user; a sign-out (a rejected
+///   refresh included) shows "not a favourite". A change during a tap is
+///   applied when the tap settles.
 ///
 /// Every saved write publishes `DataChanged('favourites')` once.
 @injectable
@@ -44,6 +49,9 @@ final class ComicFavouriteBloc
     Monitoring monitoring,
   ) : super(const ComicFavouriteState.loading(), monitoring: monitoring) {
     on<ComicFavouriteEvent>(_onEvent);
+    _sessionChanges = _session.authState.listen(
+      (_) => add(const _SessionChanged()),
+    );
     add(const ComicFavouriteEvent.load());
   }
 
@@ -52,9 +60,14 @@ final class ComicFavouriteBloc
   final ComicsDetailsNavigator _navigator;
   final SessionReader _session;
   final EventBus _bus;
+  late final StreamSubscription<AuthStatus> _sessionChanges;
 
   /// True from a tap until its sign-in and write settled.
   bool _busy = false;
+
+  /// The session epoch the shown state belongs to; null before the first
+  /// read. A session event for this same epoch changes nothing.
+  int? _shownEpoch;
 
   ComicId get _comicId => _flow.state.comicId;
 
@@ -64,17 +77,12 @@ final class ComicFavouriteBloc
   ) async {
     switch (event) {
       case _Load():
-        if (!_session.isSignedIn) {
-          emit(const ComicFavouriteState.ready(favourite: false));
-          return;
+        await _load(emit);
+      case _SessionChanged():
+        // During a tap the tap's own ending re-checks the session.
+        if (!_busy && _session.epoch != _shownEpoch) {
+          await _load(emit);
         }
-        final result = await _repository.isFavourite(_comicId);
-        emit(
-          result.fold(
-            (favourite) => ComicFavouriteState.ready(favourite: favourite),
-            ComicFavouriteState.loadFailed,
-          ),
-        );
       case _Toggle():
         if (_busy || state is _Loading) {
           return;
@@ -85,20 +93,63 @@ final class ComicFavouriteBloc
         } finally {
           _busy = false;
         }
+        if (_session.epoch != _shownEpoch) {
+          await _load(emit);
+        }
     }
   }
 
+  /// Shows the flag for the current session: "not a favourite" signed out,
+  /// the backend's answer signed in. Reads again if the session changed
+  /// while it was reading.
+  Future<void> _load(Emitter<ComicFavouriteState> emit) async {
+    final epoch = _session.epoch;
+    if (!_session.isSignedIn) {
+      _shownEpoch = epoch;
+      emit(const ComicFavouriteState.ready(favourite: false));
+      return;
+    }
+    emit(const ComicFavouriteState.loading());
+    final result = await _repository.isFavourite(_comicId);
+    if (_session.epoch != epoch) {
+      return _load(emit);
+    }
+    _shownEpoch = epoch;
+    emit(
+      result.fold(
+        (favourite) => ComicFavouriteState.ready(favourite: favourite),
+        ComicFavouriteState.loadFailed,
+      ),
+    );
+  }
+
   Future<void> _toggle(Emitter<ComicFavouriteState> emit) async {
-    final current = switch (state) {
+    var current = switch (state) {
       _Ready(:final favourite) || _SaveFailed(:final favourite) => favourite,
-      _LoadFailed() || _Loading() => false,
+      _LoadFailed() || _Loading() || _SigningIn() => false,
     };
     if (!_session.isSignedIn) {
-      emit(ComicFavouriteState.ready(favourite: current, saving: true));
-      if (!await _navigator.requestSignIn()) {
-        emit(ComicFavouriteState.ready(favourite: current));
+      emit(const ComicFavouriteState.signingIn());
+      if (!await _navigator.requestSignIn() || !_session.isSignedIn) {
+        _shownEpoch = _session.epoch;
+        emit(const ComicFavouriteState.ready(favourite: false));
         return;
       }
+      // A new session: its own flag decides, never the signed-out view.
+      final epoch = _session.epoch;
+      final fresh = await _repository.isFavourite(_comicId);
+      _shownEpoch = epoch;
+      final failure = fresh.fold<ApiFailure?>((_) => null, (error) => error);
+      if (failure != null) {
+        emit(ComicFavouriteState.loadFailed(failure));
+        return;
+      }
+      if (fresh.getOrElse(() => false)) {
+        // The tap meant "add", and this user already has it: no write.
+        emit(const ComicFavouriteState.ready(favourite: true));
+        return;
+      }
+      current = false;
     }
     final wanted = !current;
     emit(ComicFavouriteState.ready(favourite: wanted, saving: true));
@@ -115,5 +166,11 @@ final class ComicFavouriteBloc
         ComicFavouriteState.saveFailed(error, favourite: current),
       ),
     );
+  }
+
+  @override
+  Future<void> close() async {
+    await _sessionChanges.cancel();
+    return super.close();
   }
 }

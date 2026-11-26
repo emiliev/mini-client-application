@@ -74,20 +74,32 @@ final class RelatedComicsBloc
   final CharactersListRepository _repository;
   final CharactersListNavigator _navigator;
 
+  /// True while a load is in flight: a second Retry tap does not start a
+  /// second request.
+  bool _loading = false;
+
   Future<void> _onEvent(
     RelatedComicsEvent event,
     Emitter<RelatedComicsState> emit,
   ) async {
     switch (event) {
       case _Load():
-        emit(const RelatedComicsState.loading());
-        final result = await _repository.fetchRelatedComics(_character.id);
-        emit(
-          result.fold(
-            RelatedComicsState.success,
-            RelatedComicsState.failure,
-          ),
-        );
+        if (_loading) {
+          return;
+        }
+        _loading = true;
+        try {
+          emit(const RelatedComicsState.loading());
+          final result = await _repository.fetchRelatedComics(_character.id);
+          emit(
+            result.fold(
+              RelatedComicsState.success,
+              RelatedComicsState.failure,
+            ),
+          );
+        } finally {
+          _loading = false;
+        }
       case _Open(:final id):
         _navigator.openComic(id);
     }

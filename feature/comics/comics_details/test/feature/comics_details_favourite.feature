@@ -5,7 +5,6 @@ Feature: Favourite a comic
 
   Background:
     Given the backend serves {'comics.default'}
-    And the backend serves {'characters.default'}
     And the backend serves {'identity.default'}
 
   @T-0041-AC6 @smoke
@@ -13,12 +12,14 @@ Feature: Favourite a comic
     When I open comic {501500}
     And I tap {'Add to favourites'}
     Then the app was asked to sign in {1} time
+    And I see {'Add to favourites'}
     And the backend received {0} requests for {'* /v1/me/favourites/:kind/:id'}
     And the app announced {0} change to {'favourites'}
     When signing in succeeds as {'reader@mini-client.test'}
     Then I see {'Remove from favourites'}
     And the backend received {1} requests for {'PUT /v1/me/favourites/comic/501500'}
-    And the app sent {'PUT /v1/me/favourites/comic/501500'} with the bearer of {'reader@mini-client.test'}
+    And the backend received {'PUT /v1/me/favourites/comic/501500'} with the bearer of {'reader@mini-client.test'}
+    And the backend received {'GET /v1/me/favourites/comic/501500'} with the bearer of {'reader@mini-client.test'}
     And the backend answered {'PUT /v1/me/favourites/comic/501500'} with {200}
     And comic {501500} is a favourite of {'reader@mini-client.test'}
     And the app announced {1} change to {'favourites'}
@@ -131,3 +132,50 @@ Feature: Favourite a comic
     And I tap {'[Àðð ţó ƒàvóúŕíţéš ~~~~~~~]'}
     Then I see {'[Ýóúŕ ƒàvóúŕíţéš çóúļð ñóţ ƀé úþðàţéð. Þļéàšé ţŕý àĝàíñ. ~~~~~~~~~~~~~~~~~~~~~~]'}
     And nothing overflows
+
+  @T-0041-AC6
+  Scenario: Signed out, signing in as a user who already has the favourite writes nothing
+    Given {'reader@mini-client.test'} has comic {501500} among their favourites
+    When I open comic {501500}
+    And I tap {'Add to favourites'}
+    And signing in succeeds as {'reader@mini-client.test'}
+    Then I see {'Remove from favourites'}
+    And the backend received {1} requests for {'GET /v1/me/favourites/comic/501500'}
+    And the backend received {0} requests for {'PUT /v1/me/favourites/comic/501500'}
+    And the backend received {0} requests for {'DELETE /v1/me/favourites/comic/501500'}
+    And the app announced {0} change to {'favourites'}
+    And comic {501500} is a favourite of {'reader@mini-client.test'}
+
+  @T-0041-AC6
+  Scenario: A sign-in elsewhere shows that user's favourite
+    Given {'reader@mini-client.test'} has comic {501500} among their favourites
+    When I open comic {501500}
+    Then I see {'Add to favourites'}
+    When {'reader@mini-client.test'} signs in elsewhere
+    Then I see {'Remove from favourites'}
+    And the app was asked to sign in {0} time
+
+  @T-0041-AC6
+  Scenario: A sign-out elsewhere shows the comic as not a favourite
+    Given I am signed in as {'reader@mini-client.test'}
+    When I open comic {501500}
+    And I tap {'Add to favourites'}
+    Then I see {'Remove from favourites'}
+    When the session ends elsewhere
+    Then I see {'Add to favourites'}
+    And the user is signed out
+    And comic {501500} is a favourite of {'reader@mini-client.test'}
+
+  @T-0041-AC6
+  Scenario: A rejected refresh during a write signs out and shows Add again
+    Given I am signed in as {'reader@mini-client.test'}
+    When I open comic {501500}
+    Given the backend fails {'PUT /v1/me/favourites/comic/501500'} with {'unauthorized'}
+    And the backend fails {'POST /v1/auth/refresh'} with {'unauthorized'}
+    When I tap {'Add to favourites'}
+    And the app finishes writing to storage
+    Then I see {'Add to favourites'}
+    And I don't see {'Your favourites could not be updated. Please try again.'}
+    And the user is signed out
+    And the backend received {1} requests for {'POST /v1/auth/refresh'}
+    And the app announced {0} change to {'favourites'}

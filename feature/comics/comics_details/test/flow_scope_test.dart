@@ -19,9 +19,8 @@ import 'feature/util/comics_details_env.dart';
 void main() {
   setUpAll(bddSetUpAll);
 
-  void serveComics() => McTestSession.current.backend
-    ..useFixtureSet('comics.default')
-    ..useFixtureSet('characters.default');
+  void serveComics() =>
+      McTestSession.current.backend..useFixtureSet('comics.default');
 
   mcTestWidgets(
     "T-0041-AC7 the flow's container resolves every registration",
