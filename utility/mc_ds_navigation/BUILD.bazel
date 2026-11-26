@@ -1,0 +1,54 @@
+# T-0040: McAppBar, McTabBar, McSectionHeader.
+# Layering: this package must never depend on //utility/mc_feature_flow (the
+# feature fills McAppBar.leading); T-0040-AC3 checks it with cquery.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "@pub_deps//:flutter",
+]
+
+flutter_library(
+    name = "mc_ds_navigation",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = _LANG,
+    package_name = "mc_ds_navigation",
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_ds_navigation",
+    "//utility/mc_ds_buttons",
+    "//utility/mc_test_utils",
+    "@pub_deps//:flutter_test",
+]
+
+_DATA = ["//utility/mc_ds_theme:fonts"]
+
+flutter_test(
+    name = "navigation_test",
+    size = "small",
+    data = _DATA,
+    language_version = _LANG,
+    main = "test/navigation_test.dart",
+    package_name = "mc_ds_navigation",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    data = _DATA + glob(["test/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden_test.dart",
+    package_name = "mc_ds_navigation",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS,
+)
