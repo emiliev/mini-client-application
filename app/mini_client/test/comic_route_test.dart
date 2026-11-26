@@ -46,7 +46,7 @@ void main() {
     storage.deleteSync(recursive: true);
   });
 
-  Future<void> boot(WidgetTester tester) async {
+  Future<void> boot(WidgetTester tester, {String? coldStartLink}) async {
     // The iPhone 17 Pro surface (mcReferenceSurface), not the 800x600 default.
     tester.view
       ..devicePixelRatio = 1
@@ -54,6 +54,9 @@ void main() {
     addTearDown(tester.view.reset);
     final links = PendingLinks.install(tester.binding);
     addTearDown(links.detach);
+    if (coldStartLink != null) {
+      links.offer(coldStartLink);
+    }
     await tester.pumpWidget(
       DefaultAssetBundle(
         bundle: McFixtureAssetBundle(),
@@ -155,4 +158,13 @@ void main() {
       expect(find.byType(ErrorWidget), findsNothing);
     });
   }
+
+  testWidgets('T-0041-AC5 a cold-start link with a non-numeric comic id shows '
+      'the not-found page', (tester) async {
+    await boot(tester, coldStartLink: 'miniclient://app/comics/abc');
+
+    expect(tester.takeException(), isNull);
+    expect(find.byKey(const Key('not.found')), findsOneWidget);
+    expect(find.text('Nothing lives at /comics/abc'), findsOneWidget);
+  });
 }

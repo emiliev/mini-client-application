@@ -35,7 +35,7 @@ void main() {
     initializers: (routerRef) => [
       RouterDIInitializer(routerRef),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(FakeTargets());
+        getIt.registerSingleton<UniverseRouteTargets>(FakeTargets());
       }),
       if (hold != null) McDIInitializer((_, _) => hold),
     ],

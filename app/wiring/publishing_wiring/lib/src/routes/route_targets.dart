@@ -6,8 +6,8 @@ import 'package:publishing_wiring/src/flows/creator_details_placeholder_flow.dar
 /// `PublishingRouteTargetsImpl` (unannotated) supplies the flows' navigators
 /// and is registered by `PublishingWiringDIInitializer`.
 ///
-/// Prefixed with the group (universe_wiring's is `RouteTargets`) because the
-/// app imports every wiring's barrel side by side.
+/// Prefixed with the group (`UniverseRouteTargets`, ...) because the app
+/// imports every wiring's barrel side by side (F-0040 fact 11).
 abstract interface class PublishingRouteTargets {
   /// One comic: `/comics/:id`.
   ComicsDetailsFlow comicDetails(int id);

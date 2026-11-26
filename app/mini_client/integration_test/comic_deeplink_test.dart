@@ -15,7 +15,8 @@ const _comicTitle = ValueKey<String>('comics_details.title');
 /// prompt no script can answer). `main()` reads and deletes the file, then
 /// the link takes the same PendingLinks -> GoRouter path as a cold-start
 /// link. Then a link sent to the running app (as iOS delivers it) opens a
-/// second comic over the first.
+/// second comic over the first, and a link with a non-numeric id shows the
+/// app's not-found page.
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -49,5 +50,16 @@ void main() {
     expect(tester.widget<Text>(find.byKey(_comicTitle)).data, second.title);
     await letArtLoad(tester);
     await shot(binding, tester, '19_link_to_running_app_comic');
+
+    // A comic id that is not a number: the app's not-found page, not a crash.
+    await pushLink(tester, 'miniclient://app/comics/abc');
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('not.found')),
+      'the not-found page for a non-numeric comic id',
+    );
+    expect(find.text('Nothing lives at /comics/abc'), findsOneWidget);
+    expect(find.byType(ErrorWidget), findsNothing);
+    await shot(binding, tester, '20_bad_comic_link_not_found');
   });
 }

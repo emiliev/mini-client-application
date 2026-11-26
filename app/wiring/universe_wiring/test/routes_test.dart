@@ -16,7 +16,7 @@ class _FakeList extends CharactersListFlow {
       const SizedBox(key: Key('fake.characters'));
 }
 
-class _Targets implements RouteTargets {
+class _Targets implements UniverseRouteTargets {
   @override
   CharactersListFlow characters() =>
       _FakeList(navigator: diContainer<CharactersListNavigator>());
@@ -47,7 +47,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     final router = ref.attach(
@@ -81,7 +81,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     final router = ref.attach(
@@ -120,7 +120,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     GoRouter build() => GoRouter(
@@ -158,7 +158,7 @@ void main() {
       RouterDIInitializer(ref),
       const UniverseNavigatorsDIInitializer(),
       McDIInitializer((getIt, _) {
-        getIt.registerSingleton<RouteTargets>(_Targets());
+        getIt.registerSingleton<UniverseRouteTargets>(_Targets());
       }),
     ]);
     // publishing_wiring owns `/comics/:id`; a wiring never imports another
@@ -198,7 +198,7 @@ void main() {
     final router = ref.attach(GoRouter(routes: universeRoutes));
     addTearDown(router.dispose);
 
-    expect(diContainer<RouteTargets>(), isA<RouteTargets>());
+    expect(diContainer<UniverseRouteTargets>(), isA<UniverseRouteTargets>());
     expect(
       diContainer<CharactersListNavigator>(),
       same(diContainer<CharactersListNavigator>()),
@@ -216,7 +216,7 @@ void main() {
     final router = ref.attach(GoRouter(routes: universeRoutes));
     addTearDown(router.dispose);
 
-    final targets = diContainer<RouteTargets>();
+    final targets = diContainer<UniverseRouteTargets>();
     expect(
       targets.characters().navigator,
       same(diContainer<CharactersListNavigator>()),

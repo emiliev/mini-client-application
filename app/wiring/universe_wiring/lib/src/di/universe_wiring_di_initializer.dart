@@ -16,8 +16,10 @@ class UniverseWiringDIInitializer extends McDIInitializer {
 
   static FutureOr<void> _init(GetIt getIt, String? environment) async {
     await const UniverseNavigatorsDIInitializer().init(getIt);
-    getIt.registerLazySingleton<RouteTargets>(
-      () => RouteTargetsImpl(charactersList: getIt<CharactersListNavigator>()),
+    getIt.registerLazySingleton<UniverseRouteTargets>(
+      () => UniverseRouteTargetsImpl(
+        charactersList: getIt<CharactersListNavigator>(),
+      ),
     );
   }
 }

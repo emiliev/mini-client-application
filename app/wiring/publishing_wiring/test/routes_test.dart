@@ -77,6 +77,9 @@ Future<GoRouter> _boot(
     GoRouter(
       initialLocation: initial,
       routes: [...publishingRoutes, _charactersStandIn],
+      // As the app's router: an unmatched or unusable location goes here.
+      errorBuilder: (context, state) =>
+          Text('not found ${state.uri}', key: const Key('not.found')),
     ),
   );
   addTearDown(router.dispose);
@@ -90,14 +93,17 @@ Future<GoRouter> _boot(
   return router;
 }
 
-/// Lets the session's real file write finish (F-0038), then settles.
-Future<void> _settleRealIo(WidgetTester tester) async {
-  for (var i = 0; i < 20; i++) {
+/// Lets the session's real file write finish (F-0038), then settles: until
+/// the sheet closed, or [rounds] rounds when given (the sheet may be gone
+/// before the write).
+Future<void> _settleRealIo(WidgetTester tester, {int? rounds}) async {
+  for (var i = 0; i < (rounds ?? 20); i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
     await tester.pumpAndSettle();
-    if (find.byKey(fixtureSignInSheetKey).evaluate().isEmpty) {
+    if (rounds == null &&
+        find.byKey(fixtureSignInSheetKey).evaluate().isEmpty) {
       return;
     }
   }
@@ -114,6 +120,23 @@ void main() {
     expect(router.state.uri.toString(), '/comics/501500');
     expect(find.text('fake comic 501500'), findsOneWidget);
   });
+
+  for (final location in ['/comics/abc', '/comics/7x', '/creators/1x']) {
+    mcTestWidgets('T-0041-AC5 a non-numeric id ($location) goes to the '
+        "router's not-found page, and no flow is built", (tester) async {
+      await _boot(tester, initial: location);
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('not.found')), findsOneWidget);
+      expect(find.text('not found $location'), findsOneWidget);
+      expect(find.byKey(const Key('fake.comic')), findsNothing);
+      expect(
+        find.byKey(const Key('creator.details.placeholder')),
+        findsNothing,
+      );
+      expect(find.byType(ErrorWidget), findsNothing);
+    });
+  }
 
   mcTestWidgets('T-0041-AC3 openCharacter pushes the characters placeholder '
       'location', (tester) async {
@@ -165,6 +188,56 @@ void main() {
     expect(await answer, isTrue);
     expect(reader.userId, fixtureUsers.first.id);
     expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+  });
+
+  mcTestWidgets('T-0041-AC6 requestSignIn: while signing in, the barrier '
+      'and Back do not close the sheet', (tester) async {
+    await _boot(tester);
+    final backend = McTestSession.current.backend
+      ..hold('POST /v1/auth/sign-in');
+
+    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(fixtureSignInButtonKey));
+    await tester.pump();
+    await tester.tapAt(const Offset(20, 20));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(
+      find.byKey(fixtureSignInSheetKey),
+      findsOneWidget,
+      reason: 'the barrier is refused while signing in',
+    );
+    expect(await tester.binding.handlePopRoute(), isTrue);
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
+
+    await backend.release('POST /v1/auth/sign-in');
+    await _settleRealIo(tester);
+
+    expect(await answer, isTrue);
+    expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
+  });
+
+  mcTestWidgets('T-0041-AC6 requestSignIn: a sheet closed while signing in '
+      'answers the real outcome of the sign-in', (tester) async {
+    await _boot(tester);
+    final backend = McTestSession.current.backend
+      ..hold('POST /v1/auth/sign-in');
+
+    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(fixtureSignInButtonKey));
+    await tester.pump();
+    // Closed anyway, as a drag down does: a pop that no PopScope is asked.
+    Navigator.of(tester.element(find.byKey(fixtureSignInSheetKey))).pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+
+    await backend.release('POST /v1/auth/sign-in');
+    await _settleRealIo(tester, rounds: 20);
+
+    expect(await answer, isTrue, reason: 'the user did sign in');
+    expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
   });
 
   mcTestWidgets('T-0041-AC6 requestSignIn: Not now answers false and leaves '

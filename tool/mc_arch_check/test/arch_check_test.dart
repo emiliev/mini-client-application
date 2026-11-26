@@ -115,6 +115,19 @@ void main() {
     expect(actual.join(), isNot(contains('RouteTargets.a ')));
   });
 
+  test(
+    'T-0041-AC7 a group-prefixed RouteTargets class is checked too (R15)',
+    () {
+      final actual = _check('route_imports_feature');
+
+      expect(
+        actual,
+        contains(contains('GroupRouteTargets.groupPage returns Widget')),
+      );
+      expect(actual.join(), isNot(contains('GroupRouteTargets.fine ')));
+    },
+  );
+
   test('T-0017-AC4 a relative export of a page and a wildcard export that '
       'declares one fail (R4)', () {
     final actual = _check('barrel_relative_wildcard');

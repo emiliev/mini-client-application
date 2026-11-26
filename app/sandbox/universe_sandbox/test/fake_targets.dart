@@ -18,7 +18,7 @@ class FakeList extends CharactersListFlow {
       const SizedBox(key: Key('fake.characters'));
 }
 
-class FakeTargets implements RouteTargets {
+class FakeTargets implements UniverseRouteTargets {
   @override
   CharactersListFlow characters() => FakeList();
 
