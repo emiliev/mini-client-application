@@ -87,3 +87,17 @@ The form and wizard kit for the FW exemplar (P1-20, `library_reading_list_editor
 - `mc_ds_forms` has one bound widget (`McFormTextField`); bound switches, chips and steppers (over `mc_ds_inputs`) come when the FW exemplar needs them.
 - Async validators and date fields are out of scope, as written.
 
+
+## Review round (code review, ADR-0011)
+All items fixed in one round, each with a `T-0045-AC1/2/3` test shown to fail without the fix (mutations `R-*` in `documents/evidence/T-0045/engineer/mutations_review.sh`).
+1. **Typed binding:** `McFormState.fieldOf<T>(name)`. `McFormTextField` is bound to a live `FormController` (typing updates it, `reset` and `setValue` update the text) and to a `WizardController` in tests.
+2. **`Validators.pattern`:** anchored with look-arounds (`(?<![\s\S])(?:pattern)(?![\s\S])`) and the flags copied. Used instead of `^(?:...)$` because a `multiLine` pattern would turn `^` and `$` into line anchors. Tests: `a|ab` on "ab", `\d+?` on "123", flags, multiLine.
+3. **Blocked Next and submit:** the button stays disabled (semantics disabled, with a hint), and a tap calls `onBlockedNext` / `onBlockedSubmit`. `WizardController.touchCurrentStep()` is the new hook for the stepper (`fromState` now requires `onBlockedNext` and `blockedHint`). Not called while completing, completed or busy.
+4. **Edits during submit:** `setValue` is ignored while submitting (`touch` cannot change anything then, as submit has touched every field, so it has no guard). `McFieldGroup(enabled:)` and a busy `McFormScaffold` disable bound fields through an internal `McFormScope` (a nested scope can only narrow).
+5. **Lengths:** `package:characters` (a direct dependency of `mc_forms`; the lock is unchanged). 10 emoji pass `maxLength(10)`.
+6. **Stale value:** the text syncs only when the field's value changed, with the selection clamped and composing kept.
+7. **`complete()`** touches only the first invalid step's fields; `next()` and `canGoNext` are off once completed.
+8. **`onTouched`** fires once; a reset (touched back to false) re-arms it.
+9. Gates script header names the packages.
+
+Golden changes: the 8 `form_scaffold_busy.*` goldens (4 themes x 2 scales), because bound fields are now disabled while busy (the fields show the disabled fill). I looked at light x1 and highContrastDark x2: fields greyed, spinner and "Saving" unchanged. No other golden changed. Evidence re-run on the merge of `origin/main`: gates PASS, coverage 266/266 and 195/195, 124/124 mutations killed.
