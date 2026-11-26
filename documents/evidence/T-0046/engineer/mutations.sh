@@ -53,9 +53,9 @@ NAV=$DW/lib/src/navigators/discovery_search_navigator_impl.dart
 ROUTE=$DW/lib/src/routes/search_routes.dart
 LOC=$AC/lib/src/locations/app_locations.dart
 DOMAINS=$AC/lib/src/media/app_media.dart
-HOME=app/mini_client/lib/src/router/app_routes.dart
+HOME_ROUTES=app/mini_client/lib/src/router/app_routes.dart
 
-FILES=($BLOC $MAP $DTO $MODEL $REPO_ $MODULE $SCOPE $PAGE $RESULTS $TILE $HISTORY $FAIL_MSG $DE $BARREL $NAV $ROUTE $LOC $DOMAINS $HOME)
+FILES=($BLOC $MAP $DTO $MODEL $REPO_ $MODULE $SCOPE $PAGE $RESULTS $TILE $HISTORY $FAIL_MSG $DE $BARREL $NAV $ROUTE $LOC $DOMAINS $HOME_ROUTES)
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
     say "REFUSING TO RUN: $f has uncommitted edits (commit them first)"
@@ -159,7 +159,7 @@ mutate AC5-b "a flow opened with a query does not search it" $BLOC \
   "s.replace('      _query.update(query);', '      _query.update(query.substring(0, 0));', 1)" $BDD $FLOW
 mutate AC5-c "AppLocations.search does not encode the query" $LOC \
   "s.replace(\"Uri(\n    path: '/search',\n    queryParameters: query == null ? null : {'q': query},\n  ).toString();\", \"query == null ? '/search' : '/search?q=\$query';\")" $ROUTES $BOOT
-mutate AC5-d "Search on home opens the characters" $HOME \
+mutate AC5-d "Search on home opens the characters" $HOME_ROUTES \
   "s.replace('context.push(AppLocations.search())', 'context.push(AppLocations.characters)')" $APP
 mutate AC5-e "the app's backend has no discovery domain" $DOMAINS \
   "s.replace('  DiscoveryMockDomain(),\n', '')" $APP $BOOT
