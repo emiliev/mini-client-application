@@ -40,6 +40,7 @@ workspace:
   - utility/mc_ds_buttons
   - utility/mc_ds_cards
   - utility/mc_ds_feedback
+  - utility/mc_ds_forms
   - utility/mc_ds_inputs
   - utility/mc_ds_layout
   - utility/mc_ds_lists
@@ -52,10 +53,12 @@ workspace:
   - utility/mc_event_bus
   - utility/mc_feature_flow
   - utility/mc_formatters
+  - utility/mc_forms
   - utility/mc_fixtures_characters
   - utility/mc_fixtures_comics
   - utility/mc_fixtures_discovery
   - utility/mc_fixtures_identity
+  - utility/mc_fixtures_library
   - utility/mc_fixtures_media
   - utility/mc_l10n_core
   - utility/mc_media

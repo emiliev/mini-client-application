@@ -1,0 +1,10 @@
+{
+  "body": {
+    "error": {
+      "code": "unauthenticated",
+      "message": "A valid bearer token is required"
+    }
+  },
+  "request": "GET /v1/me/lists as none",
+  "status": 401
+}

@@ -476,6 +476,26 @@ void main() {
         expect(refresh.statusCode, 200);
       },
     );
+
+    test(
+      'T-0047-AC3 userForAuthorization is the check GET /v1/me applies',
+      () {
+        expect(
+          userForAuthorization('Bearer ${mintAccessToken('u-101', 7)}')?.id,
+          'u-101',
+        );
+        for (final header in [
+          null,
+          '',
+          mintAccessToken('u-100', 1),
+          'Bearer ${expiredAccessToken('u-100')}',
+          'Bearer ${mintRefreshToken('u-100', 1)}',
+          'Bearer ${mintAccessToken('u-999', 1)}',
+        ]) {
+          expect(userForAuthorization(header), isNull, reason: '$header');
+        }
+      },
+    );
   });
 }
 

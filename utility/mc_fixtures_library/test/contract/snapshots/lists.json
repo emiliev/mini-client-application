@@ -1,0 +1,32 @@
+{
+  "body": {
+    "lists": [
+      {
+        "description": "Where to begin.",
+        "id": "l-1",
+        "itemCount": 3,
+        "name": "Spider-Verse Starter",
+        "updatedAt": "2025-12-30T00:00:00.000Z",
+        "visibility": "public"
+      },
+      {
+        "description": "",
+        "id": "l-2",
+        "itemCount": 2,
+        "name": "Weekend Reads",
+        "updatedAt": "2025-12-22T00:00:00.000Z",
+        "visibility": "private"
+      },
+      {
+        "description": "Nothing here yet.",
+        "id": "l-3",
+        "itemCount": 0,
+        "name": "Someday",
+        "updatedAt": "2025-12-02T00:00:00.000Z",
+        "visibility": "private"
+      }
+    ]
+  },
+  "request": "GET /v1/me/lists as u-100",
+  "status": 200
+}

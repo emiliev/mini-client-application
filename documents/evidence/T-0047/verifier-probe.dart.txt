@@ -1,0 +1,261 @@
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
+import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
+import 'package:mc_fixtures_library/mc_fixtures_library.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+
+MockBackend mk({int seed = 42, List<MockDomain>? extra}) => MockBackend(
+  seed: seed,
+  domains: [
+    const IdentityMockDomain(),
+    const ComicsMockDomain(),
+    const LibraryMockDomain(),
+  ],
+);
+
+Dio dioOf(MockBackend b) {
+  final d = b.createDio()..options.validateStatus = (_) => true;
+  d.options.responseType = ResponseType.plain;
+  return d;
+}
+
+Future<String> signIn(Dio d, String email) async {
+  final pw = email.startsWith('reader') ? 'marvelous' : 'vault-7';
+  final r = await d.post(
+    '/v1/auth/sign-in',
+    data: {'email': email, 'password': pw},
+  );
+  expect(r.statusCode, 200, reason: '${r.data}');
+  return (jsonDecode(r.data as String) as Map)['accessToken'] as String;
+}
+
+Future<Response<dynamic>> rq(
+  Dio d,
+  String m,
+  String p,
+  String? tok, [
+  Object? body,
+  String? rawAuth,
+]) => d.request(
+  p,
+  data: body,
+  options: Options(
+    method: m,
+    headers: rawAuth != null
+        ? {'Authorization': rawAuth}
+        : tok == null
+        ? null
+        : {'Authorization': 'Bearer $tok'},
+  ),
+);
+
+Map<String, Object?> j(Response<dynamic> r) =>
+    jsonDecode(r.data as String) as Map<String, Object?>;
+
+String code(Response<dynamic> r) => (j(r)['error']! as Map)['code'] as String;
+
+Future<List<String>> sequence(MockBackend b) async {
+  final d = dioOf(b);
+  final a = await signIn(d, 'reader@mini-client.test');
+  final out = <String>[];
+  Future<void> go(String m, String p, [Object? body]) async {
+    final r = await rq(d, m, p, a, body);
+    out.add('${r.statusCode} ${r.data}');
+  }
+
+  final ids = ComicUniverse(42).byTitle.take(4).map((c) => c.id).toList();
+  await go('GET', '/v1/me/lists');
+  await go('POST', '/v1/me/lists', {
+    'name': ' New ',
+    'visibility': 'public',
+    'comicIds': ids,
+  });
+  await go('PUT', '/v1/me/lists/l-5', {'name': 'X', 'visibility': 'private'});
+  await go('PUT', '/v1/me/lists/l-5/items', {'comicIds': ids.reversed.toList()});
+  await go('DELETE', '/v1/me/lists/l-1');
+  await go('GET', '/v1/me/lists');
+  return out;
+}
+
+void main() {
+  test('P-AC1 determinism and reset', () async {
+    final b1 = mk();
+    final b2 = mk();
+    final s1 = await sequence(b1);
+    final s2 = await sequence(b2);
+    expect(s1, s2);
+    b1.reset();
+    final s3 = await sequence(b1);
+    expect(s3, s1);
+  });
+
+  test('P-AC2 crud, isolation, ordering', () async {
+    final b = mk();
+    final d = dioOf(b);
+    final a = await signIn(d, 'reader@mini-client.test');
+    final c = await signIn(d, 'collector@mini-client.test');
+    final ids = ComicUniverse(42).byTitle.take(6).map((x) => x.id).toList();
+    final order = [ids[3], ids[0], ids[5], ids[1]];
+    var r = await rq(d, 'POST', '/v1/me/lists', a, {
+      'name': 'Mine',
+      'visibility': 'private',
+      'comicIds': ids.take(3).toList(),
+    });
+    expect(r.statusCode, 201);
+    final id = j(r)['id'] as String;
+    r = await rq(d, 'GET', '/v1/me/lists', a);
+    expect((j(r)['lists']! as List).any((l) => (l as Map)['id'] == id), true);
+    // isolation: user B 404 on every route
+    for (final call in [
+      ['GET', '/v1/me/lists/$id', null],
+      ['PUT', '/v1/me/lists/$id', {'name': 'Z', 'visibility': 'public'}],
+      ['PUT', '/v1/me/lists/$id/items', {'comicIds': <int>[]}],
+      ['DELETE', '/v1/me/lists/$id', null],
+    ]) {
+      r = await rq(d, call[0]! as String, call[1]! as String, c, call[2]);
+      expect(r.statusCode, 404, reason: '$call');
+      expect(code(r), 'list_not_found');
+    }
+    r = await rq(d, 'GET', '/v1/me/lists', c);
+    expect((j(r)['lists']! as List).any((l) => (l as Map)['id'] == id), false);
+    // still intact for A
+    r = await rq(d, 'GET', '/v1/me/lists/$id', a);
+    expect(r.statusCode, 200);
+    expect((j(r)['name']), 'Mine');
+    // reorder exact
+    r = await rq(d, 'PUT', '/v1/me/lists/$id/items', a, {'comicIds': order});
+    expect(r.statusCode, 200);
+    r = await rq(d, 'GET', '/v1/me/lists/$id', a);
+    expect([for (final i in j(r)['items']! as List) (i as Map)['id']], order);
+    // updatedAt ordering after two edits: lists "Mine" edited last first
+    await rq(d, 'PUT', '/v1/me/lists/l-3', a, {'name': 'S', 'visibility': 'private'});
+    await rq(d, 'PUT', '/v1/me/lists/l-2', a, {'name': 'W', 'visibility': 'private'});
+    r = await rq(d, 'GET', '/v1/me/lists', a);
+    final order2 = [for (final l in j(r)['lists']! as List) (l as Map)['id']];
+    print('ORDER $order2');
+    expect(order2.sublist(0, 3), ['l-2', 'l-3', id]);
+    // delete
+    r = await rq(d, 'DELETE', '/v1/me/lists/$id', a);
+    expect(r.statusCode, 204);
+    r = await rq(d, 'GET', '/v1/me/lists/$id', a);
+    expect(r.statusCode, 404);
+    // persists until reset
+    b.reset();
+    r = await rq(d, 'GET', '/v1/me/lists', a);
+    expect((j(r)['lists']! as List).length, 3);
+  });
+
+  test('P-AC3 validation', () async {
+    final b = mk();
+    final d = dioOf(b);
+    final a = await signIn(d, 'reader@mini-client.test');
+    final ids = ComicUniverse(42).byTitle.take(101).map((x) => x.id).toList();
+    Map<String, Object?> body({
+      Object? name = 'ok',
+      Object? description,
+      Object? visibility = 'private',
+      Object? comicIds = const <int>[],
+    }) => {
+      'name': name,
+      if (description != null) 'description': description,
+      'visibility': visibility,
+      'comicIds': comicIds,
+    };
+    Future<Response<dynamic>> post(Map<String, Object?> m) =>
+        rq(d, 'POST', '/v1/me/lists', a, m);
+    expect(code(await post(body(name: '   '))), 'invalid_name');
+    expect((await post(body(name: 'a' * 60))).statusCode, 201);
+    expect(code(await post(body(name: 'a' * 61))), 'invalid_name');
+    expect((await post(body(name: '😀' * 60))).statusCode, 201);
+    expect(code(await post(body(name: '😀' * 61))), 'invalid_name');
+    expect((await post(body(description: 'd' * 280))).statusCode, 201);
+    expect(code(await post(body(description: 'd' * 281))), 'invalid_description');
+    expect(code(await post(body(visibility: 'Public'))), 'invalid_visibility');
+    expect(code(await post(body(visibility: 'PRIVATE'))), 'invalid_visibility');
+    expect(
+      code(await post(body(comicIds: [ids[0], ids[0]]))),
+      'duplicate_comic',
+    );
+    expect(code(await post(body(comicIds: [999999999]))), 'unknown_comic');
+    expect((await post(body(comicIds: ids.take(100).toList()))).statusCode, 201);
+    expect(code(await post(body(comicIds: ids))), 'too_many_comics');
+    final r = await rq(d, 'POST', '/v1/me/lists', a, [1, 2]);
+    expect(code(r), 'invalid_body');
+    expect(((j(r)['error']! as Map))['parameter'], 'body');
+    final r2 = await rq(d, 'POST', '/v1/me/lists', a, 'str');
+    expect(((j(r2)['error']! as Map))['parameter'], 'body');
+    // order: auth then 404 then body
+    var r3 = await rq(d, 'PUT', '/v1/me/lists/nope', null, 'bad');
+    expect(r3.statusCode, 401);
+    r3 = await rq(d, 'PUT', '/v1/me/lists/nope', a, 'bad');
+    expect(r3.statusCode, 404);
+    r3 = await rq(d, 'PUT', '/v1/me/lists/l-1', a, 'bad');
+    expect(r3.statusCode, 400);
+    // auth
+    final refresh = mintRefreshToken('u-100', 1);
+    for (final h in [
+      null,
+      'Bearer ${expiredAccessToken('u-100')}',
+      'Bearer $refresh',
+      'Basic ${mintAccessToken('u-100', 1)}',
+      'bearer ${mintAccessToken('u-100', 1)}',
+      mintAccessToken('u-100', 1),
+    ]) {
+      final x = await rq(d, 'GET', '/v1/me/lists', null, null, h);
+      expect(x.statusCode, 401, reason: '$h');
+    }
+    // same check as /v1/me
+    for (final h in [
+      'Bearer ${expiredAccessToken('u-100')}',
+      'Bearer $refresh',
+      'Basic ${mintAccessToken('u-100', 1)}',
+    ]) {
+      final x = await rq(d, 'GET', '/v1/me', null, null, h);
+      expect(x.statusCode, 401);
+    }
+  });
+
+  test('P-AC4 seeds and empty scenario', () async {
+    for (final seed in [42, 7]) {
+      final b = mk(seed: seed);
+      final d = dioOf(b);
+      final a = await signIn(d, 'reader@mini-client.test');
+      final r = await rq(d, 'GET', '/v1/me/lists/l-1', a);
+      for (final it in j(r)['items']! as List) {
+        final id = (it as Map)['id'];
+        final c = await rq(d, 'GET', '/v1/comics/$id', null);
+        expect(c.statusCode, 200, reason: 'seed $seed id $id');
+        print('SEED $seed ${it['thumbnail']}');
+      }
+    }
+    // empty scenario follows seed
+    Future<String> emptyBody(int seed) async {
+      final b = mk(seed: seed);
+      final d = dioOf(b);
+      final a = await signIn(d, 'reader@mini-client.test');
+      b.useScenario('library.empty');
+      var r = await rq(d, 'GET', '/v1/me/lists', a);
+      expect((j(r)['lists']! as List), isEmpty);
+      final comic = ComicUniverse(seed).byTitle.first.id;
+      r = await rq(d, 'POST', '/v1/me/lists', a, {
+        'name': 'e',
+        'visibility': 'private',
+        'comicIds': [comic],
+      });
+      expect(r.statusCode, 201);
+      expect(j(r)['id'], 'l-1001');
+      final cc = await rq(d, 'GET', '/v1/comics/$comic', null);
+      expect(
+        ((j(r)['items']! as List).first as Map)['title'],
+        (j(cc)['title']),
+      );
+      return r.data as String;
+    }
+
+    await emptyBody(42);
+    await emptyBody(7);
+  });
+}

@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "list_not_found",
+      "id": "l-999",
+      "message": "No reading list \"l-999\""
+    }
+  },
+  "request": "GET /v1/me/lists/l-999 as u-100",
+  "status": 404
+}

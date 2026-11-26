@@ -1,0 +1,13 @@
+{
+  "body": {
+    "description": "Nothing here yet.",
+    "id": "l-3",
+    "itemCount": 0,
+    "items": [],
+    "name": "Someday",
+    "updatedAt": "2025-12-02T00:00:00.000Z",
+    "visibility": "private"
+  },
+  "request": "GET /v1/me/lists/l-3 as u-100",
+  "status": 200
+}

@@ -10,7 +10,7 @@ _Last updated: 2026-11-26 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0045 engineer (Sonnet, merging main for review), T-0046 engineer (Opus) |
+| **Active crew** | T-0046 engineer (Opus), T-0048 engineer (Opus) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -27,7 +27,8 @@ _Last updated: 2026-11-26 by Tech Lead_
 - **SC prerequisites merged:** comics fixtures (T-0038), the auth slice with session, bearer refresh and identity fixtures (T-0039), and DS navigation (T-0040).
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
-- **Now:** prerequisites for the SR and FW exemplars: search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045). Then `discovery_search` (SR, P1-19) and the FW exemplar (P1-20), then DB, ST and IX, then the P1-24 bricks.
+- **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **Now:** `discovery_search` (SR, T-0046). Next: the reading-list editor (FW, T-0048), then the DB, ST and IX exemplars, then the P1-24 bricks.
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).

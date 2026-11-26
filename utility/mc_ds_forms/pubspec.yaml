@@ -1,0 +1,25 @@
+name: mc_ds_forms
+description: Design-system form pieces. McFormScaffold, McWizardStepper and McFieldGroup, bound to mc_forms state (T-0045).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mc_ds_buttons: any
+  mc_ds_inputs: any
+  mc_ds_layout: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_forms: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_api_errors: any
+  mc_prelude: any
+  mc_test_utils: any

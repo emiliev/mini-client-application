@@ -11,9 +11,11 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
-| [T-0045](T-0045-forms-kit.md) | `mc_forms` + `mc_ds_forms`: validators, form state, wizard steps (P1-14 AC4) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0044 | `fleet/T-0045-forms-kit` |
 
 | [T-0046](T-0046-discovery-search-exemplar.md) | **`discovery_search` exemplar** (SR, P1-19): debounced search, grouped results, history, `discovery_wiring` | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0043, T-0044 | `fleet/T-0046-discovery-search` |
+
+
+| [T-0048](T-0048-reading-list-editor-exemplar.md) | **`library_reading_list_editor` exemplar** (FW, P1-20): 3-step wizard, flow result returned to the caller, `library_wiring` | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0045, T-0047 | `fleet/T-0048-reading-list-editor` |
 
 ## Done
 | ID | Title | Result |
@@ -22,6 +24,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0047](T-0047-fixtures-library.md) | `mc_fixtures_library`: per-user reading lists with CRUD, typed validation, 404 for foreign lists, bearer via identity | merged; Verifier [PASS](../evidence/T-0047/verification-report.md) (Sonnet, single pass) |
+| [T-0045](T-0045-forms-kit.md) | `mc_forms` + `mc_ds_forms`: typed validators, form and wizard controllers, a blocked Next that reveals errors, form scaffold | merged; Verifier [PASS](../evidence/T-0045/verification-report.md) (Sonnet, single pass); F-0045 |
 | [T-0044](T-0044-ds-inputs.md) | `mc_ds_inputs`: text and search fields, chips, segmented control, stepper (intrinsic-safe) | merged; Verifier [PASS](../evidence/T-0044/verification-report.md) (Sonnet, single pass); F-0043 |
 | [T-0043](T-0043-fixtures-discovery.md) | `mc_fixtures_discovery`: global search (characters and comics), deterministic tiers, diacritic folding, suggestions | merged; Verifier [PASS](../evidence/T-0043/verification-report.md) (Sonnet, single pass) |
 | [T-0041](T-0041-comics-details-exemplar.md) | **`comics_details`, the SC exemplar** (P1-18): sections, auth-gated favourite, `publishing_wiring`, comics deep link | merged; Verifier [PASS](../evidence/T-0041/verification-report.md) (re-verified after FAIL); F-0040 |

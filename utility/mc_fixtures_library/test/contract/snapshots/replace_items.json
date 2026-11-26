@@ -1,0 +1,45 @@
+{
+  "body": {
+    "description": "",
+    "id": "l-2",
+    "itemCount": 3,
+    "items": [
+      {
+        "id": 500062,
+        "thumbnail": {
+          "path": "mock-asset://characters/017",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Chronicles #3"
+      },
+      {
+        "id": 500061,
+        "thumbnail": {
+          "path": "mock-asset://characters/011",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Chronicles #2"
+      },
+      {
+        "id": 500060,
+        "thumbnail": {
+          "path": "mock-asset://characters/003",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Chronicles #1"
+      }
+    ],
+    "name": "Weekend Reads",
+    "updatedAt": "2026-01-01T00:00:01.000Z",
+    "visibility": "private"
+  },
+  "request": "PUT /v1/me/lists/l-2/items as u-100",
+  "requestBody": {
+    "comicIds": [
+      500062,
+      500061,
+      500060
+    ]
+  },
+  "status": 200
+}
