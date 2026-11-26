@@ -622,6 +622,18 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('T-0045-AC3 dragging the body dismisses the keyboard', (
+      tester,
+    ) async {
+      await tester.pumpWidget(scaffold(onSubmit: () {}));
+      expect(
+        tester
+            .widget<SingleChildScrollView>(find.byType(SingleChildScrollView))
+            .keyboardDismissBehavior,
+        ScrollViewKeyboardDismissBehavior.onDrag,
+      );
+    });
+
     testWidgets('T-0045-AC3 no error text without an error', (tester) async {
       await tester.pumpWidget(scaffold(onSubmit: () {}));
       expect(find.text('Offline'), findsNothing);
