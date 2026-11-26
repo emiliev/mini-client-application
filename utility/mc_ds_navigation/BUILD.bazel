@@ -9,6 +9,7 @@ package(default_visibility = ["//visibility:public"])
 _LANG = "3.13"
 
 _DEPS = [
+    "//utility/mc_ds_layout",
     "//utility/mc_ds_theme",
     "//utility/mc_ds_tokens",
     "@pub_deps//:flutter",

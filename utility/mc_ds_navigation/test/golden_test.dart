@@ -100,6 +100,7 @@ void main() {
     component: 'tab_bar_5',
     height: 80,
     heightAtScale2: 100,
+    settle: const Duration(milliseconds: 300),
     builder: (_) => McTabBar(tabs: _five, currentIndex: 2, onChanged: (_) {}),
   );
   mcGoldenMatrix(
@@ -113,7 +114,7 @@ void main() {
     acId: 'T-0040-AC1',
     component: 'section_header_action',
     height: 100,
-    heightAtScale2: 160,
+    heightAtScale2: 280,
     builder: (_) => McSectionHeader(
       title: 'Featured characters in the long-running series',
       actionLabel: 'See all',

@@ -326,6 +326,35 @@ void main() {
       expect(position.maxScrollExtent, greaterThan(0));
     });
 
+    testWidgets('T-0040-AC1 the selected tab is scrolled into view', (
+      tester,
+    ) async {
+      mcSetSurface(tester, 320, 400);
+      Future<double> offsetFor(int index) async {
+        await tester.pumpWidget(
+          _page(
+            scale: 2,
+            body: McTabBar(
+              tabs: _five,
+              currentIndex: index,
+              onChanged: (_) {},
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+        final scroll = find.descendant(
+          of: find.byType(McTabBar),
+          matching: find.byType(Scrollable),
+        );
+        return tester.state<ScrollableState>(scroll).position.pixels;
+      }
+
+      expect(await offsetFor(0), 0);
+      expect(await offsetFor(4), greaterThan(0));
+      final box = tester.getRect(find.text('Stories'));
+      expect(box.right, lessThanOrEqualTo(320));
+    });
+
     testWidgets('T-0040-AC1 two tabs share the width', (tester) async {
       mcSetSurface(tester, 375, 400);
       await tester.pumpWidget(

@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
+import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 
@@ -75,7 +78,7 @@ class McTabBar extends StatelessWidget {
   }
 }
 
-class _TabItem extends StatelessWidget {
+class _TabItem extends StatefulWidget {
   const _TabItem({
     required this.label,
     required this.selected,
@@ -88,17 +91,55 @@ class _TabItem extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_TabItem> createState() => _TabItemState();
+}
+
+class _TabItemState extends State<_TabItem> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.selected) {
+      _reveal(Duration.zero);
+    }
+  }
+
+  @override
+  void didUpdateWidget(_TabItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selected && !oldWidget.selected) {
+      _reveal(McMotion.normal);
+    }
+  }
+
+  /// Scrolls the selected tab into view when the bar scrolls (a no-op when it
+  /// does not).
+  void _reveal(Duration duration) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      unawaited(
+        Scrollable.ensureVisible(
+          context,
+          alignment: 0.5,
+          duration: McA11y.duration(context, duration),
+        ),
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final p = context.mcPalette;
     return Semantics(
       role: SemanticsRole.tab,
-      selected: selected,
+      selected: widget.selected,
       button: true,
-      label: label,
-      onTap: onTap,
+      label: widget.label,
+      onTap: widget.onTap,
       excludeSemantics: true,
       child: InkWell(
-        onTap: onTap,
+        onTap: widget.onTap,
         child: ConstrainedBox(
           constraints: const BoxConstraints(
             minWidth: mcMinTapTarget,
@@ -108,7 +149,7 @@ class _TabItem extends StatelessWidget {
             decoration: BoxDecoration(
               border: Border(
                 bottom: BorderSide(
-                  color: selected ? p.primary : Colors.transparent,
+                  color: widget.selected ? p.primary : Colors.transparent,
                   width: 2,
                 ),
               ),
@@ -121,11 +162,13 @@ class _TabItem extends StatelessWidget {
               child: Center(
                 widthFactor: 1,
                 child: Text(
-                  label,
+                  widget.label,
                   maxLines: 1,
                   style: McTypeScale.label.copyWith(
-                    color: selected ? p.primary : p.onSurfaceMuted,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                    color: widget.selected ? p.primary : p.onSurfaceMuted,
+                    fontWeight: widget.selected
+                        ? FontWeight.w600
+                        : FontWeight.w500,
                   ),
                 ),
               ),
