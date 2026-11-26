@@ -25,13 +25,6 @@ final class FieldState<T> {
   /// The error to show: null until the field is touched.
   FieldError? get visibleError => touched ? error : null;
 
-  FieldState<T> withValue(T? value, FieldError? error) => FieldState<T>(
-    value: value,
-    initial: initial,
-    error: error,
-    touched: touched,
-  );
-
   FieldState<T> withError(FieldError? error) => FieldState<T>(
     value: value,
     initial: initial,
