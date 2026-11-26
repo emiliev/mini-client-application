@@ -92,13 +92,20 @@ if t == s:
 open(p, "w").write(t)
 EOF
   if [[ $? -ne 0 ]]; then say "$id $what: NOT APPLIED"; rc=1; git checkout -- "$file"; return; fi
-  [[ "$file" == *.dart ]] && fvm dart format "$file" > /dev/null
+  if [[ "$file" == *.dart ]] && ! fvm dart format "$file" > /dev/null; then
+    say "$id $what: FORMAT FAILED (not evidence)"; rc=1; git checkout -- "$file"; return
+  fi
   local out; out="$(run "$@")"
   local first; first="$(grep -a -m1 -E '^  FAIL  |^[0-9:]+ \+[0-9]+ -[0-9]+: ' <<< "$out" | sed 's/^ *//')"
   if [[ -n "$first" ]]; then
     say "$id $what: KILLED ($first)"; killed=$((killed + 1))
   elif grep -q -a -E "^ERROR|FAILED TO BUILD|Build did NOT complete" <<< "$out"; then
     say "$id $what: COMPILE ERROR (not evidence)"; rc=1
+  elif grep -q -a -E " FAILED in |NO STATUS" <<< "$out"; then
+    # A target failed, but no test in it did (a crash, a format check).
+    say "$id $what: TARGET FAILED WITHOUT A FAILING TEST (not evidence)"; rc=1
+  elif ! grep -q -a -E " PASSED in " <<< "$out"; then
+    say "$id $what: NO TEST RAN (not evidence)"; rc=1
   else
     say "$id $what: SURVIVED"; rc=1
   fi
