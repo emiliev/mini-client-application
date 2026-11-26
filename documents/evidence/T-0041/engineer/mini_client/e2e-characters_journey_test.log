@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0041 engineer on mc-T-0041-engineer-4918 (5B897ED7-0FE7-4925-903E-BB2645BEAB3B)
+# e2e_ios.sh: T-0041 engineer on mc-T-0041-engineer-15540 (E61E6575-B51C-43CE-98E8-0E50EB6C62AF)
 # cwd: /tmp/mc-T-0041-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/3-characters_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 5B897ED7-0FE7-4925-903E-BB2645BEAB3B
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.2KM0WJ/screenshots/3-characters_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d E61E6575-B51C-43CE-98E8-0E50EB6C62AF
 
 Resolving dependencies in `/private/tmp/mc-T-0041-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0041-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           10.4s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:60968/ddG2IgesKBg=/
-VMServiceFlutterDriver: Isolate found with number: 1897943316197651
-VMServiceFlutterDriver: Isolate 1897943316197651 is runnable.
+Xcode build done.                                           11.2s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62060/99phadO1-9E=/
+VMServiceFlutterDriver: Isolate found with number: 274592238637731
+VMServiceFlutterDriver: Isolate 274592238637731 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
@@ -40,10 +40,10 @@ flutter: [debug] GET /v1/comics -> 200
 flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
 flutter: 00:06 +1: (tearDownAll)
 flutter: 00:07 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/3-characters_journey_test/01_home.png (294321)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/3-characters_journey_test/02_characters_list.png (405341)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/3-characters_journey_test/03_preview.png (318057)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.EEka1R/screenshots/3-characters_journey_test/04_full_profile_placeholder.png (222291)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.2KM0WJ/screenshots/3-characters_journey_test/01_home.png (294321)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.2KM0WJ/screenshots/3-characters_journey_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.2KM0WJ/screenshots/3-characters_journey_test/03_preview.png (318057)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.2KM0WJ/screenshots/3-characters_journey_test/04_full_profile_placeholder.png (222291)
 All tests passed.
 
 # exit code: 0

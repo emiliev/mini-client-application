@@ -2,25 +2,25 @@
 
 | Field | Value |
 |---|---|
-| Result | **FAIL** |
+| Result | **PASS** |
 | Task | T-0041 |
 | Role | engineer |
 | Project | `/tmp/mc-T-0041-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0041-engineer-4918` |
-| Simulator UDID | `5B897ED7-0FE7-4925-903E-BB2645BEAB3B` |
+| Simulator | `mc-T-0041-engineer-15540` |
+| Simulator UDID | `E61E6575-B51C-43CE-98E8-0E50EB6C62AF` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-26T18:41:00Z |
-| Finished | 2026-11-26T18:43:07Z |
+| Started | 2026-11-26T18:43:37Z |
+| Finished | 2026-11-26T18:45:48Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/comics_journey_test.dart` | PASS | 52 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
-| `integration_test/comic_deeplink_test.dart` | FAIL | 31 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
-| `integration_test/characters_journey_test.dart` | PASS | 26 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
+| `integration_test/comics_journey_test.dart` | PASS | 50 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
+| `integration_test/comic_deeplink_test.dart` | PASS | 32 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
+| `integration_test/characters_journey_test.dart` | PASS | 28 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
 
 ## Screenshots
 
@@ -36,6 +36,7 @@
 | [17_cast_member_placeholder.png](17_cast_member_placeholder.png) | `integration_test/comics_journey_test.dart` | downscaled from 1206x2622 |
 | [18_deep_link_comic.png](18_deep_link_comic.png) | `integration_test/comic_deeplink_test.dart` | downscaled from 1206x2622 |
 | [19_link_to_running_app_comic.png](19_link_to_running_app_comic.png) | `integration_test/comic_deeplink_test.dart` | downscaled from 1206x2622 |
+| [20_bad_comic_link_not_found.png](20_bad_comic_link_not_found.png) | `integration_test/comic_deeplink_test.dart` | downscaled from 1206x2622 |
 | [01_home.png](01_home.png) | `integration_test/characters_journey_test.dart` | downscaled from 1206x2622 |
 | [02_characters_list.png](02_characters_list.png) | `integration_test/characters_journey_test.dart` | downscaled from 1206x2622 |
 | [03_preview.png](03_preview.png) | `integration_test/characters_journey_test.dart` | downscaled from 1206x2622 |
