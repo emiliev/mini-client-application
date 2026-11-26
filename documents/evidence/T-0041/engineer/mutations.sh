@@ -36,6 +36,7 @@ FIX_CONTRACT=//utility/mc_fixtures_comics:provider_contract_test
 ROOT_FMT=//app/wiring/app_core:formatters_root_test
 AUTH_HARNESS=//utility/mc_test_utils:auth_container_test
 FMT_CONTAINER=//utility/mc_test_utils:formatters_container_test
+CD_GOLDEN=//feature/comics/comics_details:golden_test
 ARCHCHECK=//tool/mc_arch_check:arch_check_test
 
 FILES=(
@@ -55,6 +56,7 @@ FILES=(
   $PW/lib/src/routes/comics_routes.dart
   $PW/lib/src/sign_in/fixture_sign_in_sheet.dart
   $UW/lib/src/navigators/characters_list_navigator_impl.dart
+  $CL/lib/src/presentation/widget/related_comics.dart
   utility/mc_test_utils/lib/src/test_container.dart
   utility/mc_test_utils/lib/src/backend_harness.dart
   app/wiring/app_core/lib/src/di/root_initializers.dart
@@ -74,11 +76,11 @@ trap restore_all EXIT
 # run <targets...>: the test output, one line per test, plus Bazel's summary.
 run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
 
-base="$(run $BDD $FLOW $ARCH $ROUTES $CL_BDD $UW_ROUTES $APP $FIX_CONTRACT $ROOT_FMT $AUTH_HARNESS $ARCHCHECK $FMT_CONTAINER)"
+base="$(run $BDD $FLOW $ARCH $ROUTES $CL_BDD $UW_ROUTES $APP $FIX_CONTRACT $ROOT_FMT $AUTH_HARNESS $ARCHCHECK $FMT_CONTAINER $CD_GOLDEN)"
 if grep -q -E "FAILED|NO STATUS|^ERROR" <<< "$base"; then
   say "BASELINE FAILS"; grep -E "FAILED|^ERROR" <<< "$base" | tee -a "$LOG"; exit 1
 fi
-say "baseline: PASS (12 targets)"
+say "baseline: PASS (13 targets)"
 
 rc=0
 n=0
@@ -212,6 +214,23 @@ mutate R10 "signing in shows the toggle as a favourite" $TOGGLE \
   "s.replace('signingIn: () => (false, false, null),', 'signingIn: () => (true, false, null),')" $BDD
 mutate R11 "the harness drops the request headers" utility/mc_test_utils/lib/src/backend_harness.dart \
   "s.replace(\"          for (final e in options.headers.entries) e.key: '\${e.value}',\n\", '')" $BDD $AUTH_HARNESS
+# --- Fix round after the Verifier FAIL (items 1 to 6) ----------------------
+mutate F1 "a session change during the post-sign-in read still writes" $FAV \
+  "s.replace('      if (_session.epoch != epoch) {\n        // The session changed during the read', '      if (_session.epoch != epoch && _session.userId == \'nobody\') {\n        // The session changed during the read')" $BDD
+mutate F2 "Not now stays enabled while signing in (Verifier V14)" $SHEET \
+  "re.sub(r'onPressed: _busy\s*\?\s*null\s*:\s*\(\) => Navigator\.of\(context\)\.pop\(false\),', 'onPressed: () => Navigator.of(context).pop(false),', s)" $ROUTES
+mutate F3 "the sheet can be dragged away while signing in" $SHEET \
+  "s.replace('onVerticalDragStart: _busy ? (_) {} : null,', 'onVerticalDragStart: null,')" $ROUTES
+mutate F4 "the toggle stays enabled during the write (Verifier V12)" $FAV \
+  "s.replace('emit(ComicFavouriteState.ready(favourite: wanted, saving: true));', 'emit(ComicFavouriteState.ready(favourite: wanted));')" $BDD
+mutate F5-a "the bloc ignores DataChanged('favourites') from another page" $FAV \
+  "s.replace('.listen((_) => add(const _FavouritesChanged()));', '.listen((_) {});')" $BDD
+mutate F5-b "the bloc reloads after its own announcement" $FAV \
+  "s.replace('        _ownAnnouncements++;\n', '')" $BDD
+mutate F6-a "a related comic shows no cover" $CL/lib/src/presentation/widget/related_comics.dart \
+  "re.sub(r'leading: (McImage\([^)]*\)),', r'leading: Offstage(child: \1),', s, flags=re.S)" $CL_BDD
+mutate F6-b "the facts rows lose their spacing token" $FACTS \
+  "s.replace('vertical: McSpacing.sm', 'vertical: 6')" $CD_GOLDEN
 # --- AC7: the barrel and the root imports ----------------------------------
 mutate AC7-a "barrel exports a page" $CD/lib/comics_details.dart \
   "s + \"export 'package:comics_details/src/presentation/page/comic_details_page.dart' show ComicDetailsPage;\n\"" $ARCH
