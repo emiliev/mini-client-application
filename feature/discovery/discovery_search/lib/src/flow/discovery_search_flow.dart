@@ -33,9 +33,10 @@ class DiscoverySearchFlow extends StatelessWidget {
   final String? initialQuery;
 
   /// [initialQuery], with a blank one as none (`/search?q=`).
-  String? get _query => initialQuery == null || initialQuery!.trim().isEmpty
-      ? null
-      : initialQuery;
+  String? get _query {
+    final query = initialQuery;
+    return query == null || query.trim().isEmpty ? null : query;
+  }
 
   @override
   Widget build(BuildContext context) => FeatureFlow<DiscoverySearchFlowState>(

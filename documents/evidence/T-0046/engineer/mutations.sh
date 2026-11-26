@@ -54,8 +54,11 @@ ROUTE=$DW/lib/src/routes/search_routes.dart
 LOC=$AC/lib/src/locations/app_locations.dart
 DOMAINS=$AC/lib/src/media/app_media.dart
 HOME_ROUTES=app/mini_client/lib/src/router/app_routes.dart
+FLOW_W=$DS/lib/src/flow/discovery_search_flow.dart
+DQ=utility/mc_paging/lib/src/query/debounced_query.dart
+DQ_TEST=//utility/mc_paging:debounced_query_test
 
-FILES=($BLOC $MAP $DTO $MODEL $REPO_ $MODULE $SCOPE $PAGE $RESULTS $TILE $HISTORY $FAIL_MSG $DE $BARREL $NAV $ROUTE $LOC $DOMAINS $HOME_ROUTES)
+FILES=($BLOC $MAP $DTO $MODEL $REPO_ $MODULE $SCOPE $PAGE $RESULTS $TILE $HISTORY $FAIL_MSG $DE $BARREL $NAV $ROUTE $LOC $DOMAINS $HOME_ROUTES $FLOW_W $DQ)
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
     say "REFUSING TO RUN: $f has uncommitted edits (commit them first)"
@@ -68,11 +71,11 @@ trap restore_all EXIT
 # run <targets...>: the test output, one line per test, plus Bazel's summary.
 run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
 
-base="$(run $BDD $FLOW $ARCH $CONTRACT $GOLDEN $ROUTES $APP $BOOT)"
+base="$(run $BDD $FLOW $ARCH $CONTRACT $GOLDEN $ROUTES $APP $BOOT $DQ_TEST)"
 if grep -q -E "FAILED|NO STATUS|^ERROR" <<< "$base"; then
   say "BASELINE FAILS"; grep -E "FAILED|^ERROR" <<< "$base" | tee -a "$LOG"; exit 1
 fi
-say "baseline: PASS (8 targets)"
+say "baseline: PASS (9 targets)"
 
 rc=0
 n=0
@@ -163,7 +166,7 @@ mutate AC4-c "the no-history hint cannot wrap (overflows)" $HISTORY \
 mutate AC5-a "the route drops the query" $ROUTE \
   "s.replace('search(query: q)', 'search()')" $ROUTES
 mutate AC5-b "a flow opened with a query does not search it" $BLOC \
-  "s.replace('      _query.update(query);', '      _query.update(query.substring(0, 0));', 1)" $BDD $FLOW
+  "s.replace('      _query.submit(query);', '      _query.submit(query.substring(0, 0));', 1)" $BDD $FLOW
 mutate AC5-c "AppLocations.search does not encode the query" $LOC \
   "s.replace(\"Uri(\n    path: '/search',\n    queryParameters: query == null ? null : {'q': query},\n  ).toString();\", \"query == null ? '/search' : '/search?q=\$query';\")" $ROUTES $BOOT
 mutate AC5-d "Search on home opens the characters" $HOME_ROUTES \
@@ -190,17 +193,44 @@ mutate AC6-h "nothing is saved" $BLOC \
 mutate AC6-i "a search that found nothing is saved too" $BLOC \
   "s.replace('        return !results.isEmpty;', '        return true;')" $BDD
 mutate AC6-j "a save that finishes after a clear is shown (no version check)" $BLOC \
-  "s.replace('    final saved = await _history.add(query);\n    if (version == _historyVersion) {', '    final saved = await _history.add(query);\n    if (version > 0) {')" $BDD
+  "s.replace('    final saved = await _history.add(query);\n    if (version != _historyVersion) {', '    final saved = await _history.add(query);\n    if (version < 0) {')" $BDD
 mutate AC6-k "Clear does not clear the storage" $BLOC \
   "s.replace('        await _history.clear();\n', '')" $BDD
-mutate AC6-l "a recent search tapped is put in the field but not searched" $PAGE \
-  "s.replace('    _changed(query);\n', '')" $BDD
-mutate AC6-m "a failed save empties the list" $BLOC \
-  "s.replace('      }, (_) {});', '      }, (_) => _recent = const []);')" $BDD
+mutate AC6-l "a tapped recent search waits for the debounce" $BLOC \
+  "s.replace('        _query.submit(text);', '        _query.update(text);')" $BDD
+mutate AC6-l2 "a linked query waits for the debounce" $BLOC \
+  "s.replace('      _query.submit(query);', '      _query.update(query);')" $BDD
+mutate AC6-m "a failed save keeps the in-memory list instead of reading the stored one" $BLOC \
+  "s.replace('(await _history.load()).getOrElse(() => const [])', '_recent')" $BDD
 mutate AC6-n "11 recent searches are kept" $MODULE \
   "s.replace('const int searchHistoryCap = 10;', 'const int searchHistoryCap = 11;')" $BDD
 mutate AC6-o "each flow has its own history key (not remembered)" $MODULE \
   "s.replace('key: searchHistoryKey)', \"key: '\$searchHistoryKey.\${DateTime.now().microsecondsSinceEpoch}')\")" $BDD
+# --- review round (TL items 3, 5 to 12) -------------------------------------
+mutate R3-a "submit waits for the debounce" $DQ \
+  "s.replace('    _searched = query;\n    onSearch(query);\n  }\n\n  /// Cancels', '    _timer = _timerFactory(delay, () {\n      _timer = null;\n      _searched = query;\n      onSearch(query);\n    });\n  }\n\n  /// Cancels')" $DQ_TEST
+mutate R3-b "submit leaves a pending search running" $DQ \
+  "s.replace('  void submit(String text) {\n    if (_disposed) {\n      return;\n    }\n    _timer?.cancel();\n    _timer = null;\n', '  void submit(String text) {\n    if (_disposed) {\n      return;\n    }\n')" $DQ_TEST
+mutate R3-c "submit searches the last query again" $DQ \
+  "s.replace('    if (query == _searched) {\n      return;\n    }\n    _searched = query;\n    onSearch(query);', '    _searched = query;\n    onSearch(query);')" $DQ_TEST
+mutate R5-a "the backend's too-short answer is a failure (repository)" $REPO_ \
+  "s.replace('if (_isQueryTooShort(e.response)) {', 'if (_isQueryTooShort(e.response) && query.isEmpty) {')" $BDD $CONTRACT
+mutate R5-b "the backend's too-short answer is a failure (bloc)" $BLOC \
+  "s.replace('          // The backend counts the query as too short (after folding).\n          _showHistory(emit);', '          // The backend counts the query as too short (after folding).\n          emit(\n            DiscoverySearchState.failure(\n              query: query,\n              error: const ApiFailure.clientError(400),\n            ),\n          );')" $BDD
+mutate R7-a "a failed Clear is taken as done" $BLOC \
+  "s.replace('final failed = cleared.fold((_) => false, (_) => true);', 'final failed = cleared.fold((_) => false, (_) => false);')" $BDD
+mutate R7-b "a failed Clear says nothing" $HISTORY \
+  "s.replace('        if (clearFailed)\n', '        if (clearFailed && history.isEmpty)\n')" $BDD
+mutate R8-a "a double tap opens twice (no guard)" $BLOC \
+  "s.replace('        if (_openGuard?.isActive ?? false) {', '        if ((_openGuard?.isActive ?? false) && hit.title.isEmpty) {')" $BDD
+mutate R8-b "the open guard never ends" $BLOC \
+  "s.replace('_openGuard = Timer(openGuard, () {});', '_openGuard = Timer(const Duration(days: 1), () {});')" $BDD
+mutate R9 "the section title has no count" $RESULTS \
+  "s.replace('SearchType.comic => l10n.discoverySearchComicsSection(group.total),', 'SearchType.comic => l10n.discoverySearchComics,')" $BDD
+mutate R10 "a blank linked query is kept (no keyboard)" $FLOW_W \
+  "s.replace('return query == null || query.trim().isEmpty ? null : query;', 'return query;')" $BDD
+mutate R12 "groups in another order are accepted" $MAP \
+  "s.replace('    if (!inOrder) {', '    if (!inOrder && types.isEmpty) {')" $CONTRACT
 # --- AC7: the barrel, the root imports, the wire shape ----------------------
 mutate AC7-a "barrel exports a page" $BARREL \
   "s + \"export 'package:discovery_search/src/presentation/page/discovery_search_page.dart' show DiscoverySearchPage;\n\"" $ARCH
