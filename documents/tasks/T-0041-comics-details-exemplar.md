@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-26 `d3ffb73`; Verifier PASS `be5f5db`) |
 | Owner | crew: Engineer (**Opus**: first SC exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar, auth-gated write) |
 | Branch | `fleet/T-0041-comics-details` |
@@ -201,3 +201,6 @@ Brought in the report (`git merge --ff-only 8e66e8b`), then merged `origin/main`
 
 **Test integrity:** no test deleted, skipped or weakened; no `// ignore:`. Changed: the T-0032 preview art step now finds the art by key (the preview has more images now).
 
+## Merge (TL)
+- 2026-11-26: Review-first (ADR-0011). `/code-review` at `11ee216` found 3 important bugs (deep link, dismissible sign-in sheet, stale favourite across session changes). The deep-link one didn't reproduce, so the behaviour was pinned with tests instead. TL decisions: a root `FormattersDIInitializer`; a cast summary in the comics contract (no N+1 in the exemplar); per-group `<Group>RouteTargets` (which exposed and fixed an `mc_arch_check` gap); the favourite follows the session. Review round `59a88ed`. Single Opus Verifier pass: FAIL `8e66e8b` on a Medium AC6 race (no epoch check after the post-sign-in re-read). Fix round `e053e45`: the epoch check, drag and disabled pins, two-page agreement, cover thumbnails, a spacing token, and T-0042's glob exclusion. Narrow Opus re-verify PASS `be5f5db`. The TL merged `--no-ff`; on the merge result `check` passed, 111/111 tests, lint was clean, `mc_arch_check` reported OK, the fixtures check passed and the sim app built.
+- Follow-ups: P-083 (first-send epoch pin in `mc_api_auth`), P-084 (two-page reload test gaps).
