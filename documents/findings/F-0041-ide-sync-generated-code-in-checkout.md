@@ -16,4 +16,8 @@
 6. **Nothing synced can be committed.** `ide_sync` refuses, before writing anything, a destination that is tracked or not git-ignored, skips the paths of the R28 fallback manifest (`tool/build_runner_overlay/fallback.yaml`, does not exist yet; every list item that looks like a path counts), and never deletes a tracked file when cleaning stale entries.
 
 ## Numbers (M4 Pro, warm disk cache)
-See the task's Outcome and `documents/evidence/T-0042/engineer/`.
+- 23 synced files (the app's own and the spikes'); full first sync 5.5 s, fresh output base 10 s, no-op sync 1.5 to 1.9 s, an edited freezed model 9.3 s the first time and 1.6 s from the disk cache, `--watch` 2.5 to 3.0 s from save to synced file (1 s polling).
+- The analyzer on a fresh clone: 176 errors and 11 warnings before, 0 and 0 after.
+- With the synced tree, `build //...` and `test //...` run no action and no test, and all 27,610 files under `bazel-bin` hash the same as without a sync.
+
+Evidence: `documents/evidence/T-0042/engineer/`.
