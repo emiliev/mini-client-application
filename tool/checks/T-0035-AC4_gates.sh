@@ -46,7 +46,6 @@ gate "dart format" fvm dart format --output=none --set-exit-if-changed \
   app feature spike utility tool/l10n_check tool/mc_arch_check
 gate "l10n_check" bzw run //tool/l10n_check:bin -- "$REPO"
 gate "flow_builder provenance (evergreen)" "$REPO/tool/checks/T-0035-AC4_provenance.sh"
-gate "lock delta vs 6e7eaaf (one-off, pre-merge)" "$REPO/tool/checks/T-0035-AC4_lock_delta.sh"
 PKGS=(utility/mc_feature_flow feature/characters/characters_list)
 EXEMPT="${MC_COVERAGE_EXEMPT-}"
 coverage() {

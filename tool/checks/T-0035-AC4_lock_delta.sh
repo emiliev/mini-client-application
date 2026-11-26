@@ -1,4 +1,5 @@
 #!/bin/bash
+# pre-merge only, pinned to 6e7eaaf: historical one-off, no longer run by T-0035-AC4_gates.sh.
 # T-0035-AC4 (one-off): the only lock change is flow_builder's source. Pinned
 # to the commit T-0035 branched from (6e7eaaf), so it is valid on the T-0035
 # branch before it merges, and says so (does not compare with origin/main,
