@@ -1,0 +1,111 @@
+baseline PASS
+=== V1 empty name accepted
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V2 name limit off by one
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V3 name not trimmed before measuring
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V4 name measured in UTF-16 units
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V5 created name stored untrimmed
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== V6 updated name stored untrimmed
+    KILLED by: //utility/mc_fixtures_library:library_test 
+=== V7 non-string name accepted
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V8 name constant 61
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V9 description limit exclusive
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V10 description limit off by one
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V11 description measured in UTF-16 units
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V12 non-string description accepted
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V13 description constant 281
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V14 update keeps the old description when absent
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== V15 any string is a visibility
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V16 visibility case-insensitive
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V17 update skips the visibility check
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V18 update does not store visibility
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== V19 comicIds shape unchecked
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V20 more than 100 allowed (limit 101)
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V21 100 rejected
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V22 duplicates allowed
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V23 unknown comics allowed
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V24 create skips the comicIds check
+    KILLED by: //utility/mc_fixtures_library:validation_test 
+=== V25 items route skips the comicIds check
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V26 max constant 101
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== V27 unknown ids are checked before duplicates
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== A1 no bearer needed (falls back to the first user)
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== A2 the Authorization header is never read
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== A3 unauthenticated answers 403
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== A4 unauthenticated code changed
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== A5 foreign list found (ownership ignored)
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== A6 foreign list answers 403
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== A7 listing always returns the first user's lists
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== A8 create files the list under the first user
+    KILLED by: //utility/mc_fixtures_library:library_test 
+=== C1 create answers 200
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C2 delete does not delete
+    KILLED by: //utility/mc_fixtures_library:library_test 
+=== C3 reorder sorts the ids
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C4 create sorts the ids
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C5 listing oldest first
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C6 writes do not move updatedAt
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C7 ids are reused
+    KILLED by: //utility/mc_fixtures_library:library_test 
+=== C8 writes do not persist (state rebuilt per request)
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C9 an item shows another comic's title
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test 
+=== C10 an item shows another thumbnail
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test 
+=== C11 itemCount off by one
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== C12 update clears the items
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+=== C13 seeded lists lose their first item
+    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
+=== S1 empty set seeded
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+=== S2 empty scenario shares the default state
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+=== S3 server_error set body differs from the scenario
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+=== S4 server_error set misses a route
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+=== S5 server_error scenario misses a route
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+=== S6 empty set is seeded through the default handlers
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+
+killed=54 survived=0 broken=0
