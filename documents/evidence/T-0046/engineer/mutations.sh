@@ -120,7 +120,7 @@ EOF
 mutate AC1-a "hits of a group in reverse order" $MAP \
   "s.replace('for (final result in results)', 'for (final result in results.reversed)')" $BDD
 mutate AC1-b "groups in reverse order (comics first)" $MAP \
-  "s.replace('groups: [for (final group in groups) group.toDomain()]', 'groups: [for (final group in groups.reversed) group.toDomain()]')" $BDD
+  "s.replace('final mapped = [for (final group in groups) group.toDomain()];', 'final mapped = [for (final group in groups.reversed) group.toDomain()];')" $BDD
 mutate AC1-c "All shows 4 per group" $RESULTS \
   "s.replace('const int allFilterPreviewCount = 5;', 'const int allFilterPreviewCount = 4;')" $BDD
 mutate AC1-d "the subtitle shows the title" $TILE \
@@ -195,7 +195,7 @@ mutate AC6-i "a search that found nothing is saved too" $BLOC \
 mutate AC6-j "a save that finishes after a clear is shown (no version check)" $BLOC \
   "s.replace('    final saved = await _history.add(query);\n    if (version != _historyVersion) {', '    final saved = await _history.add(query);\n    if (version < 0) {')" $BDD
 mutate AC6-k "Clear does not clear the storage" $BLOC \
-  "s.replace('        await _history.clear();\n', '')" $BDD
+  "s.replace('final cleared = await _history.clear();', 'final cleared = await _history.load();')" $BDD
 mutate AC6-l "a tapped recent search waits for the debounce" $BLOC \
   "s.replace('        _query.submit(text);', '        _query.update(text);')" $BDD
 mutate AC6-l2 "a linked query waits for the debounce" $BLOC \
@@ -205,7 +205,7 @@ mutate AC6-m "a failed save keeps the in-memory list instead of reading the stor
 mutate AC6-n "11 recent searches are kept" $MODULE \
   "s.replace('const int searchHistoryCap = 10;', 'const int searchHistoryCap = 11;')" $BDD
 mutate AC6-o "each flow has its own history key (not remembered)" $MODULE \
-  "s.replace('key: searchHistoryKey)', \"key: '\$searchHistoryKey.\${DateTime.now().microsecondsSinceEpoch}')\")" $BDD
+  "s.replace('key: searchHistoryStoreKey)', \"key: '\$searchHistoryStoreKey.\${DateTime.now().microsecondsSinceEpoch}')\")" $BDD
 # --- review round (TL items 3, 5 to 12) -------------------------------------
 mutate R3-a "submit waits for the debounce" $DQ \
   "s.replace('    _searched = query;\n    onSearch(query);\n  }\n\n  /// Cancels', '    _timer = _timerFactory(delay, () {\n      _timer = null;\n      _searched = query;\n      onSearch(query);\n    });\n  }\n\n  /// Cancels')" $DQ_TEST
