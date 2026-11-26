@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0044 merges) |
+| Status | In Progress |
 | Owner | crew: Engineer (**Opus**: first SR exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0046-discovery-search` |
@@ -61,4 +61,4 @@ As with T-0032 and T-0041, this package is the shape the P1-24 bricks copy for e
 - **T-0046-AC8 (gates):** Package coverage is ≥ 90 %. `test //...`, lint, `mc_arch_check`, `rules_fork.sh check`, format and `l10n_check` pass, and everything is traceable by `T-0046-ACn`.
 
 ## Log
-- 2026-11-26: Created (TL).
+- 2026-11-26: Created (TL); dispatched after T-0044 merged.
