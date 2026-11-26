@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Ready (dispatch after T-0039 and T-0040 merge) |
+| Status | In Progress |
 | Owner | crew: Engineer (**Opus**: first SC exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar, auth-gated write) |
 | Branch | `fleet/T-0041-comics-details` |
@@ -71,4 +71,4 @@ Like `characters_list` (T-0032), this package is the shape the P1-24 bricks copy
 - Findings start at F-0040.
 
 ## Log
-- 2026-11-26: Created (TL).
+- 2026-11-26: Created (TL); dispatched after T-0039 and T-0040 merged. The engineer may also lift the P-080 auth pins if they touch the auth tests.

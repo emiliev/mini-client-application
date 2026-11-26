@@ -10,7 +10,7 @@ _Last updated: 2026-11-24 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0039 engineer (Sonnet, fix round) |
+| **Active crew** | T-0041 engineer (Opus) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -24,7 +24,8 @@ _Last updated: 2026-11-24 by Tech Lead_
 - **T-0035 merged:** flow_builder is vendored with a patch so that deep links keep working once a flow is on screen (upstream issue drafted).
 - **T-0033 merged: `characters_list` is in the app.** Home → Characters → paged grid → preview → "See full profile" (placeholder) on the iOS simulator, with back navigation and `miniclient://app/characters` deep links (cold, during boot and while running). A `universe_sandbox` app opens straight on the list.
 - **T-0036 + T-0037 merged:** `McFlowBackButton` is correct in every navigation state the bricks will hit (pushed or root flows, deep-link stack changes, drawers, sheets, nested navigators), with flow_builder patch changes 4 and 5.
-- **Now:** the prerequisites for the second exemplar, SC `comics_details` (P1-18): comics fixtures (T-0038), the auth slice (T-0039), DS navigation (T-0040). Then the `comics_details` exemplar, then the SR, FW, DB, ST and IX exemplars and the P1-24 bricks.
+- **SC prerequisites merged:** comics fixtures (T-0038), the auth slice with session, bearer refresh and identity fixtures (T-0039), and DS navigation (T-0040).
+- **Now:** T-0041, the `comics_details` exemplar (SC, P1-18). Then the SR, FW, DB, ST and IX exemplars and the P1-24 bricks.
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).

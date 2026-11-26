@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-26 `4be9f83`; Verifier PASS `807cad3`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0039-session-and-auth` |
@@ -44,3 +44,7 @@ Signed-in state for the app. The SC exemplar's favourite needs `requestSignIn()`
 
 ### Fix round (Verifier FAIL on AC2, review)
 Items: (1) epoch compare-and-set for refresh outcomes (`SessionReader.epoch`, `updateTokens(epoch:)`, `signOut(ifEpoch:)`), Verifier probes V-P4a/b/c/e committed in `auth_races_test.dart`; (2) no cross-account replay or retry (PUT favourite test); (3) `FormData` cloned, `Stream` never replayed; (4) only a definite rejection signs out (unexpected, cancel, 429 keep the session); (5) 403 pinned; (6) sign-out token strip pinned; (7) loop guard fails on an assertion (capped route), not the 60 s timeout; (8) `SessionDIInitializer` checks the session's own file (`FileStore.existsSync`, added to `mc_storage`, approved); (9) repeat sign-in of the same user is not re-announced; (10) `McTestContainer` registers EventBus, Session, ApiAuth (isolation_test's initializer count assertion 6 to 8, disclosed). Also fixed: `Session`'s save queue is created lazily (F-0038 fact 14). Mutations: `mutations_round2.txt`; two single mutations of the replay guards survive because `onRequest` and `onError` both guard (defence in depth); removing the `onRequest` one as well is killed.
+
+## Merge (TL)
+- 2026-11-26: Verifier (Opus) FAIL `fb5332c` on AC2: a refresh outcome could be applied to a different user's session. `/code-review` added cross-account replay, FormData/Stream replays and transient errors signing users out. TL decisions: AC2 amended (rejected → sign out; unavailable → keep; outcomes apply only to the session they started for). Fix round `e055107`: a session epoch with compare-and-set, epoch-checked replays, a FormData clone and no Stream replay, a narrow sign-out rule, pins, `FileStore.existsSync`, a lazy save queue, and `McTestContainer` with session and auth. Re-verify (Opus, narrow, under ADR-0011) PASS `807cad3`. The TL merged `--no-ff`; on the merge result `check` passed, 101/101 tests, lint was clean, `mc_arch_check` reported OK, the fixtures check passed and the sim app built.
+- Follow-up: P-080 (pin three behaviours that are correct but unpinned, using the Verifier's ready probes).

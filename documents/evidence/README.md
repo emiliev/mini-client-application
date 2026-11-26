@@ -38,3 +38,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0037](T-0037/verification-report.md) | PASS (re-verified after review fixes) | Back button hardening: real `GoRouter` stack changes, drawer phases, nested navigators, rebuild counts, 23 mutations |
 | [T-0038](T-0038/verification-report.md) | PASS (re-verified after review fixes) | Comics mock domain: determinism mutations, filter and paging probes, cross-links to characters, trademark scan |
 | [T-0040](T-0040/verification-report.md) | PASS (Opus, then a Sonnet narrow re-verification) | DS navigation: 72 goldens, semantics guidelines, transitive layering negatives, e2e |
+| [T-0039](T-0039/verification-report.md) | PASS (re-verified after FAIL) | Auth: concurrent 401s on real Dio, cross-account race probes, refresh-failure policy, boot restore on the simulator |
