@@ -10,9 +10,11 @@
 | 2b. no BUILD glob picks up a synced file | PASS | 23 synced files and 6 gen-l10n files, none is a source file of any target |
 | 2b. negative control (planted .g.dart in a package without the exclusion) | PASS | the query reports it |
 | B. synced: build and test //... | PASS | both pass |
-| 3. synced tree runs no action and no test | PASS | Executed 0 out of 101 tests: 101 tests pass. |
-| 3. outputs identical with and without a sync | PASS | 33965 files, same bytes |
+| 3. synced tree runs 0 actions and 0 tests | PASS | Executed 0 out of 101 tests: 101 tests pass. |
+| 3. every unsynced output is in the synced run with the same hash | PASS | 33965 files, same bytes |
 | 3. negative control (planted file in a build) | PASS | the build ran actions, so 'no action' is a real signal |
+
+Files only in the synced run (0): none
 
 Test summary (synced tree): Executed 0 out of 101 tests: 101 tests pass.
 
