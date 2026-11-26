@@ -109,7 +109,15 @@ JUnit names carry the IDs (`test.xml` of each target; listed by the gates run).
 | AC8 | [`T-0041-AC8_gates.md`](../evidence/T-0041/engineer/T-0041-AC8_gates.md) (below) |
 
 ### Gates (AC8)
-GATES_PLACEHOLDER
+[`T-0041-AC8_gates.sh`](../../tool/checks/T-0041-AC8_gates.sh) → [**PASS**](../evidence/T-0041/engineer/T-0041-AC8_gates.md), one run, every gate:
+- `test //...`: **108/108** (101 on main + 7 new targets), after an uncached run of comics_details, characters_list, `//app/...`, mc_test_steps and l10n_check;
+- `build --config=lint //...`, `mc_arch_check` OK, `rules_fork.sh check` (3 patches), `dart format` 0 changed, `l10n_check` OK;
+- fixtures check (T-0031-AC6; comics_details found by its glob) and the relative-path scan (T-0034-AC4);
+- AC7: comics_details byte identity **12 of 12 EQUAL**, cutoff, not committed, gen-l10n parity; and for characters_list, which T-0041 changed, the T-0032 byte identity (**14 of 14**), cutoff and not-committed checks;
+- **coverage: comics_details 353/353 = 100 %, publishing_wiring 88/88 = 100 %, characters_list 216/216 = 100 %, universe_wiring 38/38 = 100 %** (it was 89.5 % on the first run, a pre-existing gap: `RouteTargetsImpl` was never called by its own tests; one test added).
+- Negative control: with `MC_COVERAGE_MIN=100.1` the same script [FAILS](../evidence/T-0041/engineer/T-0041-AC8_gates_negative_control.md).
+- Also: `build --config=sim //app/mini_client:mini_client_ios //app/sandbox/universe_sandbox:universe_sandbox_ios` succeeds.
+- AC traceability: [test_names.txt](../evidence/T-0041/engineer/test_names.txt), 63 test names carrying `T-0041-ACn` (AC1 6, AC2 8, AC3 5, AC4 7, AC5 10, AC6 12, AC7 13, AC8 2), plus the e2e targets.
 
 ### Mutations and negative controls
 - [mutations.sh](../evidence/T-0041/engineer/mutations.sh) (`MC_TASK=T-0041 MC_ROLE=engineer`): **28 of 28 killed by a failing test** ([log](../evidence/T-0041/engineer/mutations.log)), 3 to 9 per AC (AC1 5, AC2 3, AC3 3, AC4 3, AC5 3, AC6 9, AC7 2); none by a compile error.
