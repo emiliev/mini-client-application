@@ -1,0 +1,29 @@
+=== M1 title order as text (issue order)
+INFO: Build completed, 2 tests FAILED, 19 total actions
+//utility/mc_fixtures_comics:fixture_sets_test                           PASSED in 0.4s
+//utility/mc_fixtures_comics:comics_test                                 FAILED in 0.8s
+//utility/mc_fixtures_comics:provider_contract_test                      FAILED in 0.9s
+=== M3 server_error set body differs
+INFO: Build completed, 1 test FAILED, 22 total actions
+//utility/mc_fixtures_comics:comics_test                                 PASSED in 0.7s
+//utility/mc_fixtures_comics:provider_contract_test                      PASSED in 1.0s
+//utility/mc_fixtures_comics:fixture_sets_test                           FAILED in 0.3s
+=== M4 no id tie-break
+=== M5 creator surnames partly unreachable
+INFO: Build completed, 1 test FAILED, 22 total actions
+//utility/mc_fixtures_comics:comics_test                                 PASSED in 0.7s
+//utility/mc_fixtures_comics:fixture_sets_test                           PASSED in 0.3s
+//utility/mc_fixtures_comics:provider_contract_test                      FAILED in 0.9s
+=== M6 banned word back
+INFO: Build completed, 1 test FAILED, 28 total actions
+//utility/mc_fixtures_comics:comics_test                                 PASSED in 0.7s
+//utility/mc_fixtures_comics:fixture_sets_test                           PASSED in 0.3s
+//utility/mc_fixtures_comics:provider_contract_test                      FAILED in 0.9s
+=== restored
+/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/T-0038-engineer/mut.sh: line 23: syntax error near unexpected token `{'
+/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/T-0038-engineer/mut.sh: line 23: `  if (bySeries != 0) {'
+=== M4 no id tie-break
+INFO: Build completed, 1 test FAILED, 28 total actions
+//utility/mc_fixtures_comics:fixture_sets_test                           PASSED in 0.3s
+//utility/mc_fixtures_comics:provider_contract_test                      PASSED in 0.8s
+//utility/mc_fixtures_comics:comics_test                                 FAILED in 0.7s

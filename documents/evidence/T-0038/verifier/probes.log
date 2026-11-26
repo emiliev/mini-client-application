@@ -1,0 +1,25 @@
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a4f8e6eca40aa2f76`...
+Downloading packages...
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a4f8e6eca40aa2f76`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a4f8e6eca40aa2f76/utility/mc_fixtures_comics/test/zz_t0038_verifier_probe_test.dart
+00:00 +0: VP titleStartsWith VP1 case, whitespace, empty, unicode, punctuation
+00:00 +1: VP characterId VP2 unknown, non-numeric, overflow, padded, combined
+00:00 +2: VP characterId VP3 reverse lookup is complete for every character
+00:00 +3: VP offset/limit VP4 boundaries, above max, negative, overflow, empty
+00:00 +4: VP offset/limit VP5 every orderBy pages stably and totally, any page size
+00:01 +5: VP determinism VP6 request order does not change a response
+00:01 +6: VP determinism VP7 another seed changes every non-name field family
+00:01 +7: VP errors and consistency with characters VP8 404 bodies name the raw id; shapes match characters
+00:01 +8: VP errors and consistency with characters VP9 server_error scenario vs set, empty scenario keeps 400s
+scenario code=injected_failure characters code=injected_failure
+set code=server_error
+00:01 +9: VP data shape over all 2,400 comics VP10 documented invariants hold for every comic
+creator names in use (60): [Ada Alder, Ada Brook, Ada Castell, Ada Dunmore, Ada Eastwick, Bruno Alder, Bruno Brook, Bruno Castell, Bruno Dunmore, Bruno Eastwick, Calla Alder, Calla Brook, Calla Castell, Calla Dunmore, Calla Eastwick, Dmitri Alder, Dmitri Brook, Dmitri Castell, Dmitri Dunmore, Dmitri Eastwick, Esme Alder, Esme Brook, Esme Castell, Esme Dunmore, Esme Eastwick, Farid Alder, Farid Brook, Farid Castell, Farid Dunmore, Farid Eastwick, Greta Alder, Greta Brook, Greta Castell, Greta Dunmore, Greta Eastwick, Hiro Alder, Hiro Brook, Hiro Castell, Hiro Dunmore, Hiro Eastwick, Ines Alder, Ines Brook, Ines Castell, Ines Dunmore, Ines Eastwick, Jonas Alder, Jonas Brook, Jonas Castell, Jonas Dunmore, Jonas Eastwick, Kira Alder, Kira Brook, Kira Castell, Kira Dunmore, Kira Eastwick, Lev Alder, Lev Brook, Lev Castell, Lev Dunmore, Lev Eastwick]
+series titles: [Spindle Chronicles, Spire Chronicles, Sparrow Chronicles, Amber Chronicles, Brass Chronicles, Cinder Chronicles, Ember Chronicles, Frost Chronicles, Gale Chronicles, Hollow Chronicles, Iron Chronicles, Jade Chronicles, Spindle Station, Spire Station, Sparrow Station, Amber Station, Brass Station, Cinder Station, Ember Station, Frost Station, Gale Station, Hollow Station, Iron Station, Jade Station, Spindle Legacy, Spire Legacy, Sparrow Legacy, Amber Legacy, Brass Legacy, Cinder Legacy, Ember Legacy, Frost Legacy, Gale Legacy, Hollow Legacy, Iron Legacy, Jade Legacy, Spindle Vanguard, Spire Vanguard, Sparrow Vanguard, Amber Vanguard, Brass Vanguard, Cinder Vanguard, Ember Vanguard, Frost Vanguard, Gale Vanguard, Hollow Vanguard, Iron Vanguard, Jade Vanguard, Spindle Harbor, Spire Harbor, Sparrow Harbor, Amber Harbor, Brass Harbor, Cinder Harbor, Ember Harbor, Frost Harbor, Gale Harbor, Hollow Harbor, Iron Harbor, Jade Harbor, Spindle Requiem, Spire Requiem, Sparrow Requiem, Amber Requiem, Brass Requiem, Cinder Requiem, Ember Requiem, Frost Requiem, Gale Requiem, Hollow Requiem, Iron Requiem, Jade Requiem, Spindle Frontier, Spire Frontier, Sparrow Frontier, Amber Frontier, Brass Frontier, Cinder Frontier, Ember Frontier, Frost Frontier, Gale Frontier, Hollow Frontier, Iron Frontier, Jade Frontier, Spindle Gambit, Spire Gambit, Sparrow Gambit, Amber Gambit, Brass Gambit, Cinder Gambit, Ember Gambit, Frost Gambit, Gale Gambit, Hollow Gambit, Iron Gambit, Jade Gambit, Spindle Orbit, Spire Orbit, Sparrow Orbit, Amber Orbit, Brass Orbit, Cinder Orbit, Ember Orbit, Frost Orbit, Gale Orbit, Hollow Orbit, Iron Orbit, Jade Orbit, Spindle Reckoning, Spire Reckoning, Sparrow Reckoning, Amber Reckoning, Brass Reckoning, Cinder Reckoning, Ember Reckoning, Frost Reckoning, Gale Reckoning, Hollow Reckoning, Iron Reckoning, Jade Reckoning]
+00:02 +10: VP data shape over all 2,400 comics VP11 every distinct characterId is a 200 on the real characters route, for seeds 42 and 7
+seed 42: 1499 distinct characters linked, all 200
+seed 7: 1489 distinct characters linked, all 200
+00:04 +11: All tests passed!
+HEAD: 49db1a9, rc=0

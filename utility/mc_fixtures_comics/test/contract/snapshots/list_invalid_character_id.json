@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_parameter",
+      "message": "Query parameter \"characterId\" must be an integer id",
+      "parameter": "characterId"
+    }
+  },
+  "request": "GET /v1/comics?characterId=x",
+  "status": 400
+}
