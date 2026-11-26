@@ -64,6 +64,7 @@ As with T-0032 and T-0041, this package is the shape the P1-24 bricks copy for e
 - 2026-11-26: Created (TL); dispatched after T-0044 merged.
 - 2026-11-26 (Engineer): Branched from `origin/main` `5cdb28c`. Every generator built on the first try: **no codegen shim failed on a real-world case** (an injectable `@module`, a freezed union with public cases and `includeIfNull: false` are new; F-0046 fact 1). Two test-kit gaps found on the way and fixed in `mc_test_steps` (generic steps): queued real storage writes needed more rounds of real time (F-0046 fact 2), and there was no way to type character by character or to let a set amount of fake time pass.
 - 2026-11-27 (Engineer): Merged `origin/main` `f624f21` (T-0045, T-0047); `fvm flutter pub get --offline` left both locks unchanged. Gates, safety and e2e re-run on the merged tree. Handed off; evidence in `documents/evidence/T-0046/engineer/`.
+- 2026-11-27 (Engineer): Review round (TL items 1 to 12, one round; below). Merged `origin/main` `fab18f0` and `1d9bde1` (docs only). Re-handed off.
 
 ## Outcome
 **Handed off** for review and verification on `fleet/T-0046-discovery-search`. Finding: [F-0046](../findings/F-0046-search-exemplar.md). Evidence: [`documents/evidence/T-0046/engineer/`](../evidence/T-0046/engineer/).
@@ -137,3 +138,37 @@ No test deleted, skipped or weakened; no `// ignore:`. Changed shared test code:
 - A same-frame double tap on a result calls the navigator twice (intents are fire-and-forget; comics_details' cast has the same shape).
 - A query of two bare combining marks passes the client's 2-character check and gets the backend's `400`, shown as "Something went wrong" with Retry (the contract folds before counting).
 - Stale requests are not cancelled (in-process backend; F-0046 fact 7).
+
+## Review round (TL decisions 1 to 4, findings 5 to 12)
+Every fix has a `T-0046-ACn` test that fails without it, and each is a mutation in [mutations.sh](../evidence/T-0046/engineer/mutations.sh) (named in the last column).
+
+| # | Fix | Tests (fail without the fix) | Mutation |
+|---|---|---|---|
+| 1 | The suggestions endpoint is gone from the feature: no API method, no `SuggestionsDto`, no contract test (the backend route stays in `mc_fixtures_discovery`). F-0046 records type-ahead suggestions as a future SR variant | byte identity still 11/11 (the DTO and API outputs changed and still equal build_runner's) | — |
+| 2 | `app_core` exemption accepted; no code change | gates run with `MC_COVERAGE_EXEMPT=app/wiring/app_core` | — |
+| 3 | `DebouncedQuery.submit(text)` in `mc_paging`: fires at once, cancels a pending search, records the query as searched (dedup), a blank one clears only after a search, nothing after `dispose`. The bloc uses it for a tapped recent search (new event `submitted`) and for the flow's initial query | `mc_paging:debounced_query_test` "T-0046-AC6" ×5 (solitary). BDD "Tapping a recent search searches it at once" (the request is out after a zero-time frame; no second one at 300 ms), "A search opened with a query searches it at once" | R3-a, R3-b, R3-c, AC6-l, AC6-l2, AC5-b |
+| 4 | Field below `McAppBar` accepted | — | — |
+| 5 | The backend's `400 query_too_short` (it counts after folding) is "no result": the repository returns `null` for exactly that answer and the bloc shows the recent searches; any other 400 stays `ApiClientError`. No fold table on the client | BDD outline "A query the backend counts as too short shows the recent searches, not a failure" × `é` (0 requests), `e` + U+0301 and two U+0301 (1 request each): no failure, no Retry, `no error was reported` (new generic step). `:contract_test` "T-0046-AC2" ×4 (`s`, `é`, `e`+U+0301, two U+0301 → null; another 400 → `ApiClientError`) | R5-a, R5-b |
+| 6 | A failed save reads the stored list again (`SearchHistory.load`), so the list the bloc read at start is not lost behind the save's version. The duplicate version check after a save is gone (a mutation of the first one survived behind the second; one check now) | BDD "A save that fails while the stored searches are still being read keeps them" (an earlier flow saved "amber"; a new flow opened for "spi" without waiting, storage made unwritable, then the field cleared: "amber" shows) | AC6-m, AC6-j |
+| 7 | Clear checks its `Result`: on failure the list comes back and an inline error says so (`idle(clearFailed: true)`, a live region; new ARB key in en, de, `en_XA`) | BDD "A Clear that fails keeps the recent searches and says so" (and the next flow still has them), "A Clear that fails explains itself in German" | R7-a, R7-b |
+| 8 | A second open within 500 ms is ignored (`openGuard`, a timer in the bloc; by then the opened page covers the results) | BDD "A double tap on a result hands it over once", "A result can be opened again once the first open has settled" (two opens 500 ms apart) | R8-a, R8-b |
+| 9 | The section title carries the total ("Characters (152)") and the action only what it shows ("Show 20"). "Show 20 of 152" did not fit: `McSectionHeader` gives the action a third of the row and ellipsised it ("Show 20 of 1...", F-0046 fact 16) | BDD "Typing a name ..." (`Characters (152)`, `Comics (400)`, both sections offer `Show 20`, checked not ellipsised), "Show more on a section picks its chip", German `Figuren (152)`, `20 zeigen`, pseudo-locale. Goldens below | R9, AC1-g |
+| 10 | The flow treats a blank `initialQuery` (`/search?q=`) as none: the recent searches, and the field autofocuses | BDD "A search opened with a blank query opens on the recent searches, ready to type" (focus, 0 requests); "A search opened with a query ..." checks the field is not focused | R10 |
+| 11 | `searchHistoryKey` → `searchHistoryStoreKey` | — | AC6-o follows the name |
+| 12 | The mapper requires exactly the groups `[character, comic]`, in that order; anything else is a `FormatException` (`ApiMalformed`) | `:contract_test` "T-0046-AC7: values outside the contract are malformed" (reversed, missing, duplicated, extra, none) | R12 |
+
+Also changed in the shared steps (`mc_test_steps`): `the app can no longer write to storage` now keeps reads working (the directory becomes a link to a read-only copy; the first version replaced it with a file, which broke reads too; F-0046 fact 14); new `no error was reported`.
+
+**Not in this task:** a cold deep link to `/search` has no back button (P-087).
+
+**Merged** `origin/main` `1d9bde1` (docs only; locks unchanged).
+
+**Results on the merged tree:**
+- gates [PASS](../evidence/T-0046/engineer/T-0046-AC8_gates.md): 134/134 tests (every feature, `//app/...`, `mc_test_steps`, `mc_paging`'s dependants uncached), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures check, relative paths; **coverage discovery_search 333/333, discovery_wiring 22/22, `mc_paging` 129/129 ([report](../evidence/T-0046/engineer/mc_paging_coverage.txt)); `app_core` 85.3 % exempt (TL decision 2)**;
+- AC7: byte identity 11/11, cutoff, not committed, gen-l10n parity (all in the gates run); `tool/ide_sync --env dev`, `fvm flutter analyze` (no issues), [`T-0042-AC4_safety.sh`](../evidence/T-0046/engineer/T-0042-AC4_safety.md) **PASS** (0 actions and 0 of 134 tests executed on the synced tree, 46,767 outputs byte-identical), `tool/ide_sync --clean`;
+- mutations: [**59 of 59 killed**](../evidence/T-0046/engineer/mutations-review-round.log) by a failing test, none by a compile error (the 46 earlier ones, texts updated where the code moved, plus 13 for this round). Along the way AC6-j first survived (a second version check after a save masked the first; one check now);
+- e2e on a fresh `mc-T-0046-engineer-47198` (deleted): **7 of 7 PASS** ([summary](../evidence/T-0046/engineer/mini_client/e2e-summary.md)); screenshots 30 to 37 refreshed and looked at (32 and 36 show `Characters (152)`, `Comics (400)` and `Show 20`).
+
+**Goldens changed (2, both looked at; before and after in `documents/evidence/T-0046/engineer/goldens/review-round/`):** `search_results_all.png` and `search_results_comics.png` (the section titles carry the count, the action reads "Show 20"). The other 3 are unchanged.
+
+**Test integrity:** no test deleted, skipped or weakened; no `// ignore:`. Removed with the feature code it tested (TL decision 1): the contract test "the suggestions answer round-trips byte for byte". Changed to the new behaviour: the scenarios for a tapped recent search and a linked query now require the search at 0 ms (they allowed 300 ms); "See all" texts became the new labels; the contract test's `s` case moved from "a 400 failure" to "no result".

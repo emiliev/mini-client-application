@@ -8,21 +8,21 @@
 | Project | `/tmp/mc-T-0046-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0046-engineer-59251` |
-| Simulator UDID | `5CEC662A-A1C1-45B4-AB09-4E97E67AD508` |
+| Simulator | `mc-T-0046-engineer-47198` |
+| Simulator UDID | `4780FBDB-F94C-40A7-A44D-D2459449C4E3` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-26T22:08:10Z |
-| Finished | 2026-11-26T22:11:57Z |
+| Started | 2026-11-26T23:34:54Z |
+| Finished | 2026-11-26T23:38:51Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/characters_deeplink_test.dart` | PASS | 44 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
+| `integration_test/characters_deeplink_test.dart` | PASS | 43 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
 | `integration_test/characters_journey_test.dart` | PASS | 25 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
-| `integration_test/characters_link_after_flow_test.dart` | PASS | 20 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
-| `integration_test/comic_deeplink_test.dart` | PASS | 26 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
-| `integration_test/comics_journey_test.dart` | PASS | 32 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
+| `integration_test/characters_link_after_flow_test.dart` | PASS | 21 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
+| `integration_test/comic_deeplink_test.dart` | PASS | 28 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
+| `integration_test/comics_journey_test.dart` | PASS | 35 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
 | `integration_test/search_deeplink_test.dart` | PASS | 26 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
 | `integration_test/search_journey_test.dart` | PASS | 33 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
 
