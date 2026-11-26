@@ -17,25 +17,25 @@
       },
       {
         "cover": {
-          "path": "mock-asset://characters/015",
+          "path": "mock-asset://characters/011",
           "variant": "portrait_large"
         },
-        "id": 500069,
-        "issueNumber": 10,
-        "releaseDate": "2010-10-14",
+        "id": 500061,
+        "issueNumber": 2,
+        "releaseDate": "2010-02-03",
         "seriesId": 400003,
-        "title": "Amber Chronicles #10"
+        "title": "Amber Chronicles #2"
       },
       {
         "cover": {
-          "path": "mock-asset://characters/003",
+          "path": "mock-asset://characters/017",
           "variant": "portrait_large"
         },
-        "id": 500070,
-        "issueNumber": 11,
-        "releaseDate": "2010-11-14",
+        "id": 500062,
+        "issueNumber": 3,
+        "releaseDate": "2010-03-12",
         "seriesId": 400003,
-        "title": "Amber Chronicles #11"
+        "title": "Amber Chronicles #3"
       }
     ],
     "total": 2400

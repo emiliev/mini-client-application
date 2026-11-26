@@ -143,76 +143,86 @@ void main() {
       expect(dates, [...dates]..sort((a, b) => b.compareTo(a)));
     });
 
-    test('T-0038-AC2: title order lists a series by issue number, not text',
-        () async {
-      final asc = await _get(
-        dio,
-        '/v1/comics?titleStartsWith=Amber%20Chronicles&limit=100',
-      );
-      expect([for (final c in _results(asc)) c['issueNumber']], [
-        for (var i = 1; i <= issuesPerSeries; i++) i,
-      ]);
-      final desc = await _get(
-        dio,
-        '/v1/comics?titleStartsWith=Amber%20Chronicles&limit=100'
-        '&orderBy=-title',
-      );
-      expect([for (final c in _results(desc)) c['issueNumber']], [
-        for (var i = issuesPerSeries; i >= 1; i--) i,
-      ]);
-      // The whole listing is in (series title, issue) order.
-      final all = <(String, int)>[];
-      for (var offset = 0; offset < _comicCount; offset += 100) {
-        final page = await _get(dio, '/v1/comics?offset=$offset&limit=100');
-        for (final c in _results(page)) {
-          final title = c['title']! as String;
-          all.add((
-            title.substring(0, title.lastIndexOf(' #')),
-            c['issueNumber']! as int,
-          ));
-        }
-      }
-      final sorted = [...all]
-        ..sort((a, b) {
-          final bySeries = a.$1.compareTo(b.$1);
-          return bySeries != 0 ? bySeries : a.$2.compareTo(b.$2);
-        });
-      expect(all, sorted);
-    });
-
-    test('T-0038-AC2: equal sort keys break on id, ascending, both ways',
-        () async {
-      // Several comics share a release date, so the tie-break has work to do.
-      final byDate = <String, List<int>>{};
-      for (final c in ComicUniverse(42).byTitle) {
-        (byDate[c.releaseDate.toIso8601String()] ??= []).add(c.id);
-      }
-      final tied = byDate.values.where((ids) => ids.length > 1).toList();
-      expect(tied, isNotEmpty, reason: 'the data must contain ties');
-
-      for (final order in ['releaseDate', '-releaseDate']) {
-        final ids = <int>[];
-        final dates = <String>[];
+    test(
+      'T-0038-AC2: title order lists a series by issue number, not text',
+      () async {
+        final asc = await _get(
+          dio,
+          '/v1/comics?titleStartsWith=Amber%20Chronicles&limit=100',
+        );
+        expect(
+          [for (final c in _results(asc)) c['issueNumber']],
+          [
+            for (var i = 1; i <= issuesPerSeries; i++) i,
+          ],
+        );
+        final desc = await _get(
+          dio,
+          '/v1/comics?titleStartsWith=Amber%20Chronicles&limit=100'
+          '&orderBy=-title',
+        );
+        expect(
+          [for (final c in _results(desc)) c['issueNumber']],
+          [
+            for (var i = issuesPerSeries; i >= 1; i--) i,
+          ],
+        );
+        // The whole listing is in (series title, issue) order.
+        final all = <(String, int)>[];
         for (var offset = 0; offset < _comicCount; offset += 100) {
-          final page = await _get(
-            dio,
-            '/v1/comics?offset=$offset&limit=100&orderBy=$order',
-          );
+          final page = await _get(dio, '/v1/comics?offset=$offset&limit=100');
           for (final c in _results(page)) {
-            ids.add(c['id']! as int);
-            dates.add(c['releaseDate']! as String);
+            final title = c['title']! as String;
+            all.add((
+              title.substring(0, title.lastIndexOf(' #')),
+              c['issueNumber']! as int,
+            ));
           }
         }
-        var checked = 0;
-        for (var i = 1; i < ids.length; i++) {
-          if (dates[i] == dates[i - 1]) {
-            checked++;
-            expect(ids[i], greaterThan(ids[i - 1]), reason: '$order at $i');
-          }
+        final sorted = [...all]
+          ..sort((a, b) {
+            final bySeries = a.$1.compareTo(b.$1);
+            return bySeries != 0 ? bySeries : a.$2.compareTo(b.$2);
+          });
+        expect(all, sorted);
+      },
+    );
+
+    test(
+      'T-0038-AC2: equal sort keys break on id, ascending, both ways',
+      () async {
+        // Several comics share a release date, so the tie-break has work to do.
+        final byDate = <String, List<int>>{};
+        for (final c in ComicUniverse(42).byTitle) {
+          (byDate[c.releaseDate.toIso8601String()] ??= []).add(c.id);
         }
-        expect(checked, greaterThan(0), reason: order);
-      }
-    });
+        final tied = byDate.values.where((ids) => ids.length > 1).toList();
+        expect(tied, isNotEmpty, reason: 'the data must contain ties');
+
+        for (final order in ['releaseDate', '-releaseDate']) {
+          final ids = <int>[];
+          final dates = <String>[];
+          for (var offset = 0; offset < _comicCount; offset += 100) {
+            final page = await _get(
+              dio,
+              '/v1/comics?offset=$offset&limit=100&orderBy=$order',
+            );
+            for (final c in _results(page)) {
+              ids.add(c['id']! as int);
+              dates.add(c['releaseDate']! as String);
+            }
+          }
+          var checked = 0;
+          for (var i = 1; i < ids.length; i++) {
+            if (dates[i] == dates[i - 1]) {
+              checked++;
+              expect(ids[i], greaterThan(ids[i - 1]), reason: '$order at $i');
+            }
+          }
+          expect(checked, greaterThan(0), reason: order);
+        }
+      },
+    );
 
     test('T-0038-AC2: titleStartsWith is a case-insensitive prefix', () async {
       final page = await _get(dio, '/v1/comics?titleStartsWith=SPI&limit=100');

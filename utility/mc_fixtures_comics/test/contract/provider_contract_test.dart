@@ -256,15 +256,18 @@ void main() {
       }
     });
 
-    test('T-0038-AC3: the whole creator pool is reachable, all 10 surnames', () {
-      final names = <String>{};
-      for (final c in ComicUniverse(42).byTitle) {
-        for (final credit in c.creators) {
-          names.add(credit.name);
+    test(
+      'T-0038-AC3: the whole creator pool is reachable, all 10 surnames',
+      () {
+        final names = <String>{};
+        for (final c in ComicUniverse(42).byTitle) {
+          for (final credit in c.creators) {
+            names.add(credit.name);
+          }
         }
-      }
-      expect(names, hasLength(creatorCount));
-      expect({for (final n in names) n.split(' ').last}, hasLength(10));
-    });
+        expect(names, hasLength(creatorCount));
+        expect({for (final n in names) n.split(' ').last}, hasLength(10));
+      },
+    );
   });
 }

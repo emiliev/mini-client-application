@@ -90,8 +90,10 @@ else
 fi
 
 # 4. gates
-tests() { bzw test --nocache_test_results //utility/mc_fixtures_comics/... && bzw test //...; }
-gate "test //... (comics uncached)" tests
+# Two gates with their own logs, so the reported "Executed" line is the
+# uncached comics run, not the cached repo-wide run after it.
+gate "test comics (uncached)" bzw test --nocache_test_results //utility/mc_fixtures_comics/...
+gate "test //..." bzw test //...
 gate "build --config=lint //..." bzw build --config=lint //...
 gate "mc_arch_check" bzw run //tool/mc_arch_check:bin
 gate "rules_fork.sh check" "$REPO/tool/rules_fork.sh" check
@@ -107,9 +109,10 @@ coverage() {
 }
 gate "coverage >= $MIN %" coverage
 total=$(grep -a '^TOTAL' "$work/coverage.txt" 2>/dev/null || echo 'TOTAL not measured')
-tests_line=$(plain "$(logname "test //... (comics uncached)")" 2>/dev/null | grep -a 'Executed' | tail -1)
+tests_line=$(plain "$(logname "test comics (uncached)")" 2>/dev/null | grep -a 'Executed' | tail -1)
+all_line=$(plain "$(logname "test //...")" 2>/dev/null | grep -a 'Executed' | tail -1)
 
 report "" "| Gate | Result |" "|---|---|" "${rows[@]}" "" \
-  "- tests: ${tests_line:-?}" "- mc_fixtures_comics coverage: $total (threshold $MIN %)" \
+  "- comics tests, uncached: ${tests_line:-?}" "- test //...: ${all_line:-?}" "- mc_fixtures_comics coverage: $total (threshold $MIN %)" \
   ${fails[@]+"${fails[@]}"}
 finish T-0038-AC4-gates $([[ $ok -eq 1 ]] && echo 0 || echo 1)

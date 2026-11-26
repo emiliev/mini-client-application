@@ -6,25 +6,25 @@
     "results": [
       {
         "cover": {
-          "path": "mock-asset://characters/017",
+          "path": "mock-asset://characters/021",
           "variant": "portrait_large"
         },
-        "id": 501740,
+        "id": 501500,
         "issueNumber": 1,
-        "releaseDate": "2011-01-17",
-        "seriesId": 400087,
-        "title": "Amber Gambit #1"
+        "releaseDate": "1988-01-10",
+        "seriesId": 400075,
+        "title": "Amber Frontier #1"
       },
       {
         "cover": {
-          "path": "mock-asset://characters/011",
+          "path": "mock-asset://characters/001",
           "variant": "portrait_large"
         },
-        "id": 501749,
-        "issueNumber": 10,
-        "releaseDate": "2011-10-22",
-        "seriesId": 400087,
-        "title": "Amber Gambit #10"
+        "id": 501501,
+        "issueNumber": 2,
+        "releaseDate": "1988-02-25",
+        "seriesId": 400075,
+        "title": "Amber Frontier #2"
       }
     ],
     "total": 2400

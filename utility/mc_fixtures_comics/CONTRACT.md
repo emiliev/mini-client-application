@@ -39,7 +39,7 @@ Filters combine (`characterId` and `titleStartsWith` both apply). Response `200`
 }
 ```
 
-`total` counts the matches of the whole query (not the page); `count` is `results.length`. An offset past the end gives `count: 0`. `releaseDate` is a `YYYY-MM-DD` date. Note that `title` sorts as text, so `#10` comes before `#2`.
+`total` counts the matches of the whole query (not the page); `count` is `results.length`. An offset past the end gives `count: 0`. `releaseDate` is a `YYYY-MM-DD` date. `title` orders by series title, then issue number, so a series lists `#1`, `#2`, ... `#20`; `-title` is the exact reverse.
 
 A bad query value gives `400` with `{"error": {"code": "invalid_parameter", "message": "...", "parameter": "limit"}}`.
 
@@ -88,12 +88,12 @@ Every cover, series cover and variant cover is an `ApiImage`: `path` plus `varia
 | Issues per series | 20, ids `500000` to `502399` (series `n`, issue `k`: `500000 + 20n + k - 1`) |
 | Comics | 2,400 |
 | Creators | a pool of 60, ids `300000` to `300059` |
-| First titles in order | `Amber Chronicles #1`, `#10`, `#11` |
+| First titles in order | `Amber Chronicles #1`, `#2`, `#3` (issue order, ids `500060` to `500062`) |
 | `titleStartsWith=spi` | matches the series Spindle and Spire (400 comics); `Sparrow *` does not match |
 | `characterId=100000` | 6 comics |
-| Page 2 at 40 per page | `offset=40&limit=2` starts at `Amber Gambit #1` |
+| `offset=40&limit=2` | `Amber Frontier #1` and `#2` (ids `501500`, `501501`): the 21st to 40th are `Amber Crossing #1` to `#20` |
 | `GET /v1/comics/500000` | `Spindle Chronicles #1`, series `400000` |
-| Titles, series and creator names | do not depend on the seed; every other field does |
+| Independent of the seed | comic ids, issue numbers, comic titles, series ids and titles, series cover and `comicIds`, creator pool ids and names, and the synthetic sets. Everything else (descriptions, years, release dates, prices, page counts, credits, `characterIds`, variants, comic covers) depends on it |
 
 ## Scenarios
 
@@ -104,14 +104,14 @@ Every cover, series cover and variant cover is an `ApiImage`: `path` plus `varia
 
 ## Fixture sets
 
-Named sets for feature tests (plan 05 §3.4), exported as `comicsFixtureSets`. A test registers them once (`comicsFixtureSets.forEach(McFixtureSets.register)`) and switches one on per scenario (`the backend serves {'comics.default'}`). Each set serves all three routes. The first three also exist as scenarios on the default domain; the sets are for tests that need only that domain.
+Named sets for feature tests (plan 05 §3.4), exported as `comicsFixtureSets`. A test registers them once (`comicsFixtureSets.forEach(McFixtureSets.register)`) and switches one on per scenario (`the backend serves {'comics.default'}`). Each set serves all three routes. Only `comics.empty` and `comics.server_error` also exist as scenarios on the default domain, and the set and the scenario of the same name answer the same bodies (`server_error` is `injected_failure` with status `500`).
 
 | Set | Cast | Test-facing facts |
 |---|---|---|
 | `comics.default` | `ComicsMockDomain` (the 2,400 above, seed 42) | See the table above |
 | `comics.paged_45` | `SyntheticComicsDomain(45)` | `Issue 01` to `Issue 45` (ids `500000` to `500044`) in one series, `Synthetic Series` (id `400000`, `comicCount` 45); at 30 per page: two pages (30 + 15); covers cycle `000` to `023`; no creators, characters or variants; no scenarios |
 | `comics.empty` | `SyntheticComicsDomain(0)` | `total: 0`, `count: 0`; every comic and series detail is `404`; no scenarios |
-| `comics.server_error` | `FailingComicsDomain` | every route answers `500` with `error.code` `server_error`; no scenarios |
+| `comics.server_error` | `FailingComicsDomain` | every route answers `500` with `error.code` `injected_failure`, the same body as the scenario; no scenarios |
 
 ## Snapshots
 

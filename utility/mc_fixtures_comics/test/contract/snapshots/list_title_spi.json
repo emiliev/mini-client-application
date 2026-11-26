@@ -17,25 +17,25 @@
       },
       {
         "cover": {
-          "path": "mock-asset://characters/000",
+          "path": "mock-asset://characters/013",
           "variant": "portrait_large"
         },
-        "id": 500009,
-        "issueNumber": 10,
-        "releaseDate": "2020-10-24",
+        "id": 500001,
+        "issueNumber": 2,
+        "releaseDate": "2020-02-01",
         "seriesId": 400000,
-        "title": "Spindle Chronicles #10"
+        "title": "Spindle Chronicles #2"
       },
       {
         "cover": {
-          "path": "mock-asset://characters/016",
+          "path": "mock-asset://characters/019",
           "variant": "portrait_large"
         },
-        "id": 500010,
-        "issueNumber": 11,
-        "releaseDate": "2020-11-15",
+        "id": 500002,
+        "issueNumber": 3,
+        "releaseDate": "2020-03-03",
         "seriesId": 400000,
-        "title": "Spindle Chronicles #11"
+        "title": "Spindle Chronicles #3"
       }
     ],
     "total": 400
