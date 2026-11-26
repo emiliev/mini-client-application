@@ -5,12 +5,12 @@
     "itemCount": 3,
     "items": [
       {
-        "id": 500060,
+        "id": 500062,
         "thumbnail": {
-          "path": "mock-asset://characters/003",
+          "path": "mock-asset://characters/017",
           "variant": "portrait_large"
         },
-        "title": "Amber Chronicles #1"
+        "title": "Amber Chronicles #3"
       },
       {
         "id": 500061,
@@ -21,12 +21,12 @@
         "title": "Amber Chronicles #2"
       },
       {
-        "id": 500062,
+        "id": 500060,
         "thumbnail": {
-          "path": "mock-asset://characters/017",
+          "path": "mock-asset://characters/003",
           "variant": "portrait_large"
         },
-        "title": "Amber Chronicles #3"
+        "title": "Amber Chronicles #1"
       }
     ],
     "name": "Origin Stories",
@@ -36,9 +36,9 @@
   "request": "POST /v1/me/lists as u-100",
   "requestBody": {
     "comicIds": [
-      500060,
+      500062,
       500061,
-      500062
+      500060
     ],
     "description": "First issues",
     "name": " Origin Stories ",

@@ -76,32 +76,41 @@ mutate "V8 name constant 61" $RL "const int nameMaxLength = 60;" "const int name
 # --- validation: description -------------------------------------------
 mutate "V9 description limit exclusive" $H "raw.runes.length > descriptionMaxLength" "raw.runes.length >= descriptionMaxLength"
 mutate "V10 description limit off by one" $H "raw.runes.length > descriptionMaxLength" "raw.runes.length > descriptionMaxLength + 1"
-mutate "V11 description measured in UTF-16 units" $H "raw.runes.length > descriptionMaxLength" "raw.length > descriptionMaxLength"
+mutate "V11 description measured in UTF-16 units" $H "  if (raw != null &&
+      (raw is! String || raw.runes.length > descriptionMaxLength)) {" "  if (raw != null && (raw is! String || raw.length > descriptionMaxLength)) {"
 mutate "V12 non-string description accepted" $H "(raw is! String || raw.runes.length > descriptionMaxLength)" "(raw is String && raw.runes.length > descriptionMaxLength)"
 mutate "V13 description constant 281" $RL "const int descriptionMaxLength = 280;" "const int descriptionMaxLength = 281;"
 mutate "V14 update keeps the old description when absent" $H "..description = body['description'] as String? ?? ''" "..description = (body['description'] as String?) ?? list.description"
 # --- validation: visibility ---------------------------------------------
-mutate "V15 any visibility accepted" $H "if (!visibilities.contains(raw)) {" "if (false) {"
+mutate "V15 any string is a visibility" $H "if (!visibilities.contains(raw)) {" "if (raw is! String) {"
 mutate "V16 visibility case-insensitive" $H "if (!visibilities.contains(raw)) {" "if (!visibilities.contains(raw is String ? raw.toLowerCase() : raw)) {"
-mutate "V17 update skips the visibility check" $H "_checkVisibility(body['visibility']);" "null;"
+mutate "V17 update skips the visibility check" $H "_checkDescription(body['description']) ??
+          _checkVisibility(body['visibility']);" "_checkDescription(body['description']);"
 mutate "V18 update does not store visibility" $H "..visibility = body['visibility'] as String" "..visibility = list.visibility"
 # --- validation: comicIds -----------------------------------------------
 mutate "V19 comicIds shape unchecked" $H "if (raw is! List || raw.any((e) => e is! int)) {" "if (raw is! List) {"
 mutate "V20 more than 100 allowed (limit 101)" $H "ids.length > maxComicsPerList" "ids.length > maxComicsPerList + 1"
 mutate "V21 100 rejected" $H "ids.length > maxComicsPerList" "ids.length >= maxComicsPerList"
-mutate "V22 duplicates allowed" $H "if (!seen.add(id)) {" "if (!seen.add(id) && false) {"
-mutate "V23 unknown comics allowed" $H "if (universe.findComic(id) == null) {" "if (false) {"
+mutate "V22 duplicates allowed" $H "if (!seen.add(id)) {" "if (seen.length > 1000 && !seen.add(id)) {"
+mutate "V23 unknown comics allowed" $H "if (universe.findComic(id) == null) {" "if (universe.findComic(id) == null && ids.length > 1000) {"
 mutate "V24 create skips the comicIds check" $H "_checkVisibility(body['visibility']) ??
           _checkComicIds(body['comicIds'], universe);" "_checkVisibility(body['visibility']);"
 mutate "V25 items route skips the comicIds check" $H "final error = _checkComicIds(body['comicIds'], universe);" "const MockResponse? error = null;"
 mutate "V26 max constant 101" $RL "const int maxComicsPerList = 100;" "const int maxComicsPerList = 101;"
-mutate "V27 unknown ids are checked before duplicates" $H "final seen = <int>{};
+mutate "V27 unknown ids are checked before duplicates" $H "  final seen = <int>{};
   for (final id in ids) {
-    if (!seen.add(id)) {" "final seen = <int>{};
-  for (final id in ids.where((i) => universe.findComic(i) != null)) {
+    if (!seen.add(id)) {" "  for (final id in ids) {
+    if (universe.findComic(id) == null) {
+      return _invalid('unknown_comic', 'x', {});
+    }
+  }
+  final seen = <int>{};
+  for (final id in ids) {
     if (!seen.add(id)) {"
 # --- auth and ownership -------------------------------------------------
-mutate "A1 no bearer needed (falls back to the first user)" $H "final user = userForAuthorization(request.headers['authorization']);" "final user = userForAuthorization(request.headers['authorization']) ?? fixtureUsers.first;"
+mutate "A1 no bearer needed (falls back to the first user)" $H "  return user == null ? _unauthenticated() : body(user, request, context);" "  return user == null && request.method == 'NOPE'
+      ? _unauthenticated()
+      : body(user ?? fixtureUsers.first, request, context);"
 mutate "A2 the Authorization header is never read" $H "request.headers['authorization']" "request.headers['x-authorization']"
 mutate "A3 unauthenticated answers 403" $H "MockResponse _unauthenticated() => MockResponse.error(
   401," "MockResponse _unauthenticated() => MockResponse.error(
@@ -111,7 +120,7 @@ mutate "A5 foreign list found (ownership ignored)" $H "for (final list in state.
 mutate "A6 foreign list answers 403" $H "MockResponse _notFound(String id) => MockResponse.error(
   404," "MockResponse _notFound(String id) => MockResponse.error(
   403,"
-mutate "A7 listing returns every user's lists" $H "..._state(context, universe, seed: seed).listsByUser[user.id]!," "..._state(context, universe, seed: seed).listsByUser.values.expand((l) => l),"
+mutate "A7 listing always returns the first user's lists" $H "..._state(context, universe, seed: seed).listsByUser[user.id]!," "..._state(context, universe, seed: seed).listsByUser['u-100']!,"
 mutate "A8 create files the list under the first user" $H "state.listsByUser[user.id]!.add(list);" "state.listsByUser['u-100']!.add(list);"
 # --- CRUD ---------------------------------------------------------------
 mutate "C1 create answers 200" $H "return MockResponse(201, _detail(list, universe));" "return MockResponse(200, _detail(list, universe));"
@@ -121,7 +130,7 @@ mutate "C4 create sorts the ids" $H "comicIds: [...(body['comicIds'] as List).ca
 mutate "C5 listing oldest first" $H "b.updatedAt.compareTo(a.updatedAt)" "a.updatedAt.compareTo(b.updatedAt)"
 mutate "C6 writes do not move updatedAt" $H "++state.ticks" "state.ticks"
 mutate "C7 ids are reused" $H "id: 'l-\${state.nextNumber++}'," "id: 'l-\${state.nextNumber}',"
-mutate "C8 writes do not persist (state rebuilt per request)" $H "if (existing != null) {" "if (false) {"
+mutate "C8 writes do not persist (state rebuilt per request)" $H "if (existing != null) {" "if (existing != null && context.store.length > 1000) {"
 mutate "C9 an item shows another comic's title" $H "'title': universe.findComic(id)!.title," "'title': universe.byTitle.first.title,"
 mutate "C10 an item shows another thumbnail" $H "'thumbnail': universe.findComic(id)!.cover.toJson()," "'thumbnail': universe.byTitle.first.cover.toJson(),"
 mutate "C11 itemCount off by one" $RL "'itemCount': comicIds.length," "'itemCount': comicIds.length + 1,"
@@ -129,16 +138,19 @@ mutate "C12 update clears the items" $H "..visibility = body['visibility'] as St
         ..updatedAt = _touch(state, context);" "..visibility = body['visibility'] as String
         ..comicIds = <int>[]
         ..updatedAt = _touch(state, context);"
-mutate "C13 seeded lists start without items" $H "comicIds: [for (final i in _seedItems[index]) universe.byTitle[i].id]," "comicIds: const [],"
+mutate "C13 seeded lists lose their first item" $H "comicIds: [for (final i in _seedItems[index]) universe.byTitle[i].id]," "comicIds: [
+            for (final i in _seedItems[index].skip(1)) universe.byTitle[i].id,
+          ],"
 # --- fixture sets and scenarios -----------------------------------------
 mutate "S1 empty set seeded" $H "if (seed) {
     void make(" "if (true) {
     void make("
-mutate "S2 empty scenario shares the default state" $H "final key = seed ? _stateKey : _emptyStateKey;" "final key = _stateKey;"
+mutate "S2 empty scenario shares the default state" $H "const String _emptyStateKey = 'library.state.empty';" "const String _emptyStateKey = 'library.state';"
 mutate "S3 server_error set body differs from the scenario" $H "'injected_failure',
       'Injected HTTP 500" "'server_error',
       'Injected HTTP 500"
-mutate "S4 server_error set misses a route" $DOM "for (final route in libraryRouteManifest) route: handlers.serverError," "for (final route in libraryRouteManifest.skip(1)) route: handlers.serverError,"
+mutate "S4 server_error set misses a route" $DOM "for (final route in libraryRouteManifest) route: handlers.serverError," "for (final route in libraryRouteManifest.skip(1))
+          route: handlers.serverError,"
 mutate "S5 server_error scenario misses a route" $DOM "for (final route in libraryRouteManifest)
           FailureRule(" "for (final route in libraryRouteManifest.skip(1))
           FailureRule("

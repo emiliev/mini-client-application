@@ -125,20 +125,33 @@ void main() {
           'name': '  Origin Stories ',
           'description': 'First issues',
           'visibility': 'public',
-          'comicIds': comicIds(3),
+          'comicIds': comicIds(3).reversed.toList(),
         },
         expectStatus: 201,
       );
       expect(created['id'], 'l-5');
       expect(created['name'], 'Origin Stories');
-      expect(_itemIds(created), comicIds(3));
+      expect(_itemIds(created), comicIds(3).reversed.toList());
+      final second = await _json(
+        dio,
+        'POST',
+        '/v1/me/lists',
+        body: {'name': 'Second', 'visibility': 'private', 'comicIds': <int>[]},
+        expectStatus: 201,
+      );
+      expect(second['id'], 'l-6', reason: 'every list gets a new id');
 
       final lists = _lists(await _json(dio, 'GET', '/v1/me/lists'));
-      expect(lists.first['id'], 'l-5', reason: 'newest write sorts first');
-      expect(lists, hasLength(4));
-      expect(lists.first['itemCount'], 3);
-      expect(lists.first['description'], 'First issues');
-      expect(lists.first['visibility'], 'public');
+      expect(lists.first['id'], 'l-6', reason: 'newest write sorts first');
+      expect(lists, hasLength(5));
+      final first = lists.firstWhere((l) => l['id'] == 'l-5');
+      expect(first['itemCount'], 3);
+      expect(first['description'], 'First issues');
+      expect(first['visibility'], 'public');
+      expect(
+        _itemIds(await _json(dio, 'GET', '/v1/me/lists/l-5')),
+        comicIds(3).reversed.toList(),
+      );
     });
 
     test('T-0047-AC2 GET one returns the items as comic summaries in '

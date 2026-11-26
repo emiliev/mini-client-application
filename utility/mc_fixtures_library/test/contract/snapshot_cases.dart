@@ -52,7 +52,7 @@ final Map<String, SnapshotCase> snapshotCases = {
       'name': ' Origin Stories ',
       'description': 'First issues',
       'visibility': 'public',
-      'comicIds': _known(3),
+      'comicIds': _known(3).reversed.toList(),
     },
   ),
   'update': const SnapshotCase(
