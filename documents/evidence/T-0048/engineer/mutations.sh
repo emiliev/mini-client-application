@@ -56,11 +56,11 @@ RESULTS_SRC=$AC/lib/src/router/flow_results.dart
 LOCATIONS=$AC/lib/src/locations/app_locations.dart
 SHEET=$AC/lib/src/sign_in/fixture_sign_in_sheet.dart
 PW_NAV=$PW/lib/src/navigators/comics_details_navigator_impl.dart
-HOME=app/mini_client/lib/src/pages/placeholder_pages.dart
+HOME_PAGE=app/mini_client/lib/src/pages/placeholder_pages.dart
 SCOPE=$FE/lib/src/di/flow_scope.dart
 
 FILES=($BLOC $PICKER $FORM $DRAFT $MAPPER $REPO_ $FLOWW $DETAILS $REVIEW $ORDER_ROW $STEPBAR $DE $BARREL
-  $TARGETS_IMPL $NAV $RESULTS_SRC $LOCATIONS $SHEET $PW_NAV $HOME $SCOPE)
+  $TARGETS_IMPL $NAV $RESULTS_SRC $LOCATIONS $SHEET $PW_NAV $HOME_PAGE $SCOPE)
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
     say "REFUSING TO RUN: $f has uncommitted edits (commit them first)"
@@ -162,7 +162,7 @@ mutate AC4-a "German Next left in English" $DE \
 mutate AC4-b "the reading order title is not flexible (overflows at 2x)" $ORDER_ROW \
   "s.replace('Expanded(child: Text(comic.title, style: text.bodyLarge)),', 'Text(comic.title, style: text.bodyLarge),')" $BDD
 # --- AC5: the app awaits the result ---------------------------------------
-mutate AC5-a "home does not show the returned list" $HOME \
+mutate AC5-a "home does not show the returned list" $HOME_PAGE \
   "s.replace('    setState(() => _lastList = (id: id, created: created));', '    setState(() => _lastList = id.isEmpty ? (id: id, created: created) : null);')" $APP
 mutate AC5-b "the edit location is not encoded" $LOCATIONS \
   "s.replace(\"'/me/lists/\${Uri.encodeComponent(id)}/edit'\", \"'/me/lists/\$id/edit'\")" $ROUTES $RESULTS
