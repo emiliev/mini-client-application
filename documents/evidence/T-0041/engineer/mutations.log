@@ -1,4 +1,4 @@
 baseline: PASS (12 targets)
-R1-a test container does not load the formatters: KILLED (FAIL  T-0041-AC4 the test container loads the formatters, as the app's root list does)
+R8-d a read that outlived its session is shown: SURVIVED
 
-1 of 1 mutations killed by a failing test
+0 of 1 mutations killed by a failing test
