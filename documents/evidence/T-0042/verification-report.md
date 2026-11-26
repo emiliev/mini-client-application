@@ -58,3 +58,13 @@ Not mutated: the exact-path BEP listing. It is covered by fixture 16 and by AC3 
 - Everything else is clean. The fix is in the check only, not in `ide_sync`.
 - `--clean` leaves empty `ios/Runner.xcodeproj` and `ios/Runner.xcworkspace` directories, and Flutter's own ignored files (`ios/Flutter/`, `GeneratedPluginRegistrant.*`, gen-l10n). None is tracked and `git status` stays clean.
 - T-0041 needs `MC_GENERATED_DART` in its BUILD before merge (engineer's follow-up 2).
+
+## Re-verification at 351e732 (narrow)
+- **Verdict: PASS.** Evidence: `documents/evidence/T-0042/verifier/re/`. No simulator was created. Bazel output base `/tmp/mc-ob-T-0042-verifier-fresh2` (fresh), shut down afterwards.
+1. **Issue 1 fixed.** `T-0042-AC4_safety.sh` on a fresh output base: PASS. It compares the unsynced run as a hash-equal subset of the synced run (21244 files, same bytes), requires 0 actions and 0 of 101 tests in the synced run, and lists the one extra file: `bazel-bin/external/ai_rules_dart+/dart/private/analyzer_sdk_summary.sum` (`AC4_fresh2.md`).
+2. **Negatives.**
+   - `MC_AC4_TAMPER=1`: FAIL as it must. The hook appended to `bazel-bin/app/mini_client/_stage.dart_analyzer_summary.sum`, a regular Bazel-made file. `git status` was clean afterwards (`AC4_hook_tamper.md`).
+   - My own tamper: I changed the victim filter to `package_config.json` and truncated it to one byte, in a throwaway WIP commit that is not part of this branch. The check FAILED on that file (`AC4_manual_tamper.md`). The hook only selects regular, non-symlink files under `bazel-bin`, so it cannot reach a source file.
+3. **Diff 8c74763..351e732:** only `tool/checks/T-0042-AC4_safety.sh` and the engineer's evidence under `documents/evidence/T-0042/engineer/` changed. No `ide_sync`, BUILD or test change.
+4. **`T-0042-AC5_gates.sh` on the synced tree:** PASS (`test //...` 101 of 101, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixture suite, T-0032-AC6).
+- Issue 1 is closed. Final verdict for T-0042: **PASS**.
