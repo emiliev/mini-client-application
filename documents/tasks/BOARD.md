@@ -15,6 +15,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0046](T-0046-discovery-search-exemplar.md) | **`discovery_search` exemplar** (SR, P1-19): debounced search, grouped results, history, `discovery_wiring` | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0043, T-0044 | `fleet/T-0046-discovery-search` |
 
+| [T-0047](T-0047-fixtures-library.md) | `mc_fixtures_library`: reading lists CRUD with auth (P1-09 subset) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0038, T-0039 | `fleet/T-0047-fixtures-library` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
