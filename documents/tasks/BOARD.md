@@ -11,6 +11,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0041](T-0041-comics-details-exemplar.md) | **`comics_details` exemplar** (SC, P1-18): sections, auth-gated favourite, publishing wiring | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0039, T-0040 | `fleet/T-0041-comics-details` |
 
+| [T-0042](T-0042-ide-sync.md) | `tool/ide_sync`: generated code in the checkout for the IDE, `flutter run`, debugging (P3-10) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0033 | `fleet/T-0042-ide-sync` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
