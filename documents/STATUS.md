@@ -10,7 +10,7 @@ _Last updated: 2026-11-24 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0037 engineer (Sonnet) |
+| **Active crew** | None (between waves) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -23,7 +23,7 @@ _Last updated: 2026-11-24 by Tech Lead_
 - **T-0034 merged:** the exemplar now matches plan 01's code shapes, with no workarounds. Flows have an automatic back button, and the base URL is safe in release.
 - **T-0035 merged:** flow_builder is vendored with a patch so that deep links keep working once a flow is on screen (upstream issue drafted).
 - **T-0033 merged: `characters_list` is in the app.** Home → Characters → paged grid → preview → "See full profile" (placeholder) on the iOS simulator, with back navigation and `miniclient://app/characters` deep links (cold, during boot and while running). A `universe_sandbox` app opens straight on the list.
-- **T-0036 merged:** `McFlowBackButton` plus a flow_builder fix, so the back button can no longer vanish or go dead. T-0037 hardens it (outer-route changes, use outside flows, precedence) before the P1-24 bricks copy it.
+- **T-0036 + T-0037 merged:** `McFlowBackButton` is correct in every navigation state the bricks will hit (pushed or root flows, deep-link stack changes, drawers, sheets, nested navigators), with flow_builder patch changes 4 and 5.
 - Next: Phase C's remaining exemplars (SC `comics_details`, SR, FW, DB, ST, IX) and the P1-24 bricks.
 
 ## Next

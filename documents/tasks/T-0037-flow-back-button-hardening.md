@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Review |
+| Status | Done (merged 2026-11-26 `2943774`; Verifier PASS `251885f`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0037-flow-back-button-hardening` |
@@ -68,3 +68,7 @@ Each item has a `T-0037-ACn` test in `flow_back_button_test` that fails without 
 6. **`T-0036-AC3_gates.sh`:** only the `--output_base=` value is taken from `MC_BAZEL_STARTUP`; MISSING paths are relative to `GREP_ROOT`; no `MC_TASK=T-0036` export (each mutation script gets its own `MC_TASK`).
 7. **`VENDORED.md`** Task row lists F-0036. F-0036 facts 10 to 13 added.
 Gates: `T-0036-AC3_gates.md` PASS in full. e2e: 3 of 3 PASS on `mc-T-0037-engineer-2286`, deleted (0 left). No test deleted or skipped, no `// ignore:`. The D3 mutation texts in `mutations.sh` were updated for the new condition.
+
+## Merge (TL)
+- 2026-11-26: Verifier PASS `72dfd8c` (85/85; 15 of 18 Verifier mutations killed). The TL `/code-review` found an important bug the Verifier missed: an open drawer adds a `LocalHistoryEntry`, which turned the hamburger into a back arrow. It also flagged the nested-navigator, rebuild-scope and gate-script nits. Review round `4fa44d7` (21 mutations killed); re-verify PASS `251885f` (all 23 Verifier mutations killed; a dialog above the flow now causes 0 `FlowBuilder` rebuilds). The TL merged `--no-ff`; on the merge result `check` passed with 3 patches, 85/85 tests, lint was clean, `mc_arch_check` reported OK and provenance passed.
+- Remaining: P-078 (a stale `outerCanPop` when the flow's own outer route holds a local history entry); nit: `isFlowNavigator` returns true when there is no observer. Only `FeatureFlow` builds a `FlowScope`, so this is safe in production. Document the observer as required when the kit is next touched.

@@ -35,3 +35,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0035](T-0035/verification-report.md) | PASS (re-verified after review fixes) | flow_builder channel fix: stock vs patched, framework baseline, provenance negatives, T-0033 R1 repro |
 | [T-0033](T-0033/verification-report.md) | PASS (3 rounds) | **The first feature in the app on the simulator**: home → Characters → preview → profile, deep links before and after a flow, sandbox scheme |
 | [T-0036](T-0036/verification-report.md) | PASS (re-verified after FAIL) | Flow back button: dead-button repro after a state-driven return, the `isFirst` mutation, VPROBE regressions, e2e |
+| [T-0037](T-0037/verification-report.md) | PASS (re-verified after review fixes) | Back button hardening: real `GoRouter` stack changes, drawer phases, nested navigators, rebuild counts, 23 mutations |
