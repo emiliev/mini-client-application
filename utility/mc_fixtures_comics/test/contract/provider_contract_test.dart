@@ -169,7 +169,8 @@ void main() {
           '/v1/characters/${character.id}',
         );
         expect(detail.data!['id'], character.id);
-        for (final c in (page.data!['results']! as List).cast<Map>()) {
+        for (final c
+            in (page.data!['results']! as List).cast<Map<String, Object?>>()) {
           final comic = await dio.get<Map<String, Object?>>(
             '/v1/comics/${c['id']}',
           );
