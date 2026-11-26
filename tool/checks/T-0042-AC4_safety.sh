@@ -94,12 +94,9 @@ git check-ignore -q "$PLANT" || { report "the planted file is not git-ignored: t
 printf '%s\n' "$PLANT" >>"$MAN"
 planted_seen="$(sources_in_bazel | grep -cx "$PLANT")"
 sed -i '' "\|^$PLANT\$|d" "$MAN"
+rm -f "$REPO/$PLANT"
 if [[ "$planted_seen" -ge 1 ]]; then pass "2b. negative control (planted .g.dart in a package without the exclusion)" "the query reports it"
 else fail "2b. negative control (planted .g.dart)" "the query did not report it"; fi
-bzw build //utility/mc_prelude/... >"$work/plant_build.log" 2>&1
-if executed "$work/plant_build.log"; then pass "3. negative control (planted file in a build)" "the build ran actions, so 'no action' is a real signal"
-else fail "3. negative control (planted file in a build)" "the build with the planted file ran nothing: the byte-identity check cannot fail"; fi
-rm -f "$REPO/$PLANT"
 
 # --- B: synced ----------------------------------------------------------------
 bzw build //... >"$work/B_build.log" 2>&1
@@ -114,6 +111,15 @@ if executed "$work/B_build.log" || executed "$work/B_test.log"; then
 else pass "3. synced tree runs no action and no test" "$(plain "$work/B_test.log" | grep -a '^Executed' | tail -1)"; fi
 if cmp -s "$work/A.hashes" "$work/B.hashes"; then pass "3. outputs identical with and without a sync" "$a_n files, same bytes"
 else fail "3. outputs identical with and without a sync" "$(diff "$work/A.hashes" "$work/B.hashes" | head -6)"; fi
+
+# After B is hashed (this build adds its own outputs to bazel-bin): a build with
+# a planted file in a package without the exclusion runs actions.
+printf '// planted: git-ignored, like a synced file\n' >"$REPO/$PLANT"
+bzw build //utility/mc_prelude/... >"$work/plant_build.log" 2>&1
+if executed "$work/plant_build.log"; then pass "3. negative control (planted file in a build)" "the build ran actions, so 'no action' is a real signal"
+else fail "3. negative control (planted file in a build)" "the build with the planted file ran nothing: the byte-identity check cannot fail"; fi
+rm -f "$REPO/$PLANT"
+bzw build //utility/mc_prelude/... >/dev/null 2>&1
 
 report "| Check | Result | Detail |" "|---|---|---|" "${rows[@]}" "" \
   "Test summary (synced tree): $(plain "$work/B_test.log" | grep -a 'tests pass\|Executed' | tail -2 | paste -sd' ' -)"
