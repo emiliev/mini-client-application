@@ -6,7 +6,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
 
-| [T-0036](T-0036-flow-back-button.md) | `McFlowBackButton`: a const flow back button that can't vanish (P-074, P-076) | **In Progress** | Engineer (Sonnet) | T-0034 | `fleet/T-0036-flow-back-button` |
+
+| [T-0037](T-0037-flow-back-button-hardening.md) | Harden `McFlowBackButton` (outer-route dependency, safe outside flows, precedence, flow_builder `didUpdateWidget`) | **In Progress** | Engineer (Sonnet) | T-0036 | `fleet/T-0037-flow-back-button-hardening` |
 
 ## Done
 | ID | Title | Result |
@@ -15,6 +16,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0036](T-0036-flow-back-button.md) | `McFlowBackButton` + flow_builder stale-`PopScope` fix (P-074, P-076) | merged; Verifier [PASS](../evidence/T-0036/verification-report.md) (re-verified after FAIL); F-0035 |
 | [T-0033](T-0033-universe-wiring-and-sandbox.md) | **`characters_list` in the app**: `universe_wiring`, `universe_sandbox`, home entry, deep links, simulator e2e | merged; Verifier [PASS](../evidence/T-0033/verification-report.md) (3 rounds; R1 fixed via T-0035); F-0032 |
 | [T-0035](T-0035-flow-builder-deep-link-hijack.md) | Deep links survive a mounted `FeatureFlow`: flow_builder 0.1.0 vendored with a 3-hunk patch | merged; Verifier [PASS](../evidence/T-0035/verification-report.md) (re-verified after review fixes); F-0034 |
 | [T-0034](T-0034-exemplar-workarounds-removal.md) | Exemplar matches plan 01: flow `provide:`/delegates/non-listening `di`/back button/test hook, `$PagedStateCopyWith`, release-safe base URL, card height | merged; Verifier [PASS](../evidence/T-0034/verification-report.md) (re-verified after review fixes); F-0033 |
