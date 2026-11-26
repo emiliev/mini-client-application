@@ -19,7 +19,7 @@ selected tab not revealed on build: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC
 selected tab not revealed on change: KILLED (FAIL  T-0040-AC1 behaviour T-0040-AC1 the selected tab is scrolled into view)
 reveal scrolls every ancestor: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 a tab bar inside a vertical ListView leaves the page offset)
 reveal on every parent rebuild: KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 a parent rebuild with the same index does not snap the bar)
-tab bar fills a tall parent (no height factor): SURVIVED
+tab bar fills a tall parent (no Align): SURVIVED
 divider not padded in (48 pt, not 49): KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 the tab bar is 49 pt high in a Column)
 tabs do not share the free width: KILLED (FAIL  T-0040-AC1 behaviour T-0040-AC1 two tabs share the width)
 unbounded width scrolls (crash): KILLED (FAIL  T-0040-AC1 fix round T-0040-AC1 an unbounded width does not crash)

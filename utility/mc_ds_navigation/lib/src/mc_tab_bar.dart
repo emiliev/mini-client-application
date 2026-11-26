@@ -3,7 +3,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/semantics.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
@@ -152,38 +151,32 @@ class _McTabBarState extends State<McTabBar> {
         ],
       ),
     );
-    // `Align` with a height factor: under tight parent constraints (a page
-    // body) the divider still sits right under the tabs.
-    return Align(
-      alignment: AlignmentDirectional.topCenter,
-      heightFactor: 1,
-      child: Material(
-        type: MaterialType.transparency,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: divider, width: McTabBar.dividerHeight),
-            ),
+    return Material(
+      type: MaterialType.transparency,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: divider, width: McTabBar.dividerHeight),
           ),
-          // A border takes no room, so the divider's height is padded in.
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: McTabBar.dividerHeight),
-            child: LayoutBuilder(
-              builder: (context, constraints) => constraints.hasBoundedWidth
-                  ? SingleChildScrollView(
-                      controller: _controller,
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: constraints.maxWidth,
-                        ),
-                        child: row,
+        ),
+        // A border takes no room, so the divider's height is padded in.
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: McTabBar.dividerHeight),
+          child: LayoutBuilder(
+            builder: (context, constraints) => constraints.hasBoundedWidth
+                ? SingleChildScrollView(
+                    controller: _controller,
+                    scrollDirection: Axis.horizontal,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minWidth: constraints.maxWidth,
                       ),
-                    )
-                  // Unbounded: as wide as the tabs; a horizontal scroll view
-                  // cannot be given an infinite width.
-                  : row,
-            ),
+                      child: row,
+                    ),
+                  )
+                // Unbounded: as wide as the tabs; a horizontal scroll view
+                // cannot be given an infinite width.
+                : row,
           ),
         ),
       ),
