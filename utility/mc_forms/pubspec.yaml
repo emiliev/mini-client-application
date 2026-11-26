@@ -1,0 +1,16 @@
+name: mc_forms
+description: Pure Dart forms kit. Field and form state, validators, FormController and WizardController (T-0045).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  mc_api_errors: any
+  mc_prelude: any
+
+dev_dependencies:
+  mc_analysis: any
+  test: ^1.25.0

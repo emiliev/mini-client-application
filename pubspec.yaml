@@ -50,6 +50,7 @@ workspace:
   - utility/mc_event_bus
   - utility/mc_feature_flow
   - utility/mc_formatters
+  - utility/mc_forms
   - utility/mc_fixtures_characters
   - utility/mc_fixtures_comics
   - utility/mc_fixtures_identity
