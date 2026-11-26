@@ -1,0 +1,35 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [
+          {
+            "id": 500060,
+            "subtitle": "2010",
+            "thumbnail": {
+              "path": "mock-asset://characters/003",
+              "variant": "portrait_large"
+            },
+            "title": "Amber Chronicles #1",
+            "type": "comic"
+          },
+          {
+            "id": 500069,
+            "subtitle": "2010",
+            "thumbnail": {
+              "path": "mock-asset://characters/015",
+              "variant": "portrait_large"
+            },
+            "title": "Amber Chronicles #10",
+            "type": "comic"
+          }
+        ],
+        "total": 240,
+        "type": "comic"
+      }
+    ],
+    "query": "chron"
+  },
+  "request": "GET /v1/search?q=chron&types=comic&limit=2",
+  "status": 200
+}

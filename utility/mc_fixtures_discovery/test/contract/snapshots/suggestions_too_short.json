@@ -1,0 +1,12 @@
+{
+  "body": {
+    "error": {
+      "code": "query_too_short",
+      "message": "Query parameter \"q\" needs at least 2 characters",
+      "minLength": 2,
+      "parameter": "q"
+    }
+  },
+  "request": "GET /v1/search/suggestions?q=%20s%20",
+  "status": 400
+}

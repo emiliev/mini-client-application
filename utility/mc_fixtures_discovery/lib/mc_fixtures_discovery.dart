@@ -18,5 +18,4 @@ export 'package:mc_fixtures_discovery/src/search/index.dart'
         compareMatches,
         matchTier,
         searchTypes;
-export 'package:mc_fixtures_discovery/src/search/normalize.dart'
-    show foldText;
+export 'package:mc_fixtures_discovery/src/search/normalize.dart' show foldText;

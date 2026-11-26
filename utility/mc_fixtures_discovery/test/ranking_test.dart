@@ -53,10 +53,14 @@ void main() {
 
     test('T-0043-AC2: the query may span words ("amber chr")', () {
       expect(matchTier('amber chronicles #1', 'amber chr'), MatchTier.prefix);
-      expect(matchTier('the amber chronicles', 'amber chr'),
-          MatchTier.wordPrefix);
-      expect(matchTier('the zamber chronicles', 'amber chr'),
-          MatchTier.substring);
+      expect(
+        matchTier('the amber chronicles', 'amber chr'),
+        MatchTier.wordPrefix,
+      );
+      expect(
+        matchTier('the zamber chronicles', 'amber chr'),
+        MatchTier.substring,
+      );
     });
 
     test('T-0043-AC2: a word boundary is any non-letter, non-digit', () {
@@ -67,11 +71,14 @@ void main() {
       expect(matchTier('kalpa alpha', 'alp'), MatchTier.wordPrefix);
     });
 
-    test('T-0043-AC2: exact ranks before prefix, though its title sorts later', () {
-      // "Bat Cave" < "bat" as text; only the tier puts "bát" first.
-      final entries = [_entry(1, 'Bat Cave'), _entry(2, 'Bát')];
-      expect(_ranked('bat', entries), ['character:2', 'character:1']);
-    });
+    test(
+      'T-0043-AC2: exact ranks before prefix, though its title sorts later',
+      () {
+        // "Bat Cave" < "bat" as text; only the tier puts "bát" first.
+        final entries = [_entry(1, 'Bat Cave'), _entry(2, 'Bát')];
+        expect(_ranked('bat', entries), ['character:2', 'character:1']);
+      },
+    );
 
     test('T-0043-AC2: prefix ranks before word-prefix, though its title sorts later', () {
       // "Aardvark Alp" < "Alpha Zulu" as text.
@@ -93,7 +100,12 @@ void main() {
         _entry(4, 'ALP'),
         _entry(5, 'No match'),
       ];
-      expect(_titles('alp', entries), ['ALP', 'Alpha Zulu', 'Zeta Alp', 'Kalpa']);
+      expect(_titles('alp', entries), [
+        'ALP',
+        'Alpha Zulu',
+        'Zeta Alp',
+        'Kalpa',
+      ]);
       final tiers = [
         for (final m in SearchIndex(entries).search('alp')) m.tier,
       ];
@@ -110,7 +122,11 @@ void main() {
 
     test('T-0043-AC2: the same title and type is ordered by id', () {
       // Fed in the reverse of the id order.
-      final entries = [_entry(9, 'Alpha'), _entry(3, 'Alpha'), _entry(5, 'Alpha')];
+      final entries = [
+        _entry(9, 'Alpha'),
+        _entry(3, 'Alpha'),
+        _entry(5, 'Alpha'),
+      ];
       expect(_ranked('alp', entries), [
         'character:3',
         'character:5',
@@ -154,7 +170,9 @@ void main() {
         _entry(2, 'Alpha', type: 'comic'),
       ]);
       expect(
-        [for (final m in index.search('alp', types: ['comic'])) m.entry.id],
+        [
+          for (final m in index.search('alp', types: ['comic'])) m.entry.id,
+        ],
         [2],
       );
       expect(index.search('alp', types: const []), isEmpty);

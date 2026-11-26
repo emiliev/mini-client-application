@@ -1,0 +1,14 @@
+{
+  "body": {
+    "query": "spi",
+    "suggestions": [
+      "Spindle Alchemist",
+      "Spindle Artisan",
+      "Spindle Bard",
+      "Spindle Beacon",
+      "Spindle Captain"
+    ]
+  },
+  "request": "GET /v1/search/suggestions?q=spi",
+  "status": 200
+}

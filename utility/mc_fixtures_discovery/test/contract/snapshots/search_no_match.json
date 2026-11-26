@@ -1,0 +1,19 @@
+{
+  "body": {
+    "groups": [
+      {
+        "results": [],
+        "total": 0,
+        "type": "character"
+      },
+      {
+        "results": [],
+        "total": 0,
+        "type": "comic"
+      }
+    ],
+    "query": "zzzz"
+  },
+  "request": "GET /v1/search?q=zzzz",
+  "status": 200
+}

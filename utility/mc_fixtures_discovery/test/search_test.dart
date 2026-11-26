@@ -6,11 +6,10 @@ import 'package:mc_fixtures_discovery/mc_fixtures_discovery.dart';
 import 'package:mc_media/mc_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
-MockBackend _backend({int seed = 42, List<MockDomain>? domains}) =>
-    MockBackend(
-      seed: seed,
-      domains: domains ?? [const DiscoveryMockDomain()],
-    );
+MockBackend _backend({int seed = 42, List<MockDomain>? domains}) => MockBackend(
+  seed: seed,
+  domains: domains ?? [const DiscoveryMockDomain()],
+);
 
 Future<Response<String>> _res(Dio dio, String path) => dio.get<String>(
   path,
@@ -79,7 +78,8 @@ List<(int, String, int)> _oracle(Iterable<(String, int)> items, String q) {
 }
 
 Iterable<(String, int)> _characters() => [
-  for (final c in CharacterUniverse(42, defaultMockClock).byName) (c.name, c.id),
+  for (final c in CharacterUniverse(42, defaultMockClock).byName)
+    (c.name, c.id),
 ];
 
 Iterable<(String, int)> _comics() => [
@@ -138,13 +138,15 @@ void main() {
       // Names, comic titles and ids do not depend on the seed; the art does.
       expect(other, isNot(a));
       final titles = [
-        for (final g in _groups(await _get(_backend(seed: 7).createDio(),
-            '/v1/search?q=spire')))
+        for (final g in _groups(
+          await _get(_backend(seed: 7).createDio(), '/v1/search?q=spire'),
+        ))
           for (final r in _results(g)) r['title'],
       ];
       final titles42 = [
-        for (final g in _groups(await _get(_backend().createDio(),
-            '/v1/search?q=spire')))
+        for (final g in _groups(
+          await _get(_backend().createDio(), '/v1/search?q=spire'),
+        ))
           for (final r in _results(g)) r['title'],
       ];
       expect(titles, titles42);
@@ -155,26 +157,28 @@ void main() {
     late Dio dio;
     setUp(() => dio = _backend().createDio());
 
-    test('T-0043-AC2: q=spi gives character then comic groups, all matching',
-        () async {
-      final body = await _get(dio, '/v1/search?q=spi&limit=100');
-      expect(body['query'], 'spi');
-      final groups = _groups(body);
-      expect([for (final g in groups) g['type']], ['character', 'comic']);
-      expect([for (final g in groups) g['total']], [152, 400]);
-      for (final group in groups) {
-        final results = _results(group);
-        expect(results, hasLength(100));
-        for (final r in results) {
-          expect(r['type'], group['type']);
-          expect(
-            _tierOf(r['title']! as String, 'spi'),
-            greaterThanOrEqualTo(1),
-            reason: '${r['title']} must match "spi"',
-          );
+    test(
+      'T-0043-AC2: q=spi gives character then comic groups, all matching',
+      () async {
+        final body = await _get(dio, '/v1/search?q=spi&limit=100');
+        expect(body['query'], 'spi');
+        final groups = _groups(body);
+        expect([for (final g in groups) g['type']], ['character', 'comic']);
+        expect([for (final g in groups) g['total']], [152, 400]);
+        for (final group in groups) {
+          final results = _results(group);
+          expect(results, hasLength(100));
+          for (final r in results) {
+            expect(r['type'], group['type']);
+            expect(
+              _tierOf(r['title']! as String, 'spi'),
+              greaterThanOrEqualTo(1),
+              reason: '${r['title']} must match "spi"',
+            );
+          }
         }
-      }
-    });
+      },
+    );
 
     test('T-0043-AC2: P1-10 AC5 a curated name returns hits from both domains, '
         'ranked the same way every time', () async {
@@ -188,7 +192,14 @@ void main() {
       expect(_results(groups[1]).first['title'], 'Spindle Chronicles #1');
     });
 
-    for (final q in ['spi', 'co', 'war', 'chron', 'amber chronicles #1', 'ber']) {
+    for (final q in [
+      'spi',
+      'co',
+      'war',
+      'chron',
+      'amber chronicles #1',
+      'ber',
+    ]) {
       test('T-0043-AC2: "$q" is ranked like the independent oracle '
           '(tier, title, id) in both groups', () async {
         final body = await _get(
@@ -208,8 +219,36 @@ void main() {
       });
     }
 
-    test('T-0043-AC2: all four tiers show up in order on the real data',
-        () async {
+    test('T-0043-AC2: the facts CONTRACT.md lists for seed 42 hold', () async {
+      Future<List<Object?>> totals(String path) async => [
+        for (final g in _groups(await _get(dio, path))) g['total'],
+      ];
+      expect(await totals('/v1/search?q=Spire%20Warden'), [1, 0]);
+      expect(await totals('/v1/search?q=chron'), [0, 240]);
+      expect(await totals('/v1/search?q=ard&types=character'), [160]);
+      expect(await totals('/v1/search?q=spindle'), [38, 200]);
+      final spire = _groups(await _get(dio, '/v1/search?q=Spire%20Warden'));
+      expect(_results(spire[0]).single['title'], 'Spire Warden');
+      expect(_results(spire[1]), isEmpty);
+      final spindle = _groups(await _get(dio, '/v1/search?q=spindle&limit=2'));
+      expect(
+        [for (final r in _results(spindle[0])) r['title']],
+        [
+          'Spindle Alchemist',
+          'Spindle Artisan',
+        ],
+      );
+      final suggestions = await _get(dio, '/v1/search/suggestions?q=spi');
+      expect(suggestions['suggestions'], [
+        'Spindle Alchemist',
+        'Spindle Artisan',
+        'Spindle Bard',
+        'Spindle Beacon',
+        'Spindle Captain',
+      ]);
+    });
+
+    test('T-0043-AC2: all four tiers show up in order on the real data', () async {
       // "co": names starting with co, then a later word starting with co, then
       // the rest.
       final body = await _get(dio, '/v1/search?q=co&types=character&limit=100');
@@ -245,51 +284,63 @@ void main() {
       expect((await _get(dio, '/v1/search?q=%20Spïre%20'))['query'], 'Spïre');
     });
 
-    test('T-0043-AC2: groups keep the fixed order whatever order types asks',
-        () async {
-      final body = await _get(dio, '/v1/search?q=spi&types=comic,character');
-      expect([for (final g in _groups(body)) g['type']], [
-        'character',
-        'comic',
-      ]);
-      final one = await _get(dio, '/v1/search?q=spi&types=comic');
-      expect([for (final g in _groups(one)) g['type']], ['comic']);
-      // Repeats and spaces collapse to one group.
-      final twice = await _get(dio, '/v1/search?q=spi&types=comic,%20comic');
-      expect(_groups(twice), hasLength(1));
-    });
+    test(
+      'T-0043-AC2: groups keep the fixed order whatever order types asks',
+      () async {
+        final body = await _get(dio, '/v1/search?q=spi&types=comic,character');
+        expect(
+          [for (final g in _groups(body)) g['type']],
+          [
+            'character',
+            'comic',
+          ],
+        );
+        final one = await _get(dio, '/v1/search?q=spi&types=comic');
+        expect([for (final g in _groups(one)) g['type']], ['comic']);
+        // Repeats and spaces collapse to one group.
+        final twice = await _get(dio, '/v1/search?q=spi&types=comic,%20comic');
+        expect(_groups(twice), hasLength(1));
+      },
+    );
 
-    test('T-0043-AC2: a group is present, with total 0, when nothing matches',
-        () async {
-      final body = await _get(dio, '/v1/search?q=zzzz');
-      expect(body, {
-        'query': 'zzzz',
-        'groups': [
-          {'type': 'character', 'total': 0, 'results': <Object?>[]},
-          {'type': 'comic', 'total': 0, 'results': <Object?>[]},
-        ],
-      });
-    });
+    test(
+      'T-0043-AC2: a group is present, with total 0, when nothing matches',
+      () async {
+        final body = await _get(dio, '/v1/search?q=zzzz');
+        expect(body, {
+          'query': 'zzzz',
+          'groups': [
+            {'type': 'character', 'total': 0, 'results': <Object?>[]},
+            {'type': 'comic', 'total': 0, 'results': <Object?>[]},
+          ],
+        });
+      },
+    );
 
-    test('T-0043-AC2: a result has id, type, title, subtitle and thumbnail',
-        () async {
-      final body = await _get(dio, '/v1/search?q=spire&limit=1');
-      final character = _results(_groups(body)[0]).single;
-      final comic = _results(_groups(body)[1]).single;
-      expect(character.keys.toSet(), {
-        'id',
-        'type',
-        'title',
-        'subtitle',
-        'thumbnail',
-      });
-      expect(character['type'], 'character');
-      expect(comic['type'], 'comic');
-      expect(comic['subtitle'], matches(RegExp(r'^\d{4}$')));
-      for (final r in [character, comic]) {
-        expect(r['thumbnail'], containsPair('path', startsWith('mock-asset://')));
-      }
-    });
+    test(
+      'T-0043-AC2: a result has id, type, title, subtitle and thumbnail',
+      () async {
+        final body = await _get(dio, '/v1/search?q=spire&limit=1');
+        final character = _results(_groups(body)[0]).single;
+        final comic = _results(_groups(body)[1]).single;
+        expect(character.keys.toSet(), {
+          'id',
+          'type',
+          'title',
+          'subtitle',
+          'thumbnail',
+        });
+        expect(character['type'], 'character');
+        expect(comic['type'], 'comic');
+        expect(comic['subtitle'], matches(RegExp(r'^\d{4}$')));
+        for (final r in [character, comic]) {
+          expect(
+            r['thumbnail'],
+            containsPair('path', startsWith('mock-asset://')),
+          );
+        }
+      },
+    );
   });
 
   group('T-0043-AC2 tie-breaks through the endpoint', () {
@@ -297,104 +348,115 @@ void main() {
         _backend(domains: [IndexedDiscoveryDomain(SearchIndex(entries))])
             .createDio();
 
-    test('T-0043-AC2: same-tier results go by title, then id, then type',
-        () async {
-      final dio = indexed([
-        _entry(9, 'Alpha'),
-        _entry(1, 'Alpha', type: 'comic'),
-        _entry(3, 'Alpha'),
-        _entry(2, 'Alpha Aardvark'),
-        _entry(4, 'Alpha Zebra'),
-      ]);
-      final both = await _get(dio, '/v1/search?q=alp');
-      final groups = _groups(both);
-      expect([for (final r in _results(groups[0])) r['id']], [3, 9, 2, 4]);
-      expect([for (final r in _results(groups[1])) r['id']], [1]);
-    });
+    test(
+      'T-0043-AC2: same-tier results go by title, then id, then type',
+      () async {
+        final dio = indexed([
+          _entry(9, 'Alpha'),
+          _entry(1, 'Alpha', type: 'comic'),
+          _entry(3, 'Alpha'),
+          _entry(2, 'Alpha Aardvark'),
+          _entry(4, 'Alpha Zebra'),
+        ]);
+        final both = await _get(dio, '/v1/search?q=alp');
+        final groups = _groups(both);
+        expect([for (final r in _results(groups[0])) r['id']], [3, 9, 2, 4]);
+        expect([for (final r in _results(groups[1])) r['id']], [1]);
+      },
+    );
 
-    test('T-0043-AC2: suggestions rank across types by tier, title and type',
-        () async {
-      final dio = indexed([
-        _entry(1, 'Kalpa'),
-        _entry(2, 'Zeta Alp', type: 'comic'),
-        _entry(3, 'Alpha Zulu', type: 'comic'),
-        _entry(4, 'Alpha Bee'),
-        _entry(5, 'Alp'),
-        _entry(6, 'Alp', type: 'comic'),
-      ]);
-      final body = await _get(dio, '/v1/search/suggestions?q=alp');
-      // Alp (exact; the character and the comic share one title), the two
-      // prefix titles by title, then the word-prefix, then the substring.
-      expect(body['suggestions'], [
-        'Alp',
-        'Alpha Bee',
-        'Alpha Zulu',
-        'Zeta Alp',
-        'Kalpa',
-      ]);
-    });
+    test(
+      'T-0043-AC2: suggestions rank across types by tier, title and type',
+      () async {
+        final dio = indexed([
+          _entry(1, 'Kalpa'),
+          _entry(2, 'Zeta Alp', type: 'comic'),
+          _entry(3, 'Alpha Zulu', type: 'comic'),
+          _entry(4, 'Alpha Bee'),
+          _entry(5, 'Alp'),
+          _entry(6, 'Alp', type: 'comic'),
+        ]);
+        final body = await _get(dio, '/v1/search/suggestions?q=alp');
+        // Alp (exact; the character and the comic share one title), the two
+        // prefix titles by title, then the word-prefix, then the substring.
+        expect(body['suggestions'], [
+          'Alp',
+          'Alpha Bee',
+          'Alpha Zulu',
+          'Zeta Alp',
+          'Kalpa',
+        ]);
+      },
+    );
 
-    test('T-0043-AC2: suggestions stop at five and skip repeated titles',
-        () async {
-      final dio = indexed([
-        for (var i = 0; i < 8; i++) _entry(i, 'Alpha $i'),
-        _entry(20, 'Alpha 0', type: 'comic'),
-      ]);
-      final body = await _get(dio, '/v1/search/suggestions?q=alp');
-      expect(body['suggestions'], [
-        'Alpha 0',
-        'Alpha 1',
-        'Alpha 2',
-        'Alpha 3',
-        'Alpha 4',
-      ]);
-    });
+    test(
+      'T-0043-AC2: suggestions stop at five and skip repeated titles',
+      () async {
+        final dio = indexed([
+          for (var i = 0; i < 8; i++) _entry(i, 'Alpha $i'),
+          _entry(20, 'Alpha 0', type: 'comic'),
+        ]);
+        final body = await _get(dio, '/v1/search/suggestions?q=alp');
+        expect(body['suggestions'], [
+          'Alpha 0',
+          'Alpha 1',
+          'Alpha 2',
+          'Alpha 3',
+          'Alpha 4',
+        ]);
+      },
+    );
   });
 
   group('T-0043-AC2 suggestions', () {
-    test('T-0043-AC2: the top 5 titles across types match the oracle',
-        () async {
-      final dio = _backend().createDio();
-      for (final q in ['spi', 'chron', 'war', 'co', 'spire warden']) {
-        final expected = [
-          ..._oracle(_characters(), q).map((e) => (e.$1, e.$2, 0, e.$3)),
-          ..._oracle(_comics(), q).map((e) => (e.$1, e.$2, 1, e.$3)),
-        ]..sort((a, b) {
-            for (final c in [
-              a.$1.compareTo(b.$1),
-              a.$2.compareTo(b.$2),
-              a.$3.compareTo(b.$3),
-              a.$4.compareTo(b.$4),
-            ]) {
-              if (c != 0) {
-                return c;
-              }
+    test(
+      'T-0043-AC2: the top 5 titles across types match the oracle',
+      () async {
+        final dio = _backend().createDio();
+        for (final q in ['spi', 'chron', 'war', 'co', 'spire warden']) {
+          final expected =
+              [
+                ..._oracle(_characters(), q).map((e) => (e.$1, e.$2, 0, e.$3)),
+                ..._oracle(_comics(), q).map((e) => (e.$1, e.$2, 1, e.$3)),
+              ]..sort((a, b) {
+                for (final c in [
+                  a.$1.compareTo(b.$1),
+                  a.$2.compareTo(b.$2),
+                  a.$3.compareTo(b.$3),
+                  a.$4.compareTo(b.$4),
+                ]) {
+                  if (c != 0) {
+                    return c;
+                  }
+                }
+                return 0;
+              });
+          final titles = <String>[];
+          for (final e in expected) {
+            if (!titles.contains(e.$2) && titles.length < 5) {
+              titles.add(e.$2);
             }
-            return 0;
-          });
-        final titles = <String>[];
-        for (final e in expected) {
-          if (!titles.contains(e.$2) && titles.length < 5) {
-            titles.add(e.$2);
           }
+          final body = await _get(
+            dio,
+            '/v1/search/suggestions?q=${Uri.encodeQueryComponent(q)}',
+          );
+          expect(body, {'query': q, 'suggestions': titles}, reason: q);
         }
-        final body = await _get(
-          dio,
-          '/v1/search/suggestions?q=${Uri.encodeQueryComponent(q)}',
-        );
-        expect(body, {'query': q, 'suggestions': titles}, reason: q);
-      }
-    });
+      },
+    );
 
-    test('T-0043-AC2: suggestions come from both domains when both match',
-        () async {
-      final dio = _backend().createDio();
-      // Exact, then both domains' prefix titles: characters before comics.
-      final body = await _get(dio, '/v1/search/suggestions?q=spire');
-      expect((body['suggestions']! as List).first, startsWith('Spire '));
-      final none = await _get(dio, '/v1/search/suggestions?q=zzzz');
-      expect(none['suggestions'], isEmpty);
-    });
+    test(
+      'T-0043-AC2: suggestions come from both domains when both match',
+      () async {
+        final dio = _backend().createDio();
+        // Exact, then both domains' prefix titles: characters before comics.
+        final body = await _get(dio, '/v1/search/suggestions?q=spire');
+        expect((body['suggestions']! as List).first, startsWith('Spire '));
+        final none = await _get(dio, '/v1/search/suggestions?q=zzzz');
+        expect(none['suggestions'], isEmpty);
+      },
+    );
   });
 
   group('T-0043-AC4 validation', () {
@@ -423,19 +485,31 @@ void main() {
       });
     }
 
-    test('T-0043-AC4: two characters are enough, counted after trimming',
-        () async {
-      expect((await _res(dio, '/v1/search?q=sp')).statusCode, 200);
-      expect((await _res(dio, '/v1/search?q=%20sp%20')).statusCode, 200);
-      // One letter with a mark is one character, not two bytes.
-      expect(
-        (await _res(dio, '/v1/search?q=%C3%A9%C3%A9')).statusCode,
-        200,
-      );
-      expect((await _res(dio, '/v1/search/suggestions?q=sp')).statusCode, 200);
-    });
+    test(
+      'T-0043-AC4: two characters are enough, counted after trimming',
+      () async {
+        expect((await _res(dio, '/v1/search?q=sp')).statusCode, 200);
+        expect((await _res(dio, '/v1/search?q=%20sp%20')).statusCode, 200);
+        // One letter with a mark is one character, not two bytes.
+        expect(
+          (await _res(dio, '/v1/search?q=%C3%A9%C3%A9')).statusCode,
+          200,
+        );
+        expect(
+          (await _res(dio, '/v1/search/suggestions?q=sp')).statusCode,
+          200,
+        );
+      },
+    );
 
-    for (final types in ['film', 'character,film', 'Character', '', ',', 'comic,']) {
+    for (final types in [
+      'film',
+      'character,film',
+      'Character',
+      '',
+      ',',
+      'comic,',
+    ]) {
       test('T-0043-AC4: types="$types" is 400 invalid_parameter', () async {
         final response = await _res(dio, '/v1/search?q=spi&types=$types');
         expect(response.statusCode, 400);
@@ -455,30 +529,39 @@ void main() {
       });
     }
 
-    test('T-0043-AC4: limit 1 and 100 are accepted and apply per group',
-        () async {
-      final one = _groups(await _get(dio, '/v1/search?q=spi&limit=1'));
-      expect([for (final g in one) _results(g).length], [1, 1]);
-      expect([for (final g in one) g['total']], [152, 400]);
-      final hundred = _groups(await _get(dio, '/v1/search?q=spi&limit=100'));
-      expect([for (final g in hundred) _results(g).length], [100, 100]);
-      final byDefault = _groups(await _get(dio, '/v1/search?q=spi'));
-      expect([for (final g in byDefault) _results(g).length], [20, 20]);
-    });
+    test(
+      'T-0043-AC4: limit 1 and 100 are accepted and apply per group',
+      () async {
+        final one = _groups(await _get(dio, '/v1/search?q=spi&limit=1'));
+        expect([for (final g in one) _results(g).length], [1, 1]);
+        expect([for (final g in one) g['total']], [152, 400]);
+        final hundred = _groups(await _get(dio, '/v1/search?q=spi&limit=100'));
+        expect([for (final g in hundred) _results(g).length], [100, 100]);
+        final byDefault = _groups(await _get(dio, '/v1/search?q=spi'));
+        expect([for (final g in byDefault) _results(g).length], [20, 20]);
+      },
+    );
 
-    test('T-0043-AC4: the first problem reported is q, then types, then limit',
-        () async {
-      final all = await _get(dio, '/v1/search?q=s&types=x&limit=0');
-      expect(_error(all)['code'], 'query_too_short');
-      final typesAndLimit = await _get(dio, '/v1/search?q=sp&types=x&limit=0');
-      expect(_error(typesAndLimit)['parameter'], 'types');
-    });
+    test(
+      'T-0043-AC4: the first problem reported is q, then types, then limit',
+      () async {
+        final all = await _get(dio, '/v1/search?q=s&types=x&limit=0');
+        expect(_error(all)['code'], 'query_too_short');
+        final typesAndLimit = await _get(
+          dio,
+          '/v1/search?q=sp&types=x&limit=0',
+        );
+        expect(_error(typesAndLimit)['parameter'], 'types');
+      },
+    );
 
-    test('T-0043-AC4: a path outside the domain is the engine\'s 404',
-        () async {
-      final response = await _res(dio, '/v1/search/unknown?q=spi');
-      expect(response.statusCode, 404);
-    });
+    test(
+      'T-0043-AC4: a path outside the domain is the engine\'s 404',
+      () async {
+        final response = await _res(dio, '/v1/search/unknown?q=spi');
+        expect(response.statusCode, 404);
+      },
+    );
 
     test('T-0043-AC4: the library entries serve only matching types', () async {
       final body = await _get(dio, '/v1/search?q=spi&types=character');

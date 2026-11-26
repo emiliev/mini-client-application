@@ -1,0 +1,8 @@
+{
+  "body": {
+    "query": "zzzz",
+    "suggestions": []
+  },
+  "request": "GET /v1/search/suggestions?q=zzzz",
+  "status": 200
+}
