@@ -13,7 +13,7 @@ m S-spinner $DT $SC '                  if (isSubmitting)
 '
 m S-error-live $DT $SC '                  liveRegion: true,
 ' ''
-m S-error-hidden $DT $SC 'if (error != null) ...[' 'if (false) ...['
+m S-error-hidden $DT $SC 'if (error != null) ...[' 'if (error != null && false) ...['
 m S-keyboard $DT $SC 'keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,' 'keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.manual,'
 m S-scroll-stays $DT $SC '          Expanded(
             child: SingleChildScrollView(' '          Flexible(

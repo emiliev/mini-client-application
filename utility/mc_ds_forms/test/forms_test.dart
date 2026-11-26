@@ -622,6 +622,18 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('T-0045-AC3 a short body leaves the bar at the bottom', (
+      tester,
+    ) async {
+      mcSetSurface(tester, 375, 600);
+      await tester.pumpWidget(scaffold(onSubmit: () {}));
+      expect(
+        tester.getBottomLeft(find.byType(McButton)).dy,
+        greaterThan(500),
+        reason: 'the bar is pinned to the bottom, not under the body',
+      );
+    });
+
     testWidgets('T-0045-AC3 dragging the body dismisses the keyboard', (
       tester,
     ) async {
