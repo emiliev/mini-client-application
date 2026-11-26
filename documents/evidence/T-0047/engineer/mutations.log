@@ -78,7 +78,7 @@ baseline PASS
 === C4 create sorts the ids
     KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
 === C5 listing oldest first
-    KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
 === C6 writes do not move updatedAt
     KILLED by: //utility/mc_fixtures_library:library_test //utility/mc_fixtures_library:provider_contract_test 
 === C7 ids are reused
@@ -106,6 +106,14 @@ baseline PASS
 === S5 server_error scenario misses a route
     KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
 === S6 empty set is seeded through the default handlers
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:provider_contract_test 
+=== S7 empty scenario is seeded
+    KILLED by: //utility/mc_fixtures_library:fixture_sets_test //utility/mc_fixtures_library:provider_contract_test 
+=== R1 comics are always the seed-42 universe
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test 
+=== R2 the empty state shares the default id space
     KILLED by: //utility/mc_fixtures_library:fixture_sets_test 
+=== R3 invalid_body carries no parameter
+    KILLED by: //utility/mc_fixtures_library:provider_contract_test //utility/mc_fixtures_library:validation_test 
 
-killed=54 survived=0 broken=0
+killed=58 survived=0 broken=0
