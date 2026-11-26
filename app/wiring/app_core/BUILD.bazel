@@ -16,6 +16,7 @@ _DEPS = [
     "//utility/mc_ds_media",
     "//utility/mc_ds_theme",
     "//utility/mc_event_bus",
+    "//utility/mc_formatters",
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_comics",
     "//utility/mc_fixtures_identity",
@@ -53,4 +54,5 @@ flutter_library(
     "boot_test",
     "links_and_hooks_test",
     "router_ref_and_scheme_test",
+    "formatters_root_test",
 ]]

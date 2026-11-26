@@ -138,4 +138,21 @@ void main() {
     );
     expect(find.text('Character details 100366'), findsOneWidget);
   });
+
+  for (final link in [
+    'miniclient://app/comics/abc',
+    'miniclient://app/creators/1x',
+  ]) {
+    testWidgets('T-0041-AC5 a non-numeric id ($link) shows the not-found '
+        'page', (tester) async {
+      await boot(tester);
+
+      await _pushLink(tester, link);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('not.found')), findsOneWidget);
+      expect(find.byType(ErrorWidget), findsNothing);
+    });
+  }
 }

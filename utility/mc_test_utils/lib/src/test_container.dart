@@ -5,6 +5,7 @@ import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_formatters/mc_formatters.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_session/mc_session.dart';
@@ -43,7 +44,7 @@ final class ExternalDouble<T extends Object> {
 ///
 /// It mirrors the production root list of `app_core`'s `rootInitializers`
 /// (config, monitoring, storage, event bus, session, mocked backend, API
-/// client, API auth), with
+/// client, API auth, formatters), with
 /// doubles only at the edges: `MockMonitoring`, the session's
 /// `McBackendHarness` transport, a temporary storage directory and a fixed
 /// config. The real `Dio` with its interceptors runs over the harness.
@@ -83,6 +84,7 @@ abstract final class McTestContainer {
       retryDelay: Duration.zero,
     ),
     const ApiAuthDIInitializer(),
+    const FormattersDIInitializer(),
     ...wirings,
     for (final external in externals) external.toInitializer(),
   ];

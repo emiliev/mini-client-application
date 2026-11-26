@@ -23,6 +23,7 @@ dependencies:
   mc_ds_theme: any
   mc_ds_tokens: any
   mc_event_bus: any
+  mc_formatters: any
   mc_mocked_backend: any
   mc_monitoring: any
   mc_session: any

@@ -14,6 +14,7 @@ _DEPS = [
     "//utility/mc_ds_theme",
     "//utility/mc_ds_tokens",
     "//utility/mc_event_bus",
+    "//utility/mc_formatters",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
     "//utility/mc_session",

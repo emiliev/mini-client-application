@@ -182,10 +182,7 @@ injectable_package(
         "lib/src/presentation/bloc/comic_favourite_bloc.dart",
     ],
     init = _INIT,
-    init_deps = [
-        "//utility/mc_di",
-        "//utility/mc_formatters",
-    ],
+    init_deps = ["//utility/mc_di"],
     language_version = _LANG,
     package_name = _PKG,
     shard_deps = [":_stage"],
