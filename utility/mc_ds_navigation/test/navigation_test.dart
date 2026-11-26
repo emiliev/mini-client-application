@@ -99,6 +99,13 @@ void main() {
       tester.getSize(find.byKey(const Key('title'))).height,
       lessThanOrEqualTo(McAppBar.largeTitleExtent),
     );
+    // The text itself is drawn at the capped scale, not just clipped to the
+    // band (the paragraph would otherwise be 3x tall and painted outside).
+    final text = tester.widget<Text>(find.byKey(const Key('title')));
+    expect(
+      text.textScaler!.scale(10),
+      lessThanOrEqualTo(10 * McAppBar.largeTitleMaxScale),
+    );
   });
 
   testWidgets('T-0040-AC1 the large title adds a fixed band to the height', (
