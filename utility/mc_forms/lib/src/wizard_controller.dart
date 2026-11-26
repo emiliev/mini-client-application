@@ -78,7 +78,8 @@ final class WizardState<R> {
 /// [next] is blocked while the current step is invalid and then touches the
 /// step's fields so their errors show. [complete] checks every step, jumps
 /// to the first invalid one, and otherwise runs `onComplete` once; a second
-/// call while it runs, or after it succeeded, does nothing.
+/// call while it runs, or after it succeeded, does nothing. When the server
+/// refuses a field's value, [reject] shows its error on that field's step.
 ///
 /// A plain helper like `PagingController`, not a mixin: a bloc owns one and
 /// forwards `onState` to `emit`.
@@ -137,6 +138,23 @@ final class WizardController<R> {
   /// UI calls it when the user taps a disabled Next.
   void touchCurrentStep() =>
       _form.touchAll(names: _state.stepFields[_state.stepIndex]);
+
+  /// The server refused [name]'s value (a `400` naming that field, after
+  /// [complete] returned its failure): the field shows [error] until its
+  /// value changes (`FormController.reject`), and the wizard goes to the
+  /// field's step, so the user sees why. Ignored while a completion runs,
+  /// after it succeeded, or when disposed. Throws an [ArgumentError] for an
+  /// unknown field.
+  void reject(String name, FieldError error) {
+    if (_disposed || _state.isCompleting || _state.isCompleted) {
+      return;
+    }
+    _form.reject(name, error);
+    final step = _state.stepFields.indexWhere((f) => f.contains(name));
+    if (step != _state.stepIndex) {
+      _goTo(step);
+    }
+  }
 
   /// Goes to the previous step; its values are as the user left them.
   /// Returns whether it moved.

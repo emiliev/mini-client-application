@@ -372,4 +372,66 @@ void main() {
       expect(h.states, hasLength(before));
     });
   });
+
+  group('T-0048-AC2 a server-side error goes to its step', () {
+    const taken = FieldError(ValidationCode.invalid);
+
+    test("T-0048-AC2 reject goes back to the field's step and shows the "
+        'error there; a new value clears it', () async {
+      final h = _Harness(
+        onComplete: (_) async =>
+            failure(const ApiFailure.clientError(400, 'taken')),
+      );
+      h.fillAll();
+      h.controller
+        ..next()
+        ..next();
+      expect(h.s.stepIndex, 2);
+      await h.controller.complete();
+
+      h.controller.reject('title', taken);
+      expect(h.s.stepIndex, 0);
+      expect(h.s.currentErrors, {'title': taken});
+      expect(h.s.form.field('title').visibleError, taken);
+      expect(h.s.canGoNext, isFalse);
+      expect(h.s.failure, isNull);
+
+      h.controller.setValue('title', 'Other');
+      expect(h.s.currentErrors, isEmpty);
+      expect(h.s.canGoNext, isTrue);
+    });
+
+    test(
+      'T-0048-AC2 reject goes forward too, and stays on the step it is on',
+      () {
+        final h = _Harness()..fillAll();
+        h.controller.reject('books', taken);
+        expect(h.s.stepIndex, 1);
+        final before = h.states.length;
+        h.controller.reject('books', taken);
+        expect(h.s.stepIndex, 1);
+        expect(h.states.length, before + 1, reason: 'no step change emitted');
+      },
+    );
+
+    test('T-0048-AC2 reject is ignored while completing, once completed and '
+        'after dispose', () async {
+      final gate = Completer<Result<String, ApiFailure>>();
+      final h = _Harness(onComplete: (_) => gate.future)..fillAll();
+      final running = h.controller.complete();
+      h.controller.reject('title', taken);
+      expect(h.s.form.field('title').error, isNull);
+      gate.complete(success('ok'));
+      await running;
+      h.controller.reject('title', taken);
+      expect(h.s.form.field('title').error, isNull);
+      expect(h.s.stepIndex, 0);
+
+      final d = _Harness()..fillAll();
+      d.controller
+        ..dispose()
+        ..reject('books', taken);
+      expect(d.s.stepIndex, 0);
+    });
+  });
 }

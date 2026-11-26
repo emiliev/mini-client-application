@@ -65,6 +65,77 @@ void main() {
     );
   });
 
+  group('T-0048-AC2 a 4xx keeps the code and parameter of its error body', () {
+    DioException rejected(int status, Object? data) => DioException.badResponse(
+      statusCode: status,
+      requestOptions: RequestOptions(path: '/x'),
+      response: Response<Object?>(
+        requestOptions: RequestOptions(path: '/x'),
+        statusCode: status,
+        data: data,
+      ),
+    );
+
+    test('T-0048-AC2 a map body', () {
+      final failure = ApiFailure.from(
+        rejected(400, {
+          'error': {
+            'code': 'duplicate_name',
+            'message': 'taken',
+            'parameter': 'name',
+          },
+        }),
+      );
+      expect(failure, isA<ApiClientError>());
+      final error = failure as ApiClientError;
+      expect(error.status, 400);
+      expect(error.code, 'duplicate_name');
+      expect(error.parameter, 'name');
+    });
+
+    test('T-0048-AC2 a JSON text body, and a body without a parameter', () {
+      final error = ApiFailure.from(
+        rejected(409, '{"error": {"code": "conflict", "message": "x"}}'),
+      ) as ApiClientError;
+      expect(error.status, 409);
+      expect(error.code, 'conflict');
+      expect(error.parameter, isNull);
+    });
+
+    test('T-0048-AC2 a body off that shape leaves both null', () {
+      for (final data in <Object?>[
+        null,
+        'not json',
+        '[1, 2]',
+        {'error': 'flat'},
+        {
+          'error': {'code': 7},
+        },
+        {
+          'error': {'code': 'x', 'parameter': 3},
+        },
+      ]) {
+        final error = ApiFailure.from(rejected(400, data)) as ApiClientError;
+        expect(
+          error.code,
+          data is Map &&
+                  data['error'] is Map &&
+                  (data['error'] as Map)['code'] == 'x'
+              ? 'x'
+              : isNull,
+          reason: '$data',
+        );
+        expect(error.parameter, isNull, reason: '$data');
+      }
+    });
+
+    test('T-0048-AC2 the plain constructor has no body', () {
+      const error = ApiFailure.clientError(400, 'rejected') as ApiClientError;
+      expect(error.code, isNull);
+      expect(error.parameter, isNull);
+    });
+  });
+
   test('an ApiFailure passes through unchanged', () {
     const f = ApiFailure.offline();
     expect(identical(ApiFailure.from(f), f), isTrue);

@@ -321,4 +321,99 @@ void main() {
       expect(await m.controller.submit<int>((_) async => success(2)), isNull);
     });
   });
+
+  group('T-0048-AC2 a server-side error on a field', () {
+    const taken = FieldError(ValidationCode.invalid);
+
+    test('T-0048-AC2 reject shows the error on the field and makes the form '
+        'invalid until the value changes', () {
+      final m = _make();
+      _fill(m.controller);
+      m.controller.reject('email', taken);
+
+      final email = m.controller.state.field('email');
+      expect(email.error, taken);
+      expect(email.visibleError, taken, reason: 'the field is touched');
+      expect(m.controller.state.isValid, isFalse);
+
+      m.controller.setValue('email', 'a@b.c');
+      expect(
+        m.controller.state.field('email').error,
+        taken,
+        reason: 'the same value is still the refused one',
+      );
+      m.controller.setValue('email', 'b@c.d');
+      expect(m.controller.state.field('email').error, isNull);
+      expect(m.controller.state.isValid, isTrue);
+    });
+
+    test('T-0048-AC2 a failing rule wins over the server error', () {
+      final m = _make();
+      _fill(m.controller);
+      m.controller
+        ..reject('email', taken)
+        ..setValue('email', 'ab');
+      expect(
+        m.controller.state.field('email').error,
+        const FieldError(ValidationCode.tooShort, min: 3),
+      );
+    });
+
+    test(
+      'T-0048-AC2 reject after a failed submit clears the failure',
+      () async {
+        final m = _make();
+        _fill(m.controller);
+        await m.controller.submit<int>(
+          (_) async => failure(const ApiFailure.clientError(400, 'taken')),
+        );
+        expect(m.controller.state.submitStatus, SubmitStatus.failed);
+
+        m.controller.reject('email', taken);
+        expect(m.controller.state.submitStatus, SubmitStatus.idle);
+        expect(m.controller.state.submitFailure, isNull);
+        expect(
+          await m.controller.submit<int>((_) async => success(1)),
+          isNull,
+          reason: 'the refused value blocks the next submit',
+        );
+      },
+    );
+
+    test('T-0048-AC2 reject keeps an idle status idle and other fields as '
+        'they were', () {
+      final m = _make();
+      _fill(m.controller);
+      m.controller.reject('confirm', taken);
+      expect(m.controller.state.submitStatus, SubmitStatus.idle);
+      expect(m.controller.state.field('email').touched, isFalse);
+      expect(m.controller.state.field('confirm').touched, isTrue);
+    });
+
+    test('T-0048-AC2 reset forgets the server errors', () {
+      final m = _make();
+      _fill(m.controller);
+      m.controller
+        ..reject('email', taken)
+        ..reset();
+      _fill(m.controller);
+      expect(m.controller.state.field('email').error, isNull);
+    });
+
+    test('T-0048-AC2 reject is ignored while a submit runs, and names an '
+        'unknown field', () async {
+      final m = _make();
+      _fill(m.controller);
+      final gate = Completer<Result<int, ApiFailure>>();
+      final running = m.controller.submit<int>((_) => gate.future);
+      m.controller.reject('email', taken);
+      expect(m.controller.state.field('email').error, isNull);
+      gate.complete(success(1));
+      await running;
+      expect(
+        () => m.controller.reject('nope', taken),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
+  });
 }
