@@ -7,6 +7,7 @@ import 'package:mc_fixtures_discovery/mc_fixtures_discovery.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_media/mc_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:mc_test_steps/mc_test_steps.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -82,14 +83,10 @@ Widget searchFlowUnderTest({String? initialQuery}) => DiscoverySearchFlow(
 
 /// Lets real file I/O (the recent searches on `mc_storage`) complete, then
 /// settles: a `testWidgets` body runs on fake time, and a real read or write
-/// finishes only once real time passes (F-0038 fact 1).
+/// finishes only once real time passes (F-0038 fact 1). Settles with
+/// `mcSettle`, so a hold set earlier keeps its spinner.
 Future<void> letStorageFinish(WidgetTester tester) async {
-  for (var round = 0; round < 10; round++) {
-    await tester.runAsync(
-      () => Future<void>.delayed(const Duration(milliseconds: 20)),
-    );
-    await tester.pump();
-  }
+  await mcFinishStorageIo(tester);
   await mcSettle(tester);
 }
 

@@ -95,15 +95,21 @@ void main() {
       }
     });
 
-    test('T-0046-AC7: a character without a team has no subtitle, and '
-        'round-trips without one', () async {
-      final body = await _get('v1/search?q=an&limit=100');
-      final results = [
-        for (final g in SearchResponseDto.fromJson(body).groups) ...g.results,
-      ];
-      final noTeam = results.where((r) => r.subtitle == null).toList();
-      expect(noTeam, isNotEmpty, reason: 'the fixture has team-less matches');
-      expect(noTeam.first.toJson().containsKey('subtitle'), isFalse);
+    test('T-0046-AC7: a result without a subtitle (a character with no team) '
+        'parses and writes without one', () {
+      final json = _example();
+      final result =
+          ((json['groups'] as List<dynamic>).first
+                  as Map<String, dynamic>)['results']
+              as List<dynamic>;
+      (result.first as Map<String, dynamic>).remove('subtitle');
+
+      final dto = SearchResponseDto.fromJson(json);
+      final hit = dto.groups.first.results.single;
+      expect(hit.subtitle, isNull);
+      expect(hit.toJson().containsKey('subtitle'), isFalse);
+      expect(canonicalJson(dto.toJson()), canonicalJson(json));
+      expect(dto.toDomain().groups.first.hits.single.subtitle, isNull);
     });
 
     test(

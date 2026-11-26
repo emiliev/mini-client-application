@@ -18,8 +18,9 @@ final List<String> _art = [
 ];
 
 /// Opens the search with every placeholder picture decoded first, so the
-/// first frame draws the art (F-0030). The field is unfocused (no cursor),
-/// so the picture does not depend on the caret's blink.
+/// first frame draws the art (F-0030). The caret is drawn steadily
+/// (`debugDeterministicCursor`), so the picture does not depend on its
+/// blink.
 Future<void> _open(WidgetTester tester) async {
   McTestSession.current.backend.useFixtureSet('discovery.default');
   final bundle = McFixtureAssetBundle();
@@ -34,8 +35,6 @@ Future<void> _open(WidgetTester tester) async {
 Future<void> _type(WidgetTester tester, String text) async {
   await tester.enterText(searchField(), text);
   await mcSettle(tester);
-  FocusManager.instance.primaryFocus?.unfocus();
-  await tester.pump();
 }
 
 Future<void> _expectGolden(String name) => expectLater(
@@ -45,6 +44,8 @@ Future<void> _expectGolden(String name) => expectLater(
 
 void main() {
   setUpAll(bddSetUpAll);
+  setUp(() => EditableText.debugDeterministicCursor = true);
+  tearDown(() => EditableText.debugDeterministicCursor = false);
 
   mcTestWidgets('T-0046-AC6 golden: the recent searches', (tester) async {
     await _open(tester);

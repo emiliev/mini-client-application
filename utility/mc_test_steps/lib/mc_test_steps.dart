@@ -37,3 +37,4 @@ export 'package:mc_test_steps/src/interaction/i_tap_the_icon_button.dart';
 export 'package:mc_test_steps/src/interaction/i_tap_twice_in_quick_succession.dart';
 export 'package:mc_test_steps/src/interaction/i_type.dart';
 export 'package:mc_test_steps/src/interaction/i_type_one_character_at_a_time.dart';
+export 'package:mc_test_steps/src/storage_io.dart' show mcFinishStorageIo;

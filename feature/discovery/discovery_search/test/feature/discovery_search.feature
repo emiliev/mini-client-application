@@ -26,11 +26,13 @@ Feature: Search characters and comics
     And I filter by {'Comics'}
     Then the results show only the comics section
     And the comics section shows the first {20} comics for {'spi'} with their art
-    And I see {'Showing 20 of 400'}
+    When I scroll the results to the end
+    Then I see {'Showing 20 of 400'}
     When I filter by {'Characters'}
     Then the results show only the characters section
     And the characters section shows the first {20} characters for {'spi'} with their art
-    And I see {'Showing 20 of 152'}
+    When I scroll the results to the end
+    Then I see {'Showing 20 of 152'}
     When I filter by {'All'}
     Then the results show the characters section, then the comics section
     And the backend received {1} requests for {'GET /v1/search'}
@@ -159,8 +161,10 @@ Feature: Search characters and comics
     And I see {'Alle 152 anzeigen'}
     And I see {'Alle 400 anzeigen'}
     When I filter by {'Figuren'}
+    And I scroll the results to the end
     Then I see {'20 von 152 angezeigt'}
     When I type {'Spire Warden'}
+    And I filter by {'Alle'}
     Then I see {'Keine Comics passen zu „Spire Warden“.'}
 
   @T-0046-AC4 @l10n
@@ -195,6 +199,7 @@ Feature: Search characters and comics
     Then I see {'[Šéé àļļ 152 ~~~]'}
     And nothing overflows
     When I filter by {'[Çóɱíçš ~~]'}
+    And I scroll the results to the end
     Then I see {'[Šĥóŵíñĝ 20 óƀ 400 ~~~~~]'}
     And nothing overflows
     When I type {'Spire Warden'}
