@@ -32,3 +32,24 @@ abstract class ThumbnailDto with _$ThumbnailDto {
   factory ThumbnailDto.fromJson(Map<String, dynamic> json) =>
       _$ThumbnailDtoFromJson(json);
 }
+
+/// A comic summary as `GET /v1/comics?characterId=` sends it (CONTRACT.md of
+/// `mc_fixtures_comics`): the preview's related comics (T-0041). The cover
+/// has the thumbnail's shape.
+@Freezed(fromJson: true, toJson: true)
+abstract class RelatedComicDto with _$RelatedComicDto {
+  @JsonSerializable(explicitToJson: true)
+  const factory RelatedComicDto({
+    required int id,
+    required String title,
+    required int issueNumber,
+    required int seriesId,
+
+    /// A `YYYY-MM-DD` day, kept as text so it round-trips.
+    required String releaseDate,
+    required ThumbnailDto cover,
+  }) = _RelatedComicDto;
+
+  factory RelatedComicDto.fromJson(Map<String, dynamic> json) =>
+      _$RelatedComicDtoFromJson(json);
+}

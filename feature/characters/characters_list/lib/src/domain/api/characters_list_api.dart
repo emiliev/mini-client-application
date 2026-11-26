@@ -22,4 +22,12 @@ abstract class CharactersListApi {
     @Query('limit') int limit = 30,
     @Query('team') String? team,
   });
+
+  /// The comics [characterId] appears in, in title order (the preview's
+  /// related comics, T-0041).
+  @GET('v1/comics')
+  Future<ApiPage<RelatedComicDto>> getComicsOf({
+    @Query('characterId') required int characterId,
+    @Query('limit') int limit = 5,
+  });
 }

@@ -13,5 +13,13 @@
   "charactersListLoadMoreFailed": "Could not load more characters.",
   "@charactersListLoadMoreFailed": {"description": "Footer text when a later page fails; Retry follows."},
   "charactersListPreviewSeeFullProfile": "See full profile",
-  "@charactersListPreviewSeeFullProfile": {"description": "Button on the preview that opens the character's full profile."}
+  "@charactersListPreviewSeeFullProfile": {"description": "Button on the preview that opens the character's full profile."},
+  "charactersListPreviewComics": "Comics",
+  "@charactersListPreviewComics": {"description": "Section title on the preview above the comics the character appears in."},
+  "charactersListPreviewComicsLoading": "Loading comics",
+  "@charactersListPreviewComicsLoading": {"description": "Screen-reader label while the related comics load."},
+  "charactersListPreviewComicsEmpty": "No comics yet.",
+  "@charactersListPreviewComicsEmpty": {"description": "Shown when the character appears in no comic."},
+  "charactersListPreviewComicsFailed": "Comics could not be loaded.",
+  "@charactersListPreviewComicsFailed": {"description": "Shown when the related comics fail to load; Retry follows."}
 }

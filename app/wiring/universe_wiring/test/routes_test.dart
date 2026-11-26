@@ -151,6 +151,42 @@ void main() {
     expect(find.text('Character details 2'), findsOneWidget);
   });
 
+  testWidgets('T-0041-AC5 openComic pushes the comic location of the '
+      'publishing group', (tester) async {
+    final ref = RouterRef();
+    await initializeDIContainer([
+      RouterDIInitializer(ref),
+      const UniverseNavigatorsDIInitializer(),
+      McDIInitializer((getIt, _) {
+        getIt.registerSingleton<RouteTargets>(_Targets());
+      }),
+    ]);
+    // publishing_wiring owns `/comics/:id`; a wiring never imports another
+    // wiring, so a stand-in answers the location.
+    final router = ref.attach(
+      GoRouter(
+        initialLocation: AppLocations.characters,
+        routes: [
+          ...universeRoutes,
+          GoRoute(
+            path: '/comics/:id',
+            builder: (context, state) =>
+                Text('comic ${state.pathParameters['id']}'),
+          ),
+        ],
+      ),
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+
+    diContainer<CharactersListNavigator>().openComic(const ComicId(501267));
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.toString(), AppLocations.comic(501267));
+    expect(find.text('comic 501267'), findsOneWidget);
+    expect(router.canPop(), isTrue, reason: 'a push: Back returns to the list');
+  });
+
   test('T-0033-AC1 the wiring initializer resolves the route targets and the '
       'navigator', () async {
     final ref = RouterRef();

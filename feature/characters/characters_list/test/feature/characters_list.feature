@@ -4,6 +4,7 @@ Feature: Browse characters
 
   Background:
     Given the backend serves {'characters.default'}
+    And the backend serves {'comics.default'}
 
   @T-0032-AC1 @smoke
   Scenario: The first page lists 30 characters in name order

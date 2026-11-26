@@ -4,9 +4,11 @@ import 'dart:convert';
 import 'package:characters_list/src/domain/model/character_dto.dart';
 import 'package:characters_list/src/domain/model/character_id.dart';
 import 'package:characters_list/src/domain/model/character_mapper.dart';
+import 'package:characters_list/src/domain/model/comic_id.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_media/mc_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
@@ -87,6 +89,47 @@ void main() {
       );
 
       expect(dto.toDomain, throwsFormatException);
+    });
+  });
+
+  group('T-0041-AC5 RelatedComicDto against the comics fixture JSON', () {
+    Future<Map<String, dynamic>> comicsOf(int characterId) async {
+      final dio = MockBackend(domains: [const ComicsMockDomain()]).createDio();
+      final response = await dio.get<Map<String, dynamic>>(
+        '/v1/comics',
+        queryParameters: {'characterId': characterId, 'limit': 5},
+      );
+      return response.data!;
+    }
+
+    test(
+      'T-0041-AC5: every served summary round-trips byte for byte',
+      () async {
+        final body = await comicsOf(100486);
+        final page = ApiPage<RelatedComicDto>.fromJson(
+          body,
+          (json) => RelatedComicDto.fromJson(json! as Map<String, dynamic>),
+        );
+
+        expect(page.results, isNotEmpty);
+        expect(
+          canonicalJson([for (final dto in page.results) dto.toJson()]),
+          canonicalJson(body['results']),
+        );
+      },
+    );
+
+    test('T-0041-AC5: the mapper keeps id, title and cover', () async {
+      final record = ComicUniverse(42).comicsOfCharacter(100486).first;
+      final page = ApiPage<RelatedComicDto>.fromJson(
+        await comicsOf(100486),
+        (json) => RelatedComicDto.fromJson(json! as Map<String, dynamic>),
+      );
+      final first = page.results.first.toDomain();
+
+      expect(first.id, ComicId(record.id));
+      expect(first.title, record.title);
+      expect(first.cover, record.cover);
     });
   });
 }

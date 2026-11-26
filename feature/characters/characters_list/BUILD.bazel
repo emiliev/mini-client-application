@@ -3,10 +3,11 @@
 # No per-package analysis_options.yaml: the root file applies (F-0021).
 #
 # Every generator runs as a Bazel action; nothing generated is committed:
-#   freezed      character, character_dto, flow state, list bloc (state part)
+#   freezed      character, character_dto, related_comic, flow state, list
+#                bloc (state part), related comics bloc
 #   json         character_dto                  (over its freezed output)
 #   retrofit     characters_list_api            (fork patch 0001)
-#   injectable   4 shards + di_initializer.config.dart (fork patch 0002)
+#   injectable   5 shards + di_initializer.config.dart (fork patch 0002)
 #   gen-l10n     lib/src/l10n/characters_list_l10n*.dart
 #   BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
 #
@@ -86,6 +87,8 @@ _FREEZED = {
     "character_dto": "lib/src/domain/model/character_dto.dart",
     "flow_state": "lib/src/flow/characters_list_flow_state.dart",
     "list_bloc": "lib/src/presentation/bloc/characters_list_bloc.dart",
+    "related_comic": "lib/src/domain/model/related_comic.dart",
+    "related_comics_bloc": "lib/src/presentation/bloc/related_comics_bloc.dart",
 }
 
 [dart_codegen(
@@ -177,6 +180,7 @@ injectable_package(
         "lib/src/domain/repository/characters_list_repository.dart",
         "lib/src/presentation/bloc/character_preview_bloc.dart",
         "lib/src/presentation/bloc/characters_list_bloc.dart",
+        "lib/src/presentation/bloc/related_comics_bloc.dart",
     ],
     init = _INIT,
     init_deps = ["//utility/mc_di"],
@@ -210,6 +214,8 @@ _CODEGEN = [
     ":_characters_list_api_g",
     ":_flow_state_freezed",
     ":_list_bloc_freezed",
+    ":_related_comic_freezed",
+    ":_related_comics_bloc_freezed",
     ":di_config",
     ":_l10n",
 ]
@@ -259,6 +265,7 @@ _TEST_DEPS = [
     "//utility/mc_ds_navigation",
     "//utility/mc_feature_flow",
     "//utility/mc_fixtures_characters",
+    "//utility/mc_fixtures_comics",
     "//utility/mc_fixtures_media",
     "//utility/mc_media",
     "//utility/mc_mocked_backend",
@@ -291,6 +298,7 @@ flutter_test(
         ":characters_list",
         "//utility/mc_api_client",
         "//utility/mc_fixtures_characters",
+        "//utility/mc_fixtures_comics",
         "//utility/mc_media",
         "//utility/mc_mocked_backend",
         "@pub_deps//:flutter_test",

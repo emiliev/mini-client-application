@@ -5,6 +5,9 @@ import 'package:universe_wiring/universe_wiring.dart';
 class NoNavigator implements CharactersListNavigator {
   @override
   void openCharacter(CharacterId id) {}
+
+  @override
+  void openComic(ComicId id) {}
 }
 
 class FakeList extends CharactersListFlow {
