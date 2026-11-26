@@ -60,7 +60,9 @@ final class Session implements SessionReader, SessionWriter {
 
   _Active? _current;
   int _epoch = 0;
-  Future<void> _tail = Future<void>.value();
+  // Created on first use, in the caller's zone: a future made at boot under
+  // fake async would never complete for a caller that runs in real time.
+  Future<void>? _tail;
 
   @override
   AuthStatus get status =>
@@ -140,7 +142,7 @@ final class Session implements SessionReader, SessionWriter {
   Future<Result<void, StorageFailure>> _enqueue(
     Future<Result<void, StorageFailure>> Function() action,
   ) {
-    final run = _tail.then((_) => action());
+    final run = (_tail ?? Future<void>.value()).then((_) => action());
     _tail = run.then<void>((_) {}, onError: (Object _) {});
     return run;
   }
