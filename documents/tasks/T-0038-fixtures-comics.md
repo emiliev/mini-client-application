@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-26 `e6b384b`; Verifier PASS `436ff61`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier (Opus, fresh) |
 | Branch | `fleet/T-0038-fixtures-comics` |
@@ -51,3 +51,6 @@ Decisions:
 - No lock file changed: the new workspace member adds no external dependency.
 - Not done: no `// ignore:`, no test skipped or weakened.
 - 2026-11-26: Engineer review-fix round after Verifier PASS `24b7533`: `title` order is now (series title, issue number, id); `server_error` set and scenario share one body; id tie-break pinned; neutral vocabulary (`Gambit` -> `Crossing`, `Iron` -> `Slate`); all 10 creator surnames reachable; vacuous cross-link test fixed; CONTRACT.md corrected; AC4 script reports the uncached run. Mutation evidence in `documents/evidence/T-0038/engineer/review_fix_mutations.log` (each new test killed its mutation). Snapshots changed: `detail` (credit surnames), `list_first_page`, `list_offset_40`, `list_title_spi`, `list_by_character` (issue order); the other six are unchanged.
+
+## Merge (TL)
+- 2026-11-26: Verifier PASS `24b7533` (19/20 mutations killed). `/code-review` found only nits; the most relevant was that `title` sorted as text, so a series listed #1, #10, #11 … #2. Fix round `38354b9`: series/issue order, a non-vacuous cross-link test, one `server_error` body, a tie-break pin, trademark-free vocabulary (`Gambit`→`Crossing`, `Iron`→`Slate`), and `CONTRACT.md` corrections. Re-verify PASS `436ff61` (14/14 mutations, 15 probes). TL decision: constants plus a drift test instead of importing the Flutter-bound characters and media packages. The TL merged `--no-ff`; on the merge result `check` passed, 88/88 tests passed, lint was clean, `mc_arch_check` reported OK and the fixtures check passed.
