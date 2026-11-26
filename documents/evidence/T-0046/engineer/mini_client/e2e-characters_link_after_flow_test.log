@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0046 engineer on mc-T-0046-engineer-30982 (F759F6A3-E060-4BFC-9047-EF5EDB7A4627)
+# e2e_ios.sh: T-0046 engineer on mc-T-0046-engineer-59251 (5CEC662A-A1C1-45B4-AB09-4E97E67AD508)
 # cwd: /tmp/mc-T-0046-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/3-characters_link_after_flow_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d F759F6A3-E060-4BFC-9047-EF5EDB7A4627
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.pjNg6S/screenshots/3-characters_link_after_flow_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d 5CEC662A-A1C1-45B4-AB09-4E97E67AD508
 
 Resolving dependencies in `/private/tmp/mc-T-0046-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0046-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           10.2s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:65037/8gmuIvPbN5o=/
-VMServiceFlutterDriver: Isolate found with number: 2299385164439479
-VMServiceFlutterDriver: Isolate 2299385164439479 is runnable.
+Xcode build done.                                            9.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50341/ENHotastT0Q=/
+VMServiceFlutterDriver: Isolate found with number: 7646226022913375
+VMServiceFlutterDriver: Isolate 7646226022913375 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 a link sent to the running app opens its route while the characters list is shown
@@ -36,7 +36,7 @@ flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
 flutter: 00:03 +1: (tearDownAll)
 flutter: 00:03 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.k9b5A3/screenshots/3-characters_link_after_flow_test/06_link_after_flow.png (215719)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.pjNg6S/screenshots/3-characters_link_after_flow_test/06_link_after_flow.png (215719)
 All tests passed.
 
 # exit code: 0
