@@ -1,0 +1,16 @@
+  PASS  T-0022-AC1 no flowInitializer renders the first page
+  PASS  T-0022-AC2 a throwing initializer shows Retry and records
+  PASS  T-0022-AC3 complete(r) calls onComplete once with r
+  PASS  T-0022-AC4 two flows in an IndexedStack own their controllers
+  PASS  T-0022-AC5 iOS edge swipe pops a named page and reverts state
+  PASS  T-0022-AC5 an in-place update then an edge swipe keeps state and pages in step
+  PASS  T-0022-AC5 a filter changed on the list survives push and edge swipe
+  PASS  T-0022-AC5 two pushes then two edge swipes restore each level
+  PASS  T-0022-AC6 an unregistered root import fails naming its type
+  PASS  T-0022-AC6 debugResolveAll names both types
+  PASS  VPROBE1 list filter foo, push, swipe back keeps foo
+  PASS  VPROBE2 in-place change inside detail, back gives pre-push
+  PASS  VPROBE3 push push back back restores each level, re-push ok
+  PASS  VPROBE4 same-depth page replace, then swipe: pages match state
+//utility/mc_feature_flow:feature_flow_test                              PASSED in 0.8s
+Executed 1 out of 1 test: 1 test passes.

@@ -1,0 +1,63 @@
+P1 back buttons: list before=1 preview up=1 list after locale change + pop=1
+P1 one tap on the list back button returned home
+  PASS  P1 locale change with the preview open keeps the list back button
+  PASS  T-0034-AC1 context.di inside BlocProvider.create does not throw and creates the bloc once
+  PASS  T-0034-AC1 context.di registers no dependency on the scope and a new scope does not recreate the bloc
+  PASS  T-0034-AC2 provide: resolves inside the flow and nowhere outside it
+  PASS  T-0034-AC2 localizationsDelegates resolve the flow strings in en and de
+  PASS  T-0034-AC2 without localizationsDelegates the host decides
+  PASS  T-0034-AC6 flowStateOf reads the flow state through the controller
+  PASS  T-0034-AC6 flowStateOf fails on another state type and outside a flow
+  PASS  T-0034-AC2 provide: is registered before flowInitializer runs
+  PASS  T-0034-AC2 a host MaterialLocalizations override survives inside the flow, and the flow still adds its own strings
+  PASS  T-0034-AC2 a host without core or Flutter delegates gets them from the flow
+  PASS  T-0034-AC2 changing localizationsDelegates keeps the pushed page and its state
+  PASS  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 present when pushed, and tapping it pops the flow
+  PASS  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 absent when the flow is the root
+  PASS  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 a page pushed inside the flow keeps the automatic back button, which pops that page only
+Expected: no matching candidates
+  Actual: _TextWidgetFinder:<Found 1 widget with text "flow root 1": [
+  FAIL  T-0036-AC1 the back button is present after the root page rebuilds under an inner page
+Expected: no matching candidates
+  Actual: _TextWidgetFinder:<Found 1 widget with text "flow root 0": [
+  FAIL  T-0036-AC1 the iOS edge swipe leaves the flow after a state-driven return to the root
+  PASS  T-0036-AC2 McFlowBackButton on a page that is not the flow root T-0036-AC2 a drawer gives the DrawerButton, not a back button
+  PASS  T-0036-AC2 McFlowBackButton on a page that is not the flow root T-0036-AC2 a fullscreen dialog gives the CloseButton
+  PASS  T-0036-AC2 McFlowBackButton on a page that is not the flow root T-0036-AC2 outside any route it is empty
+  PASS  T-0034-AC1 FlowScope.of outside a flow names the problem
+  PASS  T-0034-AC6 flowStateOf fails when the scope has no controller
+R1 inner back buttons=1; after tap detail=false home=false root back buttons=1
+  PASS  R1 inner page with the widget: one back button, pops only it
+R2 PopScope canPop values=[false]; taps to leave=6 home=false
+Expected: <1>
+  Actual: <6>
+  FAIL  R2 dead-button repro: return by controller.update, then tap
+R3 home after one edge swipe=false
+Expected: true
+  Actual: <false>
+  FAIL  R3 dead-button repro, the iOS edge swipe
+R4 frames=0 back buttons=1 home after first tap=true extra taps=0 home=true exception=null
+  PASS  R4 rapid: x then root in one frame, tap after 0 frame(s)
+R4 frames=1 back buttons=1 home after first tap=true extra taps=0 home=true exception=null
+  PASS  R4 rapid: x then root in one frame, tap after 1 frame(s)
+R4 frames=2 back buttons=1 home after first tap=true extra taps=0 home=true exception=null
+  PASS  R4 rapid: x then root in one frame, tap after 2 frame(s)
+R4b home=true detail=false exception=null
+  PASS  R4b update to x then immediately tap the root back (pop before the push lands)
+R5 exception after dispose with a pending post-frame=null
+  PASS  R5 dispose while the post-frame callback is pending
+R6 back buttons inner root=1 inner detail=1; inner pop kept inner root=true; after inner state return one tap shows outer root=false (outer.selected=n); next tap home=false
+Expected: true
+  Actual: <false>
+  FAIL  R6 nested flows: inner flow root pops the outer flow page; after an inner state-driven return, one tap
+R7 root+drawer pushed: back=1 drawer=0; root+drawer as app root: back=0 drawer=1
+  PASS  R7 drawers: flow root pushed / flow is app root / inner page
+R8 dialog close=1 back=0; after close dialog=false root=true home=false
+  PASS  R8 fullscreen dialog pushed on the flow navigator
+R9 no route: exception=null back=0; app home outside a flow: exception=FlutterError
+  PASS  R9 outside any route, and on a route outside any flow
+INFO: Build completed, 2 tests FAILED, 16 total actions
+//feature/characters/characters_list:verifier_probe_test                 PASSED in 1.0s
+//utility/mc_feature_flow:flow_kit_test                                  FAILED in 1.4s
+//utility/mc_feature_flow:verifier_probe_test                            FAILED in 1.5s
+Executed 3 out of 3 tests: 1 test passes and 2 fail locally.

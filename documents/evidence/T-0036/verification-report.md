@@ -5,7 +5,8 @@
 - **Branch / commit verified:** `fleet/T-0036-flow-back-button` @ **`2407e45`**, a detached checkout in the Verifier's own worktree
 - **Simulator:** `mc-T-0036-verifier-48398`, iPhone 17 Pro, iOS 26.2. `tool/e2e_ios.sh` created and deleted it; afterwards `xcrun simctl list devices | grep -c mc-T-0036` gives 0
 - **Bazel:** `tool/bazelw --output_base=/tmp/mc-ob-T-0036-verifier …`. Every test run that counts used `--nocache_test_results`. The server was shut down at the end
-- **Verdict: FAIL.** AC1 and AC3 pass. **AC2 fails**: nothing tests the `isFirst` condition (my mutation survives every test), and the widget does not "leave the AppBar's automatic back alone" on an inner page. It removes it. The T-0034 inner-page case was changed so that it no longer uses the widget, rather than kept. The fix is small (Issue 1).
+- **Re-verification at `cbadeb0`: PASS** (see [the last section](#re-verification-at-cbadeb0)). The round-1 verdict below is kept as history.
+- **Verdict (round 1, `2407e45`): FAIL.** AC1 and AC3 pass. **AC2 fails**: nothing tests the `isFirst` condition (my mutation survives every test), and the widget does not "leave the AppBar's automatic back alone" on an inner page. It removes it. The T-0034 inner-page case was changed so that it no longer uses the widget, rather than kept. The fix is small (Issue 1).
   - Separately, Issue 2 (major, pre-existing, outside T-0036's scope) matters for the bricks. In the one scenario where the old button vanished, the new button is present but **dead**: tapping it never leaves the flow.
 
 My evidence is in [`verifier/`](verifier/).
@@ -95,3 +96,125 @@ The committed `characters_journey_test` also passed (screenshots `01_home` to `0
 - Issue 2 is not this task's defect, but it decides whether the AC1 fix has any user-visible value. Today's exemplar never returns to its root through a state change, so it is not live yet. The bricks will make it live.
 - The probe targets and mutation scripts are mine and committed only as evidence under `verifier/`. They are not wired into any BUILD file.
 - I deleted the e2e scratch copy `/tmp/mc-T-0036-verifier-e2e.*` at the end.
+
+---
+
+## Re-verification at cbadeb0
+
+- **Commit verified:** `fleet/T-0036-flow-back-button` @ **`cbadeb0`** (5 fix commits on top of my `00205cf`), a detached checkout in my own worktree. Output base `/tmp/mc-ob-T-0036-verifier`, shut down at the end
+- **Simulator:** `mc-T-0036-verifier-66987`, iPhone 17 Pro, iOS 26.2. `tool/e2e_ios.sh` created and deleted it; afterwards `simctl` lists 0 `mc-T-0036` devices
+- **Verdict: PASS.** All three ACs pass, and round 1's Issues 1 to 4 are fixed. What remains is four minor test gaps and three nits (R-1 to R-7 below), none of which makes an AC fail.
+
+Evidence: [`verifier/rv/`](verifier/rv/) and [`verifier/e2e-rv/`](verifier/e2e-rv/). I wrote every probe and mutation script myself, apart from the committed `tool/checks/*` scripts and the engineer's `mutations.sh`. They ran as temporary BUILD targets or in-place edits that were reverted afterwards, and `git status` was clean after each run.
+
+### The TL decisions, against the code
+| Decision | Code | Matches? |
+|---|---|---|
+| (a) Off the flow root, render the AppBar's automatic leading | `flow_context.dart:95-118`. Off the root it gives `DrawerButton` when the Scaffold has a drawer, else `CloseButton` for a fullscreen `PageRoute` or `BackButton` when `impliesAppBarDismissal && canPop`, else empty. That is AppBar's own order. The root (`:102`) keeps the flow's `BackButton` (outer `maybePop`), then a `DrawerButton` when the flow is the app root, else empty | **yes** |
+| Empty 56 px slot at the app root, accepted and documented | Widget doc comment (`flow_context.dart`, the "When the flow is the app's root" paragraph); F-0035 fact 3 | **yes** |
+| Stale `PopScope` fixed as patch change 4 | `flow_builder.dart:174-180` (post-frame `setState` in `_listener`) and `:348-351` (always-mounted `PopScope(canPop: !condition)`); patch file, `VENDORED.md` change 4, F-0034 fact 9, upstream draft "Second issue" | **yes** |
+
+### 1. AC2
+- **The restored inner-page test** (`flow_kit_test.dart:604-669`) puts `leading: const McFlowBackButton()` on the inner page, as on main. It asserts `findsOneWidget` for `BackButton` while the inner page is up, and after the tap the detail is gone, `selected` is null and the flow is still open. My R1 agrees: 1 button, it pops only the inner page, and the root's button is back.
+- **The `isFirst`-ignored mutation now dies.** My M1b (`route.isFirst` → `route.isActive`) and M1c (`isCurrent`) are each killed by 3 `T-0036-AC2` tests ([log](verifier/rv/mutations_McFlowBackButton_rv.log), driver [mut_flow_back_rv.sh](verifier/rv/mut_flow_back_rv.sh)).
+- **My earlier mutations, re-expressed for the new code:**
+
+  | Mutation | Result |
+  |---|---|
+  | M2 (root ignores `outer.canPop()`) | killed (AC2 "absent when root", 3 goldens) |
+  | M3b (root pops the inner navigator) | killed (AC1, AC2) |
+  | M7 (no route gives a `BackButton`) | killed |
+  | M8 (`canPop` read from the inner navigator) | killed |
+  | M9 (off-root drawer dropped) | killed |
+  | M11 (fullscreen dialog gets `BackButton`) | killed on `flow_kit_test` by the `CloseButton` assertion (over `//utility/mc_feature_flow/...` the library's `unused_shown_name` warning stops the build first) |
+  | M13 (off-root always empty) | killed |
+  | M14 (off-root back pops the flow) | killed |
+  | M6 (`maybePop` → `pop`) | **survives**, as in round 1 (R-1) |
+  | M10 (drawer on the root when the flow is the app root) | **survives** (R-2) |
+  | M12 (`impliesAppBarDismissal` ignored) | **survives**; it is equivalent in that branch, because off the first route both reduce to `hasActiveRouteBelow` |
+
+- **My probes** ([rv_probe_test.dart](verifier/rv/rv_probe_test.dart), [log](verifier/rv/probes_head.log)):
+  - **Drawer.** On a flow root that was pushed, the widget gives `BackButton`, not a drawer button. On a flow that is the app root, it gives `DrawerButton` with no back button. On an inner page, it gives `DrawerButton` (committed test).
+  - **Fullscreen dialog** pushed on the flow's own navigator: `CloseButton` ×1, `BackButton` ×0. Tapping it closes only the dialog.
+  - **Outside any route:** empty, no exception. On a route outside any flow (the app's home) it throws `FlutterError` from `FlowScope.read`. That is acceptable for a flow widget, but see R-5.
+  - **The exemplar probe P1** (locale change with the preview open, then the user pops) still gives 1 button and goes home in one tap.
+
+### 2. Dead button, patch change 4
+- **My round-1 repro now passes.**
+  - R2 is the return via `controller.update` (after a root rebuild under the inner page). The mounted `PopScope` now has `canPop: true`, and **one tap leaves the flow** (round 1: never, in 6 taps).
+  - R3 is the same return followed by **one iOS edge swipe, which leaves the flow**.
+  - Both committed AC1 tests now tap or swipe once and assert home.
+- **Reverting patch change 4** with [run_rv.sh](verifier/rv/run_rv.sh). The edits were made in place on the vendored file and restored afterwards, standing in for the requested scratch copy ([both](verifier/rv/probes_nohunk4.log), [post-frame only](verifier/rv/probes_no_postframe.log), [scope only](verifier/rv/probes_no_alwaysscope.log)):
+
+  | Reverted | T-0036-AC1 (button) | T-0036-AC1 (swipe) | R2 | R3 | R6 nested |
+  |---|---|---|---|---|---|
+  | both halves | **FAIL** | **FAIL** | FAIL (`[false]`, 6 taps) | FAIL | FAIL |
+  | only the post-frame `setState` | **FAIL** | **FAIL** | FAIL | FAIL | FAIL |
+  | only the always-mounted scope | pass | pass | pass | pass | pass |
+
+  So the post-frame recompute is the fix. The always-mounted scope is a structural change, because stock swapped the widget and re-parented the whole navigator subtree. No test or probe depends on it (R-3).
+- **The approach.** A post-frame `setState` that recomputes `_canPop` after the navigator has the new pages is minimal and correct.
+  - It costs one extra `FlowBuilder` build per state update. That is cheap, because the pages are identical, and in-place updates pay it too.
+  - Its window is one frame. My R4 (`x` then the root in one frame, tapped after 0, 1 or 2 frames) left the flow on the first tap in every case, with no exception. In practice the inner page's exit transition covers that frame anyway.
+  - The `mounted` guard holds. R5 disposes the flow in the same frame as an update with the callback pending: no exception.
+  - A `NavigatorObserver`-driven recompute would be exact, but it is not needed.
+- **Regressions:**
+  - **T-0022 VPROBE1-4**, spliced into `feature_flow_test` with [run_vprobes.sh](verifier/rv/run_vprobes.sh): **4/4 PASS** alongside the 10 committed T-0022 tests ([log](verifier/rv/vprobes_T-0022.log)).
+  - **T-0035:** `flow_navigation_channel_test` and `framework_navigation_baseline_test` pass uncached. So do `links_after_flow_test` and the on-simulator `characters_link_after_flow_test`.
+  - **Nested flows** (R6): the inner flow's root button pops the outer flow's nested page. After a state-driven return inside the inner flow, one tap shows the outer root with `outer.selected == null`, and the next tap goes home.
+  - **R4b** (update to `x`, then tap the root back immediately): the flow leaves cleanly.
+- **Provenance:**
+  - `VENDORED.md` change 4 describes exactly the two hunks.
+  - `T-0035-AC4_provenance.sh` passes: lib = archive + patch, 32 changed lines ([report](verifier/rv/rv_provenance_head.md)).
+  - **Broken once** by restoring stock's `_ConditionalPopScope` line: **FAIL** "DIFFERS from the recorded patch" ([report](verifier/rv/rv_provenance_broken.md)). Restored.
+
+### 3. Docs
+- **F-0035:**
+  - Fact 1 now says a user pop rebuilds the root, only a state-driven return keeps the button missing, and the bug is latent in today's exemplar.
+  - Fact 4 now says the `controller.update` return is what discriminates.
+  - Fact 5 now describes the stale `PopScope` and the masking re-parent rebuild.
+  - The AC1 comments in `flow_kit_test.dart` (the `_RebuildingRoot` doc, the rebuild comment, and "One tap leaves the flow") are corrected.
+- **F-0034 fact 9 and the upstream draft** ("Second issue") describe change 4 accurately.
+
+### 4. AC3
+- **`tool/checks/T-0036-AC3_gates.sh --role verifier`: PASS**, all 6 gates ([report](verifier/rv/T-0036-AC3_gates.md)): `T-0035-AC4_gates.sh`, T-0032 byte identity, cutoff, both mutation scripts, no `flowLeading`, and stale comments.
+- **Negative, my own plants** in a scratch tree through `MC_GREP_ROOT`: a `context.flowLeading()` file, the stale `Empty:` doc line, `assertion above` and `skipped until T-0035`. Both grep gates **FAIL** and name each hit ([report](verifier/rv/AC3_negative_verifier.md)). The unplanted copy PASSES.
+- **`mutations.sh` (T-0033):**
+  - Without `MC_TASK` it stops with `MC_TASK: set MC_TASK (e.g. T-0036)`, rc 1.
+  - With `MC_TASK=T-0036 MC_ROLE=verifier` it kills **9/9** ([log](verifier/rv/mutations_T-0033_rerun.log)).
+  - Its committed `mutate()`, fed a non-test target, prints `ERROR (no failing test)` and sets rc 1 ([log](verifier/rv/mutations_sh_error_branch.log)). A missing target is reported as `COMPILE ERROR`, also rc 1.
+- **The engineer's T-0036 `mutations.sh`**, run by me: **5/5 killed** ([log](verifier/rv/engineer_mutations_T-0036_rerun.log)). I checked the fullscreen-dialog kill separately: it is the `CloseButton` assertion, not the compiler.
+
+### 5. Gates
+| Gate | Result |
+|---|---|
+| Touched packages uncached (`characters_list`, `mc_feature_flow`, `third_party/flow_builder`, which has no tests of its own) | **9/9 PASSED** ([log](verifier/rv/rv_test_touched_uncached.log)); `test //...` 84/84 |
+| lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, provenance, coverage ≥ 90 | PASS (inside `T-0036-AC3_gates.sh`) |
+| Coverage, my parser | mc_feature_flow **147/148 = 99.3 %** (misses `feature_flow.dart:216`); characters_list **155/155 = 100 %** ([coverage](verifier/rv/rv_coverage.txt)) |
+| T-0032 byte identity / cutoff | PASS, 11/11 EQUAL / PASS (inside the AC3 gates) |
+| e2e on my simulator | **3/3 PASS**: my back-button journey, `characters_journey_test`, `characters_link_after_flow_test` ([summary](verifier/e2e-rv/e2e-summary.md)) |
+
+**Screenshots I looked at:**
+- [v02](verifier/e2e-rv/v02_list_with_back_button.png): the "Characters" grid with the iOS back chevron at the top left.
+- [v03](verifier/e2e-rv/v03_preview.png): the Amber Alchemist preview with one chevron.
+- [v04](verifier/e2e-rv/v04_list_after_preview.png): the grid again, chevron present.
+- [v05](verifier/e2e-rv/v05_home_again.png): "Mini Client" home after one tap, no chevron.
+- [06_link_after_flow](verifier/e2e-rv/06_link_after_flow.png): "Placeholder 42" from `miniclient://app/placeholder/42`, opened after the flow was shown, with a back chevron.
+
+### 6. Integrity
+- **The handoff now admits the round-1 weakening** ("Correction to the first handoff") and restores the test with a stricter assertion.
+- **Against origin/main:**
+  - The only changed test files are `flow_kit_test.dart` (+234 / −9) and `api_client_test.dart` (comment).
+  - No `expect` line is removed; the only removed `testWidgets` lines are the three renames.
+  - No `skip:` and no new `// ignore` in code. The two `ignore_for_file: avoid_print` hits are in my own probe files under `documents/evidence/`.
+  - No golden changed.
+- **All changed files are in scope:** `app/mini_client/BUILD.bazel`, the exemplar page, `mc_feature_flow` lib and test, `api_client_test`, vendored flow_builder (lib, patch, `VENDORED.md`), `tool/checks/T-0035-AC4_*`, the new `T-0036-AC3_gates.sh`, F-0034, F-0035, the upstream draft, the task file and evidence.
+
+### Remaining issues (none blocking)
+- **R-1 (minor, test gap, carried over):** nothing pins that the root button respects `PopScope` (`maybePop` → `pop` survives). Suggest a test with a `PopScope(canPop: false)` around the flow route.
+- **R-2 (minor, test gap):** the `DrawerButton` branch for a flow that is the app root (`flow_context.dart:107`) is untested; my R7 shows it works.
+- **R-3 (minor, test gap):** the always-mounted `PopScope` half of change 4 (`flow_builder.dart:348-351`) is not needed by any test or probe. It is justified (no re-parenting or full-page rebuilds when `canPop` flips), but a test that counts page builds across a push and pop would pin it.
+- **R-4 (nit, design):** on a pushed flow root whose Scaffold has a drawer, the flow's `BackButton` wins and the drawer button is not shown. AppBar would show the drawer button there. This is consistent with decision (a), which covers off-root pages only, but undocumented.
+- **R-5 (nit, docs):** on a route outside any `FeatureFlow`, the widget throws `FlutterError` (from `FlowScope.read`). The doc says "Safe on every page of a flow" (`flow_context.dart:76`), which is accurate; one line saying it needs a flow would help.
+- **R-6 (nit, naming):** `third_party/flow_builder/0001-forward-pushRouteInformation.patch` now also carries the `PopScope` change, and the file name no longer describes it. `VENDORED.md` explains it.
+- **R-7 (minor, test gap):** the engineer's AC3 negative (`engineer/AC3_negative_control.md`) planted only 2 of the 4 stale phrases; mine covers all 4 and every one is caught.

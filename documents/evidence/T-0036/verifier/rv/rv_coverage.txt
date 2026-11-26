@@ -1,0 +1,6 @@
+== utility/mc_feature_flow: 4 coverage.dat, 147/148 lines = 99.3 %
+   hand-written lib files with no LCOV record: ['lib/mc_feature_flow.dart']
+   uncovered lib/src/feature_flow.dart: [216]
+   McFlowBackButton line hits: {93: 1, 95: 1, 97: 1, 101: 2, 102: 1, 103: 2, 104: 1, 105: 4, 112: 2, 113: 2}
+== feature/characters/characters_list: 5 coverage.dat, 155/155 lines = 100.0 %
+   hand-written lib files with no LCOV record: ['lib/characters_list.dart', 'lib/src/di/flow_scope.dart', 'lib/src/domain/api/characters_list_api.dart', 'lib/src/domain/model/character.dart', 'lib/src/flow/characters_list_flow_state.dart', 'lib/src/navigator/characters_list_navigator.dart', 'lib/src/presentation/bloc/characters_list_state.dart']
