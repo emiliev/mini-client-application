@@ -82,12 +82,14 @@ if [[ -n "$probe_tracked" ]]; then pass "2a. negative control (git add -f)" "rep
 else fail "2a. negative control (git add -f)" "a force-added synced file was not reported"; fi
 
 # 2b. globs
-sources_in_bazel() {  # synced paths that some target takes as a source file
+# The synced files plus gen-l10n's, which `fvm flutter pub get` writes beside the ARBs.
+written_files() { { cat "$MAN"; find app feature utility spike -path '*/lib/src/l10n/*_l10n*.dart' -not -path '*/build/*'; } | sort -u; }
+sources_in_bazel() {  # written paths that some target takes as a source file
   bzw query 'kind("source file", deps(//...))' --output=label 2>/dev/null |
-    sed -n 's|^//\([^:]*\):\(.*\)$|\1/\2|p' | sort -u | comm -12 - <(sort "$MAN")
+    sed -n 's|^//\([^:]*\):\(.*\)$|\1/\2|p' | sort -u | comm -12 - <(written_files)
 }
 picked="$(sources_in_bazel)"
-if [[ -z "$picked" ]]; then pass "2b. no BUILD glob picks up a synced file" "$nsync synced files, none is a source file of any target"
+if [[ -z "$picked" ]]; then pass "2b. no BUILD glob picks up a synced file" "$nsync synced files and $(find app feature utility spike -path '*/lib/src/l10n/*_l10n*.dart' | wc -l | tr -d ' ') gen-l10n files, none is a source file of any target"
 else fail "2b. no BUILD glob picks up a synced file" "$picked"; fi
 printf '// planted: git-ignored, like a synced file\n' >"$REPO/$PLANT"
 git check-ignore -q "$PLANT" || { report "the planted file is not git-ignored: the control is invalid"; finish T-0042-AC4 1; }

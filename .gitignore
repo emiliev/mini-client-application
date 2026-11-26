@@ -47,6 +47,8 @@ app/**/assets/app_config.json
 **/ios/Flutter/AppFrameworkInfo.plist
 **/ios/Flutter/Debug.xcconfig
 **/ios/Flutter/Release.xcconfig
+**/ios/Runner/Runner-Bridging-Header.h
+**/ios/Runner/Assets.xcassets/LaunchImage.imageset/
 **/ios/Podfile
 **/ios/Podfile.lock
 .metadata
