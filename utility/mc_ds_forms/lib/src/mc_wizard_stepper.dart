@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
+import 'package:mc_ds_forms/src/mc_blocked_tap.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
@@ -23,6 +24,8 @@ class McWizardStepper extends StatelessWidget {
     required this.nextLabel,
     required this.onBack,
     required this.onNext,
+    this.onBlockedNext,
+    this.blockedHint,
     super.key,
   }) : assert(stepCount > 0, 'a wizard has at least one step'),
        assert(
@@ -34,7 +37,8 @@ class McWizardStepper extends StatelessWidget {
   /// back; the last step shows [finishLabel] and is enabled when the wizard
   /// can complete; every other step shows [nextLabel] and is enabled when
   /// its step is valid. While the wizard completes, both buttons are
-  /// disabled. [onNext] runs for "Next" and for "Finish".
+  /// disabled. [onNext] runs for "Next" and for "Finish". A tap on the
+  /// disabled button calls [onBlockedNext] (not while completing).
   factory McWizardStepper.fromState(
     WizardState<Object?> state, {
     required McStepLabel stepLabel,
@@ -43,6 +47,8 @@ class McWizardStepper extends StatelessWidget {
     required String finishLabel,
     required VoidCallback onBack,
     required VoidCallback onNext,
+    required VoidCallback onBlockedNext,
+    required String blockedHint,
     Key? key,
   }) => McWizardStepper(
     key: key,
@@ -55,6 +61,10 @@ class McWizardStepper extends StatelessWidget {
     onNext: (state.isLast ? state.canComplete : state.canGoNext)
         ? onNext
         : null,
+    onBlockedNext: state.isCompleting || state.isCompleted
+        ? null
+        : onBlockedNext,
+    blockedHint: blockedHint,
   );
 
   /// The current step, 0-based.
@@ -69,6 +79,15 @@ class McWizardStepper extends StatelessWidget {
 
   /// Null disables Next.
   final VoidCallback? onNext;
+
+  /// Called when the user taps the disabled Next. Wire it to
+  /// `WizardController.touchCurrentStep`, so the errors that block the step
+  /// show. Without it a tap on the disabled button does nothing.
+  final VoidCallback? onBlockedNext;
+
+  /// Read by screen readers on the disabled Next ("Complete the required
+  /// fields").
+  final String? blockedHint;
 
   static const backKey = Key('mc_wizard_stepper_back');
   static const nextKey = Key('mc_wizard_stepper_next');
@@ -142,10 +161,16 @@ class McWizardStepper extends StatelessWidget {
                   Expanded(
                     child: KeyedSubtree(
                       key: nextKey,
-                      child: McButton(
+                      child: McBlockedTap(
+                        active: onNext == null && onBlockedNext != null,
+                        onTap: onBlockedNext,
                         label: nextLabel,
-                        onPressed: onNext,
-                        expand: true,
+                        hint: blockedHint,
+                        child: McButton(
+                          label: nextLabel,
+                          onPressed: onNext,
+                          expand: true,
+                        ),
                       ),
                     ),
                   ),

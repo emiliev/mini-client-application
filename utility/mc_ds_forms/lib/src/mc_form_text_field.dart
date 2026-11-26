@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:mc_ds_forms/src/mc_form_scope.dart';
 import 'package:mc_ds_inputs/mc_ds_inputs.dart';
 import 'package:mc_forms/mc_forms.dart';
 
@@ -15,9 +18,12 @@ typedef McErrorMessage = String Function(FieldError error);
 /// current error under the field, announced by `McTextField`.
 ///
 /// [onChanged] reports each user edit (wire it to `setValue`), and
-/// [onTouched] reports the first loss of focus (wire it to `touch`). A
+/// [onTouched] reports the first loss of focus, once (wire it to `touch`). A
 /// change of `field.value` from outside (a reset) updates the text without
-/// calling [onChanged].
+/// calling [onChanged], and keeps the cursor where it was (clamped to the
+/// new length). A rebuild with an unchanged value never touches the text.
+/// The field is disabled while an enclosing [McFormScaffold] is busy or an
+/// enclosing [McFieldGroup] is not enabled.
 class McFormTextField extends StatefulWidget {
   const McFormTextField({
     required this.field,
@@ -61,22 +67,55 @@ class _McFormTextFieldState extends State<McFormTextField> {
   late final FocusNode _focus = FocusNode()..addListener(_onFocus);
   bool _hadFocus = false;
 
+  /// `onTouched` was called (or the field already was touched). Sticky, so
+  /// it fires once; a reset (touched goes back to false) re-arms it.
+  late bool _reported = widget.field.touched;
+
   void _onFocus() {
     if (_focus.hasFocus) {
       _hadFocus = true;
     } else if (_hadFocus) {
       _hadFocus = false;
-      widget.onTouched();
+      if (!_reported) {
+        _reported = true;
+        widget.onTouched();
+      }
     }
   }
 
   @override
   void didUpdateWidget(McFormTextField old) {
     super.didUpdateWidget(old);
-    final value = widget.field.value ?? '';
-    if (value != _controller.text) {
-      _controller.text = value;
+    if (old.field.touched && !widget.field.touched) {
+      _reported = false;
     }
+    // Only a change of the field's value reaches the text: a parent rebuild
+    // with a stale value must not overwrite what the user has typed since.
+    if (old.field.value == widget.field.value) {
+      return;
+    }
+    final value = widget.field.value ?? '';
+    final current = _controller.value;
+    if (value == current.text) {
+      return;
+    }
+    int clamp(int offset) =>
+        offset < 0 ? offset : math.min(offset, value.length);
+    final selection = current.selection;
+    final composing = current.composing;
+    _controller.value = TextEditingValue(
+      text: value,
+      selection: selection.isValid
+          ? TextSelection(
+              baseOffset: clamp(selection.baseOffset),
+              extentOffset: clamp(selection.extentOffset),
+              affinity: selection.affinity,
+            )
+          : TextSelection.collapsed(offset: value.length),
+      composing: composing.isValid && composing.end <= value.length
+          ? composing
+          : TextRange.empty,
+    );
   }
 
   @override
@@ -104,7 +143,7 @@ class _McFormTextFieldState extends State<McFormTextField> {
       keyboardType: widget.keyboardType,
       textInputAction: widget.textInputAction,
       inputFormatters: widget.inputFormatters,
-      enabled: widget.enabled,
+      enabled: widget.enabled && McFormScope.enabledOf(context),
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
+import 'package:mc_ds_forms/src/mc_blocked_tap.dart';
+import 'package:mc_ds_forms/src/mc_form_scope.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
@@ -20,6 +22,8 @@ class McFormScaffold extends StatelessWidget {
     this.isSubmitting = false,
     this.errorText,
     this.appBar,
+    this.onBlockedSubmit,
+    this.blockedHint,
     super.key,
   });
 
@@ -42,6 +46,15 @@ class McFormScaffold extends StatelessWidget {
 
   final PreferredSizeWidget? appBar;
 
+  /// Called when the user taps the disabled button (not while busy). Wire it
+  /// to `FormController.touchAll`, so the errors that disable the button
+  /// show.
+  final VoidCallback? onBlockedSubmit;
+
+  /// Read by screen readers on the disabled button ("Complete the required
+  /// fields").
+  final String? blockedHint;
+
   /// The submit button, for tests.
   static const submitKey = Key('mc_form_scaffold_submit');
 
@@ -55,7 +68,7 @@ class McFormScaffold extends StatelessWidget {
             child: SingleChildScrollView(
               padding: McInsets.screen,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: body,
+              child: McFormScope(enabled: !isSubmitting, child: body),
             ),
           ),
           _SubmitBar(
@@ -64,6 +77,8 @@ class McFormScaffold extends StatelessWidget {
             onSubmit: onSubmit,
             isSubmitting: isSubmitting,
             errorText: errorText,
+            onBlockedSubmit: onBlockedSubmit,
+            blockedHint: blockedHint,
           ),
         ],
       ),
@@ -78,6 +93,8 @@ class _SubmitBar extends StatelessWidget {
     required this.onSubmit,
     required this.isSubmitting,
     required this.errorText,
+    required this.onBlockedSubmit,
+    required this.blockedHint,
   });
 
   final String submitLabel;
@@ -85,6 +102,8 @@ class _SubmitBar extends StatelessWidget {
   final VoidCallback? onSubmit;
   final bool isSubmitting;
   final String? errorText;
+  final VoidCallback? onBlockedSubmit;
+  final String? blockedHint;
 
   @override
   Widget build(BuildContext context) {
@@ -117,10 +136,19 @@ class _SubmitBar extends StatelessWidget {
                 children: [
                   KeyedSubtree(
                     key: McFormScaffold.submitKey,
-                    child: McButton(
-                      label: isSubmitting ? busyLabel : submitLabel,
-                      onPressed: isSubmitting ? null : onSubmit,
-                      expand: true,
+                    child: McBlockedTap(
+                      active:
+                          !isSubmitting &&
+                          onSubmit == null &&
+                          onBlockedSubmit != null,
+                      onTap: onBlockedSubmit,
+                      label: submitLabel,
+                      hint: blockedHint,
+                      child: McButton(
+                        label: isSubmitting ? busyLabel : submitLabel,
+                        onPressed: isSubmitting ? null : onSubmit,
+                        expand: true,
+                      ),
                     ),
                   ),
                   if (isSubmitting)
