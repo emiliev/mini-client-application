@@ -59,6 +59,12 @@ class _HolderState<T> extends State<_Holder<T>> {
       widget.builder(value, (v) => setState(() => value = v));
 }
 
+double _contrast(Color a, Color b) {
+  final hi = a.computeLuminance() > b.computeLuminance() ? a : b;
+  final lo = identical(hi, a) ? b : a;
+  return (hi.computeLuminance() + 0.05) / (lo.computeLuminance() + 0.05);
+}
+
 McStepper _stepper({
   required int value,
   ValueChanged<int>? onChanged,
@@ -309,6 +315,34 @@ void main() {
         expect(controller.offset, 30);
       },
     );
+    testWidgets('T-0044-AC1 a long stepper number scales down to fit', (
+      tester,
+    ) async {
+      mcSetSurface(tester, 375, 600);
+      await tester.pumpWidget(
+        _page(
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 150,
+              child: McStepper(
+                value: 1234567890,
+                onChanged: (_) {},
+                label: 'Quantity',
+                decreaseLabel: 'Less',
+                increaseLabel: 'More',
+                max: 2000000000,
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(tester.takeException(), isNull);
+      final stepper = tester.getRect(find.byType(McStepper));
+      final number = tester.getRect(find.text('1234567890'));
+      expect(number.width, lessThanOrEqualTo(stepper.width - 88));
+    });
+
     testWidgets(
       'T-0044-AC1 segment labels are capped at ${McSegmented.labelMaxScale}x '
       'so five fit a phone at 3x',
@@ -356,6 +390,10 @@ void main() {
         await tester.pump();
         expect(clear, findsOneWidget);
         expect(changes, ['hulk']);
+        // Focus is elsewhere when the button is pressed: clearing brings it
+        // back into the field.
+        FocusManager.instance.primaryFocus?.unfocus();
+        await tester.pump();
         await tester.tap(clear);
         await tester.pump();
         expect(c.text, '');
@@ -1005,6 +1043,83 @@ void main() {
         handle.dispose();
       },
     );
+
+    // The platform's contrast guideline skips text fields, so the colours of
+    // the label, hint, helper, error, counter and the typed text are checked
+    // against the field's fill here, in every theme.
+    for (final variant in McThemeVariant.values) {
+      testWidgets('T-0044-AC3 text field colours reach 4.5:1 ${variant.name}', (
+        tester,
+      ) async {
+        for (final enabled in [true, false]) {
+          for (final error in [null, 'Fehler']) {
+            await tester.pumpWidget(
+              _page(
+                Column(
+                  children: [
+                    McTextField(
+                      controller: TextEditingController(),
+                      label: 'Name',
+                      hint: 'Hint',
+                      helperText: 'Helper',
+                      errorText: error,
+                      maxLength: 10,
+                      enabled: enabled,
+                    ),
+                    McSearchField(
+                      controller: TextEditingController(),
+                      label: 'Search',
+                      clearLabel: 'Clear',
+                      enabled: enabled,
+                    ),
+                  ],
+                ),
+                variant: variant,
+              ),
+            );
+            await tester.pumpAndSettle();
+            for (final d in tester.widgetList<InputDecorator>(
+              find.byType(InputDecorator),
+            )) {
+              final fill = d.decoration.fillColor!;
+              final colours = {
+                'label': d.decoration.labelStyle?.color,
+                'floatingLabel': d.decoration.floatingLabelStyle?.color,
+                'hint': d.decoration.hintStyle?.color,
+                'helper': d.decoration.helperStyle?.color,
+                'counter': d.decoration.counterStyle?.color,
+                'text': d.baseStyle?.color,
+              };
+              for (final e in colours.entries) {
+                if (e.value == null) {
+                  continue;
+                }
+                expect(
+                  _contrast(e.value!, fill),
+                  greaterThanOrEqualTo(4.5),
+                  reason:
+                      '${e.key} on the fill (enabled $enabled, error $error)',
+                );
+              }
+            }
+            for (final t in tester.widgetList<Text>(find.text('Fehler'))) {
+              expect(
+                _contrast(
+                  t.style!.color!,
+                  tester
+                      .widgetList<InputDecorator>(find.byType(InputDecorator))
+                      .first
+                      .decoration
+                      .fillColor!,
+                ),
+                greaterThanOrEqualTo(4.5),
+                reason: 'error text on the fill',
+              );
+            }
+          }
+        }
+      });
+    }
 
     testWidgets('T-0044-AC3 every tap target is at least 44 pt', (
       tester,

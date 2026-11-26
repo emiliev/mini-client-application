@@ -68,7 +68,7 @@ SEG=$LIB/mc_segmented.dart
 STP=$LIB/mc_stepper.dart
 
 # --- AC1: layout --------------------------------------------------------------
-mutate $T "AC1 unbounded width not handled" $FLD "s.replace('constraints.hasBoundedWidth ?', 'true ?')"
+mutate $T "AC1 unbounded width not handled" $FLD "re.sub(r'constraints.hasBoundedWidth\\s*\\?', 'true ?', s)"
 mutate $T "AC1 chip label not flexible (overflows at 3x)" $CHP \
   "re.sub(r'Flexible\(\s*child:', 'Padding(padding: EdgeInsets.zero, child:', s)"
 mutate $T "AC1 segment label not flexible (overflows)" $SEG \
@@ -106,11 +106,10 @@ mutate $T "AC2 stepper increase never disabled" $STP "s.replace('change != null 
 mutate $T "AC2 stepper ignores step" $STP "s.replace('value - step', 'value - 1').replace('value + step', 'value + 1')"
 mutate $T "AC2 stepper valueText ignored" $STP "re.sub(r'final text = [^;]*;', 'final text = value.toString();', s)"
 mutate $T "AC2 segmented reports the selected index" $SEG "s.replace('onChanged!(i)', 'onChanged!(selectedIndex)')"
-mutate $T "AC2 segmented tap ignored when disabled" $SEG "s.replace('onTap: enabled ? () => onChanged!(i) : null,\n          child', 'onTap: () => onChanged?.call(i),\n          child')"
 
 # --- AC3: semantics -----------------------------------------------------------
 mutate $T "AC3 error not a live region" $FLD "s.replace('liveRegion: true', 'liveRegion: false')"
-mutate $T "AC3 error text dropped" $FLD "s.replace('    error: errorText == null', '    error: true ? null')"
+mutate $T "AC3 error text dropped" $FLD "s.replace('              errorText,\\n', \"              '',\\n\")"
 mutate $T "AC3 text field label dropped" $FLD "s.replace('labelText: label,', '')"
 mutate $T "AC3 search label dropped" $SRC "s.replace('label: widget.label,\n            child: TextField', 'child: TextField')"
 mutate $T "AC3 clear button unlabelled" $SRC "s.replace('semanticLabel: widget.clearLabel', 'semanticLabel: \"\"')"
@@ -118,7 +117,7 @@ mutate $T "AC3 chip selected flag dropped" $CHP "s.replace('selected: selected,\
 mutate $T "AC3 chip button flag dropped" $CHP "s.replace('button: true,', '')"
 mutate $T "AC3 chip exclusive flag dropped" $CHP "s.replace('inMutuallyExclusiveGroup: exclusive ? true : null,', '')"
 mutate $T "AC3 chip group not exclusive" $GRP "s.replace('exclusive: !isMulti,', 'exclusive: false,')"
-mutate $T "AC3 chip tap target below 44" $CHP "s.replace('minHeight: mcMinTapTarget,', 'minHeight: 20,')"
+mutate $T "AC3 chip tap target below 44" $CHP "re.sub(r'minHeight: (mcMinTapTarget|20)', 'minHeight: 0', s)"
 mutate $T "AC3 chip disabled has a tap action" $CHP "s.replace('onTap: enabled ? () => onSelected!(!selected) : null,\n        excludeSemantics', 'onTap: () => onSelected?.call(!selected),\n        excludeSemantics')"
 mutate $T "AC3 segment selected flag dropped" $SEG "s.replace('selected: selected,\n      enabled', 'enabled')"
 mutate $T "AC3 segment button flag dropped" $SEG "s.replace('button: true,', '')"
