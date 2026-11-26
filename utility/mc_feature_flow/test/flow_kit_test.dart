@@ -29,7 +29,9 @@ class _State {
 
 /// A const-built root page (the exemplar's shape) that rebuilds when
 /// [rebuild] fires, even while covered by an inner page: what a locale change
-/// does to a page that reads its strings.
+/// does to a page that reads its strings. A user pop rebuilds it as well, so
+/// the old `flowLeading()` only broke when the flow returned to the root
+/// through a state change (`controller.update`), which rebuilds nothing.
 class _RebuildingRoot extends StatefulWidget {
   const _RebuildingRoot();
 
@@ -633,7 +635,10 @@ void main() {
                             name: 'detail',
                             child: Builder(
                               builder: (context) => Scaffold(
-                                appBar: AppBar(title: const Text('detail')),
+                                appBar: AppBar(
+                                  leading: const McFlowBackButton(),
+                                  title: const Text('detail'),
+                                ),
                               ),
                             ),
                           ),
@@ -653,7 +658,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('detail'), findsOneWidget);
 
-      await tester.tap(find.byType(BackButton).last);
+      // Exactly one: the widget on the inner page is the automatic back.
+      expect(find.byType(BackButton), findsOneWidget);
+      await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
 
       expect(find.text('detail'), findsNothing);
@@ -701,7 +708,9 @@ void main() {
     expect(find.text('detail'), findsOneWidget);
 
     // The root page rebuilds while the inner page is on top (what a locale
-    // change does to the exemplar's list).
+    // change does to the exemplar's list), then the flow returns to its root
+    // through a state change: nothing rebuilds the const root after that, so
+    // only a button that decides in its own build survives.
     _RebuildingRoot.rebuild.value = 1;
     await tester.pumpAndSettle();
     expect(find.text('flow root 1', skipOffstage: false), findsOneWidget);
@@ -711,8 +720,136 @@ void main() {
     expect(find.text('detail'), findsNothing);
     expect(find.text('flow root 1'), findsOneWidget);
 
-    // Tapping it is T-0036-AC2's case; here the point is that it is there.
+    // One tap leaves the flow: no stale PopScope eats it (flow_builder patch
+    // hunk 4, F-0034).
     expect(find.byType(BackButton), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expect(find.text('flow root 1'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+  });
+
+  testWidgets('T-0036-AC1 the iOS edge swipe leaves the flow after a '
+      'state-driven return to the root', (tester) async {
+    _RebuildingRoot.rebuild.value = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: McTheme.light.copyWith(platform: TargetPlatform.iOS),
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => FeatureFlow<_State>(
+                    state: const _State(),
+                    onGeneratePages: (s) => [
+                      const McFlowPage(name: 'list', child: _RebuildingRoot()),
+                      if (s.selected != null)
+                        const McFlowPage(
+                          name: 'detail',
+                          child: Scaffold(body: Text('detail')),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+    FeatureFlowController<_State> controller() => tester
+        .element(find.byType(_RebuildingRoot, skipOffstage: false))
+        .di<FeatureFlowController<_State>>();
+    controller().update((_) => const _State('x'));
+    await tester.pumpAndSettle();
+    controller().update((_) => const _State());
+    await tester.pumpAndSettle();
+    expect(find.text('detail'), findsNothing);
+
+    await tester.dragFrom(const Offset(2, 300), const Offset(500, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('flow root 0'), findsNothing);
+    expect(find.text('open'), findsOneWidget);
+  });
+
+  group('T-0036-AC2 McFlowBackButton on a page that is not the flow root', () {
+    testWidgets('T-0036-AC2 a drawer gives the DrawerButton, not a back '
+        'button', (tester) async {
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) => FeatureFlow<_State>(
+                    state: const _State('x'),
+                    onGeneratePages: (s) => [
+                      McFlowPage(
+                        name: 'list',
+                        child: Scaffold(
+                          appBar: AppBar(leading: const McFlowBackButton()),
+                        ),
+                      ),
+                      McFlowPage(
+                        name: 'detail',
+                        child: Scaffold(
+                          drawer: const Drawer(),
+                          appBar: AppBar(leading: const McFlowBackButton()),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DrawerButton), findsOneWidget);
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('T-0036-AC2 a fullscreen dialog gives the CloseButton', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(
+          Builder(
+            builder: (context) => TextButton(
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (_) => Scaffold(
+                    appBar: AppBar(leading: const McFlowBackButton()),
+                  ),
+                ),
+              ),
+              child: const Text('open'),
+            ),
+          ),
+        ),
+      );
+      await tester.tap(find.text('open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CloseButton), findsOneWidget);
+      expect(find.byType(BackButton), findsNothing);
+    });
+
+    testWidgets('T-0036-AC2 outside any route it is empty', (tester) async {
+      await tester.pumpWidget(const SizedBox(child: McFlowBackButton()));
+      expect(find.byType(BackButton), findsNothing);
+      expect(find.byType(SizedBox), findsWidgets);
+    });
   });
 
   testWidgets('T-0034-AC1 FlowScope.of outside a flow names the problem', (
