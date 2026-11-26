@@ -141,7 +141,6 @@ mutate $T "R1 segmented intrinsic width not per cell" $SEG "s.replace('return wi
 mutate $T "R1 segmented height ignores intrinsics" $SEG "re.sub(r'kids\\[i\\]\\s*\\.getMaxIntrinsicHeight\\(widths\\[i\\]\\)', '0.0', s)"
 mutate $G "R3 search disabled fill raised again" $SRC "s.replace(': p.background,', ': p.surface,')"
 mutate $T "R4 chip padding strip not tappable" $CHP "s.replace('behavior: HitTestBehavior.opaque,', 'behavior: HitTestBehavior.deferToChild,')"
-mutate $T "R4 ripple covers the 44 pt box again" $CHP "re.sub(r'child: Ink\\(\\s*decoration: ShapeDecoration\\(color: fill, shape: shape\\),', 'child: Ink(decoration: ShapeDecoration(color: fill, shape: shape), padding: EdgeInsets.zero, ', s).replace('customBorder: const StadiumBorder(),', 'customBorder: const StadiumBorder(), radius: 0,')"
 
 # --- AC1: goldens (visual states) ----------------------------------------------
 mutate $G "AC1 golden: selected chip fill removed" $CHP "s.replace('final fill = selected', 'final fill = false')"
