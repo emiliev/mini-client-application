@@ -12,7 +12,8 @@
 #   7. the fixtures check (T-0031-AC6: no production feature or utility target
 #      depends on mc_fixtures_*; comics_details is found by its glob) and the
 #      relative-path scan (T-0034-AC4)
-#   8. AC7: comics_details byte identity (12 files), cutoff, not committed and
+#   8. AC1: the fixture domains the cast summary joins are pure Dart; AC7:
+#      comics_details byte identity (12 files), cutoff, not committed and
 #      gen-l10n parity; the T-0032 byte identity (14 files), cutoff and
 #      not-committed checks re-run for characters_list, which T-0041 changed
 #   9. coverage of every touched package with hand-written lib/ code >=
@@ -40,7 +41,7 @@ gate() {  # gate <name> <command...>: runs it, records PASS/FAIL and its log tai
     fails+=("" "### $name failed" "" '```' "$(plain "$log" | grep -a -v '^\[' | tail -25)" '```')
   fi
 }
-uncached=(//feature/comics/comics_details/... //feature/characters/characters_list/... //app/... //utility/mc_test_steps/... //tool/l10n_check/...)
+uncached=(//feature/comics/comics_details/... //feature/characters/characters_list/... //app/... //utility/mc_test_steps/... //tool/l10n_check/... //utility/mc_test_utils/... //utility/mc_formatters/... //utility/mc_fixtures_comics/... //utility/mc_fixtures_characters/... //tool/mc_arch_check/...)
 tests() {
   bzw test --nocache_test_results "${uncached[@]}" && bzw test //...
 }
@@ -56,11 +57,11 @@ ob=""
 [[ "${MC_BAZEL_STARTUP:-}" == --output_base=* ]] && ob="${MC_BAZEL_STARTUP#--output_base=}"
 gate "fixtures check (T-0031-AC6)" env MC_OUTPUT_BASE="$ob" "$REPO/tool/checks/T-0031-AC6_closure.sh"
 gate "relative API paths (T-0034-AC4)" "$REPO/tool/checks/T-0034-AC4_relative_paths.sh"
-for check in T-0041-AC7_matches_build_runner T-0041-AC7_cutoff T-0041-AC7_generated_not_committed \
+for check in T-0041-AC1_fixtures_closure T-0041-AC7_matches_build_runner T-0041-AC7_cutoff T-0041-AC7_generated_not_committed \
   T-0041-AC7_gen_l10n_parity T-0032-AC6_matches_build_runner T-0032-AC6_cutoff T-0032-AC6_generated_not_committed; do
   gate "$check" "$REPO/tool/checks/$check.sh"
 done
-PKGS=(feature/comics/comics_details app/wiring/publishing_wiring feature/characters/characters_list app/wiring/universe_wiring)
+PKGS=(feature/comics/comics_details app/wiring/publishing_wiring feature/characters/characters_list app/wiring/universe_wiring utility/mc_formatters utility/mc_fixtures_comics utility/mc_fixtures_characters)
 EXEMPT="${MC_COVERAGE_EXEMPT-}"
 coverage() {
   local pkg rc=0
