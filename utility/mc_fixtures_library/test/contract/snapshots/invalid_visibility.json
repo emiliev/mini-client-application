@@ -1,0 +1,15 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_visibility",
+      "message": "visibility must be one of private, public",
+      "parameter": "visibility"
+    }
+  },
+  "request": "PUT /v1/me/lists/l-1 as u-100",
+  "requestBody": {
+    "name": "N",
+    "visibility": "friends"
+  },
+  "status": 400
+}

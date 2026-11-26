@@ -1,0 +1,15 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_body",
+      "message": "Expected a JSON object",
+      "parameter": "body"
+    }
+  },
+  "request": "POST /v1/me/lists as u-100",
+  "requestBody": [
+    1,
+    2
+  ],
+  "status": 400
+}

@@ -1,0 +1,5 @@
+{
+  "body": null,
+  "request": "DELETE /v1/me/lists/l-1 as u-100",
+  "status": 204
+}

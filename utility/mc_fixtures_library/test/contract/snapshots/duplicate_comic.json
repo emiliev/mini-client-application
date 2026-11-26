@@ -1,0 +1,19 @@
+{
+  "body": {
+    "error": {
+      "code": "duplicate_comic",
+      "comicId": 500000,
+      "message": "comic 500000 appears more than once",
+      "parameter": "comicIds"
+    }
+  },
+  "request": "PUT /v1/me/lists/l-1/items as u-100",
+  "requestBody": {
+    "comicIds": [
+      500000,
+      500001,
+      500000
+    ]
+  },
+  "status": 400
+}

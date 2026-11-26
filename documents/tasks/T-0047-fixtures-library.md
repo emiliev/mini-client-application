@@ -48,3 +48,29 @@ The backend for the FW exemplar (P1-20), where a user creates or edits a reading
 
 ## Log
 - 2026-11-26: Created and dispatched (TL).
+- 2026-11-26: Engineer (Sonnet). `utility/mc_fixtures_library` built and registered. One public hook added to `mc_fixtures_identity`: it now exports `userForAuthorization` (already the check behind `GET /v1/me`), with a test (`T-0047-AC3 userForAuthorization is the check GET /v1/me applies`). No second token scheme. Merged `origin/main` (docs only, no lock change).
+- 2026-11-26: Decisions inside the scope (all in `CONTRACT.md`): typed codes `invalid_name`, `invalid_description`, `invalid_visibility`, `invalid_body`, `too_many_comics`, `duplicate_comic`, `unknown_comic`; `list_not_found` for unknown and foreign ids; checks run auth, then 404, then body (name, description, visibility, comicIds); `server_error` set and scenario share the `injected_failure` body (T-0043 convention); `library.empty` scenario keeps its own state, so it is empty even after the default set was used; `POST` returns the full detail body (with `id`); `updatedAt` of a write is the fixed clock plus one second per write.
+
+## Outcome
+`utility/mc_fixtures_library` (archetype UM, pure Dart) is registered in the workspace. It reads comics through `ComicUniverse` (`mc_fixtures_comics`) and validates bearers with `userForAuthorization` (`mc_fixtures_identity`). Six routes, per-user lists kept in the backend store until `reset()`, two seeded users (`u-100`: 3 lists, `u-101`: 1 list), sets `library.default/empty/server_error` and scenarios `library.empty/server_error`. See `CONTRACT.md`.
+
+| AC | Evidence |
+|---|---|
+| AC1 | `library_test.dart`: `T-0047-AC1` (a 6-request sequence with writes is byte-identical on two backends; replay after `reset()` is byte-identical) |
+| AC2 | `library_test.dart`: `T-0047-AC2` (seed, create 201 with id and appears in the list, two creates get distinct ids, items in order with title and thumbnail, update persists and keeps items, absent description clears, reorder keeps exactly the submitted order incl. add/drop/empty, delete 204 then 404, recency order, persistence across Dio instances and `reset()` restoring the seed and the id counter, user B gets 404 on every route for A's list, unknown and foreign ids look the same, each user's creations are private) |
+| AC3 | `validation_test.dart` and `library_test.dart`: `T-0047-AC3` (each rule on every route that carries it: name empty/blank/missing/non-string/61/trim/60/rune count, description 281/280/null/absent/non-string/rune count, visibility, comicIds shape/101/100/duplicates/unknown/empty, check order, 404 before 400, rejected writes change nothing and take no id; 401 without bearer, expired, refresh-as-bearer, unknown user, wrong scheme on all six routes plus invalid body and unknown id) and `identity_test.dart` (`userForAuthorization`) |
+| AC4 | `provider_contract_test.dart` and `fixture_sets_test.dart`: `T-0047-AC4` (19 snapshots, manifest, scenarios, CONTRACT.md in step, every item id resolves on `GET /v1/comics/{id}` with the same title and cover for seeds 42 and 7, every thumbnail resolves to an existing asset, resolver negative control; sets: default/empty/server_error, set and scenario bodies identical, empty scenario empty after default use) |
+| AC5 | `tool/checks/T-0047-AC5_gates.sh`: pure closure (1358 targets; positive control `mc_fixtures_media`, negative control: the media package added to the library's BUILD shows the markers), registration, fixtures check (positive and negative controls), uncached library tests 4/4, `test //...` 127/127 after the final merge, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, coverage 98.5 % (194/197). Report: `documents/evidence/T-0047/engineer/AC5_gates.md` |
+
+Mutations: `documents/evidence/T-0047/engineer/mutations.sh` (`MC_TASK=T-0047 MC_ROLE=engineer`, refuses a dirty package), log `mutations.log`: **58/58 killed**, none survived, none broke the build. Every validation rule and boundary, the auth check (header, status, code), ownership (find, list, create), each write, ordering, id reuse, the set/scenario bodies and the empty-state isolation are pinned. Two survivors in the first pass (create sorting its ids, id reuse) led to stronger tests; the mutations that failed `dart format` or the analyzer were rewritten to be clean.
+
+Test integrity: no tests deleted, skipped or weakened; no `// ignore:`. Globs use `MC_GENERATED_DART`.
+
+## Review round (2026-11-26, Engineer)
+1. `library.empty` scenario no longer fixed to seed 42: handlers resolve the comics universe from `context.seed` (cached per seed). Test: `T-0047-AC4 seed 42/7: the library.empty scenario answers what the empty set answers, with the comics endpoint's titles and covers`.
+2. No `ComicUniverse` per `scenarios` access (same change).
+3. Empty state has its own id space (`l-1001`...). Test: `T-0047-AC4 switching library.empty off never aliases a created id onto a seeded list`. Documented.
+4. Coupling to the library's own `ComicUniverse(seed)` documented in `CONTRACT.md` (incl. `comics.empty`, `SyntheticComicsDomain`).
+5. Order-0 `invalid_body` carries `parameter: "body"`; snapshot updated; asserted in `T-0047-AC3 a body that is not an object is invalid_body`.
+6. Gates script: backups in the scratch dir, restore trap installed before the edits, restores verified with `cmp` against `HEAD`; "discovery" slip fixed in the `mutations.sh` header.
+Mutations R1 to R3 and S7 added (58/58 killed).

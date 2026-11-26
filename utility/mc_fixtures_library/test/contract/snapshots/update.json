@@ -1,0 +1,42 @@
+{
+  "body": {
+    "description": "",
+    "id": "l-1",
+    "itemCount": 3,
+    "items": [
+      {
+        "id": 500060,
+        "thumbnail": {
+          "path": "mock-asset://characters/003",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Chronicles #1"
+      },
+      {
+        "id": 501500,
+        "thumbnail": {
+          "path": "mock-asset://characters/021",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Frontier #1"
+      },
+      {
+        "id": 500540,
+        "thumbnail": {
+          "path": "mock-asset://characters/013",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Legacy #1"
+      }
+    ],
+    "name": "Renamed",
+    "updatedAt": "2026-01-01T00:00:01.000Z",
+    "visibility": "private"
+  },
+  "request": "PUT /v1/me/lists/l-1 as u-100",
+  "requestBody": {
+    "name": "Renamed",
+    "visibility": "private"
+  },
+  "status": 200
+}

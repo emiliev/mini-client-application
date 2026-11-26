@@ -1,0 +1,13 @@
+{
+  "body": {
+    "error": {
+      "code": "too_many_comics",
+      "maxItems": 100,
+      "message": "a list holds at most 100 comics",
+      "parameter": "comicIds"
+    }
+  },
+  "request": "PUT /v1/me/lists/l-1/items as u-100",
+  "requestBody": "(omitted: too long to read)",
+  "status": 400
+}

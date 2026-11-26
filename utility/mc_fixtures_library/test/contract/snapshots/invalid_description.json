@@ -1,0 +1,12 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_description",
+      "message": "description must be a string of at most 280 characters",
+      "parameter": "description"
+    }
+  },
+  "request": "POST /v1/me/lists as u-100",
+  "requestBody": "(omitted: too long to read)",
+  "status": 400
+}

@@ -1,0 +1,15 @@
+{
+  "domain": "library",
+  "routes": [
+    "GET /v1/me/lists",
+    "GET /v1/me/lists/:id",
+    "POST /v1/me/lists",
+    "PUT /v1/me/lists/:id",
+    "PUT /v1/me/lists/:id/items",
+    "DELETE /v1/me/lists/:id"
+  ],
+  "scenarios": [
+    "library.empty",
+    "library.server_error"
+  ]
+}

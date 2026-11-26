@@ -1,0 +1,38 @@
+{
+  "body": {
+    "description": "Where to begin.",
+    "id": "l-1",
+    "itemCount": 3,
+    "items": [
+      {
+        "id": 500060,
+        "thumbnail": {
+          "path": "mock-asset://characters/003",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Chronicles #1"
+      },
+      {
+        "id": 501500,
+        "thumbnail": {
+          "path": "mock-asset://characters/021",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Frontier #1"
+      },
+      {
+        "id": 500540,
+        "thumbnail": {
+          "path": "mock-asset://characters/013",
+          "variant": "portrait_large"
+        },
+        "title": "Amber Legacy #1"
+      }
+    ],
+    "name": "Spider-Verse Starter",
+    "updatedAt": "2025-12-30T00:00:00.000Z",
+    "visibility": "public"
+  },
+  "request": "GET /v1/me/lists/l-1 as u-100",
+  "status": 200
+}

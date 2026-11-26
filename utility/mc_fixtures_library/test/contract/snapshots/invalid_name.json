@@ -1,0 +1,16 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_name",
+      "message": "name must be 1 to 60 characters after trimming",
+      "parameter": "name"
+    }
+  },
+  "request": "POST /v1/me/lists as u-100",
+  "requestBody": {
+    "comicIds": [],
+    "name": " ",
+    "visibility": "private"
+  },
+  "status": 400
+}
