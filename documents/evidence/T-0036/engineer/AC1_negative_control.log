@@ -1,10 +1,8 @@
-  PASS  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 present when pushed, and tapping it pops the flow
-  PASS  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 absent when the flow is the root
-  PASS  T-0036-AC2 the flow root page can leave the flow T-0036-AC2 a page pushed inside the flow keeps the automatic back button, which pops that page only
 Expected: exactly one matching candidate
   Actual: _TypeWidgetFinder:<Found 0 widgets with type "BackButton": []>
-  T-0036-AC1 the back button is present after the root page rebuilds under an inner page
   FAIL  T-0036-AC1 the back button is present after the root page rebuilds under an inner page
-        The test description was: T-0036-AC1 the back button is present after the root page rebuilds under an inner page
-INFO: Build completed, 1 test FAILED, 17 total actions
-//utility/mc_feature_flow:flow_kit_test                                  FAILED in 0.9s
+  PASS  T-0036-AC1 the iOS edge swipe leaves the flow after a state-driven return to the root
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "DrawerButton": []>
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "CloseButton": []>

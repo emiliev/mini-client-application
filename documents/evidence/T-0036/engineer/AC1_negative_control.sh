@@ -1,7 +1,8 @@
 #!/bin/bash
 # T-0036-AC1 negative control: puts the old `context.flowLeading()` (T-0034)
 # back, switches the AC1 test's and the AC2 root page's leading to it, and runs
-# flow_kit_test. Expected: T-0036-AC1 FAILS. Restores both files on exit.
+# flow_kit_test. Expected: T-0036-AC1 FAILS (other widget tests may too: they
+# use the new widget). Exit 0 when AC1 failed, 1 when it passed. Restores both files on exit.
 #   MC_OB=/tmp/mc-ob-T-0036-engineer documents/evidence/T-0036/engineer/AC1_negative_control.sh
 set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
@@ -34,4 +35,5 @@ s = s.replace("leading: const McFlowBackButton()", "leading: context.flowLeading
 open(p, "w").write(s)
 PY
 tool/bazelw --output_base="$OB" test //utility/mc_feature_flow:flow_kit_test --test_output=errors >"$LOG" 2>&1
-grep -a -E "T-0036-AC|FAILED|PASSED|Expected|Actual|Some tests failed|All tests passed" "$LOG" | head -30
+grep -a -E "FAIL  T-0036-AC1|PASS  T-0036-AC1|Expected|Actual" "$LOG" | head -30
+grep -a -q "FAIL  T-0036-AC1 the back button is present" "$LOG"

@@ -3,12 +3,16 @@
 # reverts one fix in the working tree, runs the named test target, expects it
 # to FAIL, and restores the file (also on error). Exit 1 when any mutation
 # survives (its test still passed) or a restore fails.
-#   MC_OB=/tmp/mc-ob-T-0033-engineer documents/evidence/T-0033/engineer/mutations.sh
+#   MC_TASK=T-0033 MC_ROLE=engineer documents/evidence/T-0033/engineer/mutations.sh
+# MC_TASK and MC_ROLE name the output base and the log (/tmp/mc-ob-<task>-<role>,
+# /tmp/mc-<task>-<role>-mutations.log); both are required, so two agents never
+# share a log. MC_OB and MC_LOG override the names.
 set -uo pipefail
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../../.." && pwd)"
 cd "$REPO"
-OB="${MC_OB:-/tmp/mc-ob-T-0033-engineer}"
-LOG="${MC_LOG:-/tmp/mc-T-0033-engineer-mutations.log}"
+: "${MC_TASK:?set MC_TASK (e.g. T-0036)}" "${MC_ROLE:?set MC_ROLE (e.g. engineer)}"
+OB="${MC_OB:-/tmp/mc-ob-$MC_TASK-$MC_ROLE}"
+LOG="${MC_LOG:-/tmp/mc-$MC_TASK-$MC_ROLE-mutations.log}"
 rc=0
 current=""
 restore() { [ -n "$current" ] && [ -f "$current.mut-orig" ] && mv -f "$current.mut-orig" "$current"; current=""; }
@@ -35,6 +39,8 @@ PY
     echo "MUTATION $name: SURVIVED (tests passed)  [$*]"; rc=1
   elif grep -a -q 'Build did NOT complete' "$LOG"; then
     echo "MUTATION $name: COMPILE ERROR (not killed by a test)  [$*]"; rc=1
+  elif ! grep -a -q -E '^//.*FAILED' "$LOG"; then
+    echo "MUTATION $name: ERROR (no failing test)  [$*]"; rc=1
   else
     echo "MUTATION $name: killed by $(grep -a -E '^//.*FAILED' "$LOG" | sed 's/ .*//' | tr '\n' ' ')"
   fi

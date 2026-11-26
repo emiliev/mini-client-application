@@ -345,7 +345,10 @@ class _ConditionalPopScope extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return condition ? PopScope(canPop: false, child: child) : child;
+    // mini-client T-0036: always mounted, so toggling `condition` updates the
+    // scope in place (stock swapped the widget, which re-parented the whole
+    // navigator subtree and rebuilt every page).
+    return PopScope(canPop: !condition, child: child);
   }
 }
 
