@@ -41,12 +41,28 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
   /// The list the editor last returned, and whether it was new.
   ({String id, bool created})? _lastList;
 
-  Future<void> _await(Future<String?> editor, {required bool created}) async {
-    final id = await editor;
+  /// An editor is open: a second tap (New or Edit) is ignored until it
+  /// returns, so one tap opens one editor.
+  bool _awaiting = false;
+
+  Future<void> _await(
+    Future<String?> Function() open, {
+    required bool created,
+  }) async {
+    if (_awaiting) {
+      return;
+    }
+    _awaiting = true;
+    final String? id;
+    try {
+      id = await open();
+    } finally {
+      _awaiting = false;
+    }
     if (!mounted || id == null) {
       return;
     }
-    setState(() => _lastList = (id: id, created: created));
+    setState(() => _lastList = (id: id!, created: created));
   }
 
   @override
@@ -84,7 +100,7 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
           McButton(
             key: newReadingListKey,
             label: 'New reading list',
-            onPressed: () => _await(widget.onNewReadingList(), created: true),
+            onPressed: () => _await(widget.onNewReadingList, created: true),
           ),
           if (last != null) ...[
             const McGap.sm(),
@@ -100,8 +116,10 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
               key: editReadingListKey,
               label: 'Edit list ${last.id}',
               variant: McButtonVariant.secondary,
-              onPressed: () =>
-                  _await(widget.onEditReadingList(last.id), created: false),
+              onPressed: () => _await(
+                () => widget.onEditReadingList(last.id),
+                created: false,
+              ),
             ),
           ],
           const McGap.md(),

@@ -174,4 +174,30 @@ void main() {
     expect(find.text('New reading list'), findsOneWidget);
     expect(find.text('Step 1 of 3'), findsOneWidget);
   });
+
+  testWidgets('T-0048-AC5 a double tap on New reading list opens one editor', (
+    tester,
+  ) async {
+    await boot(tester);
+    await tester.ensureVisible(find.byKey(newReadingListKey));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(newReadingListKey));
+    await tester.tap(find.byKey(newReadingListKey), warnIfMissed: false);
+    await tester.pumpAndSettle();
+    await signInOnTheSheet(tester);
+    expect(
+      find.byKey(fixtureSignInSheetKey),
+      findsNothing,
+      reason: 'one sheet',
+    );
+
+    await tap(tester, find.byType(BackButton));
+    expect(
+      find.byKey(const Key('home.placeholder')),
+      findsOneWidget,
+      reason: 'one Back leads home: there was one editor',
+    );
+    expect(find.byKey(_details), findsNothing);
+  });
 }

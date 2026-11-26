@@ -110,13 +110,15 @@ void main() {
     expect(find.byKey(const Key('home')), findsOneWidget);
   });
 
-  testWidgets('T-0048-AC6 with a dialog above the route, completing pops '
-      'nothing', (tester) async {
+  testWidgets('T-0048-AC6 a result that arrives under a dialog is kept, '
+      'and the caller gets it once the dialog closed', (tester) async {
     final router = await _app(tester);
+    String? got;
     var done = false;
-    final result = AppFlows.createReadingList(
-      router,
-    ).then((value) => done = true);
+    final result = AppFlows.createReadingList(router).then((value) {
+      got = value;
+      done = true;
+    });
     await tester.pumpAndSettle();
     final finish = tester.widget<TextButton>(find.byKey(_finish));
     unawaited(
@@ -130,16 +132,21 @@ void main() {
     finish.onPressed!();
     await tester.pumpAndSettle();
 
+    // Nothing above the route is popped for the result.
     expect(find.byKey(const Key('dialog')), findsOneWidget);
     expect(router.state.uri.toString(), '/me/lists/new');
     expect(done, isFalse);
-    // The dialog closes; the route is still there for the user to leave.
+    // A second completion while it waits is ignored.
+    tester
+        .widget<TextButton>(find.byKey(_finishEmpty, skipOffstage: false))
+        .onPressed!();
+
     Navigator.of(tester.element(find.byKey(const Key('dialog')))).pop();
     await tester.pumpAndSettle();
-    router.pop();
-    await tester.pumpAndSettle();
     await result;
-    expect(done, isTrue);
+
+    expect(got, 'l-5');
+    expect(find.byKey(const Key('home')), findsOneWidget);
   });
 
   testWidgets('T-0048-AC6 a route opened by a deep link (nothing below it) '
@@ -159,15 +166,33 @@ void main() {
     final router = await _app(tester);
     unawaited(AppFlows.createReadingList(router));
     await tester.pumpAndSettle();
-    final context = tester.element(find.byKey(_finish));
+    final finish = tester.widget<TextButton>(find.byKey(_finish));
     router.pop();
     await tester.pumpAndSettle();
 
-    completeRoute<String>(context, 'late');
+    finish.onPressed!();
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('home')), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('T-0048-AC6 a second completion pops nothing more', (
+    tester,
+  ) async {
+    final router = await _app(tester);
+    unawaited(router.push<void>('/me/lists/l-9/edit'));
+    await tester.pumpAndSettle();
+    final result = AppFlows.createReadingList(router);
+    await tester.pumpAndSettle();
+    final finish = tester.widget<TextButton>(find.byKey(_finish));
+
+    finish.onPressed!();
+    finish.onPressed!();
+    await tester.pumpAndSettle();
+
+    expect(await result, 'l-5');
+    expect(router.state.uri.toString(), '/me/lists/l-9/edit');
   });
 
   test('T-0048-AC5 the reading-list locations', () {
