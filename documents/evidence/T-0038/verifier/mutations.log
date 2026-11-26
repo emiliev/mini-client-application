@@ -1,0 +1,61 @@
+M1 KILLED (AC1: seed mixed with the wall clock)
+   edit: -    final root = SplitMix64(seed).fork('comics'); +    final root = SplitMix64(seed ^ DateTime.now().microsecondsSinceEpoch).fork('comics'); 
+   failing:  [comics_test] T-0038-AC1 determinism T-0038-AC1: seed 42 gives byte-identical responses on two backends;T-0038-AC2 paging T-0038-AC2: the order is stable, sorted and covers every comic;T-0038-AC2 paging T-0038-AC2: characterId returns exactly the comics featuring it; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_first_page matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_offset_40 matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_title_spi matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_order_release_desc matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot;
+M2 KILLED (AC1: price from an unseeded Random)
+   edit: +import 'dart:math'; -      priceCents: 299 + 100 * rng.nextInt(4), +      priceCents: 299 + 100 * Random().nextInt(4), 
+   failing:  [comics_test] T-0038-AC1 determinism T-0038-AC1: seed 42 gives byte-identical responses on two backends; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot;
+M3 KILLED (AC1: per-character index built by iterating an unordered identity set)
+   edit: +import 'dart:collection'; -    for (final c in byTitle) { +    for (final c in HashSet<ComicRecord>.identity()..addAll(byTitle)) { 
+   failing:  [comics_test] T-0038-AC1 determinism T-0038-AC1: seed 42 gives byte-identical responses on two backends; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;
+M4 KILLED (AC3 drift: character count constant wrong)
+   edit: -const int characterIdCount = 1500; +const int characterIdCount = 1499; 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: characterId returns exactly the comics featuring it; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot;T-0038-AC3 links to the other fixture domains T-0038-AC3: the ID contract constants match the real packages;
+M5 KILLED (AC3 drift: character id base constant wrong)
+   edit: -const int characterIdBase = 100000; +const int characterIdBase = 100001; 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: characterId returns exactly the comics featuring it; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot;T-0038-AC3 links to the other fixture domains T-0038-AC3: the ID contract constants match the real packages;T-0038-AC3 links to the other fixture domains T-0038-AC3: every characterId a comic references resolves;T-0038-AC3 links to the other fixture domains T-0038-AC3: a seed other than 42 still links to real characters;
+M6 KILLED (AC3 drift: art-set size constant wrong)
+   edit: -const int coverImageCount = 24; +const int coverImageCount = 23; 
+   failing:  [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_first_page matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_offset_40 matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_title_spi matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_order_release_desc matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot; [fixture_sets_test] T-0038-AC2 a synthetic issue has art, a detail and a series;
+M7 KILLED (AC3 drift: art-set name wrong)
+   edit: -const String coverImageSet = 'characters'; +const String coverImageSet = 'comics'; 
+   failing:  [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_first_page matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_offset_40 matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_title_spi matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_order_release_desc matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot; [fixture_sets_test] T-0038-AC2 a synthetic issue has art, a detail and a series;
+M8 KILLED (AC3: one snapshot value edited)
+   edit: -    "pageCount": 56, +    "pageCount": 64, 
+   failing:  [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot;
+M9 KILLED (AC3: cross-link can point one past the last character)
+   edit: -      links.add(characterIdBase + rng.nextInt(characterIdCount)); +      links.add(characterIdBase + rng.nextInt(characterIdCount + 1)); 
+   failing:  [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: detail matches its snapshot;T-0038-AC3 links to the other fixture domains T-0038-AC3: every characterId a comic references resolves;T-0038-AC3 links to the other fixture domains T-0038-AC3: a seed other than 42 still links to real characters;
+M10 KILLED (AC3: cover can point one past the art set)
+   edit: -      '${(index % coverImageCount).toString().padLeft(3, '0')}', +      '${(index % (coverImageCount + 1)).toString().padLeft(3, '0')}', 
+   failing:  [provider_contract_test] T-0038-AC3 images in responses T-0038-AC3: every cover ApiImage in all responses resolves to an existing asset; [fixture_sets_test] T-0038-AC2 a synthetic issue has art, a detail and a series;
+M11 KILLED (AC2: total counts the page, not the query)
+   edit: -      total: matches.length, +      total: page.length, 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: the order is stable, sorted and covers every comic;T-0038-AC2 paging T-0038-AC2: the last page is short and past the end is empty;T-0038-AC2 paging T-0038-AC2: titleStartsWith is a case-insensitive prefix;T-0038-AC2 scenarios T-0038-AC2: comics.server_error fails every endpoint with 500; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_first_page matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_offset_40 matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_title_spi matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_order_release_desc matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: the documented counts equal the real ones; [fixture_sets_test] T-0038-AC2 comics.default serves all three endpoints;T-0038-AC2 comics.paged_45 pages 45 issues as 30 then 15;
+M12 KILLED (AC2: comic 404 does not name the id)
+   edit: -  extra: {'id': raw}, +  extra: {'id': 'x'}, 
+   failing:  [comics_test] T-0038-AC2 details T-0038-AC2: GET /v1/comics/{unknown} is a 404 naming the id;T-0038-AC2 scenarios T-0038-AC2: comics.empty empties every endpoint; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: detail_not_found matches its snapshot;
+M13 SURVIVED (AC2: id tie-break removed)
+   edit: -    primary != 0 ? primary : a.id.compareTo(b.id); +    primary; 
+   failing: none
+M14 KILLED (AC2: server_error set list answers 200)
+   edit: -      ..get('/v1/comics', serverError) +      ..get('/v1/comics', emptyPage) 
+   failing:  [fixture_sets_test] T-0038-AC2 comics.server_error answers 500 on every endpoint;
+M15 KILLED (AC2: empty scenario leaves series detail live)
+   edit: -        'GET /v1/series/:id': emptySeriesDetail, 
+   failing:  [comics_test] T-0038-AC2 scenarios T-0038-AC2: comics.empty empties every endpoint;
+M16 KILLED (AC2: non-numeric characterId accepted)
+   edit: -  if (rawCharacter != null && characterId == null) { +  if (false) { 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: a bad query value is a 400 naming the parameter; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_invalid_character_id matches its snapshot;
+M17 KILLED (AC2: titleStartsWith case-sensitive)
+   edit: -        if (c.title.toLowerCase().startsWith(query.prefix)) c, +        if (c.title.startsWith(query.prefix)) c, 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: titleStartsWith is a case-insensitive prefix; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_title_spi matches its snapshot;T-0038-AC3 provider contract snapshots T-0038-AC3: the documented counts equal the real ones;
+M18 KILLED (AC2: characterId filter ignored)
+   edit: -  var matches = query.characterId == null +  var matches = true 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: characterId returns exactly the comics featuring it; [provider_contract_test] T-0038-AC3 provider contract snapshots T-0038-AC3: list_by_character matches its snapshot;T-0038-AC3 links to the other fixture domains T-0038-AC3: a characterId filter finds a real character's comics;
+M19 KILLED (AC2: no maximum limit)
+   edit: -    max: maxLimit, 
+   failing:  [comics_test] T-0038-AC2 paging T-0038-AC2: a bad query value is a 400 naming the parameter;
+M20 KILLED (AC2: empty scenario list still full)
+   edit: -        'GET /v1/comics': emptyPage, 
+   failing:  [comics_test] T-0038-AC2 scenarios T-0038-AC2: comics.empty empties every endpoint;
+TOTAL: 19/20 killed
