@@ -15,7 +15,7 @@
 #   --link       symlink to the Bazel outputs instead of copying (A/B option;
 #                the links point into this checkout's Bazel output base).
 #   --watch      sync again whenever a Dart/ARB source changes (`fswatch` when
-#                installed, polling every MC_IDE_SYNC_POLL seconds, default 2).
+#                installed, polling every MC_IDE_SYNC_POLL seconds, default 1).
 #   --no-pub     skip `fvm flutter pub get`.
 #   --clean      delete every file in the manifest (and the manifest) and stop.
 #
@@ -38,7 +38,7 @@
 #   MC_IDE_SYNC_ROOT    tree to write into (default: this repo). Used by tests.
 #   MC_IDE_SYNC_LIST    tests only: a file of "<absolute source>\t<relative dest>"
 #                       lines replaces steps 1 and 2.
-#   MC_IDE_SYNC_POLL    watch polling interval, seconds (default 2).
+#   MC_IDE_SYNC_POLL    watch polling interval, seconds (default 1).
 #   MC_IDE_SYNC_FALLBACK  the R28 fallback manifest (default
 #                       tool/build_runner_overlay/fallback.yaml).
 #   MC_IDE_SYNC_NO_IOS  set to skip the Xcode project bootstrap (tests).
@@ -300,7 +300,7 @@ fingerprint() {
 log "watching (Ctrl-C to stop)"
 run_once || log "initial sync failed; still watching"
 last="$(fingerprint)"
-POLL="${MC_IDE_SYNC_POLL:-2}"
+POLL="${MC_IDE_SYNC_POLL:-1}"
 while true; do
   if command -v fswatch >/dev/null 2>&1; then
     # One event batch, then sync. -o coalesces; the latency avoids a storm on save.
