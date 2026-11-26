@@ -53,12 +53,31 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 ROOT="${MC_IDE_SYNC_ROOT:-$REPO}"
 MANIFEST="$ROOT/.dart_tool/mc_ide_sync.manifest"
 FALLBACK="${MC_IDE_SYNC_FALLBACK:-$REPO/tool/build_runner_overlay/fallback.yaml}"
-# The codegen outputs the IDE needs, as paths relative to the repo root. Not
+# One list of generated-file patterns: MC_GENERATED_DART in tool/bazel/defs.bzl,
+# which the BUILD globs exclude. Converted to regexes: GEN_ALL_RE matches every
+# one of them (the watch ignores them), GEN_RE the ones this script syncs. Not
 # gen-l10n: `fvm flutter pub get` and `flutter run` regenerate it from the ARBs
 # on their own (pubspec `generate: true`, l10n.yaml; F-0023), formatted
 # differently from Bazel's copy, so a synced copy would be rewritten by every
 # pub get and recopied by every sync.
-GEN_RE='(\.g\.dart|\.freezed\.dart|\.config\.dart)$'
+CONFIG_DIR="${MC_IDE_SYNC_CONFIG_DIR:-$REPO/tool/bazel/config}"
+SCAFFOLD="$ROOT/.dart_tool/mc_ide_sync.scaffold"
+read -r GEN_ALL_RE GEN_RE < <(/usr/bin/python3 -I - "${MC_IDE_SYNC_DEFS:-$REPO/tool/bazel/defs.bzl}" <<'PY'
+import re, sys
+text = open(sys.argv[1]).read()
+m = re.search(r"MC_GENERATED_DART = \[(.*?)\]", text, re.S)
+globs = re.findall(r'"([^"]+)"', m.group(1))
+def rx(g):
+    out, i = "", 0
+    while i < len(g):
+        if g.startswith("**/", i): out += "(.*/)?"; i += 3
+        elif g[i] == "*": out += "[^/]*"; i += 1
+        else: out += re.escape(g[i]); i += 1
+    return "(^|/)" + out + "$"
+print("|".join(rx(g) for g in globs), "|".join(rx(g) for g in globs if "_l10n" not in g))
+PY
+)
+[ -n "${GEN_RE:-}" ] || { echo "ide_sync: cannot read MC_GENERATED_DART from tool/bazel/defs.bzl" >&2; exit 1; }
 KINDS='^(dart_codegen|dart_aggregate_codegen) rule$'
 
 WATCH=0 LINK=0 ENVNAME="" PUB=1 CLEAN=0
@@ -77,8 +96,8 @@ while [ $# -gt 0 ]; do
     *) p=${1#//}; p=${p%/...}; p=${p%/}; PKGS+=("$p"); shift ;;
   esac
 done
-if [ -n "$ENVNAME" ] && [ ! -f "$REPO/tool/bazel/config/$ENVNAME.json" ]; then
-  echo "ide_sync: no tool/bazel/config/$ENVNAME.json (environments: $(cd "$REPO/tool/bazel/config" && ls ./*.json | sed 's|./||;s|\.json||' | paste -sd' ' -))" >&2
+if [ -n "$ENVNAME" ] && [ ! -f "$CONFIG_DIR/$ENVNAME.json" ]; then
+  echo "ide_sync: no tool/bazel/config/$ENVNAME.json (environments: $(cd "$CONFIG_DIR" && ls ./*.json | sed 's|./||;s|\.json||' | paste -sd' ' -))" >&2
   exit 2
 fi
 for p in ${PKGS[@]+"${PKGS[@]}"}; do
@@ -97,11 +116,33 @@ SCRATCH="$(mktemp -d)"
 trap 'rm -rf "$SCRATCH"' EXIT
 
 # --- 1 and 2: the list of "<absolute source>\t<relative dest>" ------------------
+# cquery_to_list <exec root> <cquery --output=files> <out>: the generated Dart
+# among the printed outputs, each as the exact `bazel-out/<config>/bin/<rel>`
+# path cquery printed (never a glob over configurations, which could pick a
+# stale copy another configuration left behind).
+cquery_to_list() {
+  local exec=$1 files=$2 out=$3 path rel src bad=0
+  : >"$out"
+  while IFS= read -r path; do
+    case $path in bazel-out/*/bin/external/*) continue ;; bazel-out/*/bin/*) ;; *) continue ;; esac
+    rel="${path#bazel-out/*/bin/}"
+    printf '%s\n' "$rel" | grep -qE "$GEN_RE" || continue
+    src="$exec/$path"
+    if [ ! -f "$src" ]; then echo "ide_sync: Bazel did not produce $rel ($path)" >&2; bad=1; continue; fi
+    printf '%s\t%s\n' "$src" "$rel" >>"$out"
+  done < <(sort -u "$files")
+  [ "$bad" = 0 ]
+}
+
 list_outputs() {  # list_outputs <out file>
   local out=$1
   if [ -n "${MC_IDE_SYNC_LIST:-}" ]; then
     cp "$MC_IDE_SYNC_LIST" "$out"
     return 0
+  fi
+  if [ -n "${MC_IDE_SYNC_CQUERY_FILES:-}" ]; then  # tests: no Bazel
+    cquery_to_list "${MC_IDE_SYNC_EXEC:?}" "$MC_IDE_SYNC_CQUERY_FILES" "$out"
+    return $?
   fi
   local scope
   if [ ${#PKGS[@]} -eq 0 ]; then
@@ -111,7 +152,7 @@ list_outputs() {  # list_outputs <out file>
     for p in "${PKGS[@]}"; do scope="$scope //$p/... +"; done
     scope="${scope% +} )"
   fi
-  local expr="let c = kind(\"$KINDS\", $scope) in \$c except attr(tags, \"manual\", \$c)"
+  local expr="let c = kind(\"$KINDS\", $scope) in \$c except attr(tags, \"(^|[\\[ ])manual([,\\]]|\$)\", \$c)"
   log "query: codegen targets under ${PKGS[*]:-the workspace}"
   bzl query "$expr" --output=label 2>"$SCRATCH/query.err" >"$SCRATCH/labels.txt" ||
     { cat "$SCRATCH/query.err" >&2; return 1; }
@@ -124,14 +165,7 @@ list_outputs() {  # list_outputs <out file>
     2>"$SCRATCH/cquery.err" >"$SCRATCH/files.txt" || { cat "$SCRATCH/cquery.err" >&2; return 1; }
   local exec
   exec="$(bzl info execution_root 2>/dev/null)" || return 1
-  # bazel-out/<config>/bin/<rel>: keep the generated Dart, once per path.
-  sed -n 's|^bazel-out/[^/]*/bin/||p' "$SCRATCH/files.txt" | grep -E "$GEN_RE" | grep -v '^external/' | sort -u |
-    while IFS= read -r rel; do
-      src="$(ls -d "$exec"/bazel-out/*/bin/"$rel" 2>/dev/null | head -1)"
-      [ -f "$src" ] || { echo "ide_sync: Bazel did not produce $rel" >&2; echo MISSING >"$SCRATCH/missing"; continue; }
-      printf '%s\t%s\n' "$src" "$rel"
-    done >"$out"
-  [ ! -e "$SCRATCH/missing" ]
+  cquery_to_list "$exec" "$SCRATCH/files.txt" "$out"
 }
 
 # --- helpers ------------------------------------------------------------------
@@ -153,14 +187,14 @@ place() {
   local src=$1 rel=$2 dest="$ROOT/$2"
   if [ "$LINK" = 1 ]; then
     if [ -L "$dest" ] && [ "$(readlink "$dest")" = "$src" ]; then echo U; return 0; fi
-    mkdir -p "$(dirname "$dest")"
-    ln -sfn "$src" "$dest.tmp.$$" && mv -f "$dest.tmp.$$" "$dest"
+    mkdir -p "$(dirname "$dest")" || return 1
+    ln -sfn "$src" "$dest.tmp.$$" && mv -f "$dest.tmp.$$" "$dest" || { rm -f "$dest.tmp.$$"; return 1; }
   else
     if [ -f "$dest" ] && [ ! -L "$dest" ] && cmp -s "$src" "$dest"; then echo U; return 0; fi
-    mkdir -p "$(dirname "$dest")"
+    mkdir -p "$(dirname "$dest")" || return 1
     # Bazel outputs are read-only; copy to a temp name and rename, so a watcher
     # never sees a half-written file.
-    cp "$src" "$dest.tmp.$$" && chmod u+w "$dest.tmp.$$" && mv -f "$dest.tmp.$$" "$dest"
+    cp "$src" "$dest.tmp.$$" && chmod u+w "$dest.tmp.$$" && mv -f "$dest.tmp.$$" "$dest" || { rm -f "$dest.tmp.$$"; return 1; }
   fi
   echo C
 }
@@ -168,6 +202,9 @@ place() {
 # --- the sync -----------------------------------------------------------------
 sync_once() {
   local list="$SCRATCH/list.tsv" want="$SCRATCH/want.txt" fb="$SCRATCH/fallback.txt"
+  # A failed sync must not leak its state into the next one (watch mode).
+  rm -f "$SCRATCH/missing" "$SCRATCH/skipped"
+  [ -z "${MC_IDE_SYNC_TEST_DELAY:-}" ] || sleep "$MC_IDE_SYNC_TEST_DELAY"
   : >"$list"
   list_outputs "$list" || { log "could not list the Bazel outputs"; return 1; }
   fallback_paths | sort -u >"$fb"
@@ -180,7 +217,7 @@ sync_once() {
       grep -q 'assets/app_config.json' "$pubspec" || continue
       appdir="$(dirname "${pubspec#"$ROOT"/}")"
       in_scope "$appdir/assets/app_config.json" || continue
-      printf '%s\t%s\n' "$REPO/tool/bazel/config/$ENVNAME.json" "$appdir/assets/app_config.json" >>"$list"
+      printf '%s\t%s\n' "$CONFIG_DIR/$ENVNAME.json" "$appdir/assets/app_config.json" >>"$list"
     done < <(find "$ROOT/app" -name pubspec.yaml -not -path '*/.dart_tool/*' -not -path '*/build/*' 2>/dev/null | sort)
   fi
 
@@ -250,17 +287,30 @@ ensure_ios_project() {
     log "flutter create --platforms=ios for $name (Xcode project, git-ignored)"
     tmp="$SCRATCH/ios-$name"; mkdir -p "$tmp/$name"
     cp -R "$appdir/ios" "$appdir/pubspec.yaml" "$tmp/$name/"
+    if [ -n "${MC_IDE_SYNC_IOS_TEMPLATE:-}" ]; then  # tests: no flutter create
+      cp -R "$MC_IDE_SYNC_IOS_TEMPLATE/." "$tmp/$name/ios/"
+    else
     (cd "$tmp/$name" && fvm flutter create --platforms=ios --project-name "$name" --org com.emiliev --no-pub . >/dev/null 2>"$SCRATCH/create.err") ||
       { cat "$SCRATCH/create.err" >&2; return 1; }
+    fi
     # Every file `flutter create` adds that the checkout lacks (the Xcode
     # project, the Flutter xcconfigs, Runner-Bridging-Header.h, the launch
-    # image), never one that exists. Each must be git-ignored.
+    # image), never one that exists. Each must be git-ignored, and all are
+    # checked before the first is written.
+    local items="$SCRATCH/ios-items-$name" arel="${appdir#"$ROOT"/}" bad=0
+    : >"$items"
     while IFS= read -r item; do
       [ ! -e "$appdir/ios/$item" ] || continue
-      mkdir -p "$(dirname "$appdir/ios/$item")"
-      cp "$tmp/$name/ios/$item" "$appdir/ios/$item"
-      is_ignored "${appdir#"$ROOT"/}/ios/$item" || { log "REFUSED: ${appdir#"$ROOT"/}/ios/$item would be committable (add it to .gitignore)"; return 1; }
+      if ! is_ignored "$arel/ios/$item"; then log "REFUSED: $arel/ios/$item would be committable (add it to .gitignore)"; bad=1; fi
+      echo "$item" >>"$items"
     done < <(cd "$tmp/$name/ios" && find . -type f -not -path './Flutter/ephemeral/*' -not -name '.gitignore' | sed 's|^\./||' | sort)
+    [ "$bad" = 0 ] || { log "nothing was written for $name"; return 1; }
+    mkdir -p "$(dirname "$SCAFFOLD")"
+    while IFS= read -r item; do
+      mkdir -p "$(dirname "$appdir/ios/$item")" && cp "$tmp/$name/ios/$item" "$appdir/ios/$item" || return 1
+      echo "$arel/ios/$item" >>"$SCAFFOLD"   # `--clean` removes these
+    done <"$items"
+    [ ! -f "$SCAFFOLD" ] || sort -u "$SCAFFOLD" -o "$SCAFFOLD"
   done < <(find "$ROOT/app" -name pubspec.yaml -not -path '*/.dart_tool/*' -not -path '*/build/*' 2>/dev/null | sort)
 }
 
@@ -286,6 +336,17 @@ if [ "$CLEAN" = 1 ]; then
     done <"$MANIFEST"
     if [ ${#PKGS[@]} -eq 0 ]; then rm -f "$MANIFEST"; fi
   fi
+  # The Xcode scaffolding ide_sync created (never gen-l10n, Pods or build/).
+  if [ -f "$SCAFFOLD" ]; then
+    : >"$SCRATCH/scaffold.keep"
+    while IFS= read -r rel; do
+      [ -n "$rel" ] || continue
+      if ! in_scope "$rel"; then echo "$rel" >>"$SCRATCH/scaffold.keep"; continue; fi
+      if is_tracked "$rel"; then log "not deleting $rel: it is tracked"; continue; fi
+      if [ -e "$ROOT/$rel" ] || [ -L "$ROOT/$rel" ]; then rm -f "$ROOT/$rel"; n=$((n + 1)); rmdir -p "$(dirname "$ROOT/$rel")" 2>/dev/null; fi
+    done <"$SCAFFOLD"
+    if [ -s "$SCRATCH/scaffold.keep" ]; then cp "$SCRATCH/scaffold.keep" "$SCAFFOLD"; else rm -f "$SCAFFOLD"; fi
+  fi
   echo "IDE_SYNC cleaned=$n"
   exit 0
 fi
@@ -299,22 +360,25 @@ fi
 # Sources that make codegen output change: Dart, ARB, pubspec and BUILD files,
 # outside generated or build directories.
 fingerprint() {
-  (cd "$ROOT" && find app feature utility spike third_party tool -type f \
-      \( -name '*.dart' -o -name '*.arb' -o -name 'BUILD.bazel' -o -name '*.bzl' \) \
-      -not -name '*.g.dart' -not -name '*.freezed.dart' -not -name '*.config.dart' \
-      -not -path '*/.dart_tool/*' -not -path '*/build/*' -not -path '*/ios/*' \
-      -not -path '*/lib/src/l10n/*_l10n*.dart' \
-      -exec stat -f '%N %m %z' {} + 2>/dev/null | sort | shasum | cut -d' ' -f1)
+  { (cd "$ROOT" && find app feature utility spike third_party tool -type f \
+      \( -name '*.dart' -o -name '*.arb' -o -name 'BUILD.bazel' -o -name '*.bzl' \
+         -o -name 'pubspec.yaml' -o -name 'l10n.yaml' \) \
+      -not -path '*/.dart_tool/*' -not -path '*/build/*' -not -path '*/ios/*' 2>/dev/null | grep -vE "$GEN_ALL_RE"
+     ) | (cd "$ROOT" && xargs stat -f '%N %m %z' 2>/dev/null)
+    find "$CONFIG_DIR" -type f -name '*.json' -exec stat -f '%N %m %z' {} + 2>/dev/null
+  } | sort | shasum | cut -d' ' -f1
 }
 log "watching (Ctrl-C to stop)"
-run_once || log "initial sync failed; still watching"
+# The baseline comes first: an edit made while the initial sync runs differs
+# from it and triggers the next one.
 last="$(fingerprint)"
+run_once || log "initial sync failed; still watching"
 POLL="${MC_IDE_SYNC_POLL:-1}"
 while true; do
   if command -v fswatch >/dev/null 2>&1; then
     # One event batch, then sync. -o coalesces; the latency avoids a storm on save.
-    (cd "$ROOT" && fswatch -1 -o -l 0.5 -e '/\.dart_tool/' -e '/build/' -e '\.g\.dart$' -e '\.freezed\.dart$' -e '\.config\.dart$' \
-        app feature utility spike third_party tool >/dev/null 2>&1) || sleep "$POLL"
+    (cd "$ROOT" && fswatch -1 -o -l 0.5 -e '/\.dart_tool/' -e '/build/' -e "$GEN_ALL_RE" \
+        app feature utility spike third_party tool "$CONFIG_DIR" >/dev/null 2>&1) || sleep "$POLL"
   else
     sleep "$POLL"
   fi
