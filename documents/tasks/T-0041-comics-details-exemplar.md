@@ -73,6 +73,7 @@ Like `characters_list` (T-0032), this package is the shape the P1-24 bricks copy
 ## Log
 - 2026-11-26: Created (TL); dispatched after T-0039 and T-0040 merged. The engineer may also lift the P-080 auth pins if they touch the auth tests.
 - 2026-11-26 (Engineer): Branched from `origin/main` `4c70671` (unchanged at handoff, so no merge). Every generator built on the first try: **no codegen shim failed on a real-world case**, so no R28 fallback. One kit gap (date symbols, F-0040 fact 1) has a marked workaround and needs a TL decision. Handed off; evidence in `documents/evidence/T-0041/engineer/`.
+- 2026-11-26 (Engineer): Review round (TL items 1 to 11, one round). Merged `origin/main` `0d395d8` (docs only; no lock change). T-0042 (`MC_GENERATED_DART` globs) is not on `origin/main` yet, so its glob exclusion and `T-0042-AC4_safety.sh` are not applied here (TL to sequence). Re-handed off; see "Review round" below.
 
 ## Outcome
 **Handed off** for review and verification on `fleet/T-0041-comics-details`. Finding: [F-0040](../findings/F-0040-section-detail-exemplar.md). Evidence: [`documents/evidence/T-0041/engineer/`](../evidence/T-0041/engineer/).
@@ -135,7 +136,7 @@ New: 5 in comics_details (`goldens/comics_details/`), all looked at. Changed: **
 ### Test integrity
 No test deleted, skipped or weakened; no `// ignore:`. Changed existing tests: characters_list `architecture_test` expects `ComicId` in the barrel; `characters_list.feature` Background also serves `comics.default` (the preview now asks for comics); its golden test serves it too. P-080's auth pins were not lifted (no auth test touched).
 
-### Decisions for the TL
+### Decisions for the TL (all answered in the review round, below)
 1. **Date symbols (F-0040 fact 1):** a root `FormattersDIInitializer` (or `L10nCoreDIInitializer`) in `rootInitializers` and `McTestContainer`, or a self-initialising `mc_formatters`; then the feature initializer returns to Tide's shape.
 2. **The cast needs N requests (F-0040 fact 10):** keep, or embed a cast summary in the comics contract.
 3. **`/creators/:id` placeholder** in publishing_wiring for `openCreator` (not in the task text).
@@ -143,8 +144,39 @@ No test deleted, skipped or weakened; no `// ignore:`. Changed existing tests: c
 5. The temporary sheet's copy is English only.
 
 ### Follow-ups (for `pending-work.md`)
-- The favourite does not react to a sign-in or sign-out elsewhere while the page is open (listen to `SessionReader.authState` / `DataChanged('favourites')`).
-- `RecordedRequest.headers` in `mc_test_utils` (F-0040 fact 4).
+- ~~The favourite does not react to a sign-in or sign-out elsewhere~~: done in the review round (item 8).
+- ~~`RecordedRequest.headers`~~: done in the review round (item 11).
 - `publishing_sandbox` (P1-18 lists it; not in this task's scope).
 - A deep-linked comic at the app root has no back button (as F-0035 accepts for any flow root).
 - `mcgen wire` for `flow_scope.dart` (as T-0032).
+
+## Review round (TL decisions 1 to 5, review findings 6 to 11)
+Every fix has a `T-0041-ACn` test that fails without it, and each is a mutation in [mutations.sh](../evidence/T-0041/engineer/mutations.sh) (R1-a to R11).
+
+| # | Fix | Tests (fail without the fix) |
+|---|---|---|
+| 1 | `FormattersDIInitializer` in `mc_formatters`; in `app_core`'s `rootInitializers` after api auth, before the wirings (where plan 01 has `L10nCoreDIInitializer`), and in `McTestContainer` (9 initializers; `isolation_test`'s count 8 to 9). The feature initializer is back in Tide's shape. **Finding:** Flutter's `GlobalMaterialLocalizations` already loads intl's date data for every supported locale, so German dates worked under any `MaterialApp` with those delegates; the root initializer covers formatting outside a widget tree (F-0040 fact 14, correcting fact 1) | `mc_formatters:formatters_di_initializer_test`, `app_core:formatters_root_test` (also checks the list position), `mc_test_utils:formatters_container_test` (no widget tree): each first sees `formatDate(.., 'de')` throw. German BDD unchanged and green with the workaround removed. R1-a, R1-b |
+| 2 | `GET /v1/comics/:id` adds `characters: [{id, name, thumbnail}]`. **`characterIds` kept** (T-0038's tests, the `characterId=` lookup and the contract read it). Built from `mc_fixtures_characters`' universe for the same seed; that package is now **pure Dart** (`characterArtCount` constant + drift test instead of `mc_fixtures_media`), so `mc_fixtures_comics` depends on it. `CONTRACT.md`, `detail.json` snapshot (only that one changed), the detail key-set test. The feature reads the summary: `getCharacter` is gone, the page makes one request | `mc_fixtures_comics:provider_contract_test` "T-0041-AC1 seed 42/7: every served cast summary equals what the characters domain serves"; `mc_fixtures_characters:provider_contract_test` "T-0041-AC1 characterArtCount ..."; `tool/checks/T-0041-AC1_fixtures_closure.sh` (both pure; positive control `mc_fixtures_media`); BDD "... list the comic's credits" now asserts `{0} requests for GET /v1/characters/:id`, and the feature tests no longer serve the characters domain (the strict harness fails any such request). R2-a, R2-b |
+| 3 | Creator placeholder kept | — |
+| 4 | `RouteTargets` → `UniverseRouteTargets` (+ `Impl`, sandbox fakes). **`mc_arch_check` checked only a class named exactly `RouteTargets`**, so prefixed targets escaped R15's `*Flow` rule; it now checks any class ending in `RouteTargets`. Convention recorded in F-0040 fact 11 | `mc_arch_check:arch_check_test` "T-0041-AC7 a group-prefixed RouteTargets class is checked too" (fixture `GroupRouteTargets`). R3 |
+| 5 | Approved edits outside the brief | — |
+| 6 | **Not reproduced; pinned.** On the unchanged code `/comics/abc` and `/creators/1x` already showed `NotFoundPage`: every typed route's generated `redirect` calls the factory first, and go_router 17.5 turns its exception into the error match list (`errorBuilder`). An `int.tryParse` redirect could not run before that factory, so none was added (F-0040 fact 16) | `publishing_wiring:routes_test` "T-0041-AC5 a non-numeric id (...)" × `/comics/abc`, `/comics/7x`, `/creators/1x`; `mini_client:comic_route_test` running-app links × 2 and a cold-start link; e2e `20_bad_comic_link_not_found.png`. R6 (the app without `errorBuilder`) |
+| 7 | The sheet: `PopScope(canPop: !_busy)`, and `showFixtureSignInSheet` answers the sign-in's real outcome when it closes without an answer | `routes_test` "T-0041-AC6 requestSignIn: while signing in, the barrier and Back do not close the sheet", "... a sheet closed while signing in answers the real outcome". R7-a, R7-b |
+| 8 | The favourite follows `SessionReader.authState` (epoch-tracked: its own sign-in causes no second read; a change during a tap is applied after it; a read that outlived its session is redone). After `requestSignIn()` → true it reads the flag for the new session; a user who has it gets no write | BDD "Signed out, signing in as a user who already has the favourite writes nothing" (0 PUT, 0 DELETE), "A sign-in elsewhere shows that user's favourite", "A sign-out elsewhere ...", "A rejected refresh during a write signs out and shows Add again", "A sign-out while the flag is being read ...", "Signed out, a failed read after sign-in ...". R8-a to R8-d |
+| 9 | `RelatedComicsBloc` in-flight guard | characters_list BDD "A double Retry of the related comics sends one request" (and comics_details "A double Retry sends one request" for the existing guard). R9, AC2-c |
+| 10 | Separate `ComicFavouriteState.signingIn`; `ready` doc corrected | BDD signed-out scenario: "Add to favourites" while the sign-in is pending. R10 |
+| 11 | `RecordedRequest.headers` (as the adapter sees them, after every interceptor). Generic step `the backend received {route} with the bearer of {user}`; the feature's recording interceptor is removed (it proved nothing extra) | `mc_test_utils:auth_container_test` "T-0041-AC6 the harness records each request with its headers ..."; the BDD bearer assertions on the PUT and the GET. R11 |
+
+New generic steps (`mc_test_steps`): `the backend received {route} with the bearer of {user}`, `the app finishes writing to storage`, `the app sends {route}` (pumps until a request behind a hold has been sent, F-0040 fact 5).
+
+**Removed scenarios (disclosed):** "A character the backend no longer knows is left out of the cast" and "A failed cast member fails the comic, and Retry recovers": the behaviour they tested (per-character requests) no longer exists (TL decision 2). AC2 gains "A double Retry sends one request" instead. No other test deleted, skipped or weakened; no `// ignore:`. Existing tests changed: `isolation_test` count 8 → 9; `mc_fixtures_comics:comics_test` detail key set gains `characters`; T-0038-AC4's closure positive control moves from `mc_fixtures_characters` (now pure) to `mc_fixtures_media`.
+
+**Goldens:** none changed in this round (the cast names and art are the same; 5 comics_details and 4 characters_list goldens pass unchanged).
+
+**Gates:** [`T-0041-AC8_gates.md`](../evidence/T-0041/engineer/T-0041-AC8_gates.md) **PASS**: 111/111 tests (every touched package uncached first), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures check, relative paths, the fixtures closure, both features' byte identity (comics_details 12/12, characters_list 14/14), cutoff and not-committed, gen-l10n parity. Coverage: comics_details 376/376, publishing_wiring 93/93, characters_list 219/219, universe_wiring 39/39, mc_formatters 29/29 (a pre-existing `Money` gap closed by one test), mc_fixtures_comics 98.8 %, mc_fixtures_characters 96.9 %.
+
+**e2e** on a fresh `mc-T-0041-engineer-15540` (deleted): 3 of 3 PASS, screenshots 01–04 and 10–20 refreshed ([summary](../evidence/T-0041/engineer/mini_client/e2e-summary.md)).
+
+**Mutations:** final full run **43 of 43 killed by a failing test**, none by a compile error ([mutations.log](../evidence/T-0041/engineer/mutations.log)): the 28 earlier ones (texts updated where the code moved; the cast-404 mutation, whose behaviour is gone, became the comic's double-Retry guard) plus 15 for this round. Along the way R1-a first survived (Flutter's material localizations load the date data, item 1) and R8-d first survived (the read had not been sent behind the hold); both are killed by the tests added for them.
+
+**For the TL:** T-0042 is not on `origin/main` at `0d395d8`, so the `MC_GENERATED_DART` glob exclusion (comics_details, publishing_wiring and the new mc_formatters test target) and `T-0042-AC4_safety.sh` are still to do: sequence T-0042 first, or I apply it after it lands.

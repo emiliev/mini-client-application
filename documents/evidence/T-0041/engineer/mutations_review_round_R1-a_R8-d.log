@@ -1,5 +1,0 @@
-baseline: PASS (12 targets)
-R1-a test container does not load the formatters: KILLED (FAIL  T-0041-AC4 the test container loads the formatters, as the app's root list does)
-R8-d a read that outlived its session is shown: KILLED (FAIL  comics_details_favourite Favourite a comic A sign-out while the flag is being read shows the signed-out view [T-0041-AC6])
-
-2 of 2 mutations killed by a failing test
