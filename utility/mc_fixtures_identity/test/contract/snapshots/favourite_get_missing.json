@@ -1,0 +1,12 @@
+{
+  "body": {
+    "error": {
+      "code": "not_favourite",
+      "id": "1",
+      "kind": "comic",
+      "message": "comic/1 is not a favourite"
+    }
+  },
+  "request": "GET /v1/me/favourites/comic/1",
+  "status": 404
+}

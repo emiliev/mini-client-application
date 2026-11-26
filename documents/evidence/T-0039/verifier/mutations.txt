@@ -1,0 +1,13 @@
+KILLED   M1 shared-refresh latch removed: ['//utility/mc_api_auth:auth_interceptor_test']
+KILLED   M2 replay keeps the old token (header not replaced on replay): ['//utility/mc_api_auth:auth_interceptor_test']
+SURVIVED M3 refresh also on 403
+KILLED   M4 failed refresh does not clear the session: ['//utility/mc_api_auth:auth_interceptor_test']
+KILLED   M5 updateTokens revives a signed-out session: ['//utility/mc_session:session_test']
+SURVIVED M6 Session saves not serialised (FileStore still serialises per key)
+KILLED   M7 _refreshing never cleared: ['//utility/mc_api_auth:auth_interceptor_test']
+KILLED   M8 replay flag ignored: ['//utility/mc_api_auth:auth_interceptor_test'] by TIMEOUT in 60 s (infinite refresh/replay loop; mutate.py only matched "FAILED in", re-run by hand)
+KILLED   M9 token counter does not skip revoked numbers: ['//utility/mc_fixtures_identity:identity_test', '//utility/mc_fixtures_identity:provider_contract_test']
+KILLED   M10 offline refresh signs out: ['//utility/mc_api_auth:auth_interceptor_test']
+KILLED   M11 boot never restores (always Session.empty): ['//app/wiring/app_core:boot_test', '//utility/mc_session:session_di_test']
+KILLED   M12 bearer prefix dropped: ['//utility/mc_api_auth:auth_api_test', '//utility/mc_api_auth:auth_interceptor_test']
+KILLED   M13 sign-out does not delete the store: ['//utility/mc_api_auth:auth_api_test', '//utility/mc_api_auth:auth_interceptor_test', '//utility/mc_session:session_test']

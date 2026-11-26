@@ -7,11 +7,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 
 const _config =
@@ -279,6 +282,12 @@ void main() {
     final adapter = dio.httpClientAdapter as MockBackendHttpAdapter;
     expect(adapter.target, same(diContainer<MockBackend>().adapter));
     expect(diContainer.isRegistered<EventBus>(), isTrue);
+    // T-0039-AC5: the session and the bearer interceptor are in the list.
+    expect(diContainer<SessionReader>(), same(diContainer<Session>()));
+    expect(diContainer<SessionWriter>(), same(diContainer<Session>()));
+    expect(diContainer.isRegistered<AuthApi>(), isTrue);
+    expect(dio.interceptors.last, isA<AuthInterceptor>());
+    expect(diContainer<Session>().isSignedIn, isFalse);
 
     // A request goes through mc_api_client's Dio to the mocked backend,
     // which has no domains, so it answers 404 and records the traffic.
@@ -294,6 +303,36 @@ void main() {
     );
     expect(diContainer<MockBackend>().recentTraffic, hasLength(1));
     expect(sink.entries, isNotEmpty, reason: 'the API client logs requests');
+  });
+
+  test('T-0039-AC5 the root list boots the session: sign in over the app Dio, '
+      'carry the bearer, and restore it on the next boot', () async {
+    List<McDIInitializer> list() => rootInitializers(
+      config: () async => _config,
+      storageDirectory: storage,
+      monitoringSinks: [InMemorySink()],
+      mockDomains: const [IdentityMockDomain()],
+    );
+    await initializeDIContainer(list());
+    final events = <SessionChanged>[];
+    diContainer<EventBus>().on<SessionChanged>().listen(events.add);
+
+    final user = await diContainer<AuthApi>().signIn(
+      email: 'reader@mini-client.test',
+      password: 'marvelous',
+    );
+    final me = await diContainer<Dio>().get<Map<String, Object?>>('/v1/me');
+    await pumpEventQueue();
+
+    expect(user.getOrNull()?.id, 'u-100');
+    expect(me.data!['displayName'], 'Rhea Reader');
+    expect(events, const [SessionChanged(AuthStatus.signedIn)]);
+
+    await resetDIContainer();
+    await initializeDIContainer(list());
+    expect(diContainer<SessionReader>().userId, 'u-100');
+    final again = await diContainer<Dio>().get<Map<String, Object?>>('/v1/me');
+    expect(again.data!['id'], 'u-100');
   });
 
   test('T-0021-AC1 an unknown backend.scenario fails boot with a clear '

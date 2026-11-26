@@ -2,12 +2,14 @@ import 'dart:io';
 
 import 'package:app_core/src/di/mocked_backend_di_initializer.dart';
 import 'package:app_core/src/router/router_ref.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 
 /// The root DI list, in order (plan 01 §3.4). Utilities first, then the
@@ -15,8 +17,11 @@ import 'package:mc_storage/mc_storage.dart';
 /// their flows, never here.
 ///
 /// The shared `Dio` (mc_api_client) runs on the mocked backend's adapter
-/// (ADR-0005). Not in the list yet, because their packages do not exist:
-/// analytics, session, api auth, feature flags and l10n core.
+/// (ADR-0005). The session needs storage and the event bus, so both come
+/// before it (plan 01 lists the bus later; T-0039), and api auth goes on the
+/// shared Dio, so it comes right after the API client. Not in the list yet,
+/// because their packages do not exist: analytics, feature flags and l10n
+/// core.
 List<McDIInitializer> rootInitializers({
   required ConfigSource config,
   required Directory storageDirectory,
@@ -30,9 +35,11 @@ List<McDIInitializer> rootInitializers({
     ConfigDIInitializer(config),
     MonitoringDIInitializer(sinks: monitoringSinks),
     StorageDIInitializer(storageDirectory),
+    const EventBusDIInitializer(),
+    const SessionDIInitializer(),
     MockedBackendDIInitializer(adapter: backendAdapter, domains: mockDomains),
     ApiClientDIInitializer(adapter: backendAdapter),
-    const EventBusDIInitializer(),
+    const ApiAuthDIInitializer(),
     if (routerRef != null) RouterDIInitializer(routerRef),
     ...wirings,
   ];

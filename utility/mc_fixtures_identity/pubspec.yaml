@@ -1,0 +1,16 @@
+# T-0039 (P1-08 subset): the identity domain of the mocked backend (R3: data plus small pure-Dart handlers).
+name: mc_fixtures_identity
+description: Mock sign-in, token refresh, sign-out, the current user and favourites for the mocked backend (T-0039).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  mc_mocked_backend: any
+
+dev_dependencies:
+  dio: ^5.11.0
+  test: ^1.25.0

@@ -6,6 +6,7 @@ package(default_visibility = ["//app:__subpackages__"])
 _LANG = "3.13"
 
 _DEPS = [
+    "//utility/mc_api_auth",
     "//utility/mc_api_client",
     "//utility/mc_bloc_kit",
     "//utility/mc_config",
@@ -19,6 +20,7 @@ _DEPS = [
     "//utility/mc_fixtures_media",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
+    "//utility/mc_session",
     "//utility/mc_storage",
     "@pub_deps//:bloc",
     "@pub_deps//:dio",
@@ -43,6 +45,7 @@ flutter_library(
     main = "test/%s.dart" % t,
     deps = _DEPS + [
         ":app_core",
+        "//utility/mc_fixtures_identity",
         "@pub_deps//:flutter_test",
     ],
 ) for t in [

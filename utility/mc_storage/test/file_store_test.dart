@@ -19,6 +19,16 @@ void main() {
     expect(read.getOrNull(), {'theme': 'dark'});
   });
 
+  test('T-0039-AC4 existsSync tells a saved key from a missing one', () async {
+    final store = FileStore(dir);
+    expect(store.existsSync('k'), isFalse);
+    await store.write('k', 1);
+    expect(store.existsSync('k'), isTrue);
+    await store.delete('k');
+    expect(store.existsSync('k'), isFalse);
+    expect(FileStore(Directory('${dir.path}/never')).existsSync('k'), isFalse);
+  });
+
   test('T-0020-AC4 a missing key reads as null', () async {
     final read = await FileStore(dir).read('nope');
     expect(_failureOf(read), isNull);

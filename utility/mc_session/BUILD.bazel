@@ -1,0 +1,45 @@
+# T-0039 (U08): the session. Pure Dart (R15); hand-written DI initializer like mc_storage.
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+_DEPS = [
+    "//utility/mc_di",
+    "//utility/mc_event_bus",
+    "//utility/mc_prelude",
+    "//utility/mc_storage",
+    "@pub_deps//:get_it",
+]
+
+dart_library(
+    name = "mc_session",
+    package_name = "mc_session",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = _DEPS,
+)
+
+[dart_test(
+    name = t,
+    size = "small",
+    package_name = "mc_session",
+    language_version = "3.13",
+    main = "test/%s.dart" % t,
+    deps = _DEPS + [
+        ":mc_session",
+        "@pub_deps//:test",
+    ],
+) for t in [
+    "session_test",
+    "session_di_test",
+]]
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_session",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

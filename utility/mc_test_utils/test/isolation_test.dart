@@ -140,7 +140,7 @@ void main() {
   ) async {
     await McTestContainer.initialize(McTestSession.current);
     final session = McTestSession.current;
-    expect(McTestContainer.initializers(session, wirings: const []).length, 6);
+    expect(McTestContainer.initializers(session, wirings: const []).length, 8);
     expect(diContainer.isRegistered<Dio>(), isTrue);
   });
 }

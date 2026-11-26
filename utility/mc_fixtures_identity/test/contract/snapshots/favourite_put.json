@@ -1,0 +1,9 @@
+{
+  "body": {
+    "favourite": true,
+    "id": "1",
+    "kind": "comic"
+  },
+  "request": "PUT /v1/me/favourites/comic/1",
+  "status": 200
+}

@@ -67,6 +67,11 @@ class FileStore {
         }
       });
 
+  /// Whether a value is saved under [key], without any asynchronous I/O (a
+  /// file that exists may still be corrupt). For boot code that must not
+  /// await real I/O.
+  bool existsSync(String key) => _file(key).existsSync();
+
   /// The value under [key]; success(null) when absent, a failure when the
   /// file is corrupt.
   Future<Result<Object?, StorageFailure>> read(String key) async {

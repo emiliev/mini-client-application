@@ -1,0 +1,10 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_refresh_token",
+      "message": "The refresh token is unknown, used or signed out"
+    }
+  },
+  "request": "POST /v1/auth/refresh",
+  "status": 401
+}

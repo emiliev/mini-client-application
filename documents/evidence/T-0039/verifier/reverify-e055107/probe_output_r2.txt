@@ -1,0 +1,24 @@
+00:00 +0: loading utility/mc_api_auth/test/verifier_probe_test.dart
+00:00 +0: V-P1 10 concurrent 401s share one refresh
+00:00 +1: V-P1b 10 concurrent 401s under realistic latency share one refresh
+00:00 +2: V-P2 a 401 after the refresh does not loop (2 calls, 1 refresh)
+00:00 +3: V-P3 the refresh call itself getting a 401 does not recurse
+00:00 +4: V-P5 no token + 401: no refresh attempt
+00:00 +5: V-P6a refresh 403 (4xx) signs out
+00:00 +6: V-P6b refresh timeout keeps the session and reports timeout
+00:00 +7: V-P6c refresh 503 keeps the session (POST is not retried)
+00:00 +8: V-P6d 3 concurrent 401s + offline refresh: one refresh, all offline, session kept
+00:00 +9: V-P7 a 403 on a request is not refreshed
+00:00 +10: V-P8 a FormData request that gets a 401 is replayed after the refresh
+00:00 +11: gated V-P4a refresh in flight, user signs out, refresh succeeds: stays signed out
+00:00 +12: gated V-P4b refresh in flight, sign-out, sign-in as another user, old refresh succeeds
+00:00 +13: gated V-P4e refresh answered by the server, response delayed; meanwhile sign-out + sign-in as B
+00:00 +14: gated V-P9 one refresh per epoch: A in flight, B starts its own
+00:00 +15: gated V-P10 A PUT after a local sign-out mid-refresh is not replayed anonymously
+00:00 +16: gated V-P4c refresh in flight, sign-out, sign-in as B, old refresh rejected: B stays signed in
+00:00 +17: gated V-P4d sign-out while the first refresh is in flight; concurrent waiters fail unauthorized
+00:00 +18: V-AC1 session change during a retry backoff: the retry uses the current session
+00:00 +19: V-AC1 sign-in as B during a retry backoff: the retry carries B
+00:00 +19 -1: V-AC1 sign-in as B during a retry backoff: the retry carries B [E]
+00:00 +19 -1: V-AC1 sign-out while a request is in flight: a 401 is not refreshed
+00:00 +20 -1: Some tests failed.

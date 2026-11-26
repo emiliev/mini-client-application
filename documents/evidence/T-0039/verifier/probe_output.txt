@@ -1,0 +1,36 @@
+00:00 +0: loading utility/mc_api_auth/test/verifier_probe_test.dart
+00:00 +0: V-P1 10 concurrent 401s share one refresh
+00:00 +1: V-P1b 10 concurrent 401s under realistic latency share one refresh
+00:00 +2: V-P2 a 401 after the refresh does not loop (2 calls, 1 refresh)
+00:00 +3: V-P3 the refresh call itself getting a 401 does not recurse
+00:00 +4: V-P5 no token + 401: no refresh attempt
+00:00 +5: V-P6a refresh 403 (4xx) signs out
+00:00 +6: V-P6b refresh timeout keeps the session and reports timeout
+00:00 +7: V-P6c refresh 503 keeps the session (POST is not retried)
+00:00 +8: V-P6d 3 concurrent 401s + offline refresh: one refresh, all offline, session kept
+00:00 +9: V-P7 a 403 on a request is not refreshed
+00:00 +10: V-P8 a FormData request that gets a 401 is replayed after the refresh
+00:00 +10 -1: V-P8 a FormData request that gets a 401 is replayed after the refresh [E]
+  Expected: <200>
+    Actual: <null>
+  Failure(ApiUnexpected(StateError: Bad state: The FormData has already been finalized. This typically means you are using the same FormData in repeated requests.))
+00:00 +10 -1: gated V-P4a refresh in flight, user signs out, refresh succeeds: stays signed out
+00:00 +11 -1: gated V-P4b refresh in flight, sign-out, sign-in as another user, old refresh succeeds
+00:00 +11 -2: gated V-P4b refresh in flight, sign-out, sign-in as another user, old refresh succeeds [E]
+  Expected: 'u-101'
+00:00 +11 -2: gated V-P4e refresh answered by the server, response delayed; meanwhile sign-out + sign-in as B
+00:00 +11 -3: gated V-P4e refresh answered by the server, response delayed; meanwhile sign-out + sign-in as B [E]
+  Expected: 'mc-access-u-101-2'
+    Actual: 'mc-access-u-100-1'
+            Expected: ... ccess-u-101-2
+              Actual: ... ccess-u-100-1
+  session userId=u-101 token=mc-access-u-100-1
+00:00 +11 -3: gated V-P4c refresh in flight, sign-out, sign-in as B, old refresh rejected: B stays signed in
+00:00 +11 -4: gated V-P4c refresh in flight, sign-out, sign-in as B, old refresh rejected: B stays signed in [E]
+  Expected: true
+    Actual: <false>
+00:00 +11 -4: gated V-P4d sign-out while the first refresh is in flight; concurrent waiters fail unauthorized
+00:00 +12 -4: V-AC1 session change during a retry backoff: the retry uses the current session
+00:00 +13 -4: V-AC1 sign-in as B during a retry backoff: the retry carries B
+00:00 +14 -4: V-AC1 sign-out while a request is in flight: a 401 is not refreshed
+00:00 +15 -4: Some tests failed.

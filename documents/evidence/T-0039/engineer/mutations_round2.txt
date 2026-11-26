@@ -1,0 +1,42 @@
+KILLED: no shared refresh  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_interceptor_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-
+KILLED: no stale-token comparison  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_interceptor_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-
+KILLED: failed refresh does not sign out  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_interceptor_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-
+KILLED: no replay flag  [0 failing tests]
+KILLED: no bearer  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_interceptor_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-
+KILLED: refresh outcome applied without epoch (success)  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: rejection signs out without epoch  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: session ignores updateTokens epoch  [1 failing tests]
+    FAIL: //utility/mc_session:session_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb722b27
+KILLED: session ignores signOut ifEpoch  [1 failing tests]
+    FAIL: //utility/mc_session:session_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb722b27
+SURVIVED: replay after the refresh ignores a session change
+SURVIVED: a 401 of another session is replayed
+KILLED: a retry of another session is sent  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: FormData is not cloned  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: a Stream body is refreshed and replayed  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: 403 is refreshed  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: unexpected failure signs out  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: 429 signs out  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: retry after sign-out keeps the old token  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72
+KILLED: repeat sign-in always announces  [1 failing tests]
+    FAIL: //utility/mc_session:session_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb722b27
+KILLED: refresh tokens do not rotate  [1 failing tests]
+    FAIL: //utility/mc_fixtures_identity:identity_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST
+KILLED: test container without api auth  [2 failing tests]
+    FAIL  T-0039-AC5 the test container carries a signed-in user: sign in, then the bearer reaches the backend
+    FAIL: //utility/mc_test_utils:auth_container_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild/tes
+KILLED: no epoch guard anywhere on replay (onRequest guard off as well)  [1 failing tests]
+    FAIL: //utility/mc_api_auth:auth_races_test (Exit 1) (see /private/tmp/mc-ob-T-0039-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild-ST-bdcb72

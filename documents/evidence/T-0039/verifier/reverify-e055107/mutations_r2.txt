@@ -1,0 +1,24 @@
+KILLED   E1 updateTokens ignores the epoch: //utility/mc_api_auth:auth_races_test FAILED 0.4s, //utility/mc_session:session_test FAILED 0.3s
+KILLED   E2 signOut ignores ifEpoch: //utility/mc_api_auth:auth_races_test FAILED 0.4s, //utility/mc_session:session_test FAILED 0.3s
+SURVIVED E3 one shared refresh across epochs (epoch compare dropped in _refreshFor)
+KILLED   X1 onRequest epoch check off: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+SURVIVED X2 onError pre-refresh epoch check off
+SURVIVED X3 onError post-refresh epoch check off
+SURVIVED X4 both onError epoch checks off
+KILLED   X5 onRequest + post-refresh checks off: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   X6 all three epoch checks off: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   B1 FormData not cloned on replay: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   B2 Stream body guard removed: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   T1 every refresh failure is a rejection: //utility/mc_api_auth:auth_interceptor_test FAILED 0.4s, //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   T2 429 counts as rejection: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   T3 ApiMalformed not a rejection: //utility/mc_api_auth:auth_interceptor_test FAILED 0.4s
+KILLED   P1 refresh on 403 (old M3): //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   P2 sign-out strip removed: //utility/mc_api_auth:auth_races_test FAILED 0.4s
+KILLED   P3 replayed flag ignored (old M8): //utility/mc_api_auth:auth_interceptor_test TIMEOUT 60.0s, //utility/mc_api_auth:auth_races_test FAILED 0.4s
+SURVIVED S1 boot check back to directory listing
+KILLED   S2 boot always reads (no skip): //app/wiring/app_core:boot_test FAILED 0.7s, //utility/mc_test_utils:auth_container_test FAILED 50.3s, //utility/mc_test_utils:isolation_test FAILED 50.3s
+KILLED   R1 repeat sign-in of the same user announces again: //utility/mc_session:session_test FAILED 0.2s
+KILLED   R2 a different user is not announced: //utility/mc_session:session_test FAILED 0.2s
+KILLED   L1 save queue created eagerly: //utility/mc_test_utils:auth_container_test FAILED 50.3s
+KILLED   C1 McTestContainer without ApiAuthDIInitializer: //utility/mc_test_utils:auth_container_test FAILED 0.4s, //utility/mc_test_utils:isolation_test FAILED 0.4s
+KILLED   C2 McTestContainer without SessionDIInitializer and ApiAuth: //utility/mc_test_utils:auth_container_test FAILED 0.4s, //utility/mc_test_utils:isolation_test FAILED 0.4s

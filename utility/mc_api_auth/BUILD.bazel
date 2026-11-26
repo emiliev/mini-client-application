@@ -1,0 +1,53 @@
+# T-0039 (U17): bearer token interceptor with a shared refresh. Pure Dart (R15).
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+_DEPS = [
+    "//utility/mc_api_client",
+    "//utility/mc_api_errors",
+    "//utility/mc_di",
+    "//utility/mc_prelude",
+    "//utility/mc_session",
+    "@pub_deps//:dio",
+    "@pub_deps//:get_it",
+]
+
+dart_library(
+    name = "mc_api_auth",
+    package_name = "mc_api_auth",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = _DEPS,
+)
+
+[dart_test(
+    name = t,
+    size = "small",
+    package_name = "mc_api_auth",
+    language_version = "3.13",
+    srcs = ["test/rig.dart"],
+    main = "test/%s.dart" % t,
+    deps = _DEPS + [
+        ":mc_api_auth",
+        "//utility/mc_event_bus",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_storage",
+        "@pub_deps//:test",
+    ],
+) for t in [
+    "auth_interceptor_test",
+    "auth_api_test",
+    "auth_races_test",
+]]
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_api_auth",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

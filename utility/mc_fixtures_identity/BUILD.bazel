@@ -1,0 +1,53 @@
+# T-0039 (P1-08 subset): the identity domain of the mocked backend. Data plus
+# small pure-Dart handlers (R3).
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+
+dart_library(
+    name = "mc_fixtures_identity",
+    package_name = "mc_fixtures_identity",
+    srcs = glob(["lib/**/*.dart"]),
+    language_version = "3.13",
+    visibility = ["//visibility:public"],
+    deps = ["//utility/mc_mocked_backend"],
+)
+
+_TEST_DEPS = [
+    ":mc_fixtures_identity",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:dio",
+    "@pub_deps//:test",
+]
+
+dart_test(
+    name = "identity_test",
+    size = "small",
+    package_name = "mc_fixtures_identity",
+    language_version = "3.13",
+    main = "test/identity_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
+    name = "provider_contract_test",
+    size = "small",
+    package_name = "mc_fixtures_identity",
+    language_version = "3.13",
+    srcs = ["test/contract/snapshot_cases.dart"],
+    data = glob(["test/contract/snapshots/*.json"]) + [
+        "CONTRACT.md",
+        "fixtures/routes.json",
+    ],
+    main = "test/contract/provider_contract_test.dart",
+    deps = _TEST_DEPS,
+)
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"]),
+    package_name = "mc_fixtures_identity",
+    language_version = "3.13",
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)
