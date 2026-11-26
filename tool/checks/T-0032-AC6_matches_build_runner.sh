@@ -26,6 +26,10 @@ EXPECTED=(
   "$PKG/lib/src/presentation/bloc/character_preview_bloc.injectable.json"
   "$PKG/lib/src/presentation/bloc/characters_list_bloc.freezed.dart"
   "$PKG/lib/src/presentation/bloc/characters_list_bloc.injectable.json"
+  # T-0041: the preview's related comics.
+  "$PKG/lib/src/domain/model/related_comic.freezed.dart"
+  "$PKG/lib/src/presentation/bloc/related_comics_bloc.freezed.dart"
+  "$PKG/lib/src/presentation/bloc/related_comics_bloc.injectable.json"
 )
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
