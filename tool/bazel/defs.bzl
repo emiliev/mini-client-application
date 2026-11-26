@@ -9,6 +9,19 @@ load("@rules_flutter//flutter:defs.bzl", "flutter_test")
 
 _TEST_STEPS = "//utility/mc_test_steps"
 
+# The generated Dart that `tool/ide_sync` writes next to the sources for the IDE
+# (T-0042). Every `glob()` over `lib/**` in a package with codegen excludes it,
+# so a build is the same with and without a sync: Bazel makes its own copies as
+# declared outputs, and a synced file in `srcs` would be a second file for the
+# same path. Mirrors the root .gitignore; `tool/checks/T-0042-AC4_safety.sh`
+# proves it (a new package whose glob misses this fails that check).
+MC_GENERATED_DART = [
+    "**/*.g.dart",
+    "**/*.freezed.dart",
+    "lib/src/di/*.config.dart",
+    "lib/src/l10n/*_l10n*.dart",
+]
+
 # The generated test's imports (bdd_widget_test `customHeaders`): every
 # scenario runs as `mcTestWidgets`, which moves `T-XXXX-ACn` / `MC-...` tags
 # into the test name (plan 05 KD4).

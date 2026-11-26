@@ -198,7 +198,7 @@ sync_once() {
   [ ! -f "$SCRATCH/skipped" ] || skipped=$(wc -l <"$SCRATCH/skipped" | tr -d ' ')
   while IFS=$'\t' read -r src rel; do
     r="$(place "$src" "$rel")" || { log "failed to write $rel"; return 1; }
-    if [ "$r" = C ]; then copied=$((copied + 1)); else unchanged=$((unchanged + 1)); fi
+    if [ "$r" = C ]; then copied=$((copied + 1)); log "wrote $rel"; else unchanged=$((unchanged + 1)); fi
   done <"$want"
   cut -f2 "$want" | sort -u >"$SCRATCH/now.txt"
 

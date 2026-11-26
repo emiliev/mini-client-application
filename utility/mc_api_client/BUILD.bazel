@@ -1,5 +1,6 @@
 # T-0023 (P1-05): the shared Dio. Pure Dart (R15); the mocked backend is a test-only dep.
 load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 # T-0032 (P-053): the `ApiPage<T>` envelope, json_serializable with
 # genericArgumentFactories, generated as a Bazel action (no build_runner).
@@ -26,7 +27,7 @@ dart_codegen(
 dart_library(
     name = "mc_api_client",
     package_name = "mc_api_client",
-    srcs = glob(["lib/**/*.dart"]) + [":_api_page_g"],
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART) + [":_api_page_g"],
     language_version = "3.13",
     visibility = ["//visibility:public"],
     deps = [
@@ -80,7 +81,7 @@ dart_test(
 dart_test(
     name = "no_flutter_test",
     size = "small",
-    data = glob(["lib/**/*.dart"]),
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
     package_name = "mc_api_client",
     language_version = "3.13",
     main = "test/no_flutter_test.dart",
