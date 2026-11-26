@@ -49,6 +49,7 @@ workspace:
   - utility/mc_feature_flow
   - utility/mc_formatters
   - utility/mc_fixtures_characters
+  - utility/mc_fixtures_comics
   - utility/mc_fixtures_media
   - utility/mc_l10n_core
   - utility/mc_media

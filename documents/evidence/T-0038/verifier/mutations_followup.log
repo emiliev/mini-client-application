@@ -1,0 +1,3 @@
+M6 drift test: FAIL  T-0038-AC3 links to the other fixture domains T-0038-AC3: the ID contract constants match the real packages
+M7 drift test: FAIL  T-0038-AC3 links to the other fixture domains T-0038-AC3: the ID contract constants match the real packages
+M13 with Verifier probes: 00:01 +4 -1: VP offset/limit VP5 every orderBy pages stably and totally, any page size [E] 00:02 +9 -1: Some tests failed. 

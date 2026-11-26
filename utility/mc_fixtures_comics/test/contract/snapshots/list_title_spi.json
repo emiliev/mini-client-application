@@ -1,0 +1,45 @@
+{
+  "body": {
+    "count": 3,
+    "limit": 3,
+    "offset": 0,
+    "results": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/016",
+          "variant": "portrait_large"
+        },
+        "id": 500000,
+        "issueNumber": 1,
+        "releaseDate": "2020-01-12",
+        "seriesId": 400000,
+        "title": "Spindle Chronicles #1"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/013",
+          "variant": "portrait_large"
+        },
+        "id": 500001,
+        "issueNumber": 2,
+        "releaseDate": "2020-02-01",
+        "seriesId": 400000,
+        "title": "Spindle Chronicles #2"
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/019",
+          "variant": "portrait_large"
+        },
+        "id": 500002,
+        "issueNumber": 3,
+        "releaseDate": "2020-03-03",
+        "seriesId": 400000,
+        "title": "Spindle Chronicles #3"
+      }
+    ],
+    "total": 400
+  },
+  "request": "GET /v1/comics?titleStartsWith=spi&limit=3",
+  "status": 200
+}

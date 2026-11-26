@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "comic_not_found",
+      "id": "1",
+      "message": "No comic with id 1"
+    }
+  },
+  "request": "GET /v1/comics/1",
+  "status": 404
+}
