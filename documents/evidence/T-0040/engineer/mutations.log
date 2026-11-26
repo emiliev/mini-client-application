@@ -7,8 +7,8 @@ tab min size below 44: KILLED (FAIL  T-0040-AC2 semantics T-0040-AC2 every tap t
 tab bar always fills (no scroll): KILLED (FAIL  T-0040-AC1 no overflow T-0040-AC1 long titles at 1.0x do not overflow)
 selected tab not revealed: KILLED (FAIL  T-0040-AC1 behaviour T-0040-AC1 the selected tab is scrolled into view)
 leading ignored: KILLED (FAIL  T-0040-AC2 semantics T-0040-AC2 every tap target is at least 44 pt)
-large title scale uncapped: SURVIVED
+large title scale uncapped: KILLED (FAIL  T-0040-AC1 the large title stays inside its band at 3x)
 large band not in preferredSize: KILLED (FAIL  T-0040-AC1 no overflow T-0040-AC1 long titles at 1.0x do not overflow)
 section action hit area below 44: KILLED (FAIL  T-0040-AC2 semantics T-0040-AC2 every tap target is at least 44 pt)
 tab tap does not report: KILLED (FAIL  T-0040-AC1 behaviour T-0040-AC1 tapping a tab reports its index)
-overall: SOME SURVIVED OR FAILED
+overall: all mutations killed
