@@ -16,14 +16,14 @@
 ## 2. The device copy is synchronous
 - `FileStore.readSync`/`writeSync` (new in `mc_storage`, temp file then rename) keep one small value per key. `change` returns with the value on disk.
 - Why: the saved theme must be known before the first routed frame; and an asynchronous save still running at teardown deletes-while-writing (`Directory not empty`, F-0050 §7). A synchronous save cannot outlive its call, so no test has to wait for it and none can flake on it. Only for tiny values; never mix it with the async `write` for one key.
-- A failed save is not a sync error: the value still applies, the screen shows the bloc's `failure` ("applies now, but this device could not save it") with Retry, which saves again. Reachable in BDD with the shared `the app can no longer write to storage`.
+- A failed save is not a sync error: the value still applies. The bloc's `failure` keeps every control on screen, with a "Not saved" banner on top whose Retry saves again (review round: a full-screen error would block the next change). Reachable in BDD with the shared `the app can no longer write to storage`. A saved copy that cannot be read is replaced on the first save, even when it equals the defaults.
 
 ## 3. The merge rule and the 409 policy (copy them for any synced setting)
 - **Pending** = settings changed on this device and not yet confirmed by the account, saved with the user they belong to (`pendingFor`, null when changed signed out).
 - On every new session epoch the account is read; **the account wins except for pending settings**, which go on top and are sent. Another user's pending settings are dropped (A's choice never reaches B). Sign-out keeps the shown values and drops what was pending.
 - The device also saves the **account version it last saw, and for whom** (`seenVersion`, `seenFor`). An account behind that version (for the same user) lost a write: the device copy is sent again. This is what makes "signed in, kill and relaunch, still Light, and the server holds Light" true against the in-process mocked backend, which is back at its seed after every kill (ADR-0005).
-- One request at a time; a `PATCH` carries only the pending keys and `ifVersion`. A change made while a request is out is sent after it (the run loop re-reads pending after each answer).
-- `409` with `current`: take `current`, re-apply only the pending keys, send once more on `current.version`. `identity.preferences_conflict` (an injected 409 whose `current` equals what we had) ends `synced` after exactly 2 PATCHes; a real other-device change in an untouched key ends `conflictResolved`; a second 409 ends `offline`.
+- One request at a time; a `PATCH` carries only the pending keys and `ifVersion`. A change made while a request is out is sent after it (the run loop re-reads pending after each answer). **A run stops being joinable in the same turn as its last check** (review round): it clears itself in its own `finally`, before its future completes. Otherwise a listener of the final snapshot that changes something joins a finished run, and the change stays pending.
+- `409` with `current`: take `current`, re-apply only the pending keys, send once more on `current.version`. **The retry limit is per change** (review round): the counter resets after each successful `PATCH`, so a change queued behind a conflicting one gets its own retry. `identity.preferences_conflict` (an injected 409 whose `current` equals what we had) ends `synced` after exactly 2 PATCHes; a real other-device change in an untouched key ends `conflictResolved`; a second 409 ends `offline`.
 - **Errors never block a local change**: any failure only moves the status to `offline`; the next change or Retry reads the account again (it may have moved), then writes.
 
 ## 4. The session-epoch rule
@@ -39,7 +39,7 @@
 ## 6. Shape the bricks copy
 - 2 pages: the settings (`settings_appearance`, the route's name) and an explainer in the flow (`settings_appearance_about`), tracked by `AnalyticsFlowObserver` (ADR-0012).
 - 1 bloc, freezed state `loading` / `ready(values, sync, signingIn)` / `failure`, Tide's sealed events.
-- 1 navigator method, `requestSignIn()`, for "Sync across devices" while signed out; the utility follows whoever signs in by itself.
+- 1 navigator method, `requestSignIn()`, for "Sync across devices" while signed out; the utility follows whoever signs in by itself. A throwing navigator is reported (`addError`), and the screen offers to sync again (review round).
 - The confirm is UI: the page awaits `showMcConfirm` and adds `reset` only on a confirm, so Cancel cannot change anything.
 - Analytics: `settings_changed` with `setting` (`theme_mode`, `density`, `reduce_motion`, `reset`) and `value` as the identity contract spells it (`dark`, `compact`, `true`, `defaults`), spelled once in `domain/settings_analytics.dart`.
 - Density shows in the screen itself: gaps from `Theme.of(context).visualDensity` and a Material `SwitchListTile` (`flow_scope_test` measures both, also at 2x text, where a row is as tall as its text and only the spacing tightens).
@@ -69,4 +69,4 @@
 - `app/sandbox/account_sandbox` (P1-22 lists it; out of scope).
 - `settings_home`, the settings index, with a `/settings` parent route.
 - DS widgets reading the density themselves.
-- The boot page does not follow the saved theme yet.
+- The boot page follows the saved theme mode (review round), but not the density or Reduce motion.

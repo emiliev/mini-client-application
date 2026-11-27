@@ -1,0 +1,100 @@
+# e2e_ios.sh: T-0063 engineer on mc-T-0063-engineer-52534 (84FD811C-01BC-4EE5-BFE5-23897F4E8BB7)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/mc-T-0063-engineer/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8Zg6zo/screenshots/1-settings_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/settings_journey_test.dart -d 84FD811C-01BC-4EE5-BFE5-23897F4E8BB7
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/mc-T-0063-engineer`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/mc-T-0063-engineer`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           13.1s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57267/S_qBZoEAMGM=/
+VMServiceFlutterDriver: Isolate found with number: 5398842738929919
+VMServiceFlutterDriver: Isolate 5398842738929919 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0063-AC5 home to Settings, Dark: home and the characters list render dark; relaunched, still dark
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 33c227c2a2e45a35b139d78067f04474, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: 33c227c2a2e45a35b139d78067f04474, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+Failed to index parameter type: <WFContentArrayParameter: 0x60000398a150> in is.workflow.actions.list: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFContentArrayParameter) for locale: en
+Skipping: <WFUnionParameter: 0x600003b7c380> in com.apple.mobilecal.EditEventIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x600003b85420> in com.apple.mobilecal.EditEventIntent because union values themselves are not treated as a type
+Failed to index parameter type: <WFSSHKeyParameter: 0x600003726ac0> in is.workflow.actions.runsshscript: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSSHKeyParameter) for locale: en
+Failed to index parameter type: <WFDynamicTagFieldParameter: 0x600003da6df0> in is.workflow.actions.wordpress.post: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter) for locale: en
+Failed to index parameter type: <WFDynamicTagFieldParameter: 0x600003da70c0> in is.workflow.actions.wordpress.post: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter) for locale: en
+Failed to index parameter type: <WFExpandingParameter: 0x6000039a01a0> in is.workflow.actions.wordpress.post: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFExpandingParameter) for locale: en
+Failed to index parameter type: <WFExpandingParameter: 0x6000039a1fb0> in is.workflow.actions.wordpress.post: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFExpandingParameter) for locale: en
+Failed to index parameter type: <WFSpotlightSearchResultTypePickerParameter: 0x1029089e0> in is.workflow.actions.spotlightsearch: ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState) for locale: en
+Failed to index parameter type: <WFExpandingParameter: 0x600003999450> in is.workflow.actions.encodemedia: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFExpandingParameter) for locale: en
+flutter: [event] mc_screen_view {screen_name: settings_appearance, session_id: 33c227c2a2e45a35b139d78067f04474, seq: 3}
+flutter: [debug] AppearanceBloc: _Load _Loading -> _Ready
+Failed to index parameter type: <WFEvernoteTagsTagFieldParameter: 0x600003d6bde0> in is.workflow.actions.evernote.new: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter) for locale: en
+Failed to index parameter type: <WFHomeServicePickerParameter: 0x600003746f40> in is.workflow.actions.gethomeaccessorystate: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeServicePickerParameter) for locale: en
+Failed to index parameter type: <WFTagFieldParameter: 0x600003b52bc0> in is.workflow.actions.addnewreminder: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFTagFieldParameter) for locale: en
+Failed to index parameter type: <WFEvernoteTagsTagFieldParameter: 0x600003d64000> in is.workflow.actions.evernote.get: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter) for locale: en
+Failed to index parameter type: <WFPhotoItemCollectionParameter: 0x6000039ae150> in com.apple.mobileslideshow.PLPhotosReliveWidgetConfigurationIntent: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPhotoItemCollectionParameter) for locale: en
+Failed to index parameter type: <WFPosterPickerParameter: 0x600003747840> in is.workflow.actions.posters.switch: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter) for locale: en
+Failed to index parameter type: <WFFontPickerParameter: 0x6000037058c0> in is.workflow.actions.overlaytext: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFFontPickerParameter) for locale: en
+Failed to index parameter type: <WFMediaPickerParameter: 0x6000037043c0> in is.workflow.actions.playmusic: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFMediaPickerParameter) for locale: en
+flutter: [debug] AppearanceBloc: _SetThemeMode _Ready -> _Ready
+flutter: [event] settings_changed {setting: theme_mode, value: dark, session_id: 33c227c2a2e45a35b139d78067f04474, seq: 4}
+Failed to index parameter type: <WFHomeAccessoryPickerParameter: 0x60000375e1c0> in is.workflow.actions.homeaccessory: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeAccessoryPickerParameter) for locale: en
+Skipping: <WFUnionParameter: 0x600003ba8460> in com.apple.MobileSMS.SendMessageReactionIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x600003b7d880> in com.apple.mobilecal.CreateEventIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x600003b7d960> in com.apple.mobilecal.CreateEventIntent because union values themselves are not treated as a type
+flutter: [event] mc_screen_view {screen_name: home, session_id: 33c227c2a2e45a35b139d78067f04474, seq: 5}
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+Failed to index action parameter: <WFMailSenderPickerParameter: 0x102d2d370> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingIntentDescription
+Failed to check availability in Spotlight for action is.workflow.actions.sendemail: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x6000010e9620 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.mobilemail, IS=false}}}
+is.workflow.actions.repeat.each WFForEachRepeatAction: Skipped because: [control flow]
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003724900> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 33c227c2a2e45a35b139d78067f04474, seq: 6}
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003717540> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003708f00> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+Failed to index action parameter: <WFInputTypeParameter: 0x102b6a170> due to ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState)
+Failed to index action parameter: <WFInputSurfaceParameter: 0x600003725680> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFInputSurfaceParameter)
+Failed to check availability in Spotlight for action com.apple.mobilephone.call: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001103930 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
+is.workflow.actions.useractivity.open WFOpenUserActivityAction: Skipped because: [donation-based action]
+is.workflow.actions.choosefrommenu WFChooseFromMenuAction: Skipped because: [control flow]
+is.workflow.actions.conditional WFConditionalAction: Skipped because: [control flow]
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x60000370d380> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+Failed to check availability in Spotlight for action com.apple.facetime.facetime: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600000f60b70 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
+Failed to index action parameter: <WFPosterPickerParameter: 0x60000370cb40> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: ea97c1909a225b533c2594120cbd8df4, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: home, session_id: ea97c1909a225b533c2594120cbd8df4, seq: 2}
+flutter: 00:12 +1: (tearDownAll)
+flutter: 00:12 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8Zg6zo/screenshots/1-settings_journey_test/60_settings_appearance.png (290226)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8Zg6zo/screenshots/1-settings_journey_test/61_settings_dark.png (286531)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8Zg6zo/screenshots/1-settings_journey_test/62_home_dark.png (322223)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8Zg6zo/screenshots/1-settings_journey_test/63_characters_dark.png (406405)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8Zg6zo/screenshots/1-settings_journey_test/64_relaunched_still_dark.png (322223)
+All tests passed.
+
+# exit code: 0

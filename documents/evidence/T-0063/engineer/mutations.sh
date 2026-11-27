@@ -3,7 +3,7 @@
 # test gap would hurt): the session epoch and the pin, the sign-in merge rule,
 # the 409 re-apply, persistence, and the reduce-motion wiring. The first runs
 # covered 74 mutants (mutations_run1.log, mutations_run2.log); this file keeps
-# the 16 in those areas; the review round swapped A21 and B08 for R1 to R3.
+# the 16 in those areas.
 #
 # Every mutation edits one source file, runs the named test targets, and must
 # make a test FAIL ("FAILED in" in Bazel's summary). Outcomes:
@@ -156,7 +156,10 @@ mutate A18 "a 409 is never retried" "$P" "$T_APP $T_FEAT" \
   "          if (conflicts > 1) {" "          if (conflicts > 0) {"
 mutate A19 "a second 409 is retried too" "$P" "$T_APP" \
   "          if (conflicts > 1) {" "          if (conflicts > 2) {"
-
+mutate A21 "a conflict is always reported as resolved with another device" "$P" "$T_APP $T_FEAT" \
+  "              .isNotEmpty) {
+            tookOtherChanges = true;" "              .isEmpty) {
+            tookOtherChanges = true;"
 P="$A/preferences_api.dart"
 mutate A26 "the write is not pinned to its epoch" "$P" "$T_APP $T_FEAT" \
   "          extra: authPinned(epoch)," "          extra: const <String, Object?>{},"
@@ -174,7 +177,9 @@ mutate B05 "reduce motion never reaches the routed app" "$P" "$T_SHELL" \
   "            data: _appearance.applyMotion(MediaQuery.of(context))," \
   "            data: MediaQuery.of(context),"
 P="$AC/shell/app_appearance.dart"
-
+mutate B08 "reduce motion off turns the platform's setting off" "$P" "$T_SHELL" \
+  "      reduceMotion ? data.copyWith(disableAnimations: true) : data;" \
+  "      data.copyWith(disableAnimations: reduceMotion);"
 P="$AC/di/root_initializers.dart"
 P=utility/mc_ds_theme/lib/src/mc_theme.dart
 # --- the feature ------------------------------------------------------------------
@@ -189,23 +194,6 @@ P=app/wiring/account_wiring/lib/src/navigators/settings_appearance_navigator_imp
 P="$AC/locations/app_locations.dart"
 P=app/mini_client/lib/src/router/app_routes.dart
 P=utility/mc_test_utils/lib/src/test_container.dart
-# --- review round: the 409 limit per change, the run join, a failed sign-in
-P="$A/appearance.dart"
-mutate R1 "the 409 limit is shared by every change of a run" "$P" "$T_APP" \
-  "          // A change that is sent next gets its own retry.
-          conflicts = 0;
-" ""
-mutate R2 "a finished run stays joinable until a later microtask" "$P" "$T_APP" \
-  "    } finally {
-      if (_runId == id) {" "    } finally {
-      await Future<void>.value();
-      if (_runId == id) {"
-P="$FS/presentation/bloc/appearance_bloc.dart"
-mutate R3 "a failed sign-in leaves the screen signing in" "$P" "$T_FEAT" \
-  "      if (!isClosed) {
-        addError(error, stackTrace);
-      }" "      rethrow;"
-
 say ""
 say "mutations: $n, killed: $killed"
 [[ $rc -eq 0 && $n -eq $killed ]] && say "RESULT: PASS" || { say "RESULT: FAIL"; exit 1; }

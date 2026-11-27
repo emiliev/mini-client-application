@@ -92,6 +92,8 @@ As with the five merged exemplars, this package is the shape the P1-24 bricks co
 - 2026-11-27: Mutations, first full run: 69 of 74 killed. A02, C03 and D05 survived. A08 timed out: a failing assertion left a held request that teardown then waited on, so the rig now releases held requests first. C15 was broken (the `& false` stopped null promotion). Tests were strengthened for each (an undelivered session change, a double tap on the switch, the gaps measured one by one) and C15 rewritten. Second run: 5 of 5 killed.
 - 2026-11-27: **PO 2026-11-27: no feature goldens (ADR to follow; now ADR-0015).** The 10 feature goldens and the `golden_test` target I had added were deleted before handoff. AC4 is now covered by widget tests: German strings, no overflow in the pseudo-locale at 1x and 2x, each of the 4 themes builds both pages in its palette, and the density changes measured sizes. DS goldens are untouched.
 - 2026-11-27: `origin/main` merged (T-0062, ADR-0015) with no conflict. Following ADR-0015, `mutations.sh` now holds 16 targeted mutants: the epoch and pin, the merge rule, the 409 re-apply, persistence and the reduce-motion wiring. They were re-run on the merge result.
+- 2026-11-27: Handed off at `552c096`.
+- 2026-11-27: Review round (TL `/code-review`: 4 important findings, 3 nits). All fixed; see the section below. ADR-0015 was updated meanwhile: no mutation testing in the fix round, and only the important findings block the merge.
 
 ## Outcome
 **Handed off** for `/code-review` and the TL's merge gates on `fleet/T-0063-settings-appearance` (ADR-0015 as amended: no Verifier pass). Decision: [ADR-0013](../adr/0013-app-wide-appearance.md) (Proposed). Finding: [F-0063](../findings/F-0063-settings-exemplar.md). Evidence: [`documents/evidence/T-0063/engineer/`](../evidence/T-0063/engineer/).
@@ -156,4 +158,33 @@ Before ADR-0015 a full run covered 74 mutants ([run 1](../evidence/T-0063/engine
 - `app/sandbox/account_sandbox` (P1-22 lists it; out of scope).
 - `settings_home` and the `/settings` parent route.
 - DS widgets reading the density themselves.
-- The boot page following the saved theme.
+- The boot page follows the saved theme mode since the review round; it does not yet follow the saved density or Reduce motion.
+
+## Review round (TL `/code-review`: 4 important, 3 nits; the one fix round, ADR-0015)
+`origin/main` merged first (`1651dd6`, the protocol and journal; no conflict).
+
+| # | Finding | Fix | Pinned by |
+|---|---|---|---|
+| 1 (important) | The 409 counter was per run, so a later change's first 409 marked the run `offline` | `conflicts` resets after each successful `PATCH`: the retry limit is per change. `tookOtherChanges` stays per run on purpose: the final status describes the values shown, which hold the earlier merge too | `mc_appearance:sync_test` "change A gets a 409 then 200; change B, queued during it, gets its own 409 then 200: the run ends conflictResolved, never offline" (held requests, 4 PATCHes, B's first body checked); mutant R1 |
+| 2 (important) | A change that joined a finished run stayed pending: `_run` was cleared a microtask late, after the final snapshot's listeners | The run clears `_run`/`_runEpoch` in its own `finally`, before its future completes (a run id guards a run that ended without awaiting) | `sync_test` "a change made by a listener of the synced snapshot is sent and ends synced"; mutant R2 |
+| 3 (important) | A throwing `requestSignIn()` left "Waiting for you to sign in." and the CTA disabled | The bloc catches it, reports it (`addError` → monitoring) and shows the state again | BDD "Signing in fails: the error is reported, and Sync across devices can be tapped again (review round)" (new step `signing in fails`); mutant R3 |
+| 4 (important) | A failed device save replaced the screen with an error view | `failure` keeps `sync` and `signingIn`; the page renders every control with a "Not saved" banner on top, whose Retry saves again | BDD "The device cannot save: the controls stay, every change still applies, a banner says so, and Retry tries again" (Dark, then Light, then Reduce motion, all applied; the banner stays) |
+| 5 (nit, done: a few lines) | A corrupt saved file was never replaced while the values equalled the defaults | After a restore failure the first save writes anyway (`_forceSave`) | `local_test` "a corrupt saved copy is replaced on the first save, even when the values equal the defaults" |
+| 6 (nit, done: one line) | Reduce motion still cross-faded the theme | `MaterialApp.router(themeAnimationDuration: Duration.zero)` while Reduce motion is on | `app_core:appearance_shell_test` "with Reduce motion on a new theme applies in the next frame" and its control "… off … cross-fades" |
+| 7 (nit, done: small) | A saved Dark flashed light on the boot page | Small, so done: `savedAppearance(FileStore)` (new, synchronous) seeds `MiniClientApp`'s `McThemeModeController` before boot (`MiniClientApp(storageDirectory:)`); `McApp` drives it from the live appearance after boot | `mini_client:settings_route_test` "the boot page of the next launch is already in the saved Dark: no light flash while booting (review round)" and "with nothing saved the boot page follows the platform"; `local_test` "savedAppearance reads the saved preferences, and null when none or unreadable" |
+
+**Mutants:**
+- ADR-0015 as updated (TL, this round): there is no mutation testing in the fix round, and `mutations.sh` stays as handed off, with 16 mutants.
+- One run had already finished when that update arrived. It had A21 and B08 swapped for R1 to R3 (one for each of items 1 to 3), and it killed 17 of 17, R1 to R3 included. So the new tests bite.
+- That run is not kept as evidence, and the script is back to its handed-off version.
+
+**Results**, on the merge with `origin/main` plus this round:
+- [Gates](../evidence/T-0063/engineer/T-0063-AC7_gates.md): PASS. 214/214 tests, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures, relative paths, byte identity, cutoff, not committed, gen-l10n parity.
+- Coverage: settings_appearance 99.3 %, account_wiring 100 %, app_core 97.2 %, mc_appearance 99.1 %, mc_storage 100 %, mc_ds_theme 92.7 %.
+- [50-run flake check](../evidence/T-0063/engineer/runs_per_test_50_review.md): 11 changed targets, 50 runs each, 0 failures.
+- e2e: the 3 settings targets on a fresh `mc-T-0063-engineer-*` simulator (deleted afterwards), [3/3 PASS](../evidence/T-0063/engineer/e2e_review/e2e-summary.md).
+
+**Test integrity:**
+- No test was deleted, skipped or weakened.
+- The scenario "The device cannot save: …" was rewritten, not weakened: it now asserts more (the controls stay, two more changes apply, the banner shows) and drops only the full-screen error the review asked to remove.
+- Additions: the new step `the app was asked to sign in {n} times` (the plural form); `mini_client`'s BUILD and pubspec gain `mc_appearance` and `mc_storage` as runtime dependencies (the boot seed).
