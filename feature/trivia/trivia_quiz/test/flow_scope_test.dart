@@ -230,15 +230,26 @@ void main() {
   });
 
   mcTestWidgets('T-0064-AC5 a linked round without a seed draws one from the '
-      'seed source', (tester) async {
+      'seed source, once: a Retry plays the same round', (tester) async {
     serveTrivia();
-    nextSeeds().add(7);
-    await openRound(tester, seed: null);
-    final asked = McTestSession.current.backend.requests.lastWhere(
-      (r) => r.path == '/v1/trivia/rounds',
+    nextSeeds().addAll([7, 9]);
+    McTestSession.current.backend.fail(
+      'GET /v1/trivia/rounds',
+      BackendFailure.serverError,
     );
-    expect(asked.query, {'category': 'all', 'difficulty': 'easy', 'seed': '7'});
-    expect(nextSeeds(), isEmpty);
+    await openRound(tester, seed: null);
+    await mcSettle(tester);
+    expect(find.text('This round could not be loaded.'), findsOneWidget);
+    McTestSession.current.backend.recover();
+    await tester.tap(find.text('Retry'));
+    await landAtOnce(tester);
+    final asked = [
+      for (final r in McTestSession.current.backend.requests)
+        if (r.path == '/v1/trivia/rounds') r.query['seed'],
+    ];
+    expect(asked.toSet(), {'7'}, reason: 'every request, retries included');
+    expect(nextSeeds(), [9], reason: 'one seed drawn');
+    expect(find.byKey(playPromptKey), findsOneWidget);
   });
 }
 

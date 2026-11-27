@@ -8,6 +8,7 @@ import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_feature_flags/mc_feature_flags.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:trivia_quiz/src/domain/engine/trivia_engine.dart';
+import 'package:trivia_quiz/src/domain/model/round_seeds.dart';
 import 'package:trivia_quiz/src/domain/model/trivia.dart';
 import 'package:trivia_quiz/src/domain/model/trivia_analytics.dart';
 import 'package:trivia_quiz/src/domain/repository/trivia_quiz_repository.dart';
@@ -59,6 +60,7 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
     this._flow,
     this._flags,
     this._tracker,
+    this._seeds,
     TriviaTicker ticker,
     Monitoring monitoring,
   ) : _ticker = ticker,
@@ -71,10 +73,15 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
   final FeatureFlowController<TriviaQuizFlowState> _flow;
   final FeatureFlagsReader _flags;
   final AnalyticsTracker _tracker;
+  final RoundSeeds _seeds;
   final TriviaTicker _ticker;
   final QuestionClock _clock;
 
   TriviaEngine? _engine;
+
+  /// The round's seed: the request's, or one drawn once (a Retry plays the
+  /// same round).
+  int? _seed;
   bool _started = false;
   bool _hintOffered = false;
   bool _confirmingQuit = false;
@@ -131,7 +138,7 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
     final result = await _repository.fetchRound(
       category: request.category,
       difficulty: request.difficulty,
-      seed: request.seed,
+      seed: _seed ??= request.seed ?? _seeds.next(),
     );
     if (isClosed) {
       return;

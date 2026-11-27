@@ -27,12 +27,14 @@ abstract class TriviaQuizFlowState with _$TriviaQuizFlowState {
 }
 
 /// Which round to play: the same three values always give the same round.
+/// [seed] is null for a linked round that named none: the play bloc draws
+/// one when the round loads.
 @freezed
 abstract class RoundRequest with _$RoundRequest {
   const factory RoundRequest({
     required String category,
     required String difficulty,
-    required int seed,
+    int? seed,
   }) = _RoundRequest;
 }
 

@@ -58,7 +58,8 @@ class TriviaQuizFlow extends StatelessWidget {
   final String? category;
   final String? difficulty;
 
-  /// The round seed; a new one from [nextSeed] when null.
+  /// The round seed; a new one from [nextSeed] when null (drawn once, when
+  /// the round loads).
   final int? seed;
 
   @override
@@ -67,7 +68,7 @@ class TriviaQuizFlow extends StatelessWidget {
       (final c?, final d?) => RoundRequest(
         category: c,
         difficulty: d,
-        seed: seed ?? nextSeed(),
+        seed: seed,
       ),
       _ => null,
     };
