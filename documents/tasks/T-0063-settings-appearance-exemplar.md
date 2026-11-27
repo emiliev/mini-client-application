@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `9b85870`; review-first and merge gates per ADR-0015, no Verifier) |
 | Owner | crew: Engineer (**Opus**: first ST exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0063-settings-appearance` |
@@ -188,3 +188,19 @@ Before ADR-0015 a full run covered 74 mutants ([run 1](../evidence/T-0063/engine
 - No test was deleted, skipped or weakened.
 - The scenario "The device cannot save: …" was rewritten, not weakened: it now asserts more (the controls stay, two more changes apply, the banner shows) and drops only the full-screen error the review asked to remove.
 - Additions: the new step `the app was asked to sign in {n} times` (the plural form); `mini_client`'s BUILD and pubspec gain `mc_appearance` and `mc_storage` as runtime dependencies (the boot seed).
+
+## Merge (TL)
+- 2026-11-27, under ADR-0015.
+  - **Review:** `/code-review` found 4 important bugs (the 409 counter carried across changes, a change joining a finished run, a stuck sign-in CTA, a save failure blocking the screen) and 3 nits. Fix round `6294e1e` fixed all 7.
+  - **TL checks:**
+    - no test file was deleted and no skip or `// ignore:` was added;
+    - the one removed assertion is the declared `isolation_test` count, 11 → 12;
+    - the sampled cited tests exist.
+  - **Merge conflicts with T-0064** in 6 files (home button, routes, `AppLocations`, BUILD, pubspec, analytics screen names), all both sides adding. The TL kept both; Trivia comes before Settings as the last home entries.
+  - **Gates on the merge result:**
+    - `check` passed, 223/223 tests, lint was clean, `mc_arch_check` reported OK;
+    - the sim app built, and the format gate and provenance passed;
+    - a 20-run uncached flake check over 26 targets was clean.
+
+    E2E wasn't re-run on the merged home: the widget-level `app_test` and the route tests cover both buttons.
+  - **ADR-0013 accepted.** Incident: the engineer's command without a `cd` overwrote the TL worktree's `BUILD.bazel`. It was restored at once, and the protocol now has a `cd` rule. Follow-ups: P-119.

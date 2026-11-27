@@ -1,6 +1,6 @@
 # ADR-0013: The app-wide appearance lives in `mc_appearance`, local first, synced with the account
 
-- **Status:** Proposed (drafted by the T-0063 Engineer; the TL accepts or edits it at the merge)
+- **Status:** Accepted (TL, 2026-11-27, at the T-0063 merge `9b85870`)
 - **Date:** 2026-11-27
 - **Deciders:** Tech Lead
 - **Related:** T-0063, T-0061, T-0050, T-0052, ADR-0007, ADR-0012, F-0050, F-0061, F-0063, P1-22, plan 01 F056
