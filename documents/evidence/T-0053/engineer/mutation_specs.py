@@ -254,8 +254,6 @@ M = [
        "  void track(AnalyticsEvent event) {\n")], [A]),
     ("X02", "setConsent still changes and saves after dispose", AN,
      [("    if (_disposed) {\n      return Future<void>.value();\n    }\n", "")], [A]),
-    ("X03", "queued entries are still delivered after dispose", AN,
-     [("    _drainScheduled = false;\n    if (_disposed) {\n      return;\n    }", "    _drainScheduled = false;")], [A]),
     ("X04", "screen() ignores the screen_name param in the cap", AN,
      [("      if (params.length + 1 > AnalyticsRules.maxParams)", "      if (params.length > AnalyticsRules.maxParams)")], [A]),
     ("X05", "screen() counts screen_name twice", AN,

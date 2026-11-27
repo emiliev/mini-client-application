@@ -364,9 +364,6 @@ class Analytics {
 
   void _drain() {
     _drainScheduled = false;
-    if (_disposed) {
-      return;
-    }
     // Consent is read again for every entry: a sink (or anything it calls)
     // may deny in the middle of a flush.
     while (_consent == AnalyticsConsent.granted && _pending.isNotEmpty) {

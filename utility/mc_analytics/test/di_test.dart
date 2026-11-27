@@ -174,9 +174,12 @@ void main() {
     () async {
       final getIt = await boot();
       final analytics = getIt<Analytics>();
+      final observer = getIt<AnalyticsLifecycleObserver>();
       await getIt.reset();
       final first = analytics.sessionId;
       final binding = TestWidgetsFlutterBinding.instance;
+      // Nothing left to remove: the container's dispose already did.
+      expect(binding.removeObserver(observer), isFalse);
 
       binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       now = now.add(const Duration(minutes: 30));

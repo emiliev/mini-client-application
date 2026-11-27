@@ -74,6 +74,10 @@ class AnalyticsDIInitializer extends McDIInitializer {
     );
     // Only after registering: a registration that throws (a second
     // initializer) leaves no observer behind that nothing would remove.
-    widgets?.addObserver(observer);
+    if (widgets != null) {
+      // Registered too, so a test can check that disposing removed it.
+      getIt.registerSingleton<AnalyticsLifecycleObserver>(observer);
+      widgets.addObserver(observer);
+    }
   };
 }
