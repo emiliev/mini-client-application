@@ -14,7 +14,7 @@
 | layering (T-0058-AC5, re-runs T-0044-AC4 and T-0040-AC3) | PASS |
 | coverage >= 90 % (touched packages) | PASS |
 
-- tests: Executed 23 out of 181 tests: 181 tests pass.
-- coverage: == utility/mc_ds_overlays TOTAL 220/222 99.1% (threshold 90 %)
+- tests: Executed 49 out of 181 tests: 181 tests pass.
+- coverage: == utility/mc_ds_overlays TOTAL 233/234 99.6% (threshold 90 %)
 
 **PASS T-0058-AC5-gates**
