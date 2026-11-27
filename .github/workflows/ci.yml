@@ -24,6 +24,8 @@ env:
   MC_CI_LOG_DIR: ${{ github.workspace }}/ci-logs
   # Flutter 3.47.7 from .fvmrc is cloned below; the format gate runs its `dart` (no FVM on the runner).
   MC_DART: dart
+  # `flutter pub get` also initialises the fresh SDK clone (bin/cache/pkg/sky_engine); `dart pub get` cannot.
+  MC_PUB_GET: flutter pub get
 
 jobs:
   ci:
@@ -63,6 +65,9 @@ jobs:
           fi
           echo "$HOME/flutter-sdk/bin" >> "$GITHUB_PATH"
           "$HOME/flutter-sdk/bin/flutter" --version
+          # Download the engine artifacts (bin/cache incl. pkg/sky_engine) now, also on a cache hit.
+          "$HOME/flutter-sdk/bin/flutter" precache --universal
+          ls "$HOME/flutter-sdk/bin/cache/pkg/sky_engine" >/dev/null
 
       # tool/bazelw -> `bazelisk` on PATH; .bazelrc puts the disk and repository caches in
       # ~/.cache/mc-bazel. Measured after a cold run (F-0068): repository cache 3.5 GB, disk cache

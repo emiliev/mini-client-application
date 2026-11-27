@@ -69,3 +69,4 @@ Every delivery runs the same gates as the TL's merge gate, on a clean machine. A
 
 ## Outcome
 Implemented and proven locally (AC1, AC2, AC5). Cache sizes: repository 3.5 GB, disk 1.3 GB, bazelisk 0.2 GB. AC3 (cold and warm GitHub runs) and AC4 (failing-test branch) are waiting for the TL push; the GitHub durations go in F-0068 after that. Details: [F-0068](../findings/F-0068-ci-github-actions.md).
+- 2026-11-27 (Engineer): CI run 1 failed at the format gate (`sky_engine` missing in a fresh Flutter clone). Fixed: `MC_PUB_GET=flutter pub get` in the workflow and gate, plus `flutter precache --universal` after the clone or cache restore. Verified with a fresh local clone; see F-0068.

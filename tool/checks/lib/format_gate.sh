@@ -10,7 +10,7 @@
 # What it does:
 #   0. MC_DART (T-0068, CI): a command line for the Dart to use instead of `fvm dart`, e.g.
 #      MC_DART=dart on a runner whose PATH has Flutter 3.47.7 (.fvmrc). With it set, step 1 runs
-#      `$MC_DART pub get` online (a clean machine has no pub cache). Default stays `fvm dart`.
+#      `$MC_PUB_GET` (default `$MC_DART pub get`; CI sets `flutter pub get`) online. Default stays `fvm dart`.
 #   1. `fvm dart pub get --offline` at the repo root when
 #      .dart_tool/package_config.json is missing. The formatter resolves
 #      `package:mc_analysis/analysis_options.yaml` through it; without it a
@@ -33,11 +33,15 @@ mc_format_gate() {
   [ "${1:-}" != "--fix" ] || fix=1
   root="$(git -C "$MC_FORMAT_GATE_DIR" rev-parse --show-toplevel)" || return 2
   if [ ! -f "$root/.dart_tool/package_config.json" ]; then
-    local pub=(pub get --offline)
-    [ -z "${MC_DART:-}" ] || pub=(pub get)
-    echo "format gate: no .dart_tool/package_config.json; running '${MC_DART_CMD[*]} ${pub[*]}'" >&2
-    (cd "$root" && "${MC_DART_CMD[@]}" "${pub[@]}" >/dev/null) || {
-      echo "format gate: '${MC_DART_CMD[*]} ${pub[*]}' failed" >&2
+    local pub=("${MC_DART_CMD[@]}" pub get --offline)
+    if [ -n "${MC_DART:-}" ]; then
+      # CI: MC_PUB_GET (e.g. `flutter pub get`) initialises a fresh Flutter SDK clone first
+      # (downloads bin/cache/pkg/sky_engine); plain `dart pub get` fails on it.
+      read -r -a pub <<< "${MC_PUB_GET:-$MC_DART pub get}"
+    fi
+    echo "format gate: no .dart_tool/package_config.json; running '${pub[*]}'" >&2
+    (cd "$root" && "${pub[@]}" >/dev/null) || {
+      echo "format gate: '${pub[*]}' failed" >&2
       return 2
     }
   fi
