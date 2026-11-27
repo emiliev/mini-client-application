@@ -134,7 +134,7 @@ It is the only tool that may format; never run `dart format .` by hand. `tool/ch
 ```sh
 tool/ci/ci.sh            # all gates, stops at the first failure
 tool/ci/ci.sh --list     # gate names
-tool/ci/ci.sh --only 5   # one gate by number
+tool/ci/ci.sh --only 6   # one gate by number
 ```
 
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs this same script on a GitHub-hosted Apple Silicon macOS runner (`macos-26`) on push to `main` and `fleet/**`, on `pull_request` and on manual `workflow_dispatch`, with a per-ref concurrency group (a newer push cancels the older run) and a 120 minute timeout. No secrets. The gates mirror the TL merge gate of ADR-0015 (minus the flake check and review items) and print a per-gate time table (also in the job summary):
@@ -146,11 +146,12 @@ tool/ci/ci.sh --only 5   # one gate by number
 | 3 | `bazel build --config=ci --config=lint //...` |
 | 4 | `bazel run //tool/mc_arch_check:bin` |
 | 5 | the format gate (`checks/lib/format_gate.sh`) |
-| 6 | `bazel run //tool/l10n_check:bin` |
-| 7 | `checks/T-0035-AC4_provenance.sh` (needs network) |
-| 8 | `checks/T-0058-AC4_no_direct_overlays.sh` |
-| 9 | `bazel build --config=ci --config=sim //app/mini_client:mini_client_ios` |
-| 10 | the `app`-tagged tests, in their own `--config=app` invocation (a no-op while none exist) |
+| 6 | `tool/mcgen`: `pub get` (also in `tool/loc`), `dart analyze --fatal-infos`, `dart test` (standalone package, not built by Bazel, F-0065) |
+| 7 | `bazel run //tool/l10n_check:bin` |
+| 8 | `checks/T-0035-AC4_provenance.sh` (needs network) |
+| 9 | `checks/T-0058-AC4_no_direct_overlays.sh` |
+| 10 | `bazel build --config=ci --config=sim //app/mini_client:mini_client_ios` |
+| 11 | the `app`-tagged tests, in their own `--config=app` invocation (a no-op while none exist) |
 
 Environment switches (all optional): `MC_BAZEL_STARTUP` (e.g. `--output_base=/tmp/x`), `MC_CI_CACHE_DIR` (own disk and repository caches, for a cold and measurable run), `MC_CI_LOG_DIR`, `MC_BAZELISK`, `MC_DART`.
 

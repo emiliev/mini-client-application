@@ -39,6 +39,19 @@ g_test()        { bzc test --config=ci //...; }
 g_lint()        { bzc build --config=ci --config=lint //...; }
 g_arch()        { bzc run --config=ci //tool/mc_arch_check:bin; }
 g_format()      { "$ROOT/tool/checks/lib/format_gate.sh"; }
+# tool/mcgen is a standalone pub package Bazel does not build (F-0065): pub get, analyze, test.
+# MC_DART set (CI): online `pub get` (empty pub cache); else `fvm dart` with --offline, as the format gate.
+g_mcgen() {
+  local dart pub=() d
+  read -r -a dart <<< "${MC_DART:-fvm dart}"
+  pub=(pub get --offline); [[ -z "${MC_DART:-}" ]] || pub=(pub get)
+  for d in tool/loc tool/mcgen; do
+    (cd "$ROOT/$d" && "${dart[@]}" "${pub[@]}") || return 1
+  done
+  cd "$ROOT/tool/mcgen" || return 1
+  "${dart[@]}" analyze --fatal-infos || return 1
+  "${dart[@]}" test --reporter=expanded
+}
 g_l10n()        { bzc run --config=ci //tool/l10n_check:bin -- "$ROOT"; }
 g_provenance()  { "$ROOT/tool/checks/T-0035-AC4_provenance.sh"; }
 g_overlays()    { "$ROOT/tool/checks/T-0058-AC4_no_direct_overlays.sh"; }
@@ -50,9 +63,9 @@ g_apptests() {
   bzc test --config=ci --config=app //...
 }
 
-NAMES=("rules_fork.sh check" "bazel test //..." "bazel build lint //..." "mc_arch_check" "format gate" \
+NAMES=("rules_fork.sh check" "bazel test //..." "bazel build lint //..." "mc_arch_check" "format gate" "mcgen analyze and test" \
        "l10n_check" "flow_builder provenance" "no direct overlays" "sim app build" "app-tagged tests")
-FUNCS=(g_rules_fork g_test g_lint g_arch g_format g_l10n g_provenance g_overlays g_sim g_apptests)
+FUNCS=(g_rules_fork g_test g_lint g_arch g_format g_mcgen g_l10n g_provenance g_overlays g_sim g_apptests)
 
 only=""
 case "${1:-}" in

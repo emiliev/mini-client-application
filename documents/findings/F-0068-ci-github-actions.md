@@ -6,7 +6,7 @@
 - **Related:** T-0068, T-0005 (superseded), ADR-0015, F-0001, F-0002, F-0006
 
 ## Summary
-`tool/ci/ci.sh` runs ten gates (the ADR-0015 merge gates minus the flake check) and `.github/workflows/ci.yml` runs it on `macos-26` for pushes to `main` and `fleet/**`, pull requests and manual runs. On a fresh clone of the branch, with its own Bazel output base and empty Bazel caches, the whole script took **341 s** (about 6 min). With the same disk and repository caches and a new output base it took **49 s**. The Bazel caches are 3.5 GB (repository) plus 1.3 GB (disk) plus 0.2 GB (bazelisk), so they fit the 10 GB Actions cache limit. The GitHub-hosted numbers are filled in after the first runs (see the task file).
+`tool/ci/ci.sh` runs eleven gates (gate 6, `tool/mcgen` pub get, analyze and test, was added after T-0065; local 27 s) (the ADR-0015 merge gates minus the flake check) and `.github/workflows/ci.yml` runs it on `macos-26` for pushes to `main` and `fleet/**`, pull requests and manual runs. On a fresh clone of the branch, with its own Bazel output base and empty Bazel caches, the whole script took **341 s** (about 6 min). With the same disk and repository caches and a new output base it took **49 s**. The Bazel caches are 3.5 GB (repository) plus 1.3 GB (disk) plus 0.2 GB (bazelisk), so they fit the 10 GB Actions cache limit. The GitHub-hosted numbers are filled in after the first runs (see the task file).
 
 ## Evidence
 Local fresh clone (`git clone` of the branch to a temp dir, `MC_BAZEL_STARTUP=--output_base=...`, `MC_CI_CACHE_DIR=...`, Apple Silicon Mac, Xcode 26.2, warm bazelisk and pub caches):
