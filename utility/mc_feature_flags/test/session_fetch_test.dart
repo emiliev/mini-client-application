@@ -5,6 +5,7 @@ import 'package:mc_feature_flags/mc_feature_flags.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_fixtures_platform/mc_fixtures_platform.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:test/test.dart';
 
 import 'rig.dart';
@@ -379,7 +380,13 @@ void main() {
       await rig.settle();
       await rig.flags.dispose();
       await Future.wait(done).timeout(const Duration(seconds: 5));
-      expect(await rig.flags.watch(pageSize).toList(), [10]);
+      expect(
+        await rig.flags
+            .watch(pageSize)
+            .toList()
+            .timeout(const Duration(seconds: 5)),
+        [10],
+      );
     });
 
     test('T-0052-AC3 after dispose refresh() returns at once and sends no '
@@ -404,14 +411,15 @@ void main() {
       await rig.signIn('u-100');
       await rig.flags.refresh();
       expect(await storedCacheUser(rig), 'u-100');
-      // Same-user sign-in keeps it.
-      await rig.signIn('u-100', 2);
-      await rig.settle();
-      expect(rig.store.existsSync(flagsCacheKey), isTrue);
       // The backend fails from now on, so nothing rewrites the cache.
       rig.backend.addFailure(
         const FailureRule('GET', '/v1/flags', FailureKind.http(500)),
       );
+      // Same-user sign-in keeps it.
+      await rig.signIn('u-100', 2);
+      await rig.flags.refresh();
+      await rig.settle();
+      expect(rig.store.existsSync(flagsCacheKey), isTrue);
       await rig.signOut();
       await rig.flags.refresh();
       await rig.settle();
@@ -435,6 +443,46 @@ void main() {
       rigs.add(restarted);
       await restarted.flags.refresh();
       expect(restarted.flags.value(searchLayout), Layout.compact);
+    });
+  });
+
+  group('T-0052-AC3 session paths', () {
+    test('T-0052-AC3 a read right after a user switch, before any stream '
+        'event, does not return the other user\'s values', () async {
+      final rig = await make(start: false);
+      await rig.signIn('u-100');
+      await rig.flags.refresh();
+      expect(rig.flags.value(searchLayout), Layout.list);
+      // The epoch moves at once inside signIn; the stream events come later.
+      final pending = rig.session.signIn(
+        userId: 'u-101',
+        tokens: AuthTokens(
+          accessToken: mintAccessToken('u-101', 1),
+          refreshToken: mintRefreshToken('u-101', 1),
+        ),
+      );
+      expect(rig.flags.value(searchLayout), Layout.compact);
+      await pending;
+    });
+
+    test('T-0052-AC3 a session without epochChanges still refetches on a '
+        'user switch, from authState alone, with no read', () async {
+      final rig = await make(start: false);
+      await rig.flags.dispose(); // only the reader-only flags fetch here
+      final flags = await FeatureFlags.open(
+        dio: rig.dio,
+        session: _ReaderOnly(rig.session),
+        store: rig.tracking,
+        env: 'dev',
+        monitoring: rig.monitoring,
+      );
+      flags.start();
+      await rig.settle();
+      final before = _flagCalls(rig);
+      await rig.signIn('u-100');
+      await rig.settle();
+      expect(_flagCalls(rig), before + 1);
+      await flags.dispose();
     });
   });
 
@@ -497,6 +545,28 @@ void main() {
       expect(await rig.flags.watch(searchLayout).first, Layout.grid);
     });
   });
+}
+
+/// Only the [SessionReader] face of a session (no `SessionEpochs`).
+final class _ReaderOnly implements SessionReader {
+  _ReaderOnly(this._inner);
+
+  final SessionReader _inner;
+
+  @override
+  AuthStatus get status => _inner.status;
+  @override
+  bool get isSignedIn => _inner.isSignedIn;
+  @override
+  String? get userId => _inner.userId;
+  @override
+  String? get accessToken => _inner.accessToken;
+  @override
+  String? get refreshToken => _inner.refreshToken;
+  @override
+  int get epoch => _inner.epoch;
+  @override
+  Stream<AuthStatus> get authState => _inner.authState;
 }
 
 /// A domain that always answers `200` with [body].

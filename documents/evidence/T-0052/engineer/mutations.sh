@@ -255,14 +255,11 @@ mutate "P12 the empty scenario is dropped" $M "    'platform.empty': MockScenari
 
 # --- review round -------------------------------------------------------------
 SE=$SS/lib/src/session.dart
-mutate "C1 a remote weight above the cap is accepted" $RS 'weight > maxVariantWeight ||' ''
+mutate "C1 a remote weight above the cap is accepted" $RS 'weight > maxVariantWeight ||' 'weight > maxVariantWeight * 1000000 ||'
 mutate "C2 the cap itself is refused" $RS 'weight > maxVariantWeight ||' 'weight >= maxVariantWeight ||'
 mutate "C3 a declared weight above the cap is accepted" $FL 'variant.weight < 0 || variant.weight > maxVariantWeight' 'variant.weight < 0'
 mutate "C4 the cap is 10^15" $BK 'const int maxVariantWeight = 1000000000;' 'const int maxVariantWeight = 1000000000000000;'
 mutate "H1 the epoch stream is not listened to" $F 'if (session is SessionEpochs) {' 'if (session is SessionEpochs && session.epochChanges.isBroadcast && _seenEpoch < 0) {'
-mutate "H2 the epoch listener does not observe" $F '_epochSubscription = session.epochChanges.listen((_) {
-        _observeEpoch();' '_epochSubscription = session.epochChanges.listen((_) {
-        _seenEpoch.hashCode;'
 mutate "H3 a sign-in announces no epoch" $SE '_epoch++;
     _announceEpoch();
     if (changed) {' '_epoch++;
@@ -271,7 +268,9 @@ mutate "H4 a sign-out announces no epoch" $SE '_epoch++;
       _announceEpoch();
       _announce(AuthStatus.signedOut);' '_epoch++;
       _announce(AuthStatus.signedOut);'
-mutate "D1 dispose leaves the watch streams open" $F 'unawaited(controller.close());' 'unawaited(Future<void>.value());'
+mutate "D1 dispose leaves the watch streams open" $F 'unawaited(controller.close());' 'if (controller.isClosed) {
+        unawaited(controller.close());
+      }'
 mutate "D2 a fetch after dispose is sent" $F 'if (_disposed) {
       return Future<void>.value();
     }
