@@ -1,0 +1,119 @@
+INFO: Invocation ID: 8054362b-729b-4d41-aa1e-622e4df0e1a8
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 7 targets (6 packages loaded, 6 targets configured)
+Analyzing: 7 targets (6 packages loaded, 6 targets configured)
+
+Analyzing: 7 targets (252 packages loaded, 13085 targets configured, 418 aspect applications)
+
+INFO: Analyzed 7 targets (271 packages loaded, 16675 targets configured, 1040 aspect applications).
+[3,408 / 4,985] [Prepa] Creating symlink external/ai_rules_flutter++flutter+pub_deps__flutter/flutter.dart_analyzer_summary.summary_root/lib/src/widgets/raw_tooltip.dart ... (12 actions, 0 running)
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+[5,385 / 6,785] Testing //utility/mc_feature_flags:di_test (run 3 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,415 / 6,785] Testing //utility/mc_feature_flags:di_test (run 10 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,441 / 6,785] Testing //utility/mc_feature_flags:di_test (run 19 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,469 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 8 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,497 / 6,785] Testing //utility/mc_feature_flags:di_test (run 38 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,522 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 13 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,549 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 16 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,579 / 6,785] Testing //utility/mc_feature_flags:di_test (run 66 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,606 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 21 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,633 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 24 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,663 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 27 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,692 / 6,785] Testing //utility/mc_feature_flags:session_fetch_test (run 30 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,719 / 6,785] Testing //utility/mc_feature_flags:di_test (run 114 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,744 / 6,785] 1 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 35 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,767 / 6,785] 1 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 44 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,792 / 6,785] 1 / 7 tests; Testing //utility/mc_feature_flags:di_test (run 159 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,812 / 6,785] 1 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 55 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,835 / 6,785] 1 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 64 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,855 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 71 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,872 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 88 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,889 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 105 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,905 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 121 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,921 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 137 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,937 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 153 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,953 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 169 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,970 / 6,785] 2 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 186 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,988 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 4 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,009 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 25 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,030 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 46 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,052 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 68 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,073 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 89 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,094 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 110 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,115 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 131 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,137 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 153 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,159 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 175 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,180 / 6,785] 3 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 196 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,198 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 14 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,215 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 31 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,231 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 47 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,248 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 64 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,265 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 81 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,281 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 97 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,297 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 113 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,314 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 130 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,331 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 147 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,348 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 164 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,365 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 181 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,381 / 6,785] 4 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 197 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,394 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 10 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,408 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 24 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,422 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 38 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,437 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 53 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,451 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 67 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,466 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 82 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,480 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 96 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,495 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 111 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,509 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 125 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,524 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 140 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[6,538 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 154 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,552 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 168 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,567 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 183 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,580 / 6,785] 5 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 196 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,585 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 1 of 200); 1s darwin-sandbox ... (14 actions, 8 running)
+[6,593 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 9 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,604 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 20 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,615 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 31 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,625 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 41 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,633 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 49 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,641 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 57 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,649 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 65 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,658 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 74 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,668 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 84 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,681 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 97 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,689 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 105 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,697 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 113 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,705 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 121 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,713 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 129 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,721 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 137 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,730 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 146 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,740 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 156 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,751 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 167 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,761 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 177 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,769 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 185 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[6,777 / 6,785] 6 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 193 of 200); 0s darwin-sandbox ... (8 actions running)
+INFO: Found 7 test targets...
+INFO: Elapsed time: 89.175s, Critical Path: 2.42s
+INFO: 6785 processes: 504 disk cache hit, 4881 internal, 1400 darwin-sandbox.
+INFO: Build completed successfully, 6785 total actions
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.4s
+  Stats over 200 runs: max = 1.4s, min = 0.8s, avg = 0.9s, dev = 0.1s
+//utility/mc_feature_flags:di_test                                       PASSED in 0.7s
+  Stats over 200 runs: max = 0.7s, min = 0.3s, avg = 0.3s, dev = 0.0s
+//utility/mc_feature_flags:evaluation_test                               PASSED in 0.6s
+  Stats over 200 runs: max = 0.6s, min = 0.5s, avg = 0.5s, dev = 0.0s
+//utility/mc_feature_flags:experiments_test                              PASSED in 0.7s
+  Stats over 200 runs: max = 0.7s, min = 0.5s, avg = 0.6s, dev = 0.0s
+//utility/mc_feature_flags:no_flutter_test                               PASSED in 0.6s
+  Stats over 200 runs: max = 0.6s, min = 0.2s, avg = 0.2s, dev = 0.1s
+//utility/mc_feature_flags:registry_overrides_test                       PASSED in 0.4s
+  Stats over 200 runs: max = 0.4s, min = 0.4s, avg = 0.4s, dev = 0.0s
+//utility/mc_feature_flags:session_fetch_test                            PASSED in 0.6s
+  Stats over 200 runs: max = 0.6s, min = 0.5s, avg = 0.5s, dev = 0.0s
+
+Executed 7 out of 7 tests: 7 tests pass.

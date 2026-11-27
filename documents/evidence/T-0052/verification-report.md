@@ -72,3 +72,42 @@ No functional defects.
 ## Notes for the Tech Lead
 - Evidence: `documents/evidence/T-0052/verifier/` (probe as `.txt`, `golden_check.py`, `cov.py`, `mutations.sh`, logs). My temporary probe target and file were removed from the tree; only evidence is committed.
 - The `McTestContainer` follow-up (flags not in it) and the one-slot cache stay in the engineer's list for `pending-work.md`.
+
+## Re-verification at d94971e (narrow, Sonnet tier, ADR-0011)
+**Verdict: PASS.** Fresh Verifier, detached worktree at `d94971e` (the merge of `origin/main` `ed3c2cd` after the flaky-teardown fix). Logs are in `verifier/` (files `reverify_*`, `e2e_reverify/`).
+
+### 1. Production diff (`914a8b9..d94971e`, `mc_feature_flags/lib`, `app_core/lib`)
+- The kit change is only in `feature_flags.dart`: `_track`, `_writes`, `pendingWrites`, `settled()`. The `app_core` lib changes are T-0053's (`router_observers`, `root_initializers`).
+- `settled()` covers: the install-id write (`_saveInstallId`; the retry is a later read that calls `_saveInstallId` again and so is tracked), the cache delete on a user change, and the cache write in `_runFetch`. It loops until `_writes` is empty, so a write that starts while it waits is awaited too, and it works on a copy (`List.of`), so removal during the wait is safe.
+- **Override saves (`_saveOverrides`, line ~661) are not tracked.** That is fine by design: they are inside the `async` future that `setFlag`, `clearAll` and so on return, so the caller awaits them. A caller that drops that future is not covered by `settled()`. Nit only.
+- Memory: each future is removed in `whenComplete` on both success and error, so no leak. Mutation 3 below shows the removal is what ends `settled()`.
+- Failure: the tracking branch is `.then(onError: swallow)`, `settled()` swallows errors too, and `_track` returns the original future, so the callers see exactly what they saw before. A failing write cannot hang `settled()` or make it throw. The kit's stores return `Result`, not exceptions; the synchronous-throw case in `_saveInstallId` is caught before `_track`.
+- Callers that never call `settled()`: behaviour is unchanged (same futures, same order, same error handling). The only additions are a `Set` entry per write and a handler that removes it.
+- `root_initializers.dart` merge: `StorageDIInitializer`, `AnalyticsDIInitializer` right after it, and `FeatureFlagsDIInitializer` right after `ApiAuthDIInitializer`. Both are present, and the comment is accurate.
+
+### 2. Tests
+- `git diff 914a8b9..d94971e` over the test files: no assertion removed or weakened, no `ignore:`, `skip:` or `@Skip` added. Changes are teardown (`disposeAll`, `quiesce`, `TrackingStore` tracking deletes, `di_test` awaiting its stores) plus the boot test wait, plus T-0053's own tests.
+- `Rig.quiesce()`: disposes flags, then 5 bounded rounds of `flags.settled()` + every `TrackingStore` write/delete + a zero delay, then the session. `disposeAll` quiesces every rig first and deletes the directories after, so nothing is deleted while a write runs.
+- Boot test wait: a loop capped at 400 iterations (about 2 s of real time), each a real 5 ms `runAsync` delay plus a `pump`. It cannot hang, and it fails through `expect(pendingWrites, 0)` if it never settles. Under mutation 3 (futures never removed) it failed 50 of 50 runs in 4 s.
+
+### 3. Flake proof (own runs)
+`test --runs_per_test=200 --nocache_test_results` on 6 `mc_feature_flags` targets + `feature_flags_boot_test`:
+- Idle: 1,400 runs, 0 failures, 0 flaky ([log](verifier/reverify_flake_idle.log)).
+- Under load (8x `yes > /dev/null`, killed afterwards, `pgrep` shows none): 1,400 runs, 0 failures, 0 flaky ([log](verifier/reverify_flake_load.log)).
+
+### 4. Mutations (own, 50 runs each on the 7 targets)
+| # | Mutation | Result |
+|---|---|---|
+| 1 | cache delete on a user change no longer tracked (`_track(_store.delete(...))` -> `_store.delete(...)`) | **survived**: 7/7 pass, not flaky ([log](verifier/reverify_mut1_nodeltrack.log)) |
+| 2 | `settled()` returns at once (`while (false && ...)`) | **survived**: 7/7 pass ([log](verifier/reverify_mut2_settled_noop.log)) |
+| 3 | completion no longer removes the future from `_writes` | **killed**: 4 targets TIMEOUT 50/50 and the boot test FAILED 50/50 ([log](verifier/reverify_mut3_never_removed.log)) |
+
+Mutations 1 and 2 survive because the tests have a second, independent guard: `TrackingStore` records every write and delete, and `Rig.quiesce` awaits those as well. So the kit's tracking of the delete, and `settled()` itself, are redundant for the teardown and no test pins them on their own. This does not make the tests flaky (the teardown is still safe), but nothing would catch a regression of `settled()` or of the delete tracking. Suggested follow-up (not a blocker): a unit test that holds a store write open and asserts `pendingWrites == 1` and that `settled()` completes only after it is released, for the cache write, the cache delete and the install id. Source restored after each mutation (`git status` clean).
+
+### 5. Gates
+- `tool/checks/T-0052-AC5_gates.sh` PASS ([log](verifier/reverify_AC5_gates.log)): closures, registration, fixtures check, `test //...` 176/176, lint, `mc_arch_check`, `rules_fork.sh check`, `dart format`, `l10n_check`, sim build, coverage mc_feature_flags 425/433 = 98.2 %, mc_fixtures_platform 51/55 = 92.7 %.
+- `test --lockfile_mode=error //...`: 176/176 pass ([log](verifier/reverify_test_lockfile_error.log)).
+- e2e: `tool/e2e_ios.sh --task T-0052 --role verifier` (the script rejects the name `T-0052-reverify`, so the simulator was `mc-T-0052-verifier-47889`) on a project copy from `tool/e2e/prepare_pub_project.sh`, **all 11 mini_client targets PASS**, including `analytics_screens_test` with analytics and flags both in the boot path ([summary](verifier/e2e_reverify/e2e-summary.md)). A first attempt against the raw `app/mini_client` failed in 11/11 only because that tree has no Xcode project; its simulator was deleted too. `simctl list` shows no `mc-T-0052` device.
+
+### Defects
+None. Nits: the two surviving mutations above (tests do not pin `settled()` / the delete tracking independently); `_saveOverrides` is not tracked by design.
