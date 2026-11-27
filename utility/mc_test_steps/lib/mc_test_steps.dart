@@ -20,6 +20,7 @@ export 'package:mc_test_steps/src/assertions/nothing_overflows.dart';
 export 'package:mc_test_steps/src/assertions/the_button_is_disabled.dart';
 export 'package:mc_test_steps/src/assertions/the_field_reads.dart';
 export 'package:mc_test_steps/src/assertions/the_session_belongs_to.dart';
+export 'package:mc_test_steps/src/assertions/the_toast_is_shown.dart';
 export 'package:mc_test_steps/src/backend/the_app_sends.dart';
 export 'package:mc_test_steps/src/backend/the_backend_answered_with.dart';
 export 'package:mc_test_steps/src/backend/the_backend_fails_with.dart';
@@ -44,6 +45,9 @@ export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storag
 export 'package:mc_test_steps/src/environment/the_device_locale_is.dart';
 export 'package:mc_test_steps/src/environment/the_pseudolocale_is_active.dart';
 export 'package:mc_test_steps/src/environment/the_text_scale_is.dart';
+export 'package:mc_test_steps/src/interaction/i_cancel_the_dialog.dart';
+export 'package:mc_test_steps/src/interaction/i_choose_in_the_sheet.dart';
+export 'package:mc_test_steps/src/interaction/i_confirm_the_dialog.dart';
 export 'package:mc_test_steps/src/interaction/i_press_search_on_the_keyboard.dart';
 export 'package:mc_test_steps/src/interaction/i_pull_to_refresh.dart';
 export 'package:mc_test_steps/src/interaction/i_swipe_back.dart';
