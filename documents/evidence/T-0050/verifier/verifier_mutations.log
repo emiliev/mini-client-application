@@ -1,0 +1,39 @@
+M1 [kill] pin compared with the epoch the bearer was applied for, not the session's: KILLED
+    00:00 +0 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized [E]
+    00:00 +0 -2: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request [E]
+    00:00 +0 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the failure says the session changed [E]
+    00:00 +2 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request pinned to a signed-out epoch is rejected after a sign-in [E]
+M2 [kill] a stale pin is sent without a bearer instead of rejected: KILLED
+    00:00 +0 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized [E]
+    00:00 +0 -2: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request [E]
+    00:00 +0 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the failure says the session changed [E]
+    00:00 +2 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request pinned to a signed-out epoch is rejected after a sign-in [E]
+M3 [kill] only the first send is held to the pin (replays and retries exempt): SURVIVED
+M4 [kill] authPinned stores the epoch as a String (silently unpinned): KILLED
+    00:00 +0 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized [E]
+    00:00 +0 -2: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request [E]
+    00:00 +0 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the failure says the session changed [E]
+    00:00 +2 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request pinned to a signed-out epoch is rejected after a sign-in [E]
+    00:00 +5 -5: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 authPinned carries the epoch under the documented key [E]
+M5 [kill] favourite: after a sign-in from the tap the shown epoch is not updated: KILLED
+    FAIL  comics_details_favourite Favourite a comic Signed out, a double tap asks to sign in once and sends one request [T-0041-AC6]
+    FAIL  comics_details_favourite Favourite a comic Signed out, signing in as a user who already has the favourite writes nothing [T-0041-AC6]
+    FAIL  comics_details_favourite Favourite a comic Signed out, the favourite waits for sign-in and then saves it [T-0041-AC6]
+M6 [kill] favourite: no reload at the end of a tap whose session moved on: KILLED
+    FAIL  comics_details_favourite Favourite a comic A rejected refresh during a write signs out and shows Add again [T-0041-AC6]
+    FAIL  comics_details_favourite Favourite a comic A sign-out during an in-flight write keeps the saved favourite and shows Add [T-0041-AC6]
+    FAIL  comics_details_favourite Favourite a comic Another user signing in during the read after sign-in gets no write [T-0041-AC6]
+M7 [survive] editor create pins the session's current epoch (no await after _canWrite: equivalent): SURVIVED
+M8 [kill] open guard: timer not cancelled in close(): SURVIVED
+M9 [kill] open guard keyed by id only (a creator with a character's id is dropped): SURVIVED
+M10 [kill] race step: hook at the END of the chain (after the auth interceptor): KILLED
+    FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is removed sends nothing for the wrong user [T-0050-AC2]
+    FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is sent sends nothing for the wrong user [T-0050-AC2]
+    FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in right before the POST is sent writes nothing for them [T-0050-AC2]
+    FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in right before the first write of an edit sends nothing [T-0050-AC2]
+    FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in right before the second write of an edit sends it for no one [T-0050-AC2]
+M11 [kill] editor create not pinned, BDD only (no contract test): KILLED
+    FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in right before the POST is sent writes nothing for them [T-0050-AC2]
+M12 [kill] editor items PUT not pinned, BDD only: KILLED
+    FAIL  reading_list_editor_races The editor stays consistent while requests are in flight Another user signing in right before the second write of an edit sends it for no one [T-0050-AC2]
+done

@@ -105,6 +105,33 @@ Future<void> scrollComicUntilVisible(WidgetTester tester, Finder finder) async {
   await mcSettle(tester);
 }
 
+/// Scrolls [target] into view, then taps it [times] times, [between] of fake
+/// time apart (zero: within one frame), then settles.
+Future<void> tapComicTarget(
+  WidgetTester tester,
+  Finder target, {
+  int times = 1,
+  Duration between = Duration.zero,
+}) async {
+  await scrollComicUntilVisible(tester, target);
+  expect(target.hitTestable(), findsOneWidget, reason: 'one tappable target');
+  for (var i = 0; i < times; i++) {
+    if (i > 0 && between > Duration.zero) {
+      await tester.pump(between);
+    }
+    await tester.tap(target.hitTestable());
+  }
+  await mcSettle(tester);
+}
+
+/// The cast card of [name].
+Finder castCard(String name) =>
+    find.descendant(of: find.byKey(comicCastKey), matching: find.text(name));
+
+/// The credit row of [name].
+Finder creditRow(String name) =>
+    find.descendant(of: find.byKey(comicCreditsKey), matching: find.text(name));
+
 /// What the flow state holds, as the tests see it.
 typedef FlowStateView = ({ComicId comicId, ComicId? cover});
 

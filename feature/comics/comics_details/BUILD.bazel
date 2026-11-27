@@ -35,6 +35,7 @@ _INIT = "lib/src/di/di_initializer.dart"
 
 # Pure-Dart deps of the hand-written, generator-read files.
 _PURE_DEPS = [
+    "//utility/mc_api_auth",
     "//utility/mc_api_client",
     "//utility/mc_api_errors",
     "//utility/mc_bloc_kit",
@@ -299,6 +300,28 @@ flutter_test(
         "//utility/mc_media",
         "//utility/mc_mocked_backend",
         "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# The favourite bloc's stale-state guard on its own: the real bloc and
+# repository over the mocked backend, with no auth interceptor (T-0050).
+flutter_test(
+    name = "bloc_guards_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/comic_favourite_bloc_guards_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":comics_details",
+        "//utility/mc_bloc_kit",
+        "//utility/mc_event_bus",
+        "//utility/mc_fixtures_comics",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_session",
+        "//utility/mc_storage",
         "@pub_deps//:flutter_test",
     ],
 )

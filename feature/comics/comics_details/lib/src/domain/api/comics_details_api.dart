@@ -25,11 +25,19 @@ abstract class ComicsDetailsApi {
   @GET('v1/me/favourites/comic/{id}')
   Future<FavouriteDto> getFavourite(@Path('id') int id);
 
-  /// Marks the comic as a favourite (idempotent). Needs the bearer.
+  /// Marks the comic as a favourite (idempotent). Needs the bearer. Pass
+  /// `authPinned(epoch)` as [extras] to send it only for that session.
   @PUT('v1/me/favourites/comic/{id}')
-  Future<FavouriteDto> putFavourite(@Path('id') int id);
+  Future<FavouriteDto> putFavourite(
+    @Path('id') int id, {
+    @Extras() Map<String, dynamic> extras = const {},
+  });
 
   /// Removes the comic from the favourites (idempotent). Needs the bearer.
+  /// Pass `authPinned(epoch)` as [extras] to send it only for that session.
   @DELETE('v1/me/favourites/comic/{id}')
-  Future<FavouriteDto> deleteFavourite(@Path('id') int id);
+  Future<FavouriteDto> deleteFavourite(
+    @Path('id') int id, {
+    @Extras() Map<String, dynamic> extras = const {},
+  });
 }
