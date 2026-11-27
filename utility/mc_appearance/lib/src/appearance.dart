@@ -75,6 +75,7 @@ final class Appearance implements AppearanceSettings {
       _saved = restored;
     }
     if (restoreFailure != null) {
+      _forceSave = true;
       _warn(
         'the saved appearance was unreadable, using the defaults: '
         '$restoreFailure',
@@ -143,9 +144,16 @@ final class Appearance implements AppearanceSettings {
   StreamSubscription<int>? _epochSubscription;
   bool _disposed = false;
 
-  /// The sync run of the current epoch, while it runs.
+  /// The sync run of the current epoch, while it runs, and its id.
   Future<void>? _run;
   int? _runEpoch;
+  int? _runId;
+  int _runSeq = 0;
+
+  /// The saved copy could not be read at launch: the next save writes even
+  /// when the values equal the defaults, so a corrupt file is replaced
+  /// (review round).
+  bool _forceSave = false;
 
   @override
   AppearanceSnapshot get snapshot => AppearanceSnapshot(
@@ -306,24 +314,44 @@ final class Appearance implements AppearanceSettings {
   /// Joins the run of the current epoch, or starts one. A run picks up
   /// whatever is pending when each request ends, so a change made while a
   /// request is out is sent next.
+  ///
+  /// A run stops being joinable in the same turn as its last check of the
+  /// pending settings (review round): [_runSync] clears [_run] in its
+  /// `finally`, before its future completes, so a change made by a listener
+  /// of the final snapshot starts a new run instead of joining a finished
+  /// one.
   Future<void> _sync() {
     final epoch = _session.epoch;
     if (_run case final run? when _runEpoch == epoch) {
       return run;
     }
+    final id = ++_runSeq;
+    _runId = id;
     _runEpoch = epoch;
-    late final Future<void> run;
-    run = _runSync(epoch).whenComplete(() {
-      if (identical(_run, run)) {
-        _run = null;
-        _runEpoch = null;
-      }
-    });
-    _run = run;
+    final run = _runSync(epoch, id);
+    // A run that ended without awaiting has cleared itself already.
+    if (_runId == id) {
+      _run = run;
+    }
     return run;
   }
 
-  Future<void> _runSync(int epoch) async {
+  Future<void> _runSync(int epoch, int id) async {
+    try {
+      await _runSyncBody(epoch);
+    } finally {
+      if (_runId == id) {
+        _run = null;
+        _runEpoch = null;
+        _runId = null;
+      }
+    }
+  }
+
+  Future<void> _runSyncBody(int epoch) async {
+    // Per change: the limit of one retry after a 409 (review round). Per run:
+    // whether another device's change was taken in, which the final status
+    // reports.
     var conflicts = 0;
     var tookOtherChanges = false;
     while (true) {
@@ -381,6 +409,8 @@ final class Appearance implements AppearanceSettings {
           if (_pending.isEmpty) {
             _pendingFor = null;
           }
+          // A change that is sent next gets its own retry.
+          conflicts = 0;
           _takeAccount(copy);
         case PatchConflict(:final current):
           conflicts++;
@@ -439,7 +469,7 @@ final class Appearance implements AppearanceSettings {
         const AppearanceRecord(
           preferences: AppearancePreferences.defaults,
         );
-    if (_saveFailure == null && saved.sameAs(record)) {
+    if (!_forceSave && _saveFailure == null && saved.sameAs(record)) {
       return;
     }
     _store
@@ -448,6 +478,7 @@ final class Appearance implements AppearanceSettings {
           (_) {
             _saved = record;
             _saveFailure = null;
+            _forceSave = false;
           },
           (failure) {
             _saveFailure = failure;

@@ -2,6 +2,7 @@
 // wiring and the app's mock domains): the Settings entry on home, the whole
 // app re-theming at once (P1-22 AC6), the choice surviving a restart signed
 // out and signed in, and the cold deep link with home below it.
+import 'dart:async';
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
@@ -55,7 +56,11 @@ void main() {
 
   /// A launch of the app on [storage]: a new root container and a new mocked
   /// backend (it forgets everything, as the app's does when it is killed).
-  Future<void> boot(WidgetTester tester, {String? coldStartLink}) async {
+  Future<void> boot(
+    WidgetTester tester, {
+    String? coldStartLink,
+    Future<void>? holdBoot,
+  }) async {
     tester.view
       ..devicePixelRatio = 1
       ..physicalSize = mcReferenceSurface;
@@ -72,18 +77,25 @@ void main() {
         bundle: McFixtureAssetBundle(),
         child: MiniClientApp(
           links: links,
-          initializers: (routerRef) => rootInitializers(
-            config: () async => _config,
-            storageDirectory: storage,
-            monitoringSinks: [InMemorySink()],
-            mockDomains: appMockDomains,
-            routerRef: routerRef,
-            wirings: wiringInitializers,
-          ),
+          storageDirectory: storage,
+          initializers: (routerRef) => [
+            if (holdBoot != null) McDIInitializer((_, _) => holdBoot),
+            ...rootInitializers(
+              config: () async => _config,
+              storageDirectory: storage,
+              monitoringSinks: [InMemorySink()],
+              mockDomains: appMockDomains,
+              routerRef: routerRef,
+              wirings: wiringInitializers,
+            ),
+          ],
         ),
       ),
     );
     await tester.pump();
+    if (holdBoot != null) {
+      return;
+    }
     await settleIo(
       tester,
       () =>
@@ -191,6 +203,45 @@ void main() {
     expect(
       Theme.of(tester.element(find.byKey(_dark))).brightness,
       Brightness.dark,
+    );
+  });
+
+  testWidgets('T-0063-AC6 the boot page of the next launch is already in the '
+      'saved Dark: no light flash while booting (review round)', (
+    tester,
+  ) async {
+    await boot(tester);
+    await tapHome(tester, 'Settings');
+    await choose(tester, _dark);
+    await kill(tester);
+
+    final hold = Completer<void>();
+    await boot(tester, holdBoot: hold.future);
+    expect(find.byKey(BootPage.loadingKey), findsOneWidget, reason: 'booting');
+    expect(
+      Theme.of(tester.element(find.byKey(BootPage.loadingKey))).brightness,
+      Brightness.dark,
+    );
+    hold.complete();
+    await settleIo(
+      tester,
+      () => find.byKey(_home).evaluate().isNotEmpty,
+    );
+    expect(brightnessOf(tester, _home), Brightness.dark);
+  });
+
+  testWidgets('T-0063-AC6 with nothing saved the boot page follows the '
+      'platform (light here)', (tester) async {
+    final hold = Completer<void>();
+    await boot(tester, holdBoot: hold.future);
+    expect(
+      Theme.of(tester.element(find.byKey(BootPage.loadingKey))).brightness,
+      Brightness.light,
+    );
+    hold.complete();
+    await settleIo(
+      tester,
+      () => find.byKey(_home).evaluate().isNotEmpty,
     );
   });
 

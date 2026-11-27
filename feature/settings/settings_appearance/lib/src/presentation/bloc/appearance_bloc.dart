@@ -122,6 +122,12 @@ final class AppearanceBloc extends McBloc<AppearanceEvent, AppearanceState> {
     _show(emit);
     try {
       await _navigator.requestSignIn();
+    } on Object catch (error, stackTrace) {
+      // The app could not sign anyone in: reported, and the screen offers
+      // to sync again (review round).
+      if (!isClosed) {
+        addError(error, stackTrace);
+      }
     } finally {
       _signingIn = false;
     }
@@ -137,7 +143,12 @@ final class AppearanceBloc extends McBloc<AppearanceEvent, AppearanceState> {
     final failure = snapshot.saveFailure;
     emit(
       failure != null
-          ? AppearanceState.failure(snapshot.preferences, failure)
+          ? AppearanceState.failure(
+              snapshot.preferences,
+              failure,
+              sync: snapshot.status,
+              signingIn: _signingIn,
+            )
           : AppearanceState.ready(
               preferences: snapshot.preferences,
               sync: snapshot.status,

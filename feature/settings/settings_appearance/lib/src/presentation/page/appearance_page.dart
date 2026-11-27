@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_feedback/mc_ds_feedback.dart';
 import 'package:mc_ds_navigation/mc_ds_navigation.dart';
@@ -9,6 +10,7 @@ import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_l10n_core/mc_l10n_core.dart';
 import 'package:settings_appearance/src/presentation/bloc/appearance_bloc.dart';
 import 'package:settings_appearance/src/presentation/widget/appearance_controls.dart';
+import 'package:settings_appearance/src/presentation/widget/save_failed_banner.dart';
 import 'package:settings_appearance/src/presentation/widget/settings_spacing.dart';
 import 'package:settings_appearance/src/presentation/widget/sync_status.dart';
 
@@ -63,44 +65,79 @@ class _AppearanceContent extends StatelessWidget {
       body: BlocBuilder<AppearanceBloc, AppearanceState>(
         builder: (context, state) => state.when(
           loading: () => const McLoading(),
-          failure: (preferences, error, stackTrace) => McErrorView(
-            title: l10n.settingsAppearanceSaveFailedTitle,
-            message: l10n.settingsAppearanceSaveFailed,
-            retryLabel: McL10nCoreL10n.of(context).commonRetry,
-            onRetry: () => context.read<AppearanceBloc>().add(
-              const AppearanceEvent.retry(),
-            ),
-          ),
-          ready: (preferences, sync, signingIn) => ListView(
-            key: appearanceBodyKey,
-            padding: EdgeInsets.symmetric(
-              horizontal: McSpacing.lg,
-              vertical: context.groupGap,
-            ),
-            children: [
-              AppearanceControls(preferences: preferences),
-              SizedBox(height: context.groupGap),
-              SyncStatus(sync: sync, signingIn: signingIn),
-              SizedBox(height: context.groupGap),
-              McButton(
-                key: aboutThemesKey,
-                label: l10n.settingsAppearanceAbout,
-                variant: McButtonVariant.tertiary,
-                onPressed: () => context.read<AppearanceBloc>().add(
-                  const AppearanceEvent.openAbout(),
-                ),
+          // A failed save keeps the controls: the change applies anyway.
+          failure: (preferences, error, sync, signingIn, stackTrace) =>
+              _Settings(
+                preferences: preferences,
+                sync: sync,
+                signingIn: signingIn,
+                saveFailed: true,
+                onReset: () => _confirmReset(context),
               ),
-              SizedBox(height: context.headerGap),
-              McButton(
-                key: resetKey,
-                label: l10n.settingsAppearanceReset,
-                variant: McButtonVariant.tertiary,
-                onPressed: () => _confirmReset(context),
-              ),
-            ],
+          ready: (preferences, sync, signingIn) => _Settings(
+            preferences: preferences,
+            sync: sync,
+            signingIn: signingIn,
+            saveFailed: false,
+            onReset: () => _confirmReset(context),
           ),
         ),
       ),
+    );
+  }
+}
+
+/// The settings themselves, with the save-failure banner on top when the
+/// device could not keep the last choice.
+class _Settings extends StatelessWidget {
+  const _Settings({
+    required this.preferences,
+    required this.sync,
+    required this.signingIn,
+    required this.saveFailed,
+    required this.onReset,
+  });
+
+  final AppearancePreferences preferences;
+  final AppearanceSyncStatus sync;
+  final bool signingIn;
+  final bool saveFailed;
+  final VoidCallback onReset;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.settingsL10n;
+    return ListView(
+      key: appearanceBodyKey,
+      padding: EdgeInsets.symmetric(
+        horizontal: McSpacing.lg,
+        vertical: context.groupGap,
+      ),
+      children: [
+        if (saveFailed) ...[
+          const SaveFailedBanner(),
+          SizedBox(height: context.groupGap),
+        ],
+        AppearanceControls(preferences: preferences),
+        SizedBox(height: context.groupGap),
+        SyncStatus(sync: sync, signingIn: signingIn),
+        SizedBox(height: context.groupGap),
+        McButton(
+          key: aboutThemesKey,
+          label: l10n.settingsAppearanceAbout,
+          variant: McButtonVariant.tertiary,
+          onPressed: () => context.read<AppearanceBloc>().add(
+            const AppearanceEvent.openAbout(),
+          ),
+        ),
+        SizedBox(height: context.headerGap),
+        McButton(
+          key: resetKey,
+          label: l10n.settingsAppearanceReset,
+          variant: McButtonVariant.tertiary,
+          onPressed: onReset,
+        ),
+      ],
     );
   }
 }

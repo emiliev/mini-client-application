@@ -28,11 +28,13 @@ _WIRINGS = [
 
 _RUNTIME_DEPS = _WIRINGS + [
     "//app/wiring/app_core",
+    "//utility/mc_appearance",
     "//utility/mc_config",
     "//utility/mc_di",
     "//utility/mc_ds_buttons",
     "//utility/mc_ds_layout",
     "//utility/mc_ds_theme",
+    "//utility/mc_storage",
     "@pub_deps//:flutter",
     "@pub_deps//:get_it",
     "@pub_deps//:go_router",
@@ -123,7 +125,6 @@ flutter_test(
         "//utility/mc_event_bus",
         "//utility/mc_mocked_backend",
         "//utility/mc_monitoring",
-        "//utility/mc_storage",
         "@pub_deps//:dio",
         "@pub_deps//:flutter_test",
     ],
@@ -265,7 +266,6 @@ flutter_test(
     deps = _RUNTIME_DEPS + [
         ":mini_client_lib",
         "//utility/mc_api_auth",
-        "//utility/mc_appearance",
         "//utility/mc_mocked_backend",
         "//utility/mc_monitoring",
         "//utility/mc_session",

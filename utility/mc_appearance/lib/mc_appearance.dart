@@ -15,4 +15,4 @@ export 'package:mc_appearance/src/appearance_preferences.dart'
 export 'package:mc_appearance/src/appearance_snapshot.dart'
     show AppearanceSnapshot, AppearanceSyncStatus;
 export 'package:mc_appearance/src/appearance_store.dart'
-    show appearanceStoreKey;
+    show appearanceStoreKey, savedAppearance;

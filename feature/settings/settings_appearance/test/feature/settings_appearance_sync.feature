@@ -41,6 +41,19 @@ Feature: The appearance follows the account
     And the backend received {0} requests for {'* /v1/me/preferences'}
 
   @T-0063-AC3
+  Scenario: Signing in fails: the error is reported, and Sync across devices can be tapped again (review round)
+    When I open the appearance settings
+    And I tap {'Sync across devices'}
+    And signing in fails
+    Then the sync status reads {'Saved on this device.'}
+    And {1} errors were reported
+    When I tap {'Sync across devices'}
+    Then the app was asked to sign in {2} times
+    And the sync status reads {'Waiting for you to sign in.'}
+    When signing in is cancelled
+    Then the sync status reads {'Saved on this device.'}
+
+  @T-0063-AC3
   Scenario: A double tap on Sync across devices asks to sign in once
     When I open the appearance settings
     And I tap {'Sync across devices'} twice in quick succession

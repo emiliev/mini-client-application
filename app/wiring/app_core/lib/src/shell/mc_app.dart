@@ -36,7 +36,9 @@ typedef McRouterFactory = GoRouter Function(String initialLocation);
 /// density is every theme's `visualDensity`, and Reduce motion turns
 /// `MediaQuery.disableAnimations` on for everything under the router. A
 /// change re-themes the whole app at once, without a restart. The boot page
-/// uses [themeMode] as it is (the appearance does not exist before boot).
+/// uses [themeMode] as it is (the appearance does not exist before boot):
+/// an app seeds it from the saved appearance (`savedAppearance`, read
+/// synchronously), so a saved Dark does not flash light while booting.
 class McApp extends StatefulWidget {
   const McApp({
     required this.boot,
@@ -222,6 +224,11 @@ class _McAppState extends State<McApp> {
             visualDensity: density,
           ),
           themeMode: mode,
+          // Reduce motion: a new theme applies at once, without the
+          // cross-fade (review round).
+          themeAnimationDuration: _appearance.reduceMotion
+              ? Duration.zero
+              : kThemeAnimationDuration,
           routerConfig: router,
           // Reduce motion for every routed page and overlay.
           builder: (context, child) => MediaQuery(

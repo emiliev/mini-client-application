@@ -15,11 +15,14 @@ sealed class AppearanceState with _$AppearanceState {
   }) = _Ready;
 
   /// The device could not keep the choice: it applies now, but would not
-  /// survive a restart. Retry saves it again.
+  /// survive a restart. The screen keeps every control (a change is never
+  /// blocked) and shows a banner whose Retry saves again (review round).
   @Implements<McFailureState>()
   const factory AppearanceState.failure(
     AppearancePreferences preferences,
     StorageFailure error, {
+    required AppearanceSyncStatus sync,
+    @Default(false) bool signingIn,
     StackTrace? stackTrace,
   }) = _Failure;
 }

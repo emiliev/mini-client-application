@@ -124,6 +124,42 @@ void main() {
     expect((rig.saved! as Map)['themeMode'], 'light');
   });
 
+  test('T-0063-AC6 a corrupt saved copy is replaced on the first save, even '
+      'when the values equal the defaults', () async {
+    final dir = Directory.systemTemp.createTempSync('mc_app_');
+    FileStore(dir).writeSync(appearanceStoreKey, '{not an appearance');
+    final rig = await Rig.create(dir: dir, signedInAs: reader);
+    rigs.add(rig);
+    await rig.settle();
+    expect(rig.shown, AppearancePreferences.defaults);
+    final saved = rig.saved;
+    expect(saved, isA<Map<String, Object?>>(), reason: 'replaced');
+    expect((saved! as Map)['themeMode'], 'system');
+    expect(savedAppearance(FileStore(dir)), AppearancePreferences.defaults);
+  });
+
+  test('T-0063-AC6 savedAppearance reads the saved preferences, and null '
+      'when none or unreadable', () {
+    final dir = Directory.systemTemp.createTempSync('mc_app_');
+    addTearDown(() => dir.deleteSync(recursive: true));
+    final store = FileStore(dir);
+    expect(savedAppearance(store), isNull);
+    store.writeSync(appearanceStoreKey, {
+      'themeMode': 'dark',
+      'density': 'compact',
+      'reduceMotion': false,
+    });
+    expect(
+      savedAppearance(store),
+      const AppearancePreferences(
+        themeMode: AppearanceThemeMode.dark,
+        density: AppearanceDensity.compact,
+      ),
+    );
+    store.writeSync(appearanceStoreKey, 'dark');
+    expect(savedAppearance(store), isNull);
+  });
+
   test('T-0063-AC6 a save that fails keeps the change in use, says so, and '
       'retry saves it once the device can write again', () async {
     final rig = await make();

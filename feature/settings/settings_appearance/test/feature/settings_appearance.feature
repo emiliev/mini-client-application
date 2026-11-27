@@ -128,11 +128,19 @@ Feature: Appearance settings
     And the settings changes tracked are {''}
 
   @T-0063-AC6
-  Scenario: The device cannot save: the choice applies, the screen says it was not saved, and Retry tries again
+  Scenario: The device cannot save: the controls stay, every change still applies, a banner says so, and Retry tries again
     When I open the appearance settings
     And the app can no longer write to storage
     And I choose the theme mode {'Dark'}
     Then the app uses {'dark'} {'comfortable'} with reduce motion {'off'}
+    And I see {'Not saved'}
     And I see {'Your choice applies now, but this device could not save it.'}
+    When I choose the theme mode {'Light'}
+    Then the theme mode is {'Light'}
+    And the app uses {'light'} {'comfortable'} with reduce motion {'off'}
+    When I switch reduce motion {'on'}
+    Then reduce motion is {'on'}
+    And I see {'Not saved'}
     When I tap {'Retry'}
     Then I see {'Not saved'}
+    And the theme mode is {'Light'}

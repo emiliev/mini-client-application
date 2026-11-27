@@ -1,3 +1,5 @@
+import 'dart:async';
+
 // Signed in, the preferences follow the account (`mc_fixtures_identity`
 // CONTRACT.md, `/v1/me/preferences`), by the merge rule of ADR-0013.
 import 'package:mc_appearance/mc_appearance.dart';
@@ -485,6 +487,64 @@ void main() {
       expect(again.preferencesTraffic, ['GET']);
       expect(again.shown.themeMode, AppearanceThemeMode.dark);
       expect((again.saved! as Map)['seenVersion'], 0);
+    });
+  });
+
+  group('T-0063-AC2 review round: the 409 limit is per change, and a run '
+      'never swallows a change', () {
+    test('T-0063-AC2 change A gets a 409 then 200; change B, queued during '
+        'it, gets its own 409 then 200: the run ends conflictResolved, never '
+        'offline', () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      final first = rig.gate.holdNext('PATCH', beforeServer: true);
+      final a = rig.appearance.change(themeMode: AppearanceThemeMode.light);
+      final heldA = await first;
+      // Another device writes while A is out: A meets a 409.
+      await rig.otherDeviceWrites(collector, {'density': 'compact'});
+      final retryA = rig.gate.holdNext('PATCH', beforeServer: true);
+      heldA.release();
+      final heldRetryA = await retryA;
+      // B is queued while A's retry is out, so it is a PATCH of its own.
+      final b = rig.appearance.change(reduceMotion: true);
+      final firstB = rig.gate.holdNext('PATCH', beforeServer: true);
+      heldRetryA.release();
+      // B's first PATCH: another device writes again first, so B meets its
+      // own 409.
+      final heldB = await firstB;
+      expect(heldB.options.data, {'ifVersion': 2, 'reduceMotion': true});
+      await rig.otherDeviceWrites(collector, {'density': 'comfortable'});
+      heldB.release();
+      await Future.wait([a, b]);
+      await rig.settle();
+      expect(rig.count('PATCH'), 4, reason: 'two tries for each change');
+      expect(rig.status, AppearanceSyncStatus.conflictResolved);
+      final account = await rig.account(collector);
+      expect(account['themeMode'], 'light');
+      expect(account['reduceMotion'], true);
+      expect(account['density'], 'comfortable');
+      expect(rig.shown.density, AppearanceDensity.comfortable);
+    });
+
+    test('T-0063-AC6 a change made by a listener of the synced snapshot is '
+        'sent and ends synced', () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      var changed = false;
+      final sub = rig.appearance.changes.listen((snapshot) {
+        if (!changed && snapshot.status == AppearanceSyncStatus.synced) {
+          changed = true;
+          unawaited(rig.appearance.change(density: AppearanceDensity.compact));
+        }
+      });
+      await rig.appearance.change(themeMode: AppearanceThemeMode.light);
+      await rig.settle();
+      await sub.cancel();
+      expect(changed, isTrue);
+      expect(rig.count('PATCH'), 2);
+      expect(rig.status, AppearanceSyncStatus.synced);
+      expect((await rig.account(collector))['density'], 'compact');
+      expect((rig.saved! as Map)['pending'], isEmpty);
     });
   });
 }

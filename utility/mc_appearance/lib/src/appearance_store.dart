@@ -80,6 +80,13 @@ final class AppearanceRecord {
   }
 }
 
+/// The preferences saved on [store], or null when none are saved or they
+/// cannot be read. Synchronous, so the app shell can paint its boot page in
+/// the saved theme before the appearance exists (review round).
+AppearancePreferences? savedAppearance(FileStore store) => AppearanceStore(
+  store,
+).read().fold((record) => record?.preferences, (_) => null);
+
 /// Reads and writes the record **synchronously** (`FileStore.readSync`,
 /// `writeSync`): the value is tiny, it must be known before the first
 /// frame, and a write that is still running can never race the next one or

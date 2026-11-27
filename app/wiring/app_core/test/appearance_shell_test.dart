@@ -209,6 +209,37 @@ void main() {
     expect(seen.disableAnimations, isFalse);
   });
 
+  for (final reduce in [true, false]) {
+    testWidgets('T-0063-AC6 with Reduce motion ${reduce ? 'on' : 'off'} a new '
+        'theme ${reduce ? 'applies in the next frame' : 'cross-fades'} '
+        '(review round)', (tester) async {
+      final seen = _Seen();
+      final appearance = _Appearance(
+        AppearancePreferences(reduceMotion: reduce),
+      );
+      tester.platformDispatcher.platformBrightnessTestValue = Brightness.light;
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      await _pumpApp(tester, seen: seen, appearance: appearance);
+      expect(seen.brightness, Brightness.light);
+
+      appearance.set(
+        AppearancePreferences(
+          themeMode: AppearanceThemeMode.dark,
+          reduceMotion: reduce,
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+      expect(
+        seen.brightness,
+        reduce ? Brightness.dark : Brightness.light,
+        reason: reduce ? 'no cross-fade' : 'still fading from light',
+      );
+      await tester.pumpAndSettle();
+      expect(seen.brightness, Brightness.dark);
+    });
+  }
+
   testWidgets("T-0063-AC6 Reduce motion off never turns the platform's own "
       'setting back on', (tester) async {
     final seen = _Seen();
