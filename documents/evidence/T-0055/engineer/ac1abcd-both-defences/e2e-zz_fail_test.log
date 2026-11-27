@@ -1,0 +1,90 @@
+# e2e_ios.sh: T-0055 engineer on mc-T-0055-engineer-60199 (B5390BEE-0C75-4EDE-BE02-A1ABD9BB29C9)
+# cwd: /tmp/mc-T-0055-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.niMXCE/screenshots/3-zz_fail_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_fail_test.dart -d B5390BEE-0C75-4EDE-BE02-A1ABD9BB29C9
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient
+Resolving dependencies in `/private/tmp/mc-T-0055-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0055-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            6.2s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58334/t-41aQSFYm0=/
+VMServiceFlutterDriver: Isolate found with number: 6075862436527159
+VMServiceFlutterDriver: Isolate 6075862436527159 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0055 runtime failing target
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: exactly one matching candidate
+flutter:   Actual: _TextWidgetFinder:<Found 0 widgets with text "absent": []>
+flutter:    Which: means none were found but one was expected
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///private/tmp/mc-T-0055-engineer-e2e/app/mini_client/integration_test/zz_fail_test.dart:9:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///private/tmp/mc-T-0055-engineer-e2e/app/mini_client/integration_test/zz_fail_test.dart line 9
+flutter: The test description was:
+flutter:   T-0055 runtime failing target
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:00 +0: T-0055 runtime failing target [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: T-0055 runtime failing target
+flutter:
+flutter: 00:00 +0 -1: (tearDownAll)
+flutter: 00:00 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: T-0055 runtime failing target
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "absent":
+[]>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///private/tmp/mc-T-0055-engineer-e2e/app/mini_client/integration_test/zz_fail_test.dart:9:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///private/tmp/mc-T-0055-engineer-e2e/app/mini_client/integration_test/zz_fail_test.dart line 9
+The test description was:
+  T-0055 runtime failing target
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1

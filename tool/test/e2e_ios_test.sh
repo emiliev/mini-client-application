@@ -628,6 +628,76 @@ test_T-0012-AC7_small_screenshot_not_upscaled() {
     fail "summary does not record small_600.png as unchanged"
 }
 
+# ------------------------------------------------ T-0055: build failures ---
+
+# T-0055-AC2, unit level: every marker in E2E_BUILD_FAIL_MARKERS, and a Dart
+# compile error line, makes build_failure_marker report a failure when it
+# appears in the output of a log (after the 6-line header); a clean log, and a
+# marker only in the header, do not.
+test_T-0055-AC2_every_marker_is_found_in_a_log() {
+  local d="$WORK/t55ac2u" markers m n=0 log
+  mkdir -p "$d"
+  scan() { "$BASH_BIN" -c 'source "$1"; build_failure_marker "$2"' _ "$E2E" "$1"; }
+  markers=$("$BASH_BIN" -c 'source "$1"; printf "%s\n" "${E2E_BUILD_FAIL_MARKERS[@]}"' _ "$E2E")
+  [ -n "$markers" ] || fail "no markers listed in E2E_BUILD_FAIL_MARKERS"
+  write_log() { # <file> <body line>
+    printf '# h1\n# h2\n# h3\n$ cmd\n\n# note\n%s\nexit\n' "$2" >"$1"
+  }
+  while IFS= read -r m; do
+    n=$((n + 1))
+    log="$d/marker-$n.log"
+    write_log "$log" "some prefix $m some suffix"
+    scan "$log" >/dev/null || fail "marker '$m' was not found in a log"
+    note "found: $m"
+  done <<EOF
+$markers
+EOF
+  [ "$n" -ge 5 ] || fail "expected at least the 5 markers named in T-0055, got $n"
+  write_log "$d/dart.log" "    integration_test/x_test.dart:8:19: Error: A value of type 'String' can't be assigned"
+  scan "$d/dart.log" >/dev/null || fail "a Dart compile error line was not found"
+  note "found: Dart compile error line"
+  # Controls: these must NOT be reported.
+  write_log "$d/clean.log" "flutter: 00:00 +1: All tests passed!"
+  scan "$d/clean.log" >/dev/null && fail "a clean log was reported as a build failure"
+  write_log "$d/error-word.log" "Error: something at runtime, not a compile error in a .dart file"
+  scan "$d/error-word.log" >/dev/null && fail "'Error:' without a file:line:col was reported"
+  printf '# h1\n# h2\n# h3\n$ echo BUILD FAILED\n\n# note\nok\n' >"$d/header.log"
+  scan "$d/header.log" >/dev/null && fail "a marker in the log header was reported"
+  note "controls: clean log, bare 'Error:' and a marker in the header are not reported"
+}
+
+# T-0055-AC2, through the real script (a real simulator, a fake runner): a
+# runner that prints a marker and exits 0 must be FAIL with "build failed" in
+# the summary, for every marker; the last target prints nothing bad and must
+# stay PASS.
+test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail() {
+  ensure_stub_project
+  local d="$WORK/t55ac2e" ev="$EV/t55ac2e" out="$OUT/t55ac2e-run.out" rc=0 markers m n=0 sum
+  mkdir -p "$d"
+  markers=$("$BASH_BIN" -c 'source "$1"; printf "%s\n" "${E2E_BUILD_FAIL_MARKERS[@]}"' _ "$E2E")
+  { printf '%s\n' "$markers"; printf '%s\n' "integration_test/x_test.dart:8:19: Error: bad type"; printf '%s\n' "All tests passed!"; } >"$d/lines"
+  printf '#!/bin/bash\nn=$(cat "$1" 2>/dev/null || echo 0); n=$((n + 1)); echo "$n" >"$1"\nsed -n "${n}p" "$2"\nexit 0\n' >"$d/fake_runner.sh"
+  chmod +x "$d/fake_runner.sh"
+  echo 0 >"$d/cnt"
+  local total targs=()
+  total=$(wc -l <"$d/lines" | tr -d ' ')
+  while [ "$n" -lt "$total" ]; do
+    targs+=(--target integration_test/stub_test.dart)
+    n=$((n + 1))
+  done
+  run_e2e "$out" --task "$TASK" --role engineer --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    "${targs[@]}" --runner-cmd "'$d/fake_runner.sh' '$d/cnt' '$d/lines'" || rc=$?
+  note "exit $rc on $(out_value "$out" SIMULATOR_NAME)"
+  assert_eq 1 "$rc" "exit code with failing targets"
+  sum="$ev/e2e-summary.md"
+  assert_eq "$((total - 1))" "$(grep -c '| FAIL (build failed: ' "$sum")" "number of targets failed as build failed"
+  assert_eq 1 "$(grep -c '| PASS |' "$sum")" "number of PASS targets (the clean one)"
+  assert_contains "$sum" "FAIL (build failed: BUILD FAILED)"
+  assert_contains "$sum" "FAIL (build failed: Dart compile error)"
+  assert_contains "$out" "RESULT: FAIL"
+}
+
 # ------------------------------------------- code-review regression tests ---
 # Each one is named after the AC whose guarantee it protects.
 
@@ -884,6 +954,8 @@ test_T-0012-AC5_fvm_checked_only_when_runner_uses_it
 test_T-0012-AC6_cleanup_only_mc_simulators
 test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
 test_T-0012-AC7_small_screenshot_not_upscaled
+test_T-0055-AC2_every_marker_is_found_in_a_log
+test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail
 "
 
 # ----------------------------------------------------------- suite runner ---

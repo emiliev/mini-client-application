@@ -22,6 +22,26 @@ DEFAULT_RUNTIME="com.apple.CoreSimulator.SimRuntime.iOS-26-2"
 DEFAULT_DRIVER="test_driver/integration_test.dart"
 DEFAULT_RUNNER_CMD='fvm flutter drive --driver={driver} --target={target} -d {udid}'
 
+# Build-failure markers (T-0055, F-0055). `flutter drive` exits 0 after a failed
+# Xcode build when an older build of the app is still installed: it prints
+# "Application failed to start on attempt: 1", attaches to that stale app and
+# reports its tests. So a target whose log contains any of these lines FAILS,
+# whatever the exit code. This is the one place the list lives; keep the
+# README's e2e section in step with it.
+E2E_BUILD_FAIL_MARKERS=(
+  'BUILD FAILED'
+  'Error (Xcode)'
+  'Failed to build iOS app'
+  'Could not build the application'
+  'Error: Compilation failed'
+  'Application failed to start on attempt'
+)
+# A Dart compile error line: "<file>.dart:<line>:<col>: Error: <message>".
+E2E_DART_ERROR_REGEX='\.dart:[0-9]+:[0-9]+: Error:'
+# The log's own header (4 "#"/"$" lines, a blank line, the uninstall note) is
+# not searched, so a runner command that merely mentions a marker is no failure.
+E2E_LOG_HEADER_LINES=6
+
 usage() {
   cat <<'EOF'
 Usage: tool/e2e_ios.sh --task T-XXXX --role engineer|verifier --project <flutter-project-dir>
@@ -31,6 +51,7 @@ Usage: tool/e2e_ios.sh --task T-XXXX --role engineer|verifier --project <flutter
                        [--runtime com.apple.CoreSimulator.SimRuntime.iOS-26-2]
                        [--evidence-dir <dir>]
                        [--runner-cmd "<cmd using {target} {driver} {udid}>"]
+                       [--bundle-id <id>]
                        [--keep-sim]
 
 Creates a private simulator named mc-<task>-<role>-<pid>, boots it, runs every
@@ -47,6 +68,12 @@ Defaults:
   --evidence-dir <repo>/documents/evidence/<task>/<role>
   --runner-cmd   fvm flutter drive --driver={driver} --target={target} -d {udid}
                  (run from --project; placeholders are replaced shell-quoted)
+
+Before each target the app is uninstalled from the simulator (its bundle id is
+read from ios/Runner.xcodeproj, or given with --bundle-id) and the project's
+build/ios/iphonesimulator is deleted, so a stale build can never run. A target also FAILS when its log holds a build-failure marker
+(BUILD FAILED, Error (Xcode), a Dart compile error, ...), whatever the exit
+code (T-0055).
 
 The evidence dir belongs to the run: at start, the previous run's outputs
 (e2e-summary.md, e2e-*.log, *.png) are removed from it; other files are kept.
@@ -121,6 +148,37 @@ downscale_if_tall() {
   fi
 }
 
+# build_failure_marker <logfile>: prints the first build-failure marker found
+# in the log (see E2E_BUILD_FAIL_MARKERS) and returns 0; returns 1 if none.
+build_failure_marker() {
+  local log=$1 m
+  for m in "${E2E_BUILD_FAIL_MARKERS[@]}"; do
+    if tail -n "+$((E2E_LOG_HEADER_LINES + 1))" "$log" | grep -F -q -- "$m"; then
+      printf '%s' "$m"
+      return 0
+    fi
+  done
+  if tail -n "+$((E2E_LOG_HEADER_LINES + 1))" "$log" | grep -E -q -- "$E2E_DART_ERROR_REGEX"; then
+    printf 'Dart compile error'
+    return 0
+  fi
+  return 1
+}
+
+# project_bundle_id: the app's bundle id, from the Runner target of the Xcode
+# project (the id the build installs under). --bundle-id overrides it. Prints
+# nothing when it can't be found (the runner is then not an iOS app project).
+project_bundle_id() {
+  if [ -n "$BUNDLE_ID" ]; then
+    printf '%s' "$BUNDLE_ID"
+    return 0
+  fi
+  local pbx="$PROJECT_DIR/ios/Runner.xcodeproj/project.pbxproj"
+  [ -f "$pbx" ] || return 0
+  grep -E 'PRODUCT_BUNDLE_IDENTIFIER = ' "$pbx" | grep -v 'RunnerTests' |
+    sed -E 's/.*PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);.*/\1/' | head -n 1 | tr -d '"'
+}
+
 # simctl_devices_tsv: one line per simulator in the default device set:
 # "<udid>\t<state>\t<name>".
 simctl_devices_tsv() {
@@ -191,6 +249,7 @@ RUNTIME="$DEFAULT_RUNTIME"
 EVIDENCE_DIR=""
 RUNNER_CMD_TEMPLATE="$DEFAULT_RUNNER_CMD"
 KEEP_SIM=0
+BUNDLE_ID=""
 
 DEVICE_TYPE_ID=""
 RUNTIME_NAME=""
@@ -355,7 +414,7 @@ on_signal() {
 parse_args() {
   while [ $# -gt 0 ]; do
     case $1 in
-      --task | --role | --project | --target | --driver | --device | --runtime | --evidence-dir | --runner-cmd)
+      --task | --role | --project | --target | --driver | --device | --runtime | --evidence-dir | --runner-cmd | --bundle-id)
         [ $# -ge 2 ] || die "$1 needs a value"
         case $1 in
           --task) TASK=$2 ;;
@@ -367,6 +426,7 @@ parse_args() {
           --runtime) RUNTIME=$2 ;;
           --evidence-dir) EVIDENCE_DIR=$2 ;;
           --runner-cmd) RUNNER_CMD_TEMPLATE=$2 ;;
+          --bundle-id) BUNDLE_ID=$2 ;;
         esac
         shift 2
         ;;
@@ -469,6 +529,36 @@ print("OK\t%s\t%s" % (dt.get("identifier"), rt.get("name", runtime)))
 }
 
 # --------------------------------------------------------------- running ---
+# remove_stale_app <logfile>: defence 1 of T-0055 (F-0055). Before each target,
+# (a) uninstall the app from the simulator, and (b) delete the project's built
+# iOS app bundle, build/ios/iphonesimulator. (b) is the one that matters: after
+# a failed build `flutter drive` installs the leftover Runner.app from the
+# previous target and runs it, even on a freshly created simulator, so
+# uninstalling alone is not enough. Xcode's intermediates stay, so the next
+# build is still incremental. Not-installed is fine (simctl's error is
+# ignored). Writes exactly one note line to the log (it is the last header
+# line, see E2E_LOG_HEADER_LINES).
+remove_stale_app() {
+  local logfile=$1 id note="" stale="$PROJECT_DIR/build/ios/iphonesimulator"
+  id=$(project_bundle_id)
+  if [ -n "$id" ]; then
+    xcrun simctl uninstall "$SIM_UDID" "$id" >/dev/null 2>&1 || true
+    note="uninstalled $id"
+  else
+    warn "no bundle id found in $PROJECT_DIR/ios/Runner.xcodeproj (pass --bundle-id); not uninstalling"
+    note="no bundle id, nothing uninstalled"
+  fi
+  if [ -e "$stale" ]; then
+    if rm -rf "$stale" 2>/dev/null; then
+      note="$note; removed build/ios/iphonesimulator"
+    else
+      warn "could not remove $stale; a stale build may still be installed (the build-failure markers still apply)"
+      note="$note; could NOT remove build/ios/iphonesimulator"
+    fi
+  fi
+  echo "# e2e_ios.sh: $note" >>"$logfile"
+}
+
 render_cmd() {
   local target=$1 cmd=$RUNNER_CMD_TEMPLATE
   cmd=$(replace_all "$cmd" "{target}" "$(printf '%q' "$target")")
@@ -605,6 +695,8 @@ run_target() {
     return 4
   fi
 
+  remove_stale_app "$logfile"
+
   CURRENT_IDX=$idx
   CURRENT_LOG=$logname
   CURRENT_SHOTS=$shots
@@ -623,12 +715,26 @@ run_target() {
   CURRENT_COLLECTED=1
   collect_screenshots "$shots" "$target" || return 4
 
+  # T-0055: a build-failure marker fails the target whatever the exit code.
+  local marker=""
+  if marker=$(build_failure_marker "$logfile"); then
+    printf '# e2e_ios.sh: FAIL, build failed (marker: %s) although the runner exited with %s\n' "$marker" "$rc" >>"$logfile" ||
+      printf 'e2e_ios: warning: cannot append to %s\n' "$logfile" >&2
+    rc=1
+  else
+    marker=""
+  fi
+
   T_DURATIONS+=("$dur")
   T_LOGS+=("$logname")
   CURRENT_IDX=-1
   if [ "$rc" -eq 0 ]; then
     T_RESULTS+=("PASS")
     log "PASS $target (${dur} s)"
+  elif [ -n "$marker" ]; then
+    T_RESULTS+=("FAIL (build failed: $marker)")
+    log "FAIL $target (${dur} s): build failed, marker '$marker'. Last lines of $logname:"
+    tail -n 30 "$logfile" | sed 's/^/    /' >&2
   else
     T_RESULTS+=("FAIL")
     log "FAIL $target (${dur} s, exit $rc). Last lines of $logname:"
