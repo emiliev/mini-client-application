@@ -14,23 +14,67 @@ import 'package:auth_signin/src/presentation/bloc/auth_signin_bloc.dart';
 import 'package:auth_signin/src/presentation/form/auth_signin_form.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
+import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_forms/mc_forms.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_prelude/mc_prelude.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 
+AuthTokens _tokens(String user) => AuthTokens(
+  accessToken: mintAccessToken(user, 1),
+  refreshToken: mintRefreshToken(user, 1),
+);
+
+/// A repository whose answer lands, and then someone else signs in elsewhere
+/// (u-101) before the bloc looks at the session.
+final class _SwitchingRepository extends AuthSignInRepository {
+  const _SwitchingRepository(super.auth, this._session);
+
+  final Session _session;
+
+  @override
+  Future<Result<AuthUser, ApiFailure>> signIn({
+    required String email,
+    required String password,
+  }) async {
+    final answer = await super.signIn(email: email, password: password);
+    await _session.signIn(userId: 'u-101', tokens: _tokens('u-101'));
+    return answer;
+  }
+}
+
 final class _Harness {
-  _Harness._(this.dir, this.backend, this.session, this.flow) {
+  _Harness._(
+    this.dir,
+    this.backend,
+    this.session,
+    this.flow, {
+    required bool switching,
+  }) {
     final auth = AuthApi(backend.createDio(), session, session);
-    bloc = AuthSignInBloc(AuthSignInRepository(auth), flow, Monitoring([]));
+    bloc = AuthSignInBloc(
+      switching
+          ? _SwitchingRepository(auth, session)
+          : AuthSignInRepository(auth),
+      flow,
+      session,
+      Monitoring([]),
+    );
     results = [];
     flow.completions.listen(results.add);
   }
 
-  static _Harness start({Duration latency = Duration.zero}) {
+  /// [signedInAs] is signed in before the form opens; [switching] makes
+  /// another user sign in elsewhere right after the form's answer lands.
+  static Future<_Harness> start({
+    Duration latency = Duration.zero,
+    String? signedInAs,
+    bool switching = false,
+  }) async {
     final dir = Directory.systemTemp.createTempSync('mc_sign_in_guards');
     final backend = MockBackend(
       domains: const [IdentityMockDomain()],
@@ -38,11 +82,16 @@ final class _Harness {
           ? LatencyProfile.none
           : LatencyProfile.slow(latency),
     );
+    final session = Session.empty(FileStore(dir));
+    if (signedInAs != null) {
+      await session.signIn(userId: signedInAs, tokens: _tokens(signedInAs));
+    }
     return _Harness._(
       dir,
       backend,
-      Session.empty(FileStore(dir)),
+      session,
       FeatureFlowController<AuthSignInFlowState>(const AuthSignInFlowState()),
+      switching: switching,
     );
   }
 
@@ -93,7 +142,8 @@ void main() {
 
   test('T-0066-AC1 three submits in one turn send one request and complete '
       'once', () async {
-    h = _Harness.start(latency: const Duration(milliseconds: 30))..fill();
+    h = await _Harness.start(latency: const Duration(milliseconds: 30));
+    h.fill();
     await h.settle();
 
     h.bloc
@@ -110,7 +160,8 @@ void main() {
 
   test('T-0066-AC1 after the sign-in, a further submit sends nothing and '
       'Not now does not turn it into a cancel', () async {
-    h = _Harness.start()..fill();
+    h = await _Harness.start();
+    h.fill();
     await h.settle();
     h.bloc.add(const AuthSignInEvent.submit());
     await h.until(() => h.results.isNotEmpty);
@@ -127,7 +178,8 @@ void main() {
 
   test('T-0066-AC1 Not now while the request is on its way is ignored, so a '
       'sign-in is never answered as cancelled', () async {
-    h = _Harness.start(latency: const Duration(milliseconds: 30))..fill();
+    h = await _Harness.start(latency: const Duration(milliseconds: 30));
+    h.fill();
     await h.settle();
 
     h.bloc
@@ -141,7 +193,7 @@ void main() {
 
   test('T-0066-AC1 Not now on an idle form completes as cancelled and '
       'sends nothing', () async {
-    h = _Harness.start();
+    h = await _Harness.start();
     await h.settle();
 
     h.bloc.add(const AuthSignInEvent.notNow());
@@ -154,7 +206,8 @@ void main() {
 
   test('T-0066-AC1 a failed submit shows the failure, an edit clears it, and '
       'the retry sends a second request', () async {
-    h = _Harness.start()..fill(password: 'not-it');
+    h = await _Harness.start();
+    h.fill(password: 'not-it');
     await h.settle();
 
     h.bloc.add(const AuthSignInEvent.submit());
@@ -175,7 +228,7 @@ void main() {
   test(
     'T-0066-AC1 an invalid form sends nothing and touches every field',
     () async {
-      h = _Harness.start();
+      h = await _Harness.start();
       await h.settle();
 
       h.bloc.add(const AuthSignInEvent.submit());
@@ -197,7 +250,8 @@ void main() {
 
   test('T-0066-AC1 a bloc closed while the request is on its way completes '
       'nothing, throws nothing, and undoes the sign-in that lands', () async {
-    h = _Harness.start(latency: const Duration(milliseconds: 30))..fill();
+    h = await _Harness.start(latency: const Duration(milliseconds: 30));
+    h.fill();
     await h.settle();
 
     h.bloc.add(const AuthSignInEvent.submit());
@@ -212,9 +266,56 @@ void main() {
     expect(h.session.isSignedIn, isFalse, reason: 'leaving cancels');
   });
 
+  test('T-0066-AC1 a user who was signed in before the form: leaving '
+      'mid-request keeps the new session (B), never signs out', () async {
+    h = await _Harness.start(
+      latency: const Duration(milliseconds: 30),
+      signedInAs: 'u-100',
+    );
+    h.bloc
+      ..add(AuthSignInEvent.emailChanged(fixtureUsers.last.email))
+      ..add(AuthSignInEvent.passwordChanged(fixtureUsers.last.password));
+    await h.settle();
+
+    h.bloc.add(const AuthSignInEvent.submit());
+    await h.until(() => h.bloc.state.form.isSubmitting);
+    await h.bloc.close();
+    await h.until(() => h.session.userId == 'u-101');
+    await h.settle();
+
+    expect(h.session.userId, 'u-101', reason: 'B, the sign-in that landed');
+    expect(
+      h.backend.recentTraffic.where((t) => t.path == '/v1/auth/sign-out'),
+      isEmpty,
+    );
+    expect(h.results, isEmpty);
+  });
+
+  test('T-0066-AC1 a late answer after another sign-in elsewhere leaves '
+      'the newer session alone', () async {
+    h = await _Harness.start(
+      latency: const Duration(milliseconds: 30),
+      switching: true,
+    );
+    h.fill();
+    await h.settle();
+
+    h.bloc.add(const AuthSignInEvent.submit());
+    await h.until(() => h.bloc.state.form.isSubmitting);
+    await h.bloc.close();
+    await h.until(() => h.session.userId == 'u-101');
+    await h.settle();
+
+    expect(h.session.userId, 'u-101', reason: 'the newer session stays');
+    expect(
+      h.backend.recentTraffic.where((t) => t.path == '/v1/auth/sign-out'),
+      isEmpty,
+    );
+  });
+
   test('T-0066-AC1 a demo account fills both fields, and is ignored while a '
       'request runs', () async {
-    h = _Harness.start(latency: const Duration(milliseconds: 30));
+    h = await _Harness.start(latency: const Duration(milliseconds: 30));
     await h.settle();
     final reader = fixtureUsers.first;
     final collector = fixtureUsers.last;

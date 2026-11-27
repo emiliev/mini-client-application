@@ -62,8 +62,8 @@ GoRouter _buildRouter(
     ...accountRoutes,
     notFoundRoute,
   ]),
-  // The sign-in guard (P1-16 AC4) re-evaluates on every sign-in and
-  // sign-out, so signing out on a protected screen redirects.
+  // The sign-in guard (P1-16 AC4) re-evaluates on every sign-out (not on a
+  // sign-in), so signing out on a protected screen redirects.
   refreshListenable: guard.refresh,
   redirect: (context, state) {
     McRouteProbe.recordRedirect(context, state.uri);

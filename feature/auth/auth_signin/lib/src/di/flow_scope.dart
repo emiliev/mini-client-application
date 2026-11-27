@@ -1,6 +1,7 @@
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 
 /// The root services this flow's container forwards (R17): the parameter
 /// types of every injectable constructor and `@factoryMethod` in the package,
@@ -14,4 +15,5 @@ import 'package:mc_monitoring/mc_monitoring.dart';
 const List<RootImport<Object>> authSignInRootImports = [
   RootImport<AuthApi>(),
   RootImport<Monitoring>(),
+  RootImport<SessionReader>(),
 ];

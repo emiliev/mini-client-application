@@ -48,7 +48,8 @@ final class SignInGuard {
   /// Gives the guard the router it protects (once `buildAppRouter` made it).
   void bind(GoRouter router) => _router = router;
 
-  /// After a sign-out: the page on top, if it is protected, goes to sign-in.
+  /// After a sign-out: if any page of the stack is protected, the user goes to
+  /// sign-in (from = the topmost protected page).
   /// Runs after the frame, when a refresh of a page that was not pushed has
   /// already redirected it.
   void _enforce() {
@@ -62,16 +63,23 @@ final class SignInGuard {
           return;
         }
         final config = router.routerDelegate.currentConfiguration;
-        if (config.isEmpty) {
-          return;
-        }
-        final last = config.last;
-        final top = last is ImperativeRouteMatch
-            ? last.matches.uri
-            : config.uri;
-        final target = redirect(top);
-        if (target != null) {
-          router.go(target);
+        // Every page of the stack, top first (pushed pages carry their own
+        // location). The topmost protected one is where the user goes back
+        // to after signing in; the `go` drops the whole stack, so no
+        // protected page is left under an open one for Back to reach.
+        final locations = <Uri>[
+          for (final match in config.matches.reversed)
+            if (match is ImperativeRouteMatch)
+              match.matches.uri
+            else
+              Uri.parse(match.matchedLocation),
+        ];
+        for (final location in locations) {
+          final target = redirect(location);
+          if (target != null) {
+            router.go(target);
+            return;
+          }
         }
       })
       ..scheduleFrame();
@@ -80,10 +88,23 @@ final class SignInGuard {
   /// The location a signed-out user is sent to for [uri], or null when
   /// nothing is in the way (signed in, or not a protected location).
   String? redirect(Uri uri) {
-    if (_session.isSignedIn || !isProtectedLocation(uri)) {
+    if (_session.isSignedIn) {
+      // Nothing to sign in to: the sign-in page sends a signed-in user on to
+      // its `from` (or home). It only runs when a location is parsed, so the
+      // page of a sign-in that is under way is never moved by it.
+      return _isSignInPage(uri)
+          ? safeSignInTarget(uri.queryParameters['from'])
+          : null;
+    }
+    if (!isProtectedLocation(uri)) {
       return null;
     }
     return AppLocations.signIn(from: originalLocationOf(uri));
+  }
+
+  static bool _isSignInPage(Uri uri) {
+    final path = Uri(path: uri.path).normalizePath().path;
+    return path == _signInPath || path == '$_signInPath/';
   }
 
   /// Protected locations (plan 01 §4.2): `/me/**`, `/library/**` and

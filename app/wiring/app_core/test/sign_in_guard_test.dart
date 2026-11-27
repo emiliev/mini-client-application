@@ -160,6 +160,29 @@ void main() {
       }
     });
 
+    test('T-0066-AC2 a signed-in user at the sign-in page is sent on to its '
+        'safe from, else home', () {
+      final guard = SignInGuard(_FakeSession(signedIn: true));
+
+      expect(
+        guard.redirect(Uri.parse('/auth/sign-in?from=%2Fme%2Flists%2Fnew')),
+        '/me/lists/new',
+      );
+      expect(guard.redirect(Uri.parse('/auth/sign-in')), '/');
+      expect(
+        guard.redirect(Uri.parse('/auth/sign-in?from=https%3A%2F%2Fevil.com')),
+        '/',
+      );
+      expect(
+        guard.redirect(Uri.parse('/auth/sign-in?from=%2Fauth%2Fsign-in')),
+        '/',
+      );
+      expect(
+        guard.redirect(Uri.parse('/x/../auth/sign-in?from=%2Fme%2Fa')),
+        '/me/a',
+      );
+    });
+
     test('T-0066-AC2 the guard reads the session at every call', () {
       final session = _FakeSession();
       final guard = SignInGuard(session);

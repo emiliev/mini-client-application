@@ -10,6 +10,7 @@ import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_forms/mc_forms.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 
 part 'auth_signin_event.dart';
 part 'auth_signin_state.dart';
@@ -40,6 +41,7 @@ final class AuthSignInBloc extends McBloc<AuthSignInEvent, AuthSignInState> {
   AuthSignInBloc(
     this._repository,
     this._flow,
+    this._session,
     Monitoring monitoring,
   ) : super(
         AuthSignInState(
@@ -62,6 +64,7 @@ final class AuthSignInBloc extends McBloc<AuthSignInEvent, AuthSignInState> {
 
   final AuthSignInRepository _repository;
   final FeatureFlowController<AuthSignInFlowState> _flow;
+  final SessionReader _session;
   late final FormController _form;
 
   /// The sign-in succeeded: nothing but the form's own updates is handled
@@ -102,22 +105,40 @@ final class AuthSignInBloc extends McBloc<AuthSignInEvent, AuthSignInState> {
   }
 
   Future<void> _submit() async {
-    final result = await _form.submit<AuthUser>(
-      (values) => _repository.signIn(
+    // Who was signed in when the request was sent, and which session this
+    // request creates: leaving mid-request undoes only the latter, and only
+    // when nobody was signed in before.
+    final signedInBefore = _session.isSignedIn;
+    int? createdEpoch;
+    final result = await _form.submit<AuthUser>((values) async {
+      final answer = await _repository.signIn(
         email: values.get<String>(SignInFields.email) ?? '',
         password: values.get<String>(SignInFields.password) ?? '',
-      ),
-    );
+      );
+      final user = answer.getOrNull();
+      if (user != null && _session.userId == user.id) {
+        createdEpoch = _session.epoch;
+      }
+      return answer;
+    });
     if (result == null) {
       // Invalid (the form shows why), or a request is already running (a
       // double tap).
       return;
     }
     if (isClosed) {
-      // The user left (Back, a link) while the request was on its way. The
-      // caller was told "no sign-in", so one that landed is undone: leaving
-      // cancels.
-      await result.fold((_) => _repository.signOut(), (_) async {});
+      // The flow was closed (a link, a screen replaced) while the request was
+      // on its way. The caller was told "no sign-in", so a session this
+      // request created is undone (leaving cancels), and only that one,
+      // never a newer session. When someone was signed in before the form,
+      // that user was already replaced by this sign-in, so the new session
+      // stays: the outcome is A or B, never signed out. A system back or an
+      // iOS swipe cannot reach here: the page refuses it while a request
+      // runs.
+      final epoch = createdEpoch;
+      if (!signedInBefore && epoch != null) {
+        await _repository.signOut(epoch: epoch);
+      }
       return;
     }
     result.fold((_) {

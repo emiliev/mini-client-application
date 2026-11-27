@@ -379,6 +379,51 @@ void main() {
       expect(find.byKey(_editor), findsOneWidget);
     });
 
+    testWidgets('T-0066-AC2 a protected page under an open one does not '
+        'survive a sign-out: no protected page is reachable by Back', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+
+      app.edit('l-1');
+      await tester.pumpAndSettle();
+      unawaited(app.router.push('/other'));
+      await tester.pumpAndSettle();
+      expect(find.text('other'), findsOneWidget);
+
+      app.session.signOut();
+      await tester.pumpAndSettle();
+
+      // The topmost protected page is where the user goes back to.
+      expect(app.location, '/auth/sign-in?from=%2Fme%2Flists%2Fl-1%2Fedit');
+      expect(find.byKey(_signInPage), findsOneWidget);
+      expect(find.byKey(_editor), findsNothing);
+      expect(find.text('other'), findsNothing);
+      expect(app.got, ['e:l-1:null'], reason: 'the editor call ended once');
+
+      // Back from sign-in is home: there is no protected page below.
+      app.router.pop();
+      await tester.pumpAndSettle();
+      expect(find.byKey(_home), findsOneWidget);
+      expect(app.router.canPop(), isFalse);
+      expect(find.byKey(_editor), findsNothing);
+    });
+
+    testWidgets('T-0066-AC2 a signed-in user at /auth/sign-in goes on to '
+        'its from, or home when it is foreign', (tester) async {
+      final app = await _app(tester);
+
+      app.router.go(AppLocations.signIn(from: '/store/checkout'));
+      await tester.pumpAndSettle();
+      expect(find.text('checkout'), findsOneWidget);
+      expect(find.byKey(_signInPage), findsNothing);
+
+      app.router.go(AppLocations.signIn(from: 'https://evil.com'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(_home), findsOneWidget);
+      expect(find.byKey(_signInPage), findsNothing);
+    });
+
     testWidgets('T-0066-AC2 signing out on an open page changes nothing', (
       tester,
     ) async {

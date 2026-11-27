@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:account_wiring/account_wiring.dart';
 import 'package:app_core/app_core.dart';
 import 'package:auth_signin/auth_signin.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -105,9 +106,11 @@ Future<GoRouter> _bootReal(
     McTestSession.current,
     wirings: [RouterDIInitializer(ref), const AccountWiringDIInitializer()],
   );
+  final guard = SignInGuard(diContainer<SessionReader>());
   final router = ref.attach(
     GoRouter(
       initialLocation: initial,
+      redirect: (context, state) => guard.redirect(state.uri),
       routes: nestUnderHome(
         [
           GoRoute(
@@ -267,10 +270,50 @@ void main() {
     },
   );
 
-  mcTestWidgets('T-0066-AC3 requestSignIn: leaving the form by Back while the '
-      'request is on its way answers false, and the sign-in that lands is '
-      'undone', (tester) async {
-    await _bootReal(tester);
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    mcTestWidgets('T-0066-AC3 requestSignIn (${platform.name}): a system back '
+        'or a swipe while the request is on its way is refused, and the '
+        'sign-in completes', (tester) async {
+      debugDefaultTargetPlatformOverride = platform;
+      addTearDown(() => debugDefaultTargetPlatformOverride = null);
+      await _bootReal(tester);
+      final backend = McTestSession.current.backend
+        ..hold('POST /v1/auth/sign-in');
+
+      bool? answer;
+      final pending = diContainer<SettingsAppearanceNavigator>()
+          .requestSignIn()
+          .then((a) => answer = a);
+      await tester.pumpAndSettle();
+      await _useDemoAccount(tester, fixtureUsers.first.email);
+      await tester.tap(find.byKey(McFormScaffold.submitKey));
+      await tester.pump();
+
+      await tester.binding.handlePopRoute();
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.dragFrom(const Offset(2, 300), const Offset(400, 0));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(
+        find.byKey(const ValueKey<String>('auth_signin.form')),
+        findsOneWidget,
+        reason: 'the form is still there',
+      );
+      expect(answer, isNull, reason: 'the caller still waits');
+
+      await backend.release('POST /v1/auth/sign-in');
+      await _settleSignIn(tester);
+      await pending;
+
+      expect(answer, isTrue);
+      expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
+      expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+    });
+  }
+
+  mcTestWidgets('T-0066-AC3 requestSignIn: the form replaced by a link while '
+      'the request is on its way answers false, and the sign-in that lands '
+      'is undone', (tester) async {
+    final router = await _bootReal(tester);
     final backend = McTestSession.current.backend
       ..hold('POST /v1/auth/sign-in');
 
@@ -282,8 +325,7 @@ void main() {
     await _useDemoAccount(tester, fixtureUsers.first.email);
     await tester.tap(find.byKey(McFormScaffold.submitKey));
     await tester.pump();
-    // A system back (the form has no back button while the request runs).
-    expect(await tester.binding.handlePopRoute(), isTrue);
+    router.go('/');
     await tester.pumpAndSettle();
     await pending;
     expect(answer, isFalse);
@@ -293,6 +335,29 @@ void main() {
 
     expect(diContainer<SessionReader>().isSignedIn, isFalse);
     expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+  });
+
+  mcTestWidgets('T-0066-AC2 a signed-in user at /auth/sign-in is sent on to '
+      'its from (or home), not shown the form', (tester) async {
+    final router = await _bootReal(tester);
+    await tester.runAsync(
+      () => diContainer<AuthApi>().signIn(
+        email: fixtureUsers.first.email,
+        password: fixtureUsers.first.password,
+      ),
+    );
+
+    router.go(AppLocations.signIn(from: '/me/lists/new'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('stand-in.target')), findsOneWidget);
+
+    router.go(AppLocations.signIn(from: 'https://evil.com'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey<String>('auth_signin.form')),
+      findsNothing,
+    );
   });
 
   mcTestWidgets('T-0066-AC2 the real route: signing in with from goes there, '

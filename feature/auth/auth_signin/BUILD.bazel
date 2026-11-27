@@ -234,6 +234,7 @@ flutter_test(
         "//utility/mc_forms",
         "//utility/mc_mocked_backend",
         "//utility/mc_monitoring",
+        "//utility/mc_prelude",
         "//utility/mc_session",
         "//utility/mc_storage",
         "@pub_deps//:flutter_test",
