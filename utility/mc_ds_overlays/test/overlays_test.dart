@@ -900,6 +900,35 @@ void main() {
       handle.dispose();
     });
 
+    testWidgets('T-0058-AC3 a screen reader can open the menu and dismiss a '
+        'sheet through the semantics tap action', (tester) async {
+      final handle = tester.ensureSemantics();
+      void semanticTap(String label) {
+        final node = _labelled(tester, label).firstWhere(
+          (n) => n.getSemanticsData().hasAction(SemanticsAction.tap),
+        );
+        tester.binding.renderViews.first.owner!.semanticsOwner!.performAction(
+          node.id,
+          SemanticsAction.tap,
+        );
+      }
+
+      final picked = <String>[];
+      await tester.pumpWidget(_menuApp(picked));
+      semanticTap('More actions');
+      await tester.pumpAndSettle();
+      expect(find.text('Edit'), findsOneWidget, reason: 'the menu opened');
+      await _tapBarrier(tester);
+
+      await tester.pumpWidget(_plain());
+      final answer = await _openChoice(tester, selected: 'light');
+      semanticTap('Close sheet');
+      await tester.pumpAndSettle();
+      expect(find.byType(McSheet), findsNothing);
+      expect(await answer, isNull);
+      handle.dispose();
+    });
+
     testWidgets('T-0058-AC3 a tooltip shows on long press and on hover, and '
         'is on the child semantics', (tester) async {
       final handle = tester.ensureSemantics();
