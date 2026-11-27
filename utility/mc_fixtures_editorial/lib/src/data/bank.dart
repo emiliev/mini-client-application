@@ -266,9 +266,9 @@ final class _Generator {
             category: category,
             difficulty: difficulty,
             prompt: question.prompt,
-            choices: question.choices,
+            choices: List.unmodifiable(question.choices),
             correctChoiceId: question.correctChoiceId,
-            facts: question.facts,
+            facts: Map.unmodifiable(question.facts),
             imageUrl: question.imageUrl,
           ),
         );

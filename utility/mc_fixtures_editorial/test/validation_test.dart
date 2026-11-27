@@ -132,6 +132,17 @@ void main() {
       );
     });
 
+    test(
+      'T-0060-AC3: the unknown_category message lists the categories',
+      () async {
+        final response = await _rounds(dio, _with('category', 'nope'));
+        expect(
+          (response.data!['error']! as Json)['message'],
+          'category must be one of all, characters, comics, creators',
+        );
+      },
+    );
+
     test('T-0060-AC3: a rejected request is a 400 with no questions', () async {
       final response = await _rounds(dio, _with('seed', '-1'));
       expect(response.data!.keys, ['error']);
@@ -252,6 +263,24 @@ void main() {
           'roundId': 'r-all-easy-42',
           'answers': [
             {'choiceId': 'c1', 'elapsedMs': 1},
+          ],
+        },
+      ),
+      (
+        'an answer with no choiceId key',
+        {
+          'roundId': 'r-all-easy-42',
+          'answers': [
+            {'questionId': 'q', 'elapsedMs': 1},
+          ],
+        },
+      ),
+      (
+        'a choiceID key of the wrong case',
+        {
+          'roundId': 'r-all-easy-42',
+          'answers': [
+            {'questionId': 'q', 'choiceID': 'c1', 'elapsedMs': 1},
           ],
         },
       ),

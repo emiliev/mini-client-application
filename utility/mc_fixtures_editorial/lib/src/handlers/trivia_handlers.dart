@@ -112,7 +112,9 @@ MockHandler getRound({required bool empty}) => (request, context) {
   if (!_categoryIds(empty: empty).contains(category)) {
     return _invalid(
       'unknown_category',
-      'category must be one of ${_categoryIds(empty: false).join(', ')}',
+      _categoryIds(empty: empty).isEmpty
+          ? 'there are no categories'
+          : 'category must be one of ${_categoryIds(empty: empty).join(', ')}',
       {'parameter': 'category'},
     );
   }
@@ -157,12 +159,13 @@ MockResponse _badBody(String message) =>
   for (final entry in raw) {
     if (entry is! Map ||
         entry['questionId'] is! String ||
+        !entry.containsKey('choiceId') ||
         (entry['choiceId'] != null && entry['choiceId'] is! String)) {
       return (
         answers: null,
         error: _badBody(
-          'each answer needs a questionId string and a choiceId string or '
-          'null',
+          'each answer needs a questionId string and a choiceId key that is '
+          'a string or null',
         ),
       );
     }

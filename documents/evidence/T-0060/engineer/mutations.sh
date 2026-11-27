@@ -232,6 +232,10 @@ mutate "H40 the round body reports another seed" $TH "'seed': seed," "'seed': se
 mutate "H41 the server_error body differs" $TH "'Injected HTTP 500 for \${request.routeKey}'," "'Injected HTTP 501 for \${request.routeKey}',"
 mutate "H42 the seed error names no parameter" $TH "{'parameter': 'seed'}" "{'parameter': 'seeds'}"
 mutate "H43 the unknown-choice error has no choice id" $TH "'choiceId': choice," "'choiceId': 'x',"
+mutate "H44 an answer without a choiceId key is read as a timeout" $TH "!entry.containsKey('choiceId') ||" 'entry.length > 99 ||'
+mutate "H45 the empty set's category message still lists categories" $TH "? 'there are no categories'" "? 'category must be one of all'"
+mutate "B35 the cached choices can be changed" $BK 'choices: List.unmodifiable(question.choices),' 'choices: question.choices,'
+mutate "B36 the cached facts can be changed" $BK 'facts: Map.unmodifiable(question.facts),' 'facts: question.facts,'
 # --- domain ------------------------------------------------------------------
 mutate "D1 the best route is not in the manifest" $DOM "  'GET /v1/me/trivia/best',
 ];" '];'

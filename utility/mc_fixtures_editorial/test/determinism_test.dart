@@ -182,6 +182,26 @@ void main() {
       );
     });
 
+    test('T-0060-AC1: the cached questions cannot be changed', () {
+      final q = triviaQuestionBank(42).first;
+      expect(
+        () => q.choices.add(const TriviaChoice(id: 'c5', text: 'x')),
+        throwsUnsupportedError,
+      );
+      expect(
+        () => q.choices[0] = const TriviaChoice(id: 'c1', text: 'x'),
+        throwsUnsupportedError,
+      );
+      expect(q.choices.clear, throwsUnsupportedError);
+      expect(() => q.facts['kind'] = 'x', throwsUnsupportedError);
+      expect(() => q.facts.remove('kind'), throwsUnsupportedError);
+      expect(q.facts.clear, throwsUnsupportedError);
+      for (final other in triviaQuestionBank(42)) {
+        expect(() => other.choices.removeLast(), throwsUnsupportedError);
+        expect(() => other.facts['x'] = 1, throwsUnsupportedError);
+      }
+    });
+
     test('T-0060-AC1: the bank holds at least 120 questions, 24 per template, '
         'with every (category, difficulty) pool at least 10 deep', () {
       for (final seed in [42, 7, 0]) {

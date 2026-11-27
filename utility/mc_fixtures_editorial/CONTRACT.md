@@ -178,7 +178,7 @@ All failures are `400` with `{"error": {"code", "message", "parameter", ...}}`. 
 
 | Order | `error.code` | Rule | Extra fields |
 |---|---|---|---|
-| 1 | `unknown_category` | `category` missing, or not `all` / `characters` / `comics` / `creators` (case-sensitive) | `parameter: "category"` |
+| 1 | `unknown_category` | `category` missing, or not `all` / `characters` / `comics` / `creators` (case-sensitive). The message lists the active categories, or says there are none (`trivia.empty`) | `parameter: "category"` |
 | 2 | `invalid_difficulty` | `difficulty` missing, or not exactly `easy`, `medium` or `hard` | `parameter: "difficulty"` |
 | 3 | `invalid_seed` | `seed` missing, or not a canonical decimal integer from 0 to 2147483647 (2^31 - 1): no sign, no spaces, no leading zeros (`0` is fine, `007`, `+5`, `-1`, `4.5` and `2147483648` are not) | `parameter: "seed"` |
 
@@ -186,7 +186,7 @@ All failures are `400` with `{"error": {"code", "message", "parameter", ...}}`. 
 
 | Order | `error.code` | Rule | Extra fields |
 |---|---|---|---|
-| 0 | `invalid_body` | The body is not an object with a `roundId` string and an `answers` list of objects that each hold a `questionId` string and a `choiceId` that is a string or `null` | `parameter: "body"` |
+| 0 | `invalid_body` | The body is not an object with a `roundId` string and an `answers` list of objects that each hold a `questionId` string and a `choiceId` **key** whose value is a string or `null` (an answer with no `choiceId` key, or with `choiceID`, is rejected, never read as a timeout) | `parameter: "body"` |
 | 1 | `unknown_round` | `roundId` is not `r-<category>-<difficulty>-<seed>` of a known category, a difficulty and a valid seed (canonical form) | `parameter: "roundId"` |
 | 2 | `answer_count_mismatch` | The number of answers is not 10 | `parameter`, `expected: 10` |
 | 3 | `unknown_question` | A `questionId` is not a question of this round (the first one is named) | `parameter`, `questionId` |

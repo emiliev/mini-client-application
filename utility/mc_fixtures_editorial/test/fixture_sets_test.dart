@@ -132,6 +132,11 @@ void main() {
       );
       expect(response.statusCode, 400, reason: category);
       expect((response.data!['error']! as Json)['code'], 'unknown_category');
+      expect(
+        (response.data!['error']! as Json)['message'],
+        'there are no categories',
+        reason: category,
+      );
     }
     final results = await postResult(dio, {
       'roundId': 'r-all-easy-42',

@@ -27,9 +27,16 @@ work="$(mktemp -d)"
 # of it afterwards) that depends on the editorial package.
 neg_flutter=utility/zz_negctl_T0060_flutter
 neg_prod=feature/zz_negctl_T0060/zz_negctl_T0060_prod
-make_neg() {  # make_neg <dir> <package> <dep>...
-  local dir="$1" pkg="$2"; shift 2
-  [[ ! -e "$dir" ]] || { echo "refusing: $dir exists" >&2; return 1; }
+# MADE lists only what this script created (the cleanup removes nothing else);
+# a refusal sets neg_refused, which fails the gate.
+MADE=()
+neg_refused=0
+make_neg() {  # make_neg <root> <dir> <package> <dep>...
+  local root="$1" dir="$2" pkg="$3"; shift 3
+  if [[ -e "$root" ]]; then
+    echo "refusing: $root exists" >&2; neg_refused=1; return 1
+  fi
+  MADE+=("$root")
   mkdir -p "$dir/lib"
   printf 'library;\n' > "$dir/lib/x.dart"
   {
@@ -40,7 +47,11 @@ make_neg() {  # make_neg <dir> <package> <dep>...
     printf '    ],\n)\n'
   } > "$dir/BUILD.bazel"
 }
-cleanup() { rm -rf "$neg_flutter" feature/zz_negctl_T0060 "$work"; }
+cleanup() {
+  local d
+  for d in ${MADE[@]+"${MADE[@]}"}; do rm -rf "$d"; done
+  rm -rf "$work"
+}
 trap cleanup EXIT
 rows=()
 fails=()
@@ -70,9 +81,9 @@ report "# T-0060-AC5: pure Dart, registered, covered" "" \
   "## positive control: mc_fixtures_media" '```' "Flutter markers: ${control:-none}" '```'
 # Negative control: a target that depends on the editorial package AND on the
 # Flutter-bound media package must show Flutter markers in its closure.
-make_neg "$neg_flutter" zz_negctl_flutter //utility/mc_fixtures_editorial //utility/mc_fixtures_media
+make_neg "$neg_flutter" "$neg_flutter" zz_negctl_flutter //utility/mc_fixtures_editorial //utility/mc_fixtures_media || true
 neg_hits="$(closure //$neg_flutter:zz_negctl_flutter | grep -E "$FLUTTER" | sort -u | head -3)"
-rm -rf "$neg_flutter"
+[[ " ${MADE[*]-} " == *" $neg_flutter "* ]] && rm -rf "$neg_flutter"
 restored=1; [[ -z "$(git status --porcelain -- "$neg_flutter")" && ! -e "$neg_flutter" ]] || restored=0
 report "## negative control: a throwaway target depending on the editorial package and on mc_fixtures_media" '```' "Flutter markers: ${neg_hits:-NOT DETECTED}" "throwaway package removed, tree clean: $([[ $restored == 1 ]] && echo yes || echo NO)" '```'
 if [[ "$restored" == 1 && "$n" -ge 50 && -z "$hits" && -n "$control" && -n "$neg_hits" ]]; then rows+=("| pure-Dart closure | PASS |"); else rows+=("| pure-Dart closure | **FAIL** |"); ok=0; fi
@@ -103,9 +114,9 @@ nlibs="$(wc -w <<< "$libs" | tr -d ' ')"
 # shellcheck disable=SC2086
 found="$(scan $libs)"
 pos="$(closure //utility/mc_fixtures_editorial:determinism_test | grep -E '^@?@?//utility/mc_fixtures_editorial' | sort -u | head -2 | tr '\n' ' ')"
-make_neg "$neg_prod" zz_negctl_prod //utility/mc_fixtures_editorial
+make_neg feature/zz_negctl_T0060 "$neg_prod" zz_negctl_prod //utility/mc_fixtures_editorial || true
 neg="$(scan //$neg_prod:zz_negctl_prod)"
-rm -rf feature/zz_negctl_T0060
+[[ " ${MADE[*]-} " == *" feature/zz_negctl_T0060 "* ]] && rm -rf feature/zz_negctl_T0060
 restored2=1; [[ -z "$(git status --porcelain -- feature/zz_negctl_T0060)" && ! -e feature/zz_negctl_T0060 ]] || restored2=0
 report "## fixtures check ($nlibs production targets scanned)" '```' \
   "editorial dependencies: ${found:-none}" "positive control (its own test): ${pos:-nothing}" \
@@ -116,11 +127,14 @@ else
   rows+=("| fixtures check | **FAIL** |"); ok=0
 fi
 
+# The negative controls must have been created (never silently skipped).
+if [[ $neg_refused == 0 ]]; then rows+=("| negative controls created | PASS |"); else rows+=("| negative controls created | **FAIL** (a throwaway path already existed) |"); ok=0; fi
+
 # 4. gates
 # Two gates with their own logs, so the reported "Executed" line is the
 # uncached editorial run, not the cached repo-wide run after it.
 gate "test editorial (uncached)" bzw test --nocache_test_results //utility/mc_fixtures_editorial/...
-gate "test //..." bzw test //...
+gate "test //... (--lockfile_mode=error)" bzw test --lockfile_mode=error //...
 gate "build --config=lint //..." bzw build --config=lint //...
 gate "mc_arch_check" bzw run //tool/mc_arch_check:bin
 gate "rules_fork.sh check" "$REPO/tool/rules_fork.sh" check
@@ -137,7 +151,7 @@ coverage() {
 gate "coverage >= $MIN %" coverage
 total=$(grep -a '^TOTAL' "$work/coverage.txt" 2>/dev/null || echo 'TOTAL not measured')
 tests_line=$(plain "$(logname "test editorial (uncached)")" 2>/dev/null | grep -a 'Executed' | tail -1)
-all_line=$(plain "$(logname "test //...")" 2>/dev/null | grep -a 'Executed' | tail -1)
+all_line=$(plain "$(logname "test //... (--lockfile_mode=error)")" 2>/dev/null | grep -a 'Executed' | tail -1)
 
 report "" "| Gate | Result |" "|---|---|" "${rows[@]}" "" \
   "- editorial tests, uncached: ${tests_line:-?}" "- test //...: ${all_line:-?}" "- mc_fixtures_editorial coverage: $total (threshold $MIN %)" \

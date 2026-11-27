@@ -29,7 +29,7 @@
 - **`MockResponse.error`'s `extra` is spread after `code`** (F-0051 §1): the extra fields here are `parameter`, `questionId`, `choiceId`, `expected`, never `code` or `message`.
 - **`int` in JSON.** `elapsedMs: 5.0` reaches the handler as a `double` (the mock transport decodes the JSON text again), so "an integer" is checked with `is int`, and `1.5`, `"100"`, `true` and `null` are all `invalid_elapsed`.
 - **`mutations.sh` needs a clean tree and a second output base** when it runs next to other Bazel work: it ran in a detached worktree (`git worktree add --detach`) with its own `--output_base`, so a flake check and the app wiring tests could use the main one. A full run of 123 mutants takes about 1 to 2 hours.
-- **Two guards cannot be reached** and are excluded from the mutation list: `_sample`'s "pool too small" and `_template`'s "yielded only n questions" (both `StateError`s that guard a generation bug). They are the only uncovered lines (99.3 % line coverage).
+- **Two guards cannot be reached** and are excluded from the mutation list: `_sample`'s "pool too small" and `_template`'s "yielded only n questions" (both `StateError`s that guard a generation bug). They are the only uncovered lines (99.6 % line coverage, 454 of 456 lines).
 
 ## Decisions
 - Added `invalid_body` (the body is malformed) and `unknown_choice` (a `choiceId` that is not one of the question's) to the list of typed codes in the task. A typo in a choice id would otherwise score as a wrong answer. Check order: body, round, count, question, duplicate, choice, elapsed.
@@ -37,3 +37,9 @@
 - `POST results` answers `200` (it evaluates a round, it does not create a resource with an id).
 - `trivia.empty` has no categories at all (the list is empty and every category, `all` included, is `unknown_category`), so an empty state is reachable in the UI.
 - The domain is registered in `appMockDomains` (`TriviaMockDomain`), with the `app_core` pubspec, BUILD and one test (`T-0060-AC5`).
+
+## Review round (2026-11-27)
+- **A missing `choiceId` key is `invalid_body`, not a timeout.** `{"questionId", "elapsedMs"}` and a wrong-case `choiceID` used to read as `choiceId == null`, so a client typo scored 0 silently. The key must be present; `null` is the explicit "no answer".
+- **Cached questions are immutable.** The per-isolate bank hands the same `TriviaQuestion` objects to every request, so `choices` and `facts` are `List.unmodifiable` / `Map.unmodifiable`; a handler or test that mutated one would have corrupted every later round.
+- **The `unknown_category` message follows the active set**: it lists `all, characters, comics, creators`, or says "there are no categories" under `trivia.empty`.
+- **The gates script removes only what it created** (a `MADE` list, no unconditional `rm -rf`) and fails when a throwaway path already exists; it runs `test --lockfile_mode=error //...`.
