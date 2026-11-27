@@ -34,6 +34,11 @@ The character profile is a hand-built SC feature in the shape of `comics_details
 10. **Tests (ADR-0015).** No goldens, no mutation script: BDD (57 scenarios), contract tests (`CharacterDto` round trip, the stats mapping as pure logic, the comics page, the favourite answers), `bloc_guards_test` (the stale-tap guard, the analytics count, the open guard keyed by comic) and `flow_scope_test` (root imports, the screen tracked once). The wiring test pushes the comic location and shows the real sheet.
 11. **Gherkin and apostrophes.** A value with an apostrophe (`a clockmaker's daughter`) is written `\'` in a step argument (the generator copies it into a single-quoted Dart string, like F-0040 fact 7's `\$`).
 
+12. **E2E traps.**
+    - After Back from a comic, the profile is still scrolled to its comics row, so the header (`characters_details.name`) is not built: wait for the row, not the name.
+    - "See full profile" is pushed over the preview, so Back from the profile shows the **preview** (a page of the characters_list flow), not the grid; Back from there reaches the list.
+    - The cold link `miniclient://app/characters/<id>` still builds `[home, list, profile]` (T-0049): the test taps Back twice.
+
 ## Implications / actions
 - The SC brick copies sections "Copied" and keeps 2, 5 and 6 as the variation points for a feature with a second request and a chart.
 - `identity.default`'s seeded favourites make two characters special in every feature that favourites a character; a brick uses an id outside that list.
