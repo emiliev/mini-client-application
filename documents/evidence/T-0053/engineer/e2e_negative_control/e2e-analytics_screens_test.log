@@ -1,0 +1,96 @@
+# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-45092 (53AC7593-6EF9-4416-B4C7-00B020289912)
+# cwd: /tmp/mc-T-0053-engineer-e2e-neg/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.XCuFsC/screenshots/1-analytics_screens_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/analytics_screens_test.dart -d 53AC7593-6EF9-4416-B4C7-00B020289912
+
+Resolving dependencies in `/private/tmp/mc-T-0053-engineer-e2e-neg`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0053-engineer-e2e-neg`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           24.7s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52410/jV-HvRSJZi8=/
+VMServiceFlutterDriver: Isolate found with number: 8879086126879347
+VMServiceFlutterDriver: Isolate 8879086126879347 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0053-AC4 home to the characters list and back records the screens
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: fd714bef7f52a12baa550a02a9e90664, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: ['characters_list']
+flutter:   Actual: []
+flutter:    Which: at location [0] is [] which shorter than expected
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///private/tmp/mc-T-0053-engineer-e2e-neg/app/mini_client/integration_test/analytics_screens_test.dart:44:5)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///private/tmp/mc-T-0053-engineer-e2e-neg/app/mini_client/integration_test/analytics_screens_test.dart line 44
+flutter: The test description was:
+flutter:   T-0053-AC4 home to the characters list and back records the screens
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:02 +0: T-0053-AC4 home to the characters list and back records the screens [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: T-0053-AC4 home to the characters list and back records the screens
+flutter:
+flutter: 00:02 +0 -1: (tearDownAll)
+flutter: 00:02 +1 -1: Some tests failed.
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.XCuFsC/screenshots/1-analytics_screens_test/01_home.png (310591)
+Failure Details:
+Failure in method: T-0053-AC4 home to the characters list and back records the screens
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: ['characters_list']
+  Actual: []
+   Which: at location [0] is [] which shorter than expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///private/tmp/mc-T-0053-engineer-e2e-neg/app/mini_client/integration_test/analytics_screens_test.dart:44:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///private/tmp/mc-T-0053-engineer-e2e-neg/app/mini_client/integration_test/analytics_screens_test.dart line 44
+The test description was:
+  T-0053-AC4 home to the characters list and back records the
+  screens
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+
+
+# exit code: 1
