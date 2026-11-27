@@ -48,6 +48,8 @@ open(p, "w").write(s.replace(old, new, 1))
 ' "$file" "$old" "$new"; then
     echo "    PATTERN NOT FOUND"; broken=$((broken + 1)); git checkout -- "$P"; return
   fi
+  # The build checks formatting, so a mutation is formatted like the source.
+  fvm dart format "$file" > /dev/null 2>&1
   run_tests
   local failed
   failed="$(tr '\r' '\n' < "$LOG" | grep -aE '^//.*FAILED' | sed 's/ *FAILED.*//' | tr '\n' ' ')"
