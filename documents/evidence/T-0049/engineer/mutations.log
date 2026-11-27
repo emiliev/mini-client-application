@@ -1,0 +1,14 @@
+baseline: PASS
+N1 a route back at the top level: comics (publishing): KILLED (FAIL  T-0049-AC1 a cold start from /comics/501500 shows a back button that leads home)
+N2 a route back at the top level: search (discovery): KILLED (FAIL  T-0049-AC1 a cold start from /search?q=spi shows a back button that leads home)
+N3 a route back at the top level: characters (universe): KILLED (FAIL  T-0049-AC1 a cold start from /characters shows a back button that leads home)
+N4 a route back at the top level: reading-list editor (library): KILLED (FAIL  T-0049-AC1 a cold start from /me/lists/new shows a back button that leads home)
+N5 nestUnderHome keeps the leading slash (absolute child): KILLED (FAIL  T-0049-AC1 entity routes become relative children of home, children kept)
+N6 nestUnderHome drops a route's children: KILLED (FAIL  T-0049-AC1 entity routes become relative children of home, children kept)
+N7 nestUnderHome drops home's own children: KILLED (FAIL  T-0049-AC1 entity routes become relative children of home, children kept)
+R1 FlowResultRoute does not complete the caller when disposed: KILLED (FAIL  T-0049-AC3 a link to home replaces an open editor: its buttons work again)
+R2 the wiring route does not pass its extra (no FlowCall): KILLED (FAIL  T-0049-AC3 a link to home replaces an open editor: its buttons work again)
+R3 FlowCall completes twice (second value wins): KILLED (FAIL  T-0048-AC6 the caller awaits AppFlows.createReadingList and gets the result the flow completed with)
+R4 home never clears its guard: KILLED (FAIL  T-0049-AC3 a link to home replaces an open editor: its buttons work again)
+mutations: 11, killed: 11
+ALL KILLED
