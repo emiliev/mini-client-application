@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `1b00a7e`; Verifier PASS `914a8b9`, re-verify PASS `d33d9b7`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (service kit used, not copied, by bricks; ADR-0011) |
 | Branch | `fleet/T-0052-feature-flags` |
@@ -128,3 +128,8 @@ The TL's gates on the merge hit `FileSystemException: Deletion failed ... (Direc
 - **Proof, `--runs_per_test=200 --nocache_test_results`** on the 6 `mc_feature_flags` targets and `feature_flags_boot_test`, on the tree merged with `origin/main` `ed3c2cd` (T-0050, T-0053): **idle 1,400 runs and under load (8x `yes`) 1,400 runs, 0 failures, 0 flaky** ([idle](../evidence/T-0052/engineer/flake_200_runs_idle.log), [load](../evidence/T-0052/engineer/flake_200_runs_load.log)). Before the fix the same run on the boot test failed 200 of 200 when my first wait hung, which is how I found that wait needed the pump.
 - **Merge:** one conflict in `root_initializers.dart` (comment only). Both initializers are kept: `AnalyticsDIInitializer` after storage, `FeatureFlagsDIInitializer` right after `ApiAuthDIInitializer`. `McTestContainer` is unchanged, so no `isolation_test` count changed. `test --lockfile_mode=error //...` passes (176/176) and the lock files are unchanged.
 - **Gates** ([AC5_gates.md](../evidence/T-0052/engineer/AC5_gates.md)) PASS on the merged tree; coverage mc_feature_flags 425/433 = 98.2 %, mc_fixtures_platform 92.7 %. **Mutations: 98 of 98 killed**, 0 survived, 0 broken ([log](../evidence/T-0052/engineer/mutations.log)); one pattern (X7) was updated for the tracked write.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 1 important bug (remote weights overflowed int64, so every subject got the control variant) and 8 nits. Review round at `5700cd6`: 98/98 mutations, and a new `mc_session` `SessionEpochs` hook. Single Sonnet Verifier pass: PASS `914a8b9` (about 96k tokens; all 28 golden rows recomputed; 13/13 of its own mutations killed).
+- The **TL's merge gate then failed**: `session_fetch_test` deleted its temp dir while a write was still running (the same race as T-0050 D1). The TL reset the unpushed merge. In the merge round (`d94971e`) the kit tracks its writes (`settled()`); 2,800 runs, idle and under load, had 0 failures. That fix changed kit code, so a narrow Sonnet re-verify followed: PASS `d33d9b7` (about 80k tokens; own 200-run proof; e2e 11/11).
+- The TL merged `--no-ff`. On the merge result, `check` passed, 176/176 tests, lint was clean, `mc_arch_check` reported OK, the sim app built and provenance passed. A 20-run uncached flake check of the flags, analytics and boot targets was clean. Follow-ups: P-106 to P-108. The new protocol DoD flake check came out of this task.
