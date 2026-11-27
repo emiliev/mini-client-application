@@ -41,6 +41,19 @@ final class GateAdapter implements HttpClientAdapter {
   final List<({String method, bool beforeServer, Completer<Held> arrived})>
   _next = [];
 
+  /// Every request held so far (released or not).
+  final List<Held> held = [];
+
+  /// Lets every held request through, so a test that failed while holding
+  /// one does not hang its teardown.
+  void releaseAll() {
+    for (final h in held) {
+      if (!h._release.isCompleted) {
+        h.release();
+      }
+    }
+  }
+
   /// The methods of every request to the preferences that left the device,
   /// in order (the backend's own traffic also has the test's direct reads).
   final List<String> sent = [];
@@ -72,6 +85,7 @@ final class GateAdapter implements HttpClientAdapter {
     }
     final gate = _next.removeAt(index);
     final held = Held(options);
+    this.held.add(held);
     if (gate.beforeServer) {
       gate.arrived.complete(held);
       await held._release.future;
@@ -233,6 +247,7 @@ final class Rig {
   /// Stops the appearance and waits for the session's saves. The
   /// appearance's own saves are synchronous, so none is ever running.
   Future<void> quiesce() async {
+    gate.releaseAll();
     await appearance.settled();
     await appearance.dispose();
     await session.dispose();

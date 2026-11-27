@@ -301,7 +301,7 @@ mutate C13 "the state is not shown again after the sign-in answer" "$P" "$T_FEAT
 mutate C14 "the appearance's changes are not followed" "$P" "$T_FEAT" \
   "            add(const _Changed());" "            assert(isClosed || !isClosed);"
 mutate C15 "a save failure is never a failure state" "$P" "$T_FEAT" \
-  "      failure != null" "      (failure != null) & false"
+  "    final failure = snapshot.saveFailure;" "    final failure = _signingIn ? snapshot.saveFailure : null;"
 mutate C16 "About themes does not open the explainer" "$P" "$T_FEAT" \
   "        _flow.update((s) => s.copyWith(aboutOpen: true));" "        _flow.update((s) => s.copyWith(aboutOpen: false));"
 P="$FS/presentation/page/appearance_page.dart"

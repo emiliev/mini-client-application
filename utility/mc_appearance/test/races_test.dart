@@ -186,9 +186,14 @@ void main() {
     });
 
     test('T-0063-AC6 a change made after a session change that the stream '
-        'has not delivered yet belongs to the new session', () async {
+        'has not delivered yet belongs to the new session: its account is '
+        'read before anything is written to it', () async {
       final rig = await make(signedInAs: reader);
       await rig.settle();
+      // The reader's account moves to version 1, the collector's stays at 0:
+      // a write sent on the reader's version would be a conflict.
+      await rig.appearance.change(density: AppearanceDensity.compact);
+      final before = rig.preferencesTraffic.length;
       // The session switches; its events are still queued when the user
       // changes something in the same turn.
       final switched = rig.signIn(collector);
@@ -196,8 +201,15 @@ void main() {
       await switched;
       await change;
       await rig.settle();
-      expect((await rig.account(collector))['reduceMotion'], true);
-      expect((await rig.account(reader))['version'], 0);
+      expect(
+        rig.preferencesTraffic.sublist(before),
+        ['GET', 'PATCH'],
+        reason: "the collector's account is read first",
+      );
+      final account = await rig.account(collector);
+      expect(account['reduceMotion'], true);
+      expect(account['version'], 1);
+      expect((await rig.account(reader))['version'], 1);
     });
   });
 }

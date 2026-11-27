@@ -73,6 +73,13 @@ Feature: Appearance settings
       | 'setting' | '"theme_mode"' |
       | 'value'   | '"dark"' |
 
+  @T-0063-AC6
+  Scenario: A double tap on Reduce motion switches it on once and tracks it once
+    When I open the appearance settings
+    And I tap {'Reduce motion'} twice in quick succession
+    Then reduce motion is {'on'}
+    And the settings changes tracked are {'reduce_motion=true'}
+
   @T-0063-AC3
   Scenario: The explainer opens in the flow, and Back returns to the settings
     When I open the appearance settings

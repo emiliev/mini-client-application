@@ -106,15 +106,22 @@ void main() {
       ),
     );
     await mcSettle(tester);
-    double gap() =>
-        tester.getTopLeft(find.byKey(densityKey('comfortable'))).dy -
+    // Between two groups (the theme control and the density header), and
+    // between a header and its control: each tightens on its own.
+    double groupGap() =>
+        tester.getTopLeft(find.text('Density')).dy -
         tester.getBottomLeft(find.byKey(themeModeKey('system'))).dy;
-    final comfortable = gap();
+    double headerGap() =>
+        tester.getTopLeft(find.byKey(densityKey('comfortable'))).dy -
+        tester.getBottomLeft(find.text('Density')).dy;
+    final group = groupGap();
+    final header = headerGap();
     final switchHeight = tester.getSize(find.byKey(reduceMotionKey)).height;
 
     compact.value = true;
     await mcSettle(tester);
-    expect(gap(), lessThan(comfortable));
+    expect(groupGap(), lessThan(group));
+    expect(headerGap(), lessThan(header));
     expect(
       tester.getSize(find.byKey(reduceMotionKey)).height,
       lessThan(switchHeight),
