@@ -51,10 +51,13 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0048 merged: `library_reading_list_editor`, the FW exemplar.** A 3-step wizard creates or edits a reading list; the result is returned to the caller (the flow-result pattern) and home shows "List created".
 - **T-0046 merged: `discovery_search`, the SR exemplar.** Debounced search across characters and comics, grouped results, type chips, recent-search history, and a Search entry on home with a `miniclient://app/search?q=` link.
 - Resumed 2026-11-27.
-- **Next, in order:**
-  1. Phase D: `tool/mcgen` (plan 02 §2). Specs, bricks and emitters templatised from the 7 exemplars, with round-trip goldens (each exemplar's spec regenerates it byte for byte), then `mcgen wire`. Engineers use Sonnet by default; Opus only for genuinely novel generator design.
-  2. Phase E: scale to S2 in batches (plan 02 §5, §7) under ADR-0015.
-  3. Phase F (continuous): Bazel profiling and the upstream report for `ai_rules_dart`/`ai_rules_flutter`.
+- **Pause (PO, 2026-11-27 night):** finish T-0068 (CI), then start no new tasks until the next session.
+- **Next session, in order:**
+  1. If T-0068 isn't merged yet, finish it: green cold and warm runs, the red-on-failure check (AC4), then merge, so every push to `main` runs CI.
+  2. Second hybrid wave:
+     - P2-04, templatise the list-detail exemplar (`characters_list`) with a round-trip golden on the `mcgen` core. Address P-120(a) and (b) first.
+     - One or two hand-built features, e.g. `settings_home` with a `/settings` parent route, or `characters_search`.
+  3. Then P2-05 to P2-07 (the remaining archetypes) and P2-08 (`mcgen wire`/`buildgen`), then the batches (Phase E).
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
