@@ -8,6 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_navigation/mc_ds_navigation.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
@@ -127,6 +128,70 @@ void main() {
       lessThan(switchHeight),
       reason: 'the Material row follows the density too',
     );
+  });
+  for (final variant in McThemeVariant.values) {
+    mcTestWidgets('T-0063-AC4 the settings and the explainer build in '
+        '${variant.name}, in its palette, and nothing overflows', (
+      tester,
+    ) async {
+      McTestSession.current.themeVariant = variant;
+      await open(tester);
+      expect(tester.takeException(), isNull);
+      final palette = McPalette.of(variant);
+      final selected = tester.widget<Ink>(
+        find
+            .ancestor(
+              of: find.byKey(themeModeKey('system')),
+              matching: find.byType(Ink),
+            )
+            .first,
+      );
+      expect(
+        (selected.decoration! as BoxDecoration).color,
+        palette.primary,
+        reason: 'the selected segment is in the variant\'s primary',
+      );
+      expect(
+        Theme.of(tester.element(find.byKey(appearanceBodyKey))).brightness,
+        palette.brightness,
+      );
+
+      await tester.tap(find.text('About themes'));
+      await mcSettle(tester);
+      expect(find.byKey(aboutBodyKey), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  mcTestWidgets('T-0063-AC4 at 2x text, Compact still tightens the screen, '
+      'and nothing overflows', (tester) async {
+    McTestSession.current.textScale = 2;
+    await ensureSettingsContainer();
+    final compact = ValueNotifier<bool>(false);
+    addTearDown(compact.dispose);
+    await initFlow(
+      tester,
+      () => ValueListenableBuilder<bool>(
+        valueListenable: compact,
+        builder: (context, on, child) => Theme(
+          data: Theme.of(context).copyWith(
+            visualDensity: on ? VisualDensity.compact : VisualDensity.standard,
+          ),
+          child: child!,
+        ),
+        child: settingsFlowUnderTest(),
+      ),
+    );
+    await mcSettle(tester);
+    // At 2x a row is as tall as its text; the spacing still tightens.
+    double groupGap() =>
+        tester.getTopLeft(find.text('Density')).dy -
+        tester.getBottomLeft(find.byKey(themeModeKey('system'))).dy;
+    final comfortable = groupGap();
+    compact.value = true;
+    await mcSettle(tester);
+    expect(groupGap(), lessThan(comfortable));
+    expect(tester.takeException(), isNull);
   });
 }
 

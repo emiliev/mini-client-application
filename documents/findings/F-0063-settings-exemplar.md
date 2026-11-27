@@ -42,7 +42,8 @@
 - 1 navigator method, `requestSignIn()`, for "Sync across devices" while signed out; the utility follows whoever signs in by itself.
 - The confirm is UI: the page awaits `showMcConfirm` and adds `reset` only on a confirm, so Cancel cannot change anything.
 - Analytics: `settings_changed` with `setting` (`theme_mode`, `density`, `reduce_motion`, `reset`) and `value` as the identity contract spells it (`dark`, `compact`, `true`, `defaults`), spelled once in `domain/settings_analytics.dart`.
-- Density shows in the screen itself: gaps from `Theme.of(context).visualDensity` and a Material `SwitchListTile` (`flow_scope_test` measures both; the compact golden).
+- Density shows in the screen itself: gaps from `Theme.of(context).visualDensity` and a Material `SwitchListTile` (`flow_scope_test` measures both, also at 2x text, where a row is as tall as its text and only the spacing tightens).
+- **No feature goldens** (PO 2026-11-27, ADR to follow). The visual ACs are widget tests: German strings on both pages (BDD), nothing overflows in the pseudo-locale at 1x and 2x (BDD), each of the 4 themes builds both pages in its palette with no error, and Compact measurably tightens the screen (`flow_scope_test`). DS kits keep their goldens.
 
 ## 7. Facts and traps
 1. **`while (x case final y?)` is not Dart** (only `if`-case is). The formatter crashed on it before the analyzer said why.
