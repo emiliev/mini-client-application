@@ -1,0 +1,297 @@
+{
+  "@@locale": "en",
+  "triviaSetupTitle": "Trivia",
+  "@triviaSetupTitle": {
+    "description": "The setup page's app bar title."
+  },
+  "triviaCategoryHeader": "Category",
+  "@triviaCategoryHeader": {
+    "description": "Header of the category list on the setup page."
+  },
+  "triviaDifficultyHeader": "Difficulty",
+  "@triviaDifficultyHeader": {
+    "description": "Header of the difficulty choice on the setup page."
+  },
+  "triviaQuestionCount": "{count, plural, =1{1 question} other{{count} questions}}",
+  "@triviaQuestionCount": {
+    "description": "How many questions a category holds.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaBest": "Best {score}",
+  "@triviaBest": {
+    "description": "A category's best score of the signed-in user, on the setup page.",
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaEasy": "Easy",
+  "@triviaEasy": {
+    "description": "The easy difficulty."
+  },
+  "triviaMedium": "Medium",
+  "@triviaMedium": {
+    "description": "The medium difficulty."
+  },
+  "triviaHard": "Hard",
+  "@triviaHard": {
+    "description": "The hard difficulty."
+  },
+  "triviaSecondsPerQuestion": "{seconds} s per question",
+  "@triviaSecondsPerQuestion": {
+    "description": "The time limit of a difficulty, under its name.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaStart": "Start",
+  "@triviaStart": {
+    "description": "Starts a round of the chosen category and difficulty."
+  },
+  "triviaSetupError": "The categories could not be loaded.",
+  "@triviaSetupError": {
+    "description": "Title of the setup page's error."
+  },
+  "triviaEmptyTitle": "No trivia yet",
+  "@triviaEmptyTitle": {
+    "description": "Title of the setup page when there are no categories."
+  },
+  "triviaEmpty": "There are no trivia categories yet.",
+  "@triviaEmpty": {
+    "description": "Message of the setup page when there are no categories."
+  },
+  "triviaQuestionOf": "Question {number} of {total}",
+  "@triviaQuestionOf": {
+    "description": "The play page's title.",
+    "placeholders": {
+      "number": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaQuit": "Quit",
+  "@triviaQuit": {
+    "description": "Accessible label of the play page's close button."
+  },
+  "triviaQuitTitle": "Quit this round?",
+  "@triviaQuitTitle": {
+    "description": "Title of the dialog that confirms quitting a round."
+  },
+  "triviaQuitMessage": "Your answers so far will be lost.",
+  "@triviaQuitMessage": {
+    "description": "Message of the dialog that confirms quitting a round."
+  },
+  "triviaQuitConfirm": "Quit",
+  "@triviaQuitConfirm": {
+    "description": "Confirms quitting a round."
+  },
+  "triviaQuitCancel": "Keep playing",
+  "@triviaQuitCancel": {
+    "description": "Cancels quitting a round."
+  },
+  "triviaSecondsLeft": "{seconds, plural, =1{1 second left} other{{seconds} seconds left}}",
+  "@triviaSecondsLeft": {
+    "description": "Screen-reader label of the countdown.",
+    "placeholders": {
+      "seconds": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaStreak": "Streak {count}",
+  "@triviaStreak": {
+    "description": "How many correct answers in a row.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaScore": "Score {score}",
+  "@triviaScore": {
+    "description": "The score so far, on the play page.",
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaCorrect": "Correct! +{points}",
+  "@triviaCorrect": {
+    "description": "Feedback after a correct answer, with its points.",
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaWrong": "Wrong",
+  "@triviaWrong": {
+    "description": "Feedback after a wrong answer."
+  },
+  "triviaTimeUp": "Time's up",
+  "@triviaTimeUp": {
+    "description": "Feedback after a question timed out."
+  },
+  "triviaAnswerWas": "The answer was {answer}.",
+  "@triviaAnswerWas": {
+    "description": "Feedback after a wrong answer or a timeout.",
+    "placeholders": {
+      "answer": {
+        "type": "String"
+      }
+    }
+  },
+  "triviaNext": "Next question",
+  "@triviaNext": {
+    "description": "Moves on to the next question."
+  },
+  "triviaSeeResults": "See results",
+  "@triviaSeeResults": {
+    "description": "After the last question: shows the results."
+  },
+  "triviaHint": "50/50 hint (−50 points)",
+  "@triviaHint": {
+    "description": "Hides two wrong choices once per round; a correct answer then earns 50 points less."
+  },
+  "triviaRoundError": "This round could not be loaded.",
+  "@triviaRoundError": {
+    "description": "Title of the play page's error."
+  },
+  "triviaPaused": "Paused",
+  "@triviaPaused": {
+    "description": "Shown over the countdown while it is paused."
+  },
+  "triviaResultsTitle": "Results",
+  "@triviaResultsTitle": {
+    "description": "The results page's app bar title."
+  },
+  "triviaCorrectCount": "{correct} of {total} correct",
+  "@triviaCorrectCount": {
+    "description": "How many answers of the round were correct.",
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaBestScore": "Best: {score}",
+  "@triviaBestScore": {
+    "description": "The best score of the round's category.",
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaNewBest": "New best!",
+  "@triviaNewBest": {
+    "description": "The round beat the best score of its category."
+  },
+  "triviaSaving": "Saving your score…",
+  "@triviaSaving": {
+    "description": "While the result is sent."
+  },
+  "triviaNotSaved": "Your score was not saved.",
+  "@triviaNotSaved": {
+    "description": "The result could not be saved."
+  },
+  "triviaSignedOut": "Sign in to save your score and see your best.",
+  "@triviaSignedOut": {
+    "description": "Signed out, on the results page."
+  },
+  "triviaSaveScore": "Save your score",
+  "@triviaSaveScore": {
+    "description": "Signed out: asks to sign in and saves the result."
+  },
+  "triviaSigningIn": "Waiting for you to sign in.",
+  "@triviaSigningIn": {
+    "description": "While the app signs someone in to save the result."
+  },
+  "triviaBreakdownTitle": "Breakdown",
+  "@triviaBreakdownTitle": {
+    "description": "Header of the results' charts."
+  },
+  "triviaOutcomeCorrect": "Correct",
+  "@triviaOutcomeCorrect": {
+    "description": "Donut segment and question row: a correct answer."
+  },
+  "triviaOutcomeWrong": "Wrong",
+  "@triviaOutcomeWrong": {
+    "description": "Donut segment and question row: a wrong answer."
+  },
+  "triviaOutcomeTimeout": "Timed out",
+  "@triviaOutcomeTimeout": {
+    "description": "Donut segment and question row: a question that timed out."
+  },
+  "triviaBreakdownSummary": "{correct} correct, {wrong} wrong, {timeout} timed out",
+  "@triviaBreakdownSummary": {
+    "description": "Screen-reader summary of the outcome donut.",
+    "placeholders": {
+      "correct": {
+        "type": "int"
+      },
+      "wrong": {
+        "type": "int"
+      },
+      "timeout": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaPointsTitle": "Points per question",
+  "@triviaPointsTitle": {
+    "description": "Header of the points bar chart."
+  },
+  "triviaPointsSummary": "Points for each of the {total} questions",
+  "@triviaPointsSummary": {
+    "description": "Screen-reader summary of the points bar chart.",
+    "placeholders": {
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaNoPoints": "No points this round.",
+  "@triviaNoPoints": {
+    "description": "The points chart when every answer scored 0."
+  },
+  "triviaPoints": "{points, plural, =1{1 point} other{{points} points}}",
+  "@triviaPoints": {
+    "description": "A question's points in the question list.",
+    "placeholders": {
+      "points": {
+        "type": "int"
+      }
+    }
+  },
+  "triviaQuestionsTitle": "Questions",
+  "@triviaQuestionsTitle": {
+    "description": "Header of the question list on the results page."
+  },
+  "triviaAboutComic": "About this comic",
+  "@triviaAboutComic": {
+    "description": "Opens the comic a question is about."
+  },
+  "triviaHintUsed": "Hint used",
+  "@triviaHintUsed": {
+    "description": "A question on which the 50/50 hint was used."
+  },
+  "triviaPlayAgain": "Play again",
+  "@triviaPlayAgain": {
+    "description": "A new round of the same category and difficulty."
+  }
+}

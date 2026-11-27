@@ -7,6 +7,10 @@ load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//visibility:public"])
 
+# The scoring spec: trivia_quiz's Scenario Outline copies its worked
+# examples, and a test there checks they are the same rows (T-0064-AC6).
+exports_files(["CONTRACT.md"])
+
 _LANG = "3.13"
 
 dart_library(

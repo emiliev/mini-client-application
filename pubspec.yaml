@@ -23,6 +23,7 @@ workspace:
   - feature/discovery/discovery_search
   - feature/library/library_reading_list_editor
   - feature/store/store_home
+  - feature/trivia/trivia_quiz
   - spike/api_envelope
   - spike/bdd_sample
   - spike/di_sample

@@ -1,0 +1,439 @@
+# T-0064 (P1-23): `trivia_quiz`, the IX exemplar feature (plan 01 §3.3, §6.1).
+# Phase D's buildgen emits this file; until then it is written by hand. It has
+# the shape of store_home's (T-0056) plus the engine lane.
+# No per-package analysis_options.yaml: the root file applies (F-0021).
+#
+# Every generator runs as a Bazel action; nothing generated is committed:
+#   freezed      trivia, trivia_dto, flow state, the three bloc states
+#   json         trivia_dto                    (over its freezed output)
+#   retrofit     trivia_quiz_api               (fork patch 0001)
+#   injectable   5 shards + di_initializer.config.dart (fork patch 0002)
+#   gen-l10n     lib/src/l10n/trivia_quiz_l10n*.dart
+#   BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
+#
+# Staging (plan 03 §3.4, §4.7). Generators read only Flutter-free libraries
+# (R15): `_stage` holds the hand-written pure files; the retrofit and json
+# actions see only the DTO file and its freezed output (`_stage_dto`).
+#
+# The engine (ADR-0014): `_engine` is the pure-Dart scoring engine with only
+# the domain model it reads; `--config=lint` analyses it without Flutter on
+# its path, and `:architecture_test` checks its import closure (with
+# negative controls).
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_package")
+load("@rules_flutter//flutter:defs.bzl", "flutter_gen_l10n", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART", "mc_bdd_tests")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "trivia_quiz"
+
+_LANG = "3.13"  # the pubspec floor; codegen equals build_runner only with it (F-0011)
+
+_INIT = "lib/src/di/di_initializer.dart"
+
+# Pure-Dart deps of the hand-written, generator-read files.
+_PURE_DEPS = [
+    "//utility/mc_api_auth",
+    "//utility/mc_api_client",
+    "//utility/mc_api_errors",
+    "//utility/mc_bloc_kit",
+    "//utility/mc_di",
+    "//utility/mc_feature_flags",
+    "//utility/mc_media",
+    "//utility/mc_monitoring",
+    "//utility/mc_prelude",
+    "//utility/mc_session",
+    "@pub_deps//:bloc",
+    "@pub_deps//:dio",
+    "@pub_deps//:freezed_annotation",
+    "@pub_deps//:get_it",
+    "@pub_deps//:injectable",
+    "@pub_deps//:json_annotation",
+    "@pub_deps//:retrofit",
+]
+
+# The Flutter-free hand-written files: domain (engine included), flags,
+# navigator, flow state, blocs and the root-import list. Pages, widgets,
+# painters, the flow widget and l10n are Flutter.
+_PURE_SRCS = glob(
+    [
+        "lib/src/di/flow_scope.dart",
+        "lib/src/domain/**/*.dart",
+        "lib/src/flags/**/*.dart",
+        "lib/src/flow/trivia_quiz_flow_state.dart",
+        "lib/src/navigator/**/*.dart",
+        "lib/src/presentation/bloc/**/*.dart",
+    ],
+    exclude = MC_GENERATED_DART,
+)
+
+# The engine and what it reads (ADR-0014): scoring, the engine, the domain
+# model. No timers, no clock, no Flutter.
+_ENGINE_SRCS = [
+    "lib/src/domain/engine/scoring.dart",
+    "lib/src/domain/engine/trivia_engine.dart",
+    "lib/src/domain/model/comic_id.dart",
+    "lib/src/domain/model/trivia.dart",
+]
+
+# Generator input only (V3-18): never a dep of the package library or a test.
+dart_library(
+    name = "_stage",
+    package_name = _PKG,
+    srcs = _PURE_SRCS,
+    language_version = _LANG,
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
+    deps = _PURE_DEPS,
+)
+
+# --- freezed ----------------------------------------------------------------
+_FREEZED = {
+    "trivia": "lib/src/domain/model/trivia.dart",
+    "trivia_dto": "lib/src/domain/model/trivia_dto.dart",
+    "flow_state": "lib/src/flow/trivia_quiz_flow_state.dart",
+    "setup_bloc": "lib/src/presentation/bloc/trivia_setup_bloc.dart",
+    "play_bloc": "lib/src/presentation/bloc/trivia_play_bloc.dart",
+    "results_bloc": "lib/src/presentation/bloc/trivia_results_bloc.dart",
+}
+
+[dart_codegen(
+    name = "_%s_freezed" % name,
+    package_name = _PKG,
+    src = src,
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    language_version = _LANG,
+    output_suffixes = [".freezed.dart"],
+    # The DTO imports only annotations, so its lane stays narrow.
+    deps = [
+        "@pub_deps//:freezed_annotation",
+        "@pub_deps//:json_annotation",
+    ] if name == "trivia_dto" else [":_stage"],
+) for name, src in _FREEZED.items()]
+
+# The engine lane: analysed by `--config=lint` with only pure-Dart deps, so
+# a Flutter import in the engine or its model fails the lint gate.
+dart_library(
+    name = "_engine",
+    package_name = _PKG,
+    srcs = _ENGINE_SRCS + [":_trivia_freezed"],
+    language_version = _LANG,
+    tags = ["no-dart-format"],
+    deps = [
+        "//utility/mc_media",
+        "@pub_deps//:freezed_annotation",
+    ],
+)
+
+# --- trivia_dto: json over the freezed output -------------------------------
+dart_library(
+    name = "_stage_dto",
+    package_name = _PKG,
+    srcs = [
+        "lib/src/domain/model/trivia_dto.dart",
+        ":_trivia_dto_freezed",
+    ],
+    language_version = _LANG,
+    # The json part comes in the next stage, so this library doesn't analyze.
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
+    deps = [
+        "@pub_deps//:freezed_annotation",
+        "@pub_deps//:json_annotation",
+    ],
+)
+
+dart_codegen(
+    name = "_trivia_dto_json_part",
+    package_name = _PKG,
+    src = "lib/src/domain/model/trivia_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/json_serializable:shim",
+    language_version = _LANG,
+    output_suffixes = [".json_serializable.g.part"],
+    deps = [":_stage_dto"],
+)
+
+dart_codegen(
+    name = "_trivia_dto_g",
+    package_name = _PKG,
+    src = "lib/src/domain/model/trivia_dto.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    language_version = _LANG,
+    output_suffixes = [".g.dart"],
+    parts = [":_trivia_dto_json_part"],
+)
+
+# --- trivia_quiz_api: retrofit (fork patch 0001) ----------------------------
+dart_codegen(
+    name = "_trivia_quiz_api_retrofit_part",
+    package_name = _PKG,
+    src = "lib/src/domain/api/trivia_quiz_api.dart",
+    generator_bin = "@rules_dart//dart/ext/retrofit:shim",
+    language_version = _LANG,
+    output_suffixes = [".retrofit.g.part"],
+    deps = [
+        ":_stage_dto",
+        "@pub_deps//:dio",
+        "@pub_deps//:injectable",
+        "@pub_deps//:retrofit",
+    ],
+)
+
+dart_codegen(
+    name = "_trivia_quiz_api_g",
+    package_name = _PKG,
+    src = "lib/src/domain/api/trivia_quiz_api.dart",
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    language_version = _LANG,
+    output_suffixes = [".g.dart"],
+    parts = [":_trivia_quiz_api_retrofit_part"],
+)
+
+# --- injectable (fork patch 0002) -------------------------------------------
+injectable_package(
+    name = "di_config",
+    srcs = [
+        "lib/src/domain/api/trivia_quiz_api.dart",
+        "lib/src/domain/repository/trivia_quiz_repository.dart",
+        "lib/src/presentation/bloc/trivia_play_bloc.dart",
+        "lib/src/presentation/bloc/trivia_results_bloc.dart",
+        "lib/src/presentation/bloc/trivia_setup_bloc.dart",
+    ],
+    init = _INIT,
+    init_deps = ["//utility/mc_di"],
+    language_version = _LANG,
+    package_name = _PKG,
+    shard_deps = [":_stage"],
+)
+
+# --- gen-l10n ---------------------------------------------------------------
+# Outputs land beside the ARBs; the rule ignores l10n.yaml, so these attributes
+# mirror it (IDE / pub path: `flutter: generate: true`, F-0023).
+flutter_gen_l10n(
+    name = "_l10n",
+    arbs = glob(["lib/src/l10n/*.arb"]),
+    nullable_getter = False,
+    output_class = "TriviaQuizL10n",
+    output_localization_file = "trivia_quiz_l10n.dart",
+    template_arb_file = "trivia_quiz_en.arb",
+)
+
+filegroup(
+    name = "arbs",
+    srcs = glob(["lib/src/l10n/*.arb"]),
+    visibility = ["//tool/l10n_check:__pkg__"],
+)
+
+_CODEGEN = [
+    ":_trivia_freezed",
+    ":_trivia_dto_freezed",
+    ":_trivia_dto_g",
+    ":_trivia_quiz_api_g",
+    ":_flow_state_freezed",
+    ":_setup_bloc_freezed",
+    ":_play_bloc_freezed",
+    ":_results_bloc_freezed",
+    ":di_config",
+    ":_l10n",
+]
+
+# --- the package library ----------------------------------------------------
+_FLUTTER_DEPS = [
+    "//utility/mc_analytics",
+    "//utility/mc_ds_buttons",
+    "//utility/mc_ds_charts",
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_media",
+    "//utility/mc_ds_navigation",
+    "//utility/mc_ds_overlays",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "//utility/mc_feature_flow",
+    "//utility/mc_l10n_core",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_bloc",
+    "@pub_deps//:flutter_localizations",
+    "@pub_deps//:intl",
+]
+
+flutter_library(
+    name = "trivia_quiz",
+    srcs = glob(
+        ["lib/**/*.dart"],
+        # `tool/ide_sync` and `fvm flutter pub get` write the generated files
+        # beside their sources for the IDE; Bazel builds its own copies.
+        exclude = MC_GENERATED_DART,
+    ) + _CODEGEN,
+    language_version = _LANG,
+    package_name = _PKG,
+    visibility = ["//visibility:public"],
+    deps = _PURE_DEPS + _FLUTTER_DEPS,
+)
+
+# --- tests (R6: BDD + contract + l10n + golden; no solitary unit tests) -----
+_TEST_DEPS = [
+    "//utility/mc_analytics",
+    "//utility/mc_api_auth",
+    "//utility/mc_di",
+    "//utility/mc_ds_charts",
+    "//utility/mc_ds_media",
+    "//utility/mc_ds_overlays",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "//utility/mc_feature_flags",
+    "//utility/mc_feature_flow",
+    "//utility/mc_fixtures_editorial",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_l10n_core",
+    "//utility/mc_media",
+    "//utility/mc_mocked_backend",
+    "//utility/mc_monitoring",
+    "//utility/mc_session",
+    "@pub_deps//:dio",
+    "@pub_deps//:mocktail",
+]
+
+mc_bdd_tests(
+    name = "bdd_test",
+    data = ["//utility/mc_fixtures_media:asset_files"],
+    features = glob(["test/feature/*.feature"]),
+    language_version = _LANG,
+    lib = ":trivia_quiz",
+    package_name = _PKG,
+    setup = "test/feature/util/trivia_quiz_env.dart",
+    steps = glob([
+        "test/feature/step/**/*.dart",
+        "test/feature/util/*.dart",
+    ]),
+    deps = _TEST_DEPS,
+)
+
+# The DTOs and the mapper against the fixture JSON (the one src/ importer, R7).
+flutter_test(
+    name = "contract_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/trivia_quiz_api_contract_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":trivia_quiz",
+        "//utility/mc_fixtures_editorial",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_media",
+        "//utility/mc_mocked_backend",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R17: the hand-written root imports resolve every registration of the flow.
+flutter_test(
+    name = "flow_scope_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    language_version = _LANG,
+    main = "test/flow_scope_test.dart",
+    package_name = _PKG,
+    deps = _TEST_DEPS + [
+        ":trivia_quiz",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# The three painters on a recording canvas (F-0059 fact 1), reached through
+# the flow: the countdown ring, the streak meter and the results charts.
+flutter_test(
+    name = "painter_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    language_version = _LANG,
+    main = "test/painter/painter_test.dart",
+    package_name = _PKG,
+    deps = _TEST_DEPS + [
+        ":trivia_quiz",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ] + glob(["test/golden/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden/trivia_quiz_golden_test.dart",
+    package_name = _PKG,
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS + [
+        ":trivia_quiz",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R4, R15 and the engine's purity (ADR-0014). The lists of generator-read
+# and engine files are written from the same lists as :_stage and :_engine,
+# so the check cannot drift from them.
+genrule(
+    name = "_pure_srcs_list",
+    outs = ["test/architecture/pure_srcs.txt"],
+    cmd = "cat > $@ <<'EOF'\n" + "\n".join(_PURE_SRCS) + "\nEOF",
+)
+
+genrule(
+    name = "_engine_srcs_list",
+    outs = ["test/architecture/engine_srcs.txt"],
+    cmd = "cat > $@ <<'EOF'\n" + "\n".join(_ENGINE_SRCS) + "\nEOF",
+)
+
+dart_test(
+    name = "architecture_test",
+    size = "small",
+    data = [
+        ":_engine_srcs_list",
+        ":_pure_srcs_list",
+    ] + glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART) + glob(["test/**/*.dart"]),
+    language_version = _LANG,
+    main = "test/architecture/architecture_test.dart",
+    package_name = _PKG,
+    deps = ["@pub_deps//:test"],
+)
+
+# The Scenario Outline copies CONTRACT.md's worked examples verbatim
+# (T-0064-AC6): this checks the two tables are the same rows.
+dart_test(
+    name = "outline_matches_contract_test",
+    size = "small",
+    data = [
+        "test/feature/trivia_quiz_scoring.feature",
+        "//utility/mc_fixtures_editorial:CONTRACT.md",
+    ],
+    language_version = _LANG,
+    main = "test/architecture/outline_matches_contract_test.dart",
+    package_name = _PKG,
+    deps = ["@pub_deps//:test"],
+)
