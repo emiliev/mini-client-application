@@ -258,7 +258,7 @@ mutate U2 "the flag stub never reads the snapshot" utility/mc_test_utils/lib/src
 mutate V01 "a dropped cart answer does not reload (item 1)" "$C" "$T_BDD" \
   $'    add(const _SessionChanged());\n    return null;' $'    return null;'
 mutate V02 "the store page starts while hidden (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
-  '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true);' '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true;'
+  '    final shown = FlowScope.maybeOf(context)?.outerIsCurrent ?? true;' '    final shown = (FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true;'
 mutate V03 "the store page starts again on every showing (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
   '    if (shown && !_started) {' '    if (shown) {'
 mutate V04 "the cart never follows the session once its visit starts (item 2)" "$C" "$T_BDD" \
@@ -270,7 +270,7 @@ mutate V06 "the flow observer depends on the host route (item 4)" "$R" "$T_AN" \
 mutate V07 "FeatureFlow does not publish its route (item 4)" utility/mc_feature_flow/lib/src/feature_flow.dart "$T_FF $T_AN" \
   '      outerRoute: route,' '      outerRoute: null,'
 mutate V08 "FlowScope does not notify a status flip (item 2, 4)" utility/mc_feature_flow/lib/src/flow_context.dart "$T_FF //feature/store/store_home:flow_scope_test" \
-  $'      outerIsCurrent != oldWidget.outerIsCurrent ||\n' ''
+  '      outerIsCurrent != oldWidget.outerIsCurrent;' '      false;'
 mutate V09 "an ended deal is shown (item 5)" "$BLOC/deals_bloc.dart" "$T_FEAT" \
   '            if (deal.runsAt(now)) deal,' '            if (deal.runsAt(now) || !deal.runsAt(now)) deal,'
 mutate V10 "a deal still runs exactly at its end (item 5)" "$F/domain/model/store.dart" "$T_FEAT" \
@@ -279,6 +279,22 @@ mutate V11 "an invalid flow page name is tracked (item 6)" "$R" "$T_AN" \
   '    if (!AnalyticsRules.isValidName(name)) {' '    if (name.isEmpty) {'
 mutate V12 "an invalid flow page is not recorded, so the page before it is reported (item 6)" "$R" "$T_AN" \
   $'      _flowScreens[hostRoute] = name;\n' $'      if (AnalyticsRules.isValidName(name)) {\n        _flowScreens[hostRoute] = name;\n      }\n'
+
+# --- Verifier round (D1 to D4) ---------------------------------------------
+mutate W01 "the cart adds an event after it was closed (D2)" "$C" "$T_BDD" \
+  $'    if (!isClosed) {\n      add(const _SessionChanged());\n    }' '    add(const _SessionChanged());'
+mutate W02 "a nested flow ignores the flow around it (D3)" utility/mc_feature_flow/lib/src/feature_flow.dart "$T_FF" \
+  '          (FlowScope.maybeOf(context)?.outerIsCurrent ?? true),' '          (FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true,'
+mutate W03 "the cart Retry ignores its state (D4, the Verifier's X02)" "$C" "$T_BDD" \
+  $'      case _Retry():\n        if (state is _Failure) {' $'      case _Retry():\n        if (state is _Failure || state is _Loading) {'
+mutate W04 "the featured Retry ignores its state (D4, X03)" "$BLOC/featured_bloc.dart" "$T_BDD" \
+  $'      case _Retry():\n        if (state is _Failure) {' $'      case _Retry():\n        if (state is _Failure || state is _Loading) {'
+mutate W05 "the category Retry loads more instead (D1, X12)" "$P" "$T_BDD" \
+  $'      case _Retry():\n        await _paging.retry();' $'      case _Retry():\n        await _paging.loadMore();'
+mutate W06 "a refresh with the flag off reads the featured bloc (D4, X10)" "$F/presentation/page/store_home_page.dart" "$T_BDD" \
+  $'      if (featured)\n        one((d) => context.read<FeaturedBloc>()' $'        one((d) => context.read<FeaturedBloc>()'
+mutate W07 "the flag is read on every build, not once per visit (D4, X09)" "$F/presentation/page/store_home_page.dart" "$T_FEAT" \
+  '  late final bool _featured = context' '  bool get _featured => context'
 
 say ""
 say "mutations: $n, killed: $killed"
