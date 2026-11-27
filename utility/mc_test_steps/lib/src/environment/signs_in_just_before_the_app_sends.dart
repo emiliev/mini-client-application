@@ -38,6 +38,7 @@ Future<void> signsInJustBeforeTheAppSends(
   final interceptors = diContainer<Dio>().interceptors;
   var fired = false;
   Object? signInProblem;
+  var saveDone = false;
   late final InterceptorsWrapper hook;
   hook = InterceptorsWrapper(
     onRequest: (options, handler) {
@@ -59,10 +60,16 @@ Future<void> signsInJustBeforeTheAppSends(
               ),
             )
             .then<void>(
-              (saved) => saved.fold((_) {}, (failure) {
-                signInProblem = failure;
-              }),
-              onError: (Object error) => signInProblem = error,
+              (saved) {
+                saveDone = true;
+                saved.fold((_) {}, (failure) {
+                  signInProblem = failure;
+                });
+              },
+              onError: (Object error) {
+                saveDone = true;
+                signInProblem = error;
+              },
             );
       }
       handler.next(options);
@@ -75,6 +82,13 @@ Future<void> signsInJustBeforeTheAppSends(
       fail(
         '$email never signed in: no request matched "$route" while the '
         'hook was installed, so the race was not exercised',
+      );
+    }
+    if (!saveDone) {
+      fail(
+        'the save of the sign-in of $email had not finished: follow this '
+        'step with `the app finishes writing to storage`, so the storage '
+        'folder is not removed while it is written',
       );
     }
     if (signInProblem != null) {

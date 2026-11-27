@@ -16,6 +16,7 @@ import 'package:comics_details/src/domain/model/creator_id.dart';
 import 'package:comics_details/src/domain/repository/comics_details_repository.dart';
 import 'package:comics_details/src/flow/comics_details_flow_state.dart';
 import 'package:comics_details/src/navigator/comics_details_navigator.dart';
+import 'package:comics_details/src/presentation/bloc/comic_details_bloc.dart';
 import 'package:comics_details/src/presentation/bloc/comic_favourite_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
@@ -28,11 +29,13 @@ import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 
 final class _Navigator implements ComicsDetailsNavigator {
-  @override
-  void openCharacter(CharacterId id) {}
+  final List<String> opened = [];
 
   @override
-  void openCreator(CreatorId id) {}
+  void openCharacter(CharacterId id) => opened.add('character ${id.value}');
+
+  @override
+  void openCreator(CreatorId id) => opened.add('creator ${id.value}');
 
   @override
   Future<bool> requestSignIn() async => false;
@@ -54,6 +57,9 @@ void main() {
   late MockBackend backend;
   late Session session;
   late ComicFavouriteBloc bloc;
+  // Saves the tests did not await: tearDown awaits them before it deletes
+  // the storage folder (T-0050 D1).
+  final saves = <Future<Object?>>[];
 
   setUp(() async {
     dir = Directory.systemTemp.createTempSync('mc_favourite_guards');
@@ -79,6 +85,8 @@ void main() {
   });
 
   tearDown(() async {
+    await Future.wait(saves);
+    saves.clear();
     await bloc.close();
     await session.dispose();
     dir.deleteSync(recursive: true);
@@ -100,8 +108,13 @@ void main() {
     // B signs in (in memory, at once); the tap comes in the same turn,
     // before the session's event reaches the bloc.
     bloc.add(const ComicFavouriteEvent.toggle());
-    session.signIn(userId: 'u-101', tokens: _tokens('u-101')).ignore();
+    final switched = session.signIn(
+      userId: 'u-101',
+      tokens: _tokens('u-101'),
+    );
+    saves.add(switched);
     await _settle();
+    await switched;
 
     expect(
       writes('DELETE'),
@@ -110,4 +123,32 @@ void main() {
     );
     expect(writes('PUT'), 1);
   });
+
+  test(
+    'T-0050-AC3 (P-089) the open guard keys on the kind as well as the id: '
+    'a creator with the id of the character just opened is not dropped',
+    () async {
+      final navigator = _Navigator();
+      final details = ComicDetailsBloc(
+        ComicsDetailsRepository(ComicsDetailsApi(backend.createDio())),
+        FeatureFlowController<ComicsDetailsFlowState>(
+          const ComicsDetailsFlowState(comicId: ComicId(501500)),
+        ),
+        navigator,
+        Monitoring([]),
+      );
+      addTearDown(details.close);
+
+      details
+        ..add(const ComicDetailsEvent.openCharacter(CharacterId(7)))
+        ..add(const ComicDetailsEvent.openCreator(CreatorId(7)));
+      await _settle();
+
+      expect(
+        navigator.opened,
+        ['character 7', 'creator 7'],
+        reason: 'the creator is another target than the character with its id',
+      );
+    },
+  );
 }

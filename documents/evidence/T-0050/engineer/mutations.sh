@@ -135,6 +135,8 @@ mutate K6 "authPinned pins to the wrong epoch" $PIN \
 mutate K7 "the key is renamed" $PIN \
   "s.replace(\"'mc_api_auth.pinned_epoch'\", \"'mc_api_auth.pin'\")" $KIT_T
 # --- AC3: P-080 -------------------------------------------------------------------
+mutate K8 "only the first send is held to the pin (replays and retries exempt; Verifier M3)" $INT \
+  "s.replace('if (pinned is int && pinned != _reader.epoch) {', 'if (pinned is int && pinned != _reader.epoch && options.extra[_applied] != true) {')" $KIT_T
 mutate P80-a "one refresh is shared across sessions" $INT \
   "s.replace('if (current != null && current.epoch == epoch) {', 'if (current != null) {')" $AUTH_ALL
 mutate P80-b "a replay after a local sign-out mid-refresh is sent without a token" $INT \
@@ -165,6 +167,8 @@ mutate P89-d "the guard is 600 ms: a tap at 501 ms is swallowed" $CD_BLOC \
   "s.replace('Duration(milliseconds: 500)', 'Duration(milliseconds: 600)')" $CD_BDD
 mutate P89-f "the guard is not per target: a different character within 450 ms is dropped" $CD_BLOC \
   "s.replace('_openTarget == target', 'true')" $CD_BDD
+mutate P89-g "the open guard is keyed by id only: a creator with a character's id is dropped (Verifier M9)" $CD_BLOC \
+  "s.replace('_openTarget == target', '_openTarget?.\$2 == target.\$2')" $CD_GUARDS
 mutate P89-e "the guard timer is never started" $CD_BLOC \
   "s.replace('    _openGuard = Timer(openGuard, () {});\n', '')" $CD_BDD
 # --- review round: the favourite bloc's stale-state guard ---------------------------

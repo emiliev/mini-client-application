@@ -159,8 +159,29 @@ void main() {
       });
 
       test('T-0039-AC2 a request retried after B signed in is failed, not sent with B', () async {
+        // Root cause of the old flake (T-0050 D4): the test slept 10 ms in
+        // real time hoping to land inside the 50 ms retry delay, so a loaded
+        // machine could run the retry first. The switch now happens when the
+        // first send arrives at the adapter, before its 503 is answered: it
+        // is certain to precede the retry, whatever the clock does.
+        var switched = false;
+        final arrivals = ArrivalAdapter(rig.backend.adapter, (options) {
+          if (!switched && options.path.endsWith('/v1/echo-auth')) {
+            switched = true;
+            rig.track(rig.session.signOut());
+            rig.track(
+              rig.session.signIn(
+                userId: 'u-101',
+                tokens: AuthTokens(
+                  accessToken: mintAccessToken('u-101', 1),
+                  refreshToken: mintRefreshToken('u-101', 1),
+                ),
+              ),
+            );
+          }
+        });
         final (dio, api) = rig.dioOver(
-          rig.backend.adapter,
+          arrivals,
           retryDelay: const Duration(milliseconds: 50),
         );
         await api.signIn(
@@ -173,14 +194,11 @@ void main() {
           const FailureKind.http(503),
         );
 
-        final pending = apiCall(
+        final result = await apiCall(
           () => dio.get<Map<String, Object?>>('/v1/echo-auth'),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        await api.signOut();
-        await _signInCollector(api);
-        final result = await pending;
 
+        expect(switched, isTrue, reason: 'the first send arrived');
         expect(_failure(result), isA<ApiUnauthorized>());
         expect(
           rig.calls('GET', '/v1/echo-auth'),

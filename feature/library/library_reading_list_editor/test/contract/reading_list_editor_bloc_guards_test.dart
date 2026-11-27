@@ -130,9 +130,14 @@ final class _Harness {
   /// next statement: the bloc has not heard of it yet (the session's stream
   /// delivers later).
   void switchUser() =>
-      session.signIn(userId: 'u-101', tokens: _tokens('u-101')).ignore();
+      _saves.add(session.signIn(userId: 'u-101', tokens: _tokens('u-101')));
+
+  /// Saves a test did not await: [dispose] awaits them before it deletes the
+  /// storage folder (T-0050 D1).
+  final List<Future<Object?>> _saves = [];
 
   Future<void> dispose() async {
+    await Future.wait(_saves);
     await bloc.close();
     await session.dispose();
     dir.deleteSync(recursive: true);
