@@ -1,0 +1,6 @@
+INFO: 61 processes: 51 action cache hit, 7 disk cache hit, 4 internal, 50 darwin-sandbox.
+INFO: Build completed successfully, 61 total actions
+//utility/mc_ds_overlays:overlays_test                                   PASSED in 13.3s
+  Stats over 50 runs: max = 13.3s, min = 7.7s, avg = 11.4s, dev = 1.6s
+
+Executed 1 out of 1 test: 1 test passes.

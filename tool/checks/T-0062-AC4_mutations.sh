@@ -62,9 +62,8 @@ say "baseline: both filters PASS (unmutated)"
 
 ok=1
 # mutate <name> <file> <python-expr transforming s> [control-informational]
-# The toast durations 3 s and 5 s were already killed by the older
-# "stays 4 s, with an action 8 s" test (3500 ms pump); the new test is a
-# tighter bracket (3.9 s up, 4.1 s gone), so for them the control is only
+# A 5 s toast is also killed by the older "stays 4 s, with an action 8 s"
+# test (its 4.2 s gone check), so for the toast mutants the control is only
 # reported and the SUITE verdict is what counts.
 mutate() {
   local name="$1" file="$2" expr="$3" info="${4:-}" c s
