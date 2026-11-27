@@ -38,7 +38,7 @@ control without the exclusion: exit 1 (must be 1)
 | l10n_check | PASS |
 | coverage >= 90 % (touched packages) | PASS |
 
-- tests: Executed 39 out of 39 tests: 39 tests pass.
-- coverage: == utility/mc_analytics TOTAL 275/275 100.0% == utility/mc_config TOTAL 25/25 100.0% == app/wiring/app_core TOTAL 428/447 95.7% == app/mini_client TOTAL 105/110 95.5% (threshold 90 %)
+- tests: Executed 40 out of 40 tests: 40 tests pass.
+- coverage: == utility/mc_analytics TOTAL 293/293 100.0% == utility/mc_config TOTAL 24/24 100.0% == app/wiring/app_core TOTAL 437/454 96.3% == app/mini_client TOTAL 109/114 95.6% (threshold 90 %)
 
 **PASS T-0053-AC5-gates**
