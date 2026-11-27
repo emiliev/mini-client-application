@@ -60,7 +60,10 @@ for check in T-0041-AC7_matches_build_runner T-0041-AC7_cutoff T-0041-AC7_genera
   T-0048-AC7_matches_build_runner T-0048-AC7_cutoff T-0048-AC7_generated_not_committed T-0048-AC7_gen_l10n_parity; do
   gate "$check" "$REPO/tool/checks/$check.sh"
 done
-PKGS=(utility/mc_api_auth utility/mc_session utility/mc_forms utility/mc_test_steps feature/comics/comics_details feature/library/library_reading_list_editor)
+PKGS=(utility/mc_api_auth utility/mc_session utility/mc_forms feature/comics/comics_details feature/library/library_reading_list_editor)
+# utility/mc_test_steps is test-only step code: its own package has one test
+# target and the steps run inside every feature's :bdd_test, so it is not
+# measured here (as in T-0048-AC8).
 EXEMPT="${MC_COVERAGE_EXEMPT-}"
 coverage() {
   local pkg rc=0
