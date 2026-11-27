@@ -229,6 +229,26 @@ flutter_test(
     ],
 )
 
+# T-0056: the store inside the real app: the Store entry on home, its ways out,
+# and the deep links with their back stacks.
+flutter_test(
+    name = "store_route_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/store_route_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_monitoring",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # T-0053: every screen of the real app is tracked once with its route name.
 flutter_test(
     name = "analytics_screens_test",
