@@ -400,21 +400,23 @@ void main() {
       expect(m.controller.state.field('email').error, isNull);
     });
 
-    test('T-0050-AC3 (P-093) reset forgets the server errors, seen before '
-        'any new value', () {
+    test('T-0050-AC3 (P-093) reset forgets the server errors: a later edit '
+        'of another field does not bring one back', () {
       final m = _make();
       // `confirm` is valid while empty, so only the server error can show.
       m.controller.reject('confirm', taken);
       expect(m.controller.state.field('confirm').error, taken);
 
-      m.controller.reset();
+      m.controller
+        ..reset()
+        // Revalidates every field, but never touches confirm's own value.
+        ..setValue('email', 'a@b.c');
 
       expect(
         m.controller.state.field('confirm').error,
         isNull,
-        reason: 'the refused value is the initial one: a stale refusal shows',
+        reason: 'the refused value is still the initial one',
       );
-      expect(m.controller.state.isValid, isFalse, reason: 'email is empty');
     });
 
     test('T-0048-AC2 reject is ignored while a submit runs, and names an '

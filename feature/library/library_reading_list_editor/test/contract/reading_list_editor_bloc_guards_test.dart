@@ -66,6 +66,7 @@ final class _Harness {
   static Future<_Harness> start({
     ReadingListId? editing,
     bool signedIn = true,
+    LatencyProfile latency = LatencyProfile.none,
   }) async {
     final dir = Directory.systemTemp.createTempSync('mc_editor_guards');
     final backend = MockBackend(
@@ -74,6 +75,7 @@ final class _Harness {
         ComicsMockDomain(),
         IdentityMockDomain(),
       ],
+      latency: latency,
     );
     final session = Session.empty(FileStore(dir));
     if (signedIn) {
@@ -103,8 +105,8 @@ final class _Harness {
       .length;
 
   /// Lets the bloc's asynchronous work run to the end.
-  Future<void> settle() async {
-    for (var i = 0; i < 20; i++) {
+  Future<void> settle({int rounds = 20}) async {
+    for (var i = 0; i < rounds; i++) {
       await Future<void>.delayed(const Duration(milliseconds: 2));
     }
   }
@@ -179,22 +181,35 @@ void main() {
     });
 
     test('T-0050-AC3 a switch between the two writes of an edit sends no second write (P-093 V03)', () async {
-      h = await _Harness.start(editing: const ReadingListId('l-1'));
-      await h.settle();
-      h.bloc.add(
-        const ReadingListEditorEvent.nameChanged('Spider-Verse Basics'),
+      // Every answer takes 100 ms, so the first write is still in flight when
+      // the user switches.
+      h = await _Harness.start(
+        editing: const ReadingListId('l-1'),
+        latency: const LatencyProfile.slow(Duration(milliseconds: 100)),
       );
-      h.bloc.add(const ReadingListEditorEvent.next());
-      h.bloc.add(const ReadingListEditorEvent.next());
-      h.bloc.add(const ReadingListEditorEvent.comicMoved(0, 1));
+      await h.settle(rounds: 100);
+      h.bloc
+        ..add(const ReadingListEditorEvent.nameChanged('Spider-Verse Basics'))
+        ..add(const ReadingListEditorEvent.next())
+        ..add(const ReadingListEditorEvent.next())
+        ..add(const ReadingListEditorEvent.comicMoved(0, 1));
       await h.settle();
-      // The first write is sent with the submit; the user switches before its
-      // answer returns to the bloc, which then must not send the second.
       h.bloc.add(const ReadingListEditorEvent.submit());
-      h.switchUser();
-      await h.settle();
+      await Future<void>.delayed(const Duration(milliseconds: 30));
 
-      expect(h.requests('PUT', '/v1/me/lists/l-1/items'), 0);
+      h.switchUser();
+      await h.settle(rounds: 200);
+
+      expect(
+        h.requests('PUT', '/v1/me/lists/l-1'),
+        1,
+        reason: 'the first write was sent, for the first user',
+      );
+      expect(
+        h.requests('PUT', '/v1/me/lists/l-1/items'),
+        0,
+        reason: 'the epoch check between the two writes',
+      );
     });
 
     test('T-0050-AC3 a sign-in the app confirms while nobody is signed in closes the editor with no list and no request (P-093 V19)', () async {
@@ -235,11 +250,10 @@ void main() {
 
       final errors = <Object>[];
       await runZonedGuarded(() async {
-        final closing = h.bloc.close();
-        // Still subscribed to the session: the close awaits the flow's
-        // subscription first.
+        // The session's event is queued first, then the bloc starts closing
+        // in the same turn: the event reaches the listener of a closed bloc.
         h.switchUser();
-        await closing;
+        await h.bloc.close();
         await h.settle();
       }, (error, _) => errors.add(error));
 
