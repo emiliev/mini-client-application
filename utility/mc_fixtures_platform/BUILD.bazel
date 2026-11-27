@@ -1,0 +1,76 @@
+# T-0052 (P1-09 subset, U49): the platform domain of the mocked backend, flags
+# slice only. Data plus small pure-Dart handlers (R3). Pure Dart (AC4): neither
+# the library nor its tests reach Flutter.
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+dart_library(
+    name = "mc_fixtures_platform",
+    package_name = "mc_fixtures_platform",
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    deps = [
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_mocked_backend",
+    ],
+)
+
+_TEST_DEPS = [
+    ":mc_fixtures_platform",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:dio",
+    "@pub_deps//:test",
+]
+
+dart_test(
+    name = "flags_test",
+    size = "small",
+    package_name = "mc_fixtures_platform",
+    language_version = _LANG,
+    srcs = ["test/support.dart"],
+    main = "test/flags_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
+    name = "fixture_sets_test",
+    size = "small",
+    package_name = "mc_fixtures_platform",
+    language_version = _LANG,
+    srcs = ["test/support.dart"],
+    main = "test/fixture_sets_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
+    name = "provider_contract_test",
+    size = "small",
+    package_name = "mc_fixtures_platform",
+    language_version = _LANG,
+    srcs = [
+        "test/contract/snapshot_cases.dart",
+        "test/support.dart",
+    ],
+    data = glob(["test/contract/snapshots/*.json"]) + [
+        "CONTRACT.md",
+        "fixtures/routes.json",
+    ],
+    main = "test/contract/provider_contract_test.dart",
+    deps = _TEST_DEPS,
+)
+
+# AC4 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    package_name = "mc_fixtures_platform",
+    language_version = _LANG,
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

@@ -1,0 +1,72 @@
+# T-0052 (U09): typed feature flags and experiments. Pure Dart (R15); a
+# hand-written DI initializer like mc_session.
+#
+# Dependencies beyond plan 01 U09 (mc_prelude, mc_di, mc_config, mc_storage,
+# mc_api_client, mc_api_errors):
+#   mc_session     the epoch and the user: whose flags these are, when they stop
+#                  being valid, and the experiment subject.
+#   mc_monitoring  the one report of a wrong-typed remote value.
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_api_client",
+    "//utility/mc_api_errors",
+    "//utility/mc_config",
+    "//utility/mc_di",
+    "//utility/mc_monitoring",
+    "//utility/mc_prelude",
+    "//utility/mc_session",
+    "//utility/mc_storage",
+    "@pub_deps//:dio",
+    "@pub_deps//:get_it",
+]
+
+dart_library(
+    name = "mc_feature_flags",
+    package_name = "mc_feature_flags",
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_feature_flags",
+    "//utility/mc_api_auth",
+    "//utility/mc_event_bus",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_fixtures_platform",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:test",
+]
+
+[dart_test(
+    name = t,
+    size = "small",
+    package_name = "mc_feature_flags",
+    language_version = _LANG,
+    srcs = ["test/rig.dart"],
+    main = "test/%s.dart" % t,
+    deps = _TEST_DEPS,
+) for t in [
+    "evaluation_test",
+    "experiments_test",
+    "session_fetch_test",
+    "registry_overrides_test",
+    "di_test",
+]]
+
+# AC5 (R15): lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    package_name = "mc_feature_flags",
+    language_version = _LANG,
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

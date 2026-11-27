@@ -1,0 +1,10 @@
+{
+  "body": {
+    "error": {
+      "code": "injected_failure",
+      "message": "Injected HTTP 500 for GET /v1/flags"
+    }
+  },
+  "request": "GET /v1/flags",
+  "status": 500
+}
