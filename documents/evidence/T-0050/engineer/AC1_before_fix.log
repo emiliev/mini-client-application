@@ -1,0 +1,55 @@
+exec ${PAGER:-/usr/bin/less} "$0" || exit 1
+Executing tests from //utility/mc_api_auth:auth_pin_test
+-----------------------------------------------------------------------------
+00:00 +0: loading utility/mc_api_auth/test/auth_pin_test.dart
+00:00 +0: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized
+00:00 +0 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized [E]
+  expected a failure
+  package:matcher                                                         fail
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 13:19  _failure.<fn>
+  package:mc_prelude/src/result.dart 112:16                               Success.fold
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 13:7   _failure
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 55:16  main.<fn>.<fn>
+  
+00:00 +0 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request
+00:00 +0 -2: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request [E]
+  Expected: empty
+    Actual: [TrafficEntry:PUT /v1/me/favourites/comic/9 -> 401 in 0 ms]
+  
+  package:matcher                                                        expect
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 70:7  main.<fn>.<fn>
+  
+00:00 +0 -2: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the failure says the session changed
+00:00 +0 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the failure says the session changed [E]
+  expected a failure
+  package:matcher                                                         fail
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 13:19  _failure.<fn>
+  package:mc_prelude/src/result.dart 112:16                               Success.fold
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 13:7   _failure
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 78:9   main.<fn>.<fn>
+  
+00:00 +0 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a pinned request of the current session gets the bearer
+00:00 +1 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the pin of a signed-out session sends no bearer while still signed out
+00:00 +2 -3: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request pinned to a signed-out epoch is rejected after a sign-in
+00:00 +2 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request pinned to a signed-out epoch is rejected after a sign-in [E]
+  expected a failure
+  package:matcher                                                          fail
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 13:19   _failure.<fn>
+  package:mc_prelude/src/result.dart 112:16                                Success.fold
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 13:7    _failure
+  org-dartlang-root:///utility/mc_api_auth/test/auth_pin_test.dart 116:14  main.<fn>.<fn>
+  
+00:00 +2 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request that skips auth ignores the pin
+00:00 +3 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a pinned request that gets a 401 is refreshed and replayed once for its own session
+00:00 +4 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 unpinned requests are unchanged: the switch gives the new bearer
+00:00 +5 -4: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 authPinned carries the epoch under the documented key
+00:00 +6 -4: Some tests failed.
+
+Failing tests:
+  utility/mc_api_auth/test/auth_pin_test.dart: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request pinned to a signed-out epoch is rejected after a sign-in
+  utility/mc_api_auth/test/auth_pin_test.dart: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request
+  utility/mc_api_auth/test/auth_pin_test.dart: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized
+  utility/mc_api_auth/test/auth_pin_test.dart: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 the failure says the session changed
+
+Consider enabling the flag chain-stack-traces to receive more detailed exceptions.
+For example, 'dart test --chain-stack-traces'.
