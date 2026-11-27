@@ -1,0 +1,159 @@
+baseline PASS
+=== O1 overrides ignore the environment
+    KILLED by: //utility/mc_feature_flags:di_test //utility/mc_feature_flags:evaluation_test 
+=== O2 overrides are never accepted
+    KILLED by: //utility/mc_feature_flags:di_test //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test //utility/mc_feature_flags:session_fetch_test 
+=== O3 the remote value beats an override
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:session_fetch_test 
+=== O4 a release-like env is only the word release
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:registry_overrides_test 
+=== R1 the remote value of this epoch is ignored
+    KILLED by: //utility/mc_feature_flags:di_test //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:registry_overrides_test //utility/mc_feature_flags:session_fetch_test 
+=== R2 the last-known-good is ignored
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:session_fetch_test 
+=== R3 the last-known-good beats the remote value
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== R4 a key the server omits falls back to the old value
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== R5 the default is wrong: a null value counts as a value
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== W1 a wrong-typed remote value is reported every time
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test 
+=== W2 a wrong-typed remote value is never reported
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test 
+=== W3 a wrong-typed override is never reported
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test 
+=== W4 an int flag accepts a double
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:registry_overrides_test 
+=== W5 a bool flag accepts 1
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:registry_overrides_test 
+=== W6 a string flag accepts any value
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:registry_overrides_test 
+=== W7 an enum name is matched case-insensitively
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== E1 a result for an old epoch is applied
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E2 the remote values of the old epoch are kept
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E3 another user's values are kept as last-known-good
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E4 the same user's values are dropped on a new epoch
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E5 value() does not notice a new epoch
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E6 the session stream does not trigger the refetch
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E7 a fetch joins an in-flight fetch of another epoch
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E8 refresh never shares a request
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== E9 a disposed instance still applies results
+    KILLED by: //utility/mc_feature_flags:di_test //utility/mc_feature_flags:session_fetch_test 
+=== E10 a failed fetch clears the remote values
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:session_fetch_test 
+=== E11 the cache is written under another key
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:session_fetch_test 
+=== E12 the cache of another user is used
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== E13 the first fetch is never started
+    KILLED by: //utility/mc_feature_flags:di_test 
+=== E14 boot waits for the first fetch
+    KILLED by: //utility/mc_feature_flags:di_test 
+=== E15 the reader port is not registered
+    KILLED by: //utility/mc_feature_flags:di_test 
+=== E16 the environment is not taken from AppConfig
+    KILLED by: //utility/mc_feature_flags:di_test 
+=== V1 set is accepted in a release-like env
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== V2 clear removes another key
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:registry_overrides_test //utility/mc_feature_flags:session_fetch_test 
+=== V3 clearAll keeps the forced variants
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== V4 set is not saved
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== V5 an undeclared variant can be forced
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== V6 a saved forced variant is not validated
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== V7 a forced variant is ignored
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
+=== X1 remote weights are ignored
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== X2 a variant the remote omits keeps its declared weight
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== X3 remote weights with no positive weight are accepted
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== X4 the subject is always the install
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== X5 the subject is a constant when signed out
+    KILLED by: //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
+=== X6 the install id is made again on every call
+    KILLED by: //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
+=== X7 the install id is not saved
+    KILLED by: //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
+=== B1 the FNV prime is wrong
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B2 the FNV offset is wrong
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B3 the hash adds instead of xor
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B4 the bucket count is 9999
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B5 String.hashCode is mixed in
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B6 the separator is a pipe
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B7 the cumulative bound is inclusive
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B8 no positive weight picks the last variant
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== B9 weights are not scaled to 10000
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== G1 a duplicate flag key is accepted
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== G2 a different flag may reuse a key
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== G3 a duplicate experiment key is accepted
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== G4 flag equality ignores the default
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== G5 a blank key is accepted
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== G6 a negative weight is accepted
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== G7 an experiment without variants is accepted
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== S1 a body without a flags map is accepted
+    KILLED by: //utility/mc_feature_flags:evaluation_test 
+=== S2 a fractional weight is accepted
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== S3 a negative weight is accepted
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== S4 a variant that is not a map is not rejected
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== P1 u-100 is not targeted
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:flags_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P2 u-101 gets the anonymous page size
+    KILLED by: //utility/mc_fixtures_platform:flags_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P3 the zero weight becomes 1
+    KILLED by: //utility/mc_fixtures_platform:flags_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P4 the malformed set is well-typed
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:flags_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P5 a missing bearer is a 401
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:flags_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P6 the empty set serves the default body
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P7 the server_error set answers 503
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P8 the server_error scenario answers 502
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P9 the malformed scenario serves the default
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P10 the route is misspelled
+    KILLED by: //utility/mc_fixtures_platform:provider_contract_test 
+=== P11 a set is renamed
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+=== P12 the empty scenario is dropped
+    KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+
+TOTAL 78  KILLED 78  SURVIVED 0  BROKEN 0
