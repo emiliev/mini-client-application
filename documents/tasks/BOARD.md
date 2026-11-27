@@ -15,6 +15,10 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
+| [T-0049](T-0049-deep-link-back-stack.md) | Cold deep links get a back stack (entity routes under home); home flow buttons survive a link (P-087, P-092) | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0048 | `fleet/T-0049-deep-link-back-stack` |
+| [T-0050](T-0050-auth-first-send-pin.md) | `mc_api_auth` epoch pin on the first send; P-080, P-089, P-093 test gaps | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0039, T-0048 | `fleet/T-0050-auth-first-send-pin` |
+| [T-0051](T-0051-fixtures-commerce.md) | `mc_fixtures_commerce`: store sections, cart in cents, promotions (P1-09 subset) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0038, T-0039 | `fleet/T-0051-fixtures-commerce` |
+
 ## Done
 | ID | Title | Result |
 |---|---|---|
