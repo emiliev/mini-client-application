@@ -105,6 +105,12 @@ Feature: A comic's page
     Then the app was asked to open character {'Amber Vanguard'} {2} times
 
   @T-0050-AC3
+  Scenario: Tapping a different character 450 ms later is not a double tap (P-089)
+    When I open comic {501500}
+    And I tap the cast member {'Amber Vanguard'} and then {'Prism Engineer'} after {450} milliseconds
+    Then the app was asked to open characters {'Amber Vanguard'} and {'Prism Engineer'}
+
+  @T-0050-AC3
   Scenario: A double tap on a creator hands them over once (P-089)
     When I open comic {501500}
     And I tap the creator {'Esme Garrow'} twice in quick succession

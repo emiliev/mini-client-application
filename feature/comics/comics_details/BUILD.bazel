@@ -304,6 +304,28 @@ flutter_test(
     ],
 )
 
+# The favourite bloc's stale-state guard on its own: the real bloc and
+# repository over the mocked backend, with no auth interceptor (T-0050).
+flutter_test(
+    name = "bloc_guards_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/comic_favourite_bloc_guards_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":comics_details",
+        "//utility/mc_bloc_kit",
+        "//utility/mc_event_bus",
+        "//utility/mc_fixtures_comics",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_session",
+        "//utility/mc_storage",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # R17: the hand-written root imports resolve every registration of the flow.
 flutter_test(
     name = "flow_scope_test",

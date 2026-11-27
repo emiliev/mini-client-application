@@ -320,7 +320,12 @@ final class ReadingListEditorBloc
   /// screen, between two writes stops the second).
   Future<Result<ReadingListId, ApiFailure>> _save(FormValues values) async {
     _wrote = false;
-    final epoch = _epoch!;
+    final epoch = _epoch;
+    if (epoch == null) {
+      // Unreachable today: the wizard only exists once the editor has a
+      // session epoch. Never write without one.
+      return failure(_stopped);
+    }
     final draft = readingListDraftOf(values);
     final editing = _editing;
     if (editing == null) {

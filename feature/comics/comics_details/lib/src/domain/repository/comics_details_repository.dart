@@ -34,7 +34,8 @@ class ComicsDetailsRepository {
   );
 
   /// Writes the flag and returns what the backend now holds. The request is
-  /// pinned to the session [epoch] the caller checked: if the session changed
+  /// pinned to the session [epoch] the caller's own check used (the session its
+  /// shown state belongs to): if the session changed
   /// before it was sent, nothing is sent and the answer is
   /// [ApiUnauthorized] (T-0050), so a write never goes out under another
   /// user's bearer.

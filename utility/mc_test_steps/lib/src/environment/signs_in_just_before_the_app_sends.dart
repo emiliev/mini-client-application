@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
@@ -13,8 +15,12 @@ import 'package:mc_test_utils/mc_test_utils.dart';
 /// the root `Dio` makes that switch the moment the first matching request
 /// enters the chain: the session changes in memory (the call a real sign-in
 /// ends with), then the request goes on to the auth interceptor. It fires
-/// once. Without a pin on the request, that request would leave under the
+/// once and then removes itself. Without a pin on the request, that request would leave under the
 /// new user's bearer.
+///
+/// The scenario FAILS at teardown when the hook never fired (a route that no
+/// request matched would make the race scenario pass vacuously), and when
+/// the sign-in itself failed (a result that is a failure, or an error).
 ///
 /// Follow it with `the app finishes writing to storage`: the session saves to
 /// a real file (F-0038).
@@ -29,30 +35,50 @@ Future<void> signsInJustBeforeTheAppSends(
         throw ArgumentError.value(email, 'email', 'Not a fixture user'),
   );
   final session = diContainer<Session>();
+  final interceptors = diContainer<Dio>().interceptors;
   var fired = false;
-  diContainer<Dio>().interceptors.insert(
-    0,
-    InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final request = RecordedRequest(
-          method: options.method,
-          path: options.uri.path,
-          query: options.uri.queryParameters,
-        );
-        if (!fired && matchesRequest(request, route)) {
-          fired = true;
-          session
-              .signIn(
-                userId: user.id,
-                tokens: AuthTokens(
-                  accessToken: mintAccessToken(user.id, 1),
-                  refreshToken: mintRefreshToken(user.id, 1),
-                ),
-              )
-              .ignore();
-        }
-        handler.next(options);
-      },
-    ),
+  Object? signInProblem;
+  late final InterceptorsWrapper hook;
+  hook = InterceptorsWrapper(
+    onRequest: (options, handler) {
+      final request = RecordedRequest(
+        method: options.method,
+        path: options.uri.path,
+        query: options.uri.queryParameters,
+      );
+      if (!fired && matchesRequest(request, route)) {
+        fired = true;
+        scheduleMicrotask(() => interceptors.remove(hook));
+        // Synchronous in memory; the save is checked below.
+        session
+            .signIn(
+              userId: user.id,
+              tokens: AuthTokens(
+                accessToken: mintAccessToken(user.id, 1),
+                refreshToken: mintRefreshToken(user.id, 1),
+              ),
+            )
+            .then<void>(
+              (saved) => saved.fold((_) {}, (failure) {
+                signInProblem = failure;
+              }),
+              onError: (Object error) => signInProblem = error,
+            );
+      }
+      handler.next(options);
+    },
   );
+  interceptors.insert(0, hook);
+  addTearDown(() {
+    interceptors.remove(hook);
+    if (!fired) {
+      fail(
+        '$email never signed in: no request matched "$route" while the '
+        'hook was installed, so the race was not exercised',
+      );
+    }
+    if (signInProblem != null) {
+      fail('the sign-in of $email failed: $signInProblem');
+    }
+  });
 }
