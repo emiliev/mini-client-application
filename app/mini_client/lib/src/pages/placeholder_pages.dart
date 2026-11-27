@@ -142,12 +142,13 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
           const McGap.md(),
           McButton(label: 'Store', onPressed: widget.onOpenStore),
           const McGap.md(),
-          McButton(label: 'Settings', onPressed: widget.onOpenSettings),
-          const McGap.md(),
           McButton(
             label: 'Open placeholder 7',
             onPressed: () => widget.onOpenPlaceholder(7),
           ),
+          // Last, so the entries above keep their places (T-0063).
+          const McGap.md(),
+          McButton(label: 'Settings', onPressed: widget.onOpenSettings),
         ],
       ),
     );
