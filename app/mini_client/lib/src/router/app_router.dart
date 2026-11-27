@@ -80,8 +80,11 @@ const _notFoundPath = '/not-found';
 
 /// What a link asked for, without its scheme and host: a link in the running
 /// app arrives as `miniclient://app/nope`, and the screen shows `/nope`.
-String _asked(Uri uri) =>
-    Uri(path: uri.path, query: uri.hasQuery ? uri.query : null).toString();
+String _asked(Uri uri) => Uri(
+  path: uri.path,
+  query: uri.hasQuery ? uri.query : null,
+  fragment: uri.hasFragment ? uri.fragment : null,
+).toString();
 
 /// The location of the not-found screen for a failed [from].
 String notFoundLocation(String from) =>

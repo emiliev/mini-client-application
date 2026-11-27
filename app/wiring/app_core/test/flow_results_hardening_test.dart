@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'package:app_core/app_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:go_router/src/logging.dart' as go_router_log;
@@ -15,6 +16,7 @@ const _finish = Key('finish');
 const _finishEmpty = Key('finish.empty');
 const _signIn = Key('signin.go_from');
 const _signInPop = Key('signin.pop_value');
+const _signInPopTrue = Key('signin.pop_true');
 const _home = Key('home');
 
 class _FakeFlow extends StatelessWidget {
@@ -43,10 +45,13 @@ class _FakeFlow extends StatelessWidget {
 /// signed out, `/me/...` goes to `/signin?from=<location>`; signing in goes
 /// to `from` with `go`, which replaces the page the guard showed.
 class _App {
-  _App(this.router, this.signedIn);
+  _App(this.router, this.signedIn, this.tick);
 
   final GoRouter router;
   final ValueNotifier<bool> signedIn;
+
+  /// A refreshListenable that is not the guard's: bumping it re-parses.
+  final ValueNotifier<int> tick;
 
   /// What the callers of [open] got, in order.
   final List<String?> got = [];
@@ -63,10 +68,12 @@ Future<_App> _app(
   String initial = '/',
 }) async {
   final state = ValueNotifier<bool>(signedIn);
+  final tick = ValueNotifier<int>(0);
   addTearDown(state.dispose);
+  addTearDown(tick.dispose);
   final router = GoRouter(
     initialLocation: initial,
-    refreshListenable: state,
+    refreshListenable: Listenable.merge([state, tick]),
     redirect: (context, s) {
       if (!state.value && s.uri.path.startsWith('/me/')) {
         return '/signin?from=${Uri.encodeComponent(s.uri.toString())}';
@@ -89,6 +96,11 @@ Future<_App> _app(
                 GoRouter.of(context).go(s.uri.queryParameters['from']!);
               },
               child: const Text('sign in'),
+            ),
+            TextButton(
+              key: _signInPopTrue,
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('pop true'),
             ),
             TextButton(
               key: _signInPop,
@@ -119,7 +131,7 @@ Future<_App> _app(
   addTearDown(router.dispose);
   await tester.pumpWidget(MaterialApp.router(routerConfig: router));
   await tester.pumpAndSettle();
-  return _App(router, state);
+  return _App(router, state, tick);
 }
 
 /// Opens a dialog over the screen that shows [_finish].
@@ -284,6 +296,158 @@ void main() {
       final error = tester.takeException();
       expect(error, isA<FlutterError>());
       expect(error.toString(), contains('extra: state.extra'));
+    });
+  });
+
+  group('T-0054-AC1 review: re-parses, same-frame replacement, listeners', () {
+    // Calls of earlier tests that never ended (a route that threw) stay.
+    late int baseline;
+    setUp(() => baseline = AppFlows.watchers);
+
+    testWidgets('T-0054-AC1 router.refresh() during a flow, then save: the '
+        'result, once', (tester) async {
+      final app = await _app(tester);
+      await app.open(tester);
+
+      app.router.refresh();
+      await tester.pumpAndSettle();
+      expect(app.got, isEmpty, reason: 'the page is still there');
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+
+      expect(app.got, ['l-5']);
+      expect(tester.takeException(), isNull);
+      expect(AppFlows.watchers, baseline);
+    });
+
+    testWidgets('T-0054-AC1 router.refresh() then Back: null, once', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await app.open(tester);
+
+      app.router.refresh();
+      await tester.pumpAndSettle();
+      app.router.pop();
+      await tester.pumpAndSettle();
+
+      expect(app.got, [null]);
+      expect(AppFlows.watchers, baseline);
+    });
+
+    testWidgets('T-0054-AC1 a refreshListenable tick during a flow, then '
+        'save: the result, once', (tester) async {
+      final app = await _app(tester);
+      await app.open(tester);
+
+      app.tick.value++;
+      await tester.pumpAndSettle();
+      app.tick.value++;
+      await tester.pumpAndSettle();
+      expect(app.got, isEmpty);
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+
+      expect(app.got, ['l-5']);
+      expect(AppFlows.watchers, baseline);
+    });
+
+    testWidgets('T-0054-AC1 a refresh, then a go elsewhere: null, once', (
+      tester,
+    ) async {
+      final app = await _app(tester);
+      await app.open(tester);
+
+      app.router.refresh();
+      await tester.pumpAndSettle();
+      app.router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+
+      expect(app.got, [null]);
+      expect(AppFlows.watchers, baseline);
+    });
+
+    testWidgets('T-0054-AC1 a restore of the saved route state during a flow, '
+        'then save: the result, once', (tester) async {
+      final app = await _app(tester);
+      await app.open(tester);
+      final saved = app.router.routeInformationParser.restoreRouteInformation(
+        app.router.routerDelegate.currentConfiguration,
+      )!;
+
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/navigation',
+        const JSONMethodCodec().encodeMethodCall(
+          MethodCall('pushRouteInformation', {
+            'location': saved.uri.toString(),
+            'state': saved.state,
+          }),
+        ),
+        (_) {},
+      );
+      await tester.pumpAndSettle();
+      expect(app.got, isEmpty, reason: 'the page is still there');
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+
+      expect(app.got, ['l-5']);
+      expect(AppFlows.watchers, baseline);
+    });
+
+    testWidgets('T-0054-AC1 a go in the same synchronous span as the push: '
+        'null, once, and nothing is left listening', (tester) async {
+      final app = await _app(tester);
+      final before = baseline;
+
+      unawaited(AppFlows.createReadingList(app.router).then(app.got.add));
+      expect(AppFlows.watchers, before + 1);
+      app.router.go(AppLocations.characters);
+      await tester.pumpAndSettle();
+
+      expect(app.got, [null]);
+      expect(AppFlows.watchers, before);
+      expect(find.byKey(_finish), findsNothing);
+    });
+
+    testWidgets('T-0054-AC1 a go to the pushed location in the same span: '
+        'null, once', (tester) async {
+      final app = await _app(tester);
+
+      unawaited(AppFlows.createReadingList(app.router).then(app.got.add));
+      app.router.go(AppLocations.newReadingList);
+      await tester.pumpAndSettle();
+
+      expect(app.got, [null]);
+      expect(AppFlows.watchers, baseline);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('T-0054-AC1 a redirected page that pops true (the sign-in '
+        'sheet does): null, nothing throws', (tester) async {
+      final app = await _app(tester, signedIn: false);
+      await app.open(tester);
+
+      await tester.tap(find.byKey(_signInPopTrue));
+      await tester.pumpAndSettle();
+
+      expect(app.got, [null]);
+      expect(tester.takeException(), isNull);
+      expect(AppFlows.watchers, baseline);
+    });
+
+    testWidgets('T-0054-AC1 every end removes the listener', (tester) async {
+      final app = await _app(tester, signedIn: false);
+      await app.open(tester);
+      expect(AppFlows.watchers, baseline + 1);
+
+      app.router.pop();
+      await tester.pumpAndSettle();
+      expect(AppFlows.watchers, baseline);
+
+      await app.open(tester);
+      await tester.tap(find.byKey(_signIn));
+      await tester.pumpAndSettle();
+      expect(AppFlows.watchers, baseline);
     });
   });
 

@@ -107,20 +107,36 @@ FA="$T_RES $T_HARD $T_APP"  # and the app's
 # --- The Verifier's V08 (T-0049): the push future is no longer chained.
 MUST="a redirected page that pops with a value" mutate V08 \
   "the push future is not chained into the call" "$RES" "$F" \
-  $'    unawaited(push.then(call.complete));\n' ''
+  $'    unawaited(\n      push.then((value) => call.complete(value is String ? value : null)),\n    );\n' ''
 
 # --- P-094: the call, not the location
 mutate M01 "the stack watch never abandons a call" "$RES" "$F" \
-  '} else if (seen) {' '} else if (false) {'
-mutate M02 "the page is never seen" "$RES" "$F" \
-  $'        seen = true;' $'        seen = false;'
+  'if (pageKey != null ? find() == null : superseded()) {' 'if (false) {'
+mutate M02 "the page's key is never taken" "$RES" "$F" \
+  $'        pageKey = match.pageKey.value;' $'        pageKey = null;'
 mutate M03 "the stack is checked at once, not after the frame" "$RES" "$F" \
   $'      WidgetsBinding.instance\n        ..addPostFrameCallback((_) => check())\n        ..scheduleFrame();' \
   'check();'
-mutate M04 "the page is matched by nothing" "$RES" "$F" \
-  'identical(match.completer.future, push)' 'false'
+mutate M04 "the page is first matched by nothing" "$RES" "$F" \
+  '? push != null && identical(match.completer.future, push)' '? false'
 mutate M05 "the stack watch is not listening" "$RES" "$F" \
-  $'    delegate.addListener(onChange);\n' ''
+  $'    delegate.addListener(onChange);\n    _watchers++;' $'    _watchers++;'
+mutate R1 "the page is matched by its completer, not its key (a re-parse abandons it)" "$RES" "$F" \
+  ': match.pageKey.value == pageKey)' ': identical(match.completer.future, push))'
+mutate R2 "the route drops its call when a re-parse gives it a null extra" "$RES" "$F" \
+  $'    if (extra is FlowCall<T>) {\n      _call = extra;\n    }' $'    _call = extra is FlowCall<T> ? extra : null;'
+mutate R3 "a superseded push is never abandoned" "$RES" "$F" \
+  'if (pageKey != null ? find() == null : superseded()) {' 'if (pageKey != null ? find() == null : false) {'
+mutate R4 "no first look after the push" "$RES" "$F" \
+  $'    onChange();\n    return call.result;' $'    return call.result;'
+mutate R5 "the listener is never removed" "$RES" "$F" \
+  $'        delegate.removeListener(onChange);\n' ''
+mutate R6 "the watcher count is never decremented" "$RES" "$F" \
+  $'        _watchers--;\n' ''
+mutate R7 "a non-String pop value is cast, not dropped" "$RES" "$F" \
+  'call.complete(value is String ? value : null)' 'call.complete(value as String?)'
+mutate R8 "a push never applied is judged superseded at once" "$RES" "$F" \
+  $'      if (push == null) {\n        return false;\n      }\n' ''
 mutate M07 "the debug assert never fires" "$RES" "$F" \
   'if (_call == null && state.extra is FlowCall) {' 'if (false) {'
 mutate M08 "the debug assert fires on a go-built route (no extra)" "$RES" "$F" \
@@ -165,6 +181,8 @@ mutate N01 "no onException: unknown paths use go_router's own page" "$ROUTER" "$
   $'  onException: (context, state, router) =>\n      router.go(notFoundLocation(_asked(state.uri))),\n' ''
 mutate N02 "not-found keeps the scheme and host of a link" "$ROUTER" "$T_NF" \
   $'    Uri(path: uri.path, query: uri.hasQuery ? uri.query : null).toString();' 'uri.toString();'
+mutate N11 "not-found loses the fragment" "$ROUTER" "$T_NF" \
+  'fragment: uri.hasFragment ? uri.fragment : null,' 'fragment: null,'
 mutate N03 "not-found loses the query" "$ROUTER" "$T_NF" \
   'query: uri.hasQuery ? uri.query : null' 'query: null'
 mutate N04 "the not-found route shows no location" "$ROUTER" "$T_NF $T_OLD" \

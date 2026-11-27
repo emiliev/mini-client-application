@@ -63,9 +63,29 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
   ({T? value})? _pending;
   bool _done = false;
 
-  FlowCall<T>? get _call {
+  /// The call this route answers. Bound from the widget's `extra`, and kept
+  /// when a re-parse (a `refresh`, a refreshListenable, a restore) hands the
+  /// route a null `extra` (the call is transient). go_router keeps the page,
+  /// and so this state, across a re-parse because the page key is unchanged.
+  FlowCall<T>? _call;
+
+  void _bindCall() {
     final extra = widget.extra;
-    return extra is FlowCall<T> ? extra : null;
+    if (extra is FlowCall<T>) {
+      _call = extra;
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _bindCall();
+  }
+
+  @override
+  void didUpdateWidget(FlowResultRoute<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _bindCall();
   }
 
   /// The flow's `onComplete`. Later calls are ignored (a flow completes once).
@@ -205,7 +225,9 @@ final class FlowCall<T> {
 ///   no codec go_router would throw `JsonUnsupportedObjectError` for it in
 ///   the engine's route report.
 ///
-/// So a route that reads `state.extra` treats null as "no argument".
+/// So a route that reads `state.extra` treats null as "no argument": a dropped
+/// extra is null after **any** re-parse of the route state (a `refresh`, a
+/// `refreshListenable`, a restore), not only after a restore.
 final class FlowExtraCodec extends Codec<Object?, Object?> {
   const FlowExtraCodec();
 
@@ -242,7 +264,7 @@ class _FlowExtraConverter extends Converter<Object?, Object?> {
           'FlowExtraCodec: dropping a route extra of type '
           '${input.runtimeType} when the route state is saved. Only JSON-safe '
           'values (null, bool, num, String, List, Map<String, ...>) are kept; '
-          'the route sees null after a restore.',
+          'the route sees null after any re-parse of the route state.',
         );
       }
       return true;
@@ -282,38 +304,89 @@ abstract final class AppFlows {
   static Future<String?> editReadingList(GoRouter router, String id) =>
       _open(router, AppLocations.editReadingList(id));
 
+  /// How many calls are being watched right now (for tests: it is back to
+  /// what it was when every call has ended).
+  @visibleForTesting
+  static int get watchers => _watchers;
+  static int _watchers = 0;
+
   /// Pushes [location] and waits for a [FlowCall], which completes exactly
   /// once, whatever happens to the push (see [FlowResultRoute]):
   ///
   /// - the route ends with a result, or is disposed (it completes the call);
   /// - the push's own future completes (a pop; also of a page a redirect
-  ///   showed instead of the route);
+  ///   showed instead of the route; a non-String value, such as the sign-in
+  ///   sheet's `true`, is no result: null);
   /// - a `go` replaces the pushed page, even one a redirect sent elsewhere
   ///   (go_router never completes the push then): the router's stack is
   ///   watched for the page, and the call completes (with a result the route
   ///   still held, else null) once the page is gone. The check runs after the
   ///   next frame, so a route holding a result under an overlay is not cut
-  ///   short.
+  ///   short;
+  /// - a `go` supersedes the push before the router applied it: the push is
+  ///   no longer the router's pending navigation and its page never showed.
   ///
-  /// The page is found by its push future: a redirect drops the `extra`, but
-  /// the match keeps the completer that the push returned.
+  /// **The page is found by its key.** The push future identifies it when the
+  /// router applies the push (a redirect drops the `extra`, but the match
+  /// keeps the completer the push returned). From then on the page's key is
+  /// used: a re-parse of the route state (`refresh`, a `refreshListenable`, a
+  /// restore) rebuilds every imperative match with a **fresh completer** and
+  /// a null `extra`, but with the same page key, so the page is still found
+  /// and never abandoned while it is there; the route keeps its call (see
+  /// [FlowResultRoute]).
   static Future<String?> _open(GoRouter router, String location) {
     final call = FlowCall<String>();
     final delegate = router.routerDelegate;
-    late final Future<String?> push;
-    var seen = false;
+    final provider = router.routeInformationProvider;
+    // Null while the router applies the push inside `push` itself.
+    Future<Object?>? push;
+    String? pageKey;
+
+    ImperativeRouteMatch? find() {
+      for (final match in delegate.currentConfiguration.matches) {
+        if (match is ImperativeRouteMatch &&
+            (pageKey == null
+                ? push != null && identical(match.completer.future, push)
+                : match.pageKey.value == pageKey)) {
+          return match;
+        }
+      }
+      return null;
+    }
+
+    // Synchronously on every change: the page's key, as soon as it exists.
+    void locate() {
+      if (pageKey != null || call.isCompleted) {
+        return;
+      }
+      final match = find();
+      if (match != null) {
+        pageKey = match.pageKey.value;
+      }
+    }
+
+    // Still the router's pending navigation? (Not yet applied, or applied.)
+    bool superseded() {
+      if (push == null) {
+        return false;
+      }
+      final info = provider.value.state;
+      return !(info is RouteInformationState<Object?> &&
+          identical(info.completer?.future, push));
+    }
+
     void check() {
       if (call.isCompleted) {
         return;
       }
-      if (_stackHolds(delegate.currentConfiguration, push)) {
-        seen = true;
-      } else if (seen) {
+      locate();
+      if (pageKey != null ? find() == null : superseded()) {
         call.abandon();
       }
     }
 
     void onChange() {
+      locate();
       WidgetsBinding.instance
         ..addPostFrameCallback((_) => check())
         ..scheduleFrame();
@@ -321,24 +394,24 @@ abstract final class AppFlows {
 
     // Listening before the push: the router may apply it at once.
     delegate.addListener(onChange);
+    _watchers++;
     unawaited(
-      call.result.whenComplete(() => delegate.removeListener(onChange)),
+      call.result.whenComplete(() {
+        delegate.removeListener(onChange);
+        _watchers--;
+      }),
     );
-    push = router.routeInformationProvider.push<String>(
+    final pushed = push = provider.push<Object?>(
       location,
       base: delegate.currentConfiguration,
       extra: call,
     );
-    unawaited(push.then(call.complete));
-    return call.result;
-  }
-
-  /// Whether the page [push] returned the future of is in [list]'s stack.
-  static bool _stackHolds(RouteMatchList list, Future<Object?> push) {
-    return list.matches.any(
-      (match) =>
-          match is ImperativeRouteMatch &&
-          identical(match.completer.future, push),
+    unawaited(
+      push.then((value) => call.complete(value is String ? value : null)),
     );
+    // A first look after the frame: a `go` in the same synchronous span as
+    // the push leaves nothing for the router to notify about.
+    onChange();
+    return call.result;
   }
 }

@@ -191,6 +191,60 @@ void main() {
     );
   });
 
+  testWidgets('T-0054-AC4 not-found keeps the #fragment a link carried, cold '
+      'and running', (tester) async {
+    await boot(tester, coldStartLink: 'miniclient://app/nope?x=1#frag');
+    expect(find.text('Nothing lives at /nope?x=1#frag'), findsOneWidget);
+
+    await _pushLink(tester, 'miniclient://app/other#top');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Nothing lives at /other#top'), findsOneWidget);
+  });
+
+  testWidgets('T-0054-AC4 a route state restored with a location that no '
+      'longer matches shows not-found with Back and Go home (an error that '
+      'does not come from a link)', (tester) async {
+    await boot(tester);
+    await tester.tap(find.text('Characters'));
+    await tester.pumpAndSettle();
+    final router = GoRouter.of(
+      tester.element(
+        find.byKey(const ValueKey<String>('characters_list.grid')),
+      ),
+    );
+    final saved = router.routeInformationParser.restoreRouteInformation(
+      router.routerDelegate.currentConfiguration,
+    )!;
+    final state = Map<Object?, Object?>.of(
+      saved.state! as Map<Object?, Object?>,
+    )..['location'] = '/gone';
+
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', {
+          'location': '/gone',
+          'state': state,
+        }),
+      ),
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(_notFound),
+      findsOneWidget,
+      reason: 'not go_router ErrorScreen',
+    );
+    expect(find.text('Nothing lives at /gone'), findsOneWidget);
+    expect(find.byType(BackButton), findsOneWidget);
+    expect(find.byKey(notFoundHomeKey), findsOneWidget);
+    await tester.tap(find.byKey(notFoundHomeKey));
+    await tester.pumpAndSettle();
+    expectHomeAlone('Go home');
+  });
+
   for (final byButton in [false, true]) {
     testWidgets('T-0054-AC4 a not-found with nothing under it goes home on '
         '${byButton ? 'Go home' : 'Back'}', (tester) async {
@@ -223,6 +277,15 @@ void main() {
       expect(find.byKey(_notFound), findsNothing);
     });
   }
+
+  test('T-0054-AC4 every error path reaches onException: go_router 17.5 '
+      'skips it only for an error inside an onEnter, and the app has none '
+      '(add onEnter, and it must route its errors to not-found too)', () {
+    final router = buildAppRouter(initialLocation: AppLocations.home);
+    addTearDown(router.dispose);
+
+    expect(router.configuration.topOnEnter, isNull);
+  });
 
   test('T-0054-AC4 the URLs of the app are unchanged', () {
     expect(AppLocations.home, '/');
