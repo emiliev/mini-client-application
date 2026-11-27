@@ -56,3 +56,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0055](T-0055/verification-report.md) | PASS (Sonnet, single pass) | e2e false PASS reproduced on the old script; each defence proven alone; 5 real breakage kinds caught |
 | [T-0057](T-0057/verification-report.md) | PASS (Sonnet, single pass) | Async-guard probes faithful; X02, X03 and X06 killed, with controls |
 | [T-0059](T-0059/verification-report.md) | PASS (Sonnet, single pass) | Charts: own geometry probe, release-path sanitising, donut neighbour colours, contrast ratios by hand, 50-run flake check |
+| [T-0058](T-0058/verification-report.md) | PASS (Sonnet, single pass) | Overlays: 18-test probe (confirm values, keyboard inset, non-dismissible), planted direct-overlay call caught, sign-in e2e |
