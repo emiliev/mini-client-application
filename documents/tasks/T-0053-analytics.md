@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `113e895`; Verifier PASS `458403f`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (service kit; ADR-0011) |
 | Branch | `fleet/T-0053-analytics` |
@@ -139,3 +139,10 @@ Decisions: the ordered step splits its text on commas and ignores spaces, and `{
 
 New Definition of Done rule: the targets this task adds or changes that touch storage, lifecycle or races pass `test --runs_per_test=50 --nocache_test_results` with 0 failures (14 targets, `runs_per_test_50.log`). Two widget tests dropped a consent save (`unawaited(setConsent(...))` under fake async): they now `await tester.runAsync(...)`, so the write finishes before the directory is deleted.
 
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 2 important bugs:
+  - the BDD screen steps used `contains`, so the go-back scenario passed vacuously;
+  - `reset()` dropped events tracked earlier in the same turn.
+
+  It also found 6 nits. All were fixed in the review round at `5d1a596` (102/102 mutations killed, 50-run flake check clean, e2e 11/11). A single Sonnet Verifier pass gave PASS `458403f` (about 125k tokens; own 13-test probe; 19/19 mutations killed; 50-run flake check on 13 targets; e2e 11/11; no defects). The TL merged `--no-ff`. On the merge result `check` passed, 165/165 tests passed, lint was clean, `mc_arch_check` reported OK, the sim app built and provenance passed. Follow-ups: P-102 to P-105.

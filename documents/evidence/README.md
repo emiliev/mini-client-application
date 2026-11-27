@@ -50,3 +50,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0051](T-0051/verification-report.md) | PASS (Sonnet, single pass) | Commerce fixtures: own cart oracle (stacking, half-up, largest remainder), section failures, two-user carts, overlong ids |
 | [T-0049](T-0049/verification-report.md) | PASS (Opus, single pass) | Deep-link back stacks on device (cold and running, from inner flow pages and sheets), result futures on every exit, codec log capture; 5 Minor defects → P-094 to P-098 |
 | [T-0050](T-0050/verification-report.md) | FAIL (Opus: flaky teardown), then PASS (narrow Sonnet re-verify) | Auth pin on the real root Dio, user-switch races in both orders, 200-run flake proofs, merge check with T-0049 |
+| [T-0053](T-0053/verification-report.md) | PASS (Sonnet, single pass) | Analytics: consent gate and same-turn races, reset delivery, session rotation boundaries, exact screen order, 50-run flake check, e2e 11/11 |
