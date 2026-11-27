@@ -28,15 +28,23 @@ import 'package:go_router/go_router.dart';
 /// **A result future always completes.** go_router never completes the
 /// future of a `push` that a `go` replaced, so a caller awaiting
 /// [GoRouter.push] alone would wait forever. [AppFlows] therefore pushes with
-/// a [FlowCall] as the `extra`; the route (given `extra: state.extra`) ends it
-/// with the result, or with null when it is disposed without one, whether it
-/// was popped, replaced or removed by a `go`.
+/// a [FlowCall] as the `extra`, one per call (never keyed by location), and
+/// the call ends exactly once, in one of these ways:
+/// - the route (given `extra: state.extra`) hands over the result, or ends it
+///   with null when it is disposed without one (popped, replaced, removed);
+/// - the push's own future completes (a pop, also of a page a redirect showed
+///   instead of the route, such as a sign-in);
+/// - a `go` replaces the pushed page, wherever the redirects sent it (the
+///   guard's `go(from)`): [AppFlows] watches the router's stack and ends the
+///   call with null. The route a `go` builds has no call (its `state.extra`
+///   is null), so it is not mistaken for a forgotten `extra: state.extra`.
 ///
 /// A route with nothing below it (a deep link opened it) has no caller to
 /// answer: completing it goes home instead of popping the last page. A result
 /// that arrives while something covers the route (a dialog, a sheet) is kept
 /// and handed over as soon as the route is on top again: it is never dropped,
-/// and what is above is never popped for it.
+/// and what is above is never popped for it. If a `go` removes the route
+/// before then, the caller still gets that result (the call keeps it).
 class FlowResultRoute<T> extends StatefulWidget {
   const FlowResultRoute({required this.builder, this.extra, super.key});
 
@@ -328,19 +336,10 @@ abstract final class AppFlows {
 
   /// Whether the page [push] returned the future of is in [list]'s stack.
   static bool _stackHolds(RouteMatchList list, Future<Object?> push) {
-    bool within(List<RouteMatchBase> matches) {
-      for (final match in matches) {
-        if (match is ImperativeRouteMatch &&
-            identical(match.completer.future, push)) {
-          return true;
-        }
-        if (match is ShellRouteMatch && within(match.matches)) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    return within(list.matches);
+    return list.matches.any(
+      (match) =>
+          match is ImperativeRouteMatch &&
+          identical(match.completer.future, push),
+    );
   }
 }
