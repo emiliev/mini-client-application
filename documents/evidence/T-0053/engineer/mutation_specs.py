@@ -5,6 +5,8 @@
   mutation_specs.py files             every file a mutation touches
   mutation_specs.py targets <id>      the Bazel targets that must go red
   mutation_specs.py what <id>         the description
+  mutation_specs.py file <id>         the file it edits (formatted afterwards: the
+                                      Bazel build checks formatting, F-0051)
   mutation_specs.py apply <id>        applies it; exit 3 when the text is not
                                       found or the file did not change
 
@@ -107,7 +109,8 @@ M = [
     ("G27", "the config default parses to granted when missing", CFGSRC,
      [("(json?['defaultConsent'] as String?) ?? 'unknown'", "(json?['defaultConsent'] as String?) ?? 'granted'")], CFG),
     ("G28", "e2e config no longer grants consent", E2EJSON,
-     [('"defaultConsent": "granted"', '"defaultConsent": "unknown"')], CFG),
+     [('"defaultConsent": "granted"', '"defaultConsent": "unknown"')],
+     ["--//tool/bazel/config:env=e2e", "//utility/mc_config:bundled_config_test"]),
     # ---- AC2: validation -------------------------------------------------
     ("V01", "name limit 41", EV,
      [("static const int maxNameLength = 40;", "static const int maxNameLength = 41;")], [A]),
@@ -251,6 +254,8 @@ if __name__ == "__main__":
         print("\n".join(sorted({m[2] for m in M})))
     elif cmd == "targets":
         print(" ".join(by_id[sys.argv[2]][4]))
+    elif cmd == "file":
+        print(by_id[sys.argv[2]][2])
     elif cmd == "what":
         print(by_id[sys.argv[2]][1])
     elif cmd == "apply":

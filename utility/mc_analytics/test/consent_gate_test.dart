@@ -248,6 +248,26 @@ void main() {
       expect(rig.analytics.bufferedCount, 0);
     });
 
+    test('T-0053-AC1 a sink that moves consent back to unknown in the middle '
+        'of a flush stops the rest, which stays buffered', () async {
+      late final Rig rig;
+      final pauser = HookSink((record) {
+        if (record.seq == 2) {
+          unawaited(rig.analytics.setConsent(AnalyticsConsent.unknown));
+        }
+      });
+      rig = Rig(consent: AnalyticsConsent.unknown, extraSinks: [pauser]);
+      for (var i = 0; i < 5; i++) {
+        rig.analytics.track(AnalyticsEvent('e$i'));
+      }
+
+      unawaited(rig.analytics.setConsent(AnalyticsConsent.granted));
+      await settle();
+
+      expect(pauser.records, hasLength(2));
+      expect(rig.analytics.bufferedCount, 4, reason: '6 entries, 2 delivered');
+    });
+
     test('T-0053-AC1 granted back to unknown holds what was queued', () async {
       final rig = Rig();
       await settle();
@@ -480,6 +500,19 @@ void main() {
         expect(rig.analytics.bufferedCount, 0);
         expect(rig.errors, hasLength(1));
         expect(rig.errors.single.error, isA<StorageFailure>());
+      },
+    );
+
+    test(
+      'T-0053-AC1 a save that cannot write throws the storage failure',
+      () async {
+        final file = File('${dir.path}/not-a-dir')..writeAsStringSync('x');
+        final store = ConsentStore(FileStore(Directory(file.path)));
+
+        await expectLater(
+          store.save(AnalyticsConsent.granted),
+          throwsA(isA<StorageFailure>()),
+        );
       },
     );
 

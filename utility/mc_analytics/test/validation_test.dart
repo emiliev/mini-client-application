@@ -57,7 +57,8 @@ void main() {
     test(
       'T-0053-AC2 every reserved prefix is rejected, the kit may use them',
       () {
-        for (final prefix in AnalyticsRules.reservedPrefixes) {
+        // Spelled out here, so removing one from the list is caught.
+        for (final prefix in ['mc_', 'ga_', 'firebase_', 'google_']) {
           final name = '${prefix}thing';
           expect(
             AnalyticsRules.validateName(name).map((v) => v.kind),
@@ -69,7 +70,17 @@ void main() {
             isEmpty,
           );
         }
-        expect(AnalyticsRules.reservedPrefixes, contains('mc_'));
+        expect(AnalyticsRules.reservedPrefixes, [
+          'mc_',
+          'ga_',
+          'firebase_',
+          'google_',
+        ]);
+        expect(AnalyticsRules.reservedParamKeys, [
+          'session_id',
+          'seq',
+          'screen_name',
+        ]);
         // A name that merely contains a prefix is fine.
         expect(AnalyticsRules.validateName('my_mc_thing'), isEmpty);
         expect(AnalyticsRules.validateName('mc'), isEmpty);
