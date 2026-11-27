@@ -36,6 +36,8 @@ dev_dependencies:
     sdk: flutter
   mc_analysis: any
   mc_analytics: any
+  mc_api_auth: any
+  mc_appearance: any
   mc_e2e_utils: any
   mc_event_bus: any
   mc_fixtures_characters: any

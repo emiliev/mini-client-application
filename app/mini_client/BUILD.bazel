@@ -250,6 +250,31 @@ flutter_test(
     ],
 )
 
+# T-0063: settings_appearance inside the real app: the whole app re-themes,
+# the choice survives a restart (signed out and signed in), the cold link.
+flutter_test(
+    name = "settings_route_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/settings_route_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_api_auth",
+        "//utility/mc_appearance",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_session",
+        "//utility/mc_test_utils",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # T-0054: the not-found screen, over home, with a way home.
 flutter_test(
     name = "not_found_test",

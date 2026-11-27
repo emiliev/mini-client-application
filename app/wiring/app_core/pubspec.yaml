@@ -52,4 +52,5 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mc_analysis: any
+  mc_ds_charts: any
   mc_test_utils: any

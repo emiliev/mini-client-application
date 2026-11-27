@@ -73,6 +73,21 @@ flutter_library(
     "router_observers_test",
 ]]
 
+# T-0063: McApp follows the appearance (charts: the reduce-motion draw-in).
+flutter_test(
+    name = "appearance_shell_test",
+    size = "small",
+    data = ["//utility/mc_ds_theme:fonts"],
+    package_name = "app_core",
+    language_version = _LANG,
+    main = "test/appearance_shell_test.dart",
+    deps = _DEPS + [
+        ":app_core",
+        "//utility/mc_ds_charts",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # T-0048: the flow-result helpers.
 flutter_test(
     name = "flow_results_test",
