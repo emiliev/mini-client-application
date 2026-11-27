@@ -34,13 +34,17 @@ E2E_BUILD_FAIL_MARKERS=(
   'Failed to build iOS app'
   'Could not build the application'
   'Error: Compilation failed'
-  'Application failed to start on attempt'
 )
+# Not a marker: "Application failed to start on attempt: N" also appears when a
+# launch timed out and a later attempt recovered (review of T-0055). A real build
+# failure always prints BUILD FAILED, Failed to build iOS app and Could not build
+# the application as well (F-0055, before-fix log), so it adds nothing.
 # A Dart compile error line: "<file>.dart:<line>:<col>: Error: <message>".
 E2E_DART_ERROR_REGEX='\.dart:[0-9]+:[0-9]+: Error:'
-# The log's own header (4 "#"/"$" lines, a blank line, the uninstall note) is
-# not searched, so a runner command that merely mentions a marker is no failure.
-E2E_LOG_HEADER_LINES=6
+# The script writes this line to the log right before the runner starts; only
+# what follows it is searched, so a runner command that merely mentions a marker
+# (in the header) is no failure.
+E2E_LOG_SENTINEL='# --- runner output ---'
 
 usage() {
   cat <<'EOF'
@@ -51,7 +55,7 @@ Usage: tool/e2e_ios.sh --task T-XXXX --role engineer|verifier --project <flutter
                        [--runtime com.apple.CoreSimulator.SimRuntime.iOS-26-2]
                        [--evidence-dir <dir>]
                        [--runner-cmd "<cmd using {target} {driver} {udid}>"]
-                       [--bundle-id <id>]
+                       [--bundle-id <id>] [--keep-build]
                        [--keep-sim]
 
 Creates a private simulator named mc-<task>-<role>-<pid>, boots it, runs every
@@ -71,8 +75,10 @@ Defaults:
 
 Before each target the app is uninstalled from the simulator (its bundle id is
 read from ios/Runner.xcodeproj, or given with --bundle-id) and the project's
-build/ios/iphonesimulator is deleted, so a stale build can never run. A target also FAILS when its log holds a build-failure marker
-(BUILD FAILED, Error (Xcode), a Dart compile error, ...), whatever the exit
+build/ios/iphonesimulator is deleted (only for the default `flutter drive`
+runner; not with --keep-build, --use-application-binary or --no-build), so a
+stale build can never run. A target also FAILS when its log holds a
+build-failure marker (BUILD FAILED, Error (Xcode), a Dart compile error, ...), whatever the exit
 code (T-0055).
 
 The evidence dir belongs to the run: at start, the previous run's outputs
@@ -151,32 +157,48 @@ downscale_if_tall() {
 # build_failure_marker <logfile>: prints the first build-failure marker found
 # in the log (see E2E_BUILD_FAIL_MARKERS) and returns 0; returns 1 if none.
 build_failure_marker() {
-  local log=$1 m
+  local log=$1 m out
+  out=$(awk -v s="$E2E_LOG_SENTINEL" 'f { print } $0 == s { f = 1 }' "$log")
   for m in "${E2E_BUILD_FAIL_MARKERS[@]}"; do
-    if tail -n "+$((E2E_LOG_HEADER_LINES + 1))" "$log" | grep -F -q -- "$m"; then
+    if printf '%s\n' "$out" | grep -F -q -- "$m"; then
       printf '%s' "$m"
       return 0
     fi
   done
-  if tail -n "+$((E2E_LOG_HEADER_LINES + 1))" "$log" | grep -E -q -- "$E2E_DART_ERROR_REGEX"; then
+  if printf '%s\n' "$out" | grep -E -q -- "$E2E_DART_ERROR_REGEX"; then
     printf 'Dart compile error'
     return 0
   fi
   return 1
 }
 
-# project_bundle_id: the app's bundle id, from the Runner target of the Xcode
-# project (the id the build installs under). --bundle-id overrides it. Prints
-# nothing when it can't be found (the runner is then not an iOS app project).
+# project_bundle_id: the app's bundle id (the id the Debug build installs
+# under). --bundle-id overrides it. Asks xcodebuild for the Runner scheme's
+# Debug build settings; falls back to the first non-RunnerTests
+# PRODUCT_BUNDLE_IDENTIFIER in the pbxproj. A value that still holds a $(VAR)
+# is refused. Prints nothing when none is found (not an iOS app project).
 project_bundle_id() {
   if [ -n "$BUNDLE_ID" ]; then
     printf '%s' "$BUNDLE_ID"
     return 0
   fi
-  local pbx="$PROJECT_DIR/ios/Runner.xcodeproj/project.pbxproj"
-  [ -f "$pbx" ] || return 0
-  grep -E 'PRODUCT_BUNDLE_IDENTIFIER = ' "$pbx" | grep -v 'RunnerTests' |
-    sed -E 's/.*PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);.*/\1/' | head -n 1 | tr -d '"'
+  local xproj="$PROJECT_DIR/ios/Runner.xcodeproj" id=""
+  [ -d "$xproj" ] || return 0
+  if command -v xcodebuild >/dev/null 2>&1; then
+    id=$(xcodebuild -showBuildSettings -project "$xproj" -scheme Runner -configuration Debug \
+      -sdk iphonesimulator 2>/dev/null |
+      sed -n 's/^ *PRODUCT_BUNDLE_IDENTIFIER = //p' | head -n 1 | tr -d '"') || true
+  fi
+  case $id in
+    "" | *'$('*)
+      id=$(grep -E 'PRODUCT_BUNDLE_IDENTIFIER = ' "$xproj/project.pbxproj" 2>/dev/null | grep -v 'RunnerTests' |
+        sed -E 's/.*PRODUCT_BUNDLE_IDENTIFIER = ([^;]+);.*/\1/' | head -n 1 | tr -d '"') || true
+      ;;
+  esac
+  case $id in
+    *'$('*) id="" ;;
+  esac
+  printf '%s' "$id"
 }
 
 # simctl_devices_tsv: one line per simulator in the default device set:
@@ -250,6 +272,8 @@ EVIDENCE_DIR=""
 RUNNER_CMD_TEMPLATE="$DEFAULT_RUNNER_CMD"
 KEEP_SIM=0
 BUNDLE_ID=""
+BUNDLE_ID_RESOLVED=""
+KEEP_BUILD=0
 
 DEVICE_TYPE_ID=""
 RUNTIME_NAME=""
@@ -431,6 +455,7 @@ parse_args() {
         shift 2
         ;;
       --keep-sim) KEEP_SIM=1; shift ;;
+      --keep-build) KEEP_BUILD=1; shift ;;
       -h | --help) usage; exit 0 ;;
       *) usage >&2; die "unknown argument '$1'" ;;
     esac
@@ -529,26 +554,42 @@ print("OK\t%s\t%s" % (dt.get("identifier"), rt.get("name", runtime)))
 }
 
 # --------------------------------------------------------------- running ---
+# stale_build_removal_applies: true when the runner is the default
+# `flutter drive` kind that builds the app itself. Not for custom runners that
+# reuse a prebuilt app (--use-application-binary, --no-build) or --keep-build.
+stale_build_removal_applies() {
+  [ "$KEEP_BUILD" -eq 0 ] || return 1
+  case $RUNNER_CMD_TEMPLATE in
+    *"--use-application-binary"* | *"--no-build"*) return 1 ;;
+    *"flutter drive"*) return 0 ;;
+  esac
+  return 1
+}
+
 # remove_stale_app <logfile>: defence 1 of T-0055 (F-0055). Before each target,
 # (a) uninstall the app from the simulator, and (b) delete the project's built
 # iOS app bundle, build/ios/iphonesimulator. (b) is the one that matters: after
 # a failed build `flutter drive` installs the leftover Runner.app from the
 # previous target and runs it, even on a freshly created simulator, so
 # uninstalling alone is not enough. Xcode's intermediates stay, so the next
-# build is still incremental. Not-installed is fine (simctl's error is
-# ignored). Writes exactly one note line to the log (it is the last header
-# line, see E2E_LOG_HEADER_LINES).
+# build is still incremental. Not-installed is fine. The log note says what
+# really happened. Writes exactly one note line to the log.
 remove_stale_app() {
   local logfile=$1 id note="" stale="$PROJECT_DIR/build/ios/iphonesimulator"
-  id=$(project_bundle_id)
+  id=$BUNDLE_ID_RESOLVED
   if [ -n "$id" ]; then
-    xcrun simctl uninstall "$SIM_UDID" "$id" >/dev/null 2>&1 || true
-    note="uninstalled $id"
+    if xcrun simctl uninstall "$SIM_UDID" "$id" >/dev/null 2>&1; then
+      note="uninstalled $id"
+    else
+      note="uninstall of $id failed or app not installed"
+    fi
   else
     warn "no bundle id found in $PROJECT_DIR/ios/Runner.xcodeproj (pass --bundle-id); not uninstalling"
     note="no bundle id, nothing uninstalled"
   fi
-  if [ -e "$stale" ]; then
+  if ! stale_build_removal_applies; then
+    note="$note; kept build/ios/iphonesimulator (custom runner or --keep-build)"
+  elif [ -e "$stale" ]; then
     if rm -rf "$stale" 2>/dev/null; then
       note="$note; removed build/ios/iphonesimulator"
     else
@@ -557,6 +598,7 @@ remove_stale_app() {
     fi
   fi
   echo "# e2e_ios.sh: $note" >>"$logfile"
+  echo "$E2E_LOG_SENTINEL" >>"$logfile"
 }
 
 render_cmd() {
@@ -779,6 +821,7 @@ main() {
   parse_args "$@"
   preflight_tools
   preflight_project
+  BUNDLE_ID_RESOLVED=$(project_bundle_id)
   preflight_simulator
   prepare_evidence_dir
 
