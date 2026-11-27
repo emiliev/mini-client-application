@@ -1,0 +1,21 @@
+name: mc_ds_charts
+description: Design-system charts. McBarChart, McLineChart, McDonutChart, McRadarChart and McTimeline, drawn with CustomPainter (T-0059).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  mc_ds_feedback: any
+  mc_ds_layout: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_test_utils: any

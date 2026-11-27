@@ -22,6 +22,9 @@ class McPalette {
     required this.error,
     required this.onError,
     required this.success,
+    required this.series1,
+    required this.series2,
+    required this.series3,
   });
 
   final Brightness brightness;
@@ -37,6 +40,18 @@ class McPalette {
   final Color onError;
   final Color success;
 
+  /// Chart series colours (T-0059). Each reaches at least 3:1 against
+  /// [surface] in every palette (asserted in `mc_ds_charts`), and the three
+  /// differ in hue so a chart does not rely on lightness alone.
+  final Color series1;
+  final Color series2;
+  final Color series3;
+
+  /// Chart role aliases: they add no colour, they only name the intent.
+  Color get positive => success;
+  Color get negative => error;
+  Color get neutral => outline;
+
   List<Object> get _fields => [
     brightness,
     primary,
@@ -50,6 +65,9 @@ class McPalette {
     error,
     onError,
     success,
+    series1,
+    series2,
+    series3,
   ];
 
   @override
@@ -72,6 +90,9 @@ class McPalette {
     error: Color(0xFFB00020),
     onError: Color(0xFFFFFFFF),
     success: Color(0xFF1B7F3B),
+    series1: Color(0xFFB3131B),
+    series2: Color(0xFF1C5FBF),
+    series3: Color(0xFF0B7A75),
   );
 
   static const McPalette dark = McPalette(
@@ -87,6 +108,9 @@ class McPalette {
     error: Color(0xFFFF8A9A),
     onError: Color(0xFF3A0010),
     success: Color(0xFF5BD083),
+    series1: Color(0xFFFF6B70),
+    series2: Color(0xFF6CA8FF),
+    series3: Color(0xFF4FD1C5),
   );
 
   /// Maximum contrast: at least 7:1 for every text pair.
@@ -103,6 +127,9 @@ class McPalette {
     error: Color(0xFF8C0000),
     onError: Color(0xFFFFFFFF),
     success: Color(0xFF004D1A),
+    series1: Color(0xFF8A0008),
+    series2: Color(0xFF0033A0),
+    series3: Color(0xFF00574F),
   );
 
   /// Maximum contrast on black: at least 7:1 for every text pair.
@@ -119,6 +146,9 @@ class McPalette {
     error: Color(0xFFFFB4BE),
     onError: Color(0xFF000000),
     success: Color(0xFF9CFFB8),
+    series1: Color(0xFFFFB3B6),
+    series2: Color(0xFFA9CBFF),
+    series3: Color(0xFF8FF0E6),
   );
 
   static McPalette of(McThemeVariant variant) => switch (variant) {
@@ -144,6 +174,9 @@ class McPalette {
       error: c(a.error, b.error),
       onError: c(a.onError, b.onError),
       success: c(a.success, b.success),
+      series1: c(a.series1, b.series1),
+      series2: c(a.series2, b.series2),
+      series3: c(a.series3, b.series3),
     );
   }
 }
