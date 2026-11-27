@@ -1,6 +1,6 @@
 # T-0056-AC8: a bloc body edit cuts off before retrofit and the injectable aggregate
 
-Edit: `assert('cutoff-1795780235-78815'.isNotEmpty);` added to the `_Open` case of `DealsBloc._onEvent` in `feature/store/store_home/lib/src/presentation/bloc/deals_bloc.dart`, then `build //feature/store/store_home:store_home` with `--execution_log_json_file`.
+Edit: `assert('cutoff-1795785026-28931'.isNotEmpty);` added to the `_Open` case of `DealsBloc._onEvent` in `feature/store/store_home/lib/src/presentation/bloc/deals_bloc.dart`, then `build //feature/store/store_home:store_home` with `--execution_log_json_file`.
 
 | | before | after |
 |---|---|---|
