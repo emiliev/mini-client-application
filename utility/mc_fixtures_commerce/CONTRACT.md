@@ -128,7 +128,7 @@ Body `{"code": string}`; the code is trimmed and case-insensitive. `200` the car
 
 ### `DELETE /v1/me/cart/promo`
 
-Removes every code (`200` the cart). With `?code=X` it removes only that one: an unknown code is `404` `unknown_promo`, a code that is not on the cart is `409` `promo_not_applicable` with `reason` `not_applied`.
+Removes every code (`200` the cart). With `?code=X` it removes only that one (a blank `code=` is `400` `invalid_parameter`): an unknown code is `404` `unknown_promo`, a code that is not on the cart is `409` `promo_not_applicable` with `reason` `not_applied`.
 
 ## Promotions
 
@@ -158,8 +158,8 @@ So a percent is worth less after a buy-2-get-1 (the free unit is not discounted 
 |---|---|---|---|
 | 401 | `unauthenticated` | See Auth | |
 | 404 | `unknown_category` | A category id that is not one of the six | `categoryId` |
-| 400 | `invalid_parameter` | A bad `offset` or `limit` | `parameter` |
-| 404 | `unknown_product` | `productId` is not a sold comic (not a number, or issue 4 and up, or any id in the empty store) | `productId` (as sent) |
+| 400 | `invalid_parameter` | A bad `offset` or `limit`; a blank `code` on `DELETE /v1/me/cart/promo` | `parameter` |
+| 404 | `unknown_product` | `productId` is not a sold comic (not a canonical decimal number: no sign, no leading zeros, at most 18 digits; or issue 4 and up, or any id in the empty store) | `productId` (as sent) |
 | 400 | `invalid_body` | The body is not a JSON object; `code` is not a string | `parameter` |
 | 400 | `invalid_quantity` | `quantity` missing, not an integer (`1.5`, `"2"`, `true`), or outside 0 to 99 | `parameter`, `min`, `max` |
 | 409 | `out_of_stock` | `quantity` is above the stock (a sold-out product has stock 0) | `productId`, `requested`, `available` |
@@ -209,7 +209,7 @@ Named sets for feature tests (plan 05 §3.4), exported as `commerceFixtureSets`.
 | `commerce.default` | `CommerceMockDomain` | See the table above |
 | `commerce.empty` | `EmptyCommerceDomain` | as the `commerce.empty` scenario; no scenarios |
 | `commerce.server_error` | `FailingCommerceDomain` | all nine routes answer `500` with `error.code` `injected_failure`; no scenarios |
-| `commerce.banners_error` | `SectionFailingCommerceDomain('banners')` | only `GET /v1/store/banners` answers `500` |
+| `commerce.banners_error` | `SectionFailingCommerceDomain('banners')` (an unknown section throws an `ArgumentError` listing the valid ones) | only `GET /v1/store/banners` answers `500` |
 | `commerce.deals_error` | `SectionFailingCommerceDomain('deals')` | only `GET /v1/store/deals` answers `500` |
 | `commerce.categories_error` | `SectionFailingCommerceDomain('categories')` | only `GET /v1/store/categories` answers `500` |
 | `commerce.category_products_error` | `SectionFailingCommerceDomain('category_products')` | only `GET /v1/store/categories/:id/products` answers `500` |

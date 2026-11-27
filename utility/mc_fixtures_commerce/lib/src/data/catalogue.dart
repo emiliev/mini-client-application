@@ -145,7 +145,9 @@ final class Catalogue {
           id: comic.id,
           title: comic.title,
           categoryId:
-              categoryDefs[(comic.seriesId - 400000) % categoryDefs.length].id,
+              categoryDefs[(comic.seriesId - seriesIdBase) %
+                      categoryDefs.length]
+                  .id,
           issueNumber: comic.issueNumber,
           seriesId: comic.seriesId,
           priceCents: price,

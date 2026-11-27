@@ -313,6 +313,22 @@ void main() {
     });
   });
 
+  test(
+    'T-0051-AC2: a product category follows the comics series id base',
+    () async {
+      final products = await loadProducts(jsonDio(commerceBackend()));
+      final series = {
+        for (final c in ComicUniverse(42).byTitle) c.id: c.seriesId,
+      };
+      for (final p in products.values) {
+        expect(
+          categoryDefs[(series[p.id]! - seriesIdBase) % categoryDefs.length].id,
+          p.category,
+        );
+      }
+    },
+  );
+
   group('T-0051-AC2 category paging', () {
     test('T-0051-AC2: paging is stable and total for every category and several page sizes', () async {
       final dio = jsonDio(commerceBackend());

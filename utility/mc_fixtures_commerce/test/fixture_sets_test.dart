@@ -172,6 +172,22 @@ void main() {
   }
 
   test(
+    'T-0051-AC2: an unknown section is an ArgumentError listing the valid ones',
+    () {
+      expect(
+        () => SectionFailingCommerceDomain('deal'),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.toString(),
+            'message',
+            allOf(contains('category_products'), contains('banners')),
+          ),
+        ),
+      );
+    },
+  );
+
+  test(
     'T-0051-AC2: each section failure is its own scenario, none is shared',
     () {
       final names = MockBackend(

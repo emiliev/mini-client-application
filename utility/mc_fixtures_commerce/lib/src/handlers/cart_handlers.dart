@@ -143,7 +143,9 @@ MockHandler putItem({required bool empty}) => _authed((
 ) {
   final catalogue = catalogueFor(context.seed, empty: empty);
   final raw = context.params['productId']!;
-  final productId = RegExp(r'^\d+$').hasMatch(raw) ? int.parse(raw) : null;
+  final productId = RegExp(r'^(0|[1-9]\d{0,17})$').hasMatch(raw)
+      ? int.parse(raw)
+      : null;
   final product = productId == null ? null : catalogue.byId[productId];
   if (product == null) {
     return _unknownProduct(raw);
@@ -237,6 +239,14 @@ MockHandler removePromo({required bool empty}) => _authed((
   final catalogue = catalogueFor(context.seed, empty: empty);
   final cart = _cartOf(context, user.id, empty: empty);
   final raw = request.query['code'];
+  if (raw != null && raw.trim().isEmpty) {
+    return MockResponse.error(
+      400,
+      'invalid_parameter',
+      'Query parameter "code" must not be blank',
+      extra: {'parameter': 'code'},
+    );
+  }
   if (raw == null) {
     cart.promotions.clear();
   } else {

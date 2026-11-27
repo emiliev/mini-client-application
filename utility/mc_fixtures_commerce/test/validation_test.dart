@@ -122,6 +122,38 @@ void main() {
       },
     );
 
+    test('T-0051-AC4: an overlong or zero-padded product id is unknown_product, never a 500', () async {
+      for (final raw in ['99999999999999999999', '0500060', '00', '1' * 40]) {
+        final r = await call<Json>(
+          dio,
+          'PUT',
+          '/v1/me/cart/items/$raw',
+          body: {'quantity': 1},
+          headers: bearer(reader),
+        );
+        expect(r.statusCode, 404, reason: raw);
+        expect(_error(r)['code'], 'unknown_product', reason: raw);
+        expect(_error(r)['productId'], raw);
+      }
+    });
+
+    test(
+      'T-0051-AC4: DELETE promo with a blank code is invalid_parameter (400)',
+      () async {
+        for (final q in ['code=', 'code=%20']) {
+          final r = await call<Json>(
+            dio,
+            'DELETE',
+            '/v1/me/cart/promo?$q',
+            headers: bearer(reader),
+          );
+          expect(r.statusCode, 400, reason: q);
+          expect(_error(r)['code'], 'invalid_parameter');
+          expect(_error(r)['parameter'], 'code');
+        }
+      },
+    );
+
     test('T-0051-AC4: invalid_quantity (400) outside 0 to 99 or not a whole number', () async {
       final p = _withStock(products, 99);
       for (final q in <Object?>[

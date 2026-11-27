@@ -52,14 +52,14 @@ open(p, "w").write(s.replace(old, new, 1))
   fvm dart format "$file" > /dev/null 2>&1
   run_tests
   local failed
-  failed="$(tr '\r' '\n' < "$LOG" | grep -aE '^//.*FAILED' | sed 's/ *FAILED.*//' | tr '\n' ' ')"
-  if [[ -n "$failed" ]]; then
-    echo "    KILLED by: $failed"
-    killed=$((killed + 1))
-  elif tr '\r' '\n' < "$LOG" | grep -aq 'Build did NOT complete'; then
+  failed="$(tr '\r' '\n' < "$LOG" | grep -aE '^//.*FAILED in' | sed 's/ *FAILED in.*//' | tr '\n' ' ')"
+  if tr '\r' '\n' < "$LOG" | grep -aq 'Build did NOT complete'; then
     echo "    BUILD ERROR (does not count as killed)"
     tr '\r' '\n' < "$LOG" | grep -aE 'error|info -|warning' | head -3
     broken=$((broken + 1))
+  elif [[ -n "$failed" ]]; then
+    echo "    KILLED by: $failed"
+    killed=$((killed + 1))
   else
     echo "    SURVIVED"; survived=$((survived + 1))
   fi
@@ -173,6 +173,11 @@ mutate "V25 unauthenticated answers 403" $CH "401,
 mutate "V26 every user shares one cart" $CH 'return carts.putIfAbsent(userId, Cart.new);' "return carts.putIfAbsent('shared', Cart.new);"
 mutate "V27 the empty store shares the default carts" $CH "const String _emptyCartsKey = 'commerce.carts.empty';" "const String _emptyCartsKey = 'commerce.carts';"
 mutate "V28 carts do not persist (rebuilt per request)" $CH 'final carts = (context.store[key] ??= <String, Cart>{}) as Map<String, Cart>;' "final carts = (context.store['\$key.\${DateTime.now().microsecondsSinceEpoch}'] ??= <String, Cart>{}) as Map<String, Cart>;"
+mutate "R1 an overlong product id throws (int.parse unguarded)" $CH '{0,17})$' '{0,})$'
+mutate "R2 leading zeros are accepted" $CH '(0|[1-9]\d{0,17})' '\d{1,17}'
+mutate "R3 a blank code on DELETE removes every code" $CH "if (raw != null && raw.trim().isEmpty) {" "if (raw != null && raw.trim().isEmpty && raw.length > 100) {"
+mutate "R4 the category base is hard-coded" $CA 'comic.seriesId - seriesIdBase' 'comic.seriesId - 400001'
+mutate "R5 an unknown section is not rejected" $DOM 'if (!commerceSections.containsKey(section)) {' 'if (section.isEmpty && !commerceSections.containsKey(section)) {'
 mutate "V29 unknown_category answers 200" $SH 'if (catalogue.category(id) == null) {' 'if (catalogue.category(id) == null && id.isEmpty) {'
 # --- store sections and paging ---------------------------------------------
 mutate "S1 the page limit allows 101" $SH 'const int maxLimit = 100;' 'const int maxLimit = 101;'

@@ -146,7 +146,15 @@ final class FailingCommerceDomain implements MockDomain {
 /// the routes of [section] answer `500`, every other route works. It has no
 /// scenarios.
 final class SectionFailingCommerceDomain implements MockDomain {
-  const SectionFailingCommerceDomain(this.section);
+  SectionFailingCommerceDomain(this.section) {
+    if (!commerceSections.containsKey(section)) {
+      throw ArgumentError.value(
+        section,
+        'section',
+        'Unknown section. Valid: ${commerceSections.keys.toList()}',
+      );
+    }
+  }
 
   /// A key of [commerceSections].
   final String section;
