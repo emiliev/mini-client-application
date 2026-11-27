@@ -534,6 +534,65 @@ void main() {
       );
     });
 
+    for (final (label, hint) in <(String, Object?)>[
+      ('a string', 'true'),
+      ('a number', 1),
+      ('null', null),
+    ]) {
+      test('T-0064-AC6: a hint that is $label is invalid_body', () async {
+        final bad = [...answers];
+        bad[2] = {...bad[2], 'hint': hint};
+        _expectError(
+          await post({'roundId': round['roundId'], 'answers': bad}),
+          400,
+          'invalid_body',
+          parameter: 'body',
+        );
+      });
+    }
+
+    test('T-0064-AC6: two hinted answers are too_many_hints; one, or a '
+        'hint of false, is accepted', () async {
+      final two = [...answers];
+      two[1] = {...two[1], 'hint': true};
+      two[7] = {...two[7], 'hint': true};
+      final response = await post({
+        'roundId': round['roundId'],
+        'answers': two,
+      });
+      _expectError(response, 400, 'too_many_hints', parameter: 'answers');
+      expect((response.data!['error']! as Json)['limit'], 1);
+
+      final one = [...answers];
+      one[1] = {...one[1], 'hint': true};
+      one[7] = {...one[7], 'hint': false};
+      expect(
+        (await post({'roundId': round['roundId'], 'answers': one})).statusCode,
+        200,
+      );
+    });
+
+    test('T-0064-AC6: too_many_hints comes after invalid_elapsed, and a '
+        'rejected hint changes nothing', () async {
+      final before = await bestOf(dio);
+      final bad = [...answers];
+      bad[0] = {...bad[0], 'hint': true};
+      bad[1] = {...bad[1], 'hint': true};
+      bad[2] = {...bad[2], 'elapsedMs': -1};
+      _expectError(
+        await post({'roundId': round['roundId'], 'answers': bad}),
+        400,
+        'invalid_elapsed',
+      );
+      bad[2] = {...bad[2], 'elapsedMs': 0};
+      _expectError(
+        await post({'roundId': round['roundId'], 'answers': bad}),
+        400,
+        'too_many_hints',
+      );
+      expect(await bestOf(dio), before);
+    });
+
     test('T-0060-AC3: a rejected result changes nothing', () async {
       final before = await bestOf(dio);
       final bad = [...answers];

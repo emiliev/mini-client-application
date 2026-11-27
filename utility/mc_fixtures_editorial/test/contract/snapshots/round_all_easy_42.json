@@ -50,6 +50,7 @@
             "text": "Ada Ivers"
           }
         ],
+        "comicId": 501007,
         "correctChoiceId": "c2",
         "difficulty": "easy",
         "id": "q-creator_writer-16",
@@ -77,6 +78,7 @@
             "text": "Jonas Holt"
           }
         ],
+        "comicId": 500400,
         "correctChoiceId": "c4",
         "difficulty": "easy",
         "id": "q-creator_writer-17",
@@ -104,6 +106,7 @@
             "text": "Farid Holt"
           }
         ],
+        "comicId": 500953,
         "correctChoiceId": "c4",
         "difficulty": "easy",
         "id": "q-creator_writer-04",
@@ -131,6 +134,7 @@
             "text": "Amber Navigator"
           }
         ],
+        "comicId": 501144,
         "correctChoiceId": "c1",
         "difficulty": "easy",
         "id": "q-comic_cast-19",
@@ -158,6 +162,7 @@
             "text": "Obsidian Keeper"
           }
         ],
+        "comicId": 500086,
         "correctChoiceId": "c4",
         "difficulty": "easy",
         "id": "q-comic_cast-03",
@@ -185,6 +190,7 @@
             "text": "Calla Garrow"
           }
         ],
+        "comicId": 501805,
         "correctChoiceId": "c3",
         "difficulty": "easy",
         "id": "q-creator_writer-03",
@@ -212,6 +218,7 @@
             "text": "Static Beacon"
           }
         ],
+        "comicId": 502287,
         "correctChoiceId": "c2",
         "difficulty": "easy",
         "id": "q-comic_cast-24",
@@ -266,6 +273,7 @@
             "text": "Greta Ivers"
           }
         ],
+        "comicId": 500687,
         "correctChoiceId": "c2",
         "difficulty": "easy",
         "id": "q-creator_writer-09",

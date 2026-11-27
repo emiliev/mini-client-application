@@ -99,8 +99,13 @@ String wrongChoice(Json question) =>
         .map((c) => c['id']! as String)
         .firstWhere((id) => id != question['correctChoiceId']);
 
-/// The answers a spec asks for, for the questions of [round], in round order.
-List<Json> answersFor(Json round, List<Answer> spec) {
+/// The answers a spec asks for, for the questions of [round], in round order;
+/// the positions in [hinted] carry `"hint": true` (T-0064).
+List<Json> answersFor(
+  Json round,
+  List<Answer> spec, {
+  Set<int> hinted = const {},
+}) {
   final questions = questionsOf(round);
   assert(questions.length == spec.length, 'one spec entry per question');
   return [
@@ -113,6 +118,7 @@ List<Json> answersFor(Json round, List<Answer> spec) {
           _ => null,
         },
         'elapsedMs': spec[i].elapsedMs,
+        if (hinted.contains(i)) 'hint': true,
       },
   ];
 }
@@ -136,10 +142,11 @@ Future<Json> play(
   Json round,
   List<Answer> spec, {
   String user = reader,
+  Set<int> hinted = const {},
 }) async {
   final response = await postResult(dio, {
     'roundId': round['roundId'],
-    'answers': answersFor(round, spec),
+    'answers': answersFor(round, spec, hinted: hinted),
   }, user: user);
   expectStatus(response, 200);
   return response.data!;

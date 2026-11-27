@@ -11,7 +11,7 @@ export 'package:mc_fixtures_editorial/src/data/bank.dart'
 export 'package:mc_fixtures_editorial/src/data/round.dart'
     show maxRoundSeed, roundSize;
 export 'package:mc_fixtures_editorial/src/data/scoring.dart'
-    show basePoints, maxTimeBonus, streakStep;
+    show basePoints, hintPenalty, hintsPerRound, maxTimeBonus, streakStep;
 export 'package:mc_fixtures_editorial/src/domain.dart'
     show
         EmptyTriviaDomain,

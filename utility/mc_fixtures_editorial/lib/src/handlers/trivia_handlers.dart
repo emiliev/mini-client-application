@@ -160,12 +160,13 @@ MockResponse _badBody(String message) =>
     if (entry is! Map ||
         entry['questionId'] is! String ||
         !entry.containsKey('choiceId') ||
-        (entry['choiceId'] != null && entry['choiceId'] is! String)) {
+        (entry['choiceId'] != null && entry['choiceId'] is! String) ||
+        (entry.containsKey('hint') && entry['hint'] is! bool)) {
       return (
         answers: null,
         error: _badBody(
           'each answer needs a questionId string and a choiceId key that is '
-          'a string or null',
+          'a string or null, and a hint that is a boolean if present',
         ),
       );
     }
@@ -251,11 +252,21 @@ MockHandler postResult({required bool empty}) =>
           );
         }
       }
+      final hints = answers.where((a) => a['hint'] == true).length;
+      if (hints > hintsPerRound) {
+        return _invalid(
+          'too_many_hints',
+          'at most $hintsPerRound answer of a round may use the hint, '
+              'got $hints',
+          {'parameter': 'answers', 'limit': hintsPerRound},
+        );
+      }
       final result = scoreRound(questions, {
         for (final a in answers)
           a['questionId']! as String: SubmittedAnswer(
             a['choiceId'] as String?,
             a['elapsedMs']! as int,
+            hint: a['hint'] == true,
           ),
       });
       final best = _state(context, empty: empty).bestByUser[user.id]!;

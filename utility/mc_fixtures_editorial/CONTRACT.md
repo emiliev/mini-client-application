@@ -57,7 +57,8 @@ All three parameters are required. `category` is `all` or a category id; `diffic
       "choices": [{"id": "c3", "text": "$4.99"}, {"id": "c1", "text": "$2.99"}, {"id": "c4", "text": "$5.99"}, {"id": "c2", "text": "$3.99"}],
       "correctChoiceId": "c1",
       "timeLimitSeconds": 20,
-      "imageUrl": "mock-asset://characters/020"
+      "imageUrl": "mock-asset://characters/020",
+      "comicId": 501507
     }
   ]
 }
@@ -68,6 +69,7 @@ All three parameters are required. `category` is `all` or a category id; `diffic
 - **Exactly 4 choices**, ids `c1` to `c4`, texts distinct and of the same type as the correct one. The ids are fixed per question; their **position** in the list is shuffled per round, so the correct choice is at each position about a quarter of the time. Exactly one choice is `correctChoiceId`.
 - `correctChoiceId` is in the body on purpose: the client's engine grades locally for instant feedback. The server never trusts it: `POST results` recomputes the score.
 - `imageUrl` is optional (absent on questions with no picture).
+- `comicId` is optional: the comic the question is about, present exactly on the templates whose truth source is one comic (`comic_cast`, `comic_price`, `comic_year`, `comic_pages`, `creator_writer`, `creator_penciller`, `creator_inker`), so a client can link to `GET /v1/comics/:id` (T-0064). It names the comic of the question, never the answer: a character's first comic (`character_first_comic`) has none.
 - `timeLimitSeconds` is per question, by difficulty:
 
 | Difficulty | `timeLimitSeconds` | Limit in ms |
@@ -116,6 +118,8 @@ Let `limitMs` be the question's `timeLimitSeconds * 1000`. Answers are scored **
    - `timeBonus = (50 * (limitMs - elapsedMs)) ~/ limitMs` (integer division, so it is the floor; `50` at 0 ms, `0` at `limitMs - 1`),
    - `streakBonus = 25 * (streak - 1)` (so the first correct answer of a run gets 0, the second 25, the third 50, and so on; there is no cap).
 
+4. **Hint (T-0064).** An answer may carry `"hint": true`: the player used the 50/50 hint on that question (the client hid two wrong choices). A **correct** hinted answer is worth `hintPenalty = 50` points less: `100 + timeBonus + streakBonus - 50` (so never less than 50). A hinted answer that is wrong or a timeout is `0`, as without the hint. The hint changes nothing else: the streak grows and resets exactly as above, and `correct` counts a hinted correct answer. At most one answer of a round may use the hint (`too_many_hints`). `"hint": false` and no `hint` key both mean no hint.
+
 `score` is the sum over the 10 answers. `correct` is the number of answers that were correct (not wrong, not timed out). The most a round can score is 2625 (ten correct answers at 0 ms: `10 * 150 + 25 * (0 + 1 + ... + 9)`).
 
 ### Worked examples
@@ -144,9 +148,21 @@ In `Answers`, `C<ms>` is the correct choice at `<ms>` of elapsed time, `W<ms>` a
 
 An answer's points are also in the response `breakdown`.
 
+### Worked examples with the hint (T-0064)
+
+`h` after an answer marks it hinted (`C0h` is the correct choice at 0 ms with the hint). These rows use their own IDs (`H<n>`), so the table above stays the 17 rows of the scoring rules. A test reads this table too.
+
+| ID | Difficulty | Answers | Score | Correct | Why |
+|---|---|---|---|---|---|
+| H1 | easy | `C0h W0x9` | 100 | 1 | 150 - 50 |
+| H2 | easy | `C0 C0h C0 W0x7` | 475 | 3 | 150 + (175 - 50) + 200: the hint does not break the streak |
+| H3 | easy | `W0h C0 W0x8` | 150 | 1 | a hinted wrong answer is 0, never negative, and resets the streak |
+| H4 | hard | `C9999h W0x9` | 50 | 1 | the least a hinted correct answer earns: 100 + 0 - 50 |
+| H5 | easy | `N0h C0x9` | 2250 | 9 | a hinted timeout is 0; then a run of 9 |
+
 ## `POST /v1/me/trivia/results`
 
-Body `{"roundId": "r-all-easy-42", "answers": [{"questionId": "q-comic_price-07", "choiceId": "c2", "elapsedMs": 4200}, ...]}`. `choiceId` is a choice id or `null`; `elapsedMs` is the time in whole milliseconds. Exactly one answer per question of the round, in any order.
+Body `{"roundId": "r-all-easy-42", "answers": [{"questionId": "q-comic_price-07", "choiceId": "c2", "elapsedMs": 4200}, ...]}`. `choiceId` is a choice id or `null`; `elapsedMs` is the time in whole milliseconds; the optional `hint` is `true` on the one answer that used the hint (see Scoring, rule 4). Exactly one answer per question of the round, in any order.
 
 `200`:
 
@@ -162,7 +178,7 @@ Body `{"roundId": "r-all-easy-42", "answers": [{"questionId": "q-comic_price-07"
 }
 ```
 
-- `breakdown` has one entry per question in round order; `outcome` is `correct`, `wrong` or `timeout`; the points add up to `score`.
+- `breakdown` has one entry per question in round order; `outcome` is `correct`, `wrong` or `timeout`; the points add up to `score`. The entry of a hinted answer also has `"hint": true` (other entries have no `hint` key).
 - The claimed score of a client is never read: only the answers count.
 - **Best scores.** The best is kept per user and per **category** (the round's category, so `all` is its own entry; difficulty does not matter). `bestScore` is the larger of this score and the user's earlier best for the category (0 when there was none). `isNewBest` is true **only** when this score is strictly higher than that earlier best (a score of 0, or a tie, is never a new best). Every submitted round makes the category appear in `GET best`, even with a score of 0. A rejected request changes nothing. Bests persist until `reset()`.
 
@@ -186,13 +202,14 @@ All failures are `400` with `{"error": {"code", "message", "parameter", ...}}`. 
 
 | Order | `error.code` | Rule | Extra fields |
 |---|---|---|---|
-| 0 | `invalid_body` | The body is not an object with a `roundId` string and an `answers` list of objects that each hold a `questionId` string and a `choiceId` **key** whose value is a string or `null` (an answer with no `choiceId` key, or with `choiceID`, is rejected, never read as a timeout) | `parameter: "body"` |
+| 0 | `invalid_body` | The body is not an object with a `roundId` string and an `answers` list of objects that each hold a `questionId` string and a `choiceId` **key** whose value is a string or `null` (an answer with no `choiceId` key, or with `choiceID`, is rejected, never read as a timeout), and whose `hint`, when present, is a boolean | `parameter: "body"` |
 | 1 | `unknown_round` | `roundId` is not `r-<category>-<difficulty>-<seed>` of a known category, a difficulty and a valid seed (canonical form) | `parameter: "roundId"` |
 | 2 | `answer_count_mismatch` | The number of answers is not 10 | `parameter`, `expected: 10` |
 | 3 | `unknown_question` | A `questionId` is not a question of this round (the first one is named) | `parameter`, `questionId` |
 | 4 | `duplicate_answer` | A `questionId` appears twice (the first repeated one is named) | `parameter`, `questionId` |
 | 5 | `unknown_choice` | A `choiceId` is not one of that question's choice ids (not in the original list of codes; added so a typo cannot pass as a wrong answer) | `parameter`, `questionId`, `choiceId` |
 | 6 | `invalid_elapsed` | `elapsedMs` is missing, not an integer, or negative (also for an answer whose `choiceId` is `null`) | `parameter`, `questionId` |
+| 7 | `too_many_hints` | More than one answer has `"hint": true` (T-0064: the hint is once per round) | `parameter: "answers"`, `limit: 1` |
 
 Checks 3 to 6 each look at all answers before the next one starts, so with 10 answers and no unknown or repeated question, every question is answered exactly once. A rejected write changes nothing.
 

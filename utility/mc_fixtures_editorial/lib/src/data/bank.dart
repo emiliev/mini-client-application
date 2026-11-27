@@ -93,6 +93,8 @@ final class TriviaQuestion {
     'correctChoiceId': correctChoiceId,
     'timeLimitSeconds': timeLimitSeconds,
     if (imageUrl != null) 'imageUrl': imageUrl,
+    // The comic the question is about (T-0064), for a link to it.
+    if (facts['comicId'] case final int comicId) 'comicId': comicId,
   };
 }
 

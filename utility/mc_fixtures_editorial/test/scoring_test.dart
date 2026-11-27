@@ -32,10 +32,11 @@ typedef _Example = ({
   int correct,
 });
 
-/// The worked-example rows of CONTRACT.md (`| E1 | easy | `C0 W0x9` | ...`).
-List<_Example> _examples() {
+/// The worked-example rows of CONTRACT.md (`| E1 | easy | `C0 W0x9` | ...`),
+/// or with [prefix] `H` the hint examples (T-0064).
+List<_Example> _examples({String prefix = 'E'}) {
   final row = RegExp(
-    r'^\| (E\d+) \| (\w+) \| `([^`]+)` \| (\d+) \| (\d+) \|',
+    '^\\| ($prefix\\d+) \\| (\\w+) \\| `([^`]+)` \\| (\\d+) \\| (\\d+) \\|',
     multiLine: true,
   );
   return [
@@ -85,6 +86,73 @@ void main() {
         );
       });
     }
+  });
+
+  group('T-0064-AC6 scoring: the hint examples of CONTRACT.md', () {
+    final examples = _examples(prefix: 'H');
+
+    test('T-0064-AC6: CONTRACT.md has 5 hint examples, and still 17 '
+        'scoring examples', () {
+      expect(examples, hasLength(5));
+      expect(_examples(), hasLength(17));
+      expect(_examples().map((e) => e.id), [
+        for (var i = 1; i <= 17; i++) 'E$i',
+      ]);
+    });
+
+    for (final e in examples) {
+      test('T-0064-AC6: ${e.id} ${e.difficulty} ${e.answers} scores '
+          '${e.score} (${e.correct} correct)', () async {
+        final dio = jsonDio(triviaBackend());
+        final round = await fetchRound(dio, difficulty: e.difficulty);
+        final spec = parseAnswers(e.answers);
+        final hinted = parseHints(e.answers);
+        expect(spec, hasLength(10));
+        expect(hinted, hasLength(1), reason: 'one hint per round');
+        final result = await play(dio, round, spec, hinted: hinted);
+        expect(result['score'], e.score);
+        expect(result['correct'], e.correct);
+        final expected = oracle(
+          _limitSeconds(e.difficulty),
+          spec,
+          hinted: hinted,
+        );
+        expect(expected.score, e.score);
+        expect(expected.correct, e.correct);
+        final breakdown = (result['breakdown']! as List).cast<Json>();
+        expect(
+          [
+            for (var i = 0; i < breakdown.length; i++)
+              if (breakdown[i]['hint'] == true) i,
+          ],
+          hinted.toList(),
+          reason: 'the breakdown marks the hinted answer, and only it',
+        );
+      });
+    }
+
+    test('T-0064-AC6: the hint penalty is 50 and the hint is once per '
+        'round', () {
+      expect(hintPenalty, 50);
+      expect(hintsPerRound, 1);
+      expect(parseHints('C0 C0h W0x8'), {1});
+      expect(parseHints('W0x3 N0hx2'), {3, 4});
+      expect(parseHints('C0x10'), isEmpty);
+    });
+
+    test('T-0064-AC6: a hint of false scores as no hint', () async {
+      final dio = jsonDio(triviaBackend());
+      final round = await fetchRound(dio);
+      final answers = [
+        for (final a in answersFor(round, parseAnswers('C0x10')))
+          {...a, 'hint': false},
+      ];
+      final response = await postResult(dio, {
+        'roundId': round['roundId'],
+        'answers': answers,
+      });
+      expect(response.data!['score'], 2625);
+    });
   });
 
   group('T-0060-AC2 scoring: boundaries and rules', () {
