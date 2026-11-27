@@ -8,23 +8,25 @@
 | Project | `/tmp/mc-T-0046-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0046-engineer-47198` |
-| Simulator UDID | `4780FBDB-F94C-40A7-A44D-D2459449C4E3` |
+| Simulator | `mc-T-0046-engineer-16594` |
+| Simulator UDID | `C2E1D6FD-F153-4A26-80D7-320629ACED0B` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-26T23:34:54Z |
-| Finished | 2026-11-26T23:38:51Z |
+| Started | 2026-11-27T01:02:58Z |
+| Finished | 2026-11-27T01:07:32Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/characters_deeplink_test.dart` | PASS | 43 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
+| `integration_test/characters_deeplink_test.dart` | PASS | 40 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
 | `integration_test/characters_journey_test.dart` | PASS | 25 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
-| `integration_test/characters_link_after_flow_test.dart` | PASS | 21 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
-| `integration_test/comic_deeplink_test.dart` | PASS | 28 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
-| `integration_test/comics_journey_test.dart` | PASS | 35 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
-| `integration_test/search_deeplink_test.dart` | PASS | 26 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
-| `integration_test/search_journey_test.dart` | PASS | 33 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
+| `integration_test/characters_link_after_flow_test.dart` | PASS | 19 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
+| `integration_test/comic_deeplink_test.dart` | PASS | 27 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
+| `integration_test/comics_journey_test.dart` | PASS | 32 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
+| `integration_test/reading_list_deeplink_test.dart` | PASS | 20 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
+| `integration_test/reading_list_journey_test.dart` | PASS | 33 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
+| `integration_test/search_deeplink_test.dart` | PASS | 25 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
+| `integration_test/search_journey_test.dart` | PASS | 34 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
 
 ## Screenshots
 
@@ -47,6 +49,15 @@
 | [15_favourite_saved.png](15_favourite_saved.png) | `integration_test/comics_journey_test.dart` | downscaled from 1206x2622 |
 | [16_comic_cast.png](16_comic_cast.png) | `integration_test/comics_journey_test.dart` | downscaled from 1206x2622 |
 | [17_cast_member_placeholder.png](17_cast_member_placeholder.png) | `integration_test/comics_journey_test.dart` | downscaled from 1206x2622 |
+| [37_deep_link_new_list.png](37_deep_link_new_list.png) | `integration_test/reading_list_deeplink_test.dart` | downscaled from 1206x2622 |
+| [38_link_edit_list.png](38_link_edit_list.png) | `integration_test/reading_list_deeplink_test.dart` | downscaled from 1206x2622 |
+| [30_home_new_reading_list.png](30_home_new_reading_list.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
+| [31_sign_in_sheet.png](31_sign_in_sheet.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
+| [32_step1_blocked.png](32_step1_blocked.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
+| [33_step1_details.png](33_step1_details.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
+| [34_step2_comics.png](34_step2_comics.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
+| [35_step3_review.png](35_step3_review.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
+| [36_home_list_created.png](36_home_list_created.png) | `integration_test/reading_list_journey_test.dart` | downscaled from 1206x2622 |
 | [36_deep_link_search.png](36_deep_link_search.png) | `integration_test/search_deeplink_test.dart` | downscaled from 1206x2622 |
 | [37_link_to_running_app_search.png](37_link_to_running_app_search.png) | `integration_test/search_deeplink_test.dart` | downscaled from 1206x2622 |
 | [30_home_search_entry.png](30_home_search_entry.png) | `integration_test/search_journey_test.dart` | downscaled from 1206x2622 |
