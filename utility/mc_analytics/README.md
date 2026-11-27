@@ -39,7 +39,7 @@ analytics.consentChanges;                           // Stream<AnalyticsConsent>
 | Reserved name prefixes | `mc_` (the kit's own events), and `ga_`, `firebase_`, `google_` (a future vendor sink) |
 | Reserved param keys | `session_id`, `seq`, `screen_name` (the kit adds them) |
 
-A screen name follows the name rules but may start with a reserved prefix.
+A screen name follows the name rules but may start with a reserved prefix. The kit's `screen_name` param counts towards the 25: a screen takes at most 24 params of its own.
 
 An invalid entry is an `AssertionError` in debug mode, so a test fails. Release
 mode drops it and reports one `AnalyticsValidationError` per entry to
@@ -57,6 +57,8 @@ the consent is, so a bug shows in a debug build before anyone has consented.
 
 - `unknown -> granted` flushes the buffer in order. `-> denied` discards it.
   `granted -> unknown` keeps what was queued (trimmed to 100).
+- `reset()` (sign-out) starts a new session. Entries already queued with consent `granted` are **kept** and delivered under the session and `seq` they were tracked in (`track(signed_out); reset();` still reports `signed_out`). Only the buffer that waits for a choice (`unknown`) is dropped; with `denied` nothing is queued.
+- After `dispose()` every call is a no-op: nothing is tracked, delivered, rotated or saved.
 - **Delivery is one microtask later**, never inline, and consent is read again
   for **every** entry at that moment. So `track(e); setConsent(denied)` in the
   same turn delivers nothing, and a sink that denies in the middle of a flush
@@ -115,6 +117,11 @@ the consent is, so a bug shows in a debug build before anyone has consented.
 - A route with no name, or a name that is not a valid screen name (go_router
   falls back to the path, `/search`), is not tracked. Name every route that is a
   screen: the typed route's `name:`.
+- A relative path such as `settings` is a valid name too, so the app passes the
+  router's declared `GoRoute.name`s (`screenNames`, `goRouteNames` in
+  `app_core`): only a declared name is a screen.
+- If `Analytics` is not registered, `appRouterObservers()` tracks nothing and
+  navigation goes on.
 - Dialogs, sheets and menus are popups, not page routes: ignored.
 - The same route becoming the top again with no other page in between (a dialog
   closed over it) is not tracked twice.
@@ -133,7 +140,8 @@ test container, which registers it over the session's `InMemoryAnalyticsSink`.
 - `the analytics event {'comic_opened'} was tracked`
 - `the analytics event {'comic_opened'} was tracked with` and a `key | json` table
 - `no analytics event was tracked` (the kit's own events and screen views excluded)
-- `the screen {'characters_list'} was tracked`
+- `the screen {'characters_list'} was tracked` (it is somewhere in the list)
+- `the screens tracked are {'home, characters_list, home'}` (exact, ordered, repeats count)
 
 ## Not here
 

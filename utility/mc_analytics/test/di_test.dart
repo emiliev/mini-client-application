@@ -213,4 +213,34 @@ void main() {
       );
     },
   );
+
+  test('T-0053-AC3 a second initializer fails and leaves no lifecycle '
+      'observer behind', () async {
+    final getIt = await boot(consent: 'granted');
+    final loser = InMemoryAnalyticsSink();
+
+    await expectLater(
+      Future<void>.sync(
+        () => AnalyticsDIInitializer(
+          sinks: [loser],
+          random: Random(9),
+          clock: () => now,
+          debugMode: true,
+        ).init(getIt),
+      ),
+      throwsA(anything),
+    );
+    final binding = TestWidgetsFlutterBinding.instance;
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+    now = now.add(const Duration(minutes: 30));
+    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+    await settle();
+
+    // The failed one saw only its own cold start: nothing rotated it.
+    expect(
+      loser.events.where((e) => e.name == sessionStartEventName),
+      hasLength(1),
+    );
+    await getIt.reset();
+  });
 }

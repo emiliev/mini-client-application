@@ -317,4 +317,115 @@ void main() {
     expect(lookups, 1);
     expect(rig.sink.screens, ['home']);
   });
+
+  group('T-0053-AC4 declared screen names', () {
+    testWidgets('T-0053-AC4 an unnamed nested route is not tracked under its '
+        'path, a named one is', (tester) async {
+      late final GoRouter router;
+      router = GoRouter(
+        initialLocation: '/',
+        observers: [
+          AnalyticsRouteObserver(
+            rig.analytics,
+            screenNames: () => {
+              for (final r in router.configuration.routes)
+                if (r is GoRoute && r.name != null) r.name!,
+              for (final r in router.configuration.routes)
+                for (final c in r.routes)
+                  if (c is GoRoute && c.name != null) c.name!,
+            },
+          ),
+        ],
+        routes: [
+          GoRoute(
+            path: '/',
+            name: 'home',
+            builder: (_, _) => _page('Home'),
+            routes: [
+              // go_router names this page `settings` (its path), which is a
+              // valid-looking screen name.
+              GoRoute(path: 'settings', builder: (_, _) => _page('Settings')),
+              GoRoute(
+                path: 'profile',
+                name: 'profile_page',
+                builder: (_, _) => _page('Profile'),
+              ),
+            ],
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      unawaited(router.push('/settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('Settings'), findsOneWidget);
+      router.pop();
+      await tester.pumpAndSettle();
+      unawaited(router.push('/profile'));
+      await tester.pumpAndSettle();
+
+      expect(await screens(tester), ['home', 'home', 'profile_page']);
+    });
+
+    testWidgets('T-0053-AC4 without declared names a path-like name that '
+        'looks valid is tracked (why the app passes them)', (tester) async {
+      final router = GoRouter(
+        routes: [
+          GoRoute(
+            path: '/',
+            name: 'home',
+            builder: (_, _) => _page('Home'),
+            routes: [
+              GoRoute(path: 'settings', builder: (_, _) => _page('Settings')),
+            ],
+          ),
+        ],
+        observers: [AnalyticsRouteObserver(rig.analytics)],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      unawaited(router.push('/settings'));
+      await tester.pumpAndSettle();
+
+      expect(await screens(tester), ['home', 'settings']);
+    });
+  });
+
+  testWidgets('T-0053-AC4 an observer with no Analytics never breaks '
+      'navigation', (tester) async {
+    final router = GoRouter(
+      observers: [AnalyticsRouteObserver.lazy(() => null)],
+      routes: [
+        GoRoute(
+          path: '/',
+          name: 'home',
+          builder: (_, _) => _page('Home'),
+          routes: [
+            GoRoute(
+              path: 'next',
+              name: 'next_page',
+              builder: (_, _) => _page('Next'),
+            ),
+          ],
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+
+    unawaited(router.push('/next'));
+    await tester.pumpAndSettle();
+    expect(find.text('Next'), findsOneWidget);
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Home'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    expect(rig.sink.screens, isEmpty);
+  });
 }

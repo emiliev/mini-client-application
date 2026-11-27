@@ -65,7 +65,6 @@ class AnalyticsDIInitializer extends McDIInitializer {
         ? (binding ?? WidgetsBinding.instance)
         : null;
     final observer = AnalyticsLifecycleObserver(analytics);
-    widgets?.addObserver(observer);
     getIt.registerSingleton<Analytics>(
       analytics,
       dispose: (a) {
@@ -73,5 +72,8 @@ class AnalyticsDIInitializer extends McDIInitializer {
         a.dispose();
       },
     );
+    // Only after registering: a registration that throws (a second
+    // initializer) leaves no observer behind that nothing would remove.
+    widgets?.addObserver(observer);
   };
 }

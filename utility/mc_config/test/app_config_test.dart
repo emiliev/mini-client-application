@@ -90,4 +90,23 @@ void main() {
       expect(parse(',"analytics":{"defaultConsent":"denied"}'), 'denied');
     });
   });
+
+  group('T-0053-AC1 a wrong-typed analytics config falls back to unknown', () {
+    String parse(String analytics) => AppConfig.parse(
+      '{"env":"dev","backend":{"seed":7,"latencyMs":0,"scenario":"happy"},'
+      '"apiBaseUrl":"https://api.test","build":"3"$analytics}',
+    ).analytics.defaultConsent;
+
+    test('a number, a list, a bool, null or an object as the value', () {
+      for (final value in ['1', '[]', 'true', 'null', '{"a":1}']) {
+        expect(parse(',"analytics":{"defaultConsent":$value}'), 'unknown');
+      }
+    });
+
+    test('a section that is not an object', () {
+      for (final section in ['"granted"', '1', '[]', 'true', 'null']) {
+        expect(parse(',"analytics":$section'), 'unknown');
+      }
+    });
+  });
 }

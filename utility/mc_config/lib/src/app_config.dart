@@ -24,10 +24,13 @@ class AnalyticsConfig {
   const AnalyticsConfig({this.defaultConsent = 'unknown'});
 
   /// A missing `analytics` section, or a missing key, means `unknown`.
-  factory AnalyticsConfig.fromJson(Map<String, dynamic>? json) =>
-      AnalyticsConfig(
-        defaultConsent: (json?['defaultConsent'] as String?) ?? 'unknown',
-      );
+  ///
+  /// A value of the wrong type (a number, a list) is treated as missing, never
+  /// a crash at boot: the safe default is `unknown`.
+  factory AnalyticsConfig.fromJson(Object? json) {
+    final value = json is Map<String, dynamic> ? json['defaultConsent'] : null;
+    return AnalyticsConfig(defaultConsent: value is String ? value : 'unknown');
+  }
 
   /// The consent before the user has chosen: `unknown`, `granted` or
   /// `denied`. `dev` and `e2e` say `granted` so developers see events;
@@ -56,9 +59,7 @@ class AppConfig {
     backend: BackendConfig.fromJson(json['backend'] as Map<String, dynamic>),
     apiBaseUrl: json['apiBaseUrl'] as String,
     build: json['build'] as String,
-    analytics: AnalyticsConfig.fromJson(
-      json['analytics'] as Map<String, dynamic>?,
-    ),
+    analytics: AnalyticsConfig.fromJson(json['analytics']),
   );
 
   /// Parses the text of `app_config.json`.

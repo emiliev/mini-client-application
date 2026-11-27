@@ -40,6 +40,7 @@ S1 = "utility/mc_test_steps/lib/src/analytics/the_analytics_event_was_tracked.da
 S2 = "utility/mc_test_steps/lib/src/analytics/the_analytics_event_was_tracked_with.dart"
 S3 = "utility/mc_test_steps/lib/src/analytics/no_analytics_event_was_tracked.dart"
 S4 = "utility/mc_test_steps/lib/src/analytics/the_screen_was_tracked.dart"
+S5 = "utility/mc_test_steps/lib/src/analytics/the_screens_tracked_are.dart"
 
 # (id, description, file, [(old, new), ...], targets)
 M = [
@@ -88,8 +89,12 @@ M = [
     ("G17", "a failed save is not reported", AN,
      [("    } on Object catch (error, stack) {\n      unawaited(_monitoring.recordError(error, stack));\n    }\n  }\n\n  void _reject",
        "    } on Object {\n      // swallowed\n    }\n  }\n\n  void _reject")], [A]),
-    ("G18", "reset keeps what was waiting", AN,
-     [("  void reset() {\n    _pending.clear();\n", "  void reset() {\n")], [A]),
+    ("G18", "reset keeps the buffer that waits for a consent choice", AN,
+     [("    if (_consent == AnalyticsConsent.unknown) {\n      _pending.clear();\n    }\n    _startSession('reset');",
+       "    _startSession('reset');")], [A]),
+    ("G18B", "reset clears the entries already queued (this turn's events are lost)", AN,
+     [("    if (_consent == AnalyticsConsent.unknown) {\n      _pending.clear();",
+       "    if (true) {\n      _pending.clear();")], [A]),
     ("G19", "an unrecognised consent value grants", CO,
      [("    return unknown;\n  }\n}", "    return granted;\n  }\n}")], [A]),
     ("G20", "a damaged saved value falls back to the default", CS,
@@ -243,6 +248,40 @@ M = [
        "      if (false) e.name,\n")], STEPS),
     ("W12", "the no-event step counts the kit's session start", S3,
      [("      if (e.name != sessionStartEventName && e.name != screenViewEventName)", "      if (e.name != screenViewEventName)")], STEPS),
+    # ---- review round -----------------------------------------------------
+    ("X01", "track still works after dispose", AN,
+     [("  void track(AnalyticsEvent event) {\n    if (_disposed) {\n      return;\n    }\n",
+       "  void track(AnalyticsEvent event) {\n")], [A]),
+    ("X02", "setConsent still changes and saves after dispose", AN,
+     [("    if (_disposed) {\n      return Future<void>.value();\n    }\n", "")], [A]),
+    ("X03", "queued entries are still delivered after dispose", AN,
+     [("    _drainScheduled = false;\n    if (_disposed) {\n      return;\n    }", "    _drainScheduled = false;")], [A]),
+    ("X04", "screen() ignores the screen_name param in the cap", AN,
+     [("      if (params.length + 1 > AnalyticsRules.maxParams)", "      if (params.length > AnalyticsRules.maxParams)")], [A]),
+    ("X05", "screen() counts screen_name twice", AN,
+     [("      if (params.length + 1 > AnalyticsRules.maxParams)", "      if (params.length + 2 > AnalyticsRules.maxParams)")], [A]),
+    ("X06", "the observer ignores the router's declared names", RO,
+     [("    if (declared != null && !declared().contains(name)) {", "    if (false) {")], [A]),
+    ("X07", "the observer throws when there is no Analytics", RO,
+     [("    _resolve()?.screen(name);", "    _resolve()!.screen(name);")], [A, "//app/wiring/app_core:router_observers_test"]),
+    ("X08", "appRouterObservers resolves Analytics even when it is not registered", OBS,
+     [("        diContainer.isRegistered<Analytics>() ? diContainer<Analytics>() : null,", "        diContainer<Analytics>(),")], ["//app/wiring/app_core:router_observers_test"]),
+    ("X09", "a wrong-typed defaultConsent crashes", CFGSRC,
+     [("value is String ? value : 'unknown'", "(value as String?) ?? 'unknown'")], CFG),
+    ("X10", "the lifecycle observer is added before registering", DI,
+     [("    widgets?.addObserver(observer);\n", ""),
+      ("    getIt.registerSingleton<Analytics>(", "    widgets?.addObserver(observer);\n    getIt.registerSingleton<Analytics>(")], [A]),
+    ("X11", "the observer does not re-track on pop", RO,
+     [("if (topRoute is! PageRoute<dynamic> || identical(topRoute, _last)) {",
+       "if (topRoute is! PageRoute<dynamic> ||\n        identical(topRoute, _last) ||\n        (previousTopRoute != null && topRoute.isFirst)) {")],
+     ["//app/mini_client:bdd_test"]),
+    ("X12", "home is tracked twice on start", RO,
+     [("    _resolve()?.screen(name);", "    _resolve()?.screen(name);\n    if (previousTopRoute == null) {\n      _resolve()?.screen(name);\n    }")],
+     ["//app/mini_client:bdd_test"]),
+    ("X13", "the ordered screens step compares as a set", S5,
+     [("    expected,\n    reason: 'the screens tracked, in order',", "    unorderedEquals(expected),\n    reason: 'the screens tracked, in order',")], STEPS),
+    ("X14", "the ordered screens step only checks they are all there", S5,
+     [("    expected,\n    reason: 'the screens tracked, in order',", "    containsAll(expected),\n    reason: 'the screens tracked, in order',")], STEPS),
 ]
 
 if __name__ == "__main__":

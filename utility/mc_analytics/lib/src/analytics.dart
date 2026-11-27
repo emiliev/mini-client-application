@@ -109,6 +109,9 @@ class Analytics {
   /// Tracks [event]. An invalid event throws an [AssertionError] in debug
   /// mode and is dropped and reported to monitoring (once) otherwise.
   void track(AnalyticsEvent event) {
+    if (_disposed) {
+      return;
+    }
     final violations = AnalyticsRules.validateEvent(event.name, event.params);
     if (violations.isNotEmpty) {
       _reject('event "${event.name}"', violations);
@@ -120,9 +123,19 @@ class Analytics {
   /// Tracks that screen [name] (snake_case) is showing, as the kit's
   /// `mc_screen_view` with the param `screen_name`.
   void screen(String name, {Map<String, Object> params = const {}}) {
+    if (_disposed) {
+      return;
+    }
     final violations = [
       ...AnalyticsRules.validateName(name, allowReserved: true),
       ...AnalyticsRules.validateEvent('screen_view', params),
+      // The kit adds `screen_name`, which counts towards the cap.
+      if (params.length + 1 > AnalyticsRules.maxParams)
+        AnalyticsViolation(
+          AnalyticsViolationKind.tooManyParams,
+          '${params.length} params and screen_name '
+          '(max ${AnalyticsRules.maxParams} with screen_name)',
+        ),
     ];
     if (violations.isNotEmpty) {
       _reject('screen "$name"', violations);
@@ -134,6 +147,9 @@ class Analytics {
   /// Sets the user property [key] to [value] (`String`, `int`, `double` or
   /// `bool`), with the same validation as an event.
   void setUserProperty(String key, Object value) {
+    if (_disposed) {
+      return;
+    }
     final violations = [
       ...AnalyticsRules.validateName(key),
       ...AnalyticsRules.validateValue('value', value),
@@ -156,12 +172,24 @@ class Analytics {
     );
   }
 
-  /// Sign-out: drops everything still waiting and starts a new session (so
-  /// the next entries cannot be tied to the user who left). The caller
-  /// decides when; consent stays. A sink that keeps user properties should
-  /// clear them when it sees `mc_session_start` with `reason` `reset`.
+  /// Sign-out: starts a new session (so the next entries cannot be tied to the
+  /// user who left). The caller decides when; consent stays. A sink that keeps
+  /// user properties should clear them when it sees `mc_session_start` with
+  /// `reason` `reset`.
+  ///
+  /// What was tracked before the reset is kept as it was: entries already
+  /// queued for delivery (consent granted) go out under their own session id
+  /// and `seq`, so `track(signed_out); reset();` still reports `signed_out`.
+  /// Only the buffer that waits for a consent choice (consent `unknown`) is
+  /// dropped, because it holds a signed-out user's activity that nobody has
+  /// agreed to send yet. With `denied` nothing is queued.
   void reset() {
-    _pending.clear();
+    if (_disposed) {
+      return;
+    }
+    if (_consent == AnalyticsConsent.unknown) {
+      _pending.clear();
+    }
     _startSession('reset');
   }
 
@@ -170,6 +198,9 @@ class Analytics {
   /// choice. The returned future completes once the choice is saved; a failed
   /// save is reported to monitoring and does not undo the choice.
   Future<void> setConsent(AnalyticsConsent next) {
+    if (_disposed) {
+      return Future<void>.value();
+    }
     final previous = _consent;
     _consent = next;
     if (previous != next) {
@@ -194,11 +225,18 @@ class Analytics {
   }
 
   /// The app went to the background (`paused`, `hidden` or `detached`).
-  void appBackgrounded() => _backgroundedAt ??= _clock();
+  void appBackgrounded() {
+    if (!_disposed) {
+      _backgroundedAt ??= _clock();
+    }
+  }
 
   /// The app came back (`resumed`). After 30 minutes or more in the
   /// background, a new session starts.
   void appForegrounded() {
+    if (_disposed) {
+      return;
+    }
     final since = _backgroundedAt;
     _backgroundedAt = null;
     if (since != null &&
@@ -207,6 +245,9 @@ class Analytics {
     }
   }
 
+  /// After this, `track`, `screen`, `setUserProperty`, `setConsent`, `reset`
+  /// and the lifecycle calls do nothing, nothing more is delivered and nothing
+  /// is saved.
   void dispose() {
     _disposed = true;
     _pending.clear();
@@ -323,6 +364,9 @@ class Analytics {
 
   void _drain() {
     _drainScheduled = false;
+    if (_disposed) {
+      return;
+    }
     // Consent is read again for every entry: a sink (or anything it calls)
     // may deny in the middle of a flush.
     while (_consent == AnalyticsConsent.granted && _pending.isNotEmpty) {

@@ -10,6 +10,7 @@ export 'package:mc_test_steps/src/analytics/no_analytics_event_was_tracked.dart'
 export 'package:mc_test_steps/src/analytics/the_analytics_event_was_tracked.dart';
 export 'package:mc_test_steps/src/analytics/the_analytics_event_was_tracked_with.dart';
 export 'package:mc_test_steps/src/analytics/the_screen_was_tracked.dart';
+export 'package:mc_test_steps/src/analytics/the_screens_tracked_are.dart';
 export 'package:mc_test_steps/src/assertions/errors_were_reported.dart';
 export 'package:mc_test_steps/src/assertions/i_dont_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see.dart';

@@ -160,4 +160,29 @@ void main() {
     await _red(theScreenWasTracked(tester, 'home'));
     await noAnalyticsEventWasTracked(tester);
   });
+
+  mcTestWidgets('T-0053-AC4 the screens tracked are {names}, in order', (
+    tester,
+  ) async {
+    final analytics = await _boot();
+    await theScreensTrackedAre(tester, '');
+
+    analytics
+      ..screen('home')
+      ..screen('characters_list')
+      ..screen('home');
+
+    await theScreensTrackedAre(tester, 'home, characters_list, home');
+    await theScreensTrackedAre(tester, 'home,characters_list,home');
+    // Negative controls: a missing, extra, repeated, reordered or renamed
+    // screen, and "none" when there are some.
+    await _red(theScreensTrackedAre(tester, 'home, characters_list'));
+    await _red(theScreensTrackedAre(tester, 'characters_list, home'));
+    await _red(
+      theScreensTrackedAre(tester, 'home, characters_list, home, home'),
+    );
+    await _red(theScreensTrackedAre(tester, 'home, home, characters_list'));
+    await _red(theScreensTrackedAre(tester, 'home, characters_list, other'));
+    await _red(theScreensTrackedAre(tester, ''));
+  });
 }

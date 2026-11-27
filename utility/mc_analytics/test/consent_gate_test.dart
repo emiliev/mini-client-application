@@ -557,6 +557,108 @@ void main() {
       expect(rig.analytics.consent, AnalyticsConsent.unknown);
     });
   });
+
+  group('T-0053-AC1 reset keeps what was already queued', () {
+    test(
+      'T-0053-AC1 granted: track then reset in one turn still delivers it',
+      () async {
+        final rig = Rig();
+        final before = rig.analytics.sessionId;
+
+        rig.analytics.track(const AnalyticsEvent('signed_out'));
+        rig.analytics.reset();
+        await settle();
+
+        final records = rig.sink.records;
+        // The old session's start and the event keep their id and seq; the new
+        // session starts at 1 after them.
+        expect(
+          [for (final r in records) (r.sessionId == before, r.seq)],
+          [(true, 1), (true, 2), (false, 1)],
+        );
+        expect(rig.names, ['signed_out']);
+        expect(rig.analytics.sessionId, isNot(before));
+      },
+    );
+
+    test(
+      'T-0053-AC1 unknown: the buffer that waits for a choice is dropped',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
+        rig.analytics.track(const AnalyticsEvent('signed_out'));
+
+        rig.analytics.reset();
+        await rig.analytics.setConsent(AnalyticsConsent.granted);
+        await settle();
+
+        expect(rig.names, isEmpty);
+        expect(rig.sink.records, hasLength(1), reason: 'only the new start');
+      },
+    );
+
+    test(
+      'T-0053-AC1 denied: nothing is queued, nothing is delivered',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.denied);
+
+        rig.analytics.track(const AnalyticsEvent('signed_out'));
+        rig.analytics.reset();
+        await settle();
+
+        expect(rig.sink.records, isEmpty);
+        expect(rig.analytics.bufferedCount, 0);
+      },
+    );
+  });
+
+  group('T-0053-AC3 a disposed Analytics does nothing', () {
+    test('T-0053-AC3 track, screen, user property, reset and consent are '
+        'no-ops, and nothing is saved', () async {
+      final saved = <AnalyticsConsent>[];
+      final rig = Rig(
+        consent: AnalyticsConsent.unknown,
+        persist: (c) async => saved.add(c),
+      );
+      rig.analytics.track(const AnalyticsEvent('before'));
+      rig.analytics.dispose();
+      final session = rig.analytics.sessionId;
+
+      rig.analytics.track(const AnalyticsEvent('after'));
+      rig.analytics.screen('home');
+      rig.analytics.setUserProperty('plan', 'free');
+      rig.analytics.reset();
+      rig.analytics.appBackgrounded();
+      rig.now = rig.now.add(const Duration(hours: 1));
+      rig.analytics.appForegrounded();
+      await rig.analytics.setConsent(AnalyticsConsent.granted);
+      await settle();
+
+      expect(rig.analytics.consent, AnalyticsConsent.unknown);
+      expect(rig.analytics.sessionId, session);
+      expect(rig.analytics.bufferedCount, 0);
+      expect(rig.sink.records, isEmpty);
+      expect(saved, isEmpty);
+    });
+
+    test('T-0053-AC3 an invalid entry after dispose does not throw', () {
+      final rig = Rig();
+      rig.analytics.dispose();
+
+      rig.analytics.track(const AnalyticsEvent('Bad'));
+      rig.analytics.screen('Bad Name');
+      rig.analytics.setUserProperty('Bad', 1);
+    });
+
+    test('T-0053-AC3 queued entries are not delivered after dispose', () async {
+      final rig = Rig();
+      rig.analytics.track(const AnalyticsEvent('queued'));
+
+      rig.analytics.dispose();
+      await settle();
+
+      expect(rig.sink.records, isEmpty);
+    });
+  });
 }
 
 String _hex(String key) =>

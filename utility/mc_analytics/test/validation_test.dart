@@ -496,4 +496,48 @@ void main() {
       );
     });
   });
+
+  group('T-0053-AC2 the screen_name param counts towards the cap', () {
+    Map<String, Object> params(int n) => {
+      for (var i = 0; i < n; i++) 'p$i': i,
+    };
+
+    test('T-0053-AC2 24 params and screen_name are accepted', () async {
+      final rig = Rig();
+
+      rig.analytics.screen('home', params: params(24));
+      await settle();
+
+      expect(rig.sink.screens, ['home']);
+      expect(rig.sink.events.last.params, hasLength(25));
+    });
+
+    test('T-0053-AC2 25 params and screen_name are rejected', () async {
+      final rig = Rig();
+
+      expect(
+        () => rig.analytics.screen('home', params: params(25)),
+        throwsA(isA<AssertionError>()),
+      );
+      await settle();
+      expect(rig.sink.screens, isEmpty);
+    });
+
+    test('T-0053-AC2 the release path drops it and reports once', () async {
+      final rig = Rig(debugMode: false);
+
+      rig.analytics.screen('home', params: params(25));
+      await settle();
+
+      expect(rig.sink.screens, isEmpty);
+      expect(rig.errors, hasLength(1));
+      expect(
+        (rig.errors.single.error as AnalyticsValidationError)
+            .violations
+            .single
+            .kind,
+        AnalyticsViolationKind.tooManyParams,
+      );
+    });
+  });
 }
