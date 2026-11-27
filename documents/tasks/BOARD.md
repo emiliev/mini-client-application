@@ -12,7 +12,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
-| [T-0046](T-0046-discovery-search-exemplar.md) | **`discovery_search` exemplar** (SR, P1-19): debounced search, grouped results, history, `discovery_wiring` | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0043, T-0044 | `fleet/T-0046-discovery-search` |
 
 
 
@@ -23,6 +22,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 | [T-0006](T-0006-link-github-remote.md) | Link GitHub remote | merged |
 | [T-0008](T-0008-marvel-api-research.md) | Marvel API status research | F-0003 |
 | [T-0009](T-0009-verification-pipeline-spike.md) | Verification pipeline spike (iOS) | PASS, F-0004 |
+| [T-0046](T-0046-discovery-search-exemplar.md) | **`discovery_search`, the SR exemplar** (P1-19): debounced search, grouped results, history, `discovery_wiring`, `DebouncedQuery.submit` | merged; Verifier [PASS](../evidence/T-0046/verification-report.md) (Opus, then a narrow Sonnet merge re-check); F-0046 |
 | [T-0048](T-0048-reading-list-editor-exemplar.md) | **`library_reading_list_editor`, the FW exemplar** (P1-20): 3-step wizard, **flow-result pattern** (`FlowResultRoute` + `AppFlows`), server field errors via `reject()` | merged; Verifier [PASS](../evidence/T-0048/verification-report.md) (Opus, single pass); F-0048 |
 | [T-0047](T-0047-fixtures-library.md) | `mc_fixtures_library`: per-user reading lists with CRUD, typed validation, 404 for foreign lists, bearer via identity | merged; Verifier [PASS](../evidence/T-0047/verification-report.md) (Sonnet, single pass) |
 | [T-0045](T-0045-forms-kit.md) | `mc_forms` + `mc_ds_forms`: typed validators, form and wizard controllers, a blocked Next that reveals errors, form scaffold | merged; Verifier [PASS](../evidence/T-0045/verification-report.md) (Sonnet, single pass); F-0045 |

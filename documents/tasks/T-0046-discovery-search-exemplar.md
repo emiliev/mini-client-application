@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `fa4fe97`; Verifier PASS `31134be`, merge re-verify PASS `273cb6a`) |
 | Owner | crew: Engineer (**Opus**: first SR exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0046-discovery-search` |
@@ -186,3 +186,6 @@ Also changed in the shared steps (`mc_test_steps`): `the app can no longer write
 **Results on the merged tree:** gates [PASS](../evidence/T-0046/engineer/T-0046-AC8_gates.md): **144/144** tests (T-0048's included), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures check, relative paths, AC7 (byte identity 11/11, cutoff, not committed, gen-l10n parity); coverage discovery_search 331/331, discovery_wiring 22/22, app_core 357/371 = 96.2 % (over 90 % since T-0048, no exemption needed). `tool/ide_sync --env dev` (55 files), `fvm flutter analyze` no issues, [`T-0042-AC4_safety.sh`](../evidence/T-0046/engineer/T-0042-AC4_safety.md) PASS (0 of 144 tests executed on the synced tree, 73,524 outputs byte-identical), `--clean`. Mutations [**65 of 65 killed**](../evidence/T-0046/engineer/mutations-merge-round.log). e2e on a fresh `mc-T-0046-engineer-16594` (deleted): **9 of 9 PASS**, the search journey and deep link and T-0048's reading-list journey and deep link among them ([summary](../evidence/T-0046/engineer/mini_client/e2e-summary.md)); home shows Characters, New reading list, Search (`36_home_list_created.png`).
 
 **Goldens:** none changed in this round. **Test integrity:** no test deleted, skipped or weakened; "A result can be opened again once the first open has settled" became the two stricter 499/501 ms scenarios.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 4 important issues (folded-length mismatch, history lost after a failed save, a silent failed Clear, and cold deep links without a back button, which is cross-cutting and became P-087). TL decisions: drop suggestions from the feature; add `DebouncedQuery.submit` to `mc_paging`; exempt `app_core` coverage (no longer needed after T-0048). Review round `bdd0888`. A single Opus Verifier pass gave PASS `31134be` with 6 Lows. The merge with T-0048 conflicted in 7 files ("both added"); the engineer resolved it and fixed L1–L6 in `4e6f6e9`. A narrow Sonnet re-verify gave PASS `273cb6a` (73k tokens). The TL merged `--no-ff`; on the merge result `check` passed, 144/144 tests, lint was clean, `mc_arch_check` reported OK, the fixtures check passed and the sim app built.

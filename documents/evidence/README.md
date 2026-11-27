@@ -46,3 +46,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0045](T-0045/verification-report.md) | PASS (Sonnet, single pass) | Forms kit: pattern and grapheme probes, blocked-Next semantics, 56 goldens byte-identical |
 | [T-0047](T-0047/verification-report.md) | PASS (Sonnet, single pass) | Library fixtures: two-user CRUD probes, validation boundaries, a seed-following scenario |
 | [T-0048](T-0048/verification-report.md) | PASS (Opus, single pass) | FW exemplar: wizard races, flow result under overlays, user-switch probes (found the P-083 gap), e2e journey and deep link |
+| [T-0046](T-0046/verification-report.md) | PASS (Opus, then a narrow Sonnet merge re-check) | SR exemplar: debounce boundaries, stale-answer races, history on a failed save, merge with T-0048 |

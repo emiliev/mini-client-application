@@ -1,16 +1,16 @@
 # Project Status
 
-_Last updated: 2026-11-26 by Tech Lead_
+_Last updated: 2026-11-27 by Tech Lead_
 
 | | |
 |---|---|
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
-| **Phase** | Phase A done: foundation and all three codegen shims (retrofit, injectable, BDD) are Bazel-native. Now Phase C: the LD kits, then the first feature, `characters_list` |
+| **Phase** | Phase C (exemplars): **4 of 7 archetypes done**: LD `characters_list`, SC `comics_details`, SR `discovery_search`, FW `library_reading_list_editor`. Remaining: DB, ST, IX, then the P1-24 bricks |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0046 Verifier (Opus) |
+| **Active crew** | **Paused** at the PO's request (2026-11-27). No agents running |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -29,8 +29,13 @@ _Last updated: 2026-11-26 by Tech Lead_
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
 - **T-0048 merged: `library_reading_list_editor`, the FW exemplar.** A 3-step wizard creates or edits a reading list; the result is returned to the caller (the flow-result pattern) and home shows "List created".
-- **Now:** `discovery_search` (SR, T-0046) in verification.
-- **Next session (first):** P-087 (no back button on cold deep links), P-083 (bearer epoch pin on the first send), P-092 (home buttons dead after a link). Then the DB, ST and IX exemplars and the P1-24 bricks.
+- **T-0046 merged: `discovery_search`, the SR exemplar.** Debounced search across characters and comics, grouped results, type chips, recent-search history, and a Search entry on home with a `miniclient://app/search?q=` link.
+- **Paused** after T-0046 and T-0048, as the PO asked.
+- **Next session, in order:**
+  1. P-087: cold deep links need a back stack (nest entity routes under home).
+  2. P-083: `mc_api_auth` epoch pin on the first send (a real race; affects T-0041 and T-0048).
+  3. P-092: home buttons dead after a link replaces an editor.
+  4. Then the DB (`store_home`), ST (`settings_appearance`) and IX (`trivia_quiz`) exemplars and their prerequisites (commerce fixtures, `mc_feature_flags`, `mc_analytics`), then the P1-24 bricks.
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
