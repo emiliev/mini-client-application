@@ -41,3 +41,19 @@ The feature's targets changed (`golden_test` deleted, `painter_test` now runs in
 //feature/trivia/trivia_quiz:painter_test                                PASSED in 7.1s
 Executed 7 out of 7 tests: 7 tests pass.
 ```
+
+## Review round, at `2b10cf5`
+
+The changed targets (`//feature/trivia/trivia_quiz/...` and `mini_client:trivia_route_test`): **8 targets x 50 runs = 400 runs, 0 failures, 0 flaky.**
+
+```
+//app/mini_client:trivia_route_test                                      PASSED in 4.1s
+//feature/trivia/trivia_quiz:architecture_test                           PASSED in 0.5s
+//feature/trivia/trivia_quiz:bdd_test                                    PASSED in 22.1s
+//feature/trivia/trivia_quiz:contract_test                               PASSED in 0.6s
+//feature/trivia/trivia_quiz:engine_test                                 PASSED in 0.4s
+//feature/trivia/trivia_quiz:flow_scope_test                             PASSED in 3.3s
+//feature/trivia/trivia_quiz:outline_matches_contract_test               PASSED in 0.4s
+//feature/trivia/trivia_quiz:painter_test                                PASSED in 3.1s
+Executed 8 out of 8 tests: 8 tests pass.
+```

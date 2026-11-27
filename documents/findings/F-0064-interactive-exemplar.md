@@ -58,8 +58,10 @@
 2. **A bloc handler must return its future.** A `switch` expression that mixes `void` and `Future` arms in a `=>` body drops the futures, and an `emit` after the handler "completed" throws. Use a `switch` statement in an `async` handler.
 3. **`go_router` keeps a popped child's query on the parent's location**: after quitting a linked round, the setup's location reads `/trivia?category=...`. Compare `uri.path`.
 4. **The home placeholder is a lazy `ListView`**: a new entry above "Open placeholder 7" pushed it off the built range and broke `app_test`. The Trivia entry is last.
-5. **`McFlowBackButton` on a linked root pops the outer route without asking**, and a `PopScope` on the play page registers with the flow page's route, not the outer one, so the iOS back swipe on a linked round's route most likely leaves without the dialog (read from the code, not tried on a device). The play page uses its own close button (follow-up below).
+5. **A flow page's `PopScope` does not guard the flow's own route** (review round, fixed). It registers with the page's route inside the flow's navigator, so the iOS back swipe and a system back on the *outer* route popped the whole flow past the quit dialog (proved: both new `mini_client:trivia_route_test` cases fail without the fix). The play page now registers a `PopEntry` with `FlowScope.outerRoute` while a round is on screen: its `canPop` is false (which also turns the route's back swipe off) and a pop asks to quit. A linked round's own exit pops with `Navigator.pop`, not `maybePop`, since that pop is asked for. Every flow page that guards its pop needs the same; a kit helper in `mc_feature_flow` would be the general fix.
 6. **The quit dialog is also a cover**: `showMcConfirm` uses the root navigator, so `outerIsCurrent` turns false and the covered pause applies too. The explicit dialog pause is kept (it holds from the tap, a frame before the dialog's route exists); a mutant that removes it alone is equivalent in tests and is not in the list.
+7. **An answer the engine judges a timeout is drawn as one** (review round): a late tap of the correct choice used to get the green check of a right answer. Only a judged choice is marked now (check or cross); after a timeout the right answer is shown in green with no mark. The late tap is still sent as tapped (`C20000`), which the server judges a timeout as well.
+8. **No `add` after an await or in a listener without `isClosed`** (review round): the quit dialog's answer (the page can be replaced while it is open), the setup's session listener, and a round that loads after the player quit (dropped by a `_left` flag: the page is still sliding out, so the bloc is not closed yet). A hint asked for while paused is refused and stays available.
 
 ## Kit and contract changes (T-0064)
 | Package | Change |
@@ -70,7 +72,7 @@
 | `tool/l10n_check` | The trivia ARBs in the workspace gate |
 
 ## Follow-ups (for `pending-work.md`)
-- **Back swipe on a linked root (for `pending-work.md`):** the iOS back swipe on a linked round's route leaves without the quit dialog (trap 5). Either `FeatureFlow` forwards the outer route's pop to the flow's root page (`PopScope` there), or the linked route sets `canPop` from the flow. Affects every flow whose root page guards its pop.
+- **A kit helper for trap 5 (for `pending-work.md`):** `mc_feature_flow` could offer "guard the outer route while this page is shown", so every flow page that guards its pop does it the same way (trivia_quiz does it by hand).
 - `app/sandbox/chronicle_sandbox` (P1-23 lists it; out of this task's scope).
 - A generic `the experiment {key} is in variant {v}` step for `mc_test_steps` (local here).
 - P1-24: the IX brick's engine folder, the outline-from-contract template and its row-check test, the play steps of §5.

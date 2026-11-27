@@ -17,6 +17,6 @@
 | coverage >= 90 % (touched packages) | PASS |
 
 - tests: Executed 0 out of 210 tests: 210 tests pass.
-- coverage: == feature/trivia/trivia_quiz TOTAL 1039/1051 98.9% == app/wiring/chronicle_wiring TOTAL 40/40 100.0% == app/wiring/app_core TOTAL 486/508 95.7% == utility/mc_fixtures_editorial TOTAL 468/470 99.6% (threshold 90 %)
+- coverage: == feature/trivia/trivia_quiz TOTAL 1062/1076 98.7% == app/wiring/chronicle_wiring TOTAL 40/40 100.0% == app/wiring/app_core TOTAL 486/508 95.7% == utility/mc_fixtures_editorial TOTAL 468/470 99.6% (threshold 90 %)
 
 **PASS T-0064-AC7-gates**
