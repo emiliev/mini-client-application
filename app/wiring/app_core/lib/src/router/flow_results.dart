@@ -406,7 +406,7 @@ abstract final class AppFlows {
       extra: call,
     );
     unawaited(
-      push.then((value) => call.complete(value is String ? value : null)),
+      pushed.then((value) => call.complete(value is String ? value : null)),
     );
     // A first look after the frame: a `go` in the same synchronous span as
     // the push leaves nothing for the router to notify about.

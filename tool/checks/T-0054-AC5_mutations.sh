@@ -107,7 +107,7 @@ FA="$T_RES $T_HARD $T_APP"  # and the app's
 # --- The Verifier's V08 (T-0049): the push future is no longer chained.
 MUST="a redirected page that pops with a value" mutate V08 \
   "the push future is not chained into the call" "$RES" "$F" \
-  $'    unawaited(\n      push.then((value) => call.complete(value is String ? value : null)),\n    );\n' ''
+  $'    unawaited(\n      pushed.then((value) => call.complete(value is String ? value : null)),\n    );\n' ''
 
 # --- P-094: the call, not the location
 mutate M01 "the stack watch never abandons a call" "$RES" "$F" \
