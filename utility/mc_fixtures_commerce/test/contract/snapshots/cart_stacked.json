@@ -1,0 +1,86 @@
+{
+  "body": {
+    "currency": "EUR",
+    "discountCents": 5175,
+    "itemCount": 6,
+    "items": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/019",
+          "variant": "portrait_large"
+        },
+        "discountCents": 1909,
+        "listPriceCents": 1443,
+        "productId": 500120,
+        "quantity": 2,
+        "subtotalCents": 2886,
+        "title": "Ember Chronicles #1",
+        "totalCents": 977,
+        "unitPriceCents": 1443
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/012",
+          "variant": "portrait_large"
+        },
+        "discountCents": 1998,
+        "listPriceCents": 1510,
+        "productId": 500121,
+        "quantity": 2,
+        "subtotalCents": 3020,
+        "title": "Ember Chronicles #2",
+        "totalCents": 1022,
+        "unitPriceCents": 1510
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/006",
+          "variant": "portrait_large"
+        },
+        "discountCents": 1268,
+        "listPriceCents": 1965,
+        "productId": 500122,
+        "quantity": 2,
+        "subtotalCents": 3930,
+        "title": "Ember Chronicles #3",
+        "totalCents": 2662,
+        "unitPriceCents": 1965
+      }
+    ],
+    "promotions": [
+      {
+        "code": "TAKE5",
+        "discountCents": 500,
+        "eligible": true,
+        "kind": "fixed_off",
+        "title": "5.00 EUR off orders from 25.00 EUR"
+      },
+      {
+        "code": "SAVE25",
+        "discountCents": 1722,
+        "eligible": true,
+        "kind": "percent_off",
+        "title": "25% off your order"
+      },
+      {
+        "code": "HEROES3",
+        "discountCents": 2953,
+        "eligible": true,
+        "kind": "buy_2_get_1",
+        "title": "Buy 2 get 1 on Heroes"
+      }
+    ],
+    "subtotalCents": 9836,
+    "totalCents": 4661
+  },
+  "request": "GET /v1/me/cart as u-100",
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":2}",
+    "PUT /v1/me/cart/items/500121 {\"quantity\":2}",
+    "PUT /v1/me/cart/items/500122 {\"quantity\":2}",
+    "POST /v1/me/cart/promo {\"code\":\"TAKE5\"}",
+    "POST /v1/me/cart/promo {\"code\":\"SAVE25\"}",
+    "POST /v1/me/cart/promo {\"code\":\"HEROES3\"}"
+  ],
+  "status": 200
+}

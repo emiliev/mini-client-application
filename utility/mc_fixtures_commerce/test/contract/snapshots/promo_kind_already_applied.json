@@ -1,0 +1,19 @@
+{
+  "body": {
+    "error": {
+      "code": "promo_not_applicable",
+      "message": "SAVE25 cannot be applied: kind_already_applied",
+      "promoCode": "SAVE25",
+      "reason": "kind_already_applied"
+    }
+  },
+  "request": "POST /v1/me/cart/promo as u-100",
+  "requestBody": {
+    "code": "SAVE25"
+  },
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":1}",
+    "POST /v1/me/cart/promo {\"code\":\"SAVE10\"}"
+  ],
+  "status": 409
+}

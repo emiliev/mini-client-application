@@ -1,0 +1,184 @@
+{
+  "body": {
+    "deals": [
+      {
+        "currency": "EUR",
+        "dealPriceCents": 1083,
+        "discountPercent": 10,
+        "endsAt": "2026-01-02T00:00:00.000Z",
+        "originalPriceCents": 1203,
+        "product": {
+          "categoryId": "mystery",
+          "cover": {
+            "path": "mock-asset://characters/001",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 1083,
+          "id": 501501,
+          "issueNumber": 2,
+          "priceCents": 1203,
+          "seriesId": 400075,
+          "stock": 120,
+          "title": "Amber Frontier #2"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 1189,
+        "discountPercent": 15,
+        "endsAt": "2026-01-03T00:00:00.000Z",
+        "originalPriceCents": 1399,
+        "product": {
+          "categoryId": "classics",
+          "cover": {
+            "path": "mock-asset://characters/009",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 1189,
+          "id": 502240,
+          "issueNumber": 1,
+          "priceCents": 1399,
+          "seriesId": 400112,
+          "stock": 10,
+          "title": "Brass Reckoning #1"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 913,
+        "discountPercent": 20,
+        "endsAt": "2026-01-04T00:00:00.000Z",
+        "originalPriceCents": 1141,
+        "product": {
+          "categoryId": "team-ups",
+          "cover": {
+            "path": "mock-asset://characters/022",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 913,
+          "id": 500822,
+          "issueNumber": 3,
+          "priceCents": 1141,
+          "seriesId": 400041,
+          "stock": 20,
+          "title": "Cinder Vanguard #3"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 570,
+        "discountPercent": 25,
+        "endsAt": "2026-01-05T00:00:00.000Z",
+        "originalPriceCents": 760,
+        "product": {
+          "categoryId": "villains",
+          "cover": {
+            "path": "mock-asset://characters/006",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 570,
+          "id": 501101,
+          "issueNumber": 2,
+          "priceCents": 760,
+          "seriesId": 400055,
+          "stock": 23,
+          "title": "Frost Harbor #2"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 320,
+        "discountPercent": 30,
+        "endsAt": "2026-01-06T00:00:00.000Z",
+        "originalPriceCents": 457,
+        "product": {
+          "categoryId": "cosmic",
+          "cover": {
+            "path": "mock-asset://characters/005",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 320,
+          "id": 501360,
+          "issueNumber": 1,
+          "priceCents": 457,
+          "seriesId": 400068,
+          "stock": 24,
+          "title": "Gale Requiem #1"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 208,
+        "discountPercent": 35,
+        "endsAt": "2026-01-07T00:00:00.000Z",
+        "originalPriceCents": 320,
+        "product": {
+          "categoryId": "team-ups",
+          "cover": {
+            "path": "mock-asset://characters/021",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 208,
+          "id": 500222,
+          "issueNumber": 3,
+          "priceCents": 320,
+          "seriesId": 400011,
+          "stock": 25,
+          "title": "Jade Chronicles #3"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 350,
+        "discountPercent": 40,
+        "endsAt": "2026-01-08T00:00:00.000Z",
+        "originalPriceCents": 583,
+        "product": {
+          "categoryId": "classics",
+          "cover": {
+            "path": "mock-asset://characters/014",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 350,
+          "id": 500681,
+          "issueNumber": 2,
+          "priceCents": 583,
+          "seriesId": 400034,
+          "stock": 27,
+          "title": "Slate Legacy #2"
+        }
+      },
+      {
+        "currency": "EUR",
+        "dealPriceCents": 511,
+        "discountPercent": 50,
+        "endsAt": "2026-01-09T00:00:00.000Z",
+        "originalPriceCents": 1022,
+        "product": {
+          "categoryId": "cosmic",
+          "cover": {
+            "path": "mock-asset://characters/016",
+            "variant": "portrait_large"
+          },
+          "currency": "EUR",
+          "dealPriceCents": 511,
+          "id": 500280,
+          "issueNumber": 1,
+          "priceCents": 1022,
+          "seriesId": 400014,
+          "stock": 120,
+          "title": "Sparrow Station #1"
+        }
+      }
+    ]
+  },
+  "request": "GET /v1/store/deals as u-100",
+  "status": 200
+}

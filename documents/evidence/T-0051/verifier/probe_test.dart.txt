@@ -1,0 +1,426 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
+import 'package:mc_fixtures_commerce/mc_fixtures_commerce.dart';
+import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+
+MockBackend mk([int seed = 42, MockDomain? d]) => MockBackend(
+  seed: seed,
+  domains: [
+    const IdentityMockDomain(),
+    d ?? const CommerceMockDomain(),
+    const ComicsMockDomain(),
+  ],
+);
+Dio dioOf(MockBackend b, {bool plain = false}) {
+  final d = b.createDio();
+  d.options.validateStatus = (_) => true;
+  if (plain) d.options.responseType = ResponseType.plain;
+  return d;
+}
+
+Future<String> signIn(Dio d, String email, String pw) async {
+  final r = await d.post(
+    '/v1/auth/sign-in',
+    data: {'email': email, 'password': pw},
+  );
+  expect(r.statusCode, 200);
+  return (r.data as Map)['accessToken'] as String;
+}
+
+Map<String, String> h(String t) => {'Authorization': 'Bearer $t'};
+Future<Response> rq(Dio d, String m, String p, {Object? body, String? tok}) =>
+    d.request(
+      p,
+      data: body,
+      options: Options(method: m, headers: tok == null ? null : h(tok)),
+    );
+
+class P {
+  P(this.id, this.cat, this.list, this.unit, this.stock);
+  final int id, list, unit, stock;
+  final String cat;
+}
+
+Future<List<P>> products(Dio d) async {
+  final deals = <int, int>{};
+  for (final x in (await d.get('/v1/store/deals')).data['deals']) {
+    deals[x['product']['id']] = x['dealPriceCents'];
+  }
+  final out = <P>[];
+  for (final c in (await d.get('/v1/store/categories')).data['categories']) {
+    final r = await d.get('/v1/store/categories/${c['id']}/products?limit=100');
+    for (final p in r.data['results']) {
+      out.add(
+        P(
+          p['id'],
+          p['categoryId'],
+          p['priceCents'],
+          deals[p['id']] ?? p['priceCents'],
+          p['stock'],
+        ),
+      );
+    }
+  }
+  return out;
+}
+
+// ---- my own oracle, written from CONTRACT.md only ----
+const promoDefs = {
+  'SAVE10': ('pct', 10, 0, ''),
+  'SAVE25': ('pct', 25, 0, ''),
+  'TAKE5': ('fix', 0, 500, ''),
+  'TAKE15': ('fix', 0, 1500, ''),
+  'HEROES3': ('b2g1', 0, 0, 'heroes'),
+  'COSMIC3': ('b2g1', 0, 0, 'cosmic'),
+};
+const mins = {'TAKE5': 2500, 'TAKE15': 8000};
+({
+  List<int> lineTotals,
+  int total,
+  Map<String, int> perPromo,
+  Map<String, bool> elig,
+})
+oracle(List<(P, int)> lines, List<String> codes) {
+  final n = lines.length;
+  final sub = [for (final l in lines) l.$1.unit * l.$2];
+  final left = List<int>.from(sub);
+  final per = <String, int>{};
+  final elig = <String, bool>{};
+  for (final c in codes.where((c) => promoDefs[c]!.$1 == 'b2g1')) {
+    final cat = promoDefs[c]!.$4;
+    final units = <List<int>>[];
+    for (var i = 0; i < n; i++) {
+      if (lines[i].$1.cat == cat) {
+        for (var q = 0; q < lines[i].$2; q++) {
+          units.add([lines[i].$1.unit, i]);
+        }
+      }
+    }
+    units.sort((a, b) => b[0] != a[0] ? b[0] - a[0] : a[1] - b[1]);
+    var t = 0;
+    for (var g = 0; g + 3 <= units.length; g += 3) {
+      final u = units[g + 2];
+      left[u[1]] -= u[0];
+      t += u[0];
+    }
+    per[c] = t;
+    elig[c] = units.length >= 3;
+  }
+  for (final c in codes.where((c) => promoDefs[c]!.$1 == 'pct')) {
+    final pc = promoDefs[c]!.$2;
+    var t = 0;
+    for (var i = 0; i < n; i++) {
+      final num = left[i] * pc;
+      var cut = num ~/ 100;
+      if (num % 100 >= 50) cut++;
+      left[i] -= cut;
+      t += cut;
+    }
+    per[c] = t;
+    elig[c] = n > 0;
+  }
+  for (final c in codes.where((c) => promoDefs[c]!.$1 == 'fix')) {
+    final r0 = left.fold(0, (a, b) => a + b);
+    final a0 = promoDefs[c]!.$3;
+    if (r0 >= mins[c]!) {
+      final fl = [for (final r in left) a0 * r ~/ r0];
+      final rest = a0 - fl.fold(0, (a, b) => a + b);
+      final idx = List.generate(n, (i) => i)
+        ..sort((a, b) {
+          final ra = a0 * left[a] % r0, rb = a0 * left[b] % r0;
+          return ra != rb ? rb - ra : a - b;
+        });
+      for (var k = 0; k < rest; k++) {
+        fl[idx[k]]++;
+      }
+      for (var i = 0; i < n; i++) {
+        left[i] -= fl[i];
+      }
+      per[c] = a0;
+      elig[c] = true;
+    } else {
+      per[c] = 0;
+      elig[c] = false;
+    }
+  }
+  return (
+    lineTotals: left,
+    total: left.fold(0, (a, b) => a + b),
+    perPromo: per,
+    elig: elig,
+  );
+}
+
+Future<void> check(
+  String name,
+  int seed,
+  List<(P, int)> lines0,
+  List<String> codes,
+) async {
+  final b = mk(seed);
+  final d = dioOf(b);
+  final byId = {for (final p in await products(d)) p.id: p};
+  final lines = [for (final l in lines0) (byId[l.$1.id]!, l.$2)];
+  final t = await signIn(d, 'reader@mini-client.test', 'marvelous');
+  for (final l in lines) {
+    final r = await rq(
+      d,
+      'PUT',
+      '/v1/me/cart/items/${l.$1.id}',
+      body: {'quantity': l.$2},
+      tok: t,
+    );
+    expect(r.statusCode, 200, reason: '${r.data}');
+  }
+  for (final c in codes) {
+    final r = await rq(
+      d,
+      'POST',
+      '/v1/me/cart/promo',
+      body: {'code': c},
+      tok: t,
+    );
+    expect(r.statusCode, 200, reason: '$name $c ${r.data}');
+  }
+  final cart = (await rq(d, 'GET', '/v1/me/cart', tok: t)).data as Map;
+  final o = oracle(lines, codes);
+  final items = cart['items'] as List;
+  expect([for (final i in items) i['totalCents']], o.lineTotals, reason: name);
+  expect(cart['totalCents'], o.total, reason: name);
+  expect(
+    cart['totalCents'],
+    items.fold<int>(0, (a, i) => a + (i['totalCents'] as int)),
+  );
+  for (final p in cart['promotions']) {
+    expect(p['discountCents'], o.perPromo[p['code']], reason: '$name ${p['code']}');
+    expect(p['eligible'], o.elig[p['code']], reason: '$name ${p['code']} elig');
+  }
+  // ignore: avoid_print
+  print(
+    '$name: total=${cart['totalCents']} lines=${o.lineTotals} promos=${[for (final p in cart['promotions']) '${p['code']}:${p['discountCents']}${p['eligible'] ? '' : '(inelig)'}']}',
+  );
+}
+
+void main() {
+  test('AC3 own oracle', () async {
+    final b0 = mk();
+    final all = await products(dioOf(b0));
+    final ok = all.where((p) => p.stock >= 12).toList()
+      ..sort((a, b) => a.id - b.id);
+    final deal = ok.where((p) => p.unit != p.list).toList();
+    final nodeal = ok.where((p) => p.unit == p.list).toList();
+    List<P> cat(String c) => ok.where((p) => p.cat == c).toList();
+    print('deals with stock>=12: ${deal.length}');
+    await check('c1 mixed', 42, [(deal.first, 2), (nodeal[3], 3), (deal.last, 1)], []);
+    final heroes = cat('heroes');
+    await check('c2 stacked', 42, [
+      (heroes[0], 5),
+      (heroes[1], 6),
+      (cat('cosmic')[0], 4),
+      (nodeal[9], 5),
+    ], ['TAKE15', 'SAVE25', 'HEROES3']);
+    final cosmic = cat('cosmic');
+    await check('c3 cosmic', 42, [
+      (cosmic[0], 3),
+      (cosmic[1], 2),
+      (cosmic[2], 2),
+    ], ['COSMIC3']);
+    final half = nodeal.where((p) => (p.unit % 10) == 5).toList();
+    print('half-up candidates: ${half.length}');
+    final hu = half.length > 1
+        ? [(half[0], 1), (half[1], 1), (nodeal.firstWhere((p) => p.id != half[0].id && p.id != half[1].id), 1)]
+        : [(nodeal[0], 1), (nodeal[1], 1)];
+    await check('c4 half-up', 42, hu, ['SAVE10']);
+    await check('c4b half-up 25', 7, hu, ['SAVE25']);
+    List<(P, int)>? best;
+    var rest = 0;
+    for (var i = 0; i + 4 < nodeal.length; i += 1) {
+      final ls = [
+        (nodeal[i], 2),
+        (nodeal[i + 1], 1),
+        (nodeal[i + 2], 3),
+        (nodeal[i + 3], 1),
+      ];
+      final r0 = ls.fold<int>(0, (a, l) => a + l.$1.unit * l.$2);
+      if (r0 < 8000) continue;
+      final fl = ls.fold<int>(0, (a, l) => a + 1500 * (l.$1.unit * l.$2) ~/ r0);
+      if (1500 - fl > rest) {
+        rest = 1500 - fl;
+        best = ls;
+      }
+    }
+    print('largest-remainder leftover cents: $rest');
+    expect(rest, greaterThanOrEqualTo(2));
+    await check('c5 fixed LR TAKE15', 42, best!, ['TAKE15']);
+    await check('c5b fixed LR + SAVE10', 7, best, ['SAVE10', 'TAKE5']);
+    final cheap = nodeal.firstWhere((p) => p.unit * 5 >= 2500 && p.unit * 5 <= 3300);
+    await check('c6 min after percent', 42, [(cheap, 5)], ['TAKE5', 'SAVE25']);
+  });
+
+  test('AC1 determinism', () async {
+    Future<List<String>> run() async {
+      final b = mk(42);
+      final d = dioOf(b, plain: true);
+      final t = await signIn(dioOf(b), 'reader@mini-client.test', 'marvelous');
+      final out = <String>[];
+      for (final p in [
+        '/v1/store/banners',
+        '/v1/store/deals',
+        '/v1/store/categories',
+        '/v1/store/categories/heroes/products?limit=7&offset=3',
+        '/v1/store/featured',
+      ]) {
+        out.add((await d.get(p)).data as String);
+      }
+      out.add(
+        (await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': 2}, tok: t)).data as String,
+      );
+      out.add(
+        (await rq(d, 'POST', '/v1/me/cart/promo', body: {'code': 'save10'}, tok: t)).data as String,
+      );
+      return out;
+    }
+
+    final a = await run(), c = await run();
+    expect(a, c);
+    print('AC1 bytes ${a.fold<int>(0, (x, s) => x + s.length)}');
+  });
+
+  test('AC2 sections', () async {
+    const routes = [
+      '/v1/store/banners',
+      '/v1/store/deals',
+      '/v1/store/categories',
+      '/v1/store/categories/heroes/products',
+      '/v1/store/featured',
+    ];
+    Future<Map<String, int?>> probe(MockBackend b) async {
+      final d = dioOf(b);
+      final t = await signIn(d, 'reader@mini-client.test', 'marvelous');
+      final res = <String, int?>{};
+      for (final r in routes) {
+        res['GET $r'] = (await d.get(r)).statusCode;
+      }
+      res['GET cart'] = (await rq(d, 'GET', '/v1/me/cart', tok: t)).statusCode;
+      res['PUT'] = (await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': 1}, tok: t)).statusCode;
+      res['POST'] = (await rq(d, 'POST', '/v1/me/cart/promo', body: {'code': 'SAVE10'}, tok: t)).statusCode;
+      res['DELETE'] = (await rq(d, 'DELETE', '/v1/me/cart/promo', tok: t)).statusCode;
+      return res;
+    }
+
+    for (final s in commerceSections.keys) {
+      final res = await probe(mk(42, SectionFailingCommerceDomain(s)));
+      final failing = res.entries.where((e) => e.value == 500).map((e) => e.key).toList();
+      print('set $s -> $failing (${res.length} routes)');
+      expect(res.length, 9);
+      expect(failing.length, commerceSections[s]!.length);
+    }
+    for (final sc in ['store.deals_error', 'store.categories_error']) {
+      final b = mk()..useScenario(sc);
+      final res = await probe(b);
+      print('scenario $sc -> ${res.entries.where((e) => e.value == 500).map((e) => e.key).toList()} (${res.length} routes)');
+      expect(res.entries.where((e) => e.value == 500).length, 1);
+    }
+    expect(
+      () => SectionFailingCommerceDomain('nope'),
+      throwsA(
+        isA<ArgumentError>().having(
+          (e) => e.toString(),
+          'msg',
+          allOf(contains('banners'), contains('cart'), contains('category_products')),
+        ),
+      ),
+    );
+    final d = dioOf(mk());
+    for (final c in ['heroes', 'team-ups']) {
+      for (final lim in [1, 7, 13, 100]) {
+        final ids = <int>[];
+        var off = 0;
+        while (true) {
+          final r = (await d.get('/v1/store/categories/$c/products?offset=$off&limit=$lim')).data;
+          final rs = r['results'] as List;
+          if (rs.isEmpty) break;
+          ids.addAll([for (final x in rs) x['id'] as int]);
+          off += lim;
+        }
+        expect(ids.length, 60);
+        expect(ids.toSet().length, 60);
+      }
+    }
+  });
+
+  test('AC4 validation and auth', () async {
+    final b = mk();
+    final d = dioOf(b);
+    final t = await signIn(d, 'reader@mini-client.test', 'marvelous');
+    final t2 = await signIn(d, 'collector@mini-client.test', 'vault-7');
+    void e(String what, Response r, int st, String code) {
+      print('$what -> ${r.statusCode} ${(r.data as Map)['error']?['code']}');
+      expect(r.statusCode, st, reason: what);
+      expect((r.data as Map)['error']['code'], code, reason: what);
+    }
+
+    e('qty 100', await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': 100}, tok: t), 400, 'invalid_quantity');
+    e('qty -1', await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': -1}, tok: t), 400, 'invalid_quantity');
+    e('qty 1.5', await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': 1.5}, tok: t), 400, 'invalid_quantity');
+    e('qty str', await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': '2'}, tok: t), 400, 'invalid_quantity');
+    e('bad body', await rq(d, 'PUT', '/v1/me/cart/items/500060', body: [1], tok: t), 400, 'invalid_body');
+    e('unknown product', await rq(d, 'PUT', '/v1/me/cart/items/1', body: {'quantity': 1}, tok: t), 404, 'unknown_product');
+    final pr = await products(d);
+    final sold = pr.firstWhere((p) => p.stock == 0);
+    e('sold out', await rq(d, 'PUT', '/v1/me/cart/items/${sold.id}', body: {'quantity': 1}, tok: t), 409, 'out_of_stock');
+    final low = pr.firstWhere((p) => p.stock > 0 && p.stock < 50);
+    e('over stock', await rq(d, 'PUT', '/v1/me/cart/items/${low.id}', body: {'quantity': low.stock + 1}, tok: t), 409, 'out_of_stock');
+    e('unknown promo', await rq(d, 'POST', '/v1/me/cart/promo', body: {'code': 'NOPE'}, tok: t), 404, 'unknown_promo');
+    e('empty cart promo', await rq(d, 'POST', '/v1/me/cart/promo', body: {'code': 'SAVE10'}, tok: t), 409, 'promo_not_applicable');
+    e('promo body', await rq(d, 'POST', '/v1/me/cart/promo', body: {'code': 5}, tok: t), 400, 'invalid_body');
+    for (final id in ['99999999999999999999', '0500060', '00', '-500060', '5e5', '+500060']) {
+      final r = await rq(d, 'PUT', '/v1/me/cart/items/$id', body: {'quantity': 1}, tok: t);
+      print('id $id -> ${r.statusCode} ${r.data['error']['code']} echoed=${r.data['error']['productId']}');
+      expect(r.statusCode, 404);
+      expect(r.data['error']['code'], 'unknown_product');
+      expect(r.data['error']['productId'], id);
+    }
+    final blank = await rq(d, 'DELETE', '/v1/me/cart/promo?code=', tok: t);
+    print('blank code -> ${blank.statusCode} ${blank.data}');
+    expect(blank.statusCode, 400);
+    for (final m in [
+      ['GET', '/v1/me/cart'],
+      ['PUT', '/v1/me/cart/items/500060'],
+      ['POST', '/v1/me/cart/promo'],
+      ['DELETE', '/v1/me/cart/promo'],
+    ]) {
+      final body = {'quantity': 1, 'code': 'SAVE10'};
+      expect((await rq(d, m[0], m[1], body: body)).statusCode, 401, reason: 'nobearer ${m[1]}');
+      expect((await rq(d, m[0], m[1], body: body, tok: 'mc-access-u-100-expired')).statusCode, 401, reason: 'expired ${m[1]}');
+    }
+    await rq(d, 'PUT', '/v1/me/cart/items/500060', body: {'quantity': 3}, tok: t);
+    await rq(d, 'POST', '/v1/me/cart/promo', body: {'code': 'SAVE10'}, tok: t);
+    final c2 = (await rq(d, 'GET', '/v1/me/cart', tok: t2)).data;
+    expect(c2['items'], isEmpty);
+    expect(c2['promotions'], isEmpty);
+    expect(c2['totalCents'], 0);
+    await rq(d, 'PUT', '/v1/me/cart/items/500061', body: {'quantity': 1}, tok: t2);
+    final c1 = (await rq(d, 'GET', '/v1/me/cart', tok: t)).data;
+    expect([for (final i in c1['items']) i['productId']], [500060]);
+    final d2 = b.createDio()..options.validateStatus = (_) => true;
+    expect(((await rq(d2, 'GET', '/v1/me/cart', tok: t)).data['items'] as List).length, 1);
+    b.reset();
+    expect(((await rq(d2, 'GET', '/v1/me/cart', tok: t)).data['items'] as List).length, 0);
+    expect(((await rq(d2, 'GET', '/v1/me/cart', tok: t2)).data['items'] as List).length, 0);
+  });
+
+  test('AC5 ids resolve seeds 42 and 7', () async {
+    for (final s in [42, 7]) {
+      final d = dioOf(mk(s));
+      final pr = await products(d);
+      expect(pr.length, 360);
+      for (final p in pr) {
+        final r = await d.get('/v1/comics/${p.id}');
+        expect(r.statusCode, 200, reason: '${p.id}');
+      }
+    }
+  });
+}

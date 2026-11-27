@@ -1,0 +1,18 @@
+{
+  "body": {
+    "error": {
+      "code": "promo_not_applicable",
+      "message": "COSMIC3 cannot be applied: no_matching_items",
+      "promoCode": "COSMIC3",
+      "reason": "no_matching_items"
+    }
+  },
+  "request": "POST /v1/me/cart/promo as u-100",
+  "requestBody": {
+    "code": "COSMIC3"
+  },
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":3}"
+  ],
+  "status": 409
+}

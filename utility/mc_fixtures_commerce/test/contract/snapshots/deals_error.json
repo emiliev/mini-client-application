@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "injected_failure",
+      "message": "Injected HTTP 500 for GET /v1/store/deals"
+    }
+  },
+  "request": "GET /v1/store/deals as u-100",
+  "scenario": "store.deals_error",
+  "status": 500
+}

@@ -1,0 +1,98 @@
+{
+  "body": {
+    "products": [
+      {
+        "categoryId": "mystery",
+        "cover": {
+          "path": "mock-asset://characters/017",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 501740,
+        "issueNumber": 1,
+        "priceCents": 709,
+        "seriesId": 400087,
+        "stock": 20,
+        "title": "Amber Crossing #1"
+      },
+      {
+        "categoryId": "classics",
+        "cover": {
+          "path": "mock-asset://characters/021",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500322,
+        "issueNumber": 3,
+        "priceCents": 1288,
+        "seriesId": 400016,
+        "stock": 120,
+        "title": "Brass Station #3"
+      },
+      {
+        "categoryId": "heroes",
+        "cover": {
+          "path": "mock-asset://characters/008",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 502281,
+        "issueNumber": 2,
+        "priceCents": 1239,
+        "seriesId": 400114,
+        "stock": 24,
+        "title": "Ember Reckoning #2"
+      },
+      {
+        "categoryId": "cosmic",
+        "cover": {
+          "path": "mock-asset://characters/021",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500640,
+        "issueNumber": 1,
+        "priceCents": 1095,
+        "seriesId": 400032,
+        "stock": 6,
+        "title": "Gale Legacy #1"
+      },
+      {
+        "categoryId": "team-ups",
+        "cover": {
+          "path": "mock-asset://characters/004",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 501902,
+        "issueNumber": 3,
+        "priceCents": 495,
+        "seriesId": 400095,
+        "stock": 35,
+        "title": "Jade Crossing #3"
+      },
+      {
+        "categoryId": "classics",
+        "cover": {
+          "path": "mock-asset://characters/010",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500921,
+        "issueNumber": 2,
+        "priceCents": 1901,
+        "seriesId": 400046,
+        "stock": 3,
+        "title": "Slate Vanguard #2"
+      }
+    ]
+  },
+  "request": "GET /v1/store/featured as u-100",
+  "status": 200
+}

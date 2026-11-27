@@ -53,3 +53,39 @@ The backend for the DB exemplar `store_home` (P1-21). It has independent section
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27: Engineer (Sonnet). `utility/mc_fixtures_commerce` built and registered (root `pubspec.yaml`; `pubspec.lock` unchanged). No file outside the package, this task file, `tool/checks/T-0051-AC5_gates.sh`, `documents/evidence/T-0051/engineer/` and `F-0051` was touched.
+- 2026-11-27: Decisions inside the scope (all in `CONTRACT.md`):
+  - A product is a comic (issues 1 to 3 of each series, 360 products), with its own EUR price (299 to 1,999 cents) and stock. Categories are `series index mod 6`.
+  - The cart charges the deal price for a deal product.
+  - Status codes: `unknown_product` 404, `invalid_quantity` 400, `out_of_stock` 409, `unknown_promo` 404, `promo_not_applicable` 409 with a `reason`, plus `invalid_body`, `unknown_category` and `invalid_parameter`.
+  - Stacking order (fixed, independent of the order the codes are applied in): buy-2-get-1, then percent (half-up per line), then fixed (shared over the lines by largest remainder). One code per kind. A code whose condition no longer holds stays on the cart with `eligible: false` and takes nothing.
+  - `DELETE /v1/me/cart/promo` removes all codes; `?code=` removes one (an addition to the scope).
+  - Per-section failures exist as scenarios (`store.<section>_error`) and as fixture sets (`commerce.<section>_error`); sections: banners, deals, categories, category_products, featured, cart.
+- 2026-11-27: Gates script note. `tool/checks/T-0051-AC5_gates.sh` runs its negative controls on throwaway untracked Bazel packages (removed by a trap and verified), so it never edits a tracked file.
+
+
+## Outcome
+`utility/mc_fixtures_commerce` (archetype UM, pure Dart) is registered in the workspace. It serves the store (banners, deals, categories, a paged category listing, featured) and a per-user cart with three promotion kinds over 9 routes. Products are comics from `mc_fixtures_comics`; bearers are checked with `userForAuthorization`. Money is integer cents throughout. Nine fixture sets (`default`, `empty`, `server_error` and one per failing section) and eight scenarios. `CONTRACT.md` documents the lot.
+
+| AC | Evidence |
+|---|---|
+| AC1 | `store_test.dart`: `T-0051-AC1` (a 12-request session with writes is byte-identical on two backends; another seed changes prices, not ids; deal end dates follow the fixed clock) |
+| AC2 | `store_test.dart` and `fixture_sets_test.dart`: `T-0051-AC2` (each section on its own; each `store.<section>_error` scenario fails only its own routes, probed on all nine; the sets answer the scenarios' bodies; category paging is stable and total for 6 categories at 5 page sizes; the documented stock, deal and featured positions) |
+| AC3 | `cart_test.dart` and `money_test.dart`: `T-0051-AC3`. 20 seeded carts (14 on seed 42, 6 on seed 7) are checked after every change against `test/oracle.dart`, which shares no code with the package, and against the invariant "cart total = sum of line totals". The sample is asserted to exercise every promotion kind. Each promotion rule, the stacking order (4 application orders give the same cart) and the half-up per-line rounding are pinned by direct `priceCart` tests and through the API. Integer cents: a response scanner (with negative controls) and a source scan for `double`, rounding calls, decimal literals and division |
+| AC4 | `validation_test.dart`: `T-0051-AC4` (every typed code and its reasons, check order, rejected writes change nothing; 401 for 6 kinds of bad bearer on all 4 cart routes, auth before product and body; two users never see each other's cart or codes; the cart persists across requests and clients and `reset()` clears it) |
+| AC5 | `provider_contract_test.dart`: `T-0051-AC5` (35 snapshots with the requests that set them up, every route, code, promotion kind and reason covered, manifest and `CONTRACT.md` in step; all 360 product ids resolve on `GET /v1/comics/{id}` with the same title, cover, issue and series for seeds 42 and 7; every image resolves to an existing bundled asset, with a resolver negative control). `tool/checks/T-0051-AC5_gates.sh` (report `documents/evidence/T-0051/engineer/AC5_gates.md`): pure closure with positive and negative controls, registration, fixtures check with controls, commerce tests 6/6 uncached, `test //...` 150/150, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, coverage 377/382 = 98.7 % |
+
+Mutations: `documents/evidence/T-0051/engineer/mutations.sh` (`MC_TASK=T-0051 MC_ROLE=engineer`; refuses a dirty package; formats each mutant, because the Bazel build checks formatting), log `mutations.log`: **95/95 killed**, none survived, none broke the build. Pinned one by one: each buy-2-get-1 rule (order, tie-break, group size, category, eligibility), percent rounding (down, up, on the total) and base, fixed minimum (ignored, exclusive, checked before percent or before everything), sharing and remainder rules, every promotion amount and minimum, the stacking order, line arithmetic, deal pricing, every typed code and status, the check order, auth, per-user and persistence, paging limits, and the section scenarios and sets.
+
+Test integrity: no tests deleted, skipped or weakened; no `// ignore:`. Globs use `MC_GENERATED_DART`. The mutation run also found and fixed one defect in the package: an error `extra` key named `code` overwrote `error.code` (now `promoCode`), see F-0051.
+
+Follow-ups: none. Questions for the PO: none.
+
+## Review round (2026-11-27, Engineer)
+1. Overlong product ids: the id pattern is `^(0|[1-9]\d{0,17})$`, so `99999999999999999999` is `404 unknown_product`, not a 500. Test `T-0051-AC4 an overlong or zero-padded product id...`; mutation R1.
+2. Leading zeros (`0500060`, `00`) are `404 unknown_product`, echoed as sent. Same test; mutation R2.
+3. `mutations.sh` checks `Build did NOT complete` first and counts a test failure only on `FAILED in`. Re-run: **100/100 killed**, 0 survived, 0 broken (95 plus R1 to R5).
+4. The category base uses `seriesIdBase`, now exported from `mc_fixtures_comics` (one line in its barrel). Test `T-0051-AC2 a product category follows the comics series id base`; mutation R4.
+5. `SectionFailingCommerceDomain` throws an `ArgumentError` listing the valid sections (its constructor is no longer `const`). Test `T-0051-AC2 an unknown section...`; mutation R5.
+6. `DELETE .../promo?code=` with a blank value is `400 invalid_parameter` (documented). Test `T-0051-AC4 DELETE promo with a blank code...`; mutation R3.
+Gates re-run after merging `origin/main` (already up to date): all PASS, `test //...` 150/150, coverage 98.7 %.

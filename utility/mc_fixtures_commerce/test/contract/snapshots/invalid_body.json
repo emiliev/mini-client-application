@@ -1,0 +1,14 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_body",
+      "message": "Expected a JSON object",
+      "parameter": "body"
+    }
+  },
+  "request": "PUT /v1/me/cart/items/500120 as u-100",
+  "requestBody": [
+    1
+  ],
+  "status": 400
+}

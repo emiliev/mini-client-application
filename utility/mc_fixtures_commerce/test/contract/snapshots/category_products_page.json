@@ -1,0 +1,87 @@
+{
+  "body": {
+    "count": 5,
+    "limit": 10,
+    "offset": 55,
+    "results": [
+      {
+        "categoryId": "cosmic",
+        "cover": {
+          "path": "mock-asset://characters/015",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500281,
+        "issueNumber": 2,
+        "priceCents": 755,
+        "seriesId": 400014,
+        "stock": 4,
+        "title": "Sparrow Station #2"
+      },
+      {
+        "categoryId": "cosmic",
+        "cover": {
+          "path": "mock-asset://characters/021",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500282,
+        "issueNumber": 3,
+        "priceCents": 568,
+        "seriesId": 400014,
+        "stock": 24,
+        "title": "Sparrow Station #3"
+      },
+      {
+        "categoryId": "cosmic",
+        "cover": {
+          "path": "mock-asset://characters/011",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500760,
+        "issueNumber": 1,
+        "priceCents": 573,
+        "seriesId": 400038,
+        "stock": 32,
+        "title": "Sparrow Vanguard #1"
+      },
+      {
+        "categoryId": "cosmic",
+        "cover": {
+          "path": "mock-asset://characters/017",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500761,
+        "issueNumber": 2,
+        "priceCents": 787,
+        "seriesId": 400038,
+        "stock": 11,
+        "title": "Sparrow Vanguard #2"
+      },
+      {
+        "categoryId": "cosmic",
+        "cover": {
+          "path": "mock-asset://characters/004",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500762,
+        "issueNumber": 3,
+        "priceCents": 1438,
+        "seriesId": 400038,
+        "stock": 25,
+        "title": "Sparrow Vanguard #3"
+      }
+    ],
+    "total": 60
+  },
+  "request": "GET /v1/store/categories/cosmic/products?offset=55&limit=10 as u-100",
+  "status": 200
+}
