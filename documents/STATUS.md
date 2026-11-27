@@ -9,6 +9,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
+| **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
 | **Active crew** | T-0063 (Opus), T-0064 (Opus) |
 
