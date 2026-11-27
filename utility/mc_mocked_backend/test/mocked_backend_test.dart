@@ -332,6 +332,27 @@ void main() {
     );
   });
 
+  group('T-0061-AC4 scenario selection hook', () {
+    test('T-0061-AC4: onSelect runs on each selection, not on null', () {
+      final seen = <Object?>[];
+      final backend = MockBackend(
+        domains: [
+          _SelectDomain(
+            MockScenario('s.once', onSelect: (store) => seen.add(store)),
+          ),
+        ],
+      );
+
+      backend
+        ..useScenario('s.once')
+        ..useScenario('s.once')
+        ..useScenario(null)
+        ..useScenario('s.once');
+
+      expect(seen, hasLength(3));
+    });
+  });
+
   group('T-0018-AC4 unknown routes', () {
     test(
       'T-0018-AC4: an unregistered route is 404 and names the path',
@@ -627,4 +648,19 @@ void main() {
       );
     },
   );
+}
+
+final class _SelectDomain implements MockDomain {
+  _SelectDomain(this.scenario);
+
+  final MockScenario scenario;
+
+  @override
+  String get name => 'select';
+
+  @override
+  void register(MockRouter router, MockDomainEnvironment environment) {}
+
+  @override
+  Map<String, MockScenario> get scenarios => {scenario.name: scenario};
 }

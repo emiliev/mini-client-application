@@ -1091,6 +1091,81 @@ void main() {
       },
     );
 
+    test('T-0061-AC4 selecting the conflict scenario again arms it again, with or without reset', () async {
+      final backend = _backend()..useScenario('identity.preferences_conflict');
+      final dio = _dio(backend);
+      final auth = await _signIn(dio);
+      const body = {'ifVersion': 0, 'density': 'compact'};
+
+      expect((await _patch(dio, body, auth)).statusCode, 409);
+      expect((await _patch(dio, body, auth)).statusCode, 200);
+
+      // Select none, then the scenario again: it fires again, once.
+      backend
+        ..useScenario(null)
+        ..useScenario('identity.preferences_conflict');
+      const next = {'ifVersion': 1, 'density': 'comfortable'};
+      expect((await _patch(dio, next, auth)).statusCode, 409);
+      expect((await _patch(dio, next, auth)).statusCode, 200);
+
+      // Selecting it twice in a row is one arming, not two.
+      backend
+        ..useScenario('identity.preferences_conflict')
+        ..useScenario('identity.preferences_conflict');
+      const last = {'ifVersion': 2, 'density': 'compact'};
+      expect((await _patch(dio, last, auth)).statusCode, 409);
+      expect((await _patch(dio, last, auth)).statusCode, 200);
+      expect(
+        (await _patch(dio, {
+          'ifVersion': 3,
+          'density': 'comfortable',
+        }, auth)).statusCode,
+        200,
+      );
+
+      // Re-selecting without any request in between keeps one arming.
+      backend.useScenario('identity.preferences_conflict');
+      expect((await _get(dio, auth)).statusCode, 200);
+      expect(
+        (await _patch(dio, {
+          'ifVersion': 4,
+          'density': 'compact',
+        }, auth)).statusCode,
+        409,
+      );
+    });
+
+    test(
+      'T-0061-AC4 the injected 409 and a real mismatch have different messages',
+      () async {
+        final backend = _backend()
+          ..useScenario('identity.preferences_conflict');
+        final dio = _dio(backend);
+        final auth = await _signIn(dio);
+
+        final injected = await _patch(dio, {
+          'ifVersion': 0,
+          'density': 'compact',
+        }, auth);
+        await _patch(dio, {'ifVersion': 0, 'density': 'compact'}, auth);
+        final real = await _patch(dio, {
+          'ifVersion': 0,
+          'density': 'comfortable',
+        }, auth);
+
+        expect(
+          (injected.data!['error']! as Json)['message'],
+          'Injected version conflict (scenario identity.preferences_conflict)',
+        );
+        expect(
+          (real.data!['error']! as Json)['message'],
+          'The preferences are at version 1, not 0',
+        );
+        expect(injected.statusCode, 409);
+        expect(real.statusCode, 409);
+      },
+    );
+
     test('T-0061-AC4 the conflict is not consumed by another user and answers for the caller', () async {
       final backend = _backend()..useScenario('identity.preferences_conflict');
       final dio = _dio(backend);

@@ -13,23 +13,25 @@ cd "$(git rev-parse --show-toplevel)" || exit 2
 : "${MC_TASK:?set MC_TASK, e.g. T-0061}"
 : "${MC_ROLE:?set MC_ROLE, e.g. engineer}"
 P=utility/mc_fixtures_identity
-if [[ -n "$(git status --porcelain "$P")" ]]; then
-  echo "refusing to run: $P has uncommitted changes" >&2
+P2=utility/mc_mocked_backend # the engine hook (review round)
+if [[ -n "$(git status --porcelain "$P" "$P2")" ]]; then
+  echo "refusing to run: $P or $P2 has uncommitted changes" >&2
   exit 2
 fi
 OB="/tmp/mc-ob-$MC_TASK-$MC_ROLE"
 PH=$P/lib/src/handlers/preferences_handlers.dart
 DOM=$P/lib/src/domain.dart
 US=$P/lib/src/data/users.dart
+ENG=$P2/lib/src/backend.dart
 LOG="$(mktemp -t "mc-$MC_TASK-$MC_ROLE-mut.XXXXXX")"
 # The restore trap is set before the first edit.
-trap 'git checkout -- "$P"; rm -f "$LOG"' EXIT
+trap 'git checkout -- "$P" "$P2"; rm -f "$LOG"' EXIT
 killed=0
 survived=0
 broken=0
 
 run_tests() {
-  tool/bazelw --output_base="$OB" test //$P/... > "$LOG" 2>&1
+  tool/bazelw --output_base="$OB" test //$P/... //$P2/... > "$LOG" 2>&1
 }
 
 # mutate <name> <file> <old> <new>
@@ -44,7 +46,7 @@ if s.count(old) < 1:
     sys.exit("pattern not found: " + old)
 open(p, "w").write(s.replace(old, new, 1))
 ' "$file" "$old" "$new"; then
-    echo "    PATTERN NOT FOUND"; broken=$((broken + 1)); git checkout -- "$P"; return
+    echo "    PATTERN NOT FOUND"; broken=$((broken + 1)); git checkout -- "$P" "$P2"; return
   fi
   # The build checks formatting, so a mutation is formatted like the source.
   fvm dart format "$file" > /dev/null 2>&1
@@ -61,7 +63,7 @@ open(p, "w").write(s.replace(old, new, 1))
   else
     echo "    SURVIVED"; survived=$((survived + 1))
   fi
-  git checkout -- "$P"
+  git checkout -- "$P" "$P2"
 }
 
 # Baseline: the unmutated tree must pass.
@@ -216,6 +218,15 @@ mutate "S8 the conflict writes before it answers" $PH "        context.store[_co
 mutate "S9 the conflict scenario overrides the wrong route" $DOM "'PATCH /v1/me/preferences': patchPreferences(conflictOnce: true)," "'PATCH /v1/me/preference': patchPreferences(conflictOnce: true),"
 mutate "S10 the conflict is never marked fired" $PH "        context.store[_conflictFiredKey] = true;
         return conflict();" "        return conflict();"
+# --- review round: re-arming on selection ------------------------------------
+mutate "R1 the conflict scenario is not wired to the hook" $DOM "onSelect: armPreferencesConflict," ""
+mutate "R2 the engine never calls onSelect" $ENG "_scenario?.onSelect?.call(_store);" "_scenario?.onSelect;"
+mutate "R3 arming clears the wrong key" $PH "store.remove(_conflictFiredKey);" "store.remove('identity.preferencesConflict');"
+mutate "R4 arming sets the marker instead of clearing it" $PH "store.remove(_conflictFiredKey);" "store[_conflictFiredKey] = true;"
+mutate "R5 the injected 409 reads like a real mismatch" $PH "'Injected version conflict (scenario identity.preferences_conflict)'," "'The preferences are at version \${preferences.version}, not \${body['ifVersion']}',"
+mutate "R6 the engine runs onSelect before the scenario is chosen" $ENG "    _scenario = name == null ? null : _scenarios[name];
+    _scenario?.onSelect?.call(_store);" "    _scenario?.onSelect?.call(_store);
+    _scenario = name == null ? null : _scenarios[name];"
 
 echo
 echo "killed=$killed survived=$survived broken=$broken"

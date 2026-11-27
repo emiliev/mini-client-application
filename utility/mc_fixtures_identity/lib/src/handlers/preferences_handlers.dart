@@ -15,6 +15,11 @@ String _key(String userId) => 'identity.preferences.$userId';
 
 const String _conflictFiredKey = 'identity.preferencesConflictFired';
 
+/// Arms `identity.preferences_conflict`: each selection of the scenario
+/// clears its fired marker.
+void armPreferencesConflict(Map<String, Object?> store) =>
+    store.remove(_conflictFiredKey);
+
 /// What the store keeps for one user. A user who never saved has none: the
 /// defaults (and the seeded `themeMode`) are built on first use.
 final class _Preferences {
@@ -137,7 +142,12 @@ MockHandler patchPreferences({bool conflictOnce = false}) =>
       );
       if (conflictOnce && context.store[_conflictFiredKey] != true) {
         context.store[_conflictFiredKey] = true;
-        return conflict();
+        return MockResponse.error(
+          409,
+          'version_conflict',
+          'Injected version conflict (scenario identity.preferences_conflict)',
+          extra: {'current': preferences.toJson(context.clock)},
+        );
       }
       if (body['ifVersion'] != preferences.version) {
         return conflict();

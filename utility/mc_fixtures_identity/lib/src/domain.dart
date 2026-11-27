@@ -94,6 +94,7 @@ final class IdentityMockDomain implements MockDomain {
           ),
           'identity.preferences_conflict': MockScenario(
             'identity.preferences_conflict',
+            onSelect: armPreferencesConflict,
             overrides: {
               'PATCH /v1/me/preferences': patchPreferences(conflictOnce: true),
             },
