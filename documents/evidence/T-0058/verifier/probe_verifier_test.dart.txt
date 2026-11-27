@@ -1,0 +1,423 @@
+// T-0058 Verifier probe (own tests, T-0058-AC2/AC3 + review items 1 and 2).
+import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_overlays/mc_ds_overlays.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+
+Widget app(
+  Widget home, {
+  McThemeVariant v = McThemeVariant.light,
+  double scale = 1,
+}) => MaterialApp(
+  theme: McTheme.of(v).copyWith(platform: TargetPlatform.iOS),
+  builder: (c, child) => MediaQuery(
+    data: MediaQuery.of(c).copyWith(textScaler: TextScaler.linear(scale)),
+    child: child!,
+  ),
+  home: home,
+);
+
+class Host extends StatelessWidget {
+  const Host({required this.onTap, super.key});
+  final void Function(BuildContext) onTap;
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(
+      child: Builder(
+        builder: (c) => ElevatedButton(
+          key: const Key('open'),
+          onPressed: () => onTap(c),
+          child: const Text('open'),
+        ),
+      ),
+    ),
+  );
+}
+
+void main() {
+  group('T-0058-AC2 probe confirm', () {
+    Future<void> run(
+      WidgetTester t,
+      Future<void> Function() act,
+      bool expected,
+    ) async {
+      bool? got;
+      await t.pumpWidget(
+        app(
+          Host(
+            onTap: (c) async {
+              got = await showMcConfirm(
+                c,
+                title: 'Delete',
+                message: 'Sure?',
+                confirmLabel: 'Yes',
+                cancelLabel: 'No',
+              );
+            },
+          ),
+        ),
+      );
+      await t.tap(find.byKey(const Key('open')));
+      await t.pumpAndSettle();
+      expect(find.text('Sure?'), findsOneWidget);
+      await act();
+      await t.pumpAndSettle();
+      expect(got, expected);
+      expect(find.text('Sure?'), findsNothing);
+    }
+
+    testWidgets('confirm true', (t) => run(t, () => t.tap(find.text('Yes')), true));
+    testWidgets('cancel false', (t) => run(t, () => t.tap(find.text('No')), false));
+    testWidgets('barrier false', (t) => run(t, () => t.tapAt(const Offset(5, 5)), false));
+    testWidgets(
+      'back false',
+      (t) => run(t, () async {
+        await t.binding.handlePopRoute();
+      }, false),
+    );
+  });
+
+  group('T-0058-AC2 probe choice sheet', () {
+    Future<void> run(
+      WidgetTester t,
+      Future<void> Function() act,
+      String? expected,
+    ) async {
+      String? got = 'unset';
+      await t.pumpWidget(
+        app(
+          Host(
+            onTap: (c) async {
+              got = await showMcChoiceSheet<String>(
+                c,
+                title: 'Theme',
+                dismissLabel: 'Close',
+                selected: 'b',
+                options: const [
+                  McChoiceOption(value: 'a', label: 'Alpha'),
+                  McChoiceOption(value: 'b', label: 'Beta'),
+                ],
+              );
+            },
+          ),
+        ),
+      );
+      await t.tap(find.byKey(const Key('open')));
+      await t.pumpAndSettle();
+      expect(find.byIcon(Icons.check), findsOneWidget);
+      await act();
+      await t.pumpAndSettle();
+      expect(got, expected);
+    }
+
+    testWidgets('value', (t) => run(t, () => t.tap(find.text('Alpha')), 'a'));
+    testWidgets(
+      'swipe null',
+      (t) => run(t, () => t.drag(find.text('Theme'), const Offset(0, 600)), null),
+    );
+    testWidgets('barrier null', (t) => run(t, () => t.tapAt(const Offset(200, 10)), null));
+    testWidgets(
+      'back null',
+      (t) => run(t, () async {
+        await t.binding.handlePopRoute();
+      }, null),
+    );
+  });
+
+  testWidgets('T-0058-AC2 probe disabled menu item', (t) async {
+    final picks = <int>[];
+    await t.pumpWidget(
+      app(
+        Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: McMenuButton<int>(
+              semanticLabel: 'More',
+              onSelected: picks.add,
+              items: const [
+                McMenuItem(value: 1, label: 'One'),
+                McMenuItem(value: 2, label: 'Two', enabled: false),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.byType(McMenuButton<int>));
+    await t.pumpAndSettle();
+    await t.tap(find.text('Two'));
+    await t.pumpAndSettle();
+    expect(picks, isEmpty);
+    expect(find.text('One'), findsOneWidget);
+    await t.tap(find.text('One'));
+    await t.pumpAndSettle();
+    expect(picks, [1]);
+  });
+
+  testWidgets('T-0058-AC2 probe toast replace and single action', (t) async {
+    var fired = 0;
+    await t.pumpWidget(app(Host(onTap: (c) {})));
+    final ctx = t.element(find.byKey(const Key('open')));
+    showMcToast(ctx, 'First', action: McToastAction(label: 'Undo', onPressed: () => fired++));
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 400));
+    expect(find.text('First'), findsOneWidget);
+    showMcToast(ctx, 'Second');
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 400));
+    expect(find.text('First'), findsNothing);
+    expect(find.text('Second'), findsOneWidget);
+    showMcToast(ctx, 'Third', action: McToastAction(label: 'Undo', onPressed: () => fired++));
+    await t.pump();
+    await t.pump(const Duration(milliseconds: 400));
+    await t.tap(find.text('Undo'));
+    await t.tap(find.text('Undo'), warnIfMissed: false);
+    await t.pumpAndSettle();
+    expect(fired, 1);
+    expect(find.text('Third'), findsNothing);
+  });
+
+  testWidgets('T-0058-AC2 probe root vs nearest navigator', (t) async {
+    final nestedKey = GlobalKey<NavigatorState>();
+    await t.pumpWidget(
+      app(
+        Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: Navigator(
+                key: nestedKey,
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (_) => Host(
+                    onTap: (c) => showMcSheet<void>(
+                      c,
+                      builder: (_) => const McSheet(
+                        title: 'RootSheet',
+                        dismissLabel: 'x',
+                        child: Text('b'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.byKey(const Key('open')));
+    await t.pumpAndSettle();
+    expect(t.getRect(find.byType(McSheet)).width, 640);
+    expect(nestedKey.currentState!.canPop(), isFalse);
+    await t.binding.handlePopRoute();
+    await t.pumpAndSettle();
+    await t.pumpWidget(
+      app(
+        Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 300,
+              height: 300,
+              child: Navigator(
+                onGenerateRoute: (_) => MaterialPageRoute<void>(
+                  builder: (_) => Host(
+                    onTap: (c) => showMcSheet<void>(
+                      c,
+                      useRootNavigator: false,
+                      builder: (_) => const McSheet(
+                        title: 'NearSheet',
+                        dismissLabel: 'x',
+                        child: Text('b'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.byKey(const Key('open')));
+    await t.pumpAndSettle();
+    expect(t.getRect(find.byType(McSheet)).width, 300);
+  });
+
+  group('review 1 keyboard', () {
+    for (final scale in [1.0, 2.0, 3.0]) {
+      testWidgets('T-0058-AC1 probe keyboard x$scale', (t) async {
+        t.view.physicalSize = const Size(390 * 3, 844 * 3);
+        t.view.devicePixelRatio = 3;
+        t.view.viewInsets = const FakeViewPadding(bottom: 300 * 3);
+        addTearDown(t.view.reset);
+        var saved = 0;
+        await t.pumpWidget(
+          app(
+            Host(
+              onTap: (c) => showMcSheet<void>(
+                c,
+                builder: (_) => McSheet(
+                  title: 'Edit',
+                  dismissLabel: 'Close',
+                  child: Column(
+                    children: [
+                      const TextField(key: Key('f')),
+                      ElevatedButton(
+                        key: const Key('save'),
+                        onPressed: () => saved++,
+                        child: const Text('Save'),
+                      ),
+                      OutlinedButton(onPressed: () {}, child: const Text('Cancel')),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            scale: scale,
+          ),
+        );
+        await t.tap(find.byKey(const Key('open')));
+        await t.pumpAndSettle();
+        expect(t.takeException(), isNull);
+        const kbTop = 844 - 300.0;
+        if (scale == 1) {
+          expect(t.getRect(find.byKey(const Key('f'))).bottom, lessThanOrEqualTo(kbTop));
+          expect(t.getRect(find.byKey(const Key('save'))).bottom, lessThanOrEqualTo(kbTop));
+          await t.tap(find.byKey(const Key('save')));
+          expect(saved, 1);
+          await t.enterText(find.byKey(const Key('f')), 'hello');
+          expect(find.text('hello'), findsOneWidget);
+        } else {
+          await t.scrollUntilVisible(
+            find.byKey(const Key('save')),
+            50,
+            scrollable: find
+                .descendant(of: find.byType(McSheet), matching: find.byType(Scrollable))
+                .first,
+          );
+          expect(t.getRect(find.byKey(const Key('save'))).bottom, lessThanOrEqualTo(kbTop));
+        }
+        expect(t.takeException(), isNull);
+      });
+    }
+  });
+
+  group('review 2 non-dismissible', () {
+    for (final cfg in [(false, true), (true, false)]) {
+      testWidgets('T-0058-AC2 probe handle dismissible=${cfg.$1} drag=${cfg.$2}', (t) async {
+        final h = t.ensureSemantics();
+        await t.pumpWidget(
+          app(
+            Host(
+              onTap: (c) => showMcSheet<void>(
+                c,
+                isDismissible: cfg.$1,
+                enableDrag: cfg.$2,
+                builder: (_) => const McSheet(
+                  title: 'S',
+                  dismissLabel: 'DismissIt',
+                  child: Text('body'),
+                ),
+              ),
+            ),
+          ),
+        );
+        await t.tap(find.byKey(const Key('open')));
+        await t.pumpAndSettle();
+        final top = t.getRect(find.byType(McSheet)).top;
+        await t.tapAt(Offset(400, top + 22));
+        await t.pumpAndSettle();
+        expect(find.text('body'), findsOneWidget);
+        expect(find.bySemanticsLabel('DismissIt'), findsNothing);
+        h.dispose();
+      });
+    }
+    testWidgets('T-0058-AC2 probe dismissible handle works and semantic tap', (t) async {
+      final h = t.ensureSemantics();
+      await t.pumpWidget(
+        app(
+          Host(
+            onTap: (c) => showMcSheet<void>(
+              c,
+              builder: (_) => const McSheet(
+                title: 'S',
+                dismissLabel: 'DismissIt',
+                child: Text('body'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await t.tap(find.byKey(const Key('open')));
+      await t.pumpAndSettle();
+      expect(find.bySemanticsLabel('DismissIt'), findsOneWidget);
+      t.semantics.tap(find.semantics.byLabel('DismissIt'));
+      await t.pumpAndSettle();
+      expect(find.text('body'), findsNothing);
+      h.dispose();
+    });
+  });
+
+  group('AC3 probe semantics', () {
+    testWidgets('title once, route name, toast live region, 44pt, guidelines', (t) async {
+      final h = t.ensureSemantics();
+      for (final v in McThemeVariant.values) {
+        await t.pumpWidget(
+          app(
+            Host(
+              onTap: (c) => showMcConfirm(
+                c,
+                title: 'UniqueTitle',
+                message: 'Msg',
+                confirmLabel: 'Yes',
+                cancelLabel: 'No',
+              ),
+            ),
+            v: v,
+          ),
+        );
+        await t.tap(find.byKey(const Key('open')));
+        await t.pumpAndSettle();
+        expect(find.bySemanticsLabel('UniqueTitle'), findsOneWidget);
+        final n = t.getSemantics(find.text('UniqueTitle'));
+        expect(n.getSemanticsData().flagsCollection.namesRoute, isTrue);
+        await expectLater(t, meetsGuideline(androidTapTargetGuideline));
+        await expectLater(t, meetsGuideline(iOSTapTargetGuideline));
+        await expectLater(t, meetsGuideline(labeledTapTargetGuideline));
+        await expectLater(t, meetsGuideline(textContrastGuideline));
+        for (final f in [find.byKey(mcConfirmButtonKey), find.byKey(mcCancelButtonKey)]) {
+          final s = t.getSize(f);
+          expect(s.height, greaterThanOrEqualTo(44));
+          expect(s.width, greaterThanOrEqualTo(44));
+        }
+        await t.binding.handlePopRoute();
+        await t.pumpAndSettle();
+      }
+      await t.pumpWidget(app(Host(onTap: (c) {})));
+      showMcToast(
+        t.element(find.byKey(const Key('open'))),
+        'ToastMsg',
+        action: McToastAction(label: 'Undo', onPressed: () {}),
+      );
+      await t.pump();
+      await t.pump(const Duration(milliseconds: 400));
+      SemanticsNode? cur = t.getSemantics(find.text('ToastMsg'));
+      var live = false;
+      while (cur != null) {
+        if (cur.getSemanticsData().flagsCollection.isLiveRegion) live = true;
+        cur = cur.parent;
+      }
+      expect(live, isTrue);
+      expect(
+        t.getSize(find.widgetWithText(TextButton, 'Undo')).height,
+        greaterThanOrEqualTo(44),
+      );
+      h.dispose();
+    });
+  });
+}

@@ -3,8 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
+import 'package:mc_ds_overlays/mc_ds_overlays.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_session/mc_session.dart';
+
+/// The stand-in's English-only accessible name for dismissing the sheet.
+const _dismissLabel = 'Close';
 
 /// Keys of the sheet, for tests and the e2e journeys.
 const fixtureSignInSheetKey = Key('app.sign_in.sheet');
@@ -55,9 +59,9 @@ Future<bool> showFixtureSignInSheet(
   required String reason,
 }) async {
   final attempt = FixtureSignInAttempt();
-  final answer = await showModalBottomSheet<bool>(
-    context: context,
-    useRootNavigator: true,
+  final answer = await showMcSheet<bool>(
+    context,
+    dismissLabel: _dismissLabel,
     builder: (_) =>
         FixtureSignInSheet(auth: auth, attempt: attempt, reason: reason),
   );
@@ -136,49 +140,46 @@ class _FixtureSignInSheetState extends State<FixtureSignInSheet> {
         key: fixtureSignInDragGuardKey,
         behavior: HitTestBehavior.opaque,
         onVerticalDragStart: _busy ? (_) {} : null,
-        child: SafeArea(
+        child: McSheet(
           key: fixtureSignInSheetKey,
-          child: Padding(
-            padding: McInsets.screen,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text('Sign in', style: text.titleLarge),
+          title: 'Sign in',
+          dismissLabel: _dismissLabel,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Sign in as ${user.displayName} (${user.email}) '
+                '${widget.reason}.',
+                style: text.bodyLarge,
+              ),
+              if (_failed) ...[
                 const McGap.sm(),
                 Text(
-                  'Sign in as ${user.displayName} (${user.email}) '
-                  '${widget.reason}.',
-                  style: text.bodyLarge,
-                ),
-                if (_failed) ...[
-                  const McGap.sm(),
-                  Text(
-                    'Signing in failed. Please try again.',
-                    style: text.bodyMedium?.copyWith(
-                      color: Theme.of(context).colorScheme.error,
-                    ),
+                  'Signing in failed. Please try again.',
+                  style: text.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.error,
                   ),
-                ],
-                const McGap.lg(),
-                McButton(
-                  key: fixtureSignInButtonKey,
-                  label: 'Sign in',
-                  expand: true,
-                  onPressed: _busy ? null : _signIn,
-                ),
-                const McGap.sm(),
-                McButton(
-                  key: fixtureSignInCancelKey,
-                  label: 'Not now',
-                  variant: McButtonVariant.tertiary,
-                  expand: true,
-                  onPressed: _busy
-                      ? null
-                      : () => Navigator.of(context).pop(false),
                 ),
               ],
-            ),
+              const McGap.lg(),
+              McButton(
+                key: fixtureSignInButtonKey,
+                label: 'Sign in',
+                expand: true,
+                onPressed: _busy ? null : _signIn,
+              ),
+              const McGap.sm(),
+              McButton(
+                key: fixtureSignInCancelKey,
+                label: 'Not now',
+                variant: McButtonVariant.tertiary,
+                expand: true,
+                onPressed: _busy
+                    ? null
+                    : () => Navigator.of(context).pop(false),
+              ),
+            ],
           ),
         ),
       ),

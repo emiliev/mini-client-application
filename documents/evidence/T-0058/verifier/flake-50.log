@@ -1,0 +1,5 @@
+//app/wiring/app_core:sign_in_sheet_test                                 PASSED in 6.7s
+//utility/mc_ds_overlays:golden_test                                     PASSED in 16.7s
+//utility/mc_ds_overlays:overlays_test                                   PASSED in 16.5s
+//utility/mc_test_steps:overlay_steps_test                               PASSED in 2.3s
+Executed 4 out of 4 tests: 4 tests pass.
