@@ -42,7 +42,11 @@ const Duration analyticsSessionTimeout = Duration(minutes: 30);
 /// coming back to the foreground after 30 minutes in the background. Each
 /// delivered entry carries its session's id and a `seq` counted in delivery
 /// order from 1.
-class Analytics {
+///
+/// **Blocs** track through the pure-Dart port [AnalyticsTracker]
+/// (`mc_monitoring`), which this class implements and the DI initializer
+/// registers: a bloc may not import this Flutter package (R15, T-0056).
+class Analytics implements AnalyticsTracker {
   Analytics({
     required List<AnalyticsSink> sinks,
     required Monitoring monitoring,
@@ -119,6 +123,12 @@ class Analytics {
     }
     _enqueueEvent(event.name, event.params);
   }
+
+  /// [track] for the bloc-facing port: the same validation, gate and
+  /// session as an [AnalyticsEvent] named [name] with [params].
+  @override
+  void trackEvent(String name, [Map<String, Object> params = const {}]) =>
+      track(AnalyticsEvent(name, params: params));
 
   /// Tracks that screen [name] (snake_case) is showing, as the kit's
   /// `mc_screen_view` with the param `screen_name`.

@@ -59,3 +59,17 @@ flutter_test(
     package_name = "mc_test_steps",
     deps = _DEPS + [":mc_test_steps"],
 )
+
+# T-0056-AC7: the flag step and its negative controls.
+flutter_test(
+    name = "flag_steps_test",
+    size = "small",
+    data = ["//utility/mc_ds_theme:fonts"],
+    language_version = _LANG,
+    main = "test/flag_steps_test.dart",
+    package_name = "mc_test_steps",
+    deps = _DEPS + [
+        ":mc_test_steps",
+        "//utility/mc_feature_flags",
+    ],
+)

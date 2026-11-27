@@ -129,6 +129,46 @@ void main() {
     expect(find.text('list page'), findsOneWidget);
   });
 
+  testWidgets('T-0056-AC7 observers watch the flow\'s own navigator, and '
+      'are read once', (tester) async {
+    final first = _TopRecorder();
+    final second = _TopRecorder();
+    late FeatureFlowController<_Selection> controller;
+    Widget flow(_TopRecorder observer) => FeatureFlow<_Selection>(
+      state: const _Selection(),
+      observers: [observer],
+      onGeneratePages: (s) => [
+        McFlowPage(
+          name: 'list',
+          child: _Probe(onController: (c) => controller = c),
+        ),
+        if (s.selected != null)
+          McFlowPage(name: 'detail', child: Text('detail ${s.selected}')),
+      ],
+    );
+    await tester.pumpWidget(_app(flow(first)));
+    await tester.pumpAndSettle();
+    expect(first.tops, ['list']);
+    expect(first.navigator, isNotNull);
+    expect(
+      first.navigator,
+      isNot(same(tester.state<NavigatorState>(find.byType(Navigator).first))),
+      reason: 'the flow\'s own navigator, not the app\'s',
+    );
+
+    controller.update((s) => const _Selection('x'));
+    await tester.pumpAndSettle();
+    expect(first.tops, ['list', 'detail']);
+
+    // A rebuild with another observer keeps the first one.
+    await tester.pumpWidget(_app(flow(second)));
+    controller.update((s) => const _Selection());
+    await tester.pumpAndSettle();
+    expect(first.tops, ['list', 'detail', 'list']);
+    expect(second.tops, isEmpty);
+    expect(second.navigator, isNull);
+  });
+
   testWidgets('T-0022-AC3 complete(r) calls onComplete once with r', (
     tester,
   ) async {
@@ -405,6 +445,18 @@ void main() {
       ),
     );
   });
+}
+
+/// Records the names of the pages that become the top of the navigator it
+/// observes.
+class _TopRecorder extends NavigatorObserver {
+  final List<String?> tops = [];
+
+  @override
+  void didChangeTop(
+    Route<dynamic> topRoute,
+    Route<dynamic>? previousTopRoute,
+  ) => tops.add(topRoute.settings.name);
 }
 
 class _Missing {}

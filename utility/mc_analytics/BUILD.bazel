@@ -47,6 +47,7 @@ _TEST_DEPS = _DEPS + [
     "sessions_sinks_test",
     "di_test",
     "route_observer_test",
+    "flow_observer_test",
 ]]
 
 # T-0053-AC3 and P-004: lib imports no network client and no third-party SDK.

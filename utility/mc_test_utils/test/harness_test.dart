@@ -217,6 +217,65 @@ void main() {
     expect(find.text('loading'), findsNothing);
   });
 
+  mcTestWidgets('T-0056-AC6 holdNext holds only the next request: a later '
+      'one is answered at once, and the held one after release', (
+    tester,
+  ) async {
+    final backend = McTestSession.current.backend
+      ..useFixtureSet(thingsSet)
+      ..holdNext('GET /v1/things');
+    await McTestContainer.initialize(McTestSession.current);
+    final dio = McTestContainer.dio;
+    final order = <String>[];
+    final first = dio
+        .get<Object?>('/v1/things')
+        .then((_) => order.add('first'));
+    await tester.pump(const Duration(milliseconds: 10));
+    final second = dio
+        .get<Object?>('/v1/things')
+        .then((_) => order.add('second'));
+    await tester.pump(const Duration(milliseconds: 10));
+
+    expect(backend.requests, hasLength(2));
+    expect(order, ['second'], reason: 'the newer request was not held');
+    expect(backend.hasHolds, isTrue);
+
+    await backend.release('GET /v1/things');
+    await tester.pump(const Duration(milliseconds: 10));
+    await Future.wait([first, second]);
+    expect(order, ['second', 'first']);
+    expect(backend.hasHolds, isFalse);
+
+    // A plain hold keeps holding every matching request.
+    backend.hold('GET /v1/things');
+    final third = dio.get<Object?>('/v1/things').then((_) => order.add('3'));
+    final fourth = dio.get<Object?>('/v1/things').then((_) => order.add('4'));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(order, ['second', 'first']);
+    await backend.release('GET /v1/things');
+    await tester.pump(const Duration(milliseconds: 10));
+    await Future.wait([third, fourth]);
+    expect(order, ['second', 'first', '3', '4']);
+  });
+
+  mcTestWidgets('T-0056-AC6 an unreleased holdNext fails the test too', (
+    tester,
+  ) async {
+    final session = McTestSession.current;
+    session.backend.holdNext('GET /v1/things');
+    await expectLater(
+      session.guard(() async {}),
+      throwsA(
+        isA<TestFailure>().having(
+          (f) => f.message,
+          'message',
+          contains('Held request never released: GET /v1/things'),
+        ),
+      ),
+    );
+    session.backend.clearHolds();
+  });
+
   mcTestWidgets('an unreleased hold fails the test', (tester) async {
     final session = McTestSession.current;
     session.backend.hold('GET /v1/things?x=1');

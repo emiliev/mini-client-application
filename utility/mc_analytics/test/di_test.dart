@@ -93,6 +93,44 @@ void main() {
     },
   );
 
+  test(
+    'T-0056-AC7 the blocs\' AnalyticsTracker is the same Analytics, behind '
+    'the same gate and validation',
+    () async {
+      final sink = InMemoryAnalyticsSink();
+      final getIt = await boot(consent: 'granted', sinks: [sink]);
+
+      final tracker = getIt<AnalyticsTracker>();
+      expect(tracker, same(getIt<Analytics>()));
+      tracker.trackEvent('store_section_viewed', {'section': 'deals'});
+      tracker.trackEvent('no_params');
+      await settle();
+
+      final events = sink.events.where((e) => e.name != sessionStartEventName);
+      expect(events.map((e) => e.name), ['store_section_viewed', 'no_params']);
+      expect(events.first.params, {'section': 'deals'});
+      expect(events.last.params, isEmpty);
+      // Validation applies: a bad name is a debug AssertionError.
+      expect(
+        () => tracker.trackEvent('Not Snake'),
+        throwsA(isA<AssertionError>()),
+      );
+      await getIt.reset();
+    },
+  );
+
+  test('T-0056-AC7 the tracker delivers nothing without consent', () async {
+    final sink = InMemoryAnalyticsSink();
+    final getIt = await boot(sinks: [sink]);
+
+    getIt<AnalyticsTracker>().trackEvent('store_section_viewed');
+    await settle();
+
+    expect(sink.events, isEmpty);
+    expect(getIt<Analytics>().bufferedCount, greaterThan(0));
+    await getIt.reset();
+  });
+
   test('T-0053-AC1 an unrecognised config value does not grant', () async {
     final getIt = await boot(consent: 'yes');
 

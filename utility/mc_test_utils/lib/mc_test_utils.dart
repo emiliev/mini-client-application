@@ -8,3 +8,4 @@ export 'package:mc_test_utils/src/init_flow.dart';
 export 'package:mc_test_utils/src/mocks.dart';
 export 'package:mc_test_utils/src/session.dart';
 export 'package:mc_test_utils/src/test_container.dart';
+export 'package:mc_test_utils/src/test_flags.dart';
