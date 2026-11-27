@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `a16a332`; Verifier PASS `26d3164`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (fixtures; ADR-0011) |
 | Branch | `fleet/T-0061-fixtures-identity-preferences` |
@@ -85,3 +85,10 @@ Decisions: `updatedAt` = clock + version seconds per user (not a global tick); s
 - **`updatedAt`:** accepted by the TL (see the Log line above).
 - Scope note: this touches `utility/mc_mocked_backend` (7 lines in `backend.dart` plus one new test group). No existing test was edited.
 - `origin/main` had no commits after the branch point (`c2c840b` already includes T-0060), so the merge was a no-op.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 1 important bug (re-selecting the conflict scenario without `reset()` didn't re-arm it) and 2 nits.
+  - The TL approved per-user `updatedAt`.
+  - Review round `7a36048`: 76/76 mutations, plus a 7-line `MockScenario.onSelect` hook in `mc_mocked_backend`.
+  - A single Sonnet Verifier pass gave PASS `26d3164` (about 84k tokens): its own two-user probe, 14 check-order pairs, 18/18 mutations, no defects.
+  - The TL merged `--no-ff`. On the merge result, `check` passed, 191/191 tests passed, lint was clean and `mc_arch_check` reported OK.
