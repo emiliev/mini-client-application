@@ -13,6 +13,7 @@ import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_prelude/mc_prelude.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
+import 'package:test/test.dart' show TestFailure;
 
 enum Layout { grid, list, compact }
 
@@ -158,7 +159,13 @@ final class GateAdapter implements HttpClientAdapter {
     }
     final completer = Completer<void>();
     _waiters.add((count, completer));
-    return completer.future;
+    // Only a failing test waits this long: the request never arrived.
+    return completer.future.timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => throw TestFailure(
+        'expected $count held request(s), saw ${held.length}',
+      ),
+    );
   }
 
   @override

@@ -28,6 +28,7 @@ dependencies:
   mc_ds_media: any
   mc_ds_theme: any
   mc_event_bus: any
+  mc_feature_flags: any
   mc_formatters: any
   mc_fixtures_characters: any
   mc_fixtures_comics: any
@@ -35,6 +36,7 @@ dependencies:
   mc_fixtures_identity: any
   mc_fixtures_library: any
   mc_fixtures_media: any
+  mc_fixtures_platform: any
   mc_mocked_backend: any
   mc_monitoring: any
   mc_session: any

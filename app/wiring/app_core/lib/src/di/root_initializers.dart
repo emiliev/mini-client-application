@@ -7,6 +7,7 @@ import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_feature_flags/mc_feature_flags.dart';
 import 'package:mc_formatters/mc_formatters.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
@@ -22,8 +23,11 @@ import 'package:mc_storage/mc_storage.dart';
 /// before it (plan 01 lists the bus later; T-0039), and api auth goes on the
 /// shared Dio, so it comes right after the API client. The formatters' locale
 /// data loads where plan 01 has `L10nCoreDIInitializer` (T-0041), last before
-/// the wirings. Not in the list yet, because their packages do not exist:
-/// analytics, feature flags and l10n core.
+/// the wirings. The feature flags (T-0052) go right after api auth, as plan 01
+/// orders them: they fetch through the shared `Dio` with the bearer, and they
+/// register at once with saved or default values (the first fetch runs in the
+/// background, so boot never waits on the network). Not in the list yet,
+/// because their packages do not exist: analytics and l10n core.
 List<McDIInitializer> rootInitializers({
   required ConfigSource config,
   required Directory storageDirectory,
@@ -42,6 +46,7 @@ List<McDIInitializer> rootInitializers({
     MockedBackendDIInitializer(adapter: backendAdapter, domains: mockDomains),
     ApiClientDIInitializer(adapter: backendAdapter),
     const ApiAuthDIInitializer(),
+    const FeatureFlagsDIInitializer(),
     const FormattersDIInitializer(),
     if (routerRef != null) RouterDIInitializer(routerRef),
     ...wirings,

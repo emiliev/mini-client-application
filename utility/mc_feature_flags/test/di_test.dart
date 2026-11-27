@@ -63,7 +63,12 @@ void main() {
       'without waiting for the network (the response is held)', () async {
     final (getIt, dir, gate, session) = await _root(holding: true);
     dirs.add(dir);
-    await const FeatureFlagsDIInitializer().init(getIt);
+    // Completes although the response is held: boot does not wait for it.
+    await Future.value(const FeatureFlagsDIInitializer().init(getIt)).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () =>
+          throw TestFailure('the initializer waited for the network'),
+    );
 
     expect(getIt.isRegistered<FeatureFlags>(), isTrue);
     final flags = getIt<FeatureFlags>();

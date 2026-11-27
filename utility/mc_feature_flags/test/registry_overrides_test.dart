@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:mc_feature_flags/mc_feature_flags.dart';
+import 'package:mc_prelude/mc_prelude.dart';
+import 'package:mc_storage/mc_storage.dart';
 import 'package:test/test.dart';
 
 import 'rig.dart';
@@ -9,6 +11,12 @@ const FeatureFlag<bool> _twin = FeatureFlag<bool>(
   key: 'store.promo_banner',
   defaultValue: false,
   description: 'Same key, other flag.',
+  codec: BoolFlagCodec(),
+);
+const FeatureFlag<bool> _otherDefault = FeatureFlag<bool>(
+  key: 'store.promo_banner',
+  defaultValue: false,
+  description: 'Shows the promotion banner.',
   codec: BoolFlagCodec(),
 );
 const FeatureFlag<int> _otherType = FeatureFlag<int>(
@@ -23,6 +31,15 @@ const FeatureFlag<bool> _blank = FeatureFlag<bool>(
   description: 'No key.',
   codec: BoolFlagCodec(),
 );
+
+/// A store whose writes throw at once instead of returning a failed result.
+final class _ThrowingStore extends FileStore {
+  _ThrowingStore(super.directory);
+
+  @override
+  Future<Result<void, StorageFailure>> write(String key, Object? value) =>
+      throw StateError('disk on fire');
+}
 
 void main() {
   final rigs = <Rig>[];
@@ -155,6 +172,13 @@ void main() {
       expect(promoBanner, promoBanner);
       expect(_twin == promoBanner, isFalse);
       expect(_otherType == promoBanner, isFalse);
+      expect(_otherDefault == promoBanner, isFalse, reason: 'default differs');
+      expect(
+        () => FeatureFlagRegistry()
+          ..registerFlag(promoBanner)
+          ..bindFlag(_otherDefault),
+        throwsA(isA<DuplicateFlagKeyError>()),
+      );
       expect(promoBanner.hashCode, isNot(_twin.hashCode));
       expect(promoBanner.toString(), 'FeatureFlag<bool>(store.promo_banner)');
       expect(
@@ -312,6 +336,65 @@ void main() {
         expect(next.flags.value(pageSize), 10, reason: '$junk');
         expect(next.flags.variant(storeHomeLayout), isNotEmpty);
       }
+    });
+  });
+
+  group('T-0052-AC3 odds and ends of the flags object', () {
+    test('T-0052-AC3 the default install id is 32 hex characters, made once '
+        'and saved', () async {
+      final rig = await make();
+      final flags = await FeatureFlags.open(
+        dio: rig.dio,
+        session: rig.session,
+        store: rig.tracking,
+        env: 'dev',
+      );
+      flags.variant(storeHomeLayout);
+      flags.variant(storeHomeLayout);
+      await rig.settle();
+      final saved = (await rig.store.read(flagsInstallIdKey)).getOrNull();
+      expect(saved, matches(RegExp(r'^[0-9a-f]{32}$')));
+      final again = await FeatureFlags.open(
+        dio: rig.dio,
+        session: rig.session,
+        store: rig.tracking,
+        env: 'dev',
+      );
+      expect(again.variant(storeHomeLayout), flags.variant(storeHomeLayout));
+      expect((await rig.store.read(flagsInstallIdKey)).getOrNull(), saved);
+      await flags.dispose();
+      await again.dispose();
+    });
+
+    test('T-0052-AC3 a fetch never throws, even when the store does', () async {
+      final rig = await make();
+      rig.stub.flags = {'catalogue.page_size': 20};
+      final flags = await FeatureFlags.open(
+        dio: rig.dio,
+        session: rig.session,
+        store: _ThrowingStore(rig.dir),
+        env: 'dev',
+        monitoring: rig.monitoring,
+      );
+      await expectLater(flags.refresh(), completes);
+      expect(flags.value(pageSize), 20, reason: 'applied before the save');
+      expect(rig.reports.any((m) => m.contains('disk on fire')), isTrue);
+      await flags.dispose();
+    });
+
+    test('T-0052-AC1 the duplicate error says which key', () {
+      final error = DuplicateFlagKeyError('a.b', 'flag');
+      expect(error.toString(), contains('flag key "a.b"'));
+      expect(
+        const Experiment(
+          key: 'e',
+          variants: [ExperimentVariant('a', 1)],
+        ).hashCode,
+        const Experiment(
+          key: 'e',
+          variants: [ExperimentVariant('a', 1)],
+        ).hashCode,
+      );
     });
   });
 }

@@ -212,10 +212,16 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
   }
 
   /// Stops listening and ignores any fetch still running.
-  Future<void> dispose() async {
+  ///
+  /// Neither the subscription's `cancel` nor the controller's `close` is
+  /// awaited: a cancelled subscription returns a future from the root zone,
+  /// which a caller under fake async (a widget test tearing down the root
+  /// container) would wait on forever.
+  Future<void> dispose() {
     _disposed = true;
-    await _authSubscription?.cancel();
-    await _changes.close();
+    unawaited(_authSubscription?.cancel());
+    unawaited(_changes.close());
+    return Future<void>.value();
   }
 
   // --- reading -----------------------------------------------------------

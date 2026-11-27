@@ -91,6 +91,9 @@ void main() {
       expect(find.text('home'), findsOneWidget);
       expect(find.byType(BootPage), findsNothing);
       expect(diContainer.isRegistered<AppConfig>(), isTrue);
+      // T-0052: the flags' first request (Dio starts it on a zero timer) ends
+      // with one more frame, so no timer is left pending.
+      await tester.pump();
     },
   );
 
@@ -174,6 +177,8 @@ void main() {
       expect(runs, 2);
       expect(find.text('home'), findsOneWidget);
       expect(diContainer.isRegistered<AppConfig>(), isTrue);
+      // T-0052: as above, the flags' first request needs one more frame.
+      await tester.pump();
     },
   );
 
@@ -301,7 +306,15 @@ void main() {
         ),
       ),
     );
-    expect(diContainer<MockBackend>().recentTraffic, hasLength(1));
+    // T-0052: the root list now also fetches the flags at boot (a 404 here,
+    // as this backend has no domains), so the log holds that request too;
+    // the probe request is still recorded exactly once.
+    expect(
+      diContainer<MockBackend>().recentTraffic.where(
+        (t) => t.path == '/v1/nothing',
+      ),
+      hasLength(1),
+    );
     expect(sink.entries, isNotEmpty, reason: 'the API client logs requests');
   });
 
