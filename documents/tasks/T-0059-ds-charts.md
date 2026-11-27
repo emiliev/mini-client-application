@@ -96,3 +96,21 @@ New package; nothing deleted, skipped or weakened; no `// ignore:`; no existing 
 ### Notes
 - `charts_test`, `painter_test` and `geometry_test` run under plain `fvm flutter test` (3 s); see F-0059 fact 5.
 - Follow-ups: restrict package visibility with the P3-06 package_group (as for every DS package); a `McBarChart` value-label option and tap-to-select if a brick needs them.
+
+## Review round
+`/code-review` found 4 important bugs and 4 nits. All fixed on the branch (merged `origin/main` first: docs only).
+
+| # | Finding | Fix | Tests (all in `utility/mc_ds_charts/test/`) |
+|---|---|---|---|
+| 1 | Release: dropping a NaN datum shifted `highlightIndex` and the default donut colours | Bar: the highlight is mapped across skipped values (null when the highlighted bar itself is skipped), and a changed highlight alone now updates the chart. Donut: roles are resolved on the original indices, then bad values are dropped | `charts_test`: "release: the highlight follows its bar past a skipped one", "a changed highlight alone updates the chart", "release: donut colours stay put past a skipped segment" |
+| 2 | More than 4 default donut roles repeated a colour on neighbours | Option chosen: both. `McChartRole.resolveAll` gives each default the least-used role that differs from **both ring neighbours** (first and last included), falling back to `positive` and `negative` after the four cycle roles. Debug: more than 4 segments without a role is an `ArgumentError`. Release: degrades through `resolveAll`. Documented on `McChartRole.resolveAll` and `McDonutChart` | "a donut of more than four default roles throws in debug", "release: default segments never repeat a neighbour, ring included" (5, 6, 9), role resolution tests for lengths 2 to 24, up to four defaults equal the cycle, named roles kept, default next to a named role, wrap-around |
+| 3 | No line at 0 when the line axis starts or ends at 0 | The zero line is drawn whenever `min <= 0 <= max`. The bar chart had no gap (its axis always includes 0 and it always draws the zero line); a test now pins that for all-positive, all-negative and all-zero data | `painter_test` "zero lines": 0..10, -10..0, constant zero, crossing zero, none when 0 is off the axis, and the bar cases |
+| 4 | `_hasData` read the untruncated series | Computed over the first three series | "release: only the fourth series has data, so it is empty" and "a fourth series is dropped, the first three stay" |
+| 5 | Turning Reduce Motion off replayed the draw-in; `CurvedAnimation` not disposed | Only the first build and a data change animate; switching the animation on later (Reduce Motion off, or `animate` flipped) shows the finished chart. The `CurvedAnimation` is disposed with its controller in both places | "Reduce Motion turned off does not replay" (bar and donut, new data still animates), "switching animate on later does not replay", "every CurvedAnimation is disposed with its controller" (counts `ObjectCreated` and `ObjectDisposed` events from `FlutterMemoryAllocations`) |
+| 6 | `McLineChart` docs | Rewritten: more values than labels is an `ArgumentError` in debug and ignored in release; more than 3 series likewise; no series is the empty view, not an error | n/a (docs) |
+| 7 | `mcFormatValue` printed `-0` | Normalised | `painter_test` "no negative zero in value text" (-0.0, -0.001, 0.001, -1.5, -2, 0.005) |
+| 8 | Radar semantics skipped axes | Every axis is read; a missing value reads as 0, as the painter draws it | `painter_test` "every axis is read, a missing value as 0 like the painter"; `charts_test` release case with 5 axes and 3 values |
+
+**Changed goldens (12 of 232), all from item 3:** `line_one_series` at 2x in the 4 themes (4 files), and `line_three_series` at 1x and 2x in the 4 themes (8 files). In these the y axis now starts at 0, so the zero line is drawn along the baseline (checked by eye: `line_three_series.light.x1`). No other golden changed.
+
+**Results at the review-round HEAD:** gates script PASS (report `ac5-gates.md`), mutations 101 of 101 killed (17 new mutants for items 1 to 5, 7 and 8; an extra survivor, "next neighbour ignored", led to a test and to resolving defaults against both ring neighbours), 50-run flake check 0 failures on all 4 targets (`flake-50.log`).
