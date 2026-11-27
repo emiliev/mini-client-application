@@ -24,6 +24,7 @@ class HomePlaceholderPage extends StatefulWidget {
     required this.onOpenCharacters,
     required this.onOpenSearch,
     required this.onOpenStore,
+    required this.onOpenSettings,
     required this.onNewReadingList,
     required this.onEditReadingList,
     super.key,
@@ -37,6 +38,9 @@ class HomePlaceholderPage extends StatefulWidget {
 
   /// Opens the store (T-0056).
   final VoidCallback onOpenStore;
+
+  /// Opens the appearance settings (T-0063).
+  final VoidCallback onOpenSettings;
 
   /// Opens the editor on a new list; completes with its id, or null.
   final Future<String?> Function() onNewReadingList;
@@ -137,6 +141,8 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
           McButton(label: 'Search', onPressed: widget.onOpenSearch),
           const McGap.md(),
           McButton(label: 'Store', onPressed: widget.onOpenStore),
+          const McGap.md(),
+          McButton(label: 'Settings', onPressed: widget.onOpenSettings),
           const McGap.md(),
           McButton(
             label: 'Open placeholder 7',

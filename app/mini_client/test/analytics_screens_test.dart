@@ -39,6 +39,8 @@ const _expectedRouteNames = {
   'store_home',
   'store_category',
   'store_cart',
+  // T-0063: the appearance settings.
+  'settings_appearance',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {

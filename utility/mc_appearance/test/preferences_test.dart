@@ -172,6 +172,8 @@ void main() {
       // In a fixed order, whatever the set's.
       'pending': ['themeMode', 'reduceMotion'],
       'pendingFor': 'u-101',
+      'seenVersion': null,
+      'seenFor': null,
     });
     final back = AppearanceRecord.fromJson(json)!;
     expect(back.preferences, dark);
@@ -185,6 +187,23 @@ void main() {
     })!;
     expect(lenient.pending, {AppearanceSetting.themeMode});
     expect(lenient.pendingFor, isNull);
+    final seen = AppearanceRecord.fromJson({
+      ...dark.toWire(),
+      'seenVersion': 4,
+      'seenFor': 'u-100',
+    })!;
+    expect((seen.seenVersion, seen.seenFor), (4, 'u-100'));
+    expect(seen.sameAs(seen), isTrue);
+    expect(seen.sameAs(record), isFalse);
+    for (final half in [
+      {'seenVersion': 4},
+      {'seenFor': 'u-100'},
+      {'seenVersion': '4', 'seenFor': 'u-100'},
+      {'seenVersion': 4, 'seenFor': ''},
+    ]) {
+      final r = AppearanceRecord.fromJson({...dark.toWire(), ...half})!;
+      expect((r.seenVersion, r.seenFor), (null, null), reason: '$half');
+    }
     expect(AppearanceRecord.fromJson(dark.toWire())!.pending, isEmpty);
     expect(AppearanceRecord.fromJson({'pending': <String>[]}), isNull);
     expect(AppearanceRecord.fromJson('dark'), isNull);

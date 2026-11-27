@@ -36,6 +36,8 @@ class HomeRoute extends GoRouteData with $HomeRoute {
       onOpenCharacters: () => unawaited(context.push(AppLocations.characters)),
       onOpenSearch: () => unawaited(context.push(AppLocations.search())),
       onOpenStore: () => unawaited(context.push(AppLocations.store)),
+      onOpenSettings: () =>
+          unawaited(context.push(AppLocations.settingsAppearance)),
       // Flows that end with a result (plan 01 §4.3): push and await.
       onNewReadingList: () => AppFlows.createReadingList(GoRouter.of(context)),
       onEditReadingList: (id) =>

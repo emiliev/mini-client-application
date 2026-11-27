@@ -5,25 +5,41 @@ import 'package:mc_storage/mc_storage.dart';
 /// The `FileStore` key the device's copy lives under.
 const String appearanceStoreKey = 'appearance';
 
-/// What the device keeps (ADR-0013): the preferences in use, and the
-/// settings changed here that the account has not confirmed yet, with the
-/// user they belong to (null: changed while signed out, so they go to
-/// whoever signs in next).
+/// What the device keeps (ADR-0013): the preferences in use; the settings
+/// changed here that the account has not confirmed yet, with the user they
+/// belong to (null: changed while signed out, so they go to whoever signs in
+/// next); and the account version this device last saw, with its user.
 ///
 /// ```json
 /// {"themeMode": "dark", "density": "comfortable", "reduceMotion": false,
-///  "pending": ["themeMode"], "pendingFor": "u-101"}
+///  "pending": ["themeMode"], "pendingFor": "u-101",
+///  "seenVersion": 3, "seenFor": "u-101"}
 /// ```
 final class AppearanceRecord {
   const AppearanceRecord({
     required this.preferences,
     this.pending = const {},
     this.pendingFor,
+    this.seenVersion,
+    this.seenFor,
   });
 
   final AppearancePreferences preferences;
   final Set<AppearanceSetting> pending;
   final String? pendingFor;
+
+  /// The account version this device last read or wrote for [seenFor].
+  final int? seenVersion;
+  final String? seenFor;
+
+  /// Whether [other] holds the same values.
+  bool sameAs(AppearanceRecord other) =>
+      other.preferences == preferences &&
+      other.pendingFor == pendingFor &&
+      other.pending.length == pending.length &&
+      other.pending.containsAll(pending) &&
+      other.seenVersion == seenVersion &&
+      other.seenFor == seenFor;
 
   Map<String, Object?> toJson() => {
     ...preferences.toWire(),
@@ -32,11 +48,14 @@ final class AppearanceRecord {
         if (pending.contains(setting)) setting.wireKey,
     ],
     'pendingFor': pendingFor,
+    'seenVersion': seenVersion,
+    'seenFor': seenFor,
   };
 
   /// The record in [json], or null when its preferences cannot be read.
-  /// Unknown pending keys are dropped, and a `pendingFor` that is not a
-  /// non-empty string counts as none.
+  /// Unknown pending keys are dropped, a `pendingFor` that is not a
+  /// non-empty string counts as none, and so does a seen version without
+  /// its user.
   static AppearanceRecord? fromJson(Object? json) {
     final preferences = AppearancePreferences.fromWire(json);
     if (preferences == null || json is! Map) {
@@ -44,6 +63,9 @@ final class AppearanceRecord {
     }
     final pending = json['pending'];
     final owner = json['pendingFor'];
+    final seenVersion = json['seenVersion'];
+    final seenFor = json['seenFor'];
+    final seen = seenVersion is int && seenFor is String && seenFor.isNotEmpty;
     return AppearanceRecord(
       preferences: preferences,
       pending: {
@@ -52,6 +74,8 @@ final class AppearanceRecord {
             if (AppearanceSetting.fromWireKey(key) case final setting?) setting,
       },
       pendingFor: owner is String && owner.isNotEmpty ? owner : null,
+      seenVersion: seen ? seenVersion : null,
+      seenFor: seen ? seenFor : null,
     );
   }
 }

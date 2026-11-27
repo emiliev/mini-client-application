@@ -45,12 +45,20 @@ void main() {
       },
     );
 
-    test('T-0063-AC1 u-100 sees the defaults and nothing is written', () async {
+    test('T-0063-AC1 u-100 sees the defaults, and only the version seen is '
+        'kept', () async {
       final rig = await make(signedInAs: reader);
       await rig.settle();
       expect(rig.shown, AppearancePreferences.defaults);
       expect(rig.status, AppearanceSyncStatus.synced);
-      expect(rig.saved, isNull, reason: 'nothing changed');
+      // Only what the device saw is kept: the account's version.
+      expect(rig.saved, {
+        ...AppearancePreferences.defaults.toWire(),
+        'pending': <String>[],
+        'pendingFor': null,
+        'seenVersion': 0,
+        'seenFor': reader,
+      });
     });
   });
 
@@ -374,6 +382,82 @@ void main() {
       await rig.settle();
       expect(rig.preferencesTraffic, ['GET', 'GET']);
       expect(rig.shown.density, AppearanceDensity.compact);
+    });
+  });
+
+  group('T-0063-AC6 a launch against an account that lost the device copy', () {
+    test('T-0063-AC6 the mocked backend forgets everything on a relaunch: '
+        'the device copy, newer than the account, is sent again and the '
+        'account holds it', () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      await rig.appearance.change(themeMode: AppearanceThemeMode.light);
+      expect((await rig.account(collector))['version'], 1);
+      expect((rig.saved! as Map)['seenVersion'], 1);
+      expect((rig.saved! as Map)['seenFor'], collector);
+
+      // A new process: a new session on the same directory, a fresh backend
+      // (u-101 is back at its dark seed, version 0).
+      await rig.quiesce();
+      final again = await Rig.create(
+        dir: rig.dir,
+        backend: MockBackend(domains: [const IdentityMockDomain()]),
+      );
+      rigs.add(again);
+      expect(again.shown.themeMode, AppearanceThemeMode.light);
+      await again.settle();
+      expect(again.shown.themeMode, AppearanceThemeMode.light);
+      expect(again.preferencesTraffic, ['GET', 'PATCH']);
+      expect((await again.account(collector))['themeMode'], 'light');
+      expect(again.status, AppearanceSyncStatus.synced);
+    });
+
+    test('T-0063-AC6 an account that moved on (another device) wins on the '
+        'next launch', () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      await rig.appearance.change(themeMode: AppearanceThemeMode.light);
+      await rig.otherDeviceWrites(collector, {'themeMode': 'system'});
+      final again = await rig.relaunch();
+      rigs.add(again);
+      await again.settle();
+      expect(again.shown.themeMode, AppearanceThemeMode.system);
+      expect(again.count('PATCH'), 0);
+    });
+
+    test("T-0063-AC6 the version seen for another user is not compared: "
+        "B's account wins over A's copy", () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      await rig.appearance.change(
+        themeMode: AppearanceThemeMode.light,
+        density: AppearanceDensity.compact,
+      );
+      await rig.signIn(reader);
+      await rig.settle();
+      expect(rig.shown, AppearancePreferences.defaults);
+      expect(rig.count('PATCH'), 1);
+      expect((rig.saved! as Map)['seenFor'], reader);
+      expect((rig.saved! as Map)['seenVersion'], 0);
+    });
+
+    test('T-0063-AC6 an account behind the device with the same values sends '
+        'nothing', () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      await rig.appearance.change(themeMode: AppearanceThemeMode.light);
+      await rig.appearance.change(themeMode: AppearanceThemeMode.dark);
+      expect((await rig.account(collector))['version'], 2);
+      await rig.quiesce();
+      final again = await Rig.create(
+        dir: rig.dir,
+        backend: MockBackend(domains: [const IdentityMockDomain()]),
+      );
+      rigs.add(again);
+      await again.settle();
+      expect(again.preferencesTraffic, ['GET']);
+      expect(again.shown.themeMode, AppearanceThemeMode.dark);
+      expect((again.saved! as Map)['seenVersion'], 0);
     });
   });
 }

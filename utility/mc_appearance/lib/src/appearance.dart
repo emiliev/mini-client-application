@@ -28,7 +28,11 @@ import 'package:mc_storage/mc_storage.dart';
 /// - pending settings of the user now signed in, or made while signed out,
 ///   go to this account;
 /// - pending settings of **another** user are dropped, so A's unsynced
-///   change never reaches B's account.
+///   change never reaches B's account;
+/// - an account that is at an **older version** than this device last saw
+///   it at (for the same user) has lost a write: the device's copy is the
+///   newest known and is sent again. An account at a newer version moved on
+///   (another device): it wins.
 ///
 /// Signing out keeps the shown values on the device (they are the device's
 /// now) and drops what was still pending: a session ending is not a change
@@ -66,6 +70,8 @@ final class Appearance implements AppearanceSettings {
       _preferences = restored.preferences;
       _pending.addAll(restored.pending);
       _pendingFor = restored.pendingFor;
+      _seenVersion = restored.seenVersion;
+      _seenFor = restored.seenFor;
       _saved = restored;
     }
     if (restoreFailure != null) {
@@ -116,6 +122,13 @@ final class Appearance implements AppearanceSettings {
   AppearancePreferences _preferences = AppearancePreferences.defaults;
   final Set<AppearanceSetting> _pending = {};
   String? _pendingFor;
+
+  /// The account version this device last saw, and whose account it was:
+  /// kept across launches, so a launch can tell an account that moved on
+  /// (another device wrote: it wins) from one that lost what this device saw
+  /// (it gets the device's copy again).
+  int? _seenVersion;
+  String? _seenFor;
   AppearanceRecord? _saved;
   StorageFailure? _saveFailure;
   AppearanceSyncStatus _status = AppearanceSyncStatus.local;
@@ -326,6 +339,17 @@ final class Appearance implements AppearanceSettings {
           _fail('read', read.fold((_) => '', (f) => f.message));
           return;
         }
+        final userId = _userId;
+        if (_seenFor == userId &&
+            _seenVersion != null &&
+            account.version < _seenVersion!) {
+          // The account is behind what this device saw it at: it lost a
+          // write (a restored or reset backend; the mocked one forgets
+          // everything when the app is killed). The device's copy is the
+          // newest known, so it is sent again, as a change not yet synced.
+          _pending.addAll(_preferences.differencesFrom(account.preferences));
+          _pendingFor = _pending.isEmpty ? null : userId;
+        }
         _takeAccount(account);
       }
       if (_pending.isEmpty) {
@@ -383,6 +407,8 @@ final class Appearance implements AppearanceSettings {
   /// The account holds [copy]: it wins, except for the pending settings.
   void _takeAccount(PreferencesCopy copy) {
     _account = copy;
+    _seenVersion = copy.version;
+    _seenFor = _userId;
     _preferences = copy.preferences.overlay(_preferences, _pending);
     _save();
     _publish();
@@ -404,6 +430,8 @@ final class Appearance implements AppearanceSettings {
       preferences: _preferences,
       pending: Set.of(_pending),
       pendingFor: _pendingFor,
+      seenVersion: _seenVersion,
+      seenFor: _seenFor,
     );
     // Nothing saved reads as the defaults with nothing pending.
     final saved =
@@ -411,11 +439,7 @@ final class Appearance implements AppearanceSettings {
         const AppearanceRecord(
           preferences: AppearancePreferences.defaults,
         );
-    if (_saveFailure == null &&
-        saved.preferences == record.preferences &&
-        saved.pendingFor == record.pendingFor &&
-        saved.pending.length == record.pending.length &&
-        saved.pending.containsAll(record.pending)) {
+    if (_saveFailure == null && saved.sameAs(record)) {
       return;
     }
     _store
