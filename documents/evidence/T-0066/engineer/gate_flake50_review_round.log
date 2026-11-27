@@ -1,0 +1,113 @@
+INFO: Invocation ID: b06f82e4-30a3-4070-8eff-e6d0f3a1e778
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 8 targets (0 packages loaded)
+Analyzing: 8 targets (0 packages loaded, 0 targets configured)
+Analyzing: 8 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 8 targets (0 packages loaded, 40 targets configured, 81 aspect applications).
+[3,077 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 14 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[3,085 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 3 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[3,085 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 3 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[3,093 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 17 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[3,101 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 25 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[3,101 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 25 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[3,109 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 33 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[3,117 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 41 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[3,117 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 41 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[3,137 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 49 of 50); 1s darwin-sandbox ... (14 actions, 9 running)
+[3,156 / 3,177] Testing //feature/auth/auth_signin:bloc_guards_test (run 49 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[82,242 / 82,295] 2 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_test (run 2 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[82,260 / 82,295] 2 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_test (run 26 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[83,038 / 83,253] 2 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_test (run 43 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[83,073 / 83,319] 2 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_test (run 19 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[83,093 / 83,319] 3 / 8 tests; Testing //utility/mc_api_auth:auth_api_test (run 25 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[83,114 / 83,319] 3 / 8 tests; Testing //utility/mc_api_auth:auth_api_test (run 46 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[83,119 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 1 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,119 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 1 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,127 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 9 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,127 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 9 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,135 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 17 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,135 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 17 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,143 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 25 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,143 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 25 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,151 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 33 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,151 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 33 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,159 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 41 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,159 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 41 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,167 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 49 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,167 / 83,319] 4 / 8 tests; Testing //app/mini_client:sign_in_guard_app_test (run 49 of 50); 6s darwin-sandbox ... (14 actions, 9 running)
+[83,175 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 7 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,175 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 7 of 50); 5s darwin-sandbox ... (14 actions, 9 running)
+[83,183 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 15 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,183 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 15 of 50); 5s darwin-sandbox ... (14 actions, 9 running)
+[83,191 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 23 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,191 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 23 of 50); 5s darwin-sandbox ... (14 actions, 9 running)
+[83,199 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 31 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,199 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 31 of 50); 5s darwin-sandbox ... (14 actions, 9 running)
+[83,207 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 39 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,207 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 39 of 50); 5s darwin-sandbox ... (14 actions, 9 running)
+[83,215 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 47 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,215 / 83,319] 5 / 8 tests; Testing //app/wiring/account_wiring:routes_test (run 47 of 50); 5s darwin-sandbox ... (14 actions, 9 running)
+[83,219 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 1 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,219 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 1 of 50); 12s darwin-sandbox ... (14 actions, 9 running)
+[83,223 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 5 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,223 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 5 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,227 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 9 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,227 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 9 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,231 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 13 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,231 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 13 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,235 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 17 of 50); 6s darwin-sandbox ... (14 actions, 8 running)
+[83,235 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 17 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,239 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 21 of 50); 8s darwin-sandbox ... (14 actions, 8 running)
+[83,239 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 21 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,243 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 25 of 50); 6s darwin-sandbox ... (14 actions, 8 running)
+[83,243 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 25 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,247 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 29 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,247 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 29 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,251 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 33 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,251 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 33 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,255 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 37 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,255 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 37 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,259 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 41 of 50); 6s darwin-sandbox ... (14 actions, 8 running)
+[83,259 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 41 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,263 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 45 of 50); 8s darwin-sandbox ... (14 actions, 8 running)
+[83,265 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 45 of 50); 9s darwin-sandbox ... (14 actions, 8 running)
+[83,265 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 45 of 50); 10s darwin-sandbox ... (14 actions, 9 running)
+[83,267 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 45 of 50); 11s darwin-sandbox ... (14 actions, 9 running)
+[83,273 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 49 of 50); 6s darwin-sandbox ... (14 actions, 8 running)
+[83,277 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 49 of 50); 7s darwin-sandbox ... (14 actions, 8 running)
+[83,279 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 49 of 50); 8s darwin-sandbox ... (14 actions, 8 running)
+[83,283 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 49 of 50); 9s darwin-sandbox ... (14 actions, 8 running)
+[83,285 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 49 of 50); 10s darwin-sandbox ... (14 actions, 8 running)
+[83,290 / 83,319] 6 / 8 tests; Testing //feature/auth/auth_signin:bdd_test (run 49 of 50); 11s darwin-sandbox ... (14 actions, 8 running)
+[83,293 / 83,319] 7 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_router_test (run 25 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,299 / 83,319] 7 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_router_test (run 31 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,301 / 83,319] 7 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_router_test (run 33 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[83,307 / 83,319] 7 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_router_test (run 39 of 50); 1s darwin-sandbox ... (12 actions, 8 running)
+[83,309 / 83,319] 7 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_router_test (run 41 of 50); 1s darwin-sandbox ... (10 actions, 8 running)
+[83,315 / 83,319] 7 / 8 tests; Testing //app/wiring/app_core:sign_in_guard_router_test (run 47 of 50); 1s darwin-sandbox ... (4 actions running)
+INFO: Found 8 test targets...
+INFO: Elapsed time: 189.849s, Critical Path: 23.97s
+INFO: 401 processes: 429 action cache hit, 1 internal, 400 darwin-sandbox.
+INFO: Build completed successfully, 401 total actions
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 6.7s
+  Stats over 50 runs: max = 6.7s, min = 6.3s, avg = 6.6s, dev = 0.1s
+//app/wiring/account_wiring:routes_test                                  PASSED in 6.1s
+  Stats over 50 runs: max = 6.1s, min = 5.9s, avg = 6.0s, dev = 0.0s
+//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 2.0s
+  Stats over 50 runs: max = 2.0s, min = 1.6s, avg = 1.9s, dev = 0.1s
+//app/wiring/app_core:sign_in_guard_test                                 PASSED in 0.6s
+  Stats over 50 runs: max = 0.6s, min = 0.5s, avg = 0.5s, dev = 0.0s
+//feature/auth/auth_signin:bdd_test                                      PASSED in 12.4s
+  Stats over 50 runs: max = 12.4s, min = 11.7s, avg = 11.8s, dev = 0.1s
+//feature/auth/auth_signin:bloc_guards_test                              PASSED in 2.3s
+  Stats over 50 runs: max = 2.3s, min = 2.0s, avg = 2.1s, dev = 0.1s
+//feature/auth/auth_signin:contract_test                                 PASSED in 0.4s
+  Stats over 50 runs: max = 0.4s, min = 0.3s, avg = 0.3s, dev = 0.0s
+//utility/mc_api_auth:auth_api_test                                      PASSED in 0.4s
+  Stats over 50 runs: max = 0.4s, min = 0.3s, avg = 0.4s, dev = 0.0s
+
+Executed 8 out of 8 tests: 8 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
