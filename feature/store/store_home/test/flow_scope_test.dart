@@ -258,6 +258,54 @@ void main() {
     expect([for (final p in store) requests(p)], [1, 1, 1, 1]);
     expect(viewed(), hasLength(4), reason: 'one visit');
   });
+
+  mcTestWidgets('T-0056-AC1 the flag is read once per visit: a change during '
+      'the visit changes nothing, even when the page rebuilds; the next visit '
+      'reads it again (Verifier round D4)', (tester) async {
+    serveStore();
+    final session = McTestSession.current;
+    session.flags.set('store.home_featured', false);
+    await ensureStoreContainer();
+    await initFlow(tester, () => storeTestHost(storeFlowUnderTest()));
+    await mcSettle(tester);
+    expect(
+      find.byKey(sectionKey('featured'), skipOffstage: false),
+      findsNothing,
+    );
+
+    session.flags.set('store.home_featured', true);
+    // Whatever rebuilds the page (here, directly).
+    final page = find.ancestor(
+      of: find.byKey(storeHomeBodyKey),
+      matching: find.byWidgetPredicate(
+        (w) => w.runtimeType.toString() == 'StoreHomePage',
+      ),
+    );
+    expect(page, findsOneWidget);
+    tester.element(page).markNeedsBuild();
+    await mcSettle(tester);
+    await sectionTitlesInOrder(tester);
+    expect(
+      find.byKey(sectionKey('featured'), skipOffstage: false),
+      findsNothing,
+    );
+    int featuredRequests() => session.backend.requests
+        .where((r) => r.path == '/v1/store/featured')
+        .length;
+    expect(featuredRequests(), 0);
+
+    // A new visit: the store opened again.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(
+      McTestApp(session: session, home: storeTestHost(storeFlowUnderTest())),
+    );
+    await mcSettle(tester);
+    expect(
+      await sectionTitlesInOrder(tester),
+      ['Highlights', 'Deals', 'Categories', 'Featured', 'Your cart'],
+    );
+    expect(featuredRequests(), 1);
+  });
 }
 
 class _NobodySignedIn implements SessionReader {

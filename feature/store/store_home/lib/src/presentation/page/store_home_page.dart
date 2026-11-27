@@ -82,14 +82,15 @@ class _StoreHomeContentState extends State<_StoreHomeContent> {
 
   bool get featured => widget.featured;
 
-  /// Depends on the flow page's route and on the flow's own route
-  /// (`FlowScope.outerIsCurrent`), so it runs again when either changes.
+  /// Depends on the flow's scope, so it runs again when whether the flow is
+  /// visible in the app changes (`FlowScope.outerIsCurrent`: its own route,
+  /// and every flow around it). The store page is always its flow's first
+  /// page when it is built (the category page only ever opens above it), so
+  /// its own flow page needs no check.
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final shown =
-        (ModalRoute.of(context)?.isCurrent ?? true) &&
-        (FlowScope.maybeOf(context)?.outerIsCurrent ?? true);
+    final shown = FlowScope.maybeOf(context)?.outerIsCurrent ?? true;
     if (shown && !_started) {
       _started = true;
       _startAll(context);

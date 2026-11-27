@@ -199,3 +199,37 @@ Feature: The store front
     When I open the store
     And I tap {'View cart'} in the {'cart'} section
     Then the app was asked to open the cart {1} times
+
+  @T-0056-AC2
+  Scenario: The category's next page fails, the footer offers Retry, and Retry loads it (Verifier round)
+    When I open the store
+    And I tap {'Cosmic'} in the {'categories'} section
+    Then the category page shows the first {20} products of {'cosmic'}
+    Given the backend fails {'GET /v1/store/categories/cosmic/products?offset=20'} with {'server_error'}
+    When I scroll the category to the end
+    Then I see {'More products could not be loaded.'}
+    And the backend received {3} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}
+    When the backend recovers
+    And I tap {'Retry'}
+    Then the backend received {4} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}
+    And the category page shows the first {40} products of {'cosmic'}
+
+  @T-0056-AC2
+  Scenario: The category's first page fails with a full-page error, and Retry loads it (Verifier round)
+    Given the backend fails {'GET /v1/store/categories/heroes/products'} with {'server_error'}
+    When I open the store at category {'heroes'}
+    Then I see {'The products could not be loaded'}
+    When the backend recovers
+    And I tap {'Retry'}
+    Then the category page shows the first {20} products of {'heroes'}
+
+  @T-0056-AC1
+  Scenario: With the flag off, no featured request even after Retry elsewhere and pull to refresh (Verifier round)
+    Given the flag {'store.home_featured'} is {false}
+    And the backend fails {'GET /v1/store/deals'} with {'server_error'}
+    When I open the store
+    And the backend recovers
+    And I tap Retry in the {'deals'} section
+    And I pull the store to refresh
+    Then the backend received {0} requests for {'GET /v1/store/featured'}
+    And the sections are {'Highlights, Deals, Categories, Your cart'}

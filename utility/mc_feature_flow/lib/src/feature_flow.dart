@@ -326,7 +326,11 @@ class _FlowScopeHost extends StatelessWidget {
       outerNavigator: Navigator.maybeOf(context),
       outerCanPop: route != null && !route.isFirst,
       outerRoute: route,
-      outerIsCurrent: route?.isCurrent ?? true,
+      // Visible in the app: its own route is current, and so is every flow
+      // around it (a flow nested in another flow's page, T-0056 D3).
+      outerIsCurrent:
+          (route?.isCurrent ?? true) &&
+          (FlowScope.maybeOf(context)?.outerIsCurrent ?? true),
       flowNavigatorObserver: flowNavigatorObserver,
       child: child,
     );

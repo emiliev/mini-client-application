@@ -151,3 +151,104 @@ Feature: Independent sections
       | 'Cosmic'            | 'categories' | 'category' | 'cosmic'  |
       | 'Amber Crossing #1' | 'featured'   | 'comic'    | '501740'  |
       | 'View cart'         | 'cart'       | 'cart'     | 'summary' |
+
+  @T-0056-AC6
+  Scenario Outline: A held section never blocks the other four (Verifier round)
+    Given the backend holds {<route>}
+    When I open the store
+    And the app sends {<route>}
+    Then the {<section>} section is loading
+    And every section but {<section>} is ready
+    And the section {<section>} was viewed {0} times
+    When the backend releases {<route>}
+    Then the {<section>} section is ready
+    And the section {<section>} was viewed {1} times
+
+    Examples:
+      | section      | route                       |
+      | 'banners'    | 'GET /v1/store/banners'     |
+      | 'deals'      | 'GET /v1/store/deals'       |
+      | 'categories' | 'GET /v1/store/categories'  |
+      | 'featured'   | 'GET /v1/store/featured'    |
+      | 'cart'       | 'GET /v1/me/cart'           |
+
+  @T-0056-AC2
+  Scenario Outline: A double Retry sends one request and recovers only its own section (Verifier round)
+    Given the backend runs the scenario {'commerce.server_error'}
+    When I open the store
+    Then the backend received {3} requests for {<route>}
+    When the backend recovers
+    And I tap Retry in the {<section>} section twice in quick succession
+    Then the {<section>} section is ready
+    And the backend received {4} requests for {<route>}
+    And every section but {<section>} shows its error
+    And the section {<section>} was viewed {1} times
+
+    Examples:
+      | section      | route                       |
+      | 'banners'    | 'GET /v1/store/banners'     |
+      | 'deals'      | 'GET /v1/store/deals'       |
+      | 'categories' | 'GET /v1/store/categories'  |
+      | 'featured'   | 'GET /v1/store/featured'    |
+      | 'cart'       | 'GET /v1/me/cart'           |
+
+  @T-0056-AC3
+  Scenario: Leaving the store while the cart loads, then its late answer: nothing fails (Verifier round)
+    Given the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    And I leave the store
+    And the backend releases {'GET /v1/me/cart'}
+    Then no error was reported
+    And the section {'cart'} was viewed {0} times
+
+  @T-0056-AC3
+  Scenario: Leaving the store while the cart loads, a sign-out, then the late answer: nothing fails (Verifier round)
+    Given the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    And I leave the store
+    And the session ends elsewhere
+    And the backend releases {'GET /v1/me/cart'}
+    Then no error was reported
+
+  @T-0056-AC3
+  Scenario: Leaving the store while the cart loads, a same-user re-sign-in, then the late answer: nothing fails (Verifier round)
+    Given the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    And I leave the store
+    And {'reader@mini-client.test'} signs in elsewhere
+    And the backend releases {'GET /v1/me/cart'}
+    Then no error was reported
+
+  @T-0056-AC7
+  Scenario: Leaving the store while deals load: the late answer tracks nothing (Verifier round)
+    Given the backend holds {'GET /v1/store/deals'}
+    When I open the store
+    And the app sends {'GET /v1/store/deals'}
+    And I leave the store
+    And the backend releases {'GET /v1/store/deals'}
+    Then the section {'deals'} was viewed {0} times
+    And no error was reported
+
+  @T-0056-AC7
+  Scenario: A dialog over the store changes nothing: no reload, no second view (Verifier round)
+    When I open the store
+    And I open a dialog over the store and close it
+    Then the backend received {1} requests for {'GET /v1/store/deals'}
+    And the backend received {1} requests for {'GET /v1/me/cart'}
+    And the section {'deals'} was viewed {1} times
+    And the section {'cart'} was viewed {1} times
+    And the screens tracked are {'store_home'}
+
+  @T-0056-AC7
+  Scenario: Store, category, back, category, back: views once, screens in order (Verifier round)
+    When I open the store
+    And I tap {'Heroes'} in the {'categories'} section
+    And I swipe back
+    And I tap {'Cosmic'} in the {'categories'} section
+    And I swipe back
+    Then the screens tracked are {'store_home, store_category, store_home, store_category, store_home'}
+    And the section {'banners'} was viewed {1} times
+    And the backend received {1} requests for {'GET /v1/store/banners'}

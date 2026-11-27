@@ -37,17 +37,21 @@ class FlowScope extends InheritedWidget {
   /// rebuild, `pushAndRemoveUntil`).
   final bool outerCanPop;
 
-  /// The route the flow itself is shown in (in [outerNavigator]); null when
-  /// the flow is not inside a route. Read it with [read] to look the route up
+  /// The route the flow itself is shown in (in [outerNavigator]; for a
+  /// nested flow, the outer flow's page); null when the flow is not inside a
+  /// route. It is the same route for the scope's whole life (the flow's state
+  /// lives in it), so a change of it notifies nobody. Read it with [read] to look the route up
   /// without depending on its status (`ModalRoute.of` would make the caller
   /// rebuild whenever the route's status changes), as `mc_analytics`'
   /// `AnalyticsFlowObserver` does (T-0056).
   final ModalRoute<Object?>? outerRoute;
 
-  /// Whether the flow's own route is the current route of [outerNavigator]
-  /// (nothing, not even a dialog, covers it); true outside a route. A widget
-  /// that depends on the scope ([of]) rebuilds when it flips, so a page can
-  /// start its work only once it is really shown (T-0056).
+  /// Whether the flow is visible in the app: its own route is the current
+  /// route of [outerNavigator] (nothing, not even a dialog, covers it), and,
+  /// for a flow nested in another flow's page, the outer flow is visible too.
+  /// True outside a route. A widget that depends on the scope ([of]) rebuilds
+  /// when it flips, so a page can start its work only once it is really shown
+  /// (T-0056).
   final bool outerIsCurrent;
 
   /// An observer attached to the flow's own navigator, so the scope knows
@@ -95,8 +99,7 @@ class FlowScope extends InheritedWidget {
   bool updateShouldNotify(FlowScope oldWidget) =>
       container != oldWidget.container ||
       outerCanPop != oldWidget.outerCanPop ||
-      outerIsCurrent != oldWidget.outerIsCurrent ||
-      !identical(outerRoute, oldWidget.outerRoute);
+      outerIsCurrent != oldWidget.outerIsCurrent;
 }
 
 extension McFlowContext on BuildContext {

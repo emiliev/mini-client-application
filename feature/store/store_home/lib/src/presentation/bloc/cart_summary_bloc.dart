@@ -137,7 +137,11 @@ final class CartSummaryBloc
     // An answer for a session that is gone is dropped, and the section
     // reloads for the session now current. A sign-in as the same user starts
     // a new epoch without an `authState` event, so nothing else would.
-    add(const _SessionChanged());
+    // Not after the store was left: a closed bloc takes no events (and has
+    // nothing to show).
+    if (!isClosed) {
+      add(const _SessionChanged());
+    }
     return null;
   }
 

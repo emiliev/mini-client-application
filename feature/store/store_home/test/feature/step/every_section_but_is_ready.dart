@@ -1,0 +1,11 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/store_home_env.dart';
+import 'the_section_is_ready.dart';
+
+/// Usage: every section but {'deals'} is ready
+Future<void> everySectionButIsReady(WidgetTester tester, String section) async {
+  for (final other in storeSections.where((s) => s != section)) {
+    await theSectionIsReady(tester, other);
+  }
+}
