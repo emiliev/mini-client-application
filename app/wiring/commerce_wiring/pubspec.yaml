@@ -1,5 +1,6 @@
-# T-0021 (P1-16): skeleton. Typed routes, navigator implementations and
-# result mappers for the commerce group (store, checkout) arrive with its features.
+# T-0056: the commerce group's app layer. Typed routes, navigator
+# implementations and the DI initializer for store_home (plan 01 §3.4).
+# Checkout and orders join with their features.
 name: commerce_wiring
 version: 0.1.0
 publish_to: none
@@ -10,11 +11,23 @@ environment:
   flutter: ^3.47.7
 
 dependencies:
+  app_core: any
   flutter:
     sdk: flutter
   get_it: ^8.0.0
   go_router: 17.5.0
+  injectable: 3.0.0
+  mc_api_auth: any
   mc_di: any
+  mc_mocked_backend: any
+  mc_session: any
+  store_home: any
 
 dev_dependencies:
+  flutter_test:
+    sdk: flutter
   mc_analysis: any
+  mc_ds_theme: any
+  mc_fixtures_commerce: any
+  mc_fixtures_identity: any
+  mc_test_utils: any

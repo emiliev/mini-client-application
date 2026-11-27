@@ -6,6 +6,7 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
+import 'package:mc_fixtures_commerce/mc_fixtures_commerce.dart';
 import 'package:mc_fixtures_library/mc_fixtures_library.dart';
 
 /// Records [route] and a redirect from inside [probe]'s scope.
@@ -105,5 +106,19 @@ void main() {
 
   test('T-0048-AC5 the app serves the library domain', () {
     expect(appMockDomains.whereType<LibraryMockDomain>(), hasLength(1));
+  });
+
+  test('T-0056-AC3 the store locations, the category id encoded', () {
+    expect(AppLocations.store, '/store');
+    expect(AppLocations.storeCategory('heroes'), '/store/categories/heroes');
+    expect(
+      AppLocations.storeCategory('team-ups'),
+      '/store/categories/team-ups',
+    );
+    expect(AppLocations.storeCategory('a b/c'), '/store/categories/a%20b%2Fc');
+  });
+
+  test('T-0056-AC5 the app serves the commerce domain', () {
+    expect(appMockDomains.whereType<CommerceMockDomain>(), hasLength(1));
   });
 }
