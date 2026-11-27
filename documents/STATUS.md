@@ -11,7 +11,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0066 (fix round), T-0068 (CI run 2) |
+| **Active crew** | T-0068 (CI) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -29,6 +29,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0066 merged: real sign-in and the `/me/**` guard.** A sign-in screen with demo accounts. Signed-out links to `/me/**`, `/library/**` and `/store/checkout` go to sign-in, then on to the target. Every "sign in to continue" uses it, and the fixture sheet is gone. A narrow auth Verifier passed it.
 - **T-0067 merged: the character profile** (F002). Portrait, bio, a stats chart, the character's comics and a favourite now sit behind "See full profile". The comic page's favourite got the same race fixes.
 - **T-0065 merged: the `tool/mcgen` core** (P2-01). Spec model and lint, seeded RNG, deterministic writer, manifest, keep regions, clobber guard, `gen --check`, and import resolution. The per-archetype templates (P2-04 to P2-07) come next. ADR-0016 accepted.
 - **T-0063 merged: `settings_appearance`, the ST exemplar.** Theme mode, density and reduce motion apply to the whole app at once, are saved on the device, and sync to the signed-in account (`mc_appearance`, ADR-0013).
@@ -54,7 +55,6 @@ _Last updated: 2026-11-27 by Tech Lead_
   1. Phase D: `tool/mcgen` (plan 02 §2). Specs, bricks and emitters templatised from the 7 exemplars, with round-trip goldens (each exemplar's spec regenerates it byte for byte), then `mcgen wire`. Engineers use Sonnet by default; Opus only for genuinely novel generator design.
   2. Phase E: scale to S2 in batches (plan 02 §5, §7) under ADR-0015.
   3. Phase F (continuous): Bazel profiling and the upstream report for `ai_rules_dart`/`ai_rules_flutter`.
-  - The `/me/**` auth guard is still deferred until the sign-in feature exists (P-044, P-110 ready).
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).

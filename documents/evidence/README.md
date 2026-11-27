@@ -61,3 +61,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0061](T-0061/verification-report.md) | PASS (Sonnet, single pass) | Preferences: two-user probe, concurrent PATCH, check order, scenario re-arm, `onSelect` hook |
 | [T-0056](T-0056/verification-report.md) | FAIL (Opus: claimed tests missing, add-after-close), then PASS (narrow Sonnet re-verify) | DB exemplar: section independence under held responses, visibility (cold category link), cart epoch, analytics once per visit, e2e 16/16 |
 | [T-0062](T-0062/verification-report.md) | PASS (Sonnet, single pass) | Tooling: bundle id on the simulator, fresh-worktree format gate with negative controls, role names, raw-tree exit 2, sheet-handle and toast mutations |
+| [T-0066](T-0066/verification-report.md) | PASS (narrow Sonnet auth check, ADR-0015 exception) | About 70 hostile `from` values, guard stacks after sign-out, `signOut(ifEpoch:)`, caller spot-checks |

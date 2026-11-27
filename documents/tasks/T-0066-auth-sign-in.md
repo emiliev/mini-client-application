@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Handed off (Engineer), awaiting review |
+| Status | Done (merged 2026-11-27 `4607381c`; narrow auth Verifier PASS `ed0bd91d`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verification | ADR-0015 exception (**auth/security**): `/code-review`, one fix round, then **one narrow Sonnet Verifier** for the guard and sign-in paths only, then the TL merge gates |
 | Branch | `fleet/T-0066-auth-sign-in` |
@@ -95,3 +95,14 @@ Replace the temporary fixture sign-in sheet (P-044) with a real sign-in feature,
 **Not done:** see F-0066 "Not done" (protected page below a non-protected top; signed-in user on `/auth/sign-in`). Not run: the full e2e suite (only the five touched targets).
 
 **Review round (one fix round):** (1) the sign-out guard walks every page of the stack and goes to sign-in with `from` = the topmost protected page; (2) a mid-request leave undoes only the session this request created (`AuthApi.signOut(ifEpoch:)`) and keeps the new session when someone was signed in before (B, never signed out); a signed-in user at `/auth/sign-in` is redirected to `safeSignInTarget(from)`; (3) a system back or an iOS swipe is refused while a request runs (`PopScope` plus a pop entry on the flow's outer route), tested on Android and iOS. Nits: comment fixed, `go(from)` stack drop documented in F-0066. Tests: `sign_in_guard_router_test`, `sign_in_guard_test`, `auth_signin:bloc_guards_test`, `account_wiring:routes_test`. The first round's Back-mid-request test became the link-replaces-form test, because a back is now refused.
+
+## Merge (TL)
+- 2026-11-27: `/code-review` found 2 important issues: a protected page under an open page survived sign-out, and a mid-request exit signed out an earlier session. The swipe-back loss during sign-in was made required too. Fix round `9c96f743` fixed all three; the engineer also made a signed-in user's `/auth/sign-in` redirect.
+- Merge order: this branch had merged T-0067's unreviewed head, so T-0067 merged first and this branch re-merged `main`.
+- **Narrow auth Verifier (ADR-0015 exception): PASS `ed0bd91d`**, about 115k tokens.
+  - About 70 extra hostile `from` values, 12 of them through the real router: all ended in-app or at home, with no loop.
+  - Guard stacks checked, `signOut(ifEpoch:)` checked, callers spot-checked, 20-run flake check on 8 targets.
+  - Two low-severity observations went to P-122.
+- TL checks: the only deleted test is `sign_in_sheet_test.dart`, declared because the sheet is removed and its behaviour is covered by the feature's BDD, bloc guards and wiring tests. No skips.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 236/236 tests, lint clean, `mc_arch_check` OK, sim app built, format gate, provenance and the no-direct-overlay check passed, and a 20-run uncached flake check over 21 auth targets was clean.
+- P-044 is done.
