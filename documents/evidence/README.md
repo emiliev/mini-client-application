@@ -57,3 +57,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0057](T-0057/verification-report.md) | PASS (Sonnet, single pass) | Async-guard probes faithful; X02, X03 and X06 killed, with controls |
 | [T-0059](T-0059/verification-report.md) | PASS (Sonnet, single pass) | Charts: own geometry probe, release-path sanitising, donut neighbour colours, contrast ratios by hand, 50-run flake check |
 | [T-0058](T-0058/verification-report.md) | PASS (Sonnet, single pass) | Overlays: 18-test probe (confirm values, keyboard inset, non-dismissible), planted direct-overlay call caught, sign-in e2e |
+| [T-0060](T-0060/verification-report.md) | PASS (Sonnet, single pass) | Trivia: own scoring oracle from CONTRACT.md alone (30 rounds), 1,000-round position spread, 91 facts hand-checked, two-user isolation |

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `a6e5df7`; Verifier PASS `0dbb1d3`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (fixtures; ADR-0011) |
 | Branch | `fleet/T-0060-fixtures-editorial-trivia` |
@@ -106,3 +106,6 @@ Decisions and gotchas: [F-0060](../findings/F-0060-trivia-fixtures.md).
 | 6 | Cached question `choices` and `facts` are unmodifiable | `T-0060-AC1` "cached questions cannot be changed"; mutations B35, B36 |
 
 Re-runs: gates PASS (coverage 99.6 %, 456/458; 187 tests pass with `--lockfile_mode=error`); 50-run flake check 0 failures (`flake50.log`); full mutation run 126 killed, 0 survived, 0 broken (`mutations_review_round_full.log`; new mutants H44, H45, B35, B36; H37 stays retired as equivalent).
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found no important issues and 6 nits. Review round `9aba674`: 126/126 mutations. A single Sonnet Verifier pass gave PASS `0dbb1d3` (about 116k tokens). Its own scoring oracle, written from `CONTRACT.md` alone, matched the server on 30 rounds with shuffled answer arrays. It hand-checked 91 questions' facts and killed 20/20 mutations, with no defects. The TL merged `--no-ff`; on the merge result `check` passed, 190/190 tests passed, lint was clean, `mc_arch_check` reported OK, the sim app built, and no feature target reaches the package.
