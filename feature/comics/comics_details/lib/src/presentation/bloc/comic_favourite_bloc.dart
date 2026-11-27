@@ -180,9 +180,9 @@ final class ComicFavouriteBloc
     final result = await _repository.setFavourite(
       _comicId,
       favourite: wanted,
-      // The session the shown state belongs to: the request is not sent for
-      // any other (T-0050), whatever happens before it leaves.
-      epoch: _shownEpoch ?? _session.epoch,
+      // The session this write starts in: the request is not sent for any
+      // other (T-0050), whatever happens before it leaves.
+      epoch: _session.epoch,
     );
     result.fold(
       (saved) {
