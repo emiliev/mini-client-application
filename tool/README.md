@@ -129,6 +129,35 @@ New gate scripts call this instead of their own `dart format` line (the old per-
 
 It is the only tool that may format; never run `dart format .` by hand. `tool/checks/T-0062-AC2_format_gate.sh` proves it in a fresh worktree, with a negative control in `tool/loc` and one in `third_party/flow_builder`.
 
+## `ci/ci.sh`: the delivery gates (local and GitHub Actions)
+
+```sh
+tool/ci/ci.sh            # all gates, stops at the first failure
+tool/ci/ci.sh --list     # gate names
+tool/ci/ci.sh --only 5   # one gate by number
+```
+
+[`.github/workflows/ci.yml`](../.github/workflows/ci.yml) runs this same script on a GitHub-hosted Apple Silicon macOS runner (`macos-26`) on push to `main` and `fleet/**`, on `pull_request` and on manual `workflow_dispatch`, with a per-ref concurrency group (a newer push cancels the older run) and a 120 minute timeout. No secrets. The gates mirror the TL merge gate of ADR-0015 (minus the flake check and review items) and print a per-gate time table (also in the job summary):
+
+| # | Gate |
+|---|---|
+| 1 | `tool/rules_fork.sh check` |
+| 2 | `bazel test --config=ci //...` (lockfile `error`, `--keep_going`) |
+| 3 | `bazel build --config=ci --config=lint //...` |
+| 4 | `bazel run //tool/mc_arch_check:bin` |
+| 5 | the format gate (`checks/lib/format_gate.sh`) |
+| 6 | `bazel run //tool/l10n_check:bin` |
+| 7 | `checks/T-0035-AC4_provenance.sh` (needs network) |
+| 8 | `checks/T-0058-AC4_no_direct_overlays.sh` |
+| 9 | `bazel build --config=ci --config=sim //app/mini_client:mini_client_ios` |
+| 10 | the `app`-tagged tests, in their own `--config=app` invocation (a no-op while none exist) |
+
+Environment switches (all optional): `MC_BAZEL_STARTUP` (e.g. `--output_base=/tmp/x`), `MC_CI_CACHE_DIR` (own disk and repository caches, for a cold and measurable run), `MC_CI_LOG_DIR`, `MC_BAZELISK`, `MC_DART`.
+
+Portability to a clean machine: `tool/bazelw` falls back to a `bazelisk` on PATH when the Homebrew one is missing; the format gate runs `$MC_DART` (the runner has Flutter 3.47.7 cloned from the `.fvmrc` version, no FVM) and does an online `pub get`. Without `MC_DART`, `ci.sh` uses `fvm dart` when `fvm` exists, else `dart` on PATH.
+
+Caches: `~/.cache/mc-bazel/repo` (3.5 GB, one entry per lockfile) and `disk` (1.3 GB, one per commit, saved on pushes only) are kept with `actions/cache`. On failure the workflow uploads `ci-logs/` (the per-gate logs plus the `test.log` of each failing test target). Durations and cache sizes: [F-0068](../documents/findings/F-0068-ci-github-actions.md).
+
 ## `rules_fork.sh`: patch queue for the rules forks
 
 Develops fixes and shims for `ai_rules_dart` / `ai_rules_flutter` in a local clone and exports them as numbered patches in `third_party/rules_patches/<repo>/` ([T-0024](../documents/tasks/T-0024-rules-patch-queue.md), plan 03 KD2). Conventions and the full workflow: [third_party/rules_patches/README.md](../third_party/rules_patches/README.md).

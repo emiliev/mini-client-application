@@ -1,0 +1,133 @@
+# T-0068: every delivery builds and tests with Bazel on a GitHub-hosted macOS runner.
+# The gates live in tool/ci/ci.sh (run the same script locally); this file only sets up the
+# machine, restores the Bazel caches, runs the script and uploads logs on failure.
+# No secrets are used. Action versions are pinned to commit SHAs (version in the comment).
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - 'fleet/**'
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same ref cancels the older run (a PR and its branch push are separate refs).
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MC_CI_LOG_DIR: ${{ github.workspace }}/ci-logs
+  # Flutter 3.47.7 from .fvmrc is cloned below; the format gate runs its `dart` (no FVM on the runner).
+  MC_DART: dart
+
+jobs:
+  ci:
+    # Apple Silicon. Private-repo macOS minutes bill at 10x, so Bazel's caches persist below.
+    runs-on: macos-26
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Tool versions
+        run: |
+          sw_vers
+          xcodebuild -version
+          df -h /
+          sysctl -n hw.ncpu hw.memsize
+
+      - name: Install bazelisk (it reads .bazelversion)
+        run: command -v bazelisk >/dev/null || brew install bazelisk
+
+      - name: Flutter version from .fvmrc
+        id: flutter
+        run: echo "version=$(python3 -c 'import json;print(json.load(open(".fvmrc"))["flutter"])')" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Flutter SDK
+        id: flutter-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/flutter-sdk
+          key: flutter-${{ runner.os }}-${{ runner.arch }}-${{ steps.flutter.outputs.version }}
+
+      - name: Install Flutter ${{ steps.flutter.outputs.version }} (for `dart format` only)
+        env:
+          FLUTTER_VERSION: ${{ steps.flutter.outputs.version }}
+        run: |
+          if [ ! -x "$HOME/flutter-sdk/bin/flutter" ]; then
+            git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git "$HOME/flutter-sdk"
+          fi
+          echo "$HOME/flutter-sdk/bin" >> "$GITHUB_PATH"
+          "$HOME/flutter-sdk/bin/flutter" --version
+
+      # tool/bazelw -> `bazelisk` on PATH; .bazelrc puts the disk and repository caches in
+      # ~/.cache/mc-bazel. Measured after a cold run (F-0068): repository cache 3.5 GB, disk cache
+      # 1.3 GB, bazelisk 0.2 GB. The repo cache changes only with the lockfile, so it is one entry
+      # per lockfile (saved once). The disk cache grows per commit, so it is restored from the newest
+      # earlier entry and saved under a per-commit key on pushes only (not on pull_request), which
+      # keeps the total well under the 10 GB per-repo cap (the oldest entries are evicted first).
+      - name: Cache Bazel repository cache and bazelisk
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            ~/.cache/mc-bazel/repo
+            ~/Library/Caches/bazelisk
+          key: bazel-repo-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('MODULE.bazel.lock', '.bazelversion') }}
+          restore-keys: |
+            bazel-repo-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Restore Bazel disk cache
+        id: disk-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/mc-bazel/disk
+          key: bazel-disk-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('MODULE.bazel.lock', '.bazelversion', '.github/workflows/ci.yml') }}-${{ github.sha }}
+          restore-keys: |
+            bazel-disk-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('MODULE.bazel.lock', '.bazelversion', '.github/workflows/ci.yml') }}-
+            bazel-disk-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Gates (tool/ci/ci.sh)
+        run: tool/ci/ci.sh
+
+      - name: Save Bazel disk cache
+        if: success() && github.event_name != 'pull_request' && steps.disk-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/mc-bazel/disk
+          key: bazel-disk-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('MODULE.bazel.lock', '.bazelversion', '.github/workflows/ci.yml') }}-${{ github.sha }}
+
+      - name: Cache sizes
+        if: always()
+        run: du -sh ~/.cache/mc-bazel/disk ~/.cache/mc-bazel/repo ~/Library/Caches/bazelisk 2>/dev/null || true
+
+      - name: Collect failing test logs
+        if: failure()
+        run: |
+          mkdir -p ci-logs/testlogs
+          tool/bazelw info bazel-testlogs > ci-logs/testlogs-path.txt 2>/dev/null || true
+          dir="$(cat ci-logs/testlogs-path.txt)"
+          if [ -d "$dir" ]; then
+            # Failing targets only: a failed test's directory holds a test.log without a passing xml
+            # result, so copy every test.log of a target whose test.xml reports a failure or is absent.
+            find "$dir" -name test.log | while read -r log; do
+              d="$(dirname "$log")"
+              if [ ! -f "$d/test.xml" ] || grep -qE '<(failure|error)' "$d/test.xml"; then
+                rel="${d#"$dir"/}"
+                mkdir -p "ci-logs/testlogs/$rel"
+                cp "$log" "ci-logs/testlogs/$rel/"
+              fi
+            done
+          fi
+
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ci-logs
+          path: ci-logs/
+          if-no-files-found: warn
+          retention-days: 14
