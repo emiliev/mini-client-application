@@ -125,8 +125,12 @@ the consent is, so a bug shows in a debug build before anyone has consented.
 - Dialogs, sheets and menus are popups, not page routes: ignored.
 - The same route becoming the top again with no other page in between (a dialog
   closed over it) is not tracked twice.
-- A flow's own navigator (`McFlowPage` names such as `list`, `preview`) has no
-  observer, so a flow's inner pages are not tracked yet.
+- A feature flow's own pages are tracked by `AnalyticsFlowObserver` on the
+  flow's navigator (`FeatureFlow(observers: [...])`, T-0056, P-103): name the
+  flow's pages with their screen names and its first page as its route; the
+  first page is then not tracked twice, a page pushed or popped inside the flow
+  is tracked, and coming back to the route tracks the page the flow shows.
+  Rules and examples: F-0056 §4.
 
 ## DI
 
@@ -143,8 +147,15 @@ test container, which registers it over the session's `InMemoryAnalyticsSink`.
 - `the screen {'characters_list'} was tracked` (it is somewhere in the list)
 - `the screens tracked are {'home, characters_list, home'}` (exact, ordered, repeats count)
 
+## Blocs: the `AnalyticsTracker` port
+
+Blocs are read by code generators and import no Flutter (R15), so they do not
+import this package. They take `AnalyticsTracker` (`mc_monitoring`, pure Dart:
+`trackEvent`, `trackScreen`), which `Analytics` implements and
+`AnalyticsDIInitializer` registers as the same instance (T-0056). A flow lists
+`RootImport<AnalyticsTracker>()`.
+
 ## Not here
 
-A network or vendor sink (P-004), the privacy settings screen (F060), exposure
-events for feature flags (a follow-up once `mc_feature_flags` exists), and
-tracking of the pages inside a flow.
+A network or vendor sink (P-004), the privacy settings screen (F060) and
+exposure events for feature flags (P-102).
