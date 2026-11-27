@@ -232,28 +232,33 @@ Feature: A character's profile
       | 2     |
 
   @T-0067-AC4 @l10n
-  Scenario Outline: At <scale>x the not-found and error states do not overflow in the pseudo-locale
-    Given the pseudo-locale is active
+  Scenario Outline: In German at <scale>x the not-found and the failed states do not overflow
+    Given the device locale is {'de'}
     And the text scale is <scale>
-    When I open character {999999}
-    Then I see {'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'}
+    And the backend fails {'GET /v1/characters/100002'} with {'server_error'}
+    When I open character {<id>}
+    Then I see {<text>}
     And nothing overflows
 
     Examples:
-      | scale |
-      | 1     |
-      | 2     |
+      | scale | id     | text                                     |
+      | 1     | 999999 | 'Figur nicht gefunden'                   |
+      | 2     | 999999 | 'Figur nicht gefunden'                   |
+      | 1     | 100002 | 'Die Figur konnte nicht geladen werden'  |
+      | 2     | 100002 | 'Die Figur konnte nicht geladen werden'  |
 
   @T-0067-AC4 @l10n
-  Scenario Outline: At <scale>x a failed character does not overflow in the pseudo-locale
+  Scenario Outline: In the pseudo-locale at <scale>x the not-found and the failed states do not overflow
     Given the pseudo-locale is active
     And the text scale is <scale>
     And the backend fails {'GET /v1/characters/100002'} with {'server_error'}
-    When I open character {100002}
-    Then I see {'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'}
+    When I open character {<id>}
+    Then I see {<text>}
     And nothing overflows
 
     Examples:
-      | scale |
-      | 1     |
-      | 2     |
+      | scale | id     | text                                                   |
+      | 1     | 999999 | '[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                       |
+      | 2     | 999999 | '[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                       |
+      | 1     | 100002 | '[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'   |
+      | 2     | 100002 | '[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'   |

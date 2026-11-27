@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mc_e2e_utils/mc_e2e_utils.dart';
@@ -81,20 +81,29 @@ void main() {
     await letArtLoad(tester);
     await shot(binding, tester, '06_comic_page');
 
-    // Back: the profile, still on the comics row.
-    await tester.tap(find.byType(BackButton).first);
-    await pumpUntil(tester, find.byKey(_profileName), 'the profile again');
-    expect(find.byKey(_comicTitle), findsNothing);
-    await shot(binding, tester, '07_back_to_profile');
-
-    // Back: the characters list.
+    // Back: the profile, still scrolled to its comics row (the header above
+    // it is not built).
     await tester.tap(find.byType(BackButton).first);
     await pumpUntil(
       tester,
-      find.byKey(charactersGridKey),
-      'the characters list, below the profile',
+      find.byKey(_profileComics),
+      'the profile again, still on its comics row',
     );
-    expect(find.byKey(_profileName), findsNothing);
-    await shot(binding, tester, '08_back_to_list');
+    expect(find.byKey(_comicTitle), findsNothing);
+    await shot(binding, tester, '07_back_to_profile');
+
+    // Back: the preview the profile was opened from.
+    await tester.tap(find.byType(BackButton).first);
+    await pumpUntil(
+      tester,
+      find.text('See full profile'),
+      'the preview, below the profile',
+    );
+    expect(find.byKey(_profileComics), findsNothing);
+    expect(
+      tester.widget<Text>(find.byKey(characterPreviewTitleKey)).data,
+      first.name,
+    );
+    await shot(binding, tester, '08_back_to_preview');
   });
 }
