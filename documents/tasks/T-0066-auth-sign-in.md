@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Handed off (Engineer), awaiting review |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verification | ADR-0015 exception (**auth/security**): `/code-review`, one fix round, then **one narrow Sonnet Verifier** for the guard and sign-in paths only, then the TL merge gates |
 | Branch | `fleet/T-0066-auth-sign-in` |
@@ -69,3 +69,27 @@ Replace the temporary fixture sign-in sheet (P-044) with a real sign-in feature,
 
 ## Log
 - 2026-11-27: Created and dispatched (TL). PO hybrid choice: a hand-built feature in parallel with the generator. It closes P-044 and the deferred auth guard.
+- 2026-11-27: Engineer built `feature/auth/auth_signin`, the guard, the sign-in route, `requestAppSignIn`, home's Sign in / Sign out, moved the callers' tests, and ran gates, 50-run flake and e2e (own simulator, deleted). Details: [F-0066](../findings/F-0066-sign-in-and-guard.md).
+
+## Outcome
+**Deviations from the brief (all in F-0066):**
+- The package is `auth_signin`, not `auth_sign_in`: `gen_l10n` reads `in_en` from `auth_sign_in_en.arb` as locale `id_EN` and fails; `l10n_check` requires `<package>_<locale>.arb`. `mcgen` needs a name check.
+- The sign-in route's result is a `bool`, not a string: a guarded push hands the sign-in page's pop value to the original caller, so a string arrived as a list id.
+- The guard ticks `refreshListenable` on sign-out only (a refresh at sign-in restores a stale stack and brings the page back), and `SignInGuard.bind(router)` handles pushed pages, which a refresh does not re-evaluate.
+- `requestFixtureSignIn` became `requestAppSignIn(routerRef, session, purpose)`; the `reason` text became a closed `SignInPurpose` code, so a link cannot put words on the screen.
+- Leaving the form mid-request undoes a sign-in that lands (answer false means no session).
+- **Editor result after `go(from)`:** home learns of it from the `DataChanged('readingLists')` the editor already announces, and shows "Reading lists changed" (no id). A real home reloads its lists on that event.
+
+**Changed callers:** `comics_details` (publishing_wiring), `library_reading_list_editor` (library_wiring), `store_home` (commerce_wiring), `trivia_quiz` (chronicle_wiring), `settings_appearance` (account_wiring): each navigator calls `requestAppSignIn` with its purpose and no longer takes `AuthApi`. Deleted: `fixture_sign_in_sheet.dart`, `sign_in_sheet_test.dart`. T-0067's `universe_wiring` navigator is not on this branch: when it merges it must switch from `requestFixtureSignIn` to `requestAppSignIn(purpose: SignInPurpose.favourites)`.
+
+**Tests that moved (assertions kept, step changed from the sheet to the sign-in screen):** the five wirings' `requestSignIn` tests (`T-0041-AC6`, `T-0048-AC6`, `T-0056-AC3`, `T-0064-AC3`, `T-0063-AC3`, now also named `T-0066-AC3`); `reading_list_route_test`, `deep_link_back_stack_test`, and the e2e journeys `reading_list_journey`, `reading_list_deeplink`, `comics_journey`, `settings_signed_in`. Sheet-only tests (barrier, drag, Back refused while busy, "sheet closed answers the real outcome", "failed sign-in keeps the sheet") have no counterpart: their behaviour is the feature's (BDD "server error", bloc guards: no Not now mid-request, undo on leave, and the `account_wiring` Back-mid-request test). Test edits to existing tests beyond that: `app_test` scrolls to "Open placeholder 7" (home grew); `buildAppRouter` callers in `app_test`, `not_found_test`, `deep_link_back_stack_test` pass a stub session; `analytics_screens_test` lists `auth_sign_in`. No test deleted-without-replacement beyond the sheet ones above, none skipped, no `// ignore:` kept.
+
+| AC | Evidence |
+|---|---|
+| T-0066-AC1 | `auth_signin:bdd_test` (`auth_signin_sign_in.feature`: sign-in, trimmed email, wrong credentials x2, correction, server error and retry, `identity.server_error`, `identity.expired_token`, double tap sends 1 request, empty and invalid form, demo accounts, Not now, reasons; `auth_signin_l10n.feature`: German, `en_XA` at 1x and 2x), `contract_test`, `bloc_guards_test`, `unit_test`, `flow_scope_test`, `architecture_test`, `account_wiring:routes_test` (real route and reasons) |
+| T-0066-AC2 | `app_core:sign_in_guard_test` (protected table, redirects, the open-redirect table), `app_core:sign_in_guard_router_test` (cold, running, push, `/library`, `/store/checkout`, Not now, signed in, foreign `from`, sign-out redirect, refresh behaviour, each `AppFlows` caller once), `account_wiring:routes_test` (real route, 4 hostile `from`s), `mini_client:sign_in_guard_app_test` (real router, sign-out on a pushed editor) |
+| T-0066-AC3 | the five wirings' `routes_test` (`T-0066-AC3`: opens the screen with its reason, true only after a real sign-in, false on Not now, true at once when signed in), `sign_in_guard_router_test` (`requestAppSignIn`) |
+| T-0066-AC4 | `integration_test/auth_signin_journey_test.dart`, PASS on `mc-T-0066-engineer-45844` (deleted), screenshots 70 to 77 in `documents/evidence/T-0066/engineer/` (`e2e-summary.md`); the four moved journeys PASS too |
+| T-0066-AC5 | `gate_*.log` in the evidence dir: `test --lockfile_mode=error //...` 231/231, lint, `mc_arch_check`, `rules_fork.sh check`, format gate, `l10n_check`, `T-0042-AC4_safety.sh` PASS; `gate_flake50.log`: 50 runs, 0 failures, `--nocache_test_results`, on `bloc_guards_test`, `contract_test`, `bdd_test`, `sign_in_guard_test`, `sign_in_guard_router_test`, `account_wiring:routes_test`, `sign_in_guard_app_test` |
+
+**Not done:** see F-0066 "Not done" (protected page below a non-protected top; signed-in user on `/auth/sign-in`). Not run: the full e2e suite (only the five touched targets).
