@@ -90,3 +90,23 @@
 - **Observation, logging.** A pinned request rejected by the interceptor is not logged by `MonitoringInterceptor`, because `reject` without `callFollowingErrorInterceptor` skips every error interceptor. The older "retry across a session change" rejection already behaves the same way.
 - **Re-verify.** A narrow Sonnet re-verify for D1 is enough: `auth_pin_test --runs_per_test=200 --nocache_test_results` green, plus `T-0050-AC4_gates.sh`. D2 and D3 can go with that fix or to `pending-work.md`.
 - **Evidence.** Everything is in `documents/evidence/T-0050/verifier/`. The probe tests, `vmut.sh`, `vnc.sh` and `vcov.py` are there to read; they are not wired into Bazel.
+
+## Re-verification at 3cf8359
+
+- **Verifier:** crew: Verifier, Sonnet tier (fresh, narrow re-verify, ADR-0011). Bazel output base `/tmp/mc-ob-T-0050-reverify` (shut down at the end). Logs: `verifier/reverify_*.log`.
+- **Verdict:** **PASS.** D1 to D4 are closed. No production file changed.
+
+| Check | Result |
+|---|---|
+| **D1, 200 runs, idle** (`--runs_per_test=200 --nocache_test_results`) | `auth_pin_test` 200/200, `auth_races_test` 200/200 ([log](verifier/reverify_runs200_idle.log)) |
+| **D1, 200 runs, under load** (8 `yes` busy loops, killed afterwards, 0 left) | `auth_pin_test` 200/200, `auth_races_test` 200/200 ([log](verifier/reverify_runs200_load.log)) |
+| **D1, bloc_guards x50** | `comics_details` 50/50, `library_reading_list_editor` 50/50 ([log](verifier/reverify_bloc_guards50.log)) |
+| **D1, code read** | `Rig.track` stores each save; `Rig.dispose` does `await Future.wait(_pending)` before `bus.dispose`, `session.dispose` and `dir.deleteSync`. `grep` for `.ignore()` and `unawaited(` over `utility/mc_api_auth/test`, `utility/mc_test_steps` and `feature/` (non-lib): **no matches** |
+| **D2** | `auth_pin_test` has two new `T-0050-AC1` tests (replay after refresh, retry after 5xx). Each asserts exactly one PUT reached the adapter (`ArrivalAdapter.seen`) and `ApiUnauthorized`. **Mutation:** I exempted replays from the pin in `auth_interceptor.dart` (`&& options.extra[_applied] != true`). Both tests went red. Restored (`git checkout`) |
+| **D3** | The `comics_details:bloc_guards_test` case "keys on the kind as well as the id" opens `CharacterId(7)`, then `CreatorId(7)`, and expects `['character 7', 'creator 7']`. **Mutation:** the guard compared the id only (`_openTarget?.$2 == target.$2`). That test went red (confirmed in `test.log`). Restored |
+| **D4** | Diff `db556b5..3cf8359` of `auth_races_test.dart`: the removed lines are only the 10 ms sleep, the `api.signOut` and `_signInCollector` calls, and the `pending` plumbing. Every `expect` is untouched, and `expect(switched, isTrue)` is added. `ArrivalAdapter.fetch` calls `onArrive` synchronously before `inner.fetch` answers, so the sign-out and sign-in precede the 503 and the 50 ms retry |
+| **Integrity** | `git diff db556b5..3cf8359 --stat` outside `documents/`: 6 files, all test code or test steps (`auth_pin_test`, `auth_races_test`, `rig.dart`, the two `bloc_guards` tests, `signs_in_just_before_the_app_sends.dart`). **No production change**, so no e2e |
+| **Gates** | `T-0050-AC4_gates.sh`: **PASS**, 17 of 17 ([log](verifier/reverify_gates.log)). Note for the TL: in a fresh worktree the `dart format` gate fails with "Package resolution error ... mc_analysis" until `fvm dart pub get` has run at the root (the formatter then misses the page width). After `pub get` it is clean (784 files, 0 changed). This is an environment step, not a code defect |
+| **Merge check** | `git merge --no-ff --no-commit origin/main`: clean. `test --lockfile_mode=error //...`: **155 of 155 pass** ([log](verifier/reverify_merge_test.log)). Merge aborted; the tree is back at `3cf8359` |
+
+No new defects. Observations from the first report (same-user re-sign-in, unlogged pinned rejection) stay with the TL.

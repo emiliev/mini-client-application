@@ -1,0 +1,53 @@
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: 0fe99745-23a5-429b-9b47-8cbb1859501c
+Computing main repo mapping: 
+Loading: 
+Loading: 1 packages loaded
+Analyzing: 2 targets (6 packages loaded, 6 targets configured)
+Analyzing: 2 targets (6 packages loaded, 6 targets configured)
+
+Analyzing: 2 targets (213 packages loaded, 7744 targets configured, 303 aspect applications)
+
+INFO: Analyzed 2 targets (224 packages loaded, 9510 targets configured, 454 aspect applications).
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+[1,886 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 1 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[1,897 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 4 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[1,903 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 3 of 200); 1s darwin-sandbox ... (14 actions, 8 running)
+[1,913 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 13 of 200); 1s darwin-sandbox ... (14 actions, 9 running)
+[1,924 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 20 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[1,932 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 26 of 200); 1s darwin-sandbox ... (14 actions, 9 running)
+[1,940 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 32 of 200); 1s darwin-sandbox ... (14 actions, 9 running)
+[1,953 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 44 of 200); 1s darwin-sandbox ... (14 actions, 9 running)
+[1,965 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 51 of 200); 1s darwin-sandbox ... (14 actions, 9 running)
+[1,974 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 56 of 200); 1s darwin-sandbox ... (14 actions, 9 running)
+[1,995 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 66 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[2,014 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 76 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,035 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 88 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+[2,047 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 93 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,056 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 98 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,065 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 102 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,076 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 108 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,088 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 112 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,101 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 118 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,115 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 128 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,127 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 134 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,143 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 142 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,157 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 149 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,172 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 154 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,187 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 166 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,199 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 174 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,213 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 185 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,229 / 2,286] Testing //utility/mc_api_auth:auth_races_test (run 194 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,248 / 2,286] Testing //utility/mc_api_auth:auth_pin_test (run 140 of 200); 0s darwin-sandbox ... (14 actions, 8 running)
+[2,268 / 2,286] Testing //utility/mc_api_auth:auth_pin_test (run 156 of 200); 0s darwin-sandbox ... (14 actions, 9 running)
+INFO: Found 2 test targets...
+INFO: Elapsed time: 35.073s, Critical Path: 2.51s
+INFO: 2286 processes: 202 disk cache hit, 1684 internal, 400 darwin-sandbox.
+INFO: Build completed successfully, 2286 total actions
+//utility/mc_api_auth:auth_pin_test                                      PASSED in 1.2s
+  Stats over 200 runs: max = 1.2s, min = 0.3s, avg = 0.5s, dev = 0.2s
+//utility/mc_api_auth:auth_races_test                                    PASSED in 1.5s
+  Stats over 200 runs: max = 1.5s, min = 0.5s, avg = 0.7s, dev = 0.3s
+
+Executed 2 out of 2 tests: 2 tests pass.

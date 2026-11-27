@@ -1,0 +1,83 @@
+INFO: Invocation ID: bf0241dc-e482-4e7f-becc-d82fc748eb50
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+Analyzing: 2 targets (0 packages loaded, 0 targets configured)
+
+Analyzing: 2 targets (97 packages loaded, 8685 targets configured, 669 aspect applications)
+[1 / 1] no actions running
+INFO: Analyzed 2 targets (97 packages loaded, 8693 targets configured, 721 aspect applications).
+INFO: From DartCodegen @@//feature/comics/comics_details:_comic_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/library/library_reading_list_editor:_reading_list_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+[10,581 / 11,666] Checking Dart library imports of @@//utility/mc_api_client:mc_api_client; 0s disk-cache ... (10 actions, 0 running)
+INFO: From DartAggregateCodegen @@//feature/library/library_reading_list_editor:di_config:
+Missing dependencies in library_reading_list_editor/src/di/di_initializer.dart
+
+[ComicPickerBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[ReadingListEditorApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[ReadingListEditorBloc] depends on unregistered type [FeatureFlowController<(ReadingListEditorFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ReadingListEditorBloc] depends on unregistered type [ReadingListEditorNavigator] , from package:library_reading_list_editor/src/navigator/reading_list_editor_navigator.dart
+[ReadingListEditorBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[ReadingListEditorBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[ReadingListEditorBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/comics/comics_details:di_config:
+Missing dependencies in comics_details/src/di/di_initializer.dart
+
+[ComicDetailsBloc] depends on unregistered type [FeatureFlowController<(ComicsDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ComicDetailsBloc] depends on unregistered type [ComicsDetailsNavigator] , from package:comics_details/src/navigator/comics_details_navigator.dart
+[ComicDetailsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[ComicsDetailsApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[ComicFavouriteBloc] depends on unregistered type [FeatureFlowController<(ComicsDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ComicFavouriteBloc] depends on unregistered type [ComicsDetailsNavigator] , from package:comics_details/src/navigator/comics_details_navigator.dart
+[ComicFavouriteBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[ComicFavouriteBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[ComicFavouriteBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[11,694 / 11,794] Testing //feature/comics/comics_details:bloc_guards_test (run 1 of 50); 1s darwin-sandbox ... (14 actions, 9 running)
+[11,701 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 6 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,705 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 1 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,713 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 7 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,720 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 8 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[11,722 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 8 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,725 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 11 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,728 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 13 of 50); 3s darwin-sandbox ... (14 actions, 8 running)
+[11,730 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 14 of 50); 3s darwin-sandbox ... (14 actions, 8 running)
+[11,735 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 14 of 50); 4s darwin-sandbox ... (14 actions, 8 running)
+[11,738 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 15 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,744 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 19 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,752 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 21 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[11,754 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 21 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,758 / 11,794] Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 23 of 50); 2s darwin-sandbox ... (14 actions, 8 running)
+[11,768 / 11,794] Testing //feature/comics/comics_details:bloc_guards_test (run 48 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[11,771 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 28 of 50); 1s darwin-sandbox ... (14 actions, 8 running)
+[11,771 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 28 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[11,778 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 35 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[11,779 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 36 of 50); 2s darwin-sandbox ... (14 actions, 9 running)
+[11,784 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 41 of 50); 3s darwin-sandbox ... (10 actions, 9 running)
+[11,786 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 43 of 50); 3s darwin-sandbox ... (8 actions running)
+[11,787 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 44 of 50); 3s darwin-sandbox ... (7 actions running)
+[11,791 / 11,794] 1 / 2 tests; Testing //feature/library/library_reading_list_editor:bloc_guards_test (run 48 of 50); 4s darwin-sandbox ... (3 actions running)
+INFO: Found 2 test targets...
+INFO: Elapsed time: 29.743s, Critical Path: 7.69s
+INFO: 11794 processes: 377 disk cache hit, 11317 internal, 100 darwin-sandbox.
+INFO: Build completed successfully, 11794 total actions
+//feature/comics/comics_details:bloc_guards_test                         PASSED in 2.1s
+  Stats over 50 runs: max = 2.1s, min = 0.7s, avg = 1.0s, dev = 0.4s
+//feature/library/library_reading_list_editor:bloc_guards_test           PASSED in 4.8s
+  Stats over 50 runs: max = 4.8s, min = 2.6s, avg = 3.2s, dev = 0.7s
+
+Executed 2 out of 2 tests: 2 tests pass.
