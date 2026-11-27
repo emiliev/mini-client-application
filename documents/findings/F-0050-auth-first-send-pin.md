@@ -36,6 +36,11 @@ Dio runs every request interceptor in `Future(() => ...)` (`dio-5.11.1/lib/src/d
 ## 6. The race step must not be vacuous
 `{user} signs in just before the app sends {route}` removes its hook once it fired, keeps the sign-in's result, and registers a teardown that **fails the scenario** if no request matched the route (the race was not exercised) or the sign-in failed. `negative_control.sh` points it at a route nobody sends: with the `session belongs to` assertion the scenario goes red, and without that assertion (and without the tap) only the teardown check fails ([log](../evidence/T-0050/engineer/negative_control.log)).
 
-## 7. Mutation harness notes
+## 7. Never drop a session future in a test
+`session.signIn(...).ignore()` leaves a file save running. Test teardown then deletes the temp storage folder under it: `Directory not empty (errno 66)`, 3 of 100 runs idle and 10 of 100 under load (Verifier D1). Rule: keep the future and await it before the folder goes. `Rig.track(future)` does it for `mc_api_auth` tests (`Rig.dispose` awaits every tracked save first); the bloc guard tests keep a list awaited in `tearDown`; the race step fails its scenario at teardown if its save had not finished (follow it with `the app finishes writing to storage`). Proof: `auth_pin_test` and `auth_races_test` at `--runs_per_test=200 --nocache_test_results`, idle and with 12 busy loops, 0 failures ([auth_pin_test](../evidence/T-0050/engineer/runs200_auth_pin_test.log), [auth_races_test](../evidence/T-0050/engineer/runs200_auth_races_test.log)).
+
+A related lesson (D4, a T-0039 test): do not wait in wall-clock time to land inside a retry delay (`delayed(10 ms)` against a 50 ms delay failed 1 in 100 under load, because the retry could run first). Act when the first send **arrives at the adapter** (`ArrivalAdapter`): that is before its 503 is answered, so it precedes the retry on any clock.
+
+## 8. Mutation harness notes
 - `if (_startOpenGuard() | true)` forces a guard to always pass without the analyzer's dead-code warning, which a build break would hide as "not evidence".
 - `EXPECT=survive` marks an equivalent mutation: the script fails if it is killed, so a later change that makes the guard load-bearing is noticed.

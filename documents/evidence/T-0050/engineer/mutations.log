@@ -5,7 +5,8 @@ K3 the pin failure is not the documented one: KILLED (00:00 +2 -1: T-0050-AC1 a 
 K4 a request that skips auth is held to its pin too: KILLED (00:00 +6 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a request that skips auth ignores the pin [E])
 K5 every unpinned request is rejected as if pinned: KILLED (00:00 +8 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 unpinned requests are unchanged: the switch gives the new bearer [E])
 K6 authPinned pins to the wrong epoch: KILLED (00:00 +0 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a user switch right after the call: no request, unauthorized [E])
-K7 the key is renamed: KILLED (00:00 +9 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 authPinned carries the epoch under the documented key [E])
+K7 the key is renamed: KILLED (00:00 +11 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 authPinned carries the epoch under the documented key [E])
+K8 only the first send is held to the pin (replays and retries exempt; Verifier M3): KILLED (00:00 +9 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a replay after the refresh keeps the pin: a sign-out between the refresh and the replay sends nothing more [E])
 P80-a one refresh is shared across sessions: KILLED (00:00 +7 -1: T-0039-AC2 a refresh outcome belongs to the session it started for T-0050-AC3 (P-080) one refresh per session: user A is in flight, user B starts its own [E])
 P80-b a replay after a local sign-out mid-refresh is sent without a token: KILLED (00:00 +8 -1: T-0039-AC2 a refresh outcome belongs to the session it started for T-0050-AC3 (P-080) a PUT of user A after a local sign-out during the refresh is not replayed without a token [E])
 P80-c boot reads the store even when the session file is absent: KILLED (00:00 +6 -1: T-0050-AC3 (P-080) with no session file nothing is read at boot, whatever else is in the directory [E])
@@ -20,6 +21,7 @@ P89-b a double tap on a creator opens it twice: KILLED (FAIL  comics_details A c
 P89-c the guard is 400 ms: a tap at 499 ms opens again: KILLED (FAIL  comics_details A comic's page A second tap 499 ms after the first is still the same tap (P-089) [T-0050-AC3])
 P89-d the guard is 600 ms: a tap at 501 ms is swallowed: KILLED (FAIL  comics_details A comic's page A tap 501 ms after the first opens the character again (P-089) [T-0050-AC3])
 P89-f the guard is not per target: a different character within 450 ms is dropped: KILLED (FAIL  comics_details A comic's page Tapping a different character 450 ms later is not a double tap (P-089) [T-0050-AC3])
+P89-g the open guard is keyed by id only: a creator with a character's id is dropped (Verifier M9): KILLED (FAIL  T-0050-AC3 (P-089) the open guard keys on the kind as well as the id: a creator with the id of the character just opened is not dropped)
 P89-e the guard timer is never started: KILLED (FAIL  comics_details A comic's page A double tap on a character hands it over once (P-089) [T-0050-AC3])
 R1-a the favourite tap is not dropped when the session moved on (still pinned to the shown epoch): KILLED (FAIL  T-0050-AC2 a tap handled after another user signed in, before the bloc heard of it, writes nothing for them)
 R1-b the favourite tap is not dropped and the write pins the current epoch: KILLED (FAIL  T-0050-AC2 a tap handled after another user signed in, before the bloc heard of it, writes nothing for them)
@@ -38,4 +40,4 @@ P93-E1 en_XA: the failed-load title is not the pseudo text: KILLED (FAIL  readin
 P93-E2 en_XA: the not-found title is not the pseudo text: KILLED (FAIL  reading_list_editor_l10n The reading list editor speaks the reader's language In the pseudo-locale a list that is not the reader's fits at <scale>x (1) [T-0050-AC3])
 P93-DE German: the refused-name message is English: KILLED (FAIL  reading_list_editor_l10n The reading list editor speaks the reader's language In German the backend's refusal of a name is German, under the name [T-0050-AC3])
 
-38 of 38 mutations behaved as expected
+40 of 40 mutations behaved as expected
