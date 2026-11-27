@@ -28,7 +28,7 @@ Flutter markers: @flutter_sky_engine//:sky_engine
 @flutter_sky_engine//sky_engine:lib/_empty.dart
 throwaway package removed, tree clean: yes
 ```
-## fixtures check (33 production targets scanned)
+## fixtures check (34 production targets scanned)
 ```
 mc_fixtures_platform dependencies: none
 positive control (a test of mc_feature_flags): //utility/mc_fixtures_platform:lib/mc_fixtures_platform.dart //utility/mc_fixtures_platform:lib/src/data/flags.dart 
@@ -54,7 +54,7 @@ throwaway package removed, tree clean: yes
 | coverage >= 90 % | PASS |
 
 - the two packages' tests, uncached: Executed 10 out of 10 tests: 10 tests pass.
-- test //...: Executed 62 out of 163 tests: 163 tests pass.
-- coverage (mc_feature_flags, then mc_fixtures_platform): TOTAL 416/423 98.3% TOTAL 51/55 92.7%  (threshold 90 %)
+- test //...: Executed 0 out of 176 tests: 176 tests pass.
+- coverage (mc_feature_flags, then mc_fixtures_platform): TOTAL 425/433 98.2% TOTAL 51/55 92.7%  (threshold 90 %)
 
 **PASS T-0052-AC5-gates**
