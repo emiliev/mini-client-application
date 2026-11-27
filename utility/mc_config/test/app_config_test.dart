@@ -73,4 +73,21 @@ void main() {
       expect(withTrailingSlash(''), '/');
     });
   });
+
+  group('T-0053-AC1 analytics default consent', () {
+    String parse(String analytics) => AppConfig.parse(
+      '{"env":"dev","backend":{"seed":7,"latencyMs":0,"scenario":"happy"},'
+      '"apiBaseUrl":"https://api.test","build":"3"$analytics}',
+    ).analytics.defaultConsent;
+
+    test('a missing section or key means unknown', () {
+      expect(parse(''), 'unknown');
+      expect(parse(',"analytics":{}'), 'unknown');
+    });
+
+    test('the configured value is read', () {
+      expect(parse(',"analytics":{"defaultConsent":"granted"}'), 'granted');
+      expect(parse(',"analytics":{"defaultConsent":"denied"}'), 'denied');
+    });
+  });
 }

@@ -19,6 +19,23 @@ class BackendConfig {
   final String scenario;
 }
 
+/// Analytics settings (`analytics` in `config/<env>.json`, optional).
+class AnalyticsConfig {
+  const AnalyticsConfig({this.defaultConsent = 'unknown'});
+
+  /// A missing `analytics` section, or a missing key, means `unknown`.
+  factory AnalyticsConfig.fromJson(Map<String, dynamic>? json) =>
+      AnalyticsConfig(
+        defaultConsent: (json?['defaultConsent'] as String?) ?? 'unknown',
+      );
+
+  /// The consent before the user has chosen: `unknown`, `granted` or
+  /// `denied`. `dev` and `e2e` say `granted` so developers see events;
+  /// release-like builds leave it `unknown`. `mc_analytics` reads it (a
+  /// saved choice wins).
+  final String defaultConsent;
+}
+
 /// [url] with a trailing `/` added when it has none. Real code, not an
 /// assert: asserts are stripped in release builds.
 String withTrailingSlash(String url) => url.endsWith('/') ? url : '$url/';
@@ -31,6 +48,7 @@ class AppConfig {
     required this.backend,
     required String apiBaseUrl,
     required this.build,
+    this.analytics = const AnalyticsConfig(),
   }) : apiBaseUrl = withTrailingSlash(apiBaseUrl);
 
   factory AppConfig.fromJson(Map<String, dynamic> json) => AppConfig(
@@ -38,6 +56,9 @@ class AppConfig {
     backend: BackendConfig.fromJson(json['backend'] as Map<String, dynamic>),
     apiBaseUrl: json['apiBaseUrl'] as String,
     build: json['build'] as String,
+    analytics: AnalyticsConfig.fromJson(
+      json['analytics'] as Map<String, dynamic>?,
+    ),
   );
 
   /// Parses the text of `app_config.json`.
@@ -53,4 +74,5 @@ class AppConfig {
   /// `baseUrl + path` as strings. The mocked backend never contacts it.
   final String apiBaseUrl;
   final String build;
+  final AnalyticsConfig analytics;
 }
