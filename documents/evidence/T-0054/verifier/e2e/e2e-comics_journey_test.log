@@ -1,0 +1,69 @@
+# e2e_ios.sh: T-0054 verifier on mc-T-0054-verifier-95588 (424AB238-3792-40DF-B308-C1338F33C0F9)
+# cwd: /tmp/mc-T-0054-verifier-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test
+$ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/T-0054-verifier/run_target.sh 424AB238-3792-40DF-B308-C1338F33C0F9 integration_test/comics_journey_test.dart test_driver/integration_test.dart
+
+== verifier wrapper: uninstall com.emiliev.miniClient from 424AB238-3792-40DF-B308-C1338F33C0F9, rm build/ios/iphonesimulator
+Resolving dependencies in `/private/tmp/mc-T-0054-verifier-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0054-verifier-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           14.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:54077/La6EH-qV2sI=/
+VMServiceFlutterDriver: Isolate found with number: 4111685936842323
+VMServiceFlutterDriver: Isolate 4111685936842323 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0041-AC5 home to a character preview, a related comic and its page; favourite after sign-in; the cast leads on
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: d2737ef4559cba1ebbcf05233bd470be, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: d2737ef4559cba1ebbcf05233bd470be, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: d2737ef4559cba1ebbcf05233bd470be, seq: 3}
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
+flutter: [event] mc_screen_view {screen_name: comics_details, session_id: d2737ef4559cba1ebbcf05233bd470be, seq: 4}
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501267 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _SigningIn
+flutter: [debug] POST /v1/auth/sign-in -> 200
+flutter: [warning] GET /v1/me/favourites/comic/501267 failed: 404
+flutter: [debug] ComicFavouriteBloc: _Toggle _SigningIn -> _Ready
+flutter: [debug] PUT /v1/me/favourites/comic/501267 -> 200
+flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _Ready
+flutter: [event] mc_screen_view {screen_name: character_details, session_id: d2737ef4559cba1ebbcf05233bd470be, seq: 5}
+flutter: 00:16 +1: (tearDownAll)
+flutter: 00:16 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/10_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/11_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/12_preview_related_comics.png (332722)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/13_comic_page.png (374920)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/14_sign_in_sheet.png (348220)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/15_favourite_saved.png (377614)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/16_comic_cast.png (352658)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/7-comics_journey_test/17_cast_member_placeholder.png (222291)
+All tests passed.
+
+# exit code: 0

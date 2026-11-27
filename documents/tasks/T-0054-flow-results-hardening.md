@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Review (engineer done; awaiting a fresh Verifier) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Opus tier** (app navigation; ADR-0011) |
 | Branch | `fleet/T-0054-flow-results-hardening` |
@@ -56,3 +56,54 @@ The not-found screen also needs a way home.
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27: Review round (TL, from `/code-review`): items 1 to 6 fixed, see "Review round". The TL authorized editing F-0049 (it was in the brief).
+- 2026-11-27: Engineer implemented AC1 to AC5 on `fleet/T-0054-flow-results-hardening`; merged `origin/main` (`ed3c2cd`, T-0053) and re-ran everything on the merged tree.
+
+## Outcome
+
+### AC to evidence
+| AC | Evidence |
+|---|---|
+| T-0054-AC1 (P-094) | `app_core/test/flow_results_hardening_test.dart`, group `T-0054-AC1`: a result; Back; a `go` that replaces it; dispose; a guard redirect then `go(from)` (null once, no assert, the route a `go` built adds nothing); a redirect then Back; a redirect then go home; a redirected page that pops with a value (kills V08); two callers of one location; a forgotten `extra` still asserts and a `go` to the pushed location does not. Mutation V08 killed (log below) |
+| T-0054-AC2 (P-095) | same file, group `T-0054-AC2`: JSON round-trip, FlowCall dropped, unsafe values (custom class, int keys, NaN, closures, a list holding one) dropped with one warning naming the type, self-reference, a custom extra pushed and reported (no throw, saved state has no trace, one codec warning, none from go_router, go_router's `logger` captured). T-0049 codec tests unchanged and green |
+| T-0054-AC3 (P-096) | same file, group `T-0054-AC3`: complete then `go` before the dialog closes; dialog closes then `go`; both same-frame orders (dialog first, `go` first); an empty result; no result; a route removed from a plain Navigator while holding a result (no router). T-0048 / T-0049 overlay tests unchanged and green |
+| T-0054-AC4 (P-097) | `mini_client/test/not_found_test.dart` (cold and running, for `/nope`, `/a/b/c`, `/comics/abc`: `[home, not-found]`, Back and Go home each reach home in one action; a not-found with nothing under it; one pushed over a page pops; URLs unchanged). e2e `not_found_cold_test`, `not_found_cold_bad_comic_test`, screenshots `60`..`62b` in `evidence/T-0054/engineer/e2e/` |
+| T-0054-AC4 (P-098) | `deep_link_back_stack_test`: the `/characters/<id>` AC2 test now starts from home (name carries `T-0054-AC4`). Mutation P1 (links as a push) is killed by exactly that test |
+| T-0054-AC5 | `tool/checks/T-0054-AC5_gates.sh` PASS ([gates.md](../evidence/T-0054/engineer/gates.md)): 167 tests, lint, arch, rules_fork, format, l10n, fixtures, relative paths, provenance, coverage mini_client 96.2 %, app_core 96.9 %. e2e: 13/13 PASS on own simulator `mc-T-0054-engineer-61021`, deleted. `tool/checks/T-0054-AC5_mutations.sh` |
+| DoD flake rule | `--runs_per_test=50 --nocache_test_results` on every changed or added navigation target plus app_test, analytics_screens_test, router_observers_test, bdd_test: 8/8 pass, 0 failures ([log](../evidence/T-0054/engineer/runs_per_test_50.log)). None of the new tests drops a storage-writing future |
+
+### Mutations
+33 mutations (the Verifier's V08 and 32 of mine), **33 killed**, none broken, none survived ([log](../evidence/T-0054/engineer/mutations.log)). Two earlier candidates were dropped honestly: a "no first stack check after the push" mutant survived, because the listener makes that check redundant, so I removed the dead call; and the direct `_call?.complete(pending.value)` in `_deliver` is now an equivalent mutant (the call also holds the result), so it stays as an explicit guard and is not claimed as mutation-tested. P1 runs only the T-0054-AC4 test (`--test_filter`), because under a push the other deep-link tests wait out their timeouts.
+
+### Plan 01 §4.4 sentence for the TL to apply (picker extras)
+> A picker's arguments travel as the route's `$extra` and must be a JSON-safe value (null, bool, finite number, String, or a List or Map with String keys of those): `FlowExtraCodec` keeps only those when the route state is saved and drops anything else to null with a debug warning, so a picker reads a null `$extra` as "no argument" (it is also null after **any** re-parse of the route state: a `refresh`, a `refreshListenable` tick or a restore) and never relies on a live object surviving. *(Corrected in the review round.)*
+
+### Decisions inside scope
+1. **The page is found by its push future, not by extra or location.** A redirect drops the `extra`; the match keeps the completer whose future `routeInformationProvider.push` returned, so `AppFlows` calls that (what `GoRouter.push` does) and watches the delegate. The check runs after the next frame, because a page a `go` removed under a dialog is disposed late and must hand over its held result first.
+2. **`FlowCall` holds the result** (`_hold` / `abandon`), so the stack watch and dispose both deliver a held result (P-096).
+3. **The debug assert compares widget `extra` with `GoRouterState.extra`** and the location tokens are gone.
+4. **Codec warning once per type** (a static set, with `resetFlowExtraWarnings()` for tests), because go_router encodes each imperative match on every report. Depth limit 32.
+5. **Not-found is a route nested under home**, `/not-found?from=<path>` (named `not_found`), reached by `onException` (which sees both no-match and the typed route's redirect error for `/comics/abc`). `errorBuilder` is removed (go_router allows only one of them). `AppLocations` is unchanged; the new location lives in `app_router.dart`. The shown location is the link's path and query without `miniclient://app`.
+6. `analytics_screens_test` (T-0053) lists every route name exactly; I added `not_found` to its expected set (one line).
+
+### Changes outside `app_core` and `mini_client`
+None in code. New scripts `tool/checks/T-0054-AC5_gates.sh` and `T-0054-AC5_mutations.sh`, and F-0049 (facts 7 to 9, rule, not done).
+
+### Findings for the TL
+- **`tool/e2e_ios.sh` can report a false PASS.** My first e2e run built two new targets with a compile error (`e2eStartLinkFile` is in `app_core`); the Xcode build failed, yet the target "passed" because an app installed by the previous target ran its own test and the script saw that pass. Look for `BUILD FAILED` in `e2e-*.log` (I do; none in the final run). Worth a pending-work item for the script (fail a target whose log has `BUILD FAILED` or `Failed to build`).
+- Reproduced the Bazel `Checking Dart formatting` failure as a build error for an unformatted test file (a mutation script must run `dart format` after editing, which mine does).
+
+## Review round (2026-11-27)
+| # | Finding | Fix | Evidence |
+|---|---|---|---|
+| 1 | A re-parse abandons a live call (go_router makes a fresh `Completer`, a null `extra`, the same `pageKey`) | The stack watch takes the page's **key** when the router applies the push (synchronously, in the delegate listener) and matches by key from then on. `FlowResultRoute` keeps the call it was given when a re-parse gives it a null `extra` (go_router keeps the page and its `State` because the key is unchanged). No lookup by key is needed: a rebuilt `State` would have disposed, and ended the call, first | Tests `refresh()` then save (the result once), `refresh()` then Back (null once), a `refreshListenable` tick then save, a refresh then a `go`, a restore of the saved state then save. Mutations R1 (match by completer) and R2 (drop the call on a null extra) killed |
+| 2 | A page replaced before the first post-frame check hangs the caller; the listener leaks | The key is taken on every delegate change; a first look after the push; a push that is no longer the provider's pending navigation and never showed is abandoned. Every completion removes the listener. A test hook `AppFlows.debugOnChange` proves no listener is left | Tests: `createReadingList(router); router.go(...)` in one span (null once), the same with the pushed location, every end removes the listener (a router change reaches no watch afterwards). Mutations R3 (no supersede check and no first look) and R5 (listener never removed) killed. Either guard alone is redundant for the same-span case (each alone survives), so R3 removes both |
+| 3 | Errors outside the parser show go_router's ErrorScreen | Read `parser.dart` (17.5): `onException` covers every error list `_navigate` produces: no-match, a redirect that throws, and a restored state whose location no longer matches. It is skipped only for an error inside an `onEnter` (the app has none), and a malformed saved state throws from `decode` before any match list exists. So `onException` stays, and a test pins `topOnEnter == null` | Tests: a restore with a location that no longer matches shows not-found with Back and Go home (`[home, not-found]`), and the `topOnEnter` pin. Not mutation-tested: the pin is a test of the router's shape |
+| 4 | `push<String>` throws on a non-String pop | Pushed as `Object?`, mapped with `value is String ? value : null` | Test: a redirected page popping `true` gives null, nothing throws. Mutation R7 killed |
+| 5 | The extras doc said "after a restore" | Fixed in the codec doc, the debug warning and F-0049, and in the plan §4.4 sentence above | |
+| 6 | Not-found dropped the `#fragment` | Kept (`_asked`) | Test cold and running; mutation N11 killed |
+| 7 | F-0049 | Authorized by the TL; extended (re-parse, same-frame replacement, pop values, error paths) | |
+
+**Reruns on the final tree.** Gates PASS (coverage mini_client 96.3 %, app_core 96.2 %). `--runs_per_test=50 --nocache_test_results` on 8 targets: 0 failures. Mutations: **39 of 39 killed**, none broken (some mutations from the first round were re-anchored or merged; a mutant that survived alone was redundant). e2e 13/13 PASS on my own simulator `mc-T-0054-engineer-91556` (deleted), with `xcrun simctl uninstall` before each target and a grep of every log for `BUILD FAILED`, `Error (Xcode)`, `Could not build the application` and `Compilation failed` (no hit). The e2e ran one commit before the last, which only reworded a variable (`push.then` to `pushed.then`, a lint fix: an unused variable). Gates, flake check and mutations ran on the final commit.
+
+**Decisions.** (a) The registry by page key that I first built to re-attach a rebuilt route was dead code (the old `State` disposes and ends the call first) and is removed. (b) `AppFlows.watchers` (a counter) was replaced by `debugOnChange`, because the counter could not tell a leaked listener from a removed one.

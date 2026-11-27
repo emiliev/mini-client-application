@@ -1,0 +1,50 @@
+"""T-0054 Verifier coverage parser (independent of tool/checks/merge_lcov.py).
+
+usage: cov.py <repo> <testlogs dir> <pkg> [<pkg> ...]
+For each package: union of line hits over the coverage.dat of the package's
+OWN test targets (testlogs/<pkg>/*/coverage.dat), counting only hand-written
+files under <pkg>/lib/ (generated *.g.dart, *.freezed.dart, *.config.dart and
+l10n output excluded). Lists lib files no LCOV mentions, and per-file misses
+for flow_results.dart / app_router.dart / placeholder_pages.dart.
+"""
+import glob
+import os
+import re
+import sys
+
+GEN = re.compile(r"\.(g|freezed|config|gr|mocks)\.dart$|/l10n/gen/|app_localizations")
+
+repo, logs = sys.argv[1], sys.argv[2]
+for pkg in sys.argv[3:]:
+    hits = {}
+    dats = glob.glob(os.path.join(logs, pkg, "*", "coverage.dat"))
+    for dat in dats:
+        sf = None
+        for line in open(dat, errors="replace"):
+            line = line.strip()
+            if line.startswith("SF:"):
+                p = line[3:]
+                name = os.path.basename(pkg)
+                if p.startswith("package:%s/" % name):
+                    sf = "%s/lib/%s" % (pkg, p[len("package:%s/" % name):])
+                else:
+                    i = p.find(pkg + "/lib/")
+                    sf = p[i:] if i >= 0 else None
+                if sf and GEN.search(sf):
+                    sf = None
+            elif line.startswith("DA:") and sf:
+                ln, n = line[3:].split(",")[:2]
+                d = hits.setdefault(sf, {})
+                d[int(ln)] = d.get(int(ln), 0) + int(n)
+            elif line == "end_of_record":
+                sf = None
+    total = sum(len(v) for v in hits.values())
+    cov = sum(1 for v in hits.values() for n in v.values() if n > 0)
+    print("== %s: %d LCOV files, %d/%d = %.1f %%" % (pkg, len(dats), cov, total, 100.0 * cov / max(total, 1)))
+    libs = [os.path.relpath(f, repo) for f in glob.glob(os.path.join(repo, pkg, "lib", "**", "*.dart"), recursive=True)]
+    missing = sorted(f for f in libs if f not in hits and not GEN.search(f))
+    print("   lib files no LCOV mentions:", missing)
+    for f, v in sorted(hits.items()):
+        if re.search(r"flow_results|app_router|placeholder_pages|route_nesting", f):
+            miss = sorted(l for l, n in v.items() if n == 0)
+            print("   %s: %d/%d, missed lines %s" % (f, sum(1 for n in v.values() if n), len(v), miss))

@@ -31,6 +31,8 @@ const _expectedRouteNames = {
   'discovery_search',
   'reading_list_new',
   'reading_list_edit',
+  // T-0054: the not-found screen, nested under home.
+  'not_found',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {

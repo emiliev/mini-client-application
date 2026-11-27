@@ -1,0 +1,186 @@
+// VERIFIER PROBE (temporary). T-0054-AC4 (P-097): the not-found screen is reachable at any path, cold or
+// running, opens as [home, not-found], and always has a way home.
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:app_core/app_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+import 'package:mini_client/src/mini_client_app.dart';
+import 'package:mini_client/src/pages/placeholder_pages.dart';
+
+const _config =
+    '{"env":"e2e","backend":{"seed":42,"latencyMs":0,"scenario":"happy"},'
+    '"apiBaseUrl":"https://mock.mini-client.invalid/","build":"1"}';
+
+const _home = Key('home.placeholder');
+const _notFound = Key('not.found');
+
+/// The paths that find nothing: an unknown path, a deeper one, a bad id.
+
+Future<void> _pushLink(WidgetTester tester, String location) =>
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', {
+          'location': location,
+          'state': null,
+        }),
+      ),
+      (_) {},
+    );
+
+void main() {
+  late Directory storage;
+
+  setUp(() async {
+    await resetDIContainer();
+    storage = Directory.systemTemp.createTempSync('not_found_test');
+  });
+
+  tearDown(() async {
+    await resetDIContainer();
+    storage.deleteSync(recursive: true);
+  });
+
+  Future<void> boot(WidgetTester tester, {String? coldStartLink}) async {
+    tester.view
+      ..devicePixelRatio = 1
+      ..physicalSize = mcReferenceSurface;
+    addTearDown(tester.view.reset);
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    if (coldStartLink != null) {
+      links.offer(coldStartLink);
+    }
+    await tester.pumpWidget(
+      DefaultAssetBundle(
+        bundle: McFixtureAssetBundle(),
+        child: MiniClientApp(
+          links: links,
+          initializers: (routerRef) => rootInitializers(
+            config: () async => _config,
+            storageDirectory: storage,
+            monitoringSinks: [InMemorySink()],
+            mockDomains: appMockDomains,
+            routerRef: routerRef,
+            wirings: wiringInitializers,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+  }
+
+  /// How many pages the router holds (the stack, not the screens).
+  int depth(WidgetTester tester, Key on) {
+    final router = GoRouter.of(tester.element(find.byKey(on)));
+    return router.routerDelegate.currentConfiguration.matches.length;
+  }
+
+  void expectHomeAlone(String reason) {
+    expect(find.byKey(_home), findsOneWidget, reason: reason);
+    expect(find.byKey(_notFound), findsNothing, reason: reason);
+    expect(find.byType(BackButton), findsNothing, reason: 'nothing below home');
+  }
+
+  testWidgets('VN01 a restored state whose pushed page no longer matches', (
+    tester,
+  ) async {
+    await boot(tester);
+    await tester.tap(find.text('Characters'));
+    await tester.pumpAndSettle();
+    final router = GoRouter.of(
+      tester.element(
+        find.byKey(const ValueKey<String>('characters_list.grid')),
+      ),
+    );
+    final saved = router.routeInformationParser.restoreRouteInformation(
+      router.routerDelegate.currentConfiguration,
+    )!;
+    final state = Map<String, Object?>.of(
+      jsonDecode(jsonEncode(saved.state)) as Map<String, Object?>,
+    );
+    // ignore: avoid_print
+    print('VN01 saved state: ${jsonEncode(state)}');
+    final imps = (state['imperativeMatches']! as List)
+        .cast<Map<String, Object?>>();
+    imps.first['location'] = '/gone';
+    await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', {
+          'location': saved.uri.toString(),
+          'state': state,
+        }),
+      ),
+      (_) {},
+    );
+    await tester.pumpAndSettle();
+    final ex = tester.takeException();
+    // ignore: avoid_print
+    print('VN01 exception: $ex');
+    final cfg = router.routerDelegate.currentConfiguration;
+    // ignore: avoid_print
+    print(
+      'VN01 cfg uri=${cfg.uri} isError=${cfg.isError} matches=${cfg.matches.map((m) => '${m.runtimeType}:${m.matchedLocation}:${m is ImperativeRouteMatch ? m.matches.isError : '-'}').toList()}',
+    );
+    // ignore: avoid_print
+    print(
+      'VN01 provider=${router.routeInformationProvider.value.uri} ${router.routeInformationProvider.value.state.runtimeType}',
+    );
+    // ignore: avoid_print
+    print(
+      'VN01 notFound=${find.byKey(_notFound).evaluate().length} '
+      'errorScreen=${find.textContaining('Page Not Found').evaluate().length} '
+      'texts=${find.byType(Text).evaluate().map((e) => (e.widget as Text).data).take(8).toList()}',
+    );
+  });
+
+  testWidgets('VN02 a push of an unknown path from inside the app', (
+    tester,
+  ) async {
+    await boot(tester);
+    final router = GoRouter.of(tester.element(find.byKey(_home)));
+    await tester.tap(find.text('Characters'));
+    await tester.pumpAndSettle();
+    unawaited(router.push<void>('/nope'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_notFound), findsOneWidget);
+    expect(depth(tester, _notFound), 2);
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+    expectHomeAlone('Back');
+  });
+
+  testWidgets('VN03 cold /nope#frag', (tester) async {
+    await boot(tester, coldStartLink: 'miniclient://app/nope#frag');
+    expect(find.text('Nothing lives at /nope#frag'), findsOneWidget);
+    expect(depth(tester, _notFound), 2);
+    await tester.tap(find.byKey(notFoundHomeKey));
+    await tester.pumpAndSettle();
+    expectHomeAlone('Go home');
+  });
+
+  testWidgets('VN04 a link to /comics/abc, then to /not-found itself', (
+    tester,
+  ) async {
+    await boot(tester);
+    await _pushLink(tester, 'miniclient://app/comics/abc');
+    await tester.pumpAndSettle();
+    expect(find.text('Nothing lives at /comics/abc'), findsOneWidget);
+    expect(depth(tester, _notFound), 2);
+    await _pushLink(tester, 'miniclient://app/not-found');
+    await tester.pumpAndSettle();
+    expect(find.byKey(_notFound), findsOneWidget);
+    expect(depth(tester, _notFound), 2);
+    expect(tester.takeException(), isNull);
+  });
+}

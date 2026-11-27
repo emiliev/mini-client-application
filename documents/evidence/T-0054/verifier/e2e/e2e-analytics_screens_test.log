@@ -1,0 +1,73 @@
+# e2e_ios.sh: T-0054 verifier on mc-T-0054-verifier-95588 (424AB238-3792-40DF-B308-C1338F33C0F9)
+# cwd: /tmp/mc-T-0054-verifier-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/1-analytics_screens_test
+$ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/T-0054-verifier/run_target.sh 424AB238-3792-40DF-B308-C1338F33C0F9 integration_test/analytics_screens_test.dart test_driver/integration_test.dart
+
+== verifier wrapper: uninstall com.emiliev.miniClient from 424AB238-3792-40DF-B308-C1338F33C0F9, rm build/ios/iphonesimulator
+Resolving dependencies in `/private/tmp/mc-T-0054-verifier-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0054-verifier-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           46.5s
+Failed to index action parameter: <WFDynamicTagFieldParameter: 0x600003d8eb20> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter)
+Failed to index action parameter: <WFDynamicTagFieldParameter: 0x600003d8f2a0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter)
+Failed to check availability in Spotlight for action com.apple.facetime.facetime: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x6000010e6940 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51869/X6YJcQtdgTQ=/
+VMServiceFlutterDriver: Isolate found with number: 8146763413236635
+VMServiceFlutterDriver: Isolate 8146763413236635 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0053-AC4 home to the characters list and back records the screens
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: b550c0f49933cc0c9de694229bdcd9df, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: b550c0f49933cc0c9de694229bdcd9df, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: b550c0f49933cc0c9de694229bdcd9df, seq: 3}
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+Failed to index action parameter: <WFPhotoItemCollectionParameter: 0x60000397b260> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPhotoItemCollectionParameter)
+Failed to index action parameter: <WFSSHKeyParameter: 0x6000037392c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSSHKeyParameter)
+Failed to index action parameter: <WFSpotlightSearchResultTypePickerParameter: 0x10299edc0> due to ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState)
+Failed to index action parameter: <WFPosterPickerParameter: 0x600003722100> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
+Failed to index action parameter: <WFTagFieldParameter: 0x600003b6c380> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFTagFieldParameter)
+Failed to index action parameter: <WFMediaPickerParameter: 0x6000037400c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFMediaPickerParameter)
+is.workflow.actions.conditional WFConditionalAction: Skipped because: [control flow]
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d52850> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+Failed to check availability in Spotlight for action is.workflow.actions.lightroom.import: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x60000110bb40 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.adobe.lrmobile, IS=false}}}
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+is.workflow.actions.useractivity.open WFOpenUserActivityAction: Skipped because: [donation-based action]
+Failed to check availability in Spotlight for action is.workflow.actions.workout.start: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001151710 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.SessionTrackerApp, IS=false}}}
+Failed to check availability in Spotlight for action is.workflow.actions.workout.end: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x60000110bd20 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.SessionTrackerApp, IS=false}}}
+is.workflow.actions.sirikit.donation.handle WFHandleDonatedIntentAction: Skipped because: [donation-based action]
+flutter: [event] mc_screen_view {screen_name: home, session_id: b550c0f49933cc0c9de694229bdcd9df, seq: 4}
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x60000373b3c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+Failed to index action parameter: <WFHomeAccessoryPickerParameter: 0x60000373b780> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeAccessoryPickerParameter)
+Failed to index action parameter: <WFHomeServicePickerParameter: 0x600003750f00> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeServicePickerParameter)
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d4ca50> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+Failed to index action parameter: <WFPosterPickerParameter: 0x60000373e280> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
+is.workflow.actions.repeat.count WFFiniteRepeatAction: Skipped because: [control flow]
+flutter: 00:06 +1: (tearDownAll)
+flutter: 00:06 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/1-analytics_screens_test/01_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/1-analytics_screens_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/1-analytics_screens_test/03_back_to_home.png (310591)
+All tests passed.
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x6000037658c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+
+# exit code: 0

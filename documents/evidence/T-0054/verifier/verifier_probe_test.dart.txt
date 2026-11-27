@@ -1,0 +1,817 @@
+// T-0054 Verifier probes (temporary; removed after the run, kept as .txt).
+import 'dart:async';
+import 'dart:convert';
+
+import 'package:app_core/app_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+
+const _finish = Key('v.finish');
+const _signIn = Key('v.signin');
+const _signInPop = Key('v.signin.pop');
+
+class _Flow extends StatelessWidget {
+  const _Flow({required this.onComplete, required this.label});
+  final ValueChanged<String?> onComplete;
+  final String label;
+  @override
+  Widget build(BuildContext context) => TextButton(
+    key: _finish,
+    onPressed: () => onComplete(label),
+    child: Text('finish $label'),
+  );
+}
+
+class _H {
+  _H(this.router, this.signedIn, this.tick);
+  final GoRouter router;
+  final ValueNotifier<bool> signedIn;
+  final ValueNotifier<int> tick;
+  final List<String> got = [];
+  void create() => unawaited(
+    AppFlows.createReadingList(router).then((v) => got.add('c:$v')),
+  );
+  void edit(String id) => unawaited(
+    AppFlows.editReadingList(router, id).then((v) => got.add('e:$v')),
+  );
+}
+
+int _changes = 0;
+
+Future<_H> _boot(
+  WidgetTester tester, {
+  bool signedIn = true,
+  bool asyncGuard = false,
+  int guardMs = 50,
+}) async {
+  final state = ValueNotifier<bool>(signedIn);
+  final tick = ValueNotifier<int>(0);
+  addTearDown(state.dispose);
+  addTearDown(tick.dispose);
+  FutureOr<String?> guard(BuildContext c, GoRouterState s) {
+    String? target() {
+      if (!state.value && s.uri.path.startsWith('/me/')) {
+        return '/signin?from=${Uri.encodeComponent(s.uri.toString())}';
+      }
+      return null;
+    }
+
+    if (asyncGuard && s.uri.path.startsWith('/me/')) {
+      return Future<String?>.delayed(
+        Duration(milliseconds: guardMs),
+        target,
+      );
+    }
+    return target();
+  }
+
+  final router = GoRouter(
+    extraCodec: const FlowExtraCodec(),
+    refreshListenable: Listenable.merge([state, tick]),
+    redirect: guard,
+    routes: [
+      GoRoute(path: '/', builder: (c, s) => const Text('home')),
+      GoRoute(path: '/other', builder: (c, s) => const Text('other')),
+      GoRoute(
+        path: '/signin',
+        builder: (c, s) => Column(
+          children: [
+            TextButton(
+              key: _signIn,
+              onPressed: () {
+                state.value = true;
+                GoRouter.of(c).go(s.uri.queryParameters['from']!);
+              },
+              child: const Text('sign in'),
+            ),
+            TextButton(
+              key: _signInPop,
+              onPressed: () => Navigator.of(c).pop('popped'),
+              child: const Text('pop'),
+            ),
+          ],
+        ),
+      ),
+      GoRoute(
+        path: '/me/lists/new',
+        builder: (c, s) => FlowResultRoute<String>(
+          extra: s.extra,
+          builder: (complete) => _Flow(onComplete: complete, label: 'new-id'),
+        ),
+      ),
+      GoRoute(
+        path: '/me/lists/:id/edit',
+        builder: (c, s) => FlowResultRoute<String>(
+          extra: s.extra,
+          builder: (complete) =>
+              _Flow(onComplete: complete, label: s.pathParameters['id']!),
+        ),
+      ),
+    ],
+  );
+  addTearDown(router.dispose);
+  await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+  await tester.pumpAndSettle();
+  return _H(router, state, tick);
+}
+
+/// Router changes after every call ended reach no watch.
+Future<void> _noListener(WidgetTester tester, _H h) async {
+  final before = _changes;
+  h.router.go('/other');
+  await tester.pumpAndSettle();
+  h.router.go('/');
+  await tester.pumpAndSettle();
+  expect(_changes, before, reason: 'a listener is left on the delegate');
+}
+
+Future<void> _systemBack(WidgetTester tester) async {
+  await tester.binding.handlePopRoute();
+  await tester.pumpAndSettle();
+}
+
+Future<void> _restore(WidgetTester tester, GoRouter router) async {
+  final saved = router.routeInformationParser.restoreRouteInformation(
+    router.routerDelegate.currentConfiguration,
+  )!;
+  // Through JSON, as the engine would.
+  final state = jsonDecode(jsonEncode(saved.state));
+  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+    'flutter/navigation',
+    const JSONMethodCodec().encodeMethodCall(
+      MethodCall('pushRouteInformation', {
+        'location': saved.uri.toString(),
+        'state': state,
+      }),
+    ),
+    (_) {},
+  );
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapFinish(WidgetTester tester) async {
+  await tester.tap(find.byKey(_finish));
+  await tester.pumpAndSettle();
+}
+
+void main() {
+  setUp(() {
+    _changes = 0;
+    AppFlows.debugOnChange = () => _changes++;
+    addTearDown(() => AppFlows.debugOnChange = null);
+  });
+
+  group('VP AC1', () {
+    testWidgets('VP01 result once, listener positive control then removed', (
+      tester,
+    ) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      final live = _changes;
+      h.tick.value++;
+      await tester.pumpAndSettle();
+      expect(_changes, greaterThan(live), reason: 'watch is live (control)');
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      await _noListener(tester, h);
+      expect(h.got, ['c:new-id']);
+    });
+
+    testWidgets('VP02 router.pop gives null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.pop();
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP03 system back gives null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      await _systemBack(tester);
+      expect(find.text('home'), findsOneWidget);
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP04 go replaces it: null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP05 guard redirect then go(from): null once, no assert, '
+        'later save adds nothing', (tester) async {
+      final h = await _boot(tester, signedIn: false);
+      h.create();
+      await tester.pumpAndSettle();
+      expect(find.byKey(_signIn), findsOneWidget);
+      expect(h.got, isEmpty);
+      await tester.tap(find.byKey(_signIn));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(_finish), findsOneWidget);
+      expect(h.got, ['c:null']);
+      await _tapFinish(tester);
+      expect(tester.takeException(), isNull);
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP06 guard redirect then system Back: null once', (
+      tester,
+    ) async {
+      final h = await _boot(tester, signedIn: false);
+      h.create();
+      await tester.pumpAndSettle();
+      await _systemBack(tester);
+      expect(find.text('home'), findsOneWidget);
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP07 async guard redirect then go(from): null once', (
+      tester,
+    ) async {
+      final h = await _boot(tester, signedIn: false, asyncGuard: true);
+      h.create();
+      await tester.pumpAndSettle();
+      expect(find.byKey(_signIn), findsOneWidget);
+      expect(h.got, isEmpty, reason: 'the async redirect is not a supersede');
+      await tester.tap(find.byKey(_signIn));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(_finish), findsOneWidget);
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP08 async guard, signed in: save gives the result', (
+      tester,
+    ) async {
+      final h = await _boot(tester, asyncGuard: true);
+      h.create();
+      await tester.pumpAndSettle();
+      expect(h.got, isEmpty);
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      await _noListener(tester, h);
+    });
+
+    for (final ms in [150, 400]) {
+      for (final plain in [true, false]) {
+        testWidgets('VP07d control: slow async guard ${ms}ms, '
+            '${plain ? 'plain router.push' : 'AppFlows'}', (tester) async {
+          final h = await _boot(
+            tester,
+            signedIn: false,
+            asyncGuard: true,
+            guardMs: ms,
+          );
+          if (plain) {
+            unawaited(h.router.push<Object?>('/me/lists/new'));
+          } else {
+            h.create();
+          }
+          for (var i = 0; i < 20; i++) {
+            await tester.pump(const Duration(milliseconds: 50));
+          }
+          await tester.pumpAndSettle();
+          // ignore: avoid_print
+          print(
+            'VP07d ms=$ms plain=$plain signin=${find.byKey(_signIn).evaluate().length} got=${h.got} '
+            'cfg=${h.router.routerDelegate.currentConfiguration.uri} '
+            'provider=${h.router.routeInformationProvider.value.uri}',
+          );
+        });
+      }
+    }
+
+    testWidgets('VP07b slow async guard (spans frames): not abandoned while '
+        'the push waits, then go(from) gives null once', (tester) async {
+      final h = await _boot(
+        tester,
+        signedIn: false,
+        asyncGuard: true,
+        guardMs: 400,
+      );
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      h.create();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(h.got, isEmpty, reason: 'a push still in its redirect is live');
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(find.byKey(_signIn), findsOneWidget);
+      expect(h.got, isEmpty);
+      await tester.tap(find.byKey(_signIn));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP07c slow async guard, signed in: save gives the id', (
+      tester,
+    ) async {
+      final h = await _boot(tester, asyncGuard: true, guardMs: 400);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      h.create();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(h.got, isEmpty);
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(h.got, isEmpty);
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      await _noListener(tester, h);
+    });
+
+    for (final how in ['replace', 'pushReplacement']) {
+      testWidgets('VP23 two calls, the second redirected, then $how of the '
+          'sign-in page, then Back: each call ends once', (tester) async {
+        final h = await _boot(tester);
+        h.create();
+        await tester.pumpAndSettle();
+        h.signedIn.value = false;
+        await tester.pumpAndSettle();
+        h.edit('l-4');
+        await tester.pumpAndSettle();
+        expect(find.byKey(_signIn), findsOneWidget);
+        if (how == 'replace') {
+          unawaited(h.router.replace<void>('/other'));
+        } else {
+          unawaited(h.router.pushReplacement<void>('/other'));
+        }
+        await tester.pumpAndSettle();
+        expect(find.text('other'), findsOneWidget);
+        // ignore: avoid_print
+        print('VP23 $how after replace: ${h.got}');
+        await _systemBack(tester);
+        // ignore: avoid_print
+        print('VP23 $how after Back: ${h.got}');
+        expect(h.got, contains('e:null'), reason: 'the redirected call ended');
+        expect(
+          h.got.where((g) => g.startsWith('c:')),
+          isEmpty,
+          reason: 'the editor below is still open',
+        );
+        expect(find.text('finish new-id'), findsOneWidget);
+        await _tapFinish(tester);
+        expect(h.got, ['e:null', 'c:new-id']);
+      });
+    }
+
+    testWidgets('VP09 dispose of the whole app: null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      await tester.pumpWidget(const SizedBox());
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+    });
+
+    testWidgets('VP10 refresh then save: id once; then Back on home adds '
+        'nothing', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      expect(h.got, isEmpty);
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      await _systemBack(tester);
+      expect(h.got, ['c:new-id']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP11 refresh then system Back: null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      await _systemBack(tester);
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP12 refreshListenable tick then save, and tick then go', (
+      tester,
+    ) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.tick.value++;
+      await tester.pumpAndSettle();
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      h.create();
+      await tester.pumpAndSettle();
+      h.tick.value++;
+      await tester.pumpAndSettle();
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:new-id', 'c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP13 restore (through JSON) then save: id once; restore then '
+        'Back: null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      await _restore(tester, h.router);
+      expect(h.got, isEmpty);
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      h.edit('l-9');
+      await tester.pumpAndSettle();
+      await _restore(tester, h.router);
+      await _systemBack(tester);
+      expect(h.got, ['c:new-id', 'e:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP14 same span push; go elsewhere: null once', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+      expect(find.text('other'), findsOneWidget);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP15 same span push (redirected); go elsewhere: null once', (
+      tester,
+    ) async {
+      final h = await _boot(tester, signedIn: false);
+      h.create();
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP16 same span push (async redirect); go: null once', (
+      tester,
+    ) async {
+      final h = await _boot(tester, signedIn: false, asyncGuard: true);
+      h.create();
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null']);
+      expect(find.byKey(_signIn), findsNothing);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP17 two calls to different flows in flight', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.edit('l-2');
+      await tester.pumpAndSettle();
+      await _tapFinish(tester);
+      expect(h.got, ['e:l-2']);
+      expect(find.text('finish new-id'), findsOneWidget);
+      await _tapFinish(tester);
+      expect(h.got, ['e:l-2', 'c:new-id']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP18 two different flows, then a go: both null once', (
+      tester,
+    ) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.edit('l-2');
+      await tester.pumpAndSettle();
+      h.router.go('/');
+      await tester.pumpAndSettle();
+      expect(h.got..sort(), ['c:null', 'e:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP19 the same flow twice: top answers, then Back nulls the '
+        'first', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.create();
+      await tester.pumpAndSettle();
+      expect(find.text('finish new-id'), findsOneWidget);
+      await _tapFinish(tester);
+      expect(h.got, ['c:new-id']);
+      await _systemBack(tester);
+      expect(h.got, ['c:new-id', 'c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP20 the same flow twice in one span, then a go', (
+      tester,
+    ) async {
+      final h = await _boot(tester);
+      h.create();
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:null', 'c:null']);
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP21 the redirected page pops a String after a refresh', (
+      tester,
+    ) async {
+      final h = await _boot(tester, signedIn: false);
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(_signInPop));
+      await tester.pumpAndSettle();
+      // Informational: after a re-parse the push future is gone, so a pop
+      // value from a redirected page is not delivered; the call still ends.
+      expect(h.got, hasLength(1));
+      // ignore: avoid_print
+      print('VP21 got ${h.got}');
+      await _noListener(tester, h);
+    });
+
+    testWidgets('VP22 a route that forgot extra still asserts; a correct one '
+        'pushed 3 ways never does', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      h.router.go('/me/lists/new');
+      await tester.pumpAndSettle();
+      unawaited(h.router.push<void>('/me/lists/l-1/edit'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+
+      final bad = GoRouter(
+        extraCodec: const FlowExtraCodec(),
+        routes: [
+          GoRoute(path: '/', builder: (c, s) => const Text('home')),
+          GoRoute(
+            path: '/me/lists/new',
+            builder: (c, s) => FlowResultRoute<String>(
+              builder: (complete) => _Flow(onComplete: complete, label: 'x'),
+            ),
+          ),
+        ],
+      );
+      addTearDown(bad.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: bad));
+      await tester.pumpAndSettle();
+      unawaited(AppFlows.createReadingList(bad));
+      await tester.pumpAndSettle();
+      expect(tester.takeException().toString(), contains('extra: state.extra'));
+    });
+  });
+
+  group('VP AC3', () {
+    Future<NavigatorState> holdUnderDialog(WidgetTester tester) async {
+      final ctx = tester.element(find.byKey(_finish));
+      unawaited(
+        showDialog<void>(context: ctx, builder: (_) => const Text('dlg')),
+      );
+      await tester.pumpAndSettle();
+      tester.widget<TextButton>(find.byKey(_finish)).onPressed!();
+      await tester.pumpAndSettle();
+      return Navigator.of(ctx);
+    }
+
+    for (final order in ['go-first', 'pop-first', 'go-only', 'sheet']) {
+      testWidgets('VP30 result under overlay, $order', (tester) async {
+        final h = await _boot(tester);
+        h.create();
+        await tester.pumpAndSettle();
+        NavigatorState nav;
+        if (order == 'sheet') {
+          final ctx = tester.element(find.byKey(_finish));
+          nav = Navigator.of(ctx);
+          unawaited(
+            showModalBottomSheet<void>(
+              context: ctx,
+              builder: (_) => const Text('sheet'),
+            ),
+          );
+          await tester.pumpAndSettle();
+          tester.widget<TextButton>(find.byKey(_finish)).onPressed!();
+          await tester.pumpAndSettle();
+        } else {
+          nav = await holdUnderDialog(tester);
+        }
+        expect(h.got, isEmpty, reason: 'held');
+        if (order == 'go-first') {
+          h.router.go('/other');
+          nav.pop();
+        } else if (order == 'pop-first') {
+          nav.pop();
+          h.router.go('/other');
+        } else {
+          h.router.go('/other');
+        }
+        await tester.pumpAndSettle();
+        expect(h.got, ['c:new-id']);
+        expect(tester.takeException(), isNull);
+        await _noListener(tester, h);
+        expect(h.got, ['c:new-id']);
+      });
+    }
+
+    testWidgets('VP31 result under dialog, refresh, then go: result once', (
+      tester,
+    ) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      await holdUnderDialog(tester);
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      expect(h.got, isEmpty);
+      h.router.go('/other');
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:new-id']);
+    });
+
+    testWidgets('VP32 result under dialog, dialog closes: result and the '
+        'route pops', (tester) async {
+      final h = await _boot(tester);
+      h.create();
+      await tester.pumpAndSettle();
+      final nav = await holdUnderDialog(tester);
+      nav.pop();
+      await tester.pumpAndSettle();
+      expect(h.got, ['c:new-id']);
+      expect(find.text('home'), findsOneWidget);
+    });
+  });
+
+  group('VP AC2', () {
+    late List<String> lines;
+    late DebugPrintCallback prev;
+    setUp(() {
+      resetFlowExtraWarnings();
+      lines = [];
+      prev = debugPrint;
+      debugPrint = (m, {wrapWidth}) => lines.add(m ?? '');
+      addTearDown(() => debugPrint = prev);
+    });
+
+    test('VP40 nested JSON round trip; non-finite dropped', () {
+      const c = FlowExtraCodec();
+      final ok = <Object?>[
+        <String, Object?>{
+          'a': <Object?>[
+            1,
+            <String, Object?>{
+              'b': <Object?>[
+                <Object?>[true, null, 'x', -0.5],
+              ],
+            },
+          ],
+          'n': null,
+        },
+        <Object?>[<Object?>[], <String, Object?>{}],
+        <int>[1, 2],
+        <String, int>{'k': 1},
+      ];
+      for (final v in ok) {
+        expect(c.decode(jsonDecode(jsonEncode(c.encode(v)))), v);
+      }
+      expect(lines, isEmpty);
+      for (final v in <Object?>[
+        double.negativeInfinity,
+        <Object?>[1, double.nan],
+        <String, Object?>{
+          'x': <Object?>[double.infinity],
+        },
+        {1, 2},
+        DateTime(2020),
+      ]) {
+        expect(c.encode(v), isNull, reason: '$v');
+      }
+      // Nothing it returns ever makes jsonEncode throw.
+      expect(lines, isNotEmpty);
+    });
+
+    testWidgets('VP41 custom extra pushed: no throw, null after refresh and '
+        'restore, one warning', (tester) async {
+      final seen = <Object?>[];
+      final router = GoRouter(
+        extraCodec: const FlowExtraCodec(),
+        routes: [
+          GoRoute(path: '/', builder: (c, s) => const Text('home')),
+          GoRoute(
+            path: '/picker',
+            builder: (c, s) {
+              seen.add(s.extra);
+              return const Text('picker');
+            },
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      unawaited(router.push<void>('/picker', extra: _Custom()));
+      await tester.pumpAndSettle();
+      expect(seen.last, isA<_Custom>());
+      router.refresh();
+      await tester.pumpAndSettle();
+      expect(seen.last, isNull, reason: 'null after a refresh');
+      unawaited(router.push<void>('/picker', extra: _Custom()));
+      await tester.pumpAndSettle();
+      await _restore(tester, router);
+      expect(seen.last, isNull, reason: 'null after a restore');
+      debugPrint = prev;
+      expect(tester.takeException(), isNull);
+      expect(lines.where((l) => l.contains('_Custom')), hasLength(1));
+      // ignore: avoid_print
+      print('VP41 lines: $lines');
+    });
+
+    testWidgets('VP42 JSON-safe extra survives a refresh', (tester) async {
+      final seen = <Object?>[];
+      final router = GoRouter(
+        extraCodec: const FlowExtraCodec(),
+        routes: [
+          GoRoute(path: '/', builder: (c, s) => const Text('home')),
+          GoRoute(
+            path: '/picker',
+            builder: (c, s) {
+              seen.add(s.extra);
+              return const Text('picker');
+            },
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+      final v = <String, Object?>{
+        'ids': <Object?>[1, 2],
+        'm': <String, Object?>{'q': 'x'},
+      };
+      unawaited(router.push<void>('/picker', extra: v));
+      await tester.pumpAndSettle();
+      router.refresh();
+      await tester.pumpAndSettle();
+      await _restore(tester, router);
+      expect(seen.last, v);
+      debugPrint = prev;
+      expect(lines, isEmpty);
+    });
+
+    testWidgets('VP43 FlowCall never in the saved state, also after refresh '
+        'and with a redirect', (tester) async {
+      final h = await _boot(tester, signedIn: false);
+      h.create();
+      await tester.pumpAndSettle();
+      String saved() => jsonEncode(
+        h.router.routeInformationParser
+            .restoreRouteInformation(
+              h.router.routerDelegate.currentConfiguration,
+            )!
+            .state,
+      );
+      expect(saved(), isNot(contains('FlowCall')));
+      await tester.tap(find.byKey(_signIn));
+      await tester.pumpAndSettle();
+      h.create();
+      await tester.pumpAndSettle();
+      expect(saved(), isNot(contains('FlowCall')));
+      h.router.refresh();
+      await tester.pumpAndSettle();
+      expect(saved(), isNot(contains('FlowCall')));
+      debugPrint = prev;
+      expect(lines.where((l) => l.contains('FlowExtraCodec')), isEmpty);
+    });
+  });
+}
+
+class _Custom {}

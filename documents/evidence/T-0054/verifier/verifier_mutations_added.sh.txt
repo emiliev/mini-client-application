@@ -1,0 +1,28 @@
+
+# --- Verifier mutations (T-0054). MC_EXTRA adds probe targets.
+F="$T_RES $T_HARD ${MC_EXTRA:-}"
+mutate X01 "the page key is not taken on delegate changes (only in the post-frame check)" "$RES" "$F" \
+  $'      debugOnChange?.call();\n      locate();' $'      debugOnChange?.call();'
+mutate X02 "a push not yet located always counts as superseded" "$RES" "$F" \
+  $'      final info = provider.value.state;\n      return !(info' $'      final info = provider.value.state;\n      return true || !(info'
+mutate X03 "a push is never superseded" "$RES" "$F" \
+  $'      final info = provider.value.state;\n      return !(info' $'      final info = provider.value.state;\n      return false && !(info'
+mutate X06 "the page is first matched as any imperative page" "$RES" "$F" \
+  '? push != null && identical(match.completer.future, push)' '? push != null'
+mutate X11 "a result is delivered even when an overlay covers the route" "$RES" "$F" \
+  'if (pending == null || route == null || !route.isCurrent) {' 'if (pending == null || route == null) {'
+mutate X13 "every pop value is dropped" "$RES" "$F" \
+  'call.complete(value is String ? value : null)' 'call.complete(null)'
+mutate X21 "the listener is removed only when the stack watch abandons the call" "$RES" "$F" \
+  $'      call.result.whenComplete(() {\n        delegate.removeListener(onChange);\n      }),' $'      call.result.whenComplete(() {}),' \
+  $'        call.abandon();\n      }' $'        call.abandon();\n        delegate.removeListener(onChange);\n      }'
+mutate X22 "a held result is lost when the stack watch ends the call" "$RES" "$F" \
+  $'        call.abandon();\n      }' $'        call.complete(null);\n      }'
+mutate X16 "not-found is pushed over the stack, not a go" "$ROUTER" "$T_NF" \
+  'router.go(notFoundLocation(_asked(state.uri)))' 'router.push<void>(notFoundLocation(_asked(state.uri)))'
+mutate X18 "an onEnter is added to the router (the pin must go red)" "$ROUTER" "$T_NF" \
+  $'  overridePlatformDefaultLocation: true,\n' $'  overridePlatformDefaultLocation: true,\n  onEnter: (c, cur, next, r) => const Allow(),\n'
+mutate X19 "not-found Back always goes home (never pops)" "$PAGES" "$T_NF" \
+  $'          if (GoRouter.of(context).canPop()) {\n            GoRouter.of(context).pop();\n          } else {\n            _home(context);\n          }' $'          _home(context);'
+mutate X20 "the not-found route is left out of the routes under home" "$ROUTER" "$T_NF" \
+  $'    ...accountRoutes,\n    notFoundRoute,\n  ]),' $'    ...accountRoutes,\n  ])..add(notFoundRoute),'

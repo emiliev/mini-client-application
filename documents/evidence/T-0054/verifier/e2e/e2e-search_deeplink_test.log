@@ -1,0 +1,56 @@
+# e2e_ios.sh: T-0054 verifier on mc-T-0054-verifier-95588 (424AB238-3792-40DF-B308-C1338F33C0F9)
+# cwd: /tmp/mc-T-0054-verifier-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/12-search_deeplink_test
+$ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/T-0054-verifier/run_target.sh 424AB238-3792-40DF-B308-C1338F33C0F9 integration_test/search_deeplink_test.dart test_driver/integration_test.dart
+
+== verifier wrapper: uninstall com.emiliev.miniClient from 424AB238-3792-40DF-B308-C1338F33C0F9, rm build/ios/iphonesimulator
+Resolving dependencies in `/private/tmp/mc-T-0054-verifier-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0054-verifier-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           16.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:56040/eoXEg3m_Is0=/
+VMServiceFlutterDriver: Isolate found with number: 5078532906242439
+VMServiceFlutterDriver: Isolate 5078532906242439 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0046-AC5 the deep link miniclient://app/search?q=spi opens the search with its results
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 742a852d552c035c37cf13dc0493bb9f, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: 742a852d552c035c37cf13dc0493bb9f, seq: 2}
+flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/search -> 200
+flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
+flutter: [event] mc_screen_view {screen_name: home, session_id: 742a852d552c035c37cf13dc0493bb9f, seq: 3}
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: 742a852d552c035c37cf13dc0493bb9f, seq: 4}
+flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/search -> 200
+flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
+flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/search -> 200
+flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
+flutter: 00:10 +1: (tearDownAll)
+flutter: 00:10 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/12-search_deeplink_test/36_deep_link_search.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/12-search_deeplink_test/36b_back_from_search_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.jfBVpB/screenshots/12-search_deeplink_test/37_link_to_running_app_search.png (413127)
+All tests passed.
+
+# exit code: 0
