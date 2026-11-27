@@ -45,12 +45,14 @@ Future<GoRouter> _app(WidgetTester tester, {String initial = '/'}) async {
       GoRoute(
         path: AppLocations.newReadingList,
         builder: (context, state) => FlowResultRoute<String>(
+          extra: state.extra,
           builder: (complete) => _FakeFlow(onComplete: complete),
         ),
       ),
       GoRoute(
         path: '/me/lists/:id/edit',
         builder: (context, state) => FlowResultRoute<String>(
+          extra: state.extra,
           builder: (complete) => _FakeFlow(
             onComplete: (_) => complete(state.pathParameters['id']),
           ),
@@ -193,6 +195,82 @@ void main() {
 
     expect(await result, 'l-5');
     expect(router.state.uri.toString(), '/me/lists/l-9/edit');
+  });
+
+  group('T-0049-AC3 a result future always completes, once, with null '
+      'when the route goes away without a result', () {
+    Future<(List<String?>, Future<void>)> open(
+      WidgetTester tester,
+      GoRouter router,
+    ) async {
+      final got = <String?>[];
+      final done = AppFlows.createReadingList(router).then(got.add);
+      await tester.pumpAndSettle();
+      expect(find.byKey(_finish), findsOneWidget);
+      return (got, done);
+    }
+
+    testWidgets('T-0049-AC3 replaced by a go', (tester) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, [null]);
+      expect(find.byKey(const Key('home')), findsOneWidget);
+    });
+
+    testWidgets('T-0049-AC3 replaced by a go to another route', (
+      tester,
+    ) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      router.go(AppLocations.editReadingList('l-3'));
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, [null]);
+    });
+
+    testWidgets('T-0049-AC3 popped by Back', (tester) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, [null]);
+    });
+
+    testWidgets('T-0049-AC3 a result then leaving gives the result once', (
+      tester,
+    ) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+      router.go(AppLocations.editReadingList('l-3'));
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, ['l-5']);
+    });
+
+    testWidgets('T-0049-AC3 a route nobody pushed (a link) ends without a '
+        'caller and without error', (tester) async {
+      final router = await _app(tester, initial: AppLocations.newReadingList);
+
+      router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('home')), findsOneWidget);
+    });
   });
 
   test('T-0048-AC5 the reading-list locations', () {

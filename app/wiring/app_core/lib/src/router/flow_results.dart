@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:app_core/src/locations/app_locations.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
@@ -22,13 +24,23 @@ import 'package:go_router/go_router.dart';
 ///    the navigator implementation (in its wiring) awaits the [AppFlows]
 ///    entry and maps the result into its feature's type (`src/mappers/`).
 ///
+/// **A result future always completes.** go_router never completes the
+/// future of a `push` that a `go` replaced, so a caller awaiting
+/// [GoRouter.push] alone would wait forever. [AppFlows] therefore pushes with
+/// a [FlowCall] as the `extra`; the route (given `extra: state.extra`) ends it
+/// with the result, or with null when it is disposed without one, whether it
+/// was popped, replaced or removed by a `go`.
+///
 /// A route with nothing below it (a deep link opened it) has no caller to
 /// answer: completing it goes home instead of popping the last page. A result
 /// that arrives while something covers the route (a dialog, a sheet) is kept
 /// and handed over as soon as the route is on top again: it is never dropped,
 /// and what is above is never popped for it.
 class FlowResultRoute<T> extends StatefulWidget {
-  const FlowResultRoute({required this.builder, super.key});
+  const FlowResultRoute({required this.builder, this.extra, super.key});
+
+  /// The route's `state.extra`: a [FlowCall] when [AppFlows] pushed it.
+  final Object? extra;
 
   /// Builds the flow; pass `complete` as its `onComplete`.
   final Widget Function(ValueChanged<T?> complete) builder;
@@ -41,6 +53,11 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
   /// The result waiting for the route to be on top; set at most once.
   ({T? value})? _pending;
   bool _done = false;
+
+  FlowCall<T>? get _call {
+    final extra = widget.extra;
+    return extra is FlowCall<T> ? extra : null;
+  }
 
   /// The flow's `onComplete`. Later calls are ignored (a flow completes once).
   void _complete(T? result) {
@@ -62,6 +79,7 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
     }
     _pending = null;
     _done = true;
+    _call?.complete(pending.value);
     if (route.isFirst) {
       GoRouter.of(context).go(AppLocations.home);
     } else {
@@ -83,11 +101,35 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
   }
 
   @override
+  void dispose() {
+    // Left without a result (Back, a `go` that replaced the route, ...).
+    _call?.complete(null);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     // The dependency that brings [didChangeDependencies] when the route
     // becomes current again.
     ModalRoute.of(context);
     return widget.builder(_complete);
+  }
+}
+
+/// One caller's wait for a result route, sent as the push's `extra`.
+/// Completes once: with the flow's result, or with null when the route went
+/// away without one. Later calls are ignored.
+final class FlowCall<T> {
+  final Completer<T?> _completer = Completer<T?>();
+
+  /// Completes with the result of the route.
+  Future<T?> get result => _completer.future;
+
+  /// Completes the wait; ignored once completed.
+  void complete(T? value) {
+    if (!_completer.isCompleted) {
+      _completer.complete(value);
+    }
   }
 }
 
@@ -99,11 +141,19 @@ abstract final class AppFlows {
   /// with the new list's id, or null when the user left without saving
   /// (Back, a declined sign-in).
   static Future<String?> createReadingList(GoRouter router) =>
-      router.push<String>(AppLocations.newReadingList);
+      _open(router, AppLocations.newReadingList);
 
   /// Opens the reading-list editor on list [id]. Completes with [id] once
   /// saved (also when nothing changed), or null when the user left without
   /// saving.
   static Future<String?> editReadingList(GoRouter router, String id) =>
-      router.push<String>(AppLocations.editReadingList(id));
+      _open(router, AppLocations.editReadingList(id));
+
+  /// Pushes [location] and waits for the route's [FlowCall], which always
+  /// completes (see [FlowResultRoute]).
+  static Future<String?> _open(GoRouter router, String location) {
+    final call = FlowCall<String>();
+    unawaited(router.push<String>(location, extra: call).then(call.complete));
+    return call.result;
+  }
 }
