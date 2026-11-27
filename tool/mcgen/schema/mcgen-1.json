@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/emiliev/mini-client-application/tool/mcgen/schema/mcgen-1.json",
+  "title": "mcgen/1 module spec",
+  "description": "One YAML file per module, at <tier>/.../<module>/mcgen.yaml (plan 02 section 2.2, ADR-0016). Structure only: tool/mcgen's spec lint adds the semantic checks (layering, names, scenario ids, rule examples). Archetype-specific settings go under `options`, which each archetype validates.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "module", "tier", "archetype", "ownership"],
+  "properties": {
+    "schema": {"const": "mcgen/1"},
+    "module": {"$ref": "#/$defs/packageName"},
+    "tier": {"enum": ["app", "feature", "utility"]},
+    "archetype": {"$ref": "#/$defs/snakeName"},
+    "description": {"type": "string", "minLength": 1},
+    "size_class": {"enum": ["S", "M", "L", "XL"]},
+    "ownership": {"enum": ["managed", "mixed", "ejected"]},
+    "seed_salt": {"type": "integer", "minimum": 0},
+    "deps": {"$ref": "#/$defs/packageList"},
+    "dev_deps": {"$ref": "#/$defs/packageList"},
+    "owned": {
+      "description": "mixed only: module-relative paths or globs written once, never again.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[^/\\s][^\\s]*$"}
+    },
+    "keep": {
+      "description": "Keep-region ids the module declares; every id must be emitted.",
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/keepId"}
+    },
+    "entities": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
+    "endpoints": {"type": "array", "items": {"$ref": "#/$defs/endpoint"}},
+    "rules": {"type": "array", "items": {"$ref": "#/$defs/rule"}},
+    "blocs": {"type": "array", "items": {"$ref": "#/$defs/bloc"}},
+    "flow": {"$ref": "#/$defs/flow"},
+    "screens": {"type": "array", "items": {"$ref": "#/$defs/screen"}},
+    "navigator": {"$ref": "#/$defs/navigator"},
+    "l10n": {"$ref": "#/$defs/l10n"},
+    "mixins": {"type": "array", "items": {"$ref": "#/$defs/mixin"}},
+    "bdd": {"type": "array", "items": {"$ref": "#/$defs/bddFeature"}},
+    "options": {
+      "description": "Archetype-specific settings, validated by the archetype (P2-04 to P2-07).",
+      "type": "object"
+    }
+  },
+  "$defs": {
+    "packageName": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "packageList": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/packageName"}
+    },
+    "snakeName": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+    "typeName": {"type": "string", "pattern": "^[A-Z][A-Za-z0-9]*$"},
+    "memberName": {"type": "string", "pattern": "^[a-z][A-Za-z0-9]*$"},
+    "keepId": {"type": "string", "pattern": "^[a-z][A-Za-z0-9_.-]*$"},
+    "typeExpr": {
+      "description": "A Dart type expression: Name, Name?, Name<A, B>, nested.",
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_<>, ?]*$"
+    },
+    "signature": {
+      "description": "name(arg, ...) with an optional ' -> ReturnType'.",
+      "type": "string",
+      "pattern": "^[a-z][A-Za-z0-9]*(\\([^()]*\\))?( -> [A-Za-z_][A-Za-z0-9_<>, ?]*)?$"
+    },
+    "doc": {"type": "string"},
+    "field": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type"],
+      "properties": {
+        "name": {"$ref": "#/$defs/memberName"},
+        "type": {"$ref": "#/$defs/typeExpr"},
+        "default": {},
+        "unknown": {"type": "string"},
+        "json_key": {"type": "string", "minLength": 1},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "entity": {
+      "description": "A model (fields), an enum (enum) or a sealed union (union); exactly one of the three.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"$ref": "#/$defs/typeName"},
+        "doc": {"$ref": "#/$defs/doc"},
+        "json": {"type": "boolean"},
+        "fields": {"type": "array", "items": {"$ref": "#/$defs/field"}},
+        "enum": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/memberName"}
+        },
+        "union": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/signature"}
+        },
+        "union_key": {"$ref": "#/$defs/memberName"}
+      }
+    },
+    "endpoint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "method", "path"],
+      "properties": {
+        "id": {"$ref": "#/$defs/memberName"},
+        "method": {"enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
+        "path": {"type": "string", "pattern": "^[^/\\s][^\\s]*$"},
+        "query": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/memberName"}},
+        "body": {"$ref": "#/$defs/typeExpr"},
+        "returns": {"$ref": "#/$defs/typeExpr"},
+        "auth": {"type": "boolean"},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "ruleCase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["when", "then"],
+      "properties": {
+        "when": {"type": "string", "minLength": 1},
+        "then": {"type": ["string", "integer", "number", "boolean"]}
+      }
+    },
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {"$ref": "#/$defs/memberName"},
+        "kind": {"enum": ["classifier", "comparator", "validator", "calculator", "filter", "grouper", "state_machine"]},
+        "input": {"$ref": "#/$defs/typeExpr"},
+        "cases": {"type": "array", "items": {"$ref": "#/$defs/ruleCase"}},
+        "default": {"type": ["string", "integer", "number", "boolean"]},
+        "examples": {"type": "array", "items": {"type": "object", "required": ["expect"]}},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "bloc": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "states", "events"],
+      "properties": {
+        "name": {"$ref": "#/$defs/typeName"},
+        "states": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/signature"}},
+        "events": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/signature"}},
+        "transformers": {
+          "type": "object",
+          "additionalProperties": {"type": "string", "pattern": "^(debounce_[0-9]+ms|throttle_[0-9]+ms|droppable|restartable|sequential|concurrent)$"}
+        },
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "flow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["pages"],
+      "properties": {
+        "name": {"$ref": "#/$defs/typeName"},
+        "state": {"type": "array", "items": {"$ref": "#/$defs/field"}},
+        "pages": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"$ref": "#/$defs/typeName"}},
+        "args": {"type": "array", "items": {"$ref": "#/$defs/field"}},
+        "result": {"$ref": "#/$defs/typeExpr"},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "screen": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"$ref": "#/$defs/typeName"},
+        "layout": {"$ref": "#/$defs/snakeName"},
+        "depth": {"type": "integer", "minimum": 1},
+        "widgets": {"type": "integer", "minimum": 0},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "navigator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "outbound"],
+      "properties": {
+        "name": {"$ref": "#/$defs/typeName"},
+        "outbound": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/signature"}},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "l10n": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["locales"],
+      "properties": {
+        "locales": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "pattern": "^[a-z]{2}(_[A-Za-z]{2,4})?$"}},
+        "keys": {"type": "integer", "minimum": 0},
+        "placeholders": {"type": "integer", "minimum": 0},
+        "plurals": {"type": "integer", "minimum": 0},
+        "selects": {"type": "integer", "minimum": 0}
+      }
+    },
+    "mixin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"$ref": "#/$defs/typeName"},
+        "on": {"$ref": "#/$defs/typeName"}
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "steps"],
+      "properties": {
+        "id": {"type": "string"},
+        "title": {"type": "string", "minLength": 1},
+        "steps": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "tags": {"type": "array", "items": {"type": "string", "pattern": "^@?[A-Za-z0-9_-]+$"}}
+      }
+    },
+    "outline": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "rule", "title"],
+      "properties": {
+        "id": {"type": "string"},
+        "rule": {"$ref": "#/$defs/memberName"},
+        "title": {"type": "string", "minLength": 1}
+      }
+    },
+    "bddFeature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["feature"],
+      "properties": {
+        "feature": {"$ref": "#/$defs/snakeName"},
+        "background": {"type": "string"},
+        "scenarios": {"type": "array", "items": {"$ref": "#/$defs/scenario"}},
+        "outlines": {"type": "array", "items": {"$ref": "#/$defs/outline"}}
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+name: utility_hello
+description: The pubspec of utility_hello, the reference archetype mcgen's core is tested with (T-0065). Not an exemplar.
+version: 0.1.0
+
+# mcgen precomputes every value (plan 02 section 2.4); by hand:
+#   mason make utility_hello -c vars.json
+vars:
+  name:
+    type: string
+    description: The package name.
+  description:
+    type: string
+    description: The pubspec description.
+  sdk:
+    type: string
+    description: The environment sdk constraint.
+  has_dependencies:
+    type: boolean
+    description: Whether there is a dependencies section.
+  dependencies:
+    type: array
+    description: 'Items {"entry": "<name>: <constraint>"}, sorted.'
