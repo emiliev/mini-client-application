@@ -166,7 +166,7 @@ baseline PASS
 === S10 a deal product can be sold out
     KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
 === S11 five categories
-pattern not found: categoryDefs.length].id
+pattern not found: % categoryDefs.length]
     PATTERN NOT FOUND
 === S12 a product id is not its comic id
     KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test //utility/mc_fixtures_commerce:validation_test 
