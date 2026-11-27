@@ -1,0 +1,9 @@
+# tool/loc is a standalone package (not a pub workspace member), so it cannot
+# include package:mc_analysis. P-117 (T-0065): this file includes nothing, so
+# the format gate reads the same `formatter` settings here whether or not a
+# `pub get` left tool/loc/.dart_tool/package_config.json behind. Before it
+# existed, that nested config made the root file's
+# `include: package:mc_analysis/...` unresolvable and the formatter fell back
+# to its default style.
+formatter:
+  trailing_commas: preserve

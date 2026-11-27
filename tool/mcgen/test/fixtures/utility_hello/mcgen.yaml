@@ -1,0 +1,21 @@
+# The reference spec for mcgen's core tests (T-0065). Tests copy it to
+# <temp root>/utility/mc_hello/mcgen.yaml; the expected output is
+# test/golden/utility_hello/.
+schema: mcgen/1
+module: mc_hello
+tier: utility
+archetype: utility_hello
+description: Greetings, generated to test mcgen's core.
+ownership: managed
+seed_salt: 0
+entities:
+  - name: Greeting
+    doc: A greeting for one person.
+    fields:
+      - {name: name, type: String, doc: Who is greeted.}
+      - {name: mood, type: Mood, default: calm}
+      - {name: excited, type: bool, default: false}
+  - name: Mood
+    doc: How a greeting sounds.
+    enum: [calm, cheerful]
+keep: [greeting.render]
