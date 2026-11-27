@@ -189,7 +189,7 @@ mutate "X3 remote weights with no positive weight are accepted" $F 'scaled.any((
 mutate "X4 the subject is always the install" $F '_session.userId ?? _install()' '_install()'
 mutate "X5 the subject is a constant when signed out" $F '_session.userId ?? _install()' "_session.userId ?? (_installId == 'x' ? _install() : 'anonymous')"
 mutate "X6 the install id is made again on every call" $F 'final existing = _installId;' "final existing = _installId == 'x' ? 'x' : null;"
-mutate "X7 the install id is not saved" $F 'unawaited(_store.write(flagsInstallIdKey, id));' 'unawaited(Future<void>.value());'
+mutate "X7 the install id is not saved" $F 'write = _store.write(flagsInstallIdKey, id);' 'write = Future.value(success(null));'
 mutate "B1 the FNV prime is wrong" $BK 'hash * 403' 'hash * 401'
 mutate "B2 the FNV offset is wrong" $BK 'var hash = 2166136261;' 'var hash = 2166136260;'
 mutate "B3 the hash adds instead of xor" $BK 'hash ^= byte;' 'hash += byte;'
@@ -210,17 +210,25 @@ mutate "G3 a duplicate experiment key is accepted" $FL 'if (_experiments.contain
 mutate "G4 flag equality ignores the default" $FL '          other.defaultValue == defaultValue &&
 ' ''
 mutate "G5 a blank key is accepted" $FL 'if (flag.key.trim().isEmpty) {' 'if (flag.key.isEmpty) {'
-mutate "G6 a negative weight is accepted" $FL 'if (variant.weight < 0) {' 'if (variant.weight < -1) {'
+mutate "G6 a negative weight is accepted" $FL 'variant.weight < 0 || variant.weight > maxVariantWeight' 'variant.weight < -1 || variant.weight > maxVariantWeight'
 mutate "G7 an experiment without variants is accepted" $FL 'if (experiment.variants.isEmpty) {' 'if (experiment.variants.length < 0) {'
 mutate "S1 a body without a flags map is accepted" $RS "body is! Map || body['flags'] is! Map" 'body is! Map'
-mutate "S2 a fractional weight is accepted" $RS 'weight is! int || weight < 0) {
+mutate "S2 a fractional weight is accepted" $RS 'weight is! int ||
+          weight < 0 ||
+          weight > maxVariantWeight ||
+          weights.containsKey(name)) {
         return null;
       }
-      weights[name] = weight;' 'weight is! num || weight < 0) {
+      weights[name] = weight;' 'weight is! num ||
+          weight < 0 ||
+          weight > maxVariantWeight ||
+          weights.containsKey(name)) {
         return null;
       }
       weights[name] = weight.toInt();'
-mutate "S3 a negative weight is accepted" $RS 'weight is! int || weight < 0' 'weight is! int || weight < -1'
+mutate "S3 a negative weight is accepted" $RS 'weight < 0 ||
+          weight > maxVariantWeight' 'weight < -1 ||
+          weight > maxVariantWeight'
 mutate "S4 a variant that is not a map is not rejected" $RS 'if (variant is! Map) {' 'if (variant is! Map && variant != 5) {'
 # --- fixtures ----------------------------------------------------------------
 D=$FP/lib/src/data/flags.dart
@@ -284,7 +292,7 @@ mutate "K1 flag and experiment reports share a key" $F "'remote:experiment:\$key
 mutate "K2 an empty variants list is not malformed" $RS 'if (variants is! List || variants.isEmpty) {' 'if (variants is! List) {'
 mutate "K3 a repeated variant name is accepted" $RS 'weights.containsKey(name)' 'weights.length > 999'
 mutate "Y1 the cache stays on disk when the user changes" $F 'if (userId != _seenUserId) {' "if (userId == '__never__') {"
-mutate "Y2 another cache file is deleted" $F '_store.delete(flagsCacheKey)' "_store.delete('\${flagsCacheKey}_x')"
+mutate "Y2 another cache file is deleted" $F '.delete(flagsCacheKey)' ".delete('\${flagsCacheKey}_x')"
 mutate "Y3 the cache is deleted on a same-user sign-in too" $F 'if (userId != _seenUserId) {' 'if (userId != _seenUserId || epoch > 0) {'
 
 echo
