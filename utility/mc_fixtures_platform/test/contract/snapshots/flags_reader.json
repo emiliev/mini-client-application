@@ -1,0 +1,45 @@
+{
+  "body": {
+    "experiments": [
+      {
+        "key": "store_home_layout",
+        "variants": [
+          {
+            "name": "control",
+            "weight": 5000
+          },
+          {
+            "name": "compact",
+            "weight": 3000
+          },
+          {
+            "name": "rich",
+            "weight": 2000
+          }
+        ]
+      },
+      {
+        "key": "trivia_hint",
+        "variants": [
+          {
+            "name": "control",
+            "weight": 10000
+          },
+          {
+            "name": "hint",
+            "weight": 0
+          }
+        ]
+      }
+    ],
+    "flags": {
+      "catalogue.page_size": 20,
+      "dev.diagnostics": false,
+      "search.layout": "list",
+      "settings.accent": "red",
+      "store.promo_banner": true
+    }
+  },
+  "request": "GET /v1/flags",
+  "status": 200
+}

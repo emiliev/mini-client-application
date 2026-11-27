@@ -1,0 +1,49 @@
+INFO: Invocation ID: 2441b6a9-aa3f-4ed9-ac90-4ad37fb136af
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 7 targets (0 packages loaded, 0 targets configured)
+Analyzing: 7 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 7 targets (0 packages loaded, 30 targets configured, 54 aspect applications).
+[3,604 / 3,700] Testing //utility/mc_feature_flags:no_flutter_test (run 11 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,381 / 5,597] Testing //app/wiring/app_core:feature_flags_boot_test (run 1 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,436 / 5,735] 1 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 2 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,450 / 5,735] 1 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 16 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,460 / 5,735] 1 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 26 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,472 / 5,735] 1 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 38 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,484 / 5,735] 1 / 7 tests; Testing //app/wiring/app_core:feature_flags_boot_test (run 50 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,510 / 5,735] 2 / 7 tests; Testing //utility/mc_feature_flags:di_test (run 26 of 50); 0s darwin-sandbox ... (14 actions, 9 running)
+[5,535 / 5,735] 3 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 1 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,551 / 5,735] 3 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 17 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,567 / 5,735] 3 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 33 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,583 / 5,735] 3 / 7 tests; Testing //utility/mc_feature_flags:session_fetch_test (run 49 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,597 / 5,735] 4 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 13 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,609 / 5,735] 4 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 25 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,623 / 5,735] 4 / 7 tests; Testing //utility/mc_feature_flags:experiments_test (run 39 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,639 / 5,735] 5 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 5 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,655 / 5,735] 5 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 21 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,671 / 5,735] 5 / 7 tests; Testing //utility/mc_feature_flags:evaluation_test (run 37 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,689 / 5,735] 6 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 5 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,711 / 5,735] 6 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 27 of 50); 0s darwin-sandbox ... (14 actions, 8 running)
+[5,731 / 5,735] 6 / 7 tests; Testing //utility/mc_feature_flags:registry_overrides_test (run 47 of 50); 0s darwin-sandbox ... (4 actions running)
+INFO: Found 7 test targets...
+INFO: Elapsed time: 22.257s, Critical Path: 2.43s
+INFO: 373 processes: 174 action cache hit, 11 internal, 351 darwin-sandbox, 11 worker.
+INFO: Build completed successfully, 373 total actions
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.0s
+  Stats over 50 runs: max = 1.0s, min = 0.8s, avg = 0.8s, dev = 0.0s
+//utility/mc_feature_flags:di_test                                       PASSED in 0.3s
+  Stats over 50 runs: max = 0.3s, min = 0.3s, avg = 0.3s, dev = 0.0s
+//utility/mc_feature_flags:evaluation_test                               PASSED in 0.5s
+  Stats over 50 runs: max = 0.5s, min = 0.5s, avg = 0.5s, dev = 0.0s
+//utility/mc_feature_flags:experiments_test                              PASSED in 0.6s
+  Stats over 50 runs: max = 0.6s, min = 0.6s, avg = 0.6s, dev = 0.0s
+//utility/mc_feature_flags:no_flutter_test                               PASSED in 0.4s
+  Stats over 50 runs: max = 0.4s, min = 0.2s, avg = 0.3s, dev = 0.1s
+//utility/mc_feature_flags:registry_overrides_test                       PASSED in 0.4s
+  Stats over 50 runs: max = 0.4s, min = 0.3s, avg = 0.4s, dev = 0.0s
+//utility/mc_feature_flags:session_fetch_test                            PASSED in 0.5s
+  Stats over 50 runs: max = 0.5s, min = 0.5s, avg = 0.5s, dev = 0.0s
+
+Executed 7 out of 7 tests: 7 tests pass.

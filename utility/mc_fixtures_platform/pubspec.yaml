@@ -1,0 +1,18 @@
+# T-0052 (P1-09 subset, U49): the platform domain of the mocked backend; this task adds the feature-flags slice (R3: data plus small pure-Dart handlers).
+name: mc_fixtures_platform
+description: Mock remote feature flags and experiments for the mocked backend (T-0052, U49 flags slice).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  mc_fixtures_identity: any
+  mc_mocked_backend: any
+
+dev_dependencies:
+  dio: ^5.11.0
+  mc_analysis: any
+  test: ^1.25.0

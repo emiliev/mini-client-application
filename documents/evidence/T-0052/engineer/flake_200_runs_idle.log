@@ -1,0 +1,9 @@
+INFO: Build completed successfully, 1401 total actions
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 2.0s
+//utility/mc_feature_flags:di_test                                       PASSED in 0.5s
+//utility/mc_feature_flags:evaluation_test                               PASSED in 0.9s
+//utility/mc_feature_flags:experiments_test                              PASSED in 1.1s
+//utility/mc_feature_flags:no_flutter_test                               PASSED in 0.5s
+//utility/mc_feature_flags:registry_overrides_test                       PASSED in 0.7s
+//utility/mc_feature_flags:session_fetch_test                            PASSED in 0.9s
+Executed 7 out of 7 tests: 7 tests pass.

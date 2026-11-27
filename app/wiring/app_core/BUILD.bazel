@@ -19,6 +19,7 @@ _DEPS = [
     "//utility/mc_ds_media",
     "//utility/mc_ds_theme",
     "//utility/mc_event_bus",
+    "//utility/mc_feature_flags",
     "//utility/mc_formatters",
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_comics",
@@ -26,6 +27,7 @@ _DEPS = [
     "//utility/mc_fixtures_identity",
     "//utility/mc_fixtures_library",
     "//utility/mc_fixtures_media",
+    "//utility/mc_fixtures_platform",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
     "//utility/mc_session",
@@ -61,6 +63,7 @@ flutter_library(
     "router_ref_and_scheme_test",
     "formatters_root_test",
     "app_layer_test",
+    "feature_flags_boot_test",
     "route_nesting_test",
     "router_observers_test",
 ]]

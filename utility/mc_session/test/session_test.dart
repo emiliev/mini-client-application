@@ -28,6 +28,29 @@ void main() {
 
   Future<Session> open() => Session.restore(store, bus: bus);
 
+  test('T-0052-AC3 epochChanges announces every new epoch, including a '
+      'sign-in as the same user, which authState does not', () async {
+    final session = await open();
+    final epochs = <int>[];
+    final states = <AuthStatus>[];
+    session.epochChanges.listen(epochs.add);
+    session.authState.listen(states.add);
+
+    await session.signIn(userId: 'u-1', tokens: _tokens);
+    await session.signIn(userId: 'u-1', tokens: _tokens);
+    await session.updateTokens(_tokens); // not a new epoch
+    await session.signOut();
+    await session.signOut(); // already signed out: no epoch
+    await pumpEventQueue();
+
+    expect(epochs, [1, 2, 3]);
+    expect(session.epoch, 3);
+    expect(states, [
+      AuthStatus.signedIn,
+      AuthStatus.signedOut,
+    ], reason: 'authState misses the same-user sign-in');
+  });
+
   group('T-0039-AC4 persistence', () {
     test(
       'T-0039-AC4 a new instance on the same store restores the session',

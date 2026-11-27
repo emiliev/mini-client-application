@@ -1,0 +1,8 @@
+{
+  "body": {
+    "experiments": [],
+    "flags": {}
+  },
+  "request": "GET /v1/flags",
+  "status": 200
+}

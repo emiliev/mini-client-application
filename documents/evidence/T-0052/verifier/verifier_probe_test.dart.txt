@@ -1,0 +1,147 @@
+// Verifier probe (T-0052), written independently of the engineer's tests.
+import 'package:mc_fixtures_platform/mc_fixtures_platform.dart';
+import 'package:test/test.dart';
+
+import 'rig.dart';
+
+bool ok(Object r) => (r as dynamic).fold((_) => true, (_) => false) as bool;
+
+void main() {
+  test('V-AC1 order: override > remote > LKG > default', () async {
+    final stub = StubFlagsDomain(flags: {'catalogue.page_size': 30});
+    var rig = await Rig.create(stub: stub);
+    addTearDown(() => rig.dispose());
+    expect(rig.flags.value(pageSize), 10); // default before the fetch
+    await rig.settle();
+    expect(rig.flags.value(pageSize), 30); // remote
+    expect(ok(await rig.flags.set(pageSize, 50)), isTrue);
+    expect(rig.flags.value(pageSize), 50); // override
+    await rig.flags.clear(pageSize);
+    expect(rig.flags.value(pageSize), 30);
+    // restart with a failing backend: LKG
+    rig = await rig.relaunch(domain: const FailingPlatformDomain());
+    expect(rig.flags.value(pageSize), 30);
+    await rig.settle();
+    expect(rig.flags.value(pageSize), 30, reason: 'failed fetch keeps LKG');
+    // a user switch deletes the cache; a failing restart sees the default
+    await rig.signIn('u-100');
+    await rig.settle();
+    expect(rig.flags.value(pageSize), 10);
+    rig = await rig.relaunch(domain: const FailingPlatformDomain());
+    expect(rig.flags.value(pageSize), 10, reason: 'cache gone / other user');
+  });
+
+  for (final env in ['prod', 'release', 'staging', 'banana', '']) {
+    test('V-AC1 release-like env "$env" rejects overrides', () async {
+      final rig = await Rig.create(
+        env: env,
+        stub: StubFlagsDomain(flags: {'catalogue.page_size': 30}),
+      );
+      addTearDown(() => rig.dispose());
+      await rig.settle();
+      expect(ok(await rig.flags.set(pageSize, 50)), isFalse);
+      expect(rig.flags.value(pageSize), 30);
+    });
+  }
+
+  test('V-AC1 wrong type falls back, reported once', () async {
+    final rig = await Rig.create(
+      stub: StubFlagsDomain(flags: {'catalogue.page_size': 'abc'}),
+    );
+    addTearDown(() => rig.dispose());
+    await rig.settle();
+    for (var i = 0; i < 5; i++) {
+      expect(rig.flags.value(pageSize), 10);
+    }
+    await rig.flags.refresh();
+    expect(rig.flags.value(pageSize), 10);
+    final n = rig.reports.where((m) => m.contains('catalogue.page_size'));
+    expect(n.length, 1);
+  });
+
+  test('V-AC2 weights: 0, 1e15, forced', () async {
+    final rig = await Rig.create(
+      stub: StubFlagsDomain(
+        experiments: [
+          {
+            'key': 'store_home_layout',
+            'variants': [
+              {'name': 'control', 'weight': 0},
+              {'name': 'compact', 'weight': 0},
+              {'name': 'rich', 'weight': 7},
+            ],
+          },
+        ],
+      ),
+    );
+    addTearDown(() => rig.dispose());
+    await rig.settle();
+    for (var i = 0; i < 200; i++) {
+      await rig.signIn('user-$i', i + 1);
+      expect(rig.flags.variant(storeHomeLayout), 'rich');
+    }
+    // 1e15 is malformed -> declared weights
+    rig.stub.experiments = [
+      {
+        'key': 'store_home_layout',
+        'variants': [
+          {'name': 'control', 'weight': 1000000000000000},
+          {'name': 'compact', 'weight': 1},
+          {'name': 'rich', 'weight': 1},
+        ],
+      },
+    ];
+    await rig.flags.refresh();
+    var counts = <String, int>{};
+    for (var i = 0; i < 300; i++) {
+      await rig.signIn('x-$i', i + 1);
+      counts.update(
+        rig.flags.variant(storeHomeLayout),
+        (v) => v + 1,
+        ifAbsent: () => 1,
+      );
+    }
+    // declared weights 50/30/20 apply: all three variants occur
+    expect(counts.length, 3, reason: '$counts');
+    await rig.flags.forceVariant(storeHomeLayout, 'rich');
+    expect(rig.flags.variant(storeHomeLayout), 'rich');
+  });
+
+  test('V-AC3 stale epoch dropped (both orders) + same-user watch', () async {
+    final rig = await Rig.create(
+      stub: StubFlagsDomain(flags: {'catalogue.page_size': 30}),
+      holding: true,
+    );
+    addTearDown(() => rig.dispose());
+    await rig.gate.waitForHeld(1);
+    rig.stub.flags = {'catalogue.page_size': 99};
+    await rig.signIn('u-100');
+    await rig.gate.waitForHeld(2);
+    // order A: new first, then the stale one
+    rig.gate.held[1].release();
+    await rig.settle();
+    expect(rig.flags.value(pageSize), 99);
+    rig.stub.flags = {'catalogue.page_size': 1};
+    rig.gate.held[0].release();
+    await rig.settle();
+    expect(rig.flags.value(pageSize), 99, reason: 'stale dropped');
+    // watch-only subscriber, same-user re-sign-in
+    rig.gate.holding = false;
+    rig.stub.flags = {'catalogue.page_size': 77};
+    final seen = <int>[];
+    final sub = rig.flags.watch(pageSize).listen(seen.add);
+    await rig.settle();
+    await rig.signIn('u-100', 2);
+    await rig.settle();
+    await sub.cancel();
+    expect(seen.last, 77, reason: '$seen');
+    // dispose: no requests, streams done
+    final before = rig.stub.authorizations.length;
+    final done = rig.flags.watch(pageSize).toList();
+    await rig.flags.dispose();
+    await rig.flags.refresh();
+    await rig.settle();
+    expect(rig.stub.authorizations.length, before);
+    await done;
+  });
+}
