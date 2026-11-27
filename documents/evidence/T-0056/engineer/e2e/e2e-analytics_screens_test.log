@@ -1,0 +1,50 @@
+# e2e_ios.sh: T-0056 engineer on mc-T-0056-engineer-7407 (67A0AFFF-1C06-432B-BD46-1643DB32379E)
+# cwd: /tmp/mc-T-0056-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/1-analytics_screens_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/analytics_screens_test.dart -d 67A0AFFF-1C06-432B-BD46-1643DB32379E
+
+Resolving dependencies in `/private/tmp/mc-T-0056-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0056-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           20.9s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57045/4tHH-FFePe4=/
+VMServiceFlutterDriver: Isolate found with number: 768590984197307
+VMServiceFlutterDriver: Isolate 768590984197307 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0053-AC4 home to the characters list and back records the screens
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 51debbd5672941e6fcec9f7c26d59154, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: home, session_id: 51debbd5672941e6fcec9f7c26d59154, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 51debbd5672941e6fcec9f7c26d59154, seq: 3}
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [event] mc_screen_view {screen_name: home, session_id: 51debbd5672941e6fcec9f7c26d59154, seq: 4}
+flutter: 00:06 +1: (tearDownAll)
+flutter: 00:06 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/1-analytics_screens_test/01_home.png (315801)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/1-analytics_screens_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/1-analytics_screens_test/03_back_to_home.png (315801)
+All tests passed.
+
+# exit code: 0

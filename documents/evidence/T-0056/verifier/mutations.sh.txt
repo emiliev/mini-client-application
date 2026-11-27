@@ -1,0 +1,117 @@
+#!/bin/bash
+# T-0056 Verifier mutations: 10 of the engineer's 69 re-run, plus 12 of my own.
+# Usage: vmut.sh <worktree> <output_base> <log> [ids...]
+# Each mutation edits one file, runs the targets, restores the file with
+# `git checkout`, and checks the restore. KILLED needs "FAILED in"; a build
+# failure is BROKEN (not a kill).
+set -uo pipefail
+WT="$1"; OB="$2"; LOG="$3"; shift 3
+ONLY=" $* "
+cd "$WT" || exit 2
+say() { printf '%s\n' "$*" | tee -a "$LOG"; }
+bz() { tool/bazelw --output_base="$OB" "$@"; }
+F=feature/store/store_home/lib/src
+BLOC=$F/presentation/bloc
+WID=$F/presentation/widget
+PAGE=$F/presentation/page/store_home_page.dart
+C=$BLOC/cart_summary_bloc.dart
+S=$BLOC/store_section_bloc.dart
+R=utility/mc_analytics/lib/src/route_observer.dart
+FF=utility/mc_feature_flow/lib/src/feature_flow.dart
+FC=utility/mc_feature_flow/lib/src/flow_context.dart
+FILES=("$C" "$S" "$PAGE" "$R" "$FF" "$FC" "$BLOC/featured_bloc.dart" "$BLOC/category_products_bloc.dart" "$WID/deals_section.dart")
+restore_all() { git checkout -- "${FILES[@]}" 2>/dev/null; }
+trap restore_all EXIT INT TERM
+TARGETS="//feature/store/store_home:bdd_test //feature/store/store_home:flow_scope_test //feature/store/store_home:contract_test //app/mini_client:analytics_screens_test //app/mini_client:store_route_test //utility/mc_feature_flow:feature_flow_test //utility/mc_analytics:flow_observer_test //utility/mc_analytics:route_observer_test"
+run() { bz test --nocache_test_results --test_timeout=900 $TARGETS 2>&1 | tr '\r' '\n'; }
+
+if [[ " $ONLY " == *" BASE "* ]]; then
+  out="$(run)"
+  if grep -q -a -E "FAILED|NO STATUS|Build did NOT complete" <<< "$out"; then
+    say "BASELINE FAILS"; grep -a -E "FAILED|Build did NOT" <<< "$out" | tee -a "$LOG"; exit 1
+  fi
+  say "baseline: PASS ($(grep -a -c 'PASSED in' <<< "$out") targets)"
+fi
+
+mutate() {
+  local id="$1" what="$2" file="$3"; shift 3
+  if [[ "$ONLY" != *" $id "* ]]; then return; fi
+  /usr/bin/python3 -I - "$file" "$@" <<'EOF'
+import sys
+path, pairs = sys.argv[1], sys.argv[2:]
+s = open(path).read()
+for old, new in zip(pairs[0::2], pairs[1::2]):
+    if s.count(old) != 1:
+        print("PATTERN MATCHES %d TIMES: %r" % (s.count(old), old)); sys.exit(3)
+    s = s.replace(old, new)
+open(path, "w").write(s)
+EOF
+  if [[ $? -ne 0 ]]; then say "$id $what: NOT APPLIED"; git checkout -- "$file"; return; fi
+  fvm dart format "$file" > /dev/null
+  local out; out="$(run)"
+  if grep -q -a -E "Build did NOT complete|FAILED TO BUILD" <<< "$out"; then
+    say "$id $what: BROKEN"; grep -a -E "error|Error" <<< "$out" | head -5 | tee -a "$LOG"
+  elif grep -q -a "FAILED in" <<< "$out"; then
+    say "$id $what: KILLED ($(grep -a 'FAILED in' <<< "$out" | awk '{print $1}' | paste -sd' ' -))"
+  elif grep -q -a "TIMEOUT in" <<< "$out"; then
+    say "$id $what: TIMEOUT"
+  else
+    say "$id $what: SURVIVED"
+  fi
+  git checkout -- "$file"
+  git diff --quiet -- "$file" || say "RESTORE FAILED: $file"
+}
+
+# --- 10 of the engineer's 69, re-run (same patterns) ----------------------
+mutate M01 "a stale answer is applied (no generation check)" "$S" \
+  'if (result == null || generation != _generation || isClosed) {' 'if (result == null || isClosed) {'
+mutate M05 "section_viewed for a failed section too" "$S" \
+  '    }, (error) => emit(failureState(error)));' \
+  $'    }, (error) {\n      emit(failureState(error));\n      tracker.sectionViewed(section);\n    });'
+mutate C01 "an answer for a session that is gone is shown" "$C" \
+  '    if (_session.epoch == epoch) {' '    if (_session.epoch == epoch || epoch >= 0) {'
+mutate C04 "a session change elsewhere is ignored" "$C" \
+  $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch) {' $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch && _shownEpoch == null) {'
+mutate V01 "a dropped cart answer does not reload" "$C" \
+  $'    add(const _SessionChanged());\n    return null;' $'    return null;'
+mutate V02 "the store page starts while hidden" "$PAGE" \
+  '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true);' '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true;'
+mutate V03 "the store page starts again on every showing" "$PAGE" \
+  '    if (shown && !_started) {' '    if (shown) {'
+mutate V08 "FlowScope does not notify a status flip" "$FC" \
+  $'      outerIsCurrent != oldWidget.outerIsCurrent ||\n' ''
+mutate K2 "a flow page is tracked while hidden under another screen" "$R" \
+  '      if (!hostRoute.isCurrent) {' '      if (!hostRoute.isCurrent && name.isEmpty) {'
+mutate G01 "the featured flag is ignored" "$PAGE" \
+  $'    storeHomeFeatured,\n  );' $'    storeHomeFeatured,\n  ) || true;'
+
+# --- the Verifier's own ---------------------------------------------------
+mutate X01 "isolation: the deals Retry also retries the banners" "$WID/deals_section.dart" \
+  "import 'package:store_home/src/presentation/bloc/deals_bloc.dart';" \
+  $'import \'package:store_home/src/presentation/bloc/banners_bloc.dart\';\nimport \'package:store_home/src/presentation/bloc/deals_bloc.dart\';' \
+  $'            onRetry: () =>\n                context.read<DealsBloc>().add(const DealsEvent.retry()),' \
+  $'            onRetry: () {\n              context.read<DealsBloc>().add(const DealsEvent.retry());\n              context.read<BannersBloc>().add(const BannersEvent.retry());\n            },'
+mutate X02 "isolation: the cart Retry ignores its state (double tap reads twice)" "$C" \
+  $'      case _Retry():\n        if (state is _Failure) {' $'      case _Retry():\n        if (state is _Failure || state is _Loading) {'
+mutate X03 "isolation: the featured Retry ignores its state" "$BLOC/featured_bloc.dart" \
+  $'      case _Retry():\n        if (state is _Failure) {' $'      case _Retry():\n        if (state is _Failure || state is _Loading) {'
+mutate X04 "visibility: the page ignores whether it is its flow's top page" "$PAGE" \
+  '        (ModalRoute.of(context)?.isCurrent ?? true) &&' '        true &&'
+mutate X05 "visibility: the scope always says its route is current" "$FF" \
+  '      outerIsCurrent: route?.isCurrent ?? true,' '      outerIsCurrent: route != null || true,'
+mutate X06 "cart epoch: every session event reloads, also for the shown epoch" "$C" \
+  $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch) {' $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch || _shownEpoch != null) {'
+mutate X07 "cart epoch: an answer is checked against the shown epoch, not its own" "$C" \
+  '    if (_session.epoch == epoch) {' '    if (_session.epoch == (_shownEpoch ?? epoch)) {'
+mutate X08 "once per visit: a refresh views every section again" "$S" \
+  $'    try {\n      await load(emit, keepShown: true);' $'    try {\n      _viewed = false;\n      await load(emit, keepShown: true);'
+mutate X09 "flag: read on every build, not once per visit" "$PAGE" \
+  $'  late final bool _featured = context.di<FeatureFlagsReader>().value(' $'  bool get _featured => context.di<FeatureFlagsReader>().value('
+mutate X10 "flag: pull to refresh reads the featured bloc with the flag off" "$PAGE" \
+  $'      if (featured)\n        one((d) => context.read<FeaturedBloc>().add(FeaturedEvent.refresh(d))),' \
+  $'      one((d) => context.read<FeaturedBloc>().add(FeaturedEvent.refresh(d))),'
+mutate X11 "visibility: the scope does not notify a new outer route" "$FC" \
+  $'      outerIsCurrent != oldWidget.outerIsCurrent ||\n      !identical(outerRoute, oldWidget.outerRoute);' $'      outerIsCurrent != oldWidget.outerIsCurrent;'
+mutate X12 "paging: the category Retry loads more instead of retrying" "$BLOC/category_products_bloc.dart" \
+  $'      case _Retry():\n        await _paging.retry();' $'      case _Retry():\n        await _paging.loadMore();'
+say "done"

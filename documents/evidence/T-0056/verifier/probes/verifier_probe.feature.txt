@@ -1,0 +1,142 @@
+Feature: Verifier probes (T-0056, not part of the branch)
+
+  Background:
+    Given the backend serves {'commerce.default'}
+    And the backend serves {'identity.default'}
+    And I am signed in as {'reader@mini-client.test'}
+    And {'reader@mini-client.test'} has {1} of product {500060} in the cart
+
+  @T-0056-AC6
+  Scenario Outline: VP01 a held section never blocks the other four
+    Given the backend holds {<route>}
+    When I open the store
+    And the app sends {<route>}
+    Then the {<section>} section is loading
+    And every section but {<section>} is ready
+    And the section {<section>} was viewed {0} times
+    When the backend releases {<route>}
+    Then the {<section>} section is ready
+    And the section {<section>} was viewed {1} times
+
+    Examples:
+      | section      | route                       |
+      | 'banners'    | 'GET /v1/store/banners'     |
+      | 'deals'      | 'GET /v1/store/deals'       |
+      | 'categories' | 'GET /v1/store/categories'  |
+      | 'featured'   | 'GET /v1/store/featured'    |
+      | 'cart'       | 'GET /v1/me/cart'           |
+
+  @T-0056-AC2
+  Scenario Outline: VP02 a double Retry sends one request and recovers only its own section
+    Given the backend runs the scenario {'commerce.server_error'}
+    When I open the store
+    Then the backend received {3} requests for {<route>}
+    When the backend recovers
+    And I tap Retry in the {<section>} section twice in quick succession
+    Then the {<section>} section is ready
+    And the backend received {4} requests for {<route>}
+    And every section but {<section>} shows its error
+    And the section {<section>} was viewed {1} times
+
+    Examples:
+      | section      | route                       |
+      | 'banners'    | 'GET /v1/store/banners'     |
+      | 'deals'      | 'GET /v1/store/deals'       |
+      | 'categories' | 'GET /v1/store/categories'  |
+      | 'featured'   | 'GET /v1/store/featured'    |
+      | 'cart'       | 'GET /v1/me/cart'           |
+
+  @T-0056-AC2
+  Scenario: VP03 the category's next page fails, the footer offers Retry, and Retry loads it
+    When I open the store
+    And I tap {'Cosmic'} in the {'categories'} section
+    Then the category page shows the first {20} products of {'cosmic'}
+    Given the backend fails {'GET /v1/store/categories/cosmic/products?offset=20'} with {'server_error'}
+    When I scroll the category to the end
+    Then I see {'More products could not be loaded.'}
+    And the backend received {3} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}
+    When the backend recovers
+    And I tap {'Retry'}
+    Then the backend received {4} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}
+    And the category page shows the first {40} products of {'cosmic'}
+
+  @T-0056-AC2
+  Scenario: VP04 the category's first page fails with a full-page error, and Retry loads it
+    Given the backend fails {'GET /v1/store/categories/heroes/products'} with {'server_error'}
+    When I open the store at category {'heroes'}
+    Then I see {'The products could not be loaded'}
+    When the backend recovers
+    And I tap {'Retry'}
+    Then the category page shows the first {20} products of {'heroes'}
+
+  @T-0056-AC3
+  Scenario: VP05 control: leaving the store while the cart loads, then its late answer: nothing fails
+    Given the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    And I leave the store
+    And the backend releases {'GET /v1/me/cart'}
+    Then no error was reported
+    And the section {'cart'} was viewed {0} times
+
+  @T-0056-AC3
+  Scenario: VP06 leaving the store while the cart loads, a sign-out, then the late answer: nothing fails
+    Given the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    And I leave the store
+    And the session ends elsewhere
+    And the backend releases {'GET /v1/me/cart'}
+    Then no error was reported
+
+  @T-0056-AC3
+  Scenario: VP07 leaving the store while the cart loads, a same-user re-sign-in, then the late answer: nothing fails
+    Given the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    And I leave the store
+    And {'reader@mini-client.test'} signs in elsewhere
+    And the backend releases {'GET /v1/me/cart'}
+    Then no error was reported
+
+  @T-0056-AC7
+  Scenario: VP08 leaving the store while deals load: the late answer tracks nothing
+    Given the backend holds {'GET /v1/store/deals'}
+    When I open the store
+    And the app sends {'GET /v1/store/deals'}
+    And I leave the store
+    And the backend releases {'GET /v1/store/deals'}
+    Then the section {'deals'} was viewed {0} times
+    And no error was reported
+
+  @T-0056-AC7
+  Scenario: VP09 a dialog over the store changes nothing: no reload, no second view
+    When I open the store
+    And I open a dialog over the store and close it
+    Then the backend received {1} requests for {'GET /v1/store/deals'}
+    And the backend received {1} requests for {'GET /v1/me/cart'}
+    And the section {'deals'} was viewed {1} times
+    And the section {'cart'} was viewed {1} times
+    And the screens tracked are {'store_home'}
+
+  @T-0056-AC7
+  Scenario: VP10 store, category, back, category, back: views once, screens in order
+    When I open the store
+    And I tap {'Heroes'} in the {'categories'} section
+    And I swipe back
+    And I tap {'Cosmic'} in the {'categories'} section
+    And I swipe back
+    Then the screens tracked are {'store_home, store_category, store_home, store_category, store_home'}
+    And the section {'banners'} was viewed {1} times
+    And the backend received {1} requests for {'GET /v1/store/banners'}
+
+  @T-0056-AC1
+  Scenario: VP11 flag off: no featured request even after Retry elsewhere and pull to refresh
+    Given the flag {'store.home_featured'} is {false}
+    And the backend fails {'GET /v1/store/deals'} with {'server_error'}
+    When I open the store
+    And the backend recovers
+    And I tap Retry in the {'deals'} section
+    And I pull the store to refresh
+    Then the backend received {0} requests for {'GET /v1/store/featured'}
+    And the sections are {'Highlights, Deals, Categories, Your cart'}

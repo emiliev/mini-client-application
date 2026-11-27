@@ -120,7 +120,28 @@ class _FailRule {
   bool get fires => times < 0 || calls <= times;
 }
 
-typedef _Hold = ({_Route route, Completer<void> gate});
+final class _Hold {
+  _Hold(this.route, {required this.once});
+
+  final _Route route;
+  final Completer<void> gate = Completer<void>();
+
+  /// Holds only the first matching request (`holdNext`).
+  final bool once;
+
+  /// A `once` hold that has its request: later ones pass.
+  bool taken = false;
+
+  /// Whether a request to [method] [path] with [query] waits on this hold;
+  /// a `once` hold takes the first such request and no other.
+  bool takes(String method, String path, Map<String, String> query) {
+    if (taken || !route.matches(method, path, query)) {
+      return false;
+    }
+    taken = once;
+    return true;
+  }
+}
 
 final Map<String, MockDomain Function()> _fixtureSets = {};
 
@@ -224,7 +245,14 @@ final class McBackendHarness {
   /// Makes matching requests pend until [release], so the loading state can
   /// be observed deterministically. No timers are involved.
   void hold(String route) =>
-      _holds.add((route: _Route.parse(route), gate: Completer<void>()));
+      _holds.add(_Hold(_Route.parse(route), once: false));
+
+  /// Like [hold], but only the next matching request waits; later ones go
+  /// through at once. So a test can keep one request in flight while a
+  /// newer one to the same route is answered (a refresh racing a load), and
+  /// then [release] the old one.
+  void holdNext(String route) =>
+      _holds.add(_Hold(_Route.parse(route), once: true));
 
   /// Lets the requests held on [route], and later ones, through.
   Future<void> release(String route) async {
@@ -362,10 +390,12 @@ class _HarnessAdapter implements HttpClientAdapter {
     if (!malformed) {
       _harness._checkMatched(method, path, query);
     }
-    for (final hold in List.of(_harness._holds)) {
-      if (hold.route.matches(method, path, query)) {
-        await _awaitGate(hold.gate, cancelFuture, options);
-      }
+    final gates = [
+      for (final hold in List.of(_harness._holds))
+        if (hold.takes(method, path, query)) hold.gate,
+    ];
+    for (final gate in gates) {
+      await _awaitGate(gate, cancelFuture, options);
     }
     return _harness.backend.adapter.fetch(options, requestStream, cancelFuture);
   }

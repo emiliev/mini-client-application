@@ -1,0 +1,25 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: I open a dialog over the store and close it (verifier probe)
+Future<void> iOpenADialogOverTheStoreAndCloseIt(WidgetTester tester) async {
+  await letSectionsLand(tester);
+  final context = tester.element(find.byKey(storeHomeBodyKey));
+  unawaited(
+    showDialog<void>(
+      context: context,
+      useRootNavigator: true,
+      builder: (_) => const AlertDialog(content: Text('probe dialog')),
+    ),
+  );
+  await mcSettle(tester);
+  expect(find.text('probe dialog'), findsOneWidget);
+  Navigator.of(tester.element(find.text('probe dialog'))).pop();
+  await mcSettle(tester);
+  await letSectionsLand(tester);
+}

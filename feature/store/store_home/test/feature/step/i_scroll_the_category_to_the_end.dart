@@ -1,0 +1,22 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: I scroll the category to the end
+///
+/// Drags the category grid to its end, past the load-more threshold, and
+/// lets the next page land.
+Future<void> iScrollTheCategoryToTheEnd(WidgetTester tester) async {
+  final grid = find.byKey(categoryGridKey);
+  expect(grid, findsOneWidget, reason: 'the category grid');
+  final scrollable = find
+      .descendant(of: grid, matching: find.byType(Scrollable))
+      .first;
+  final position = tester.state<ScrollableState>(scrollable).position;
+  position.jumpTo(position.maxScrollExtent);
+  await tester.pump();
+  await tester.drag(scrollable, const Offset(0, -200));
+  await mcSettle(tester);
+}

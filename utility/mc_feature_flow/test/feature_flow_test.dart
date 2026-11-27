@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
@@ -59,14 +61,15 @@ List<McFlowPage> _pages(_Selection s) => [
 
 /// Exposes the flow's controller so tests can drive the flow.
 class _Probe extends StatelessWidget {
-  const _Probe({required this.onController});
+  const _Probe({required this.onController, this.child});
 
   final void Function(FeatureFlowController<_Selection>) onController;
+  final Widget? child;
 
   @override
   Widget build(BuildContext context) {
     onController(context.di<FeatureFlowController<_Selection>>());
-    return const Text('probe');
+    return child ?? const Text('probe');
   }
 }
 
@@ -126,6 +129,179 @@ void main() {
     await tester.tap(find.text('Retry'));
     await tester.pumpAndSettle();
     expect(attempts, 2);
+    expect(find.text('list page'), findsOneWidget);
+  });
+
+  testWidgets('T-0056-AC7 observers watch the flow\'s own navigator, and '
+      'are read once', (tester) async {
+    final first = _TopRecorder();
+    final second = _TopRecorder();
+    late FeatureFlowController<_Selection> controller;
+    Widget flow(_TopRecorder observer) => FeatureFlow<_Selection>(
+      state: const _Selection(),
+      observers: [observer],
+      onGeneratePages: (s) => [
+        McFlowPage(
+          name: 'list',
+          child: _Probe(onController: (c) => controller = c),
+        ),
+        if (s.selected != null)
+          McFlowPage(name: 'detail', child: Text('detail ${s.selected}')),
+      ],
+    );
+    await tester.pumpWidget(_app(flow(first)));
+    await tester.pumpAndSettle();
+    expect(first.tops, ['list']);
+    expect(first.navigator, isNotNull);
+    expect(
+      first.navigator,
+      isNot(same(tester.state<NavigatorState>(find.byType(Navigator).first))),
+      reason: 'the flow\'s own navigator, not the app\'s',
+    );
+
+    controller.update((s) => const _Selection('x'));
+    await tester.pumpAndSettle();
+    expect(first.tops, ['list', 'detail']);
+
+    // A rebuild with another observer keeps the first one.
+    await tester.pumpWidget(_app(flow(second)));
+    controller.update((s) => const _Selection());
+    await tester.pumpAndSettle();
+    expect(first.tops, ['list', 'detail', 'list']);
+    expect(second.tops, isEmpty);
+    expect(second.navigator, isNull);
+  });
+
+  testWidgets('T-0056-AC7 the scope publishes the flow\'s route and whether '
+      'it is current, and a page that depends on it sees each flip', (
+    tester,
+  ) async {
+    final seen = <bool>[];
+    ModalRoute<Object?>? outer;
+    late BuildContext hostContext;
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) {
+            hostContext = context;
+            return FeatureFlow<_Selection>(
+              state: const _Selection(),
+              onGeneratePages: (_) => [
+                McFlowPage(
+                  name: 'only',
+                  child: Builder(
+                    builder: (context) {
+                      final scope = FlowScope.of(context);
+                      seen.add(scope.outerIsCurrent);
+                      outer = FlowScope.read(context).outerRoute;
+                      return const Text('page');
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(seen.last, isTrue);
+    expect(outer, same(ModalRoute.of(hostContext)));
+
+    unawaited(
+      Navigator.of(hostContext)
+          .push(MaterialPageRoute<void>(builder: (_) => const Text('cover'))),
+    );
+    await tester.pumpAndSettle();
+    expect(seen.last, isFalse, reason: 'covered');
+    Navigator.of(hostContext).pop();
+    await tester.pumpAndSettle();
+    expect(seen.last, isTrue, reason: 'shown again');
+  });
+
+  testWidgets('T-0056-AC7 a nested flow is visible only while the flow around '
+      'it is: covering the app route or the outer flow\'s page flips the '
+      'inner scope (Verifier D3)', (tester) async {
+    final inner = <bool>[];
+    late FeatureFlowController<_Selection> outer;
+    late BuildContext hostContext;
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) {
+            hostContext = context;
+            return FeatureFlow<_Selection>(
+              state: const _Selection(),
+              onGeneratePages: (s) => [
+                McFlowPage(
+                  name: 'outer',
+                  child: _Probe(
+                    onController: (c) => outer = c,
+                    child: FeatureFlow<int>(
+                      state: 0,
+                      onGeneratePages: (_) => [
+                        McFlowPage(
+                          name: 'inner',
+                          child: Builder(
+                            builder: (context) {
+                              inner.add(FlowScope.of(context).outerIsCurrent);
+                              return const Text('inner page');
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (s.selected != null)
+                  const McFlowPage(name: 'above', child: Text('above')),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(inner.last, isTrue);
+
+    // A screen over the app route.
+    unawaited(
+      Navigator.of(hostContext)
+          .push(MaterialPageRoute<void>(builder: (_) => const Text('cover'))),
+    );
+    await tester.pumpAndSettle();
+    expect(inner.last, isFalse, reason: 'the app route is covered');
+    Navigator.of(hostContext).pop();
+    await tester.pumpAndSettle();
+    expect(inner.last, isTrue);
+
+    // A page of the outer flow over the page that holds the inner flow.
+    outer.update((_) => const _Selection('x'));
+    await tester.pumpAndSettle();
+    expect(inner.last, isFalse, reason: 'the outer flow page is covered');
+    outer.update((_) => const _Selection());
+    await tester.pumpAndSettle();
+    expect(inner.last, isTrue);
+  });
+
+  testWidgets('T-0056-AC7 a flow builds its first page a frame after it is '
+      'built itself, so a router observer sees the route first (the order '
+      'ADR-0012 relies on)', (tester) async {
+    await tester.pumpWidget(
+      _app(
+        const FeatureFlow<_Selection>(
+          state: _Selection(),
+          onGeneratePages: _pages,
+        ),
+      ),
+    );
+    expect(
+      find.text('list page'),
+      findsNothing,
+      reason: 'the first page waits for the flow container',
+    );
+    expect(find.byType(Navigator), findsOneWidget, reason: 'no flow navigator');
+    await tester.pump();
     expect(find.text('list page'), findsOneWidget);
   });
 
@@ -405,6 +581,18 @@ void main() {
       ),
     );
   });
+}
+
+/// Records the names of the pages that become the top of the navigator it
+/// observes.
+class _TopRecorder extends NavigatorObserver {
+  final List<String?> tops = [];
+
+  @override
+  void didChangeTop(
+    Route<dynamic> topRoute,
+    Route<dynamic>? previousTopRoute,
+  ) => tops.add(topRoute.settings.name);
 }
 
 class _Missing {}

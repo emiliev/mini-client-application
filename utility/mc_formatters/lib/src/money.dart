@@ -12,6 +12,18 @@ enum Currency {
 
   /// Digits after the decimal separator (`minorUnits` = amount * 10^digits).
   final int fractionDigits;
+
+  /// The currency with ISO 4217 [code] (`EUR`), as an API sends it. An
+  /// unknown or lower-case code is a [FormatException], so a mapper that
+  /// reads a response turns it into a malformed response, never a guess.
+  static Currency parse(String code) {
+    for (final currency in values) {
+      if (currency.code == code) {
+        return currency;
+      }
+    }
+    throw FormatException('Unknown currency code', code);
+  }
 }
 
 /// An amount in minor units (cents), so no floating point is involved.

@@ -12,8 +12,9 @@ import 'package:mc_di/mc_di.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_storage/mc_storage.dart';
 
-/// Registers [Analytics]. List `ConfigDIInitializer`, `MonitoringDIInitializer`
-/// and `StorageDIInitializer` first.
+/// Registers [Analytics], also as the blocs' [AnalyticsTracker] (T-0056).
+/// List `ConfigDIInitializer`, `MonitoringDIInitializer` and
+/// `StorageDIInitializer` first.
 ///
 /// The starting consent is the saved choice, else the config's
 /// `analytics.defaultConsent` (`granted` in `dev` and `e2e` so developers see
@@ -65,13 +66,17 @@ class AnalyticsDIInitializer extends McDIInitializer {
         ? (binding ?? WidgetsBinding.instance)
         : null;
     final observer = AnalyticsLifecycleObserver(analytics);
-    getIt.registerSingleton<Analytics>(
-      analytics,
-      dispose: (a) {
-        widgets?.removeObserver(observer);
-        a.dispose();
-      },
-    );
+    getIt
+      ..registerSingleton<Analytics>(
+        analytics,
+        dispose: (a) {
+          widgets?.removeObserver(observer);
+          a.dispose();
+        },
+      )
+      // The same instance for blocs, which may not import this Flutter
+      // package (R15): they take the pure-Dart port (T-0056).
+      ..registerSingleton<AnalyticsTracker>(analytics);
     // Only after registering: a registration that throws (a second
     // initializer) leaves no observer behind that nothing would remove.
     if (widgets != null) {

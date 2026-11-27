@@ -1,0 +1,27 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: I scroll through the whole store
+///
+/// Scrolls from the top to the end and back, so every section is built and
+/// laid out once (a lazy list builds only what is near the screen), and
+/// each carousel to its end.
+Future<void> iScrollThroughTheWholeStore(WidgetTester tester) async {
+  await letSectionsLand(tester);
+  await sectionTitlesInOrder(tester);
+  for (final section in ['banners', 'deals', 'featured']) {
+    final content = find.byKey(sectionPartKey(section, 'content'));
+    await scrollStoreUntilVisible(tester, find.byKey(sectionKey(section)));
+    if (content.evaluate().isEmpty) {
+      continue;
+    }
+    await scrollStoreUntilVisible(tester, content);
+    final position = tester
+        .state<ScrollableState>(carouselScrollable(section))
+        .position;
+    position.jumpTo(position.maxScrollExtent);
+    await tester.pump();
+  }
+}

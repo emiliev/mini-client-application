@@ -15,6 +15,7 @@ _DEPS = [
     "//utility/mc_ds_theme",
     "//utility/mc_ds_tokens",
     "//utility/mc_event_bus",
+    "//utility/mc_feature_flags",
     "//utility/mc_formatters",
     "//utility/mc_mocked_backend",
     "//utility/mc_monitoring",
@@ -58,6 +59,7 @@ _TEST_DEPS = _DEPS + [
     "init_flow_test",
     "auth_container_test",
     "formatters_container_test",
+    "flags_container_test",
 ]]
 
 flutter_test(

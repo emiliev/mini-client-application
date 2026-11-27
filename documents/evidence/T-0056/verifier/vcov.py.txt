@@ -1,0 +1,57 @@
+"""Verifier's own coverage parser (T-0056): starts from the hand-written
+lib/ files on disk, not from the LCOV, so a file no test loads shows up.
+
+  python3 -I vcov.py <repo> <bazel-out> <pkg> [<pkg> ...]
+"""
+import os
+import re
+import sys
+
+repo, out, pkgs = sys.argv[1], sys.argv[2], sys.argv[3:]
+GENERATED = re.compile(r"(\.g|\.freezed|\.config|\.gr)\.dart$|/l10n/[^/]*_l10n[^/]*\.dart$")
+
+dats = []
+for root, _dirs, files in os.walk(out):
+    if "testlogs" in root and "coverage.dat" in files:
+        dats.append(os.path.join(root, "coverage.dat"))
+
+for pkg in pkgs:
+    name = os.path.basename(pkg)
+    disk = set()
+    for root, _dirs, files in os.walk(os.path.join(repo, pkg, "lib")):
+        for f in files:
+            p = os.path.relpath(os.path.join(root, f), os.path.join(repo, pkg))
+            if p.endswith(".dart") and not GENERATED.search(p):
+                disk.add(p)
+    lines = {}  # file -> {line: max hits}
+    for dat in dats:
+        cur = None
+        for raw in open(dat, errors="replace"):
+            raw = raw.rstrip("\n")
+            if raw.startswith("SF:"):
+                sf = raw[3:]
+                rel = None
+                if sf.startswith("package:%s/" % name):
+                    rel = "lib/" + sf[len("package:%s/" % name):]
+                elif ("/%s/lib/" % pkg) in ("/" + sf):
+                    rel = "lib/" + ("/" + sf).split("/%s/lib/" % pkg, 1)[1]
+                cur = rel if rel in disk else None
+            elif raw.startswith("DA:") and cur:
+                n, c = raw[3:].split(",")[:2]
+                d = lines.setdefault(cur, {})
+                d[int(n)] = max(d.get(int(n), 0), int(c))
+    tot = cov = 0
+    missed = []
+    for f in sorted(lines):
+        d = lines[f]
+        tot += len(d)
+        cov += sum(1 for v in d.values() if v > 0)
+        m = sorted(n for n, v in d.items() if v == 0)
+        if m:
+            missed.append("%s %s" % (f, m))
+    unmeasured = sorted(disk - set(lines))
+    print("%s: %d/%d = %.1f %%" % (pkg, cov, tot, 100.0 * cov / max(tot, 1)))
+    for m in missed:
+        print("   missed: " + m)
+    if unmeasured:
+        print("   no LCOV: " + ", ".join(unmeasured))

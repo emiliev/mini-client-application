@@ -35,6 +35,7 @@ class HomeRoute extends GoRouteData with $HomeRoute {
       // A push, so Back returns home (the list is not a child of home).
       onOpenCharacters: () => unawaited(context.push(AppLocations.characters)),
       onOpenSearch: () => unawaited(context.push(AppLocations.search())),
+      onOpenStore: () => unawaited(context.push(AppLocations.store)),
       // Flows that end with a result (plan 01 §4.3): push and await.
       onNewReadingList: () => AppFlows.createReadingList(GoRouter.of(context)),
       onEditReadingList: (id) =>

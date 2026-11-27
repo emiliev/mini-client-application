@@ -1,3 +1,4 @@
+import 'package:get_it/get_it.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:test/test.dart';
 
@@ -47,6 +48,35 @@ void main() {
       expect(sink.entries, hasLength(3));
     },
   );
+  // T-0056 closed this package's pre-existing coverage gap (73 % → 100 %):
+  // the DI initializer and the console lines of events and errors.
+  test('T-0056-AC8 MonitoringDIInitializer registers Monitoring over the '
+      'given sinks, and over the console by default', () async {
+    final sink = InMemorySink();
+    final getIt = GetIt.asNewInstance();
+    await MonitoringDIInitializer(sinks: [sink]).init(getIt);
+    await getIt<Monitoring>().log('hello');
+    expect(sink.entries.single, isA<LogEntry>());
+
+    final defaults = GetIt.asNewInstance();
+    await MonitoringDIInitializer().init(defaults);
+    expect(defaults<Monitoring>(), isA<Monitoring>());
+  });
+
+  test('T-0056-AC8 the console prints events and errors, fatal and with a '
+      'stack', () async {
+    final lines = <String>[];
+    final console = ConsoleSink(printer: lines.add);
+    final monitoring = Monitoring([console]);
+    await monitoring.trackEvent('opened', attributes: {'id': 1});
+    await monitoring.recordError('boom', null, fatal: true);
+    await monitoring.recordError('bang', StackTrace.fromString('frame 1'));
+    expect(lines, [
+      '[event] opened {id: 1}',
+      '[error fatal] boom',
+      '[error] bang\nframe 1',
+    ]);
+  });
 }
 
 class _ThrowingSink implements MonitoringSink {

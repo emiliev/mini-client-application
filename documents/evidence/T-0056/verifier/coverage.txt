@@ -1,0 +1,28 @@
+feature/store/store_home: 885/900 = 98.3 %
+   missed: lib/src/presentation/bloc/category_products_bloc.dart [81, 84, 86, 113]
+   missed: lib/src/presentation/bloc/category_products_event.dart [36]
+   missed: lib/src/presentation/page/category_page.dart [51, 65, 66, 67, 68, 88, 89, 90, 91]
+   missed: lib/src/presentation/widget/failure_message.dart [11]
+   no LCOV: lib/src/di/flow_scope.dart, lib/src/domain/api/store_home_api.dart, lib/src/flags/store_home_flags.dart, lib/src/flow/store_home_flow_state.dart, lib/src/navigator/store_home_navigator.dart, lib/src/presentation/bloc/banners_state.dart, lib/src/presentation/bloc/cart_summary_state.dart, lib/src/presentation/bloc/categories_state.dart, lib/src/presentation/bloc/category_products_state.dart, lib/src/presentation/bloc/deals_state.dart, lib/src/presentation/bloc/featured_state.dart, lib/store_home.dart
+app/wiring/commerce_wiring: 54/54 = 100.0 %
+   no LCOV: lib/src/routes/route_targets.dart
+app/wiring/app_core: 488/502 = 97.2 %
+   missed: lib/src/boot/boot_bloc.dart [106]
+   missed: lib/src/di/mocked_backend_di_initializer.dart [29, 37, 38]
+   missed: lib/src/di/root_initializers.dart [56]
+   missed: lib/src/links/e2e_start_link.dart [24]
+   missed: lib/src/links/pending_links.dart [69]
+   missed: lib/src/router/route_nesting.dart [33]
+   missed: lib/src/shell/error_hooks.dart [9, 10]
+   missed: lib/src/shell/mc_app.dart [105, 106, 155, 172]
+   no LCOV: lib/app_core.dart
+utility/mc_analytics: 326/326 = 100.0 %
+   no LCOV: lib/mc_analytics.dart
+utility/mc_feature_flow: 172/173 = 99.4 %
+   missed: lib/src/feature_flow.dart [230]
+   no LCOV: lib/mc_feature_flow.dart
+utility/mc_monitoring: 29/30 = 96.7 %
+   missed: lib/src/sinks.dart [54]
+   no LCOV: lib/mc_monitoring.dart, lib/src/analytics_tracker.dart
+utility/mc_formatters: 33/33 = 100.0 %
+   no LCOV: lib/mc_formatters.dart

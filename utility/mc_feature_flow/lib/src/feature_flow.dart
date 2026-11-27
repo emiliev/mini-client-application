@@ -41,6 +41,9 @@ typedef OnGenerateFlowPages<T> = List<McFlowPage> Function(T state);
 /// not provide.
 /// A failing [flowInitializer] shows an error view with Retry and reports the
 /// error to [Monitoring] when the root has one.
+/// [observers] watch the flow's own navigator (its pages), for example
+/// `mc_analytics`' `AnalyticsFlowObserver`, which tracks the pages as screens
+/// (T-0056). They are read once, when the flow is created.
 class FeatureFlow<T> extends StatefulWidget {
   const FeatureFlow({
     required this.state,
@@ -50,6 +53,7 @@ class FeatureFlow<T> extends StatefulWidget {
     this.localizationsDelegates = const [],
     this.rootImports = const <RootImport<Object>>[],
     this.onComplete,
+    this.observers = const [],
     super.key,
   });
 
@@ -74,6 +78,11 @@ class FeatureFlow<T> extends StatefulWidget {
   /// Called once with the result passed to `FeatureFlowController.complete`.
   final ValueChanged<Object?>? onComplete;
 
+  /// Observers of the flow's own navigator, after the flow's internal one.
+  /// Read once, when the flow is created (like [provide]): a rebuild with
+  /// other observers keeps the first ones.
+  final List<NavigatorObserver> observers;
+
   @override
   State<FeatureFlow<T>> createState() => _FeatureFlowState<T>();
 }
@@ -85,6 +94,10 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
   late Future<ChildDIContainer> _container;
   final Map<int, T> _snapshots = {};
   final NavigatorObserver _navigatorObserver = NavigatorObserver();
+  late final List<NavigatorObserver> _observers = [
+    _navigatorObserver,
+    ...widget.observers,
+  ];
   bool _forwarding = false;
   Object? _configError;
   StackTrace? _configStack;
@@ -277,7 +290,7 @@ class _FeatureFlowState<T> extends State<FeatureFlow<T>> {
             child: FlowBuilder<T>(
               controller: _flowController,
               onGeneratePages: _pages,
-              observers: [_navigatorObserver],
+              observers: _observers,
             ),
           );
         },
@@ -312,6 +325,12 @@ class _FlowScopeHost extends StatelessWidget {
       controller: controller,
       outerNavigator: Navigator.maybeOf(context),
       outerCanPop: route != null && !route.isFirst,
+      outerRoute: route,
+      // Visible in the app: its own route is current, and so is every flow
+      // around it (a flow nested in another flow's page, T-0056 D3).
+      outerIsCurrent:
+          (route?.isCurrent ?? true) &&
+          (FlowScope.maybeOf(context)?.outerIsCurrent ?? true),
       flowNavigatorObserver: flowNavigatorObserver,
       child: child,
     );

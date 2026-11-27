@@ -25,3 +25,4 @@ dependencies:
 dev_dependencies:
   mc_analysis: any
   mc_ds_theme: any
+  mc_feature_flags: any

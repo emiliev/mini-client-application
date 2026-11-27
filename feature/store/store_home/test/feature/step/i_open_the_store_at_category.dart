@@ -1,0 +1,16 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: I open the store at category {'heroes'}
+///
+/// The flow as `/store/categories/:id` builds it: opened at the category.
+Future<void> iOpenTheStoreAtCategory(WidgetTester tester, String id) async {
+  await ensureStoreContainer();
+  await initFlow(
+    tester,
+    () => storeTestHost(storeFlowUnderTest(category: id)),
+  );
+  await mcSettle(tester);
+}

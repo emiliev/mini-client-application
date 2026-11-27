@@ -20,6 +20,7 @@ dart_test(
     main = "test/monitoring_test.dart",
     deps = [
         ":mc_monitoring",
+        "@pub_deps//:get_it",
         "@pub_deps//:test",
     ],
 )

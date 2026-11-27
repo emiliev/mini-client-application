@@ -9,6 +9,7 @@ import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_test_utils/src/backend_harness.dart';
 import 'package:mc_test_utils/src/golden.dart';
 import 'package:mc_test_utils/src/mocks.dart';
+import 'package:mc_test_utils/src/test_flags.dart';
 
 /// The reference surface: iPhone 17 Pro, logical pixels at DPR 1.
 const Size mcReferenceSurface = Size(402, 874);
@@ -43,6 +44,11 @@ final class McTestSession {
   /// container). The sink is the one `Analytics` was built over, so the BDD
   /// steps `the analytics event ... was tracked` read it.
   final InMemoryAnalyticsSink analytics = InMemoryAnalyticsSink();
+
+  /// The feature flags' stub remote snapshot (P-107): the test container
+  /// registers it as the root's `FeatureFlagsReader`, and the BDD step
+  /// `the flag {key} is {value}` sets it.
+  final McTestFlags flags = McTestFlags();
 
   /// A temporary directory standing in for the app's storage directory.
   final Directory storageDirectory;

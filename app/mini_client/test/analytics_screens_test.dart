@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mini_client/src/mini_client_app.dart';
@@ -19,6 +20,8 @@ const _config =
     '"analytics":{"defaultConsent":"granted"}}';
 
 const _home = Key('home.placeholder');
+const _storeBody = ValueKey<String>('store_home.body');
+const _categoryGrid = ValueKey<String>('store_category.grid');
 
 /// Every named route of the app, in the order the typed routes declare them.
 const _expectedRouteNames = {
@@ -33,6 +36,9 @@ const _expectedRouteNames = {
   'reading_list_edit',
   // T-0054: the not-found screen, nested under home.
   'not_found',
+  'store_home',
+  'store_category',
+  'store_cart',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {
@@ -110,6 +116,143 @@ void main() {
     expect(find.byKey(_home), findsOneWidget);
 
     expect(sink.screens, ['home', 'characters_list', 'home']);
+  });
+
+  Future<void> openStore(WidgetTester tester) async {
+    await tester.scrollUntilVisible(
+      find.text('Store'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Store'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_storeBody), findsOneWidget);
+  }
+
+  Future<void> tapInStore(WidgetTester tester, String text) async {
+    final target = find.descendant(
+      of: find.byKey(_storeBody),
+      matching: find.text(text),
+    );
+    await tester.scrollUntilVisible(
+      target,
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byKey(_storeBody),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(target.hitTestable().first);
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('T-0056-AC7 home, store, a category, back, back records home, '
+      'store_home, store_category, store_home, home: the category page is '
+      'tracked from inside the flow', (tester) async {
+    await boot(tester);
+    await openStore(tester);
+    await tapInStore(tester, 'Heroes');
+    expect(find.byKey(_categoryGrid), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_storeBody), findsOneWidget);
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_home), findsOneWidget);
+
+    expect(sink.screens, [
+      'home',
+      'store_home',
+      'store_category',
+      'store_home',
+      'home',
+    ]);
+  });
+
+  testWidgets('T-0056-AC7 back from a comic opened on the category page '
+      'tracks the category again, not the store route', (tester) async {
+    await boot(tester);
+    await openStore(tester);
+    await tapInStore(tester, 'Heroes');
+    await tester.tap(find.text('Ember Chronicles #1'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_categoryGrid), findsNothing);
+
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_categoryGrid), findsOneWidget);
+
+    expect(sink.screens, [
+      'home',
+      'store_home',
+      'store_category',
+      'comics_details',
+      'store_category',
+    ]);
+  });
+
+  testWidgets('T-0056-AC7 a cold link to a category: the store below it '
+      'loads and tracks nothing; after Back each section loads and is viewed '
+      'once, and a comic opened and closed over it changes nothing (one '
+      'visit, review round)', (tester) async {
+    await boot(
+      tester,
+      coldStartLink: 'miniclient://app${AppLocations.storeCategory('heroes')}',
+    );
+    expect(find.byKey(_categoryGrid), findsOneWidget);
+    const store = [
+      '/v1/store/banners',
+      '/v1/store/deals',
+      '/v1/store/categories',
+      '/v1/store/featured',
+    ];
+    List<int> requests() => [
+      for (final path in store)
+        diContainer<MockBackend>().recentTraffic
+            .where((t) => t.method == 'GET' && t.path == path)
+            .length,
+    ];
+    List<String> viewed() => [
+      for (final e in sink.events)
+        if (e.name == 'store_section_viewed') e.params['section']! as String,
+    ]..sort();
+    // The one categories request is the category page's own name lookup.
+    expect(requests(), [0, 0, 1, 0], reason: 'the store page is hidden');
+    expect(viewed(), isEmpty);
+
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_storeBody), findsOneWidget);
+    expect(requests(), [1, 1, 2, 1]);
+    expect(viewed(), ['banners', 'categories', 'deals', 'featured']);
+
+    await tapInStore(tester, 'Amber Frontier #2');
+    expect(find.byKey(_storeBody), findsNothing);
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_storeBody), findsOneWidget);
+    expect(requests(), [1, 1, 2, 1], reason: 'the same visit');
+    expect(viewed(), hasLength(4));
+  });
+
+  testWidgets('T-0056-AC7 a cold link to a category tracks store_category '
+      'once, and Back walks store_home then home', (tester) async {
+    await boot(
+      tester,
+      coldStartLink: 'miniclient://app${AppLocations.storeCategory('heroes')}',
+    );
+    expect(find.byKey(_categoryGrid), findsOneWidget);
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_home), findsOneWidget);
+
+    expect(sink.screens, ['store_category', 'store_home', 'home']);
   });
 
   testWidgets('T-0053-AC4 a cold-start link tracks the linked screen, once', (

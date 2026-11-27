@@ -39,4 +39,14 @@ abstract final class AppLocations {
   /// a result: push it through `AppFlows.editReadingList`.
   static String editReadingList(String id) =>
       '/me/lists/${Uri.encodeComponent(id)}/edit';
+
+  /// The store home (T-0056). Equals `StoreRoute().location` in
+  /// commerce_wiring.
+  static const String store = '/store';
+
+  /// The store opened at category [id] (T-0056), encoded as go_router_builder
+  /// encodes a path parameter. Equals `StoreCategoryRoute(id: id).location`
+  /// in commerce_wiring.
+  static String storeCategory(String id) =>
+      '/store/categories/${Uri.encodeComponent(id)}';
 }

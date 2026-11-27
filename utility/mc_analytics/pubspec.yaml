@@ -22,3 +22,5 @@ dev_dependencies:
     sdk: flutter
   go_router: 17.5.0
   mc_analysis: any
+  mc_ds_theme: any
+  mc_feature_flow: any

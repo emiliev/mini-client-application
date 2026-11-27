@@ -1,0 +1,46 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: the cart section shows the cart of {'reader@mini-client.test'}
+///
+/// The section shows that user's item count and total as the backend holds
+/// them now (read straight from the engine with a minted token: the oracle
+/// is the backend, not the feature), formatted by the test's own oracle.
+Future<void> theCartSectionShowsTheCartOf(
+  WidgetTester tester,
+  String email,
+) async {
+  await letSectionsLand(tester);
+  final user = fixtureUser(email);
+  final response = await tester.runAsync(
+    () => McTestSession.current.backend.backend.createDio().get<Object?>(
+      'v1/me/cart',
+      options: Options(
+        headers: {'Authorization': 'Bearer ${mintAccessToken(user.id, 1)}'},
+      ),
+    ),
+  );
+  final cart = response!.data! as Map<String, Object?>;
+  final count = cart['itemCount']! as int;
+  final total = cart['totalCents']! as int;
+  expect(count, greaterThan(0), reason: '$email has items in the cart');
+  final section = find.byKey(sectionKey('cart'));
+  await scrollStoreUntilVisible(
+    tester,
+    find.byKey(sectionPartKey('cart', 'content')),
+  );
+  for (final text in [
+    count == 1 ? '1 item' : '$count items',
+    'Total ${euros(total)}',
+  ]) {
+    expect(
+      find.descendant(of: section, matching: find.text(text)),
+      findsOneWidget,
+      reason: 'the cart of $email shows "$text"',
+    );
+  }
+}

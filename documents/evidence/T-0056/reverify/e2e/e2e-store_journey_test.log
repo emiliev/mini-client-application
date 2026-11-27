@@ -1,0 +1,105 @@
+# e2e_ios.sh: T-0056 verifier on mc-T-0056-verifier-70586 (83A4221A-2908-4F55-BA4C-CF02CE57B8AC)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a94f2e667d8ab1716/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/store_journey_test.dart -d 83A4221A-2908-4F55-BA4C-CF02CE57B8AC
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a94f2e667d8ab1716`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a94f2e667d8ab1716`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           13.4s
+Failed to check availability in Spotlight for action com.apple.mobilephone.call: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001134ab0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
+is.workflow.actions.repeat.count WFFiniteRepeatAction: Skipped because: [control flow]
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:60209/PsxuoS1M3xE=/
+VMServiceFlutterDriver: Isolate found with number: 554282496377339
+VMServiceFlutterDriver: Isolate 554282496377339 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0056-AC5 home to the store, a deal and its comic, back, a category and its second page
+VMServiceFlutterDriver: Connected to Flutter application.
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003723c00> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+Failed to index action parameter: <WFFontPickerParameter: 0x600003754900> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFFontPickerParameter)
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x60000371f480> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: e58d6477d07db052d997980827b9c7d5, seq: 1}
+is.workflow.actions.sirikit.donation.handle WFHandleDonatedIntentAction: Skipped because: [donation-based action]
+Failed to index action parameter: <WFPosterPickerParameter: 0x600003768000> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003db45a0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+flutter: [event] mc_screen_view {screen_name: home, session_id: e58d6477d07db052d997980827b9c7d5, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+is.workflow.actions.choosefrommenu WFChooseFromMenuAction: Skipped because: [control flow]
+Failed to index action parameter: <WFHomeServicePickerParameter: 0x600003745c80> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeServicePickerParameter)
+Failed to index action parameter: <WFTagFieldParameter: 0x600003b981c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFTagFieldParameter)
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003752580> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+flutter: [event] mc_screen_view {screen_name: store_home, session_id: e58d6477d07db052d997980827b9c7d5, seq: 3}
+flutter: [debug] BannersBloc: _Load _Loading -> _Loading
+flutter: [debug] DealsBloc: _Load _Loading -> _Loading
+flutter: [debug] CategoriesBloc: _Load _Loading -> _Loading
+flutter: [debug] FeaturedBloc: _Load _Loading -> _Loading
+flutter: [debug] CartSummaryBloc: _Load _Loading -> _SignedOut
+flutter: [debug] GET /v1/store/banners -> 200
+flutter: [debug] GET /v1/store/deals -> 200
+flutter: [debug] GET /v1/store/categories -> 200
+flutter: [debug] GET /v1/store/featured -> 200
+flutter: [debug] BannersBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: banners, session_id: e58d6477d07db052d997980827b9c7d5, seq: 4}
+flutter: [debug] DealsBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: deals, session_id: e58d6477d07db052d997980827b9c7d5, seq: 5}
+flutter: [debug] CategoriesBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: categories, session_id: e58d6477d07db052d997980827b9c7d5, seq: 6}
+flutter: [debug] FeaturedBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: featured, session_id: e58d6477d07db052d997980827b9c7d5, seq: 7}
+Failed to index action parameter: <WFInputTypeParameter: 0x11b247000> due to ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState)
+Failed to index action parameter: <WFInputSurfaceParameter: 0x6000037706c0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFInputSurfaceParameter)
+Indexed: 1128
+Errored: 0
+Skipped: [donation-based action: 2, control flow: 4]
+   donation-based action: 2
+   control flow: 4
+Finished in 16.603648s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [event] store_item_tapped {section: deals, kind: comic, id: 501501, session_id: e58d6477d07db052d997980827b9c7d5, seq: 8}
+flutter: [event] mc_screen_view {screen_name: comics_details, session_id: e58d6477d07db052d997980827b9c7d5, seq: 9}
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501501 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: store_home, session_id: e58d6477d07db052d997980827b9c7d5, seq: 10}
+flutter: [event] store_item_tapped {section: categories, kind: category, id: heroes, session_id: e58d6477d07db052d997980827b9c7d5, seq: 11}
+flutter: [event] mc_screen_view {screen_name: store_category, session_id: e58d6477d07db052d997980827b9c7d5, seq: 12}
+flutter: [debug] CategoryProductsBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/store/categories/heroes/products -> 200
+flutter: [debug] CategoryProductsBloc: _PageChanged _Loading -> _Success
+flutter: [debug] CategoryProductsBloc: _PageChanged _Success -> _Success
+flutter: [debug] GET /v1/store/categories/heroes/products -> 200
+flutter: [debug] CategoryProductsBloc: _PageChanged _Success -> _Success
+flutter: 00:21 +1: (tearDownAll)
+flutter: 00:21 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/40_home_store_entry.png (315801)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/41_store_sections.png (426450)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/42_store_lower_sections.png (394278)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/43_comic_from_deal.png (373204)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/44_back_to_store.png (424936)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/45_category_heroes.png (397444)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7nErky/screenshots/1-store_journey_test/46_category_page_two.png (407910)
+All tests passed.
+
+# exit code: 0

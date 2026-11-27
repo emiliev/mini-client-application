@@ -26,6 +26,7 @@ export 'package:mc_test_steps/src/backend/the_backend_answered_with.dart';
 export 'package:mc_test_steps/src/backend/the_backend_fails_with.dart';
 export 'package:mc_test_steps/src/backend/the_backend_fails_with_once.dart';
 export 'package:mc_test_steps/src/backend/the_backend_holds.dart';
+export 'package:mc_test_steps/src/backend/the_backend_holds_the_next.dart';
 export 'package:mc_test_steps/src/backend/the_backend_received.dart';
 export 'package:mc_test_steps/src/backend/the_backend_received_requests_for.dart';
 export 'package:mc_test_steps/src/backend/the_backend_received_with_a_token_of.dart';
@@ -33,6 +34,7 @@ export 'package:mc_test_steps/src/backend/the_backend_received_with_the_bearer_o
 export 'package:mc_test_steps/src/backend/the_backend_received_with_the_body.dart';
 export 'package:mc_test_steps/src/backend/the_backend_recovers.dart';
 export 'package:mc_test_steps/src/backend/the_backend_releases.dart';
+export 'package:mc_test_steps/src/backend/the_backend_runs_the_scenario.dart';
 export 'package:mc_test_steps/src/backend/the_backend_serves.dart';
 export 'package:mc_test_steps/src/backend_failure_names.dart';
 export 'package:mc_test_steps/src/data_table.dart';
@@ -43,6 +45,7 @@ export 'package:mc_test_steps/src/environment/the_app_can_no_longer_write_to_sto
 export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storage.dart';
 export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storage_never_showing.dart';
 export 'package:mc_test_steps/src/environment/the_device_locale_is.dart';
+export 'package:mc_test_steps/src/environment/the_flag_is.dart';
 export 'package:mc_test_steps/src/environment/the_pseudolocale_is_active.dart';
 export 'package:mc_test_steps/src/environment/the_text_scale_is.dart';
 export 'package:mc_test_steps/src/interaction/i_cancel_the_dialog.dart';

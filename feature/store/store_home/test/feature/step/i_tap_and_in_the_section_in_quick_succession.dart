@@ -1,0 +1,30 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: I tap {'Heroes'} and {'Cosmic'} in the {'categories'} section in quick succession
+///
+/// Two different items of one section tapped within one frame (both on
+/// screen): both events reach the section's bloc before the first tap's
+/// effect is drawn.
+Future<void> iTapAndInTheSectionInQuickSuccession(
+  WidgetTester tester,
+  String first,
+  String second,
+  String section,
+) async {
+  await letSectionsLand(tester);
+  await scrollToSection(tester, section);
+  Finder inSection(String text) => find
+      .descendant(
+        of: find.byKey(sectionKey(section)),
+        matching: find.text(text),
+      )
+      .hitTestable();
+  expect(inSection(first), findsOneWidget, reason: '"$first" on screen');
+  expect(inSection(second), findsOneWidget, reason: '"$second" on screen');
+  await tester.tap(inSection(first));
+  await tester.tap(inSection(second));
+  await mcSettle(tester);
+}

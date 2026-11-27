@@ -1,0 +1,35 @@
+baseline: PASS (8 targets)
+M01 a stale answer is applied (no generation check): KILLED (//feature/store/store_home:bdd_test)
+M05 section_viewed for a failed section too: KILLED (//feature/store/store_home:bdd_test)
+C01 an answer for a session that is gone is shown: KILLED (//feature/store/store_home:bdd_test)
+C04 a session change elsewhere is ignored: KILLED (//feature/store/store_home:bdd_test)
+V01 a dropped cart answer does not reload: KILLED (//feature/store/store_home:bdd_test)
+V02 the store page starts while hidden: KILLED (//app/mini_client:analytics_screens_test //feature/store/store_home:flow_scope_test)
+V03 the store page starts again on every showing: KILLED (//app/mini_client:analytics_screens_test //feature/store/store_home:bdd_test //feature/store/store_home:flow_scope_test)
+V08 FlowScope does not notify a status flip: KILLED (//app/mini_client:analytics_screens_test //feature/store/store_home:flow_scope_test //utility/mc_feature_flow:feature_flow_test)
+K2 a flow page is tracked while hidden under another screen: KILLED (//app/mini_client:analytics_screens_test //utility/mc_analytics:flow_observer_test)
+G01 the featured flag is ignored: KILLED (//feature/store/store_home:bdd_test)
+X01 isolation: the deals Retry also retries the banners: KILLED (//feature/store/store_home:bdd_test)
+X02 isolation: the cart Retry ignores its state (double tap reads twice): SURVIVED
+X03 isolation: the featured Retry ignores its state: SURVIVED
+X04 visibility: the page ignores whether it is its flow's top page: SURVIVED
+X05 visibility: the scope always says its route is current: KILLED (//app/mini_client:analytics_screens_test //feature/store/store_home:flow_scope_test //utility/mc_feature_flow:feature_flow_test)
+X06 cart epoch: every session event reloads, also for the shown epoch: KILLED (//feature/store/store_home:bdd_test)
+X07 cart epoch: an answer is checked against the shown epoch, not its own: KILLED (//feature/store/store_home:bdd_test)
+X08 once per visit: a refresh views every section again: KILLED (//feature/store/store_home:bdd_test)
+X09 flag: read on every build, not once per visit: SURVIVED
+X10 flag: pull to refresh reads the featured bloc with the flag off: SURVIVED
+X11 visibility: the scope does not notify a new outer route: SURVIVED
+X12 paging: the category Retry loads more instead of retrying: SURVIVED
+done
+EXIT 0
+
+# Survivors re-run against the Verifier probes (probe worktree)
+baseline: PASS (2 targets)
+X02 isolation: the cart Retry ignores its state (double tap reads twice): KILLED (//feature/store/store_home:bdd_test)
+X03 isolation: the featured Retry ignores its state: KILLED (//feature/store/store_home:bdd_test)
+X04 visibility: the page ignores whether it is its flow's top page: SURVIVED
+X09 flag: read on every build, not once per visit: SURVIVED
+X10 flag: pull to refresh reads the featured bloc with the flag off: KILLED (//feature/store/store_home:bdd_test)
+X12 paging: the category Retry loads more instead of retrying: KILLED (//feature/store/store_home:bdd_test)
+done
