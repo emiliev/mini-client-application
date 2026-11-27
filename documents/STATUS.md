@@ -5,13 +5,13 @@ _Last updated: 2026-11-27 by Tech Lead_
 | | |
 |---|---|
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
-| **Phase** | **Phase C (exemplars) complete: all 7 archetypes merged**: LD `characters_list`, SC `comics_details`, SR `discovery_search`, FW `library_reading_list_editor`, DB `store_home`, ST `settings_appearance`, IX `trivia_quiz`. Next: Phase D, the `mcgen` generator (plan 02) |
+| **Phase** | Phase C complete (7 of 7 archetypes). **Phase D started (hybrid, PO 2026-11-27):** the `mcgen` generator plus hand-built features in parallel |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | none |
+| **Active crew** | T-0065 (Opus), T-0066 (Sonnet), T-0067 (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
