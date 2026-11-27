@@ -89,6 +89,7 @@ Read: the task file (ACs + verification plan), ADR-0006, documents/templates/ver
 Work in your own worktree. Create your own simulator (mc-T-XXXX-verifier) and delete it when done.
 1. Re-run every gate yourself; don't trust the handoff output.
 2. For each AC: find the mapped test, read it, and judge whether it really asserts the AC. Run it.
+   Grep for every test the Outcome cites. A cited test that doesn't exist is a FAIL.
 3. Audit the diff for deleted, skipped or weakened tests, lint suppressions and golden updates.
 4. Feature/UI tasks: run the e2e journey and capture screenshots at each checkpoint into
    documents/evidence/T-XXXX/ (sips -Z 1200). Look at every screenshot and describe what is visible.
@@ -109,6 +110,7 @@ Findings: <F-XXXX created, or "none">
 Follow-ups: <work discovered but not done>
 Questions for PO: <only direction-level, or "none">
 ```
+- **Every evidence row names something that exists at the handoff commit:** a test name, a file or a log. Before handing off, the Engineer greps for each cited test name at HEAD. _Lesson 2026-11-27:_ T-0056's Outcome cited category paging-error tests that had never been written. The Opus Verifier caught it, and it cost a FAIL round.
 
 ## Escalation boundary
 | Goes to the Product Owner | Decided by the Tech Lead |
