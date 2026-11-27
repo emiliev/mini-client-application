@@ -113,7 +113,7 @@ Not a UI task. [`verifier/e2e/01_home_with_restored_session.png`](verifier/e2e/0
 | Coverage, my own parser ([coverage.txt](verifier/reverify-e055107/coverage.txt)) | `mc_session` 92/92 **100 %**, `mc_api_auth` 119/119 **100 %** (round 1's missed lines 50-51 are now covered), `mc_fixtures_identity` 128/130 **98.5 %** |
 
 ### Items
-Each mutation was run alone, with the original targets uncached ([mutate_r2.py](verifier/reverify-e055107/mutate_r2.py), [mutations_r2.txt](verifier/reverify-e055107/mutations_r2.txt)). My probes are [verifier_probe_test.dart](verifier/reverify-e055107/verifier_probe_test.dart) and [verifier_boot_probe_test.dart](verifier/reverify-e055107/verifier_boot_probe_test.dart). Their output is in [probe_output_r2.txt](verifier/reverify-e055107/probe_output_r2.txt), and the probe-versus-mutation runs are in [probe_controls.txt](verifier/reverify-e055107/probe_controls.txt).
+Each mutation was run alone, with the original targets uncached ([mutate_r2.py](verifier/reverify-e055107/mutate_r2.py), [mutations_r2.txt](verifier/reverify-e055107/mutations_r2.txt)). My probes are [verifier_probe_test.dart](verifier/reverify-e055107/verifier_probe_test.dart) and [verifier_boot_probe_test.dart.txt](verifier/reverify-e055107/verifier_boot_probe_test.dart.txt). Their output is in [probe_output_r2.txt](verifier/reverify-e055107/probe_output_r2.txt), and the probe-versus-mutation runs are in [probe_controls.txt](verifier/reverify-e055107/probe_controls.txt).
 
 | # | Item | Test(s) | Reverting mutation | My check | Result |
 |---|---|---|---|---|---|

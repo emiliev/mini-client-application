@@ -48,7 +48,7 @@ E2E_LOG_SENTINEL='# --- runner output ---'
 
 usage() {
   cat <<'EOF'
-Usage: tool/e2e_ios.sh --task T-XXXX --role engineer|verifier --project <flutter-project-dir>
+Usage: tool/e2e_ios.sh --task T-XXXX --role <[a-z0-9-]+> --project <flutter-project-dir>
                        [--target integration_test/<file>.dart]...
                        [--driver test_driver/integration_test.dart]
                        [--device "iPhone 17 Pro"]
@@ -463,11 +463,10 @@ parse_args() {
 
   [ -n "$TASK" ] || die "--task is required (e.g. --task T-0012)"
   [[ $TASK =~ ^T-[0-9]{4}$ ]] || die "--task '$TASK' must look like T-0012"
-  case $ROLE in
-    engineer | verifier) ;;
-    "") die "--role is required (engineer or verifier)" ;;
-    *) die "--role '$ROLE' must be engineer or verifier" ;;
-  esac
+  # Any [a-z0-9-]+ role (engineer, verifier, reverify, ...) goes into the
+  # simulator name mc-<task>-<role>-<pid> and the default evidence dir (P-108).
+  [ -n "$ROLE" ] || die "--role is required (a name made of a-z, 0-9 and -, such as engineer, verifier or reverify)"
+  [[ $ROLE =~ ^[a-z0-9-]+$ ]] || die "--role '$ROLE' must match [a-z0-9-]+ (such as engineer, verifier or reverify)"
   [ -n "$PROJECT_DIR" ] || die "--project is required"
   [ -n "$RUNNER_CMD_TEMPLATE" ] || die "--runner-cmd must not be empty"
 }
@@ -551,6 +550,17 @@ print("OK\t%s\t%s" % (dt.get("identifier"), rt.get("name", runtime)))
   if [ -n "$(udids_named "$SIM_NAME")" ]; then
     die "a simulator named $SIM_NAME already exists (an orphan from a dead run?); run tool/sim_cleanup.sh"
   fi
+}
+
+# preflight_xcode_project (P-108): the default `flutter drive` runner needs an
+# Xcode project, and the raw tree has none (the repo builds with Bazel). Say so
+# once, with the command that makes one, instead of letting the first target
+# fail with a build error. Runs after the simulator checks, so a bad --runtime
+# is still reported first. Custom runners are left alone.
+preflight_xcode_project() {
+  [ "$RUNNER_CMD_TEMPLATE" = "$DEFAULT_RUNNER_CMD" ] || return 0
+  [ ! -d "$PROJECT_DIR/ios/Runner.xcodeproj" ] || return 0
+  die "'$PROJECT_DIR' has no ios/Runner.xcodeproj (a raw tree: the repo has no Xcode project). Prepare one first with: tool/e2e/prepare_pub_project.sh --app app/<name> --out <empty-dir>, then pass the E2E_PROJECT=<dir> it prints as --project"
 }
 
 # --------------------------------------------------------------- running ---
@@ -823,6 +833,7 @@ main() {
   preflight_project
   BUNDLE_ID_RESOLVED=$(project_bundle_id)
   preflight_simulator
+  preflight_xcode_project
   prepare_evidence_dir
 
   WORK_TMP=$(mktemp -d "${TMPDIR:-/tmp}/e2e_ios.XXXXXX")

@@ -16,14 +16,14 @@ restore() {
 trap restore EXIT
 cat "$S/ff_build_append.txt" >> "$FF/BUILD.bazel"
 cat "$S/cl_build_append.txt" >> "$CL/BUILD.bazel"
-cp "$S/characters_probe_test.dart" "$CL/test/verifier_probe_test.dart"
+cp "$S/characters_probe_test.dart.txt" "$CL/test/verifier_probe_test.dart"
 if [[ "$MODE" == old ]]; then
   git -C "$W" show origin/main:$FF/lib/src/flow_context.dart > "$FF/lib/src/flow_context.dart"
   git -C "$W" show origin/main:$CL/lib/src/presentation/page/characters_list_page.dart \
     > "$CL/lib/src/presentation/page/characters_list_page.dart"
-  sed -e 's/LEADING_EXPR/context.flowLeading()/' -e 's/const McFlowBackButton()/null/' "$S/verifier_probe_test.dart" > "$FF/test/verifier_probe_test.dart"
+  sed -e 's/LEADING_EXPR/context.flowLeading()/' -e 's/const McFlowBackButton()/null/' "$S/verifier_probe_test.dart.txt" > "$FF/test/verifier_probe_test.dart"
 else
-  sed 's/LEADING_EXPR/const McFlowBackButton()/' "$S/verifier_probe_test.dart" > "$FF/test/verifier_probe_test.dart"
+  sed 's/LEADING_EXPR/const McFlowBackButton()/' "$S/verifier_probe_test.dart.txt" > "$FF/test/verifier_probe_test.dart"
 fi
 tool/bazelw --output_base=/tmp/mc-ob-T-0036-verifier test --nocache_test_results --test_output=all \
   //$FF:verifier_probe_test //$CL:verifier_probe_test > "$S/probes_$MODE.raw.log" 2>&1

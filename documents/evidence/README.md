@@ -60,3 +60,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0060](T-0060/verification-report.md) | PASS (Sonnet, single pass) | Trivia: own scoring oracle from CONTRACT.md alone (30 rounds), 1,000-round position spread, 91 facts hand-checked, two-user isolation |
 | [T-0061](T-0061/verification-report.md) | PASS (Sonnet, single pass) | Preferences: two-user probe, concurrent PATCH, check order, scenario re-arm, `onSelect` hook |
 | [T-0056](T-0056/verification-report.md) | FAIL (Opus: claimed tests missing, add-after-close), then PASS (narrow Sonnet re-verify) | DB exemplar: section independence under held responses, visibility (cold category link), cart epoch, analytics once per visit, e2e 16/16 |
+| [T-0062](T-0062/verification-report.md) | PASS (Sonnet, single pass) | Tooling: bundle id on the simulator, fresh-worktree format gate with negative controls, role names, raw-tree exit 2, sheet-handle and toast mutations |

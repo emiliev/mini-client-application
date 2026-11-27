@@ -63,6 +63,7 @@ sequenceDiagram
 - [ ] **Verifier report: PASS on every AC** (`documents/evidence/T-XXXX/verification-report.md`), from a fresh agent that isn't the implementer.
 - [ ] `/code-review` has no unresolved important findings.
 - [ ] No tests deleted, skipped or weakened, and no lint suppressions, unless approved by the TL in the task log.
+- [ ] **Tests per ADR-0015:** features use BDD plus contract tests, with plain unit tests allowed for pure logic and **no goldens**. DS kits keep their goldens. About 15 targeted mutants on the risky logic, with no full sweeps.
 - [ ] **Flake check:** every test target the task adds or changes that touches storage, timers, streams or races passes `test --runs_per_test=50 --nocache_test_results` with 0 failures, and the log is in the evidence. Tests never drop a future that writes to storage (`.ignore()`, `unawaited`): they await it before teardown deletes the directory (F-0050 §7).
 - [ ] The TL re-ran `tool/verify.sh` on the merge result before pushing; CI is green on `main` once T-0005 is done.
 - [ ] Task file Log and Outcome filled in, with evidence links. Decisions are ADRs, gotchas are findings, and leftover work goes to `pending-work.md`.
@@ -126,6 +127,7 @@ Questions for PO: <only direction-level, or "none">
 - **Verifiers:** tier set in the task file.
   - **Opus:** exemplars, rules and codegen patches, vendored code, concurrency and security (auth, sessions, money), kits the bricks copy (`mc_feature_flow`, `McFlowBackButton`), and app navigation changes.
   - **Sonnet:** everything else. A Sonnet Verifier's scope is every AC, the gates, at most 10 targeted mutations, and e2e only when an AC needs it.
+  - **ADR-0015 (2026-11-27) narrows every Verifier's scope:** per AC, read and run the cited test, re-run the gates, run the e2e for e2e ACs, probe only where an AC or review finding points at risk, and re-run at most 5 of the engineer's mutants. No own mutant sets, no own coverage parsers, no full re-derivation. The test-integrity diff and the "every cited test exists" check stay.
 - **Re-verification after a FAIL:** Sonnet, on a narrow checklist (the failed items plus the gates). Use Opus only when the failure is itself in an Opus-tier area.
 - **Haiku:** mechanical work only:
   - bulk generated modules verified by the generators' own checks;
