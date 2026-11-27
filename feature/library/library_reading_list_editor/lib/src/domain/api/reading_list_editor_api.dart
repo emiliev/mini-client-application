@@ -24,22 +24,30 @@ abstract class ReadingListEditorApi {
   Future<ReadingListDto> getList(@Path('id') String id);
 
   /// A new list (`201`, the list in the detail shape). Never retried.
+  ///
+  /// The writes take `authPinned(epoch)` as [extras], so they are sent only
+  /// for the session the editor checked (T-0050).
   @POST('v1/me/lists')
-  Future<ReadingListDto> createList(@Body() CreateReadingListDto body);
+  Future<ReadingListDto> createList(
+    @Body() CreateReadingListDto body, {
+    @Extras() Map<String, dynamic> extras = const {},
+  });
 
   /// The name, description and visibility of a list.
   @PUT('v1/me/lists/{id}')
   Future<ReadingListDto> updateList(
     @Path('id') String id,
-    @Body() ReadingListDetailsDto body,
-  );
+    @Body() ReadingListDetailsDto body, {
+    @Extras() Map<String, dynamic> extras = const {},
+  });
 
   /// The comics of a list, in order.
   @PUT('v1/me/lists/{id}/items')
   Future<ReadingListDto> replaceItems(
     @Path('id') String id,
-    @Body() ReadingListItemsDto body,
-  );
+    @Body() ReadingListItemsDto body, {
+    @Extras() Map<String, dynamic> extras = const {},
+  });
 
   /// The picker's search: comics whose title starts with [titleStartsWith]
   /// (case-insensitive), in title order; all comics when it is null.

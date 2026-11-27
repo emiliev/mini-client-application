@@ -4,6 +4,7 @@ import 'package:library_reading_list_editor/src/domain/model/comic_id.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_id.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_mapper.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_prelude/mc_prelude.dart';
@@ -29,27 +30,45 @@ class ReadingListEditorRepository {
       apiCall(() async => (await _api.getList(id.value)).toDomain());
 
   /// Creates a list; the answer is the list as saved, with its new id.
-  Future<Result<ReadingList, ApiFailure>> create(ReadingListDraft draft) =>
-      apiCall(
-        () async => (await _api.createList(draft.toCreateDto())).toDomain(),
-      );
-
-  /// Writes the name, description and visibility.
-  Future<Result<ReadingList, ApiFailure>> updateDetails(
-    ReadingListId id,
-    ReadingListDraft draft,
-  ) => apiCall(
-    () async =>
-        (await _api.updateList(id.value, draft.toDetailsDto())).toDomain(),
+  ///
+  /// Every write is pinned to the session [epoch] the caller checked (T-0050):
+  /// if the session changed before the request was sent, nothing is sent and
+  /// the answer is [ApiUnauthorized], so a list is never written under
+  /// another user's bearer.
+  Future<Result<ReadingList, ApiFailure>> create(
+    ReadingListDraft draft, {
+    required int epoch,
+  }) => apiCall(
+    () async => (await _api.createList(
+      draft.toCreateDto(),
+      extras: authPinned(epoch),
+    )).toDomain(),
   );
 
-  /// Writes the comics, in [draft]'s order.
+  /// Writes the name, description and visibility (pinned to [epoch]).
+  Future<Result<ReadingList, ApiFailure>> updateDetails(
+    ReadingListId id,
+    ReadingListDraft draft, {
+    required int epoch,
+  }) => apiCall(
+    () async => (await _api.updateList(
+      id.value,
+      draft.toDetailsDto(),
+      extras: authPinned(epoch),
+    )).toDomain(),
+  );
+
+  /// Writes the comics, in [draft]'s order (pinned to [epoch]).
   Future<Result<ReadingList, ApiFailure>> replaceItems(
     ReadingListId id,
-    ReadingListDraft draft,
-  ) => apiCall(
-    () async =>
-        (await _api.replaceItems(id.value, draft.toItemsDto())).toDomain(),
+    ReadingListDraft draft, {
+    required int epoch,
+  }) => apiCall(
+    () async => (await _api.replaceItems(
+      id.value,
+      draft.toItemsDto(),
+      extras: authPinned(epoch),
+    )).toDomain(),
   );
 
   /// Comics whose title starts with [query] (all comics for an empty one),

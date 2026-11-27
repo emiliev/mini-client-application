@@ -12,6 +12,7 @@ import 'package:library_reading_list_editor/src/domain/model/reading_list_dto.da
 import 'package:library_reading_list_editor/src/domain/model/reading_list_id.dart';
 import 'package:library_reading_list_editor/src/domain/model/reading_list_mapper.dart';
 import 'package:library_reading_list_editor/src/domain/repository/reading_list_editor_repository.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
@@ -162,7 +163,9 @@ void main() {
     );
 
     test('T-0048-AC1 create answers the new list with its id', () async {
-      final list = _success(await _backend().repository.create(_draft));
+      final list = _success(
+        await _backend().repository.create(_draft, epoch: 0),
+      );
       expect(list.id, const ReadingListId('l-5'));
       expect([for (final c in list.comics) c.id], _draft.comicIds);
     });
@@ -172,10 +175,14 @@ void main() {
       () async {
         final repository = _backend().repository;
         const id = ReadingListId('l-1');
-        final details = _success(await repository.updateDetails(id, _draft));
+        final details = _success(
+          await repository.updateDetails(id, _draft, epoch: 0),
+        );
         expect(details.name, 'Amber reads');
         expect(details.comics, hasLength(3), reason: 'items untouched');
-        final items = _success(await repository.replaceItems(id, _draft));
+        final items = _success(
+          await repository.replaceItems(id, _draft, epoch: 0),
+        );
         expect([for (final c in items.comics) c.id], _draft.comicIds);
         expect(items.name, 'Amber reads');
       },
@@ -204,7 +211,8 @@ void main() {
   group('T-0048-AC2 a refused write is an ApiClientError naming the code '
       'and the field', () {
     Future<ApiClientError> reject(ReadingListDraft draft) async =>
-        _failure(await _backend().repository.create(draft)) as ApiClientError;
+        _failure(await _backend().repository.create(draft, epoch: 0))
+            as ApiClientError;
 
     test('T-0048-AC2 duplicate_name: a name the user already has', () async {
       final error = await reject(_draft.copyWith(name: 'weekend reads'));
@@ -237,6 +245,7 @@ void main() {
         await _backend().repository.updateDetails(
           const ReadingListId('l-1'),
           _draft.copyWith(name: 'Someday'),
+          epoch: 0,
         ),
       ) as ApiClientError;
       expect((error.code, error.parameter), ('duplicate_name', 'name'));
@@ -250,9 +259,41 @@ void main() {
             name: '\u{1F1E9}\u{1F1EA}' * 60,
             description: '\u{1F1E9}\u{1F1EA}' * 280,
           ),
+          epoch: 0,
         ),
       );
       expect(list.id, const ReadingListId('l-5'));
+    });
+  });
+
+  test('T-0050-AC2 every write of the repository is pinned to the epoch it is '
+      'given, and no read is', () async {
+    final b = _backend();
+    final pins = <String, Object?>{};
+    b.dio.interceptors.insert(
+      0,
+      InterceptorsWrapper(
+        onRequest: (options, handler) {
+          pins['${options.method} ${options.uri.path}'] =
+              options.extra[mcSessionEpoch];
+          handler.next(options);
+        },
+      ),
+    );
+    const id = ReadingListId('l-1');
+
+    await b.repository.create(_draft, epoch: 7);
+    await b.repository.updateDetails(id, _draft, epoch: 8);
+    await b.repository.replaceItems(id, _draft, epoch: 9);
+    await b.repository.fetchList(id);
+    await b.repository.searchComics('A');
+
+    expect(pins, {
+      'POST /v1/me/lists': 7,
+      'PUT /v1/me/lists/l-1': 8,
+      'PUT /v1/me/lists/l-1/items': 9,
+      'GET /v1/me/lists/l-1': null,
+      'GET /v1/comics': null,
     });
   });
 
