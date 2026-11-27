@@ -134,10 +134,26 @@ baseline PASS
 === S7 the conflict is used up by a rejected request
     KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === S8 the conflict writes before it answers
-    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+pattern not found:         context.store[_conflictFiredKey] = true;
+        return conflict();
+    PATTERN NOT FOUND
 === S9 the conflict scenario overrides the wrong route
     KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === S10 the conflict is never marked fired
+pattern not found:         context.store[_conflictFiredKey] = true;
+        return conflict();
+    PATTERN NOT FOUND
+=== R1 the conflict scenario is not wired to the hook
     KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R2 the engine never calls onSelect
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_mocked_backend:mocked_backend_test 
+=== R3 arming clears the wrong key
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R4 arming sets the marker instead of clearing it
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R5 the injected 409 reads like a real mismatch
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R6 the engine runs onSelect before the scenario is chosen
+    KILLED by: //utility/mc_mocked_backend:mocked_backend_test 
 
-killed=70 survived=0 broken=0
+killed=74 survived=0 broken=2

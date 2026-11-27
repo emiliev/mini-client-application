@@ -212,12 +212,12 @@ mutate "S7 the conflict is used up by a rejected request" $PH "      final body 
       }
       if (body is! Map ||"
 mutate "S8 the conflict writes before it answers" $PH "        context.store[_conflictFiredKey] = true;
-        return conflict();" "        context.store[_conflictFiredKey] = true;
+        return MockResponse.error(" "        context.store[_conflictFiredKey] = true;
         preferences.version++;
-        return conflict();"
+        return MockResponse.error("
 mutate "S9 the conflict scenario overrides the wrong route" $DOM "'PATCH /v1/me/preferences': patchPreferences(conflictOnce: true)," "'PATCH /v1/me/preference': patchPreferences(conflictOnce: true),"
 mutate "S10 the conflict is never marked fired" $PH "        context.store[_conflictFiredKey] = true;
-        return conflict();" "        return conflict();"
+        return MockResponse.error(" "        return MockResponse.error("
 # --- review round: re-arming on selection ------------------------------------
 mutate "R1 the conflict scenario is not wired to the hook" $DOM "onSelect: armPreferencesConflict," ""
 mutate "R2 the engine never calls onSelect" $ENG "_scenario?.onSelect?.call(_store);" "_scenario?.onSelect;"
