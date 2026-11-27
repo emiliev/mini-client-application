@@ -188,7 +188,29 @@ final Map<String, SnapshotCase> snapshotCases = {
     spec: 'C0x10',
     tweak: _negativeElapsed,
   ),
+  // T-0064: the 50/50 hint.
+  'result_hint': const SnapshotCase(
+    'POST',
+    '/v1/me/trivia/results',
+    play: _allEasy42,
+    spec: 'C0 C1500 W0 C0x7',
+    tweak: _hintSecond,
+  ),
+  'too_many_hints': const SnapshotCase(
+    'POST',
+    '/v1/me/trivia/results',
+    play: _allEasy42,
+    spec: 'C0x10',
+    tweak: _twoHints,
+  ),
 };
+
+void _hintSecond(List<Json> answers) =>
+    answers[1] = {...answers[1], 'hint': true};
+void _twoHints(List<Json> answers) {
+  answers[0] = {...answers[0], 'hint': true};
+  answers[6] = {...answers[6], 'hint': true};
+}
 
 void _unknownQuestion(List<Json> answers) =>
     answers[3] = {...answers[3], 'questionId': 'q-nothing-01'};

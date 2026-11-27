@@ -39,6 +39,9 @@ const _expectedRouteNames = {
   'store_home',
   'store_category',
   'store_cart',
+  // T-0064: the quiz's setup and a linked round.
+  'trivia_setup',
+  'trivia_play',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {
@@ -323,5 +326,56 @@ void main() {
 
     expect(sink.screens, ['home', 'characters_list']);
     expect(sink.records.map((r) => r.seq), [1, 2, 3]);
+  });
+
+  testWidgets('T-0064-AC7 home, the quiz, a round, quit, back records home, '
+      'trivia_setup, trivia_play, trivia_setup, home; a cold link to a round '
+      'records trivia_play once, and Back the setup', (tester) async {
+    await boot(tester);
+    await tester.scrollUntilVisible(
+      find.text('Trivia'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Trivia'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey<String>('trivia_setup.start')));
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    await tester.tap(find.byKey(const ValueKey<String>('trivia_play.quit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('mc_overlays.confirm')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_home), findsOneWidget);
+
+    expect(sink.screens, [
+      'home',
+      'trivia_setup',
+      'trivia_play',
+      'trivia_setup',
+      'home',
+    ]);
+  });
+
+  testWidgets('T-0064-AC7 a cold link to a round: the setup below it tracks '
+      'nothing until Back shows it', (tester) async {
+    await boot(
+      tester,
+      coldStartLink:
+          'miniclient://app/trivia/play?category=all&difficulty=easy&seed=42',
+    );
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(sink.screens, ['trivia_play']);
+    await tester.tap(find.byKey(const ValueKey<String>('trivia_play.quit')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('mc_overlays.confirm')));
+    await tester.pumpAndSettle();
+
+    expect(sink.screens, ['trivia_play', 'trivia_setup']);
   });
 }

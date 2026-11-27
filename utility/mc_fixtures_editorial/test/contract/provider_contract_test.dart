@@ -359,6 +359,7 @@ void main() {
         'unknown_choice',
         'invalid_elapsed',
         'invalid_body',
+        'too_many_hints',
         'unauthenticated',
       });
     });
@@ -405,6 +406,7 @@ void main() {
         'unknown_choice',
         'invalid_elapsed',
         'invalid_body',
+        'too_many_hints',
         'injected_failure',
       ]) {
         expect(doc, contains('`$code`'), reason: code);
@@ -450,6 +452,40 @@ void main() {
         }
         expect(problems, isEmpty);
         expect(bank, hasLength(336));
+      });
+
+      test('T-0064-AC3 seed $seed: a question about one comic names it on '
+          'the wire (comicId), and that comic exists', () async {
+        const aboutAComic = {
+          'comic_cast',
+          'comic_price',
+          'comic_year',
+          'comic_pages',
+          'creator_writer',
+          'creator_penciller',
+          'creator_inker',
+        };
+        final dio = jsonDio(triviaBackend(seed: seed, withSources: true));
+        var linked = 0;
+        for (final q in bank) {
+          final wire = q.toJson();
+          if (aboutAComic.contains(q.template)) {
+            expect(wire['comicId'], isA<int>(), reason: q.id);
+            expect(wire['comicId'], q.facts['comicId'], reason: q.id);
+            linked++;
+          } else {
+            expect(wire.containsKey('comicId'), isFalse, reason: q.id);
+          }
+        }
+        expect(linked, 7 * questionsPerTemplate);
+        final sample = bank.firstWhere((q) => q.template == 'comic_price');
+        final comic = await call<Json>(
+          dio,
+          'GET',
+          '/v1/comics/${sample.facts['comicId']}',
+        );
+        expect(comic.statusCode, 200);
+        expect(comic.data!['id'], sample.facts['comicId']);
       });
 
       test('T-0060-AC4 seed $seed: each question\'s image is its subject\'s '
@@ -514,6 +550,8 @@ void main() {
             expect(served['prompt'], q.prompt);
             expect(served['correctChoiceId'], q.correctChoiceId);
             expect(served['imageUrl'], q.imageUrl);
+            // T-0064: the comic a question is about, for a link to it.
+            expect(served['comicId'], q.facts['comicId']);
             expect(
               {
                 for (final c in choicesOf(served)) c['id']: c['text'],

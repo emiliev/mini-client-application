@@ -28,6 +28,7 @@ dart_test(
         "//feature/discovery/discovery_search:arbs",
         "//feature/library/library_reading_list_editor:arbs",
         "//feature/store/store_home:arbs",
+        "//feature/trivia/trivia_quiz:arbs",
         "//utility/mc_l10n_core:arbs",
     ],
     language_version = "3.13",

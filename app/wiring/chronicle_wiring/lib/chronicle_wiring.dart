@@ -1,13 +1,17 @@
-import 'package:get_it/get_it.dart';
+// The chronicle group's app layer (plan 01 §3.4): typed routes, navigator
+// implementations and the DI initializer. Features never see any of it.
+// Events and stories join with their features.
+import 'package:chronicle_wiring/src/routes/trivia_routes.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mc_di/mc_di.dart';
 
-/// The chronicle group (events, stories, trivia)'s routes. Empty until its features exist.
-const List<RouteBase> chronicleRoutes = <RouteBase>[];
+export 'package:chronicle_wiring/src/di/chronicle_wiring_di_initializer.dart'
+    show ChronicleWiringDIInitializer, chronicleClock, chronicleSeed;
+export 'package:chronicle_wiring/src/di/di_initializer.dart'
+    show ChronicleNavigatorsDIInitializer;
+export 'package:chronicle_wiring/src/routes/route_targets.dart'
+    show ChronicleRouteTargets;
+export 'package:chronicle_wiring/src/routes/trivia_routes.dart'
+    show TriviaPlayRoute, TriviaRoute;
 
-/// Registers the chronicle group's navigator implementations. None yet.
-class ChronicleWiringDIInitializer extends McDIInitializer {
-  const ChronicleWiringDIInitializer() : super(_init);
-
-  static void _init(GetIt getIt, String? environment) {}
-}
+/// The chronicle group's routes (the trivia; events and stories later).
+List<RouteBase> get chronicleRoutes => <RouteBase>[...triviaRoutes];

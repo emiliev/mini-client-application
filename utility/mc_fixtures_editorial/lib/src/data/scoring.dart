@@ -9,12 +9,21 @@ const int maxTimeBonus = 50;
 /// What each consecutive correct answer after the first adds.
 const int streakStep = 25;
 
-/// One submitted answer: `choiceId` null means no answer was given.
+/// What a correct answer that used the 50/50 hint loses (T-0064). A hinted
+/// correct answer is therefore worth at least `basePoints - hintPenalty`.
+const int hintPenalty = 50;
+
+/// How many answers of a round may use the hint.
+const int hintsPerRound = 1;
+
+/// One submitted answer: `choiceId` null means no answer was given; [hint]
+/// is true when the player used the 50/50 hint on it.
 final class SubmittedAnswer {
-  const SubmittedAnswer(this.choiceId, this.elapsedMs);
+  const SubmittedAnswer(this.choiceId, this.elapsedMs, {this.hint = false});
 
   final String? choiceId;
   final int elapsedMs;
+  final bool hint;
 }
 
 /// How an answer was judged.
@@ -22,16 +31,23 @@ enum Outcome { correct, wrong, timeout }
 
 /// One scored answer.
 final class ScoredAnswer {
-  const ScoredAnswer(this.questionId, this.outcome, this.points);
+  const ScoredAnswer(
+    this.questionId,
+    this.outcome,
+    this.points, {
+    this.hint = false,
+  });
 
   final String questionId;
   final Outcome outcome;
   final int points;
+  final bool hint;
 
   Map<String, Object?> toJson() => {
     'questionId': questionId,
     'outcome': outcome.name,
     'points': points,
+    if (hint) 'hint': true,
   };
 }
 
@@ -57,12 +73,13 @@ RoundScore scoreRound(
   for (final q in questions) {
     final answer = answers[q.id]!;
     final limitMs = q.timeLimitSeconds * 1000;
+    final hint = answer.hint;
     if (answer.choiceId == null || answer.elapsedMs >= limitMs) {
       streak = 0;
-      scored.add(ScoredAnswer(q.id, Outcome.timeout, 0));
+      scored.add(ScoredAnswer(q.id, Outcome.timeout, 0, hint: hint));
     } else if (answer.choiceId != q.correctChoiceId) {
       streak = 0;
-      scored.add(ScoredAnswer(q.id, Outcome.wrong, 0));
+      scored.add(ScoredAnswer(q.id, Outcome.wrong, 0, hint: hint));
     } else {
       streak++;
       final timeBonus = maxTimeBonus * (limitMs - answer.elapsedMs) ~/ limitMs;
@@ -70,7 +87,11 @@ RoundScore scoreRound(
         ScoredAnswer(
           q.id,
           Outcome.correct,
-          basePoints + timeBonus + streakStep * (streak - 1),
+          basePoints +
+              timeBonus +
+              streakStep * (streak - 1) -
+              (hint ? hintPenalty : 0),
+          hint: hint,
         ),
       );
     }

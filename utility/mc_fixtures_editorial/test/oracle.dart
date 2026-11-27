@@ -11,11 +11,16 @@ library;
 /// choice) or `N` (no choice), at [elapsedMs].
 typedef Answer = ({String kind, int elapsedMs});
 
-/// Parses `C0 W0x9` into ten answers (`xN` repeats the one before it).
+/// One token: a kind, the elapsed ms, `h` for a hinted answer (T-0064),
+/// and `xN` to repeat it.
+final RegExp _token = RegExp(r'^([CWN])(\d+)(h)?(?:x(\d+))?$');
+
+/// Parses `C0 W0x9` into ten answers (`xN` repeats the one before it). A
+/// hint mark (`C0h`) is accepted and ignored here: [parseHints] reads it.
 List<Answer> parseAnswers(String spec) {
   final out = <Answer>[];
   for (final token in spec.split(' ')) {
-    final match = RegExp(r'^([CWN])(\d+)(?:x(\d+))?$').firstMatch(token);
+    final match = _token.firstMatch(token);
     if (match == null) {
       throw FormatException('bad answer token', token);
     }
@@ -23,14 +28,41 @@ List<Answer> parseAnswers(String spec) {
       kind: match.group(1)!,
       elapsedMs: int.parse(match.group(2)!),
     );
-    out.addAll(List.filled(int.parse(match.group(3) ?? '1'), answer));
+    out.addAll(List.filled(int.parse(match.group(4) ?? '1'), answer));
   }
   return out;
 }
 
+/// The positions of [spec]'s hinted answers (`C0h`; T-0064).
+Set<int> parseHints(String spec) {
+  final hinted = <int>{};
+  var position = 0;
+  for (final token in spec.split(' ')) {
+    final match = _token.firstMatch(token);
+    if (match == null) {
+      throw FormatException('bad answer token', token);
+    }
+    final times = int.parse(match.group(4) ?? '1');
+    if (match.group(3) != null) {
+      for (var i = 0; i < times; i++) {
+        hinted.add(position + i);
+      }
+    }
+    position += times;
+  }
+  return hinted;
+}
+
 /// The score and the correct count of [answers], for a round whose questions
 /// have [limitSeconds] seconds each.
-({int score, int correct}) oracle(int limitSeconds, List<Answer> answers) {
+///
+/// A correct answer at a position in [hinted] loses 50 points, counted down
+/// one point at a time (T-0064); a hinted miss stays at 0.
+({int score, int correct}) oracle(
+  int limitSeconds,
+  List<Answer> answers, {
+  Set<int> hinted = const {},
+}) {
   final limit = limitSeconds * 1000;
   // A correct answer inside the limit "counts"; everything else is a break.
   final counts = [
@@ -58,6 +90,11 @@ List<Answer> parseAnswers(String spec) {
     score += 100 + bonus;
     for (var step = 0; step < position; step++) {
       score += 25;
+    }
+    if (hinted.contains(i)) {
+      for (var point = 0; point < 50; point++) {
+        score--;
+      }
     }
   }
   return (score: score, correct: correct);

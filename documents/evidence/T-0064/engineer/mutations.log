@@ -1,0 +1,19 @@
+baseline: PASS
+S01 the limit itself is still in time: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+S04 time bonus at most 49: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+S08 the first of a run already gets a streak bonus: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+S09 the hint costs nothing: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+E01 a miss does not reset the streak: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+E03 the hint can be used twice: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+P01 the background does not pause: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+P02 a covering screen does not pause: KILLED (//feature/trivia/trivia_quiz:flow_scope_test)
+P03 a resumed question gets its whole limit again: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+P13 the countdown ends a millisecond late: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+P05 the hint flag is read on every frame: KILLED (//feature/trivia/trivia_quiz:flow_scope_test)
+R02 an answer for a session that is gone is shown: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+R03 the result POST is not pinned: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+R08 a mismatch is not reported: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+R10 the engine's score is shown over the server's: KILLED (//feature/trivia/trivia_quiz:bdd_test)
+
+mutations: 15, killed: 15
+RESULT: PASS

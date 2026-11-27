@@ -212,6 +212,7 @@
             "text": "32"
           }
         ],
+        "comicId": 501705,
         "correctChoiceId": "c3",
         "difficulty": "hard",
         "id": "q-comic_pages-02",
@@ -239,6 +240,7 @@
             "text": "56"
           }
         ],
+        "comicId": 500416,
         "correctChoiceId": "c3",
         "difficulty": "hard",
         "id": "q-comic_pages-09",
