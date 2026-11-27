@@ -267,7 +267,7 @@ M = [
     ("X09", "a wrong-typed defaultConsent crashes", CFGSRC,
      [("value is String ? value : 'unknown'", "(value as String?) ?? 'unknown'")], CFG),
     ("X10", "the lifecycle observer is added before registering", DI,
-     [("    widgets?.addObserver(observer);\n", ""),
+     [("      widgets.addObserver(observer);\n", ""),
       ("    getIt.registerSingleton<Analytics>(", "    widgets?.addObserver(observer);\n    getIt.registerSingleton<Analytics>(")], [A]),
     ("X11", "the observer does not re-track on pop", RO,
      [("if (topRoute is! PageRoute<dynamic> || identical(topRoute, _last)) {",

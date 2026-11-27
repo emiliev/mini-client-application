@@ -1,7 +1,6 @@
 // T-0053-AC4 in the full app (the real router, the 7 wirings and the app's own
 // root list): the screens a user walks through are tracked once each, with the
 // page names the typed routes declare.
-import 'dart:async';
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
@@ -170,7 +169,11 @@ void main() {
     await tester.tap(find.text('Characters'));
     await tester.pumpAndSettle();
 
-    unawaited(diContainer<Analytics>().setConsent(AnalyticsConsent.granted));
+    // The save is real file I/O: await it in real time, before teardown
+    // deletes the directory (F-0050 section 7).
+    await tester.runAsync(
+      () => diContainer<Analytics>().setConsent(AnalyticsConsent.granted),
+    );
     await tester.pump();
 
     expect(sink.screens, ['home', 'characters_list']);

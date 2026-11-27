@@ -1,7 +1,5 @@
 // T-0053-AC4: each analytics step passes when it should and goes red when it
 // should (negative controls), over the test container's real `Analytics`.
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_di/mc_di.dart';
@@ -149,9 +147,9 @@ void main() {
     tester,
   ) async {
     final analytics = await _boot();
-    // The save is real file I/O, which fake async cannot await (F-0038); the
-    // choice itself applies at once.
-    unawaited(analytics.setConsent(AnalyticsConsent.denied));
+    // The save is real file I/O: await it in real time, before the session
+    // deletes its directory (F-0050 section 7). The choice applies at once.
+    await tester.runAsync(() => analytics.setConsent(AnalyticsConsent.denied));
 
     analytics.track(const AnalyticsEvent('comic_opened'));
     analytics.screen('home');
