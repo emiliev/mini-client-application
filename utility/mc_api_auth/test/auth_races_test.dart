@@ -189,6 +189,58 @@ void main() {
         );
       });
 
+      test('T-0050-AC3 (P-080) one refresh per session: user A is in flight, user B starts its own', () async {
+        final gated = GatedAdapter(rig.backend.adapter, '/v1/auth/refresh');
+        final (dio, _) = rig.dioOver(gated);
+        await rig.startExpiredSession();
+        final a = _get(dio, '/v1/me');
+        await gated.arrived.future;
+        await rig.session.signOut();
+        await rig.session.signIn(
+          userId: 'u-101',
+          tokens: AuthTokens(
+            accessToken: expiredAccessToken('u-101'),
+            refreshToken: mintRefreshToken('u-101', 0),
+          ),
+        );
+        final b = _get(dio, '/v1/me');
+        await rig.settle();
+        gated.gate.complete();
+        final resultA = await a;
+        final resultB = await b;
+        await rig.settle();
+
+        expect(_failure(resultA), isA<ApiUnauthorized>());
+        expect(resultB.getOrNull()?.data?['id'], 'u-101');
+        expect(rig.session.userId, 'u-101');
+        expect(rig.session.accessToken, startsWith('mc-access-u-101-'));
+        expect(
+          rig.calls('POST', '/v1/auth/refresh'),
+          2,
+          reason: 'B did not wait for, or share, the refresh of A',
+        );
+      });
+
+      test('T-0050-AC3 (P-080) a PUT of user A after a local sign-out during the refresh is not replayed without a token', () async {
+        final gated = GatedAdapter(rig.backend.adapter, '/v1/auth/refresh');
+        final (dio, _) = rig.dioOver(gated);
+        await rig.startExpiredSession();
+        final put = apiCall(
+          () => dio.put<Map<String, Object?>>('/v1/me/favourites/comic/5'),
+        );
+        await gated.arrived.future;
+        await rig.session.signOut();
+        gated.gate.complete();
+        final result = await put;
+
+        expect(_failure(result), isA<ApiUnauthorized>());
+        expect(
+          rig.calls('PUT', '/v1/me/favourites/comic/5'),
+          1,
+          reason: 'the 401 reaches the caller; there is no anonymous replay',
+        );
+      });
+
       test('T-0039-AC1 a request retried after a sign-out goes out without the old token', () async {
         final (dio, api) = rig.dioOver(
           rig.backend.adapter,

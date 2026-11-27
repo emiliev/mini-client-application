@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dio/dio.dart';
 import 'package:mc_api_auth/src/auth_api.dart';
+import 'package:mc_api_auth/src/auth_pin.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_session/mc_session.dart';
 
@@ -17,6 +18,15 @@ import 'package:mc_session/mc_session.dart';
 ///   reaches the caller untouched, so a request of user A is never repeated
 ///   with user B's token. A retry of A's request (by the retry interceptor)
 ///   after such a change is failed as unauthorized instead of being sent.
+/// - A caller can pin a request to the session epoch it checked (`authPinned`,
+///   `mcSessionEpoch`). The pin holds from the **first send**: Dio runs each
+///   request interceptor in a new event-loop turn, so without it a user switch
+///   in that window would give the request the new user's bearer. A pinned
+///   request whose epoch is no longer current is rejected before any bearer
+///   is attached and never reaches the backend; the caller gets
+///   [ApiFailure.unauthorized] ("The session changed"), the same failure as a
+///   retry across a session change. Unpinned requests carry whatever token is
+///   current when they are sent.
 /// - A 401 for a request that carried our token starts one refresh. Every
 ///   other request that gets a 401 while it runs waits for that same refresh.
 ///   A 401 that arrives after the refresh finished sees a newer token than
@@ -52,6 +62,18 @@ class AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (options.extra[skipAuthKey] != true) {
+      final pinned = options.extra[mcSessionEpoch];
+      if (pinned is int && pinned != _reader.epoch) {
+        // A request its caller started for another session: rejected before
+        // any bearer is attached, whether or not someone is signed in now.
+        return handler.reject(
+          DioException(
+            requestOptions: options,
+            type: DioExceptionType.unknown,
+            error: const ApiFailure.unauthorized('The session changed'),
+          ),
+        );
+      }
       final ours = options.extra[_applied] == true;
       final token = _reader.accessToken;
       if (ours && options.extra[_epoch] != _reader.epoch && token != null) {
