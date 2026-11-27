@@ -283,6 +283,7 @@ _TEST_DEPS = [
     "//utility/mc_di",
     "//utility/mc_ds_charts",
     "//utility/mc_ds_media",
+    "//utility/mc_ds_navigation",
     "//utility/mc_ds_overlays",
     "//utility/mc_ds_theme",
     "//utility/mc_ds_tokens",
