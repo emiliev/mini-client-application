@@ -293,6 +293,35 @@ Feature: Favourite a comic
     And comic {501500} is a favourite of {'collector@mini-client.test'}
     And the backend received {0} requests for {'DELETE /v1/me/favourites/comic/501500'}
 
+  @T-0050-AC2
+  Scenario: A user switch right before the favourite is sent sends nothing for the wrong user
+    Given I am signed in as {'reader@mini-client.test'}
+    When I open comic {501500}
+    And {'collector@mini-client.test'} signs in just before the app sends {'PUT /v1/me/favourites/comic/501500'}
+    And I tap {'Add to favourites'}
+    And the app finishes writing to storage
+    Then the backend received {0} requests for {'PUT /v1/me/favourites/comic/501500'}
+    And the backend received {0} requests for {'DELETE /v1/me/favourites/comic/501500'}
+    And I see {'Add to favourites'}
+    And the app announced {0} change to {'favourites'}
+    And comic {501500} is not a favourite of {'collector@mini-client.test'}
+    And comic {501500} is not a favourite of {'reader@mini-client.test'}
+
+  @T-0050-AC2
+  Scenario: A user switch right before the favourite is removed sends nothing for the wrong user
+    Given I am signed in as {'reader@mini-client.test'}
+    And {'reader@mini-client.test'} has comic {501500} among their favourites
+    And {'collector@mini-client.test'} has comic {501500} among their favourites
+    When I open comic {501500}
+    Then I see {'Remove from favourites'}
+    When {'collector@mini-client.test'} signs in just before the app sends {'DELETE /v1/me/favourites/comic/501500'}
+    And I tap {'Remove from favourites'}
+    And the app finishes writing to storage
+    Then the backend received {0} requests for {'DELETE /v1/me/favourites/comic/501500'}
+    And comic {501500} is a favourite of {'collector@mini-client.test'}
+    And comic {501500} is a favourite of {'reader@mini-client.test'}
+    And the app announced {0} change to {'favourites'}
+
   @T-0041-AC6
   Scenario: Two pages of the same comic agree after one of them writes
     Given I am signed in as {'reader@mini-client.test'}
