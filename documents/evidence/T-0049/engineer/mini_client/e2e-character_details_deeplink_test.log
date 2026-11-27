@@ -20,3 +20,32 @@ Downloading packages...
 Got dependencies in `/private/tmp/mc-T-0049-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           12.0s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.Zf1Kdv/flutter_ios_build_temp_dir3CUvys/temporary_xcresult_bundle
+
+    integration_test/character_details_deeplink_test.dart:18:41: Error: Undefined name 'e2eStartLinkFile'.
+        File('${Directory.systemTemp.path}/$e2eStartLinkFile').writeAsStringSync(
+                                            ^^^^^^^^^^^^^^^^
+    Target kernel_snapshot_program failed: Exception
+    Failed to package /private/tmp/mc-T-0049-engineer-e2e/app/mini_client.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Could not build the application for the simulator.
+Application failed to start on attempt: 1
+Application failed to start on attempt: 2
+Application failed to start on attempt: 3
+Application failed to start. Will not run test. Quitting.
+
+# exit code: 1
