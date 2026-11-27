@@ -1,0 +1,10 @@
+PROBE P1 link -> /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/mc_storage_ro_C5eGMY
+  PASS  zz_verifier_probe Verifier probes (temporary) P1 storage made read-only keeps reads and blocks writes
+  PASS  zz_verifier_probe Verifier probes (temporary) P2 the previous scenario left nothing behind
+PROBE P3 log: LogLevel.debug DiscoverySearchBloc: _LoadHistory _Idle -> _Idle
+PROBE P3 log: LogLevel.debug DiscoverySearchBloc: _Search _Idle -> _Searching
+PROBE P3 log: LogLevel.warning GET /v1/search failed: 400
+PROBE P3 log: LogLevel.debug DiscoverySearchBloc: _Search _Searching -> _Idle
+  PASS  zz_verifier_probe Verifier probes (temporary) P3 a too-short answer is logged, not reported
+  PASS  zz_verifier_probe Verifier probes (temporary) P4 a keyboard search action searches at once
+Executed 1 out of 1 test: 1 test passes.

@@ -1,0 +1,17 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+/// Usage: no read-only storage copy or link is left behind
+Future<void> noReadOnlyStorageCopyOrLinkIsLeftBehind(
+  WidgetTester tester,
+) async {
+  final names = [
+    for (final e in Directory.systemTemp.listSync())
+      '${e.uri.pathSegments.where((s) => s.isNotEmpty).last}'
+          '${FileSystemEntity.isLinkSync(e.path) ? ' (link)' : ''}',
+  ];
+  print('PROBE P2 systemTemp=${Directory.systemTemp.path} entries=$names');
+  expect(names.where((n) => n.startsWith('mc_storage_ro_')), isEmpty);
+  expect(names.where((n) => n.endsWith('(link)')), isEmpty);
+}

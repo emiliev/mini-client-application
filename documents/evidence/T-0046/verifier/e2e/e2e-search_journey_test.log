@@ -1,0 +1,55 @@
+# e2e_ios.sh: T-0046 verifier on mc-T-0046-verifier-70220 (C092E270-E9B9-4B00-8CEC-2A3F006F9245)
+# cwd: /tmp/mc-T-0046-verifier-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_journey_test.dart -d C092E270-E9B9-4B00-8CEC-2A3F006F9245
+
+Resolving dependencies in `/private/tmp/mc-T-0046-verifier-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0046-verifier-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           11.0s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57864/Q4zwXgLvyLk=/
+VMServiceFlutterDriver: Isolate found with number: 2383486661933711
+VMServiceFlutterDriver: Isolate 2383486661933711 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0046-AC5 home to the search, "spi", the results, a comic and its page; back, and the recent search
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] DiscoverySearchBloc: _LoadHistory _Idle -> _Idle
+flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/search -> 200
+flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] DiscoverySearchBloc: _FilterChanged _Results -> _Results
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/500000 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+flutter: [debug] DiscoverySearchBloc: _Cleared _Results -> _Idle
+flutter: 00:16 +1: (tearDownAll)
+flutter: 00:16 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test/30_home_search_entry.png (300465)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test/31_search_opened.png (209750)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test/32_search_results_grouped.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test/33_search_comics_chip.png (405902)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test/34_comic_from_search.png (371207)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.cJf4PH/screenshots/7-search_journey_test/35_recent_searches.png (212120)
+All tests passed.
+
+# exit code: 0

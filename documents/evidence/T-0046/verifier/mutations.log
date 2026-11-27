@@ -1,0 +1,38 @@
+baseline: PASS (9 targets)
+AC1-a hits of a group in reverse order: KILLED (FAIL  discovery_search Search characters and comics Typing a name shows its characters, then its comics, in the backend's ranking [T-0046-AC1])
+AC2-d a double Retry sends two requests (the state check comes too late): KILLED (FAIL  discovery_search Search characters and comics A double Retry sends one request [T-0046-AC2])
+AC3-d the wiring replaces the search instead of pushing: KILLED (FAIL  T-0046-AC3 openComic pushes the comic location, and Back returns to the search)
+AC5-b a flow opened with a query does not search it: KILLED (FAIL  T-0046-AC5 a new initialQuery builds a new flow that searches it)
+AC6-c a stale answer is shown (no generation check): KILLED (FAIL  discovery_search_typing Search as you type A slow answer for an older query does not replace the newer one's [T-0046-AC6])
+AC6-d clearing the field does not drop the answer in flight: KILLED (FAIL  discovery_search_typing Search as you type Clearing the field while a request is in flight shows the recent searches [T-0046-AC6])
+AC6-f a too-short query does not drop the answer in flight: KILLED (FAIL  discovery_search_typing Search as you type Shortening the query while a request is in flight drops its answer [T-0046-AC6])
+AC6-j a save that finishes after a clear is shown (no version check): KILLED (FAIL  discovery_search_typing Search as you type Clearing the recent searches while a search is being saved forgets that one too [T-0046-AC6])
+AC6-l a tapped recent search waits for the debounce: KILLED (FAIL  discovery_search_typing Search as you type Tapping a recent search searches it at once [T-0046-AC6])
+AC6-m a failed save keeps the in-memory list instead of reading the stored one: KILLED (FAIL  discovery_search_typing Search as you type A save that fails while the stored searches are still being read keeps them [T-0046-AC6])
+R3-c submit searches the last query again: KILLED (00:00 +11 -1: T-0046-AC6: submit of the query last searched does not search again [E])
+R5-b the backend's too-short answer is a failure (bloc): KILLED (FAIL  discovery_search Search characters and comics A query the backend counts as too short shows the recent searches, not a failure ('e\u0301', 1) [T-0046-AC2])
+R7-a a failed Clear is taken as done: KILLED (FAIL  discovery_search_typing Search as you type A Clear that fails keeps the recent searches and says so [T-0046-AC6])
+R8-a a double tap opens twice (no guard): KILLED (FAIL  discovery_search Search characters and comics A double tap on a result hands it over once [T-0046-AC3])
+R10 a blank linked query is kept (no keyboard): KILLED (FAIL  discovery_search Search characters and comics A search opened with a blank query opens on the recent searches, ready to type [T-0046-AC5])
+V01 the initial history read has no version check: SURVIVED
+V02 a failed Clear restores the list even after a later save: SURVIVED
+V03 Clear empties the list only after storage answered: KILLED (FAIL  discovery_search_typing Search as you type Clear forgets the recent searches, also for the next search flow [T-0046-AC6])
+V05 Retry searches another query (upper-cased): KILLED (FAIL  discovery_search Search characters and comics A double Retry sends one request [T-0046-AC2])
+V10 any 400 with an error code is taken as too short: KILLED (FAIL  T-0046-AC1 the repository and the mapper T-0046-AC2: failures come back as values)
+V11 the open guard lasts 1 ms: SURVIVED
+V11b the open guard lasts 501 ms: SURVIVED
+V14 a blank submit clears but keeps the last query as searched: SURVIVED
+V18 the field always autofocuses: KILLED (FAIL  discovery_search Search characters and comics A search opened with a query searches it at once [T-0046-AC5 T-0046-AC6])
+V19 a tapped recent search is not put in the field: KILLED (FAIL  discovery_search_typing Search as you type Tapping a recent search searches it at once [T-0046-AC6])
+V26 the flow is not keyed by its query: KILLED (FAIL  T-0046-AC5 a new initialQuery builds a new flow that searches it)
+V27 a failure state is not reported to monitoring: SURVIVED
+V27b the backend's too-short answer reports an error: KILLED (FAIL  discovery_search Search characters and comics A query the backend counts as too short shows the recent searches, not a failure ('e\u0301', 1) [T-0046-AC2])
+V30 a 301 ms debounce: KILLED (FAIL  discovery_search_typing Search as you type Typing one character at a time sends one request, for the whole word [T-0046-AC6])
+V31 a keystroke does not cancel the pending search: KILLED (00:00 +0 -1: T-0030-AC4: 5 characters in 200 ms fire one search with the final text [E])
+V32 the read-only step leaves storage writable: KILLED (FAIL  discovery_search_typing Search as you type A search that cannot be saved still shows its results and keeps the recent searches [T-0046-AC6])
+V32b the read-only step loses what was stored (reads fail too): KILLED (FAIL  discovery_search_typing Search as you type A search that cannot be saved still shows its results and keeps the recent searches [T-0046-AC6])
+V34 storage I/O stops after the 10 fixed rounds: KILLED (FAIL  discovery_search Search characters and comics The pseudo-locale renders every state without overflow [T-0046-AC4])
+V35 a search does not show that it is searching: KILLED (FAIL  discovery_search Search characters and comics A double Retry sends one request [T-0046-AC2])
+V40 the wiring sends a character to the comic location: KILLED (FAIL  T-0046-AC3 openCharacter pushes the character location, and Back returns to the search)
+
+29 of 35 mutations killed by a failing test
