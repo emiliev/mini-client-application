@@ -152,4 +152,43 @@ void main() {
     await tester.pumpAndSettle();
     await _red(theToastIsShown(tester, 'Comic removed'));
   });
+
+  testWidgets('T-0058-AC4 I choose {option} in the sheet only taps choice '
+      'rows', (tester) async {
+    await tester.pumpWidget(_app());
+
+    // The sheet's title reads like an option: the step picks the row, not the
+    // heading, and does not see two matches.
+    final answers = <String?>[];
+    unawaited(
+      showMcChoiceSheet<String>(
+        _ctx(tester),
+        title: 'Dark',
+        dismissLabel: 'Close',
+        options: const [
+          McChoiceOption(value: 'light', label: 'Light'),
+          McChoiceOption(value: 'dark', label: 'Dark'),
+        ],
+      ).then(answers.add),
+    );
+    await tester.pumpAndSettle();
+    await iChooseInTheSheet(tester, 'Dark');
+    expect(answers, ['dark']);
+
+    // Negative control: a sheet that is not a choice sheet, with the text.
+    unawaited(
+      showMcSheet<void>(
+        _ctx(tester),
+        builder: (_) => const McSheet(
+          title: 'Dark',
+          dismissLabel: 'Close',
+          child: Text('Light'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _red(iChooseInTheSheet(tester, 'Dark'));
+    await _red(iChooseInTheSheet(tester, 'Light'));
+    expect(find.byType(McSheet), findsOneWidget);
+  });
 }

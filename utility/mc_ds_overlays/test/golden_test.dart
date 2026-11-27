@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_overlays/mc_ds_overlays.dart';
-import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
 const _german =
@@ -117,65 +115,66 @@ Widget _dialog({
       ],
 );
 
-/// `mcGoldenMatrix` with real shadows: the test binding draws them as hard
-/// black outlines, which is not what the app shows. The flag is restored
-/// before the invariants are checked.
-void _matrix({
-  required String acId,
-  required String component,
-  required Widget Function(BuildContext context) builder,
-  required double height,
-  required double heightAtScale2,
-  Duration settle = Duration.zero,
-}) {
-  for (final variant in McThemeVariant.values) {
-    for (final scale in const [1.0, 2.0]) {
-      final label = 'x${scale.toStringAsFixed(0)}';
-      testWidgets('$acId $component golden ${variant.name} $label', (
-        tester,
-      ) async {
-        await mcLoadFonts();
-        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-        debugDisableShadows = false;
-        try {
-          mcSetSurface(tester, 375, scale > 1 ? heightAtScale2 : height);
-          await tester.pumpWidget(
-            mcGoldenApp(
-              variant: variant,
-              textScale: scale,
-              child: Builder(builder: builder),
+/// A sheet over a stand-in keyboard of 300 pt: the sheet is lifted by the
+/// keyboard's inset and its body scrolls above it.
+Widget _keyboardSheet(BuildContext context) => SizedBox.expand(
+  child: Stack(
+    children: [
+      Positioned(
+        left: 0,
+        right: 0,
+        bottom: 0,
+        height: 300,
+        child: const ColoredBox(
+          color: Color(0xFFB0B0B8),
+          child: Center(child: Text('keyboard')),
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: MediaQuery(
+          data: MediaQuery.of(
+            context,
+          ).copyWith(viewInsets: const EdgeInsets.only(bottom: 300)),
+          child: McSheet(
+            title: 'Rename list',
+            dismissLabel: 'Close',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const TextField(
+                  decoration: InputDecoration(labelText: 'Name'),
+                ),
+                const SizedBox(height: 16),
+                McButton(label: 'Save', onPressed: () {}),
+                McButton(
+                  label: 'Cancel',
+                  variant: McButtonVariant.tertiary,
+                  onPressed: () {},
+                ),
+              ],
             ),
-          );
-          await tester.pump();
-          if (settle > Duration.zero) {
-            await tester.pump(settle);
-          }
-          expect(tester.takeException(), isNull);
-          await expectLater(
-            find.byType(MaterialApp),
-            matchesGoldenFile('goldens/$component.${variant.name}.$label.png'),
-          );
-        } finally {
-          debugDisableShadows = true;
-          debugDefaultTargetPlatformOverride = null;
-        }
-      });
-    }
-  }
-}
+          ),
+        ),
+      ),
+    ],
+  ),
+);
 
 void main() {
   const ac = 'T-0058-AC1';
   const settle = Duration(milliseconds: 500);
 
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'dialog_default',
     height: 360,
     heightAtScale2: 640,
     builder: (_) => _dialog(),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'dialog_destructive',
     height: 360,
@@ -191,7 +190,8 @@ void main() {
       ],
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'dialog_three_actions_disabled',
     height: 460,
@@ -214,7 +214,8 @@ void main() {
       ],
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'dialog_long',
     height: 560,
@@ -233,7 +234,8 @@ void main() {
     ),
   );
 
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'sheet_default',
     height: 300,
@@ -244,7 +246,8 @@ void main() {
       child: Text('Issue 1 of the main series, first printing.'),
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'sheet_long',
     height: 460,
@@ -255,7 +258,8 @@ void main() {
       child: Text('Beschreibung: $_german'),
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'choice_sheet_selected',
     height: 360,
@@ -270,7 +274,8 @@ void main() {
       ),
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'choice_sheet_none',
     height: 360,
@@ -285,7 +290,8 @@ void main() {
       ),
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'choice_sheet_long',
     height: 560,
@@ -309,7 +315,8 @@ void main() {
     ),
   );
 
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'menu_open',
     height: 300,
@@ -317,7 +324,8 @@ void main() {
     settle: settle,
     builder: (_) => _menu(),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'menu_open_long',
     height: 400,
@@ -326,7 +334,8 @@ void main() {
     builder: (_) => _menu(long: true),
   );
 
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'tooltip_shown',
     height: 200,
@@ -344,7 +353,8 @@ void main() {
     ),
   );
 
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'toast',
     height: 240,
@@ -352,7 +362,8 @@ void main() {
     settle: settle,
     builder: (_) => _toast('Comic saved'),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'toast_action',
     height: 240,
@@ -363,7 +374,8 @@ void main() {
       action: McToastAction(label: 'Undo', onPressed: () {}),
     ),
   );
-  _matrix(
+  mcGoldenMatrix(
+    realShadows: true,
     acId: ac,
     component: 'toast_long',
     height: 320,
@@ -373,5 +385,14 @@ void main() {
       'Gespeichert: $_german',
       action: McToastAction(label: 'Rückgängig machen', onPressed: () {}),
     ),
+  );
+
+  mcGoldenMatrix(
+    realShadows: true,
+    acId: ac,
+    component: 'sheet_keyboard',
+    height: 560,
+    heightAtScale2: 800,
+    builder: _keyboardSheet,
   );
 }

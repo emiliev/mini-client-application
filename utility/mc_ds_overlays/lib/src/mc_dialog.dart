@@ -42,8 +42,9 @@ class McDialogAction {
 ///
 /// It brings no route: show it with [showMcDialog] (or [showMcConfirm]).
 /// The whole card scrolls when it is taller than the screen, so large text
-/// never overflows. **Semantics:** the card scopes and names its route with
-/// [title], so a screen reader announces the title when the dialog opens.
+/// never overflows. **Semantics:** the card scopes its route and [title] is
+/// one node, the heading that also names the route, so a screen reader
+/// announces the title once when the dialog opens.
 /// The actions are plain buttons of at least 44 pt.
 ///
 /// It uses no `LayoutBuilder` (F-0043), so it is safe in any intrinsic-size
@@ -74,17 +75,17 @@ class McDialog extends StatelessWidget {
       insetPadding: const EdgeInsets.all(McSpacing.xl),
       child: Semantics(
         scopesRoute: true,
-        namesRoute: true,
         explicitChildNodes: true,
-        label: title,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(McSpacing.xl),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // One node: the heading, and the route's name.
               Semantics(
                 header: true,
+                namesRoute: true,
                 child: Text(
                   title,
                   style: McTypeScale.headline.copyWith(color: p.onSurface),

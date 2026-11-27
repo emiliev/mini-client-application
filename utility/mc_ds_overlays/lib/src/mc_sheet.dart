@@ -10,10 +10,15 @@ import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 /// (a route or a `Scaffold` body gives one); the body scrolls when the sheet
 /// is taller than the screen, so large text never overflows.
 ///
-/// **Semantics.** The card scopes and names its route with [title]. The
-/// drag handle is a 44 pt button named [dismissLabel] that closes the sheet
-/// through `Navigator.maybePop`, so a `PopScope` that refuses to pop (a
-/// sheet that is busy) is respected.
+/// **Keyboard.** The card is lifted by the keyboard's inset, so a text field
+/// in it stays visible and the body scrolls above the keyboard.
+///
+/// **Semantics.** The card scopes its route, and its [title] is one node: the
+/// heading that also names the route. The drag handle is a 44 pt button named
+/// [dismissLabel] that closes the sheet through `Navigator.maybePop`, so a
+/// `PopScope` that refuses to pop (a sheet that is busy) is respected. In a
+/// sheet shown with `isDismissible: false` or `enableDrag: false` the handle
+/// is only a picture: no tap, no name.
 class McSheet extends StatelessWidget {
   const McSheet({
     required this.title,
@@ -31,62 +36,87 @@ class McSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.mcPalette;
-    return Semantics(
-      scopesRoute: true,
-      namesRoute: true,
-      explicitChildNodes: true,
-      label: title,
-      child: Material(
-        color: p.surface,
-        elevation: McElevation.high,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            top: Radius.circular(McRadius.lg),
+    // The keyboard: lift the card above it. The body is a scroll view in a
+    // bounded column, so what no longer fits scrolls and the handle and the
+    // title stay put. The safe-area inset is the keyboard's job while it is up.
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.only(bottom: keyboard),
+      child: Semantics(
+        scopesRoute: true,
+        explicitChildNodes: true,
+        child: Material(
+          color: p.surface,
+          elevation: McElevation.high,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(McRadius.lg),
+            ),
           ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: SafeArea(
-          top: false,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _DragHandle(dismissLabel: dismissLabel),
-              Flexible(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(
-                    McSpacing.lg,
-                    0,
-                    McSpacing.lg,
-                    McSpacing.lg,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Semantics(
-                        header: true,
-                        child: Text(
-                          title,
-                          style: McTypeScale.headline.copyWith(
-                            color: p.onSurface,
+          clipBehavior: Clip.antiAlias,
+          child: SafeArea(
+            top: false,
+            bottom: keyboard == 0,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _DragHandle(dismissLabel: dismissLabel),
+                Flexible(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(
+                      McSpacing.lg,
+                      0,
+                      McSpacing.lg,
+                      McSpacing.lg,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // One node: the heading, and the route's name.
+                        Semantics(
+                          header: true,
+                          namesRoute: true,
+                          child: Text(
+                            title,
+                            style: McTypeScale.headline.copyWith(
+                              color: p.onSurface,
+                            ),
                           ),
                         ),
-                      ),
-                      const McGap.sm(),
-                      DefaultTextStyle.merge(
-                        style: McTypeScale.body.copyWith(color: p.onSurface),
-                        child: child,
-                      ),
-                    ],
+                        const McGap.sm(),
+                        DefaultTextStyle.merge(
+                          style: McTypeScale.body.copyWith(color: p.onSurface),
+                          child: child,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+/// Tells an [McSheet] whether the route may be dismissed by the user, so its
+/// handle does not offer what the barrier and the drag refuse.
+class _McSheetScope extends InheritedWidget {
+  const _McSheetScope({required this.dismissible, required super.child});
+
+  final bool dismissible;
+
+  static bool dismissibleOf(BuildContext context) =>
+      context
+          .dependOnInheritedWidgetOfExactType<_McSheetScope>()
+          ?.dismissible ??
+      true;
+
+  @override
+  bool updateShouldNotify(_McSheetScope old) => dismissible != old.dismissible;
 }
 
 class _DragHandle extends StatelessWidget {
@@ -97,6 +127,22 @@ class _DragHandle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final p = context.mcPalette;
+    final bar = SizedBox(
+      height: mcMinTapTarget,
+      child: Center(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: p.outline,
+            borderRadius: McRadius.smAll,
+          ),
+          child: const SizedBox(width: 36, height: McSpacing.xs),
+        ),
+      ),
+    );
+    if (!_McSheetScope.dismissibleOf(context)) {
+      // Not dismissible: the handle is a picture, with no tap and no name.
+      return ExcludeSemantics(child: bar);
+    }
     return Semantics(
       label: dismissLabel,
       button: true,
@@ -105,18 +151,7 @@ class _DragHandle extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => Navigator.of(context).maybePop(),
-        child: SizedBox(
-          height: mcMinTapTarget,
-          child: Center(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: p.outline,
-                borderRadius: McRadius.smAll,
-              ),
-              child: const SizedBox(width: 36, height: McSpacing.xs),
-            ),
-          ),
-        ),
+        child: bar,
       ),
     );
   }
@@ -146,7 +181,10 @@ Future<T?> showMcSheet<T>(
   backgroundColor: Colors.transparent,
   elevation: 0,
   barrierLabel: dismissLabel,
-  builder: builder,
+  builder: (sheetContext) => _McSheetScope(
+    dismissible: isDismissible && enableDrag,
+    child: Builder(builder: builder),
+  ),
 );
 
 /// One choice of [showMcChoiceSheet].

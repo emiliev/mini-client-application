@@ -4,9 +4,11 @@
 # showMcSheet, showMcChoiceSheet, McMenuButton, showMcToast).
 #   1. scan every `lib/` Dart file under app/, feature/, utility/,
 #      third_party/ and spike/ except utility/mc_ds_overlays for showDialog,
-#      showModalBottomSheet, showBottomSheet, showGeneralDialog,
-#      showCupertinoDialog, showCupertinoModalPopup, showSnackBar and
-#      showMenu. Whole-line comments (`//`, `///`) are ignored, so a doc that
+#      showAdaptiveDialog, showModalBottomSheet, showBottomSheet,
+#      showGeneralDialog, showCupertinoDialog, showCupertinoModalPopup,
+#      showCupertinoSheet, showSnackBar, showMaterialBanner, showAboutDialog,
+#      showLicensePage, showMenu, the PopupMenuButton widget and
+#      `Overlay.of(...).insert`. Whole-line comments (`//`, `///`) are ignored, so a doc that
 #      names one is fine. Tests are out of scope: they drive Flutter's own
 #      API on purpose (T-0048, T-0054).
 #   2. positive control: the same scan over utility/mc_ds_overlays/lib finds
@@ -18,7 +20,7 @@ set -uo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 cd "$REPO"
 rc=0
-CALLS='showDialog|showModalBottomSheet|showBottomSheet|showGeneralDialog|showCupertinoDialog|showCupertinoModalPopup|showSnackBar|showMenu'
+CALLS='showDialog|showAdaptiveDialog|showModalBottomSheet|showBottomSheet|showGeneralDialog|showCupertinoDialog|showCupertinoModalPopup|showCupertinoSheet|showSnackBar|showMaterialBanner|showAboutDialog|showLicensePage|showMenu|PopupMenuButton|Overlay\.of\([^)]*\)\.insert'
 PROBE="feature/characters/characters_list/lib/t0058_probe.dart"
 report "# T-0058-AC4: no direct overlay calls" ""
 
@@ -48,11 +50,28 @@ report "## positive control: mc_ds_overlays/lib holds the calls in: ${pos:-NOTHI
 # --- 3. negative controls ----------------------------------------------------
 neg=()
 trap 'rm -f "$PROBE"' EXIT
-for c in showDialog showModalBottomSheet showBottomSheet showGeneralDialog showCupertinoDialog showCupertinoModalPopup showSnackBar showMenu; do
-  printf "void f(dynamic ctx) {\n  %s(context: ctx);\n}\n" "$c" > "$PROBE"
+PROBES=(
+  'showDialog(context: ctx);'
+  'showAdaptiveDialog(context: ctx);'
+  'showModalBottomSheet(context: ctx);'
+  'showBottomSheet(context: ctx);'
+  'showGeneralDialog(context: ctx);'
+  'showCupertinoDialog(context: ctx);'
+  'showCupertinoModalPopup(context: ctx);'
+  'showCupertinoSheet(context: ctx);'
+  'showSnackBar(null);'
+  'showMaterialBanner(null);'
+  'showAboutDialog(context: ctx);'
+  'showLicensePage(context: ctx);'
+  'showMenu(context: ctx);'
+  'PopupMenuButton<int>(itemBuilder: b);'
+  'Overlay.of(ctx).insert(entry);'
+)
+for c in "${PROBES[@]}"; do
+  printf "void f(dynamic ctx) {\n  %s\n}\n" "$c" > "$PROBE"
   if scan_all | grep -q t0058_probe; then neg+=("$c: reported"); else neg+=("$c: NOT DETECTED"); fi
 done
-printf "// showDialog(context: ctx)\n/// showSnackBar is named in a doc\nvoid f() {}\n" > "$PROBE"
+printf "// showDialog(context: ctx)\n/// showSnackBar and PopupMenuButton are named in a doc\nvoid f() {}\n" > "$PROBE"
 if scan_all | grep -q t0058_probe; then neg+=("whole-line comments: WRONGLY REPORTED"); else neg+=("whole-line comments: ignored"); fi
 rm -f "$PROBE"; trap - EXIT
 report "## negative controls" '```' "${neg[@]}" '```'

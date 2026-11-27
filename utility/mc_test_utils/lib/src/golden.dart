@@ -137,6 +137,12 @@ void mcSetSurface(WidgetTester tester, double width, double height) {
 /// `goldens/<component>.<variant>.x<scale>.png` next to the test file, which
 /// under Bazel must be listed in `data`.
 ///
+/// The test binding draws shadows as hard black outlines. Pass
+/// [realShadows] for a golden of a surface with elevation (sheets, menus,
+/// toasts): the shadows are then blurred as in the app. The flag is restored
+/// before the binding checks its invariants. The default leaves every
+/// existing golden as it was.
+///
 /// To draw fixture art, pass [assetBundle] (a [McFixtureAssetBundle]) and the
 /// asset keys in [precache]; they are decoded before the first frame, so the
 /// golden shows the pictures, not placeholders.
@@ -150,6 +156,7 @@ void mcGoldenMatrix({
   Duration settle = Duration.zero,
   AssetBundle? assetBundle,
   Iterable<String> precache = const [],
+  bool realShadows = false,
 }) {
   for (final variant in McThemeVariant.values) {
     for (final scale in const [1.0, 2.0]) {
@@ -159,6 +166,7 @@ void mcGoldenMatrix({
       ) async {
         await mcLoadFonts();
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        debugDisableShadows = !realShadows;
         try {
           mcSetSurface(tester, width, scale > 1 ? heightAtScale2 : height);
           if (precache.isNotEmpty) {
@@ -183,6 +191,7 @@ void mcGoldenMatrix({
             matchesGoldenFile('goldens/$component.${variant.name}.$label.png'),
           );
         } finally {
+          debugDisableShadows = true;
           debugDefaultTargetPlatformOverride = null;
         }
       });

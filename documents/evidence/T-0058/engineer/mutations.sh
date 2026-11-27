@@ -127,7 +127,6 @@ mutate $T "menu ignores the nearest option" $MNU "s.replace('useRootNavigator: w
 mutate $T "dialog does not name its route" $DLG "s.replace('namesRoute: true,', 'namesRoute: false,')"
 mutate $T "dialog does not scope its route" $DLG "s.replace('scopesRoute: true,', 'scopesRoute: false,')"
 mutate $T "dialog title is not a heading" $DLG "s.replace('header: true,', 'header: false,')"
-mutate $T "dialog route name is empty" $DLG "s.replace('label: title,\n        child: SingleChildScrollView', 'label: \"\",\n        child: SingleChildScrollView')"
 mutate $T "dialog accepts any number of actions" $DLG "s.replace('actions.length >= 1 && actions.length <= 3', 'true')"
 mutate $T "dialog does not scroll" $DLG "s.replace('child: SingleChildScrollView(', 'child: Padding(')"
 mutate $T "destructive text is not the error colour" $DLG "s.replace('foregroundColor: p.error,', 'foregroundColor: p.primary,')"
@@ -172,6 +171,17 @@ mutate $T "toast ignores an explicit duration" $TST "s.replace('duration ??\n   
 # --- tooltip ------------------------------------------------------------------
 mutate $T "tooltip shows on a plain tap" $TIP "s.replace('TooltipTriggerMode.longPress', 'TooltipTriggerMode.tap')"
 mutate $T "tooltip has no message" $TIP "s.replace('message: message,', 'message: \"\",')"
+
+# --- review round: keyboard, non-dismissible sheets, one title node, step ----
+mutate $T "sheet ignores the keyboard" $SHT "s.replace('padding: EdgeInsets.only(bottom: keyboard),', 'padding: EdgeInsets.zero,')"
+mutate $T "handle offered although the sheet is not dismissible" $SHT "s.replace('dismissible: isDismissible && enableDrag,', 'dismissible: true,')"
+mutate $T "handle ignores isDismissible: false" $SHT "s.replace('dismissible: isDismissible && enableDrag,', 'dismissible: enableDrag,')"
+mutate $T "handle ignores enableDrag: false" $SHT "s.replace('dismissible: isDismissible && enableDrag,', 'dismissible: isDismissible,')"
+mutate $T "a standalone sheet has no handle action" $SHT "re.sub(r'\\?\\.dismissible \\?\\?\\s*true;', '?.dismissible ?? false;', s)"
+mutate $T "sheet title is read twice (route label too)" $SHT "s.replace('scopesRoute: true,\n        explicitChildNodes: true,', 'scopesRoute: true,\n        explicitChildNodes: true,\n        label: title,')"
+mutate $T "dialog title is read twice (route label too)" $DLG "s.replace('scopesRoute: true,\n        explicitChildNodes: true,', 'scopesRoute: true,\n        explicitChildNodes: true,\n        label: title,')"
+mutate $G "real shadows off in the golden harness" utility/mc_test_utils/lib/src/golden.dart "s.replace('debugDisableShadows = !realShadows;', 'debugDisableShadows = true;')"
+mutate $ST "choose step matches any text in the sheet again" $STEPS/interaction/i_choose_in_the_sheet.dart "re.sub(r'find\.byWidgetPredicate\(\(w\) => w is McChoiceList\)', 'find.byType(McSheet)', s)"
 
 # --- goldens ------------------------------------------------------------------
 mutate $G "choice rows do not line up (no reserved icon slot)" $SHT "s.replace('reserveIcon: options.any((o) => o.icon != null),', 'reserveIcon: false,')"

@@ -109,6 +109,21 @@ SemanticsData _node(WidgetTester tester, String label) {
   return found.single.getSemanticsData();
 }
 
+/// The title is read once: one node carries it, as the heading and as the
+/// route's name, inside a node that scopes the route.
+void _expectTitleOnce(WidgetTester tester, String title) {
+  final nodes = _labelled(tester, title).toList();
+  expect(nodes, hasLength(1), reason: 'exactly one node reads "$title"');
+  final flags = nodes.single.getSemanticsData().flagsCollection;
+  expect(flags.isHeader, isTrue, reason: 'the title is a heading');
+  expect(flags.namesRoute, isTrue, reason: 'and it names the route');
+  expect(
+    _nodes(tester).any((n) => n.getSemanticsData().flagsCollection.scopesRoute),
+    isTrue,
+    reason: 'a node scopes the route',
+  );
+}
+
 Future<void> _confirm(
   WidgetTester tester, {
   bool destructive = false,
@@ -869,18 +884,7 @@ void main() {
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(_plain());
       await _confirm(tester);
-      final named = _nodes(tester).where((n) {
-        final d = n.getSemanticsData();
-        return d.label == 'Delete comic?' &&
-            d.flagsCollection.namesRoute &&
-            d.flagsCollection.scopesRoute;
-      });
-      expect(named, hasLength(1));
-      final header = _nodes(tester).where((n) {
-        final d = n.getSemanticsData();
-        return d.label == 'Delete comic?' && d.flagsCollection.isHeader;
-      });
-      expect(header, hasLength(1), reason: 'the title is also a heading');
+      _expectTitleOnce(tester, 'Delete comic?');
       for (final label in ['Delete', 'Keep']) {
         final d = _node(tester, label);
         expect(d.flagsCollection.isButton, isTrue, reason: label);
@@ -895,13 +899,7 @@ void main() {
       final handle = tester.ensureSemantics();
       await tester.pumpWidget(_plain());
       await _openChoice(tester, selected: 'light');
-      final named = _nodes(tester).where((n) {
-        final d = n.getSemanticsData();
-        return d.label == 'Appearance' &&
-            d.flagsCollection.namesRoute &&
-            d.flagsCollection.scopesRoute;
-      });
-      expect(named, hasLength(1));
+      _expectTitleOnce(tester, 'Appearance');
       final dismiss = _nodes(tester).where((n) {
         final d = n.getSemanticsData();
         return d.label == 'Close sheet' &&
@@ -1138,6 +1136,231 @@ void main() {
         );
       }
     }
+  });
+
+  // ------------------------------------------------- keyboard (review round)
+  group('T-0058-AC1 keyboard', () {
+    const fieldKey = Key('test.sheet_field');
+    const saveKey = Key('test.sheet_save');
+
+    Future<void> openFormSheet(WidgetTester tester) async {
+      unawaited(
+        showMcSheet<void>(
+          _ctx(tester),
+          dismissLabel: 'Close',
+          builder: (_) => McSheet(
+            title: 'Rename list',
+            dismissLabel: 'Close',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const TextField(key: fieldKey),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  key: saveKey,
+                  onPressed: () {},
+                  child: const Text('Save'),
+                ),
+                const SizedBox(height: 8),
+                ElevatedButton(onPressed: () {}, child: const Text('Cancel')),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    // The drawn card (McSheet itself also holds the keyboard padding).
+    Finder _card() => find
+        .descendant(of: find.byType(McSheet), matching: find.byType(Material))
+        .first;
+
+    void keyboard(WidgetTester tester, double height) {
+      tester.view.viewInsets = FakeViewPadding(
+        bottom: height * tester.view.devicePixelRatio,
+      );
+      addTearDown(tester.view.resetViewInsets);
+    }
+
+    testWidgets('T-0058-AC1 the field and the actions stay above a 300 pt '
+        'keyboard and take taps', (tester) async {
+      mcSetSurface(tester, 375, 667);
+      await tester.pumpWidget(_plain());
+      await openFormSheet(tester);
+      keyboard(tester, 300);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      for (final key in [fieldKey, saveKey]) {
+        final rect = tester.getRect(find.byKey(key));
+        expect(rect.bottom, lessThanOrEqualTo(667 - 300), reason: '$key');
+        expect(find.byKey(key).hitTestable(), findsOneWidget, reason: '$key');
+      }
+      expect(
+        tester.getRect(_card()).bottom,
+        lessThanOrEqualTo(667 - 300),
+        reason: 'the card sits on the keyboard',
+      );
+      await tester.tap(find.byKey(fieldKey));
+      await tester.enterText(find.byKey(fieldKey), 'Reading');
+      expect(tester.takeException(), isNull);
+    });
+
+    for (final scale in [2.0, 3.0]) {
+      testWidgets('T-0058-AC1 with the keyboard up at ${scale}x nothing '
+          'overflows, the body scrolls and the actions are reachable', (
+        tester,
+      ) async {
+        mcSetSurface(tester, 375, 667);
+        await tester.pumpWidget(_plain(scale: scale));
+        await openFormSheet(tester);
+        keyboard(tester, 300);
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(
+          tester.getRect(_card()).bottom,
+          lessThanOrEqualTo(667 - 300),
+        );
+        // The body scrolls: bring the Save button into view and tap it.
+        await tester.scrollUntilVisible(
+          find.byKey(saveKey),
+          100,
+          scrollable: find
+              .descendant(
+                of: find.byType(McSheet),
+                matching: find.byType(Scrollable),
+              )
+              .first,
+        );
+        expect(find.byKey(saveKey).hitTestable(), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets('T-0058-AC1 without a keyboard the sheet sits at the bottom '
+        'with the safe-area inset', (tester) async {
+      mcSetSurface(tester, 375, 667);
+      await tester.pumpWidget(_plain());
+      await openFormSheet(tester);
+      expect(tester.getRect(_card()).bottom, 667);
+    });
+  });
+
+  // ------------------------------- dismissible (review round, T-0058-AC2/AC3)
+  group('T-0058-AC2 a sheet that may not be dismissed', () {
+    Future<Future<String?>> open(
+      WidgetTester tester, {
+      bool isDismissible = true,
+      bool enableDrag = true,
+    }) async {
+      final answer = showMcSheet<String>(
+        _ctx(tester),
+        dismissLabel: 'Close',
+        isDismissible: isDismissible,
+        enableDrag: enableDrag,
+        builder: (_) => const McSheet(
+          title: 'Busy',
+          dismissLabel: 'Close',
+          child: Text('Working'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      return answer;
+    }
+
+    /// Taps where the handle is: the middle of the first 44 pt of the card.
+    Future<void> tapHandle(WidgetTester tester) {
+      final card = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(McSheet),
+              matching: find.byType(Material),
+            )
+            .first,
+      );
+      return tester.tapAt(Offset(card.center.dx, card.top + 22));
+    }
+
+    for (final (name, dismissible, drag) in [
+      ('isDismissible: false', false, true),
+      ('enableDrag: false', true, false),
+    ]) {
+      testWidgets('T-0058-AC2 with $name the handle tap, the screen reader '
+          'and the barrier leave the sheet open', (tester) async {
+        final handle = tester.ensureSemantics();
+        await tester.pumpWidget(_plain());
+        await open(tester, isDismissible: dismissible, enableDrag: drag);
+
+        await tapHandle(tester);
+        await tester.pumpAndSettle();
+        expect(find.byType(McSheet), findsOneWidget, reason: 'handle tap');
+
+        final actions = _nodes(tester).where((n) {
+          final d = n.getSemanticsData();
+          return d.label == 'Close' && d.hasAction(SemanticsAction.tap);
+        });
+        // The barrier of an `isDismissible: false` sheet has no tap either.
+        expect(
+          actions.where((n) => n.getSemanticsData().flagsCollection.isButton),
+          isEmpty,
+          reason: 'no dismiss button for a screen reader',
+        );
+        if (!dismissible) {
+          await tester.tapAt(const Offset(2, 2));
+          await tester.pumpAndSettle();
+          expect(find.byType(McSheet), findsOneWidget, reason: 'barrier tap');
+        }
+        handle.dispose();
+      });
+    }
+
+    testWidgets('T-0058-AC2 a dismissible sheet keeps its handle', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_plain());
+      final answer = await open(tester);
+      expect(
+        _nodes(tester).any((n) {
+          final d = n.getSemanticsData();
+          return d.label == 'Close' &&
+              d.flagsCollection.isButton &&
+              d.hasAction(SemanticsAction.tap);
+        }),
+        isTrue,
+      );
+      await tapHandle(tester);
+      await tester.pumpAndSettle();
+      expect(find.byType(McSheet), findsNothing);
+      expect(await answer, isNull);
+      handle.dispose();
+    });
+
+    testWidgets('T-0058-AC2 a standalone McSheet keeps its handle', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(
+        _app(
+          const Align(
+            alignment: Alignment.bottomCenter,
+            child: McSheet(
+              title: 'Solo',
+              dismissLabel: 'Close',
+              child: Text('x'),
+            ),
+          ),
+        ),
+      );
+      expect(
+        _nodes(tester).any((n) {
+          final d = n.getSemanticsData();
+          return d.label == 'Close' && d.flagsCollection.isButton;
+        }),
+        isTrue,
+      );
+      handle.dispose();
+    });
   });
 
   // ---------------------------------------------------------------- AC1
