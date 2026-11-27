@@ -26,9 +26,9 @@ const storeHomeBodyKey = ValueKey<String>('store_home.body');
 /// The store home: provides one bloc per section and nothing else (Tide).
 ///
 /// - **Sections are independent.** Each section has its own bloc, request
-///   and states. The blocs are created with the page (`lazy: false`), so
-///   every section loads in parallel when the visit starts, also those below
-///   the fold, which a lazy list has not built yet (F-0040 fact 6).
+///   and states. The visit's start reads every bloc (creating it) and adds
+///   its `load`, so every section loads in parallel, also those below the
+///   fold, which a lazy list has not built yet (F-0040 fact 6).
 /// - **The flag decides which sections exist**, read once when the page
 ///   opens: with `store.home_featured` off, the featured section and its bloc
 ///   are never created, so its endpoint is never called.
@@ -57,12 +57,11 @@ class _StoreHomePageState extends State<StoreHomePage> {
     // The only DI lookups in UI code (R17).
     return MultiBlocProvider(
       providers: [
-        BlocProvider(lazy: false, create: (c) => c.di<BannersBloc>()),
-        BlocProvider(lazy: false, create: (c) => c.di<DealsBloc>()),
-        BlocProvider(lazy: false, create: (c) => c.di<CategoriesBloc>()),
-        if (_featured)
-          BlocProvider(lazy: false, create: (c) => c.di<FeaturedBloc>()),
-        BlocProvider(lazy: false, create: (c) => c.di<CartSummaryBloc>()),
+        BlocProvider(create: (c) => c.di<BannersBloc>()),
+        BlocProvider(create: (c) => c.di<DealsBloc>()),
+        BlocProvider(create: (c) => c.di<CategoriesBloc>()),
+        if (_featured) BlocProvider(create: (c) => c.di<FeaturedBloc>()),
+        BlocProvider(create: (c) => c.di<CartSummaryBloc>()),
       ],
       child: _StoreHomeContent(featured: _featured),
     );

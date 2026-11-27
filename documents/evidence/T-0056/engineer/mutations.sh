@@ -29,7 +29,9 @@ CHECK_ONLY="${MC_CHECK_ONLY:-}"
 say() { printf '%s\n' "$*" | tee -a "$LOG"; }
 bz() { tool/bazelw --output_base="$OB" "$@"; }
 
-if [[ -z "$CHECK_ONLY" && -n "$(git status --porcelain)" ]]; then
+# Also in check-only mode: the restore trap checks the files out, which
+# would drop uncommitted work in them.
+if [[ -n "$(git status --porcelain)" ]]; then
   echo "REFUSING TO RUN: the tree is dirty (commit or remove these first):" >&2
   git status --short >&2
   exit 2
@@ -165,7 +167,7 @@ mutate C02 "a double tap asks to sign in twice" "$C" "$T_BDD" \
 mutate C03 "a declined sign-in leaves the section waiting" "$C" "$T_BDD" \
   'if (_session.epoch != _shownEpoch || state is _SigningIn) {' 'if (_session.epoch != _shownEpoch) {'
 mutate C04 "a session change elsewhere is ignored" "$C" "$T_BDD" \
-  'if (_shownEpoch != null && _session.epoch != _shownEpoch) {' 'if (_shownEpoch != null && _session.epoch != _shownEpoch && _shownEpoch == null) {'
+  $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch) {' $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch && _shownEpoch == null) {'
 mutate C05 "pull to refresh asks for the cart while signed out" "$C" "$T_BDD" \
   $'      case _Refresh(:final done):\n        if (_session.isSignedIn) {' $'      case _Refresh(:final done):\n        if (_session.isSignedIn || !_session.isSignedIn) {'
 mutate C06 "signed out still asks for the cart" "$C" "$T_BDD" \
@@ -259,8 +261,8 @@ mutate V02 "the store page starts while hidden (item 2)" "$F/presentation/page/s
   '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true);' '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true;'
 mutate V03 "the store page starts again on every showing (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
   '    if (shown && !_started) {' '    if (shown) {'
-mutate V04 "the cart loads on a session event before the visit starts (item 2)" "$C" "$T_BDD //feature/store/store_home:flow_scope_test" \
-  'if (_shownEpoch != null && _session.epoch != _shownEpoch) {' 'if (_session.epoch != _shownEpoch) {'
+mutate V04 "the cart never follows the session once its visit starts (item 2)" "$C" "$T_BDD" \
+  '        _sessionChanges ??= _session.authState.listen(' '        _sessionChanges ??= const Stream<AuthStatus>.empty().listen('
 mutate V05 "a flow page changed under a popup is never tracked (item 3)" "$R" "$T_AN" \
   '      if (flowPage != null && flowPage != _reported[topRoute]) {' '      if (flowPage != null && flowPage != _reported[topRoute] && flowPage.isEmpty) {'
 mutate V06 "the flow observer depends on the host route (item 4)" "$R" "$T_AN" \

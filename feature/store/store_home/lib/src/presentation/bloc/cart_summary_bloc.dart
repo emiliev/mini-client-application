@@ -49,16 +49,17 @@ final class CartSummaryBloc
         section: StoreSection.cart,
       ) {
     on<CartSummaryEvent>(_onEvent);
-    _sessionChanges = _session.authState.listen(
-      (_) => add(const _SessionChanged()),
-    );
-    // Idle until the page is shown: the page adds `load` (a visit).
+    // Idle until the page is shown: the page adds `load` (a visit), and only
+    // then does the section follow the session.
   }
 
   final StoreHomeRepository _repository;
   final StoreHomeNavigator _navigator;
   final SessionReader _session;
-  late final StreamSubscription<AuthStatus> _sessionChanges;
+
+  /// From the visit's start (the first `load`): a page built under another
+  /// screen does not follow the session, so it loads nothing.
+  StreamSubscription<AuthStatus>? _sessionChanges;
 
   /// The session epoch the section last started to show (loaded, or showed
   /// signed out for). A session event for this same epoch changes nothing.
@@ -70,6 +71,9 @@ final class CartSummaryBloc
   ) async {
     switch (event) {
       case _Load():
+        _sessionChanges ??= _session.authState.listen(
+          (_) => add(const _SessionChanged()),
+        );
         await _show(emit);
       case _Retry():
         if (state is _Failure) {
@@ -82,8 +86,7 @@ final class CartSummaryBloc
           done.complete();
         }
       case _SessionChanged():
-        // Not before the page started the section (`_shownEpoch` is null).
-        if (_shownEpoch != null && _session.epoch != _shownEpoch) {
+        if (_session.epoch != _shownEpoch) {
           await _show(emit);
         }
       case _SignIn():
@@ -158,7 +161,7 @@ final class CartSummaryBloc
   Future<void> close() {
     // Not awaited: a cancel future is made in the root zone and never
     // completes under a widget test's fake async (F-0052 trap 1).
-    unawaited(_sessionChanges.cancel());
+    unawaited(_sessionChanges?.cancel());
     return super.close();
   }
 }
