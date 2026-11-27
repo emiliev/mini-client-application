@@ -21,9 +21,7 @@ choice sheet does not pass the option on: KILLED (FAIL  T-0058-AC2 root and near
 menu default is nearest navigator: KILLED (FAIL  T-0058-AC2 root and nearest navigator T-0058-AC2 a menu: root by default, nearest on request)
 menu ignores the nearest option: KILLED (FAIL  T-0058-AC2 root and nearest navigator T-0058-AC2 a menu: root by default, nearest on request)
 dialog does not name its route: KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a dialog names its route with the title)
-dialog does not scope its route: KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a dialog names its route with the title)
 dialog title is not a heading: KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a dialog names its route with the title)
-dialog route name is empty: KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a dialog names its route with the title)
 dialog accepts any number of actions: KILLED (FAIL  T-0058-AC2 showMcDialog T-0058-AC2 a dialog needs one to three actions)
 dialog does not scroll: KILLED (FAIL  T-0058-AC2 root and nearest navigator T-0058-AC2 a dialog with the nearest navigator stays ins)
 destructive text is not the error colour: KILLED (FAIL  T-0058-AC2 showMcConfirm T-0058-AC2 destructive draws the confirm outlined in the error colour)
@@ -58,6 +56,15 @@ toast action never fires: KILLED (FAIL  T-0058-AC2 toasts T-0058-AC2 the toast a
 toast ignores an explicit duration: KILLED (FAIL  T-0058-AC2 toasts T-0058-AC2 an explicit duration wins)
 tooltip shows on a plain tap: KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a tooltip shows on long press and on hover, and is on the chil)
 tooltip has no message: KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a tooltip shows on long press and on hover, and is on the chil)
+sheet ignores the keyboard: KILLED (FAIL  T-0058-AC1 keyboard T-0058-AC1 the field and the actions stay above a 300 pt keyboard and take)
+handle offered although the sheet is not dismissible: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with isDismissible: false the handle t)
+handle ignores isDismissible: false: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with isDismissible: false the handle t)
+handle ignores enableDrag: false: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with enableDrag: false the handle tap,)
+a standalone sheet has no handle action: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 a standalone McSheet keeps its handle)
+sheet title is read twice (label beside the child text): KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a sheet names its route and has a dismiss label)
+dialog title is read twice (label beside the child text): KILLED (FAIL  T-0058-AC3 semantics T-0058-AC3 a dialog names its route with the title)
+real shadows off in the golden harness: KILLED (FAIL  T-0058-AC1 sheet_default golden light x1)
+choose step matches any text in the sheet again: KILLED (FAIL  T-0058-AC4 I choose {option} in the sheet only taps choice rows)
 choice rows do not line up (no reserved icon slot): KILLED (FAIL  T-0058-AC1 choice_sheet_selected golden light x1)
 dialog corners: KILLED (FAIL  T-0058-AC1 dialog_default golden light x1)
 toast colour: KILLED (FAIL  T-0058-AC1 toast golden light x1)
@@ -75,4 +82,4 @@ sign-in sheet allows a drag while busy: KILLED (FAIL  T-0048-AC6 requestFixtureS
 sign-in sheet answers true on Not now: KILLED (FAIL  T-0048-AC6 requestFixtureSignIn: Not now answers false and sends nothing)
 sign-in sheet keeps Not now enabled while busy: KILLED (FAIL  T-0048-AC6 requestFixtureSignIn: while signing in, the barrier, Back, Not now and a drag do no)
 
-TALLY: killed=72 survived=0 broken=0 not-applied=0 total=72
+TALLY: killed=79 survived=0 broken=0 not-applied=0 total=79

@@ -8,19 +8,19 @@
 | Project | `/tmp/mc-T-0058-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0058-engineer-93863` |
-| Simulator UDID | `E480ABDD-8C2A-4422-8B88-43709CB22B97` |
+| Simulator | `mc-T-0058-engineer-95070` |
+| Simulator UDID | `8A1BAB38-0D64-4340-8343-4D0C5316D1CF` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-27T12:26:43Z |
-| Finished | 2026-11-27T12:29:06Z |
+| Started | 2026-11-27T13:23:25Z |
+| Finished | 2026-11-27T13:26:00Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/reading_list_journey_test.dart` | PASS | 60 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
+| `integration_test/reading_list_journey_test.dart` | PASS | 65 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
 | `integration_test/comics_journey_test.dart` | PASS | 36 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
-| `integration_test/reading_list_deeplink_test.dart` | PASS | 25 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
+| `integration_test/reading_list_deeplink_test.dart` | PASS | 26 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
 
 ## Screenshots
 
