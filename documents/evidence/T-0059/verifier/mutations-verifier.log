@@ -1,0 +1,11 @@
+[0] line zero line: only when min<0 (0 on the axis edge missed): KILLED
+[1] line zero line: only when max>0: KILLED
+[3] line _hasData ignores x label truncation: SURVIVED
+[4] line series truncation removed: KILLED
+[5] resolveAll: previous neighbour ignored: KILLED
+[6] resolveAll: wrap-around ignored (next): KILLED
+[7] donut sweep: minimum never applied: KILLED
+[8] donut sweep: pinned not subtracted: KILLED
+[9] format: negative zero printed: KILLED
+[10] tick: epsilon on floor removed: SURVIVED
+[11] radar vertex: y sign flipped: KILLED

@@ -1,0 +1,72 @@
+Resolving dependencies...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+00:00 +0: loading /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a773738fafc5123b2/utility/mc_ds_charts/test/zz_probe_test.dart
+00:00 +0: probe ticks
+TICKS 0.0..0.0 -> min=0.0 max=1.0 step=0.5 n=3
+TICKS -7.0..3.0 -> min=-10.0 max=5.0 step=5.0 n=4
+TICKS 0.001..0.004 -> min=0.001 max=0.004 step=0.001 n=4
+TICKS 1000000000.0..3000000000.0 -> min=1000000000.0 max=3000000000.0 step=500000000.0 n=5
+00:00 +1: probe donut sweeps
+SWEEP n=4 sumDeg=360.0 minPositive=4.0
+SWEEP n=3 sumDeg=360.0 minPositive=119.99999999999999
+SWEEP n=2 sumDeg=0.0 minPositive=5672.28217179515
+SWEEP n=1 sumDeg=360.0 minPositive=360.0
+SWEEP n=3 sumDeg=360.0 minPositive=4.0
+SWEEP n=90 sumDeg=360.0000000000004 minPositive=4.0
+SWEEP n=40 sumDeg=360.0000000000002 minPositive=4.0
+00:00 +2: probe radar
+RADAR n=3 i=0 -> Offset(100.0, 50.0)
+RADAR n=3 i=1 -> Offset(143.3, 125.0)
+RADAR n=3 i=2 -> Offset(56.7, 125.0)
+RADAR n=5 i=0 -> Offset(100.0, 50.0)
+RADAR n=5 i=1 -> Offset(147.6, 84.5)
+RADAR n=5 i=2 -> Offset(129.4, 140.5)
+RADAR n=8 i=0 -> Offset(100.0, 50.0)
+RADAR n=8 i=1 -> Offset(135.4, 64.6)
+RADAR n=8 i=2 -> Offset(150.0, 100.0)
+00:00 +3: probe bar extents
+BARS [5.0, -3.0, 0.0] zeroY=60.0 rects=[Rect.fromLTRB(15.0, 10.0, 85.0, 60.0), Rect.fromLTRB(115.0, 60.0, 185.0, 90.0), Rect.fromLTRB(215.0, 60.0, 285.0, 60.0)]
+BARS [-2.0, -8.0] zeroY=0.0 rects=[Rect.fromLTRB(22.5, 0.0, 127.5, 25.0), Rect.fromLTRB(172.5, 0.0, 277.5, 100.0)]
+BARS [0.0, 0.0] zeroY=100.0 rects=[Rect.fromLTRB(22.5, 100.0, 127.5, 100.0), Rect.fromLTRB(172.5, 100.0, 277.5, 100.0)]
+BARS [4.0, 10.0] zeroY=100.0 rects=[Rect.fromLTRB(22.5, 60.0, 127.5, 100.0), Rect.fromLTRB(172.5, 0.0, 277.5, 100.0)]
+00:00 +4: probe zero line line chart
+ZERO line [0.0, 5.0, 10.0]: horizontal heavier lines=1 widths={1.0, 1.5}
+ZERO line [-10.0, -5.0, 0.0]: horizontal heavier lines=1 widths={1.0, 1.5}
+ZERO line [0.0, 0.0, 0.0]: horizontal heavier lines=1 widths={1.0, 1.5}
+ZERO line [2.0, 4.0, 6.0]: horizontal heavier lines=0 widths={1.0}
+00:00 +5: probe AC3 release
+HIGHLIGHT data=[A, C, D] idx=1 reports=1
+HIGHLIGHT outlines=1
+bars=3
+DONUT full=[Color(alpha: 1.0000, red: 0.7020, green: 0.0745, blue: 0.1059, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.1098, green: 0.3725, blue: 0.7490, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0431, green: 0.4784, blue: 0.4588, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.5569, green: 0.5569, blue: 0.5961, colorSpace: ColorSpace.sRGB)]
+DONUT dropped=[Color(alpha: 1.0000, red: 0.7020, green: 0.0745, blue: 0.1059, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.0431, green: 0.4784, blue: 0.4588, colorSpace: ColorSpace.sRGB), Color(alpha: 1.0000, red: 0.5569, green: 0.5569, blue: 0.5961, colorSpace: ColorSpace.sRGB)]
+DONUT n=5 arcs=5
+DONUT n=6 arcs=6
+DONUT n=9 arcs=9
+DEBUG errors: [ArgumentError, FlutterError, _AssertionError]
+00:00 +6: probe AC4 semantics
+SEM bar [SUMMARY, Mon: 0, Tue: 0, Wed: 2]
+SEM radar [RAD, S: a 0.5, b 0.2, c 0.9, d 0, e 0]
+00:00 +7: probe contrast
+CONTRAST light surface=Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB) {series1: 6.94, series2: 6.11, series3: 5.18, positive: 5.07, negative: 7.33, neutral: 3.24}
+CONTRAST dark surface=Color(alpha: 1.0000, red: 0.1020, green: 0.1020, blue: 0.1176, colorSpace: ColorSpace.sRGB) {series1: 6.27, series2: 7.17, series3: 9.30, positive: 8.92, negative: 7.73, neutral: 4.21}
+CONTRAST highContrast surface=Color(alpha: 1.0000, red: 1.0000, green: 1.0000, blue: 1.0000, colorSpace: ColorSpace.sRGB) {series1: 10.08, series2: 10.60, series3: 8.48, positive: 10.11, negative: 9.93, neutral: 21.00}
+CONTRAST highContrastDark surface=Color(alpha: 1.0000, red: 0.0000, green: 0.0000, blue: 0.0000, colorSpace: ColorSpace.sRGB) {series1: 12.38, series2: 12.67, series3: 15.77, positive: 17.41, negative: 12.52, neutral: 21.00}
+00:00 +8: probe animation reduce motion
+ANIM transient after reduce-motion off: 0
+00:00 +9: All tests passed!
