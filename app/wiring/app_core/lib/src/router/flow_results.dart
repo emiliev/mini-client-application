@@ -66,6 +66,9 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
       return;
     }
     _pending = (value: result);
+    // Remembered by the call too, so that a result held under an overlay is
+    // not lost when the call ends some other way (P-096).
+    _call?._hold(result);
     _deliver();
   }
 
@@ -104,20 +107,15 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
     if (GoRouter.maybeOf(context) == null) {
       return true;
     }
-    final here = GoRouterState.of(context).uri.toString();
-    final expected = _expectedCalls[here] ?? 0;
-    if (expected > 0) {
-      // This route takes the token, with or without its call.
-      if (expected == 1) {
-        _expectedCalls.remove(here);
-      } else {
-        _expectedCalls[here] = expected - 1;
-      }
-    }
-    if (_call == null && expected > 0) {
+    final state = GoRouterState.of(context);
+    // The call travels as go_router's `extra`: a route pushed with one but
+    // built without it forgot `extra: state.extra`. A route a later `go`
+    // built (a guard's `from=`) has no call in its state, so it is never
+    // mistaken for that.
+    if (_call == null && state.extra is FlowCall) {
       throw FlutterError(
-        'FlowResultRoute at $here was opened through AppFlows but built '
-        'without its FlowCall, so the caller would wait forever.\n'
+        'FlowResultRoute at ${state.uri} was opened through AppFlows but '
+        'built without its FlowCall, so the caller would wait forever.\n'
         'Pass `extra: state.extra` to FlowResultRoute in the route.',
       );
     }
@@ -140,8 +138,10 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
 
   @override
   void dispose() {
-    // Left without a result (Back, a `go` that replaced the route, ...).
-    _call?.complete(null);
+    // Left without a result (Back, a `go` that replaced the route, ...), or
+    // replaced while a result waited under an overlay (P-096): that one is
+    // delivered, not lost.
+    _call?.abandon();
     super.dispose();
   }
 
@@ -165,6 +165,18 @@ final class FlowCall<T> {
   /// Completes with the result of the route.
   Future<T?> get result => _completer.future;
 
+  /// The result the route has but could not hand over yet (an overlay).
+  ({T? value})? _held;
+
+  void _hold(T? value) => _held ??= (value: value);
+
+  /// The route or its page went away without handing a result over: the
+  /// caller gets the result the route held (P-096), else null.
+  void abandon() => complete(_held?.value);
+
+  /// Whether the wait has ended.
+  bool get isCompleted => _completer.isCompleted;
+
   /// Completes the wait; ignored once completed.
   void complete(T? value) {
     if (!_completer.isCompleted) {
@@ -173,29 +185,77 @@ final class FlowCall<T> {
   }
 }
 
-/// Locations [AppFlows] opened and whose route has not yet shown its call
-/// (debug only; see `_debugCheckCall`).
-final Map<String, int> _expectedCalls = <String, int>{};
-
-/// go_router's `extraCodec` for the app: a [FlowCall] is **transient** (a
-/// live future can't be saved), so it encodes as null and decodes as no call,
-/// and go_router doesn't warn on every push that it can't serialise it. Any
-/// other extra passes through unchanged.
+/// go_router's `extraCodec` for the app: what of a route's `extra` survives a
+/// save of the route state (the iOS route report).
+///
+/// - A [FlowCall] is **transient** (a live future can't be saved): it encodes
+///   as null and decodes as no call.
+/// - A JSON-safe value (null, bool, finite num, String, and Lists and Maps
+///   with String keys of those) passes through unchanged.
+/// - **Anything else is dropped** (saved as null, so decoded as null) with a
+///   debug-only warning naming its type, once per type. It never throws: with
+///   no codec go_router would throw `JsonUnsupportedObjectError` for it in
+///   the engine's route report.
+///
+/// So a route that reads `state.extra` treats null as "no argument".
 final class FlowExtraCodec extends Codec<Object?, Object?> {
   const FlowExtraCodec();
 
   @override
-  Converter<Object?, Object?> get encoder => const _FlowExtraConverter();
+  Converter<Object?, Object?> get encoder => const _FlowExtraConverter(true);
 
   @override
-  Converter<Object?, Object?> get decoder => const _FlowExtraConverter();
+  Converter<Object?, Object?> get decoder => const _FlowExtraConverter(false);
 }
 
+/// Types the codec already warned about (debug only).
+final Set<Type> _warnedExtraTypes = <Type>{};
+
+/// Forgets which extra types were warned about, so a test sees the warning.
+@visibleForTesting
+void resetFlowExtraWarnings() => _warnedExtraTypes.clear();
+
 class _FlowExtraConverter extends Converter<Object?, Object?> {
-  const _FlowExtraConverter();
+  const _FlowExtraConverter(this._encoding);
+
+  final bool _encoding;
 
   @override
-  Object? convert(Object? input) => input is FlowCall ? null : input;
+  Object? convert(Object? input) {
+    if (input == null || input is FlowCall) {
+      return null;
+    }
+    if (_isJsonSafe(input, 0)) {
+      return input;
+    }
+    assert(() {
+      if (_encoding && _warnedExtraTypes.add(input.runtimeType)) {
+        debugPrint(
+          'FlowExtraCodec: dropping a route extra of type '
+          '${input.runtimeType} when the route state is saved. Only JSON-safe '
+          'values (null, bool, num, String, List, Map<String, ...>) are kept; '
+          'the route sees null after a restore.',
+        );
+      }
+      return true;
+    }());
+    return null;
+  }
+
+  static bool _isJsonSafe(Object? value, int depth) {
+    if (depth > 32) {
+      return false;
+    }
+    return switch (value) {
+      null || bool() || String() => true,
+      final num n => n.isFinite,
+      final List<Object?> list => list.every((e) => _isJsonSafe(e, depth + 1)),
+      final Map<Object?, Object?> map => map.entries.every(
+        (e) => e.key is String && _isJsonSafe(e.value, depth + 1),
+      ),
+      _ => false,
+    };
+  }
 }
 
 /// The flows that end with a result, as typed entries: push the route and
@@ -214,26 +274,73 @@ abstract final class AppFlows {
   static Future<String?> editReadingList(GoRouter router, String id) =>
       _open(router, AppLocations.editReadingList(id));
 
-  /// Pushes [location] and waits for the route's [FlowCall], which always
-  /// completes (see [FlowResultRoute]).
+  /// Pushes [location] and waits for a [FlowCall], which completes exactly
+  /// once, whatever happens to the push (see [FlowResultRoute]):
+  ///
+  /// - the route ends with a result, or is disposed (it completes the call);
+  /// - the push's own future completes (a pop; also of a page a redirect
+  ///   showed instead of the route);
+  /// - a `go` replaces the pushed page, even one a redirect sent elsewhere
+  ///   (go_router never completes the push then): the router's stack is
+  ///   watched for the page, and the call completes (with a result the route
+  ///   still held, else null) once the page is gone. The check runs after the
+  ///   next frame, so a route holding a result under an overlay is not cut
+  ///   short.
+  ///
+  /// The page is found by its push future: a redirect drops the `extra`, but
+  /// the match keeps the completer that the push returned.
   static Future<String?> _open(GoRouter router, String location) {
     final call = FlowCall<String>();
-    assert(() {
-      final key = Uri.parse(location).toString();
-      _expectedCalls[key] = (_expectedCalls[key] ?? 0) + 1;
-      unawaited(
-        call.result.whenComplete(() {
-          final left = (_expectedCalls[key] ?? 1) - 1;
-          if (left <= 0) {
-            _expectedCalls.remove(key);
-          } else {
-            _expectedCalls[key] = left;
-          }
-        }),
-      );
-      return true;
-    }());
-    unawaited(router.push<String>(location, extra: call).then(call.complete));
+    final delegate = router.routerDelegate;
+    late final Future<String?> push;
+    var seen = false;
+    void check() {
+      if (call.isCompleted) {
+        return;
+      }
+      if (_stackHolds(delegate.currentConfiguration, push)) {
+        seen = true;
+      } else if (seen) {
+        call.abandon();
+      }
+    }
+
+    void onChange() {
+      WidgetsBinding.instance
+        ..addPostFrameCallback((_) => check())
+        ..scheduleFrame();
+    }
+
+    // Listening before the push: the router may apply it at once.
+    delegate.addListener(onChange);
+    unawaited(
+      call.result.whenComplete(() => delegate.removeListener(onChange)),
+    );
+    push = router.routeInformationProvider.push<String>(
+      location,
+      base: delegate.currentConfiguration,
+      extra: call,
+    );
+    unawaited(push.then(call.complete));
+    onChange();
     return call.result;
+  }
+
+  /// Whether the page [push] returned the future of is in [list]'s stack.
+  static bool _stackHolds(RouteMatchList list, Future<Object?> push) {
+    bool within(List<RouteMatchBase> matches) {
+      for (final match in matches) {
+        if (match is ImperativeRouteMatch &&
+            identical(match.completer.future, push)) {
+          return true;
+        }
+        if (match is ShellRouteMatch && within(match.matches)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    return within(list.matches);
   }
 }

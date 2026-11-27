@@ -1,4 +1,6 @@
+import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
 
@@ -6,6 +8,9 @@ import 'package:mc_ds_layout/mc_ds_layout.dart';
 const newReadingListKey = Key('home.reading_list.new');
 const readingListResultKey = Key('home.reading_list.result');
 const editReadingListKey = Key('home.reading_list.edit');
+
+/// The not-found screen's "Go home" button.
+const notFoundHomeKey = Key('not.found.home');
 
 /// The home placeholder until the discovery features exist (P1-17+).
 ///
@@ -167,19 +172,46 @@ class PlaceholderDetailPage extends StatelessWidget {
   }
 }
 
-/// Unknown paths (plan 01 §4.2 "Unknown paths go to … not-found page").
+/// Unknown paths and bad ids (plan 01 §4.2 "Unknown paths go to … not-found
+/// page"). It always has a way home (T-0054, P-097): Back pops when something
+/// is below, and goes home when not; "Go home" goes home.
 class NotFoundPage extends StatelessWidget {
   const NotFoundPage({required this.location, super.key});
 
   final String location;
 
+  void _home(BuildContext context) =>
+      GoRouter.of(context).go(AppLocations.home);
+
   @override
   Widget build(BuildContext context) => Scaffold(
     key: const Key('not.found'),
-    appBar: AppBar(title: const Text('Not found')),
+    appBar: AppBar(
+      title: const Text('Not found'),
+      leading: BackButton(
+        onPressed: () {
+          if (GoRouter.of(context).canPop()) {
+            GoRouter.of(context).pop();
+          } else {
+            _home(context);
+          }
+        },
+      ),
+    ),
     body: Padding(
       padding: McInsets.screen,
-      child: Text('Nothing lives at $location'),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Nothing lives at $location'),
+          const McGap.lg(),
+          McButton(
+            key: notFoundHomeKey,
+            label: 'Go home',
+            onPressed: () => _home(context),
+          ),
+        ],
+      ),
     ),
   );
 }
