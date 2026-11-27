@@ -1,0 +1,17 @@
+==> Removing the previous run's e2e outputs from /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/retry
+==> Task T-0055, role verifier, project /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+==> Evidence dir: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/retry
+==> Creating simulator mc-T-0055-verifier-39039 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0055-verifier-39039
+SIMULATOR_UDID=27E16CB9-0A6E-4C7D-87A4-69772CC22A2D
+SIMULATOR_CREATED_AT=1795778852
+==> Booting 27E16CB9-0A6E-4C7D-87A4-69772CC22A2D
+==> Booted in 21 s
+==> Running target 1/1: integration_test/zz_good_test.dart
+==>   $ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/fake.sh retry integration_test/zz_good_test.dart
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/retry/e2e-zz_good_test.log
+==> PASS integration_test/zz_good_test.dart (1 s)
+==> Summary: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/retry/e2e-summary.md
+==> RESULT: PASS (1 target(s))
+==> Deleted simulator mc-T-0055-verifier-39039 (27E16CB9-0A6E-4C7D-87A4-69772CC22A2D)
+SIMULATOR_DELETED_AT=1795778877

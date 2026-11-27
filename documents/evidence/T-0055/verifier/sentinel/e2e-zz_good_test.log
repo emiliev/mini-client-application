@@ -1,0 +1,10 @@
+# e2e_ios.sh: T-0055 verifier on mc-T-0055-verifier-40445 (F7B68A8D-ADE6-433F-AC2E-DE30BD932F62)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.dXtidP/screenshots/1-zz_good_test
+$ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/fake.sh ok 'BUILD FAILED Error (Xcode)' integration_test/zz_good_test.dart
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient; kept build/ios/iphonesimulator (custom runner or --keep-build)
+# --- runner output ---
+ok
+
+# exit code: 0
