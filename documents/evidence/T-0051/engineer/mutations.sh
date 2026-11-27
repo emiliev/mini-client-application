@@ -133,7 +133,6 @@ mutate "L13 an emptied cart keeps its codes" $CH '// An empty cart carries no co
 mutate "V1 quantity 100 allowed" $CH 'quantity > maxQuantity)' 'quantity > maxQuantity + 1)'
 mutate "V2 quantity -1 allowed" $CH 'quantity < 0 ||' 'quantity < -1 ||'
 mutate "V3 the maximum quantity constant is 100" $PR 'const int maxQuantity = 99;' 'const int maxQuantity = 100;'
-mutate "V4 a non-integer quantity is not checked" $CH 'quantity is! int ||' 'quantity == null ||'
 mutate "V5 stock off by one" $CH 'quantity > product.stock) {' 'quantity >= product.stock) {'
 mutate "V6 stock not checked" $CH 'quantity > product.stock) {' 'quantity > product.stock + 1000) {'
 mutate "V7 unknown_product answers 400" $CH "404,
@@ -164,16 +163,16 @@ mutate "V19 fixed-off applies below its minimum" $CH '_price(cart, catalogue).be
 mutate "V20 fixed-off minimum checked on the subtotal" $CH '_price(cart, catalogue).beforeFixedCents < promo.minSubtotalCents' '_price(cart, catalogue).subtotalCents < promo.minSubtotalCents'
 mutate "V21 DELETE with a code removes every code" $CH 'if (raw == null) {' 'if (raw == null || raw.isNotEmpty) {'
 mutate "V22 DELETE of a code that is not applied succeeds" $CH 'if (!cart.promotions.remove(promo)) {' 'if (cart.promotions.remove(promo) && cart.promotions.length > 100) {'
-mutate "V23 no bearer needed (falls back to the first user)" $CH "final user = userForAuthorization(request.headers['authorization']);" "final user =
-      userForAuthorization(request.headers['authorization']) ??
-      fixtureUsers.first;"
+mutate "V23 no bearer needed (falls back to the first user)" $CH '  return user == null ? _unauthenticated() : body(user, request, context);' "  return user == null && request.method == 'NOPE'
+      ? _unauthenticated()
+      : body(user ?? fixtureUsers.first, request, context);"
 mutate "V24 the Authorization header is never read" $CH "request.headers['authorization']" "request.headers['x-authorization']"
 mutate "V25 unauthenticated answers 403" $CH "401,
   'unauthenticated'," "403,
   'unauthenticated',"
 mutate "V26 every user shares one cart" $CH 'return carts.putIfAbsent(userId, Cart.new);' "return carts.putIfAbsent('shared', Cart.new);"
 mutate "V27 the empty store shares the default carts" $CH "const String _emptyCartsKey = 'commerce.carts.empty';" "const String _emptyCartsKey = 'commerce.carts';"
-mutate "V28 carts do not persist (rebuilt per request)" $CH 'final carts = (context.store[key] ??= <String, Cart>{}) as Map<String, Cart>;' 'final carts = <String, Cart>{};'
+mutate "V28 carts do not persist (rebuilt per request)" $CH 'final carts = (context.store[key] ??= <String, Cart>{}) as Map<String, Cart>;' "final carts = (context.store['\$key.\${DateTime.now().microsecondsSinceEpoch}'] ??= <String, Cart>{}) as Map<String, Cart>;"
 mutate "V29 unknown_category answers 200" $SH 'if (catalogue.category(id) == null) {' 'if (catalogue.category(id) == null && id.isEmpty) {'
 # --- store sections and paging ---------------------------------------------
 mutate "S1 the page limit allows 101" $SH 'const int maxLimit = 100;' 'const int maxLimit = 101;'
@@ -191,10 +190,12 @@ mutate "S10 a deal product can be sold out" $CA 'const List<int> dealPositions =
 mutate "S11 five categories" $CA 'categoryDefs.length].id' '5].id'
 mutate "S12 a product id is not its comic id" $CA 'id: comic.id,' 'id: comic.id + 1,'
 mutate "S13 a product title differs from its comic" $CA 'title: comic.title,' "title: '\${comic.title}!',"
-mutate "S14 prices ignore the seed" $CA "final rng = random.fork('\${comic.id}');" "final rng = SplitMix64(1).fork('\${comic.id}');"
+mutate "S14 prices ignore the seed" $CA "final random = SplitMix64(seed).fork('commerce')" "final random = SplitMix64(1).fork('commerce')"
 mutate "S15 prices span a different range" $CA '299 + rng.nextInt(1701)' '299 + rng.nextInt(1800)'
 mutate "S16 the large stock is below 99" $CA 'const int plentyStock = 120;' 'const int plentyStock = 90;'
-mutate "S17 nothing is sold out" $CA 'const int outOfStockModulus = 11;' 'const int outOfStockModulus = 100000;'
+mutate "S17 the sold-out products move" $CA 'const int outOfStockRemainder = 5;' 'const int outOfStockRemainder = 6;'
+mutate "S18 the deals move" $CA 'const List<int> dealPositions = [7, 48,' 'const List<int> dealPositions = [7, 49,'
+mutate "S19 the featured products move" $CA 'const List<int> featuredPositions = [3, 56,' 'const List<int> featuredPositions = [3, 57,'
 # --- scenarios and fixture sets ---------------------------------------------
 mutate "X1 store.deals_error also fails banners" $DOM "'deals': ['GET /v1/store/deals']," "'deals': ['GET /v1/store/deals', 'GET /v1/store/banners'],"
 mutate "X2 a section set fails nothing" $DOM 'for (final route in commerceSections[section]!)' 'for (final route in commerceSections[section]!.skip(1))'

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_commerce/mc_fixtures_commerce.dart';
 
 import 'support.dart';
@@ -264,6 +265,51 @@ void main() {
       ]) {
         expect((await getJson(dio, path)).statusCode, 200, reason: path);
       }
+    });
+  });
+
+  group('T-0051-AC2 the documented facts of the default set', () {
+    test('T-0051-AC2: stock, deals and featured sit at the positions CONTRACT.md names', () async {
+      final dio = jsonDio(commerceBackend());
+      final products = await loadProducts(dio);
+      // The catalogue in comic title order: issues 1 to 3 of every series.
+      final order = [
+        for (final c in ComicUniverse(42).byTitle)
+          if (c.issueNumber <= 3) c.id,
+      ];
+      expect(order, hasLength(360));
+      expect(products.keys.toSet(), order.toSet());
+      for (var k = 0; k < order.length; k++) {
+        final stock = products[order[k]]!.stock;
+        if (k % 11 == 5) {
+          expect(stock, 0, reason: 'position $k is sold out');
+        } else if (k % 7 == 0) {
+          expect(stock, 120, reason: 'position $k has plenty');
+        } else {
+          expect(stock, inInclusiveRange(3, 40), reason: 'position $k');
+        }
+        expect(products[order[k]]!.listCents, inInclusiveRange(299, 1999));
+      }
+      final deals =
+          ((await getJson(dio, '/v1/store/deals')).data!['deals']! as List)
+              .cast<Json>();
+      expect(
+        [for (final d in deals) (d['product']! as Json)['id']],
+        [
+          for (final k in const [7, 48, 89, 130, 171, 212, 253, 294]) order[k],
+        ],
+      );
+      final featured =
+          ((await getJson(dio, '/v1/store/featured')).data!['products']!
+                  as List)
+              .cast<Json>();
+      expect(
+        [for (final p in featured) p['id']],
+        [
+          for (final k in const [3, 56, 109, 162, 215, 268]) order[k],
+        ],
+      );
+      expect(order.first, 500060, reason: 'Amber Chronicles #1 is first');
     });
   });
 

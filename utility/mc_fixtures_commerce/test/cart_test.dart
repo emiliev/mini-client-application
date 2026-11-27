@@ -364,6 +364,85 @@ void main() {
     });
   });
 
+  group('T-0051-AC3 the stacking order through the API', () {
+    /// A product and quantity whose subtotal is in [low, high).
+    (ProductView, int) _basket(
+      Map<int, ProductView> products,
+      int low,
+      int high,
+    ) {
+      for (final p in products.values) {
+        if (p.listCents != p.unitCents) {
+          continue;
+        }
+        for (var q = 1; q <= min(p.stock, 20); q++) {
+          if (p.unitCents * q >= low && p.unitCents * q < high) {
+            return (p, q);
+          }
+        }
+      }
+      fail('no product for $low..$high');
+    }
+
+    test('T-0051-AC3: a fixed code stops being eligible once a percent code takes the total below its minimum', () async {
+      final dio = jsonDio(commerceBackend());
+      final products = await loadProducts(dio);
+      // A subtotal of 2,500 to 3,332: SAVE25 leaves under 2,500.
+      final (product, quantity) = _basket(products, 2500, 3333);
+      await putQuantity(dio, product.id, quantity);
+      final withFixed = (await applyCode(dio, 'TAKE5')).data!;
+      expect(withFixed['discountCents'], 500);
+      final stacked = (await applyCode(dio, 'SAVE25')).data!;
+      _expectMatchesOracle(stacked, products);
+      final byCode = {
+        for (final p in (stacked['promotions']! as List).cast<Json>())
+          p['code']! as String: p,
+      };
+      expect(byCode['TAKE5']!['eligible'], isFalse);
+      expect(byCode['TAKE5']!['discountCents'], 0);
+      expect(byCode['SAVE25']!['eligible'], isTrue);
+      expect(stacked['discountCents'], byCode['SAVE25']!['discountCents']);
+    });
+
+    test('T-0051-AC3: the minimum of a fixed code is checked after the percent code already on the cart', () async {
+      final dio = jsonDio(commerceBackend());
+      final products = await loadProducts(dio);
+      final (product, quantity) = _basket(products, 2500, 3333);
+      await putQuantity(dio, product.id, quantity);
+      expect((await applyCode(dio, 'SAVE25')).statusCode, 200);
+      final refused = await applyCode(dio, 'TAKE5');
+      expect(refused.statusCode, 409);
+      expect((refused.data!['error']! as Json)['reason'], 'minimum_not_met');
+      // Without the percent code the same cart qualifies.
+      await call<Json>(
+        dio,
+        'DELETE',
+        '/v1/me/cart/promo',
+        headers: bearer(reader),
+      );
+      expect((await applyCode(dio, 'TAKE5')).statusCode, 200);
+    });
+
+    test('T-0051-AC3: buy-2-get-1 is not eligible below three units and eligible from three', () async {
+      final dio = jsonDio(commerceBackend());
+      final products = await loadProducts(dio);
+      final heroes = inCategory(products, 'heroes', minStock: 3).first;
+      await putQuantity(dio, heroes.id, 2);
+      var promo =
+          ((await applyCode(dio, 'HEROES3')).data!['promotions']! as List)
+              .cast<Json>()
+              .single;
+      expect(promo['eligible'], isFalse);
+      expect(promo['discountCents'], 0);
+      promo =
+          ((await putQuantity(dio, heroes.id, 3)).data!['promotions']! as List)
+              .cast<Json>()
+              .single;
+      expect(promo['eligible'], isTrue);
+      expect(promo['discountCents'], heroes.unitCents);
+    });
+  });
+
   group('T-0051-AC3 cart lines', () {
     test('T-0051-AC3: a line holds the quantity it was last set to; 0 removes it; lines keep their order', () async {
       final dio = jsonDio(commerceBackend());
