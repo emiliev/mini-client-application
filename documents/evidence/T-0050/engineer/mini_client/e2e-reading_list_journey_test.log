@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0050 engineer on mc-T-0050-engineer-30943 (5F5474D2-E02F-4C13-BC45-1626F9CAE3E5)
+# e2e_ios.sh: T-0050 engineer on mc-T-0050-engineer-16651 (FA1D4011-3EB2-44E9-BDA4-B79B28A3F89D)
 # cwd: /tmp/mc-T-0050-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_journey_test.dart -d 5F5474D2-E02F-4C13-BC45-1626F9CAE3E5
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_journey_test.dart -d FA1D4011-3EB2-44E9-BDA4-B79B28A3F89D
 
 Resolving dependencies in `/private/tmp/mc-T-0050-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0050-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           13.9s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:53248/HHXJgfTRUWI=/
-VMServiceFlutterDriver: Isolate found with number: 2811147166570999
-VMServiceFlutterDriver: Isolate 2811147166570999 is runnable.
+Xcode build done.                                           10.0s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58265/EA6u7g3PZJs=/
+VMServiceFlutterDriver: Isolate found with number: 7608276186442383
+VMServiceFlutterDriver: Isolate 7608276186442383 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0048-AC5 home to a new reading list in three steps, and home shows the id the editor returned
@@ -54,13 +54,13 @@ flutter: [debug] POST /v1/me/lists -> 201
 flutter: [debug] ReadingListEditorBloc: _WizardChanged _Editing -> _Editing
 flutter: 00:16 +1: (tearDownAll)
 flutter: 00:16 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/30_home_new_reading_list.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/31_sign_in_sheet.png (250325)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/32_step1_blocked.png (255429)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/33_step1_details.png (259356)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/34_step2_comics.png (371585)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/35_step3_review.png (309452)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.whRiyE/screenshots/7-reading_list_journey_test/36_home_list_created.png (327520)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/30_home_new_reading_list.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/31_sign_in_sheet.png (250325)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/32_step1_blocked.png (255429)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/33_step1_details.png (259356)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/34_step2_comics.png (371585)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/35_step3_review.png (309452)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.daiPa6/screenshots/7-reading_list_journey_test/36_home_list_created.png (327520)
 All tests passed.
 
 # exit code: 0
