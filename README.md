@@ -1,5 +1,7 @@
 # mini-client
 
+[![CI](https://github.com/emiliev/mini-client-application/actions/workflows/ci.yml/badge.svg)](https://github.com/emiliev/mini-client-application/actions/workflows/ci.yml)
+
 An enterprise Marvel app in the Tide "Project Miniclient" architecture, built with Bazel. Project knowledge lives in [`documents/`](documents/README.md); agents start with [`CLAUDE.md`](CLAUDE.md).
 
 ## Developing

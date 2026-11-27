@@ -52,3 +52,6 @@ app/**/assets/app_config.json
 **/ios/Podfile
 **/ios/Podfile.lock
 .metadata
+
+# CI logs written by tool/ci/ci.sh in the workflow (T-0068)
+ci-logs/

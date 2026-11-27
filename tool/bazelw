@@ -11,10 +11,16 @@
 #
 # `--budget16` is recognised only among the startup options, before the
 # command; anything after the command (or after `--`) is passed through as is.
-# Override the bazelisk path with MC_BAZELISK=/path/to/bazelisk.
+# Override the bazelisk path with MC_BAZELISK=/path/to/bazelisk. Without it, a bazelisk on PATH is
+# used when the Homebrew one is missing (clean CI runner, T-0068).
 set -euo pipefail
 
+# Default: the unlinked Homebrew bazelisk. On a clean machine (CI) it is not there, so fall back
+# to a `bazelisk` on PATH (never bare `bazel`, which may not be bazelisk, F-0006).
 BAZELISK="${MC_BAZELISK:-/opt/homebrew/opt/bazelisk/bin/bazelisk}"
+if [[ -z "${MC_BAZELISK:-}" && ! -x "$BAZELISK" ]] && command -v bazelisk >/dev/null 2>&1; then
+  BAZELISK="$(command -v bazelisk)"
+fi
 if [[ ! -x "$BAZELISK" ]]; then
   echo "tool/bazelw: bazelisk not found at $BAZELISK." >&2
   echo "  Install it with 'brew install bazelisk' (it stays unlinked next to the bazel formula)," >&2

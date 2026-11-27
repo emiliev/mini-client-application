@@ -61,3 +61,13 @@ Every delivery runs the same gates as the TL's merge gate, on a clean machine. A
 
 ## Log
 - 2026-11-27: Created and dispatched (TL). The PO asked for it urgently and chose macOS with caching, triggered on `main` + `fleet/**` + PRs + manual runs. It runs as a 4th concurrent agent (above the usual 3) because it is urgent and small. Checked first: the keychain token has the `workflow` scope, and Actions is enabled with all actions allowed.
+- 2026-11-27 (Engineer): Wrote `tool/ci/ci.sh` (10 gates, per-gate time table), `.github/workflows/ci.yml`, made `tool/bazelw` (bazelisk on PATH fallback) and `format_gate.sh` (`MC_DART`) portable, added the `tool/README.md` section, README badge, `ci-logs/` ignore and F-0068.
+  - AC1: fresh clone of the branch in `/tmp`, own output base, empty `--disk_cache` and `--repository_cache`: all 10 gates PASS in 341 s (test 251, sim build 67, the rest 1 to 5 s each). Warm disk cache with a new output base: 49 s. 223 tests pass.
+  - AC2: `actionlint` clean; actions pinned to SHAs (checkout v7.0.1, cache v6.1.0, upload-artifact v7.0.2).
+  - AC5: lockfiles unchanged (clean `git status` after the run); `--config=ci` has `--lockfile_mode=error`.
+  - AC3 and AC4 need the TL's push; pending.
+
+## Outcome
+Implemented and proven locally (AC1, AC2, AC5). Cache sizes: repository 3.5 GB, disk 1.3 GB, bazelisk 0.2 GB. AC3 (cold and warm GitHub runs) and AC4 (failing-test branch) are waiting for the TL push; the GitHub durations go in F-0068 after that. Details: [F-0068](../findings/F-0068-ci-github-actions.md).
+- 2026-11-27 (Engineer): CI run 1 failed at the format gate (`sky_engine` missing in a fresh Flutter clone). Fixed: `MC_PUB_GET=flutter pub get` in the workflow and gate, plus `flutter precache --universal` after the clone or cache restore. Verified with a fresh local clone; see F-0068.
+- 2026-11-27 (Engineer): Merged origin/main (T-0065) and added gate 6, `tool/mcgen` (`pub get` in `tool/loc` and `tool/mcgen`, `dart analyze --fatal-infos`, `dart test`, 96 tests): PASS locally with `fvm` (27 s) and in CI mode (`MC_DART=dart`, online pub get, 18 s). Gates 7 to 11 are the former 6 to 10.
