@@ -1,0 +1,231 @@
+// VERIFIER PROBE for T-0053 (not part of the tree).
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_analytics/mc_analytics.dart';
+import 'package:mc_analytics/src/consent_store.dart';
+import 'package:mc_storage/mc_storage.dart';
+
+import 'support.dart';
+
+String s(int n) => 'x' * n;
+Map<String, Object> params(int n) => {for (var i = 0; i < n; i++) 'p$i': i};
+
+void main() {
+  group('PROBE AC1', () {
+    for (final c in [AnalyticsConsent.unknown, AnalyticsConsent.denied]) {
+      test('$c delivers 0 across track/screen/userprop', () async {
+        final r = Rig(consent: c);
+        r.analytics.track(const AnalyticsEvent('a'));
+        r.analytics.screen('home');
+        r.analytics.setUserProperty('k', 'v');
+        await settle();
+        expect(r.sink.records, isEmpty);
+      });
+    }
+    test('unknown -> granted flush in order with session+seq', () async {
+      final r = Rig(consent: AnalyticsConsent.unknown);
+      final sid = r.analytics.sessionId;
+      r.analytics.track(const AnalyticsEvent('a'));
+      r.analytics.screen('home');
+      r.analytics.setUserProperty('k', 1);
+      r.analytics.track(const AnalyticsEvent('b'));
+      await settle();
+      expect(r.sink.records, isEmpty);
+      await r.analytics.setConsent(AnalyticsConsent.granted);
+      await settle();
+      final recs = r.sink.records;
+      expect(recs.length, 5);
+      expect(recs.map((e) => e.seq), [1, 2, 3, 4, 5]);
+      expect(recs.every((e) => e.sessionId == sid), isTrue);
+      expect((recs[0] as AnalyticsEventRecord).name, 'mc_session_start');
+      expect((recs[1] as AnalyticsEventRecord).name, 'a');
+      expect((recs[2] as AnalyticsEventRecord).params['screen_name'], 'home');
+      expect((recs[3] as AnalyticsUserPropertyRecord).key, 'k');
+      expect((recs[4] as AnalyticsEventRecord).name, 'b');
+    });
+    test('unknown -> denied discards, later grant brings nothing', () async {
+      final r = Rig(consent: AnalyticsConsent.unknown);
+      r.analytics.track(const AnalyticsEvent('a'));
+      await r.analytics.setConsent(AnalyticsConsent.denied);
+      await settle();
+      await r.analytics.setConsent(AnalyticsConsent.granted);
+      await settle();
+      expect(r.sink.records, isEmpty);
+      expect(r.analytics.bufferedCount, 0);
+    });
+    test('buffer 100 / 101', () async {
+      for (final extra in [99, 100]) {
+        final r = Rig(consent: AnalyticsConsent.unknown);
+        for (var i = 0; i < extra; i++) {
+          r.analytics.track(AnalyticsEvent('e$i'));
+        }
+        await r.analytics.setConsent(AnalyticsConsent.granted);
+        await settle();
+        if (extra == 99) {
+          expect(r.sink.records.length, 100);
+          expect(
+            (r.sink.records.first as AnalyticsEventRecord).name,
+            'mc_session_start',
+          );
+          expect(r.analytics.droppedCount, 0);
+        } else {
+          expect(r.sink.records.length, 100);
+          expect((r.sink.records.first as AnalyticsEventRecord).name, 'e0');
+          expect(
+            r.sink.records.map((e) => e.seq).toList(),
+            List.generate(100, (i) => i + 1),
+          );
+          expect(r.analytics.droppedCount, 1);
+        }
+      }
+    });
+    test('same-turn denied both orders', () async {
+      var r = Rig(consent: AnalyticsConsent.granted);
+      await settle();
+      r.sink.clear();
+      r.analytics.track(const AnalyticsEvent('a'));
+      r.analytics.setConsent(AnalyticsConsent.denied);
+      await settle();
+      expect(r.sink.records, isEmpty);
+      r = Rig(consent: AnalyticsConsent.granted);
+      await settle();
+      r.sink.clear();
+      r.analytics.setConsent(AnalyticsConsent.denied);
+      r.analytics.track(const AnalyticsEvent('a'));
+      await settle();
+      expect(r.sink.records, isEmpty);
+    });
+    test('persist over a real directory; damaged reads unknown', () async {
+      final dir = Directory.systemTemp.createTempSync('probe');
+      addTearDown(() => dir.deleteSync(recursive: true));
+      final store = ConsentStore(FileStore(dir));
+      expect(
+        await store.restore(AnalyticsConsent.granted),
+        AnalyticsConsent.granted,
+      );
+      await store.save(AnalyticsConsent.denied);
+      expect(
+        await ConsentStore(FileStore(dir)).restore(AnalyticsConsent.granted),
+        AnalyticsConsent.denied,
+      );
+      final files = dir.listSync(recursive: true).whereType<File>().toList();
+      expect(files, isNotEmpty);
+      for (final f in files) {
+        f.writeAsStringSync('garbage\u0000{{');
+      }
+      expect(
+        await ConsentStore(FileStore(dir)).restore(AnalyticsConsent.granted),
+        AnalyticsConsent.unknown,
+      );
+    });
+    test('reset under granted delivers queued + new session; unknown drops',
+        () async {
+      var r = Rig(consent: AnalyticsConsent.granted);
+      await settle();
+      r.sink.clear();
+      final old = r.analytics.sessionId;
+      r.analytics.track(const AnalyticsEvent('signed_out'));
+      r.analytics.reset();
+      await settle();
+      expect(r.analytics.sessionId, isNot(old));
+      final names = r.sink.events
+          .map((e) => '${e.sessionId == old}:${e.name}')
+          .toList();
+      expect(names, ['true:signed_out', 'false:mc_session_start']);
+      expect(r.sink.events.map((e) => e.seq), [2, 1]); // old session had mc_session_start as seq 1
+      r = Rig(consent: AnalyticsConsent.unknown);
+      r.analytics.track(const AnalyticsEvent('x'));
+      r.analytics.reset();
+      expect(r.analytics.bufferedCount, 1);
+      await r.analytics.setConsent(AnalyticsConsent.granted);
+      await settle();
+      expect(r.sink.events.map((e) => e.name), ['mc_session_start']);
+    });
+  });
+
+  group('PROBE AC2', () {
+    test('boundaries (debug throws)', () {
+      final a = Rig().analytics;
+      a.track(AnalyticsEvent(s(40)));
+      expect(() => a.track(AnalyticsEvent(s(41))), throwsAssertionError);
+      expect(() => a.track(const AnalyticsEvent('Bad')), throwsAssertionError);
+      expect(() => a.track(const AnalyticsEvent('a-b')), throwsAssertionError);
+      expect(() => a.track(const AnalyticsEvent('')), throwsAssertionError);
+      expect(() => a.track(const AnalyticsEvent('a__b')), throwsAssertionError);
+      a.track(AnalyticsEvent('ok', params: params(25)));
+      expect(
+        () => a.track(AnalyticsEvent('ok', params: params(26))),
+        throwsAssertionError,
+      );
+      a.track(AnalyticsEvent('ok', params: {'k': s(100)}));
+      expect(
+        () => a.track(AnalyticsEvent('ok', params: {'k': s(101)})),
+        throwsAssertionError,
+      );
+      for (final n in ['mc_x', 'ga_x', 'firebase_x', 'google_x']) {
+        expect(() => a.track(AnalyticsEvent(n)), throwsAssertionError);
+      }
+      for (final k in ['session_id', 'seq', 'screen_name']) {
+        expect(
+          () => a.track(AnalyticsEvent('ok', params: {k: 1})),
+          throwsAssertionError,
+        );
+      }
+      a.screen('home', params: params(24));
+      expect(() => a.screen('home', params: params(25)), throwsAssertionError);
+    });
+    test('release: dropped, reported once each', () async {
+      final r = Rig(debugMode: false);
+      await settle();
+      r.sink.clear();
+      r.analytics.track(AnalyticsEvent('Bad', params: params(30)));
+      r.analytics.screen('home', params: params(25));
+      r.analytics.setUserProperty('Bad Key', s(200));
+      await settle();
+      expect(r.sink.records, isEmpty);
+      expect(r.errors.length, 3);
+    });
+  });
+
+  group('PROBE AC3', () {
+    test('rotation 29:59 / 30:00; seq no gaps', () async {
+      final r = Rig();
+      final sid = r.analytics.sessionId;
+      r.analytics.appBackgrounded();
+      r.now = r.now.add(const Duration(minutes: 29, seconds: 59));
+      r.analytics.appForegrounded();
+      expect(r.analytics.sessionId, sid);
+      r.analytics.appBackgrounded();
+      r.now = r.now.add(const Duration(minutes: 30));
+      r.analytics.appForegrounded();
+      expect(r.analytics.sessionId, isNot(sid));
+      r.analytics.track(const AnalyticsEvent('a'));
+      await settle();
+      final second = r.sink.events.where(
+        (e) => e.sessionId == r.analytics.sessionId,
+      );
+      expect(second.map((e) => e.seq), [1, 2]);
+      expect(
+        Rig(seed: 5).analytics.sessionId,
+        isNot(Rig(seed: 6).analytics.sessionId),
+      );
+    });
+    test('throwing sink', () async {
+      final t = ThrowingSink();
+      final r = Rig(extraSinks: [t]);
+      r.analytics.track(const AnalyticsEvent('a'));
+      r.analytics.track(const AnalyticsEvent('b'));
+      await settle();
+      expect(r.names, ['a', 'b']);
+      expect(r.errors.length, 1);
+      expect(t.calls, 3);
+    });
+    test('monitoring sink forwards', () async {
+      final r = Rig(forwardToMonitoring: true);
+      r.analytics.track(const AnalyticsEvent('a', params: {'k': 1}));
+      await settle();
+      expect(r.monitoringEvents.map((e) => e.name), contains('a'));
+    });
+  });
+}

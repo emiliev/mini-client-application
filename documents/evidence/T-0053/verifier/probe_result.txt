@@ -1,0 +1,15 @@
+  PASS  PROBE AC1 AnalyticsConsent.unknown delivers 0 across track/screen/userprop
+  PASS  PROBE AC1 AnalyticsConsent.denied delivers 0 across track/screen/userprop
+  PASS  PROBE AC1 unknown -> granted flush in order with session+seq
+  PASS  PROBE AC1 unknown -> denied discards, later grant brings nothing
+  PASS  PROBE AC1 buffer 100 / 101
+  PASS  PROBE AC1 same-turn denied both orders
+  PASS  PROBE AC1 persist over a real directory; damaged reads unknown
+  PASS  PROBE AC1 reset under granted delivers queued + new session; unknown drops
+  PASS  PROBE AC2 boundaries (debug throws)
+  PASS  PROBE AC2 release: dropped, reported once each
+  PASS  PROBE AC3 rotation 29:59 / 30:00; seq no gaps
+  PASS  PROBE AC3 throwing sink
+  PASS  PROBE AC3 monitoring sink forwards
+13 passed
+//utility/mc_analytics:zz_probe_test                                     PASSED in 0.3s

@@ -1,0 +1,12 @@
+baseline: PASS
+G01: KILLED by utility/mc_analytics:consent_gate_test -- the gate is removed from the drain loop (delivers whatever the consent)
+G02: KILLED by utility/mc_analytics:consent_gate_test -- unknown delivers too
+G04: KILLED by utility/mc_analytics:consent_gate_test -- switching to denied keeps the buffer
+G18: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- reset keeps the buffer that waits for a consent choice
+S01: KILLED by utility/mc_analytics:di_test utility/mc_analytics:sessions_sinks_test -- rotation needs more than 30:00
+S02: KILLED by utility/mc_analytics:sessions_sinks_test -- the timeout is 29 minutes
+X06: KILLED by utility/mc_analytics:route_observer_test -- the observer ignores the router's declared names
+X07: KILLED by app/wiring/app_core:router_observers_test utility/mc_analytics:route_observer_test -- the observer throws when there is no Analytics
+X11: KILLED by app/mini_client:bdd_test -- the observer does not re-track on pop
+---
+mutations: 9, killed: 9, survived: 0, broken: 0, not applied: 0; tree: clean
