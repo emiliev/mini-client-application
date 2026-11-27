@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
@@ -21,6 +22,7 @@ const _config =
 
 const _home = Key('home.placeholder');
 const _details = ValueKey<String>('reading_list_editor.details');
+const _signInForm = ValueKey<String>('auth_signin.form');
 
 /// The links of AC1, each with a finder for its own screen.
 final _links = <String, Finder>{
@@ -93,20 +95,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Signs in on the shared fixture sheet (the session's file write needs
-  /// real time, F-0038).
-  Future<void> signInOnTheSheet(WidgetTester tester) async {
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
+  /// Signs in on the sign-in form with the first demo account: the session's
+  /// real file write needs real time (F-0038).
+  Future<void> signInOnTheForm(WidgetTester tester, {String? reason}) async {
+    expect(find.byKey(_signInForm), findsOneWidget);
+    if (reason != null) {
+      expect(find.text(reason), findsOneWidget);
+    }
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('auth_signin.demo.reader@mini-client.test'),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
     for (var i = 0; i < 20; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
-      await tester.pumpAndSettle();
-      if (find.byKey(fixtureSignInSheetKey).evaluate().isEmpty) {
+      // Not `pumpAndSettle`: the form's spinner runs until the answer.
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.byKey(_signInForm).evaluate().isEmpty) {
         break;
       }
     }
+    await tester.pumpAndSettle();
+    expect(find.byKey(_signInForm), findsNothing);
     expect(diContainer<SessionReader>().isSignedIn, isTrue);
   }
 
@@ -139,7 +153,7 @@ void main() {
         'button that leads home', (tester) async {
       await boot(tester, coldStartLink: 'miniclient://app${entry.key}');
       if (entry.key == AppLocations.newReadingList) {
-        await signInOnTheSheet(tester);
+        await signInOnTheForm(tester);
       }
 
       expect(entry.value, findsWidgets, reason: 'the linked screen');
@@ -166,7 +180,7 @@ void main() {
         await _pushLink(tester, 'miniclient://app${entry.key}');
         await tester.pumpAndSettle();
         if (entry.key == AppLocations.newReadingList) {
-          await signInOnTheSheet(tester);
+          await signInOnTheForm(tester);
         }
         expect(entry.value, findsWidgets, reason: 'the linked screen');
 
@@ -176,7 +190,10 @@ void main() {
   }
 
   test('T-0049-AC3 the app router treats a FlowCall extra as transient', () {
-    final router = buildAppRouter(initialLocation: AppLocations.home);
+    final router = buildAppRouter(
+      initialLocation: AppLocations.home,
+      session: _SignedOut(),
+    );
     addTearDown(router.dispose);
 
     expect(router.configuration.extraCodec, isA<FlowExtraCodec>());
@@ -189,7 +206,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(newReadingListKey));
     await tester.pumpAndSettle();
-    await signInOnTheSheet(tester);
+    await signInOnTheForm(tester);
     expect(find.byKey(_details), findsOneWidget);
 
     await _pushLink(tester, 'miniclient://app/');
@@ -208,4 +225,19 @@ void main() {
       reason: 'the second tap opened the editor (the first caller got null)',
     );
   });
+}
+
+/// A signed-out session for a router that is built without a root container.
+class _SignedOut implements SessionReader {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  bool get isSignedIn => false;
+
+  @override
+  AuthStatus get status => AuthStatus.signedOut;
+
+  @override
+  Stream<AuthStatus> get authState => const Stream<AuthStatus>.empty();
 }

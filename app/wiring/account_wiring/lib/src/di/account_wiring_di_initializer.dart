@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:account_wiring/src/di/di_initializer.dart';
 import 'package:account_wiring/src/routes/route_targets.dart';
 import 'package:account_wiring/src/routes/route_targets_impl.dart';
+import 'package:auth_signin/auth_signin.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:settings_appearance/settings_appearance.dart';
@@ -19,6 +20,7 @@ class AccountWiringDIInitializer extends McDIInitializer {
     getIt.registerLazySingleton<AccountRouteTargets>(
       () => AccountRouteTargetsImpl(
         settingsAppearance: getIt<SettingsAppearanceNavigator>(),
+        authSignIn: getIt<AuthSignInNavigator>(),
       ),
     );
   }

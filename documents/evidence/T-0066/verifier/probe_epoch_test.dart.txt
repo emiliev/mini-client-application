@@ -1,0 +1,70 @@
+// Verifier probe (T-0066): AuthApi.signOut(ifEpoch:) with a stale and a
+// current epoch.
+import 'package:test/test.dart';
+
+import 'rig.dart';
+
+void main() {
+  late Rig rig;
+
+  setUp(() async => rig = await Rig.create());
+  tearDown(() => rig.dispose());
+
+  test('stale epoch: no-op, no server call, session stays', () async {
+    await rig.api.signIn(
+      email: 'reader@mini-client.test',
+      password: 'marvelous',
+    );
+    final stale = rig.session.epoch;
+    await rig.api.signIn(
+      email: 'reader@mini-client.test',
+      password: 'marvelous',
+    );
+    expect(rig.session.epoch, isNot(stale));
+
+    await rig.api.signOut(ifEpoch: stale);
+    await rig.settle();
+
+    expect(rig.session.isSignedIn, isTrue);
+    expect(rig.calls('POST', '/v1/auth/sign-out'), 0);
+  });
+
+  test('stale epoch after sign-out and sign-in as someone else', () async {
+    await rig.api.signIn(
+      email: 'reader@mini-client.test',
+      password: 'marvelous',
+    );
+    final stale = rig.session.epoch;
+    await rig.api.signOut();
+    await rig.api.signIn(
+      email: 'reader@mini-client.test',
+      password: 'marvelous',
+    );
+    final calls = rig.calls('POST', '/v1/auth/sign-out');
+
+    await rig.api.signOut(ifEpoch: stale);
+    await rig.settle();
+
+    expect(rig.session.isSignedIn, isTrue);
+    expect(rig.calls('POST', '/v1/auth/sign-out'), calls);
+  });
+
+  test('current epoch signs out and tells the server', () async {
+    await rig.api.signIn(
+      email: 'reader@mini-client.test',
+      password: 'marvelous',
+    );
+    await rig.api.signOut(ifEpoch: rig.session.epoch);
+    await rig.settle();
+
+    expect(rig.session.isSignedIn, isFalse);
+    expect(rig.calls('POST', '/v1/auth/sign-out'), 1);
+  });
+
+  test('signed out already, ifEpoch of the current epoch: harmless', () async {
+    final epoch = rig.session.epoch;
+    await rig.api.signOut(ifEpoch: epoch);
+    await rig.settle();
+    expect(rig.session.isSignedIn, isFalse);
+  });
+}

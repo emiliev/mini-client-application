@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
@@ -44,6 +45,8 @@ const _expectedRouteNames = {
   'trivia_play',
   // T-0063: the appearance settings.
   'settings_appearance',
+  // T-0066: the sign-in form.
+  'auth_sign_in',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {
@@ -308,17 +311,26 @@ void main() {
 
     await tester.tap(find.text('Add to favourites'));
     await tester.pumpAndSettle();
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
+    const form = ValueKey<String>('auth_signin.form');
+    expect(find.byKey(form), findsOneWidget);
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('auth_signin.demo.reader@mini-client.test'),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
     for (var i = 0; i < 20; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
-      await tester.pumpAndSettle();
+      // Not `pumpAndSettle`: the form's spinner runs until the answer.
+      await tester.pump(const Duration(milliseconds: 100));
       if (find.text('Remove from favourites').evaluate().isNotEmpty) {
         break;
       }
     }
+    await tester.pumpAndSettle();
 
     expect(find.text('Remove from favourites'), findsOneWidget);
     final tracked = [

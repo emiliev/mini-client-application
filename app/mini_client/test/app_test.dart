@@ -13,6 +13,7 @@ import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 import 'package:mini_client/src/mini_client_app.dart';
 import 'package:mini_client/src/router/app_router.dart';
@@ -323,6 +324,9 @@ void main() {
     expect(find.text('Marvel universe'), findsOneWidget);
     expect(find.text('Config: env=e2e'), findsOneWidget);
 
+    // The session entry (T-0066) pushed the buttons down: scroll to it.
+    await tester.scrollUntilVisible(find.text('Open placeholder 7'), 100);
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Open placeholder 7'));
     await tester.pumpAndSettle();
     expect(find.text('Placeholder detail 7'), findsOneWidget);
@@ -367,8 +371,26 @@ void main() {
   test('all 7 wirings are composed', () {
     expect(wiringInitializers, hasLength(7));
     expect(appConfigAsset, 'assets/app_config.json');
-    final GoRouter router = buildAppRouter(initialLocation: '/');
+    final GoRouter router = buildAppRouter(
+      initialLocation: '/',
+      session: _SignedOut(),
+    );
     addTearDown(router.dispose);
     expect(router.configuration.routes, isNotEmpty);
   });
+}
+
+/// A signed-out session for a router that is built without a root container.
+class _SignedOut implements SessionReader {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  bool get isSignedIn => false;
+
+  @override
+  AuthStatus get status => AuthStatus.signedOut;
+
+  @override
+  Stream<AuthStatus> get authState => const Stream<AuthStatus>.empty();
 }

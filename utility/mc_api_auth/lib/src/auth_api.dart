@@ -60,9 +60,16 @@ class AuthApi {
 
   /// Ends the session at once, then tells the server (best effort). The
   /// result is the server call's; the session is cleared either way.
-  Future<Result<void, ApiFailure>> signOut() async {
+  ///
+  /// With [ifEpoch] it does nothing unless that session is still the current
+  /// one (a sign-in started by someone who has since left undoes only its
+  /// own session, never a newer one).
+  Future<Result<void, ApiFailure>> signOut({int? ifEpoch}) async {
+    if (ifEpoch != null && ifEpoch != _reader.epoch) {
+      return success(null);
+    }
     final refresh = _reader.refreshToken;
-    await _writer.signOut();
+    await _writer.signOut(ifEpoch: ifEpoch);
     return apiCall(() async {
       await _dio.post<Object?>(
         '/v1/auth/sign-out',

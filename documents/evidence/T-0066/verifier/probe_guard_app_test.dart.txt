@@ -1,0 +1,286 @@
+// T-0066: the sign-in guard and the sign-in screen inside the real app (the
+// full root list, every wiring, the real router and the real form): AC2, the
+// guard, and AC3, the callers.
+import 'dart:async';
+import 'dart:io';
+
+import 'package:app_core/app_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+import 'package:mini_client/src/mini_client_app.dart';
+import 'package:mini_client/src/pages/placeholder_pages.dart';
+
+const _config =
+    '{"env":"e2e","backend":{"seed":42,"latencyMs":0,"scenario":"happy"},'
+    '"apiBaseUrl":"https://mock.mini-client.invalid/","build":"1"}';
+
+const _home = Key('home.placeholder');
+const _details = ValueKey<String>('reading_list_editor.details');
+const _signInForm = ValueKey<String>('auth_signin.form');
+const _notNow = ValueKey<String>('auth_signin.not_now');
+const _reader = ValueKey<String>('auth_signin.demo.reader@mini-client.test');
+
+/// What iOS sends for a link once the app runs.
+Future<void> _pushLink(WidgetTester tester, String location) =>
+    tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+      'flutter/navigation',
+      const JSONMethodCodec().encodeMethodCall(
+        MethodCall('pushRouteInformation', {
+          'location': location,
+          'state': null,
+        }),
+      ),
+      (_) {},
+    );
+
+void main() {
+  late Directory storage;
+
+  setUp(() async {
+    await resetDIContainer();
+    storage = Directory.systemTemp.createTempSync('sign_in_guard_app_test');
+  });
+
+  tearDown(() async {
+    await resetDIContainer();
+    storage.deleteSync(recursive: true);
+  });
+
+  Future<void> boot(WidgetTester tester) async {
+    tester.view
+      ..devicePixelRatio = 1
+      ..physicalSize = mcReferenceSurface;
+    addTearDown(tester.view.reset);
+    final links = PendingLinks.install(tester.binding);
+    addTearDown(links.detach);
+    await tester.pumpWidget(
+      DefaultAssetBundle(
+        bundle: McFixtureAssetBundle(),
+        child: MiniClientApp(
+          links: links,
+          initializers: (routerRef) => rootInitializers(
+            config: () async => _config,
+            storageDirectory: storage,
+            monitoringSinks: [InMemorySink()],
+            mockDomains: appMockDomains,
+            routerRef: routerRef,
+            wirings: wiringInitializers,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pumpAndSettle();
+  }
+
+  GoRouter router(WidgetTester tester) => diContainer<GoRouter>();
+
+  String location(WidgetTester tester) {
+    final config = router(tester).routerDelegate.currentConfiguration;
+    final last = config.last;
+    return (last is ImperativeRouteMatch ? last.matches.uri : config.uri)
+        .toString();
+  }
+
+  /// Signs in on the form with the first demo account (the session's real
+  /// file write needs real time, F-0038).
+  Future<void> signInOnTheForm(WidgetTester tester) async {
+    expect(find.byKey(_signInForm), findsOneWidget);
+    await tester.tap(find.byKey(_reader));
+    await tester.pump();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
+    for (var i = 0; i < 20; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      // Not `pumpAndSettle`: the form's spinner runs until the answer.
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.byKey(_signInForm).evaluate().isEmpty) {
+        break;
+      }
+    }
+    await tester.pumpAndSettle();
+    expect(find.byKey(_signInForm), findsNothing);
+    expect(diContainer<SessionReader>().isSignedIn, isTrue);
+  }
+
+  Future<void> tap(WidgetTester tester, Finder finder) async {
+    await tester.ensureVisible(finder);
+    await tester.pumpAndSettle();
+    await tester.tap(finder.hitTestable());
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> signOutNow(WidgetTester tester) async {
+    await tester.runAsync(() => diContainer<AuthApi>().signOut());
+    await tester.pumpAndSettle();
+  }
+
+  Future<void> signedInBoot(WidgetTester tester) async {
+    await boot(tester);
+    await tap(tester, find.byKey(signInKey));
+    await signInOnTheForm(tester);
+  }
+
+  for (final open in [1, 2]) {
+    testWidgets('PROBE protected page under $open open page(s), signed out: '
+        'no protected page reachable by Back', (tester) async {
+      await signedInBoot(tester);
+      unawaited(router(tester).push(AppLocations.newReadingList));
+      await tester.pumpAndSettle();
+      expect(find.byKey(_details), findsOneWidget);
+      for (var i = 0; i < open; i++) {
+        unawaited(router(tester).push('/settings/appearance'));
+        await tester.pumpAndSettle();
+      }
+
+      await signOutNow(tester);
+
+      expect(find.byKey(_signInForm), findsOneWidget);
+      expect(find.byKey(_details), findsNothing);
+      expect(
+        location(tester),
+        AppLocations.signIn(from: AppLocations.newReadingList),
+      );
+      router(tester).pop();
+      await tester.pumpAndSettle();
+      expect(find.byKey(_home), findsOneWidget);
+      expect(router(tester).canPop(), isFalse);
+      expect(find.byKey(_details), findsNothing);
+      // ignore: avoid_print
+      print('RESULT stack $open: ok');
+    });
+
+    testWidgets('PROBE editor under $open open pages, sign in again lands '
+        'on editor with home beneath', (tester) async {
+      await signedInBoot(tester);
+      unawaited(router(tester).push('/me/lists/l-1/edit'));
+      await tester.pumpAndSettle();
+      for (var i = 0; i < open; i++) {
+        unawaited(router(tester).push('/settings/appearance'));
+        await tester.pumpAndSettle();
+      }
+      await signOutNow(tester);
+      expect(find.byKey(_signInForm), findsOneWidget);
+      await signInOnTheForm(tester);
+      expect(location(tester), '/me/lists/l-1/edit');
+      router(tester).pop();
+      await tester.pumpAndSettle();
+      // ignore: avoid_print
+      print('RESULT after pop: ${location(tester)}');
+      expect(find.byKey(_home), findsOneWidget);
+    });
+  }
+
+  testWidgets('PROBE signed out, push to /me/lists/new reaches sign-in', (
+    tester,
+  ) async {
+    await boot(tester);
+    unawaited(router(tester).push(AppLocations.newReadingList));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_signInForm), findsOneWidget);
+    expect(
+      location(tester),
+      AppLocations.signIn(from: AppLocations.newReadingList),
+    );
+    await tap(tester, find.byKey(_notNow));
+    expect(find.byKey(_home), findsOneWidget);
+    expect(router(tester).canPop(), isFalse);
+  });
+
+  for (final target in [
+    '/me/lists/l-1/edit',
+    '/me/lists/new?x=1',
+    '/me',
+    '/me/anything/else',
+    '/library',
+    '/library/a/b',
+    '/store/checkout',
+    '/ME/lists/new',
+    '/%6De/lists/new',
+    '/x/../me/lists/new',
+  ]) {
+    testWidgets('PROBE signed out link $target is never shown signed out', (
+      tester,
+    ) async {
+      await boot(tester);
+      await _pushLink(tester, 'miniclient://app$target');
+      await tester.pumpAndSettle();
+      final form = find.byKey(_signInForm).evaluate().isNotEmpty;
+      // ignore: avoid_print
+      print('RESULT link $target => ${location(tester)} form=$form');
+      expect(find.byKey(_details), findsNothing);
+      if (form) {
+        await tap(tester, find.byKey(_notNow));
+        expect(find.byKey(_home), findsOneWidget);
+        expect(router(tester).canPop(), isFalse);
+      }
+    });
+  }
+
+  for (final from in [
+    '//evil.com',
+    '/%2F/evil.com',
+    r'/\evil.com',
+    'https://evil.com',
+    'javascript:alert(1)',
+    'miniclient://evil/me/lists/new',
+    '/auth/sign-in',
+    '/auth/sign-in?from=/auth/sign-in',
+    '/%252F%252Fevil',
+    '',
+    '   ',
+    '/me/lists/../../auth/sign-in',
+  ]) {
+    testWidgets('PROBE sign in with hostile from [$from] ends at home', (
+      tester,
+    ) async {
+      await boot(tester);
+      await _pushLink(
+        tester,
+        'miniclient://app${AppLocations.signIn(from: from)}',
+      );
+      await tester.pumpAndSettle();
+      await signInOnTheForm(tester);
+      // ignore: avoid_print
+      print('RESULT hostile [$from] => ${location(tester)}');
+      expect(find.byKey(_home), findsOneWidget);
+      expect(find.byKey(_signInForm), findsNothing);
+    });
+
+    testWidgets('PROBE signed in, /auth/sign-in?from=[$from]: redirected, '
+        'no loop', (tester) async {
+      await signedInBoot(tester);
+      await _pushLink(
+        tester,
+        'miniclient://app${AppLocations.signIn(from: from)}',
+      );
+      await tester.pumpAndSettle();
+      // ignore: avoid_print
+      print('RESULT signedin [$from] => ${location(tester)}');
+      expect(find.byKey(_signInForm), findsNothing);
+      expect(find.byKey(_home), findsOneWidget);
+    });
+  }
+
+  testWidgets('PROBE signed in, /auth/sign-in?from=/me/lists/new redirects '
+      'to the editor', (tester) async {
+    await signedInBoot(tester);
+    await _pushLink(
+      tester,
+      'miniclient://app${AppLocations.signIn(from: AppLocations.newReadingList)}',
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(_signInForm), findsNothing);
+    expect(find.byKey(_details), findsOneWidget);
+  });
+}

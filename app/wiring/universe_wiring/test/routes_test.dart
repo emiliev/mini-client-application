@@ -1,4 +1,5 @@
 import 'package:app_core/app_core.dart';
+import 'package:app_core/testing.dart';
 import 'package:characters_details/characters_details.dart' as details;
 import 'package:characters_list/characters_list.dart';
 import 'package:flutter/material.dart';
@@ -86,7 +87,11 @@ Future<GoRouter> _boot(
   final router = ref.attach(
     GoRouter(
       initialLocation: initial,
-      routes: [...universeRoutes, _comicsStandIn],
+      routes: [
+        ...universeRoutes,
+        _comicsStandIn,
+        standInSignInRoute(signIn: _signInFixtureUser),
+      ],
     ),
   );
   addTearDown(router.dispose);
@@ -100,15 +105,26 @@ Future<GoRouter> _boot(
   return router;
 }
 
+/// What the stand-in's "Sign in" does: the real `AuthApi` signs the first
+/// fixture user in; true when it did.
+Future<bool> _signInFixtureUser() async {
+  final user = fixtureUsers.first;
+  final result = await diContainer<AuthApi>().signIn(
+    email: user.email,
+    password: user.password,
+  );
+  return result.getOrNull() != null;
+}
+
 /// Lets the session's real file write finish (F-0038), then settles, until
-/// the sign-in sheet closed.
+/// the stand-in sign-in screen is gone.
 Future<void> _settleRealIo(WidgetTester tester) async {
   for (var i = 0; i < 20; i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
     await tester.pumpAndSettle();
-    if (find.byKey(fixtureSignInSheetKey).evaluate().isEmpty) {
+    if (find.byKey(standInSignInKey).evaluate().isEmpty) {
       return;
     }
   }
@@ -211,8 +227,9 @@ void main() {
     expect(find.text('comic 500138'), findsNothing);
   });
 
-  mcTestWidgets('T-0067-AC3 the profile\'s requestSignIn shows the app\'s '
-      'sheet: Sign in signs the fixture user in and answers true', (
+  mcTestWidgets('T-0067-AC3 T-0066-AC3 the profile\'s requestSignIn opens '
+      'the sign-in screen for the favourite: Sign in signs the fixture user '
+      'in and answers true', (
     tester,
   ) async {
     await _boot(tester, initial: '/characters/100001');
@@ -222,14 +239,15 @@ void main() {
     final answer = diContainer<details.CharacterDetailsNavigator>()
         .requestSignIn();
     await tester.pumpAndSettle();
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
+    expect(find.byKey(standInSignInKey), findsOneWidget);
+    expect(find.text(standInSignInText('favourites')), findsOneWidget);
 
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
+    await tester.tap(find.byKey(standInSignInConfirmKey));
     await _settleRealIo(tester);
 
     expect(await answer, isTrue);
     expect(reader.userId, fixtureUsers.first.id);
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+    expect(find.byKey(standInSignInKey), findsNothing);
   });
 
   mcTestWidgets('T-0067-AC3 the profile\'s requestSignIn: Not now answers '
@@ -239,7 +257,7 @@ void main() {
     final answer = diContainer<details.CharacterDetailsNavigator>()
         .requestSignIn();
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
+    await tester.tap(find.byKey(standInSignInNotNowKey));
     await tester.pumpAndSettle();
 
     expect(await answer, isFalse);
@@ -247,7 +265,7 @@ void main() {
   });
 
   mcTestWidgets('T-0067-AC3 requestSignIn answers true at once when someone '
-      'is already signed in, with no sheet', (tester) async {
+      'is already signed in, with no sign-in screen', (tester) async {
     await _boot(tester, initial: '/characters/100001');
     final user = fixtureUsers.first;
     final signedIn = await tester.runAsync(
@@ -263,7 +281,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(await answer, isTrue);
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+    expect(find.byKey(standInSignInKey), findsNothing);
   });
 
   mcTestWidgets('T-0033-AC1 the wiring initializer resolves the route targets '

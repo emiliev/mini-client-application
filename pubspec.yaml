@@ -18,6 +18,7 @@ workspace:
   - app/wiring/library_wiring
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
+  - feature/auth/auth_signin
   - feature/characters/characters_details
   - feature/characters/characters_list
   - feature/comics/comics_details

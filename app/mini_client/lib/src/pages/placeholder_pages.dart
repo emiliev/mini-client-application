@@ -1,13 +1,26 @@
+import 'dart:async';
+
 import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_layout/mc_ds_layout.dart';
+import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_session/mc_session.dart';
 
 /// Keys of the home's reading-list entry, for tests and the e2e journey.
 const newReadingListKey = Key('home.reading_list.new');
 const readingListResultKey = Key('home.reading_list.result');
 const editReadingListKey = Key('home.reading_list.edit');
+
+/// Shown when the reading lists changed without a result reaching home (the
+/// editor was opened by a guard's `go(from)` after a sign-in, T-0066).
+const readingListsChangedKey = Key('home.reading_list.changed');
+
+/// Home's session entry (T-0066): who is signed in, and Sign in / Sign out.
+const sessionStatusKey = Key('home.session.status');
+const signInKey = Key('home.session.sign_in');
+const signOutKey = Key('home.session.sign_out');
 
 /// The not-found screen's "Go home" button.
 const notFoundHomeKey = Key('not.found.home');
@@ -28,6 +41,10 @@ class HomePlaceholderPage extends StatefulWidget {
     required this.onOpenSettings,
     required this.onNewReadingList,
     required this.onEditReadingList,
+    required this.session,
+    required this.onSignIn,
+    required this.onSignOut,
+    required this.dataChanges,
     super.key,
   });
 
@@ -52,9 +69,27 @@ class HomePlaceholderPage extends StatefulWidget {
   /// Opens the editor on list `id`; completes with the id once saved.
   final Future<String?> Function(String id) onEditReadingList;
 
+  /// Who is signed in (T-0066); home shows it and follows its changes.
+  final SessionReader session;
+
+  /// Opens the sign-in screen; completes once it ended.
+  final Future<void> Function() onSignIn;
+
+  /// Signs out.
+  final Future<void> Function() onSignOut;
+
+  /// The app's data-change events: home learns of a reading list the editor
+  /// saved when no result reached it (T-0066, F-0049 note 11).
+  final Stream<DataChanged> dataChanges;
+
   @override
   State<HomePlaceholderPage> createState() => _HomePlaceholderPageState();
 }
+
+/// The `mc_event_bus` topic the reading-list editor announces a save on
+/// (library_reading_list_editor's `readingListsTopic`): a feature's constant
+/// is not importable here, so the string is repeated and tested.
+const _readingListsTopic = 'readingLists';
 
 class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
   /// The list the editor last returned, and whether it was new.
@@ -63,6 +98,40 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
   /// An editor is open: a second tap (New or Edit) is ignored until it
   /// returns, so one tap opens one editor.
   bool _awaiting = false;
+
+  /// A reading list was saved by an editor nobody awaited: a guard sent the
+  /// user to sign in, and after it `go(from)` built the editor with no
+  /// caller, so its result cannot reach [_await]. The editor announces
+  /// `DataChanged('readingLists')` once per save, which is how home learns
+  /// (T-0066). A real home reloads its lists here; the placeholder says so.
+  bool _listsChanged = false;
+
+  StreamSubscription<DataChanged>? _changes;
+
+  @override
+  void initState() {
+    super.initState();
+    _changes = widget.dataChanges
+        .where((change) => change.topic == _readingListsTopic)
+        .listen(_onListsChanged);
+  }
+
+  @override
+  void dispose() {
+    unawaited(_changes?.cancel());
+    super.dispose();
+  }
+
+  /// While home awaits an editor, the result is on its way and says more
+  /// (the id): the announcement is ignored then.
+  void _onListsChanged(DataChanged _) {
+    if (!_awaiting && mounted) {
+      setState(() {
+        _lastList = null;
+        _listsChanged = true;
+      });
+    }
+  }
 
   Future<void> _await(
     Future<String?> Function() open, {
@@ -81,7 +150,10 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
     if (!mounted || id == null) {
       return;
     }
-    setState(() => _lastList = (id: id!, created: created));
+    setState(() {
+      _lastList = (id: id!, created: created);
+      _listsChanged = false;
+    });
   }
 
   @override
@@ -113,6 +185,12 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
           ),
           const McGap.lg(),
           Text('Config: env=${widget.env}', style: text.labelLarge),
+          const McGap.md(),
+          _SessionRow(
+            session: widget.session,
+            onSignIn: widget.onSignIn,
+            onSignOut: widget.onSignOut,
+          ),
           const McGap.xl(),
           McButton(label: 'Characters', onPressed: widget.onOpenCharacters),
           const McGap.md(),
@@ -121,6 +199,14 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
             label: 'New reading list',
             onPressed: () => _await(widget.onNewReadingList, created: true),
           ),
+          if (_listsChanged) ...[
+            const McGap.sm(),
+            Text(
+              'Reading lists changed',
+              key: readingListsChangedKey,
+              style: text.titleMedium,
+            ),
+          ],
           if (last != null) ...[
             const McGap.sm(),
             Text(
@@ -159,6 +245,55 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
       ),
     );
   }
+}
+
+/// Who is signed in, with Sign in or Sign out (T-0066). It follows the
+/// session's changes.
+class _SessionRow extends StatelessWidget {
+  const _SessionRow({
+    required this.session,
+    required this.onSignIn,
+    required this.onSignOut,
+  });
+
+  final SessionReader session;
+  final Future<void> Function() onSignIn;
+  final Future<void> Function() onSignOut;
+
+  @override
+  Widget build(BuildContext context) => StreamBuilder<AuthStatus>(
+    stream: session.authState,
+    initialData: session.status,
+    builder: (context, _) {
+      // Read from the session itself: the stream only says "changed".
+      final userId = session.userId;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            userId == null ? 'Signed out' : 'Signed in as $userId',
+            key: sessionStatusKey,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const McGap.sm(),
+          if (userId == null)
+            McButton(
+              key: signInKey,
+              label: 'Sign in',
+              variant: McButtonVariant.secondary,
+              onPressed: () => unawaited(onSignIn()),
+            )
+          else
+            McButton(
+              key: signOutKey,
+              label: 'Sign out',
+              variant: McButtonVariant.secondary,
+              onPressed: () => unawaited(onSignOut()),
+            ),
+        ],
+      );
+    },
+  );
 }
 
 /// The placeholder detail route: the deep-link target until real features.

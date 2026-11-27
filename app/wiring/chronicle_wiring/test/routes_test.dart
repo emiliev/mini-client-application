@@ -1,4 +1,5 @@
 import 'package:app_core/app_core.dart';
+import 'package:app_core/testing.dart';
 import 'package:chronicle_wiring/chronicle_wiring.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,7 @@ import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:trivia_quiz/trivia_quiz.dart';
 
@@ -88,7 +90,11 @@ Future<GoRouter> _boot(
   final router = ref.attach(
     GoRouter(
       initialLocation: initial,
-      routes: [...chronicleRoutes, ..._standIns],
+      routes: [
+        ...chronicleRoutes,
+        ..._standIns,
+        standInSignInRoute(signIn: _signInFixtureUser),
+      ],
       errorBuilder: (context, state) =>
           Text('not found ${state.uri}', key: const Key('not.found')),
     ),
@@ -102,6 +108,31 @@ Future<GoRouter> _boot(
   );
   await tester.pumpAndSettle();
   return router;
+}
+
+/// What the stand-in's "Sign in" does: the real `AuthApi` signs the first
+/// fixture user in; true when it did.
+Future<bool> _signInFixtureUser() async {
+  final user = fixtureUsers.first;
+  final result = await diContainer<AuthApi>().signIn(
+    email: user.email,
+    password: user.password,
+  );
+  return result.getOrNull() != null;
+}
+
+/// Lets the session's real file write finish (F-0038), then settles, until
+/// the stand-in sign-in screen is gone.
+Future<void> _settleRealIo(WidgetTester tester) async {
+  for (var i = 0; i < 20; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pumpAndSettle();
+    if (find.byKey(standInSignInKey).evaluate().isEmpty) {
+      return;
+    }
+  }
 }
 
 void main() {
@@ -174,43 +205,77 @@ void main() {
     expect(find.text('fake setup'), findsOneWidget);
   });
 
-  mcTestWidgets('T-0064-AC3 requestSignIn: signed in it answers true at '
-      'once, with no sheet', (tester) async {
-    McTestSession.current.backend.useFixtureSet('identity.default');
-    await _boot(tester);
-    final user = fixtureUsers.first;
-    await tester.runAsync(
-      () => diContainer<AuthApi>().signIn(
-        email: user.email,
-        password: user.password,
-      ),
-    );
+  mcTestWidgets(
+    'T-0066-AC3 requestSignIn: the trivia quiz signs in on the screen '
+    'and gets true only once a session exists',
+    (tester) async {
+      McTestSession.current.backend.useFixtureSet('identity.default');
+      await _boot(tester);
+      final reader = diContainer<SessionReader>();
+      expect(reader.isSignedIn, isFalse);
 
-    expect(await diContainer<TriviaQuizNavigator>().requestSignIn(), isTrue);
-    expect(find.byType(BottomSheet), findsNothing);
-  });
+      bool? answer;
+      final pending = diContainer<TriviaQuizNavigator>().requestSignIn().then(
+        (a) => answer = a,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text(standInSignInText('triviaResults')), findsOneWidget);
+      expect(answer, isNull, reason: 'the caller waits');
 
-  mcTestWidgets('T-0064-AC3 requestSignIn: signed out it shows the shared '
-      'sheet with the score reason, and Cancel answers false', (tester) async {
-    await _boot(tester);
+      await tester.tap(find.byKey(standInSignInConfirmKey));
+      await _settleRealIo(tester);
+      await pending;
 
-    var answered = false;
-    bool? answer;
-    final pending = diContainer<TriviaQuizNavigator>().requestSignIn().then((
-      a,
-    ) {
-      answered = true;
-      answer = a;
-    });
-    await tester.pumpAndSettle();
-    expect(find.textContaining('to save your score'), findsOneWidget);
-    expect(answered, isFalse);
+      expect(answer, isTrue);
+      expect(reader.userId, fixtureUsers.first.id);
+    },
+  );
 
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
-    await tester.pumpAndSettle();
-    await pending;
-    expect(answer, isFalse);
-  });
+  mcTestWidgets(
+    'T-0064-AC3 T-0066-AC3 requestSignIn: signed in it answers true at '
+    'once, with no sign-in screen',
+    (tester) async {
+      McTestSession.current.backend.useFixtureSet('identity.default');
+      await _boot(tester);
+      final user = fixtureUsers.first;
+      await tester.runAsync(
+        () => diContainer<AuthApi>().signIn(
+          email: user.email,
+          password: user.password,
+        ),
+      );
+
+      expect(await diContainer<TriviaQuizNavigator>().requestSignIn(), isTrue);
+      expect(find.byKey(standInSignInKey), findsNothing);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0064-AC3 T-0066-AC3 requestSignIn: signed out it opens the sign-in '
+    'screen for the trivia results, and Not now answers false',
+    (
+      tester,
+    ) async {
+      await _boot(tester);
+
+      var answered = false;
+      bool? answer;
+      final pending = diContainer<TriviaQuizNavigator>().requestSignIn().then((
+        a,
+      ) {
+        answered = true;
+        answer = a;
+      });
+      await tester.pumpAndSettle();
+      expect(find.text(standInSignInText('triviaResults')), findsOneWidget);
+      expect(answered, isFalse);
+
+      await tester.tap(find.byKey(standInSignInNotNowKey));
+      await tester.pumpAndSettle();
+      await pending;
+      expect(answer, isFalse);
+    },
+  );
 
   mcTestWidgets('T-0064-AC5 the wiring initializer registers the navigator '
       'and route targets that build the real flow', (tester) async {

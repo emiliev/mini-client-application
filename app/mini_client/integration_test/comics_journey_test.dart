@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
 import 'package:mc_e2e_utils/mc_e2e_utils.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
@@ -10,8 +11,10 @@ import 'package:mini_client/main.dart' as app;
 const _comicTitle = ValueKey<String>('comics_details.title');
 const _comicBody = ValueKey<String>('comics_details.body');
 const _cast = ValueKey<String>('comics_details.cast');
-const _signInSheet = Key('app.sign_in.sheet');
-const _signInConfirm = Key('app.sign_in.confirm');
+const _signInForm = ValueKey<String>('auth_signin.form');
+const _demoReader = ValueKey<String>(
+  'auth_signin.demo.reader@mini-client.test',
+);
 
 /// The scrollable of the comic page.
 Finder _comicScrollable() => find
@@ -20,7 +23,7 @@ Finder _comicScrollable() => find
 
 /// T-0041-AC5 on a simulator, through the real `main()`: home, Characters,
 /// the first character's preview, a related comic, and the comic page; then
-/// the favourite through the wiring's temporary sign-in sheet (AC6 in the
+/// the favourite through the sign-in form (AC6 in the
 /// app), and the cast's way out to the characters placeholder (AC3 in the
 /// app). Run through `tool/e2e_ios.sh`.
 void main() {
@@ -68,16 +71,19 @@ void main() {
     await shot(binding, tester, '13_comic_page');
 
     await tester.tap(find.text('Add to favourites'));
-    await pumpUntil(tester, find.byKey(_signInSheet), 'the sign-in sheet');
-    await shot(binding, tester, '14_sign_in_sheet');
+    await pumpUntil(tester, find.byKey(_signInForm), 'the sign-in form');
+    expect(find.text('Sign in to keep your favourites.'), findsOneWidget);
+    await shot(binding, tester, '14_sign_in_form');
 
-    await tester.tap(find.byKey(_signInConfirm));
+    await tester.tap(find.byKey(_demoReader));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
     await pumpUntil(
       tester,
       find.text('Remove from favourites'),
       'the saved favourite',
     );
-    expect(find.byKey(_signInSheet), findsNothing);
+    expect(find.byKey(_signInForm), findsNothing);
     await shot(binding, tester, '15_favourite_saved');
 
     await tester.scrollUntilVisible(

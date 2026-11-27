@@ -1,4 +1,5 @@
 import 'package:app_core/app_core.dart';
+import 'package:app_core/testing.dart';
 import 'package:comics_details/comics_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -76,7 +77,13 @@ Future<GoRouter> _boot(
   final router = ref.attach(
     GoRouter(
       initialLocation: initial,
-      routes: [...publishingRoutes, _charactersStandIn],
+      routes: [
+        ...publishingRoutes,
+        _charactersStandIn,
+        // The real sign-in route is account_wiring's; this one signs the
+        // fixture user in through the real `AuthApi`.
+        standInSignInRoute(signIn: _signInFixtureUser),
+      ],
       // As the app's router: an unmatched or unusable location goes here.
       errorBuilder: (context, state) =>
           Text('not found ${state.uri}', key: const Key('not.found')),
@@ -93,17 +100,26 @@ Future<GoRouter> _boot(
   return router;
 }
 
-/// Lets the session's real file write finish (F-0038), then settles: until
-/// the sheet closed, or [rounds] rounds when given (the sheet may be gone
-/// before the write).
-Future<void> _settleRealIo(WidgetTester tester, {int? rounds}) async {
-  for (var i = 0; i < (rounds ?? 20); i++) {
+/// What the stand-in's "Sign in" does: the real `AuthApi` signs the first
+/// fixture user in; true when it did.
+Future<bool> _signInFixtureUser() async {
+  final user = fixtureUsers.first;
+  final result = await diContainer<AuthApi>().signIn(
+    email: user.email,
+    password: user.password,
+  );
+  return result.getOrNull() != null;
+}
+
+/// Lets the session's real file write finish (F-0038), then settles, until
+/// the stand-in sign-in screen is gone.
+Future<void> _settleRealIo(WidgetTester tester) async {
+  for (var i = 0; i < 20; i++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
     await tester.pumpAndSettle();
-    if (rounds == null &&
-        find.byKey(fixtureSignInSheetKey).evaluate().isEmpty) {
+    if (find.byKey(standInSignInKey).evaluate().isEmpty) {
       return;
     }
   }
@@ -171,181 +187,92 @@ void main() {
     expect(router.canPop(), isTrue);
   });
 
-  mcTestWidgets('T-0041-AC6 requestSignIn: Sign in on the sheet signs the '
-      'fixture user in and answers true', (tester) async {
-    await _boot(tester);
-    final reader = diContainer<SessionReader>();
-    expect(reader.isSignedIn, isFalse);
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: Sign in on the sign-in screen '
+    'signs the fixture user in and answers true',
+    (tester) async {
+      await _boot(tester);
+      final reader = diContainer<SessionReader>();
+      expect(reader.isSignedIn, isFalse);
 
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    expect(find.textContaining(fixtureUsers.first.email), findsOneWidget);
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+      expect(find.byKey(standInSignInKey), findsOneWidget);
+      // T-0066: it is opened for the favourite.
+      expect(find.text(standInSignInText('favourites')), findsOneWidget);
 
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
-    await _settleRealIo(tester);
+      await tester.tap(find.byKey(standInSignInConfirmKey));
+      await _settleRealIo(tester);
 
-    expect(await answer, isTrue);
-    expect(reader.userId, fixtureUsers.first.id);
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
-  });
+      expect(await answer, isTrue);
+      expect(reader.userId, fixtureUsers.first.id);
+      expect(find.byKey(standInSignInKey), findsNothing);
+    },
+  );
 
-  mcTestWidgets('T-0041-AC6 requestSignIn: while signing in, the barrier '
-      'and Back do not close the sheet', (tester) async {
-    await _boot(tester);
-    final backend = McTestSession.current.backend
-      ..hold('POST /v1/auth/sign-in');
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: Not now answers false and leaves '
+    'the user signed out',
+    (tester) async {
+      await _boot(tester);
 
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
-    await tester.pump();
-    await tester.tapAt(const Offset(20, 20));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(
-      find.byKey(fixtureSignInSheetKey),
-      findsOneWidget,
-      reason: 'the barrier is refused while signing in',
-    );
-    expect(await tester.binding.handlePopRoute(), isTrue);
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    // Not now is disabled, and tapping it does nothing.
-    final notNow = find.descendant(
-      of: find.byKey(fixtureSignInCancelKey),
-      matching: find.byWidgetPredicate((w) => w is ButtonStyleButton),
-    );
-    expect(tester.widget<ButtonStyleButton>(notNow).enabled, isFalse);
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    // A real drag down does not move the sheet away either.
-    await tester.drag(find.byKey(fixtureSignInSheetKey), const Offset(0, 600));
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(
-      find.byKey(fixtureSignInSheetKey),
-      findsOneWidget,
-      reason: 'the drag is refused while signing in',
-    );
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(standInSignInNotNowKey));
+      await tester.pumpAndSettle();
 
-    await backend.release('POST /v1/auth/sign-in');
-    await _settleRealIo(tester);
-
-    expect(await answer, isTrue);
-    expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: idle, a drag down dismisses the '
-      'sheet and answers false (the control for the busy drag)', (
-    tester,
-  ) async {
-    await _boot(tester);
-
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    await tester.drag(find.byKey(fixtureSignInSheetKey), const Offset(0, 600));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
-    expect(await answer, isFalse);
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: a sheet closed while signing in '
-      'answers the real outcome of the sign-in', (tester) async {
-    await _boot(tester);
-    final backend = McTestSession.current.backend
-      ..hold('POST /v1/auth/sign-in');
-
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
-    await tester.pump();
-    // Closed anyway, by a route change: a pop that no PopScope is asked.
-    Navigator.of(tester.element(find.byKey(fixtureSignInSheetKey))).pop();
-    await tester.pumpAndSettle();
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
-
-    await backend.release('POST /v1/auth/sign-in');
-    await _settleRealIo(tester, rounds: 20);
-
-    expect(await answer, isTrue, reason: 'the user did sign in');
-    expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: Not now answers false and leaves '
-      'the user signed out', (tester) async {
-    await _boot(tester);
-
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
-    await tester.pumpAndSettle();
-
-    expect(await answer, isFalse);
-    expect(diContainer<SessionReader>().isSignedIn, isFalse);
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
-    expect(
-      McTestSession.current.backend.requests.where(
-        (r) => r.path.startsWith('/v1/auth/'),
-      ),
-      isEmpty,
-    );
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: dismissing the sheet answers '
-      'false', (tester) async {
-    await _boot(tester);
-
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    // Tap the barrier above the sheet.
-    await tester.tapAt(const Offset(20, 20));
-    await tester.pumpAndSettle();
-
-    expect(await answer, isFalse);
-    expect(diContainer<SessionReader>().isSignedIn, isFalse);
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: a failed sign-in keeps the sheet '
-      'open with an error', (tester) async {
-    await _boot(tester);
-    McTestSession.current.backend.fail(
-      'POST /v1/auth/sign-in',
-      BackendFailure.serverError,
-    );
-
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Signing in failed. Please try again.'), findsOneWidget);
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
-    await tester.pumpAndSettle();
-    expect(await answer, isFalse);
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: already signed in answers true '
-      'without a sheet', (tester) async {
-    await _boot(tester);
-    final user = fixtureUsers.first;
-    await tester.runAsync(
-      () => diContainer<SessionWriter>().signIn(
-        userId: user.id,
-        tokens: AuthTokens(
-          accessToken: mintAccessToken(user.id, 1),
-          refreshToken: mintRefreshToken(user.id, 1),
+      expect(await answer, isFalse);
+      expect(diContainer<SessionReader>().isSignedIn, isFalse);
+      expect(find.byKey(standInSignInKey), findsNothing);
+      expect(
+        McTestSession.current.backend.requests.where(
+          (r) => r.path.startsWith('/v1/auth/'),
         ),
-      ),
-    );
+        isEmpty,
+      );
+    },
+  );
 
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: leaving the sign-in screen by Back '
+    'answers false',
+    (tester) async {
+      final router = await _boot(tester);
 
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
-    expect(await answer, isTrue);
-  });
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+      router.pop();
+      await tester.pumpAndSettle();
+
+      expect(await answer, isFalse);
+      expect(diContainer<SessionReader>().isSignedIn, isFalse);
+      expect(find.byKey(standInSignInKey), findsNothing);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: already signed in answers true '
+    'without a sign-in screen',
+    (tester) async {
+      await _boot(tester);
+      final user = fixtureUsers.first;
+      await tester.runAsync(
+        () => diContainer<SessionWriter>().signIn(
+          userId: user.id,
+          tokens: AuthTokens(
+            accessToken: mintAccessToken(user.id, 1),
+            refreshToken: mintRefreshToken(user.id, 1),
+          ),
+        ),
+      );
+
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(standInSignInKey), findsNothing);
+      expect(await answer, isTrue);
+    },
+  );
 
   test('T-0041-AC6 requestSignIn before the router shows anything answers '
       'false', () async {
@@ -355,9 +282,7 @@ void main() {
     await initializeDIContainer([
       RouterDIInitializer(ref),
       McDIInitializer((getIt, _) {
-        getIt
-          ..registerSingleton<SessionReader>(_SignedOut())
-          ..registerSingleton<AuthApi>(_NoAuth());
+        getIt.registerSingleton<SessionReader>(_SignedOut());
       }),
       const PublishingNavigatorsDIInitializer(),
     ]);
@@ -378,9 +303,7 @@ void main() {
     await initializeDIContainer([
       RouterDIInitializer(ref),
       McDIInitializer((getIt, _) {
-        getIt
-          ..registerSingleton<SessionReader>(_SignedOut())
-          ..registerSingleton<AuthApi>(_NoAuth());
+        getIt.registerSingleton<SessionReader>(_SignedOut());
       }),
       const PublishingWiringDIInitializer(),
     ]);
@@ -428,9 +351,4 @@ class _SignedOut implements SessionReader {
 
   @override
   bool get isSignedIn => false;
-}
-
-class _NoAuth implements AuthApi {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

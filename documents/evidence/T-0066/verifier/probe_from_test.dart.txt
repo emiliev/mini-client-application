@@ -1,0 +1,136 @@
+// Verifier probe (T-0066): extra open-redirect cases for safeSignInTarget.
+// Copy to app/wiring/app_core/test/probe_from_test.dart to run.
+import 'package:app_core/app_core.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+void main() {
+  const home = AppLocations.home;
+  final hostile = <String>[
+    'https:',
+    'https:evil.com',
+    'HTTPS://evil.com',
+    'javascript:alert(1)',
+    'JaVaScRiPt:alert(1)',
+    ' https://evil.com',
+    'https://evil.com ',
+    '\thttps://evil.com',
+    '\nhttps://evil.com',
+    '/\t/evil.com',
+    '/\n/evil.com',
+    '//evil',
+    '///evil',
+    '////evil',
+    '\\\\evil',
+    '/\\evil',
+    '\\/evil',
+    '/%5Cevil',
+    '/%5cevil',
+    '/%2F/evil',
+    '/%2f%2fevil',
+    '%2F%2Fevil',
+    '%2f%2fevil.com',
+    '/%252F%252Fevil',
+    '/%25252F%25252Fevil',
+    '/%2525252F%2525252Fevil',
+    '/%252525252F%252525252Fevil',
+    '/%255Cevil',
+    '/%25255Cevil',
+    'miniclient://evil/me/lists',
+    'miniclient://evil',
+    'miniclient:/me/lists',
+    'miniclient:me/lists',
+    'miniclient://app.evil.com/me',
+    'miniclient://APP@evil/me',
+    'miniclient://app:80/me',
+    'MINICLIENT://evil/x',
+    'miniclient:///me',
+    'miniclient://app//evil',
+    'miniclient://app/%2F%2Fevil',
+    'miniclient://app/\\evil',
+    '',
+    ' ',
+    '   ',
+    ' ',
+    '​//evil',
+    '/ /evil',
+    '/auth/sign-in',
+    '/auth/sign-in/',
+    '/auth/sign-in?from=/auth/sign-in',
+    '/AUTH/sign-in',
+    '/auth//sign-in',
+    '/auth/./sign-in',
+    '/auth/%2e/sign-in',
+    '/auth%2Fsign-in',
+    '/auth%252Fsign-in',
+    '/me/../auth/sign-in',
+    'miniclient://app/auth/sign-in',
+    'miniclient://app/auth/sign-in?from=%2Fauth%2Fsign-in',
+    'data:text/html,<script>',
+    'file:///etc/passwd',
+    'ftp://evil',
+    'tel:123',
+    'mailto:a@b',
+    'evil.com',
+    'evil.com/me',
+    '../me',
+    '?x=1',
+    '#x',
+    '/%',
+    '/%zz',
+    '/%E0%A4%A',
+    '/..//evil',
+    '/a/..//evil',
+    '/a/%2e%2e//evil',
+    '/a/%252e%252e/%252fevil',
+  ];
+  for (final from in hostile) {
+    test('hostile ${hostile.indexOf(from)}', () {
+      final t = safeSignInTarget(from);
+      final u = Uri.parse(t);
+      expect(
+        u.hasScheme && !t.startsWith('miniclient://app/'),
+        isFalse,
+        reason: t,
+      );
+      expect(
+        u.hasAuthority && !t.startsWith('miniclient://app/'),
+        isFalse,
+        reason: t,
+      );
+      expect(t.startsWith('//'), isFalse, reason: t);
+      expect(t.contains('\\'), isFalse, reason: t);
+      expect(
+        t == home || t.startsWith('/') || t.startsWith('miniclient://app/'),
+        isTrue,
+        reason: t,
+      );
+      var d = u.path;
+      for (var i = 0; i < 8; i++) {
+        try {
+          d = Uri.decodeComponent(d);
+        } on Object {
+          break;
+        }
+        expect(d.startsWith('//'), isFalse, reason: '$from -> $t -> $d');
+        expect(d.startsWith('/\\'), isFalse, reason: '$from -> $t -> $d');
+        expect(
+          Uri(path: d).normalizePath().path.startsWith('/auth/sign-in'),
+          isFalse,
+          reason: '$from -> $t',
+        );
+      }
+      // ignore: avoid_print
+      print(
+        'RESULT [$from] => $t'.replaceAll('\n', r'\n').replaceAll('\t', r'\t'),
+      );
+    });
+  }
+  test('good ones survive', () {
+    expect(safeSignInTarget('/me/lists/new'), '/me/lists/new');
+    // ignore: avoid_print
+    print(
+      'RESULT good: ${safeSignInTarget('miniclient://app/me/lists/new?x=1')}'
+      ' ${safeSignInTarget('/library/a%2Fb')}',
+    );
+  });
+}

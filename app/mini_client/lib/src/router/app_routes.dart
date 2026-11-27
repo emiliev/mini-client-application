@@ -5,8 +5,11 @@ import 'dart:async';
 import 'package:app_core/app_core.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_session/mc_session.dart';
 
 import 'package:mini_client/src/pages/placeholder_pages.dart';
 
@@ -43,6 +46,11 @@ class HomeRoute extends GoRouteData with $HomeRoute {
       onNewReadingList: () => AppFlows.createReadingList(GoRouter.of(context)),
       onEditReadingList: (id) =>
           AppFlows.editReadingList(GoRouter.of(context), id),
+      // The session entry (T-0066): the sign-in screen is a result route.
+      session: diContainer<SessionReader>(),
+      onSignIn: () => AppFlows.signIn(GoRouter.of(context)),
+      onSignOut: () => diContainer<AuthApi>().signOut(),
+      dataChanges: diContainer<EventBus>().on<DataChanged>(),
     );
   }
 }

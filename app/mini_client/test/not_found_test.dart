@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mini_client/src/mini_client_app.dart';
 import 'package:mini_client/src/pages/placeholder_pages.dart';
@@ -281,7 +282,10 @@ void main() {
   test('T-0054-AC4 every error path reaches onException: go_router 17.5 '
       'skips it only for an error inside an onEnter, and the app has none '
       '(add onEnter, and it must route its errors to not-found too)', () {
-    final router = buildAppRouter(initialLocation: AppLocations.home);
+    final router = buildAppRouter(
+      initialLocation: AppLocations.home,
+      session: _SignedOut(),
+    );
     addTearDown(router.dispose);
 
     expect(router.configuration.topOnEnter, isNull);
@@ -296,4 +300,19 @@ void main() {
     expect(AppLocations.newReadingList, '/me/lists/new');
     expect(AppLocations.editReadingList('l-1'), '/me/lists/l-1/edit');
   });
+}
+
+/// A signed-out session for a router that is built without a root container.
+class _SignedOut implements SessionReader {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
+  @override
+  bool get isSignedIn => false;
+
+  @override
+  AuthStatus get status => AuthStatus.signedOut;
+
+  @override
+  Stream<AuthStatus> get authState => const Stream<AuthStatus>.empty();
 }
