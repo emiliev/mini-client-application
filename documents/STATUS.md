@@ -10,7 +10,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0056 engineer (Opus) |
+| **Active crew** | T-0056 (Opus), T-0058, T-0059 engineers (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -41,7 +41,8 @@ _Last updated: 2026-11-27 by Tech Lead_
 - Resumed 2026-11-27.
 - **Next, in order:**
   1. DB prerequisites done (`mc_feature_flags`, `mc_analytics`, commerce fixtures). Next: the DB exemplar (T-0056, in progress) `store_home` (P1-21) on `mc_fixtures_commerce`.
-  2. The `/me/**` auth guard (P-110 done in T-0057; decide how home learns the editor's result after `go(from)`).
+  2. ST/IX prerequisites: `mc_ds_overlays` (T-0058) and `mc_ds_charts` (T-0059), both in progress.
+  - The `/me/**` auth guard is **deferred until the sign-in feature exists**. It needs a `/auth/sign-in?from=` route; today sign-in is the temporary fixture sheet (P-044), and the editor gates sign-in itself. P-110 is ready for it.
   3. ST (`settings_appearance`) and IX (`trivia_quiz`) exemplars, then the P1-24 bricks.
 
 ## Next

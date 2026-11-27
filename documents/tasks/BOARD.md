@@ -24,6 +24,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 | [T-0056](T-0056-store-home-exemplar.md) | `store_home`, the DB exemplar (P1-21): 5 independent sections, category paging, first flag and analytics use | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0051, T-0052, T-0053 | `fleet/T-0056-store-home` |
+| [T-0058](T-0058-ds-overlays.md) | `mc_ds_overlays`: dialogs, sheets, menus, tooltip, toasts; sign-in sheet migrated | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0058-ds-overlays` |
+| [T-0059](T-0059-ds-charts.md) | `mc_ds_charts`: bar, line, donut, radar, timeline painters | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0059-ds-charts` |
 
 ## Done
 | ID | Title | Result |
