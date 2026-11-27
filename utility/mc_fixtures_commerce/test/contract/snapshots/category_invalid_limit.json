@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_parameter",
+      "message": "Query parameter \"limit\" must be a whole number from 1 to 100",
+      "parameter": "limit"
+    }
+  },
+  "request": "GET /v1/store/categories/heroes/products?limit=101 as u-100",
+  "status": 400
+}

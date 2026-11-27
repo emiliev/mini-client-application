@@ -10,7 +10,8 @@ export 'package:mc_fixtures_comics/src/data/universe.dart'
         VariantRecord,
         creatorCount,
         issuesPerSeries,
-        seriesCount;
+        seriesCount,
+        seriesIdBase;
 export 'package:mc_fixtures_comics/src/domain.dart'
     show
         ComicsMockDomain,

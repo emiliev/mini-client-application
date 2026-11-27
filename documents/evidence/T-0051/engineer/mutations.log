@@ -1,0 +1,203 @@
+baseline PASS
+=== B1 the cheapest unit is taken first (ascending order)
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== B2 equal prices go to the later line
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== B3 the first unit of each three is free
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== B4 every second unit is free
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== B5 a group of four
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== B6 every category counts
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== B7 eligible from two units
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== B8 HEROES3 is on another category
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== B9 COSMIC3 is on another category
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== P1 percent is taken before buy-2-get-1 (full line)
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== P2 percent rounds down
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== P3 percent rounds up
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== P4 percent rounds the total, not each line
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== P5 SAVE10 is 11 percent
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== P6 SAVE25 is 24 percent
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== P7 the fixed step ignores the percent step (stacking order)
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== F1 the minimum is ignored
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== F2 the minimum is exclusive
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== F3 the minimum is checked on the full subtotal
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== F4 the amount is not shared (all on the first line)
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== F5 the odd cents go to the smallest remainders
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== F6 equal remainders go to the later line
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== F7 the odd cents are dropped
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== F8 TAKE5 is worth 400
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== F9 TAKE5 needs 2400
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== F10 TAKE15 is worth 1400
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== F11 TAKE15 needs 7000
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== L1 a deal product is charged at list price
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== L2 a line ignores its quantity
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== L3 a line total drops the fixed discount
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== L4 the cart total is the sum of subtotals
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== L5 the deal price rounds down
+    KILLED by: //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== L6 the first deal is 11 percent
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test 
+=== L7 a deal ends a day later
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== L8 the cart item count is the line count
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== L9 eligible is always true
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== L10 the list price shows the unit price
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== L11 a set quantity adds to the line
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== L12 quantity 0 keeps the line
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== L13 an emptied cart keeps its codes
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== V1 quantity 100 allowed
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V2 quantity -1 allowed
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== V3 the maximum quantity constant is 100
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V5 stock off by one
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:validation_test 
+=== V6 stock not checked
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V7 unknown_product answers 400
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V8 out_of_stock answers 400
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V9 invalid_quantity answers 422
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V10 unknown_promo answers 400
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V11 promo_not_applicable answers 400
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V12 an id of an unsold comic is a product
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V13 promo codes are case-sensitive
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V14 promo codes are not trimmed
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== V15 a code already applied is applied twice
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V16 two codes of one kind can stack
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V17 a code applies to an empty cart
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V18 buy-2-get-1 applies without a matching item
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V19 fixed-off applies below its minimum
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V20 fixed-off minimum checked on the subtotal
+    KILLED by: //utility/mc_fixtures_commerce:cart_test 
+=== V21 DELETE with a code removes every code
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V22 DELETE of a code that is not applied succeeds
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V23 no bearer needed (falls back to the first user)
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V24 the Authorization header is never read
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V25 unauthenticated answers 403
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== V26 every user shares one cart
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== V27 the empty store shares the default carts
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== V28 carts do not persist (rebuilt per request)
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== R1 an overlong product id throws (int.parse unguarded)
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== R2 leading zeros are accepted
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== R3 a blank code on DELETE removes every code
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== R4 the category base is hard-coded
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== R5 an unknown section is not rejected
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+=== V29 unknown_category answers 200
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test 
+=== S1 the page limit allows 101
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test 
+=== S2 the default page is 25
+    KILLED by: //utility/mc_fixtures_commerce:store_test 
+=== S3 the offset is ignored
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S4 total counts the page
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S5 a category count is off by one
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S6 the server_error body differs from the scenario
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+=== S7 no banner searches
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S8 the store sells four issues per series
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S9 the currency is dollars
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S10 a deal product can be sold out
+    KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S11 five categories
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S12 a product id is not its comic id
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test //utility/mc_fixtures_commerce:validation_test 
+=== S13 a product title differs from its comic
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test 
+=== S14 prices ignore the seed
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S15 prices span a different range
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S16 the large stock is below 99
+    KILLED by: //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test //utility/mc_fixtures_commerce:validation_test 
+=== S17 the sold-out products move
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S18 the deals move
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== S19 the featured products move
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== X1 store.deals_error also fails banners
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:store_test 
+=== X2 a section set fails nothing
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+=== X3 the server_error scenario misses a route
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+=== X4 the server_error set misses a route
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+=== X5 the empty scenario is the default store
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== X6 the empty set is the default store
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+=== X7 injected failures are 503
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== X8 the cart section misses a route
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
+
+killed=100 survived=0 broken=0

@@ -1,0 +1,60 @@
+{
+  "body": {
+    "banners": [
+      {
+        "id": "b-1",
+        "image": {
+          "path": "mock-asset://characters/001",
+          "variant": "landscape"
+        },
+        "subtitle": "Fresh first issues, picked for you",
+        "target": {
+          "comicId": 500540,
+          "type": "comic"
+        },
+        "title": "New this week"
+      },
+      {
+        "id": "b-2",
+        "image": {
+          "path": "mock-asset://characters/005",
+          "variant": "landscape"
+        },
+        "subtitle": "Buy 2 get 1 with HEROES3",
+        "target": {
+          "categoryId": "heroes",
+          "type": "category"
+        },
+        "title": "Heroes assemble"
+      },
+      {
+        "id": "b-3",
+        "image": {
+          "path": "mock-asset://characters/009",
+          "variant": "landscape"
+        },
+        "subtitle": "Every Amber series in one search",
+        "target": {
+          "query": "amber",
+          "type": "search"
+        },
+        "title": "Amber season"
+      },
+      {
+        "id": "b-4",
+        "image": {
+          "path": "mock-asset://characters/013",
+          "variant": "landscape"
+        },
+        "subtitle": "Cosmic adventures, buy 2 get 1 with COSMIC3",
+        "target": {
+          "categoryId": "cosmic",
+          "type": "category"
+        },
+        "title": "Out of this world"
+      }
+    ]
+  },
+  "request": "GET /v1/store/banners as u-100",
+  "status": 200
+}

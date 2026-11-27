@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "categoryId": "nope",
+      "code": "unknown_category",
+      "message": "No category \"nope\""
+    }
+  },
+  "request": "GET /v1/store/categories/nope/products as u-100",
+  "status": 404
+}

@@ -1,0 +1,62 @@
+{
+  "body": {
+    "categories": [
+      {
+        "count": 60,
+        "id": "heroes",
+        "image": {
+          "path": "mock-asset://characters/002",
+          "variant": "standard"
+        },
+        "name": "Heroes"
+      },
+      {
+        "count": 60,
+        "id": "villains",
+        "image": {
+          "path": "mock-asset://characters/006",
+          "variant": "standard"
+        },
+        "name": "Villains"
+      },
+      {
+        "count": 60,
+        "id": "cosmic",
+        "image": {
+          "path": "mock-asset://characters/010",
+          "variant": "standard"
+        },
+        "name": "Cosmic"
+      },
+      {
+        "count": 60,
+        "id": "mystery",
+        "image": {
+          "path": "mock-asset://characters/014",
+          "variant": "standard"
+        },
+        "name": "Mystery"
+      },
+      {
+        "count": 60,
+        "id": "classics",
+        "image": {
+          "path": "mock-asset://characters/018",
+          "variant": "standard"
+        },
+        "name": "Classics"
+      },
+      {
+        "count": 60,
+        "id": "team-ups",
+        "image": {
+          "path": "mock-asset://characters/022",
+          "variant": "standard"
+        },
+        "name": "Team-Ups"
+      }
+    ]
+  },
+  "request": "GET /v1/store/categories as u-100",
+  "status": 200
+}

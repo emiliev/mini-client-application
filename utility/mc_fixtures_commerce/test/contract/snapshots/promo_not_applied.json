@@ -1,0 +1,15 @@
+{
+  "body": {
+    "error": {
+      "code": "promo_not_applicable",
+      "message": "TAKE5 cannot be applied: not_applied",
+      "promoCode": "TAKE5",
+      "reason": "not_applied"
+    }
+  },
+  "request": "DELETE /v1/me/cart/promo?code=TAKE5 as u-100",
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":1}"
+  ],
+  "status": 409
+}

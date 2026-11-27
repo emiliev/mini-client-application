@@ -1,0 +1,35 @@
+{
+  "body": {
+    "currency": "EUR",
+    "discountCents": 0,
+    "itemCount": 1,
+    "items": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/012",
+          "variant": "portrait_large"
+        },
+        "discountCents": 0,
+        "listPriceCents": 1510,
+        "productId": 500121,
+        "quantity": 1,
+        "subtotalCents": 1510,
+        "title": "Ember Chronicles #2",
+        "totalCents": 1510,
+        "unitPriceCents": 1510
+      }
+    ],
+    "promotions": [],
+    "subtotalCents": 1510,
+    "totalCents": 1510
+  },
+  "request": "PUT /v1/me/cart/items/500120 as u-100",
+  "requestBody": {
+    "quantity": 0
+  },
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":1}",
+    "PUT /v1/me/cart/items/500121 {\"quantity\":1}"
+  ],
+  "status": 200
+}

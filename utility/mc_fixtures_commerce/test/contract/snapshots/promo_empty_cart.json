@@ -1,0 +1,15 @@
+{
+  "body": {
+    "error": {
+      "code": "promo_not_applicable",
+      "message": "SAVE10 cannot be applied: empty_cart",
+      "promoCode": "SAVE10",
+      "reason": "empty_cart"
+    }
+  },
+  "request": "POST /v1/me/cart/promo as u-100",
+  "requestBody": {
+    "code": "SAVE10"
+  },
+  "status": 409
+}

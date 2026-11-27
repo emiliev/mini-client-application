@@ -1,0 +1,16 @@
+{
+  "body": {
+    "error": {
+      "available": 0,
+      "code": "out_of_stock",
+      "message": "Only 0 of \"Amber Crossing #3\" in stock",
+      "productId": 501742,
+      "requested": 1
+    }
+  },
+  "request": "PUT /v1/me/cart/items/501742 as u-100",
+  "requestBody": {
+    "quantity": 1
+  },
+  "status": 409
+}

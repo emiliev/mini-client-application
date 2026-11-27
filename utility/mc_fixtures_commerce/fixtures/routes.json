@@ -1,0 +1,24 @@
+{
+  "domain": "commerce",
+  "routes": [
+    "GET /v1/store/banners",
+    "GET /v1/store/deals",
+    "GET /v1/store/categories",
+    "GET /v1/store/categories/:id/products",
+    "GET /v1/store/featured",
+    "GET /v1/me/cart",
+    "PUT /v1/me/cart/items/:productId",
+    "POST /v1/me/cart/promo",
+    "DELETE /v1/me/cart/promo"
+  ],
+  "scenarios": [
+    "commerce.empty",
+    "commerce.server_error",
+    "store.banners_error",
+    "store.cart_error",
+    "store.categories_error",
+    "store.category_products_error",
+    "store.deals_error",
+    "store.featured_error"
+  ]
+}
