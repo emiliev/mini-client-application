@@ -568,6 +568,9 @@ void main() {
         expect([r['score'], r['bestScore'], r['isNewBest']], [325, 325, true]);
         r = await score('C0 W0x9'); // lower again
         expect([r['score'], r['bestScore'], r['isNewBest']], [150, 325, false]);
+        expect(await bestOf(dio, user: collector), {'comics': 325});
+        r = await score('C0 C0 W0x8'); // 325 again: a tie
+        expect([r['score'], r['bestScore'], r['isNewBest']], [325, 325, false]);
         r = await score('C0x10'); // the maximum
         expect(
           [r['score'], r['bestScore'], r['isNewBest']],

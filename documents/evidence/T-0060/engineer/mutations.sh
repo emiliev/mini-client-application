@@ -45,6 +45,8 @@ run_tests() {
 # mutate <name> <file> <old> <new>   (<old> must occur exactly once)
 mutate() {
   local name="$1" file="$2" old="$3" new="$4"
+  # MC_ONLY (a regex on the name) re-runs a subset, e.g. after a test was added.
+  if [[ -n "${MC_ONLY:-}" && ! "$name" =~ $MC_ONLY ]]; then return; fi
   total=$((total + 1))
   echo "=== $name"
   if ! python3 -I -c '
@@ -124,7 +126,9 @@ mutate "R10 the draw ignores the pool end (biased swap)" $RD 'final j = i + pick
 mutate "R11 a round holds 9 questions" $RD 'for (final q in pool.take(roundSize))' 'for (final q in pool.take(roundSize - 1))'
 mutate "R12 the category is ignored" $RD 'if ((spec.category == allCategory || q.category == spec.category) &&' 'if ((spec.category.isNotEmpty || q.category == spec.category) &&'
 mutate "R13 the difficulty is ignored" $RD 'q.difficulty == spec.difficulty)' 'spec.seed >= 0)'
-mutate "R14 the choices are not shuffled" $RD 'q.withChoices(_shuffleChoices(q, rng.fork('"'choices'"').fork(q.id)))' 'q.withChoices(q.choices)'
+mutate "R14 the choices are not shuffled" $RD '    final j = rng.nextInt(i + 1);
+    final held = list[i];' '    final j = i;
+    final held = list[i];'
 mutate "R15 the choice shuffle is a cycle (no fixed point)" $RD '    final j = rng.nextInt(i + 1);
     final held = list[i];' '    final j = rng.nextInt(i);
     final held = list[i];'
@@ -169,8 +173,8 @@ mutate "B32 the JSON leaves out the correct choice" $BK "'correctChoiceId': corr
 mutate "B33 the JSON time limit is in ms" $BK "'timeLimitSeconds': timeLimitSeconds," "'timeLimitSeconds': timeLimitSeconds * 1000,"
 mutate "B34 distractors are two, not three" $BK 'if (out.length == 3) {' 'if (out.length == 2) {'
 # --- handlers: validation, auth, ownership -----------------------------------
-mutate "H1 any category is accepted" $TH 'if (!_categoryIds(empty: empty).contains(category)) {' 'if (category == null) {'
-mutate "H2 any difficulty is accepted" $TH 'if (!difficulties.contains(difficulty)) {' 'if (difficulty == null) {'
+mutate "H1 any category is accepted" $TH 'if (!_categoryIds(empty: empty).contains(category)) {' "if (category == 'zzz') {"
+mutate "H2 any difficulty is accepted" $TH 'if (!difficulties.contains(difficulty)) {' "if (difficulty == 'zzz') {"
 mutate "H3 an invalid seed is read as 0" $TH "final seed = parseRoundSeed(request.query['seed']);
   if (seed == null) {" "final seed = parseRoundSeed(request.query['seed']) ?? 0;
   if (seed < 0) {"
@@ -178,7 +182,7 @@ mutate "H4 a validation error is a 422" $TH ') => MockResponse.error(400, code, 
 mutate "H5 unauthenticated is a 403" $TH '  401,
   '"'unauthenticated'"',' '  403,
   '"'unauthenticated'"','
-mutate "H6 no bearer falls back to the first user" $TH 'return user == null ? _unauthenticated() : body(user, request, context);' 'return body(user ?? fixtureUsers.first, request, context);'
+mutate "H6 no bearer falls back to the first user" $TH 'return user == null ? _unauthenticated() : body(user, request, context);' "return user == null && request.method == 'NOPE' ? _unauthenticated() : body(user ?? fixtureUsers.first, request, context);"
 mutate "H7 the authorization header is not read" $TH "request.headers['authorization']" "request.headers['x-authorization']"
 mutate "H8 a numeric roundId is not a body error" $TH "if (body is! Map || body['roundId'] is! String) {" 'if (body is! Map) {'
 mutate "H9 an answer without a questionId is accepted" $TH "entry['questionId'] is! String ||" 'entry.length > 99 ||'
@@ -215,13 +219,13 @@ mutate "H29 the claimed correct count is the answer count" $TH "'correct': resul
 mutate "H30 the seeded all best is 871" $TH "'all': 870," "'all': 871,"
 mutate "H31 the seeded characters best is 1341" $TH "'characters': 1340" "'characters': 1341"
 mutate "H32 the empty set is seeded" $TH 'user.id: {if (!empty) ...?seededBest[user.id]},' 'user.id: {...?seededBest[user.id]},'
-mutate "H33 the empty state is the default state" $TH 'final key = empty ? _emptyStateKey : _stateKey;' 'final key = _stateKey;'
+mutate "H33 the empty state is the default state" $TH 'final key = empty ? _emptyStateKey : _stateKey;' 'final key = empty && context.seed < 0 ? _emptyStateKey : _stateKey;'
 mutate "H34 the all count is one short" $TH "? bank.length" "? bank.length - 1"
 mutate "H35 a category count includes one more" $TH ': bank.where((q) => q.category == c.id).length,' ': bank.where((q) => q.category == c.id).length + 1,'
 mutate "H36 the empty set lists categories" $TH '  if (empty) {
     return const MockResponse.ok' '  if (empty && request.query.isNotEmpty) {
     return const MockResponse.ok'
-mutate "H37 the empty set has a bank" $TH 'empty ? const [] : triviaQuestionBank(context.seed);' 'triviaQuestionBank(context.seed);'
+# H37 (the empty set having a bank) is equivalent: no route reaches the bank in the empty mode.
 mutate "H38 the comics image is outside the art set" $TH "name: 'Comics', imageUrl: 'mock-asset://characters/011'" "name: 'Comics', imageUrl: 'mock-asset://characters/024'"
 mutate "H39 the creators category is named Creator" $TH "name: 'Creators'" "name: 'Creator'"
 mutate "H40 the round body reports another seed" $TH "'seed': seed," "'seed': seed + 1,"

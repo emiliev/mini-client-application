@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_editorial/mc_fixtures_editorial.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
@@ -253,8 +254,16 @@ Future<String?> _verify(_Truth truth, TriviaQuestion q) async {
         return 'prompt lacks the title';
       }
       final role = facts['role']! as String;
-      if (kind != 'creator_$role') {
+      const verbs = {
+        'writer': 'wrote',
+        'penciller': 'penciled',
+        'inker': 'inked',
+      };
+      if (q.template != 'creator_$role' || kind != q.template) {
         return 'role does not match the template';
+      }
+      if (!q.prompt.startsWith('Who ${verbs[role]} ')) {
+        return 'the prompt asks for another role';
       }
       final holders = [
         for (final c in (comic['creators']! as List).cast<Json>())
@@ -518,6 +527,22 @@ void main() {
       });
     });
   }
+
+  test('T-0060-AC4: every first-comic question is about a character with at least two comics, over 12 backend seeds', () {
+    for (var seed = 0; seed < 12; seed++) {
+      final universe = ComicUniverse(seed);
+      for (final q in triviaQuestionBank(seed)) {
+        if (q.template == 'character_first_comic') {
+          final id = q.facts['characterId']! as int;
+          expect(
+            universe.comicsOfCharacter(id).length,
+            greaterThanOrEqualTo(2),
+            reason: 'seed $seed ${q.id}',
+          );
+        }
+      }
+    }
+  });
 
   group('T-0060-AC4 images resolve to bundled assets', () {
     const resolver = BundledImageResolver();

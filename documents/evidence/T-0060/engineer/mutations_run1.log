@@ -1,0 +1,263 @@
+baseline PASS
+=== S1 elapsed equal to the limit is not a timeout
+    KILLED by: provider_contract_test scoring_test 
+=== S2 the limit minus 1 ms is a timeout
+    KILLED by: provider_contract_test scoring_test 
+=== S3 the limit plus 1 ms is not a timeout
+    KILLED by: provider_contract_test scoring_test 
+=== S4 no choice is not a timeout
+    KILLED by: provider_contract_test scoring_test 
+=== S5 the limit is 1001 ms per second
+    KILLED by: provider_contract_test scoring_test 
+=== S6 base is 101
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== S7 the time bonus is at most 51
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== S8 the streak step is 26
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== S9 the time bonus rounds up
+    KILLED by: provider_contract_test scoring_test validation_test 
+=== S10 the time bonus rounds half up
+    KILLED by: scoring_test validation_test 
+=== S11 the bonus ignores the elapsed time
+    KILLED by: provider_contract_test scoring_test validation_test 
+=== S12 the bonus counts from 1 ms
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== S13 the first correct answer already earns a streak step
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== S14 the streak bonus is capped at 3 steps
+    KILLED by: fixture_sets_test scoring_test validation_test 
+=== S15 the streak grows by 2
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== S16 a wrong answer keeps the streak
+    KILLED by: provider_contract_test scoring_test 
+=== S17 a timeout keeps the streak
+    KILLED by: provider_contract_test scoring_test 
+=== S18 a wrong answer scores a point
+    KILLED by: provider_contract_test scoring_test validation_test 
+=== S19 answers are scored in reverse round order
+    KILLED by: provider_contract_test scoring_test 
+=== S20 correct counts every non-wrong answer
+    KILLED by: provider_contract_test scoring_test 
+=== S21 the outcome of a timeout is named wrong
+    KILLED by: provider_contract_test scoring_test 
+=== S22 the score is the last answer's points
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== R1 the largest seed is 2^31
+    KILLED by: provider_contract_test validation_test 
+=== R2 the seed 2^31-1 is rejected
+    KILLED by: provider_contract_test validation_test 
+=== R3 leading zeros are accepted
+    KILLED by: validation_test 
+=== R4 a signed seed is accepted
+    KILLED by: provider_contract_test validation_test 
+=== R5 an unknown category in a round id is accepted
+    KILLED by: validation_test 
+=== R6 the round id leaves out the seed
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== R7 a round id of another difficulty is accepted
+    KILLED by: validation_test 
+=== R8 the round seed is not used for the question draw
+    KILLED by: determinism_test provider_contract_test validation_test 
+=== R9 easy and hard rounds share a stream
+    KILLED by: provider_contract_test 
+=== R10 the draw ignores the pool end (biased swap)
+    KILLED by: provider_contract_test 
+=== R11 a round holds 9 questions
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== R12 the category is ignored
+    KILLED by: determinism_test provider_contract_test 
+=== R13 the difficulty is ignored
+    KILLED by: determinism_test provider_contract_test scoring_test 
+=== R14 the choices are not shuffled
+    BUILD ERROR (broken, does not count as killed)
+ERROR: /private/tmp/claude-501/T-0060-engineer/mutwt/utility/mc_fixtures_editorial/BUILD.bazel:12:13: Analyzing Dart sources of //utility/mc_fixtures_editorial:mc_fixtures_editorial against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on dart_library rule target //utility/mc_fixtures_editorial:mc_fixtures_editorial) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+warning - utility/mc_fixtures_editorial/lib/src/data/round.dart:78:20 - The declaration '_shuffleChoices' isn't referenced. Try removing the declaration of '_shuffleChoices'. - unused_element
+=== R15 the choice shuffle is a cycle (no fixed point)
+    KILLED by: provider_contract_test 
+=== R16 every question has the same choice shuffle
+    KILLED by: provider_contract_test 
+=== R17 the round seed does not shuffle the choices
+    KILLED by: determinism_test provider_contract_test 
+=== B1 a template yields 20 questions
+    KILLED by: determinism_test provider_contract_test 
+=== B2 the easy limit is 21 s
+    KILLED by: determinism_test provider_contract_test scoring_test validation_test 
+=== B3 the medium limit is 16 s
+    KILLED by: determinism_test provider_contract_test scoring_test 
+=== B4 the hard limit is 11 s
+    KILLED by: determinism_test provider_contract_test scoring_test 
+=== B5 the subjects are not shuffled by seed
+    KILLED by: determinism_test provider_contract_test 
+=== B6 choice ids start at c0
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B7 the correct id is off by one
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B8 the bank order of choices is not shuffled
+    KILLED by: provider_contract_test 
+=== B9 the question id is not padded
+    KILLED by: provider_contract_test 
+=== B10 a team question's answer is the origin
+    KILLED by: provider_contract_test 
+=== B11 a power distractor may be the character's own power
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B12 year distractors reach five years away
+    KILLED by: provider_contract_test 
+=== B13 the debut year question is off by a year
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B14 one-comic characters are asked about
+    SURVIVED
+=== B15 the latest comic is the first appearance
+    KILLED by: provider_contract_test 
+=== B16 a release-date tie goes to the higher id
+    KILLED by: provider_contract_test 
+=== B17 first-comic distractors are comics that feature the character
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B18 debut years may repeat
+    KILLED by: determinism_test 
+=== B19 debut distractors are characters of the same year
+    KILLED by: provider_contract_test 
+=== B20 cast distractors are cast members
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B21 the price cents are wrong
+    KILLED by: provider_contract_test 
+=== B22 the comic year is its month
+    KILLED by: provider_contract_test 
+=== B23 a series starts when it ends
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B24 a series ends when it starts
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B25 page counts step by 4
+    KILLED by: provider_contract_test 
+=== B26 a comic with no inker is asked about
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B27 creator distractors may hold the role
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B28 the penciller question asks for the inker
+    SURVIVED
+=== B29 the comic year question is in another category
+    KILLED by: provider_contract_test 
+=== B30 a series image is left out
+    KILLED by: provider_contract_test 
+=== B31 the image field is dropped from the JSON of questions with one
+    KILLED by: provider_contract_test 
+=== B32 the JSON leaves out the correct choice
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== B33 the JSON time limit is in ms
+    KILLED by: determinism_test provider_contract_test 
+=== B34 distractors are two, not three
+    KILLED by: determinism_test fixture_sets_test provider_contract_test scoring_test validation_test 
+=== H1 any category is accepted
+    BUILD ERROR (broken, does not count as killed)
+ERROR: /private/tmp/claude-501/T-0060-engineer/mutwt/utility/mc_fixtures_editorial/BUILD.bazel:12:13: Analyzing Dart sources of //utility/mc_fixtures_editorial:mc_fixtures_editorial against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on dart_library rule target //utility/mc_fixtures_editorial:mc_fixtures_editorial) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+warning - utility/mc_fixtures_editorial/lib/src/handlers/trivia_handlers.dart:135:34 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
+=== H2 any difficulty is accepted
+    BUILD ERROR (broken, does not count as killed)
+ERROR: /private/tmp/claude-501/T-0060-engineer/mutwt/utility/mc_fixtures_editorial/BUILD.bazel:12:13: Analyzing Dart sources of //utility/mc_fixtures_editorial:mc_fixtures_editorial against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on dart_library rule target //utility/mc_fixtures_editorial:mc_fixtures_editorial) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+warning - utility/mc_fixtures_editorial/lib/src/handlers/trivia_handlers.dart:135:47 - The '!' will have no effect because the receiver can't be null. Try removing the '!' operator. - unnecessary_non_null_assertion
+=== H3 an invalid seed is read as 0
+    KILLED by: provider_contract_test validation_test 
+=== H4 a validation error is a 422
+    KILLED by: fixture_sets_test provider_contract_test validation_test 
+=== H5 unauthenticated is a 403
+    KILLED by: fixture_sets_test provider_contract_test validation_test 
+=== H6 no bearer falls back to the first user
+    BUILD ERROR (broken, does not count as killed)
+ERROR: /private/tmp/claude-501/T-0060-engineer/mutwt/utility/mc_fixtures_editorial/BUILD.bazel:12:13: Analyzing Dart sources of //utility/mc_fixtures_editorial:mc_fixtures_editorial against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on dart_library rule target //utility/mc_fixtures_editorial:mc_fixtures_editorial) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+warning - utility/mc_fixtures_editorial/lib/src/handlers/trivia_handlers.dart:62:14 - The declaration '_unauthenticated' isn't referenced. Try removing the declaration of '_unauthenticated'. - unused_element
+=== H7 the authorization header is not read
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== H8 a numeric roundId is not a body error
+    KILLED by: validation_test 
+=== H9 an answer without a questionId is accepted
+    KILLED by: validation_test 
+=== H10 a numeric choiceId is accepted as a body
+    KILLED by: validation_test 
+=== H11 an unknown round is scored as a default round
+    KILLED by: fixture_sets_test provider_contract_test validation_test 
+=== H12 more answers than questions are accepted
+    KILLED by: validation_test 
+=== H13 fewer answers than questions are accepted
+    KILLED by: provider_contract_test validation_test 
+=== H14 an unknown question is accepted
+    KILLED by: provider_contract_test validation_test 
+=== H15 a repeated answer is accepted
+    KILLED by: provider_contract_test validation_test 
+=== H16 an unknown choice is accepted
+    KILLED by: provider_contract_test validation_test 
+=== H17 no choice is rejected as unknown
+    KILLED by: provider_contract_test scoring_test validation_test 
+=== H18 elapsed -1 is accepted
+    KILLED by: provider_contract_test validation_test 
+=== H19 elapsed 0 is rejected
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== H20 a non-integer elapsed is accepted
+    KILLED by: validation_test 
+=== H21 the first result of 0 is a new best
+    KILLED by: provider_contract_test validation_test 
+=== H22 an equal score is a new best
+    KILLED by: provider_contract_test validation_test 
+=== H23 the best is the latest score
+    KILLED by: provider_contract_test validation_test 
+=== H24 the stored best is the latest score
+    SURVIVED
+=== H25 every best is kept under one category
+    KILLED by: validation_test 
+=== H26 results are kept for the first user
+    KILLED by: provider_contract_test validation_test 
+=== H27 the best list is of the first user
+    KILLED by: provider_contract_test validation_test 
+=== H28 the best list is not sorted
+    KILLED by: validation_test 
+=== H29 the claimed correct count is the answer count
+    KILLED by: provider_contract_test scoring_test 
+=== H30 the seeded all best is 871
+    KILLED by: provider_contract_test validation_test 
+=== H31 the seeded characters best is 1341
+    KILLED by: provider_contract_test validation_test 
+=== H32 the empty set is seeded
+    KILLED by: fixture_sets_test 
+=== H33 the empty state is the default state
+    BUILD ERROR (broken, does not count as killed)
+ERROR: /private/tmp/claude-501/T-0060-engineer/mutwt/utility/mc_fixtures_editorial/BUILD.bazel:12:13: Analyzing Dart sources of //utility/mc_fixtures_editorial:mc_fixtures_editorial against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on dart_library rule target //utility/mc_fixtures_editorial:mc_fixtures_editorial) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+warning - utility/mc_fixtures_editorial/lib/src/handlers/trivia_handlers.dart:10:14 - The declaration '_emptyStateKey' isn't referenced. Try removing the declaration of '_emptyStateKey'. - unused_element
+=== H34 the all count is one short
+    KILLED by: provider_contract_test 
+=== H35 a category count includes one more
+    KILLED by: provider_contract_test 
+=== H36 the empty set lists categories
+    KILLED by: fixture_sets_test 
+=== H37 the empty set has a bank
+    SURVIVED
+=== H38 the comics image is outside the art set
+    KILLED by: provider_contract_test 
+=== H39 the creators category is named Creator
+    KILLED by: provider_contract_test 
+=== H40 the round body reports another seed
+    KILLED by: provider_contract_test validation_test 
+=== H41 the server_error body differs
+    KILLED by: fixture_sets_test 
+=== H42 the seed error names no parameter
+    KILLED by: provider_contract_test validation_test 
+=== H43 the unknown-choice error has no choice id
+    KILLED by: provider_contract_test validation_test 
+=== D1 the best route is not in the manifest
+    KILLED by: fixture_sets_test provider_contract_test 
+=== D2 the slow scenario delays 1 s
+    KILLED by: fixture_sets_test 
+=== D3 the slow scenario fails with 500
+    KILLED by: fixture_sets_test 
+=== D4 the server_error scenario fails with 503
+    KILLED by: fixture_sets_test 
+=== D5 the empty scenario is not empty
+    KILLED by: fixture_sets_test 
+=== D6 the empty set is not empty
+    KILLED by: fixture_sets_test 
+=== D7 the domain is named differently
+    KILLED by: fixture_sets_test provider_contract_test 
+
+TOTAL 123  KILLED 114  SURVIVED 4  BROKEN 5
+survivor: B14 one-comic characters are asked about
+survivor: B28 the penciller question asks for the inker
+survivor: H24 the stored best is the latest score
+survivor: H37 the empty set has a bank
