@@ -141,3 +141,30 @@ Port options B to D are fairly rejected, and A is minimal. The edits:
     - a 50-run flake check passes on `bdd_test`.
 - My probe files are kept as evidence under [`verifier/probes/`](verifier/probes/) (`.txt`, so nothing builds them), with the diff of the probe edits I made to existing tests.
 - Everything else is solid, the review-round fixes above all.
+
+## Re-verification at d6c2b90 (Verifier, Sonnet, narrow)
+
+**Verdict: PASS.** D1 to D4 are fixed and ADR-0012's edits match the code. No new defects. Evidence: [`reverify/`](reverify/) (gates report, gates log, e2e summary, logs and 12 screenshots).
+
+| Scope | Result |
+|---|---|
+| D1: scenarios | "The category's next page fails, the footer offers Retry, and Retry loads it" and "The category's first page fails with a full-page error, and Retry loads it" exist in `store_home.feature` (lines 204 and 218), both tagged `@T-0056-AC2`, and pass. |
+| D1: coverage | My own `bazel coverage //feature/store/store_home:bdd_test`: `category_products_bloc.dart:81` (2 hits) and `:113` (1), `category_page.dart:65-68` (2, 1, 1, 1). All covered. |
+| D1: Outcome rows | I grepped every double-quoted test name in the AC1 to AC8 rows: all 4 exist (the section-order test, both category scenarios, the "every store route fails" scenario). The unquoted cart scenarios in AC3 match `store_home_cart.feature` (12 scenarios). `flow_scope_test` "the flag is read once per visit" exists (AC7 tag). No cited test is missing. |
+| D2: repro and fix | The guard is `if (!isClosed) add(const _SessionChanged());` at `cart_summary_bloc.dart:142`. VP05 (control), VP06 and VP07 pass with it, with no `StateError`. |
+| D2: guard removed | With the guard replaced by `if (true)`, VP06 and VP07 fail with `Bad state: Cannot add new events after calling close`, and VP05 still passes. Restored (`git checkout`). |
+| D2: audit | The only `add` calls in blocs are `cart_summary_bloc.dart:75` (a session subscription, cancelled in `close`), `:143` (guarded) and `category_products_bloc.dart:52` (`PagingController.onState`; the controller is disposed in `close`) and `:56` (in the constructor). Section blocs check `isClosed` after the await (`store_section_bloc.dart:81`). No unguarded add after an await. |
+| D3 | `feature_flow_test` "a nested flow is visible only while the flow around it is" covers the app route covered (inner false, then true again) and the outer flow's page covered (inner false, then true). With `outerIsCurrent` reverted to `route?.isCurrent ?? true` it fails (`Expected: false, Actual: true`). Restored. Note: the test reads only the inner scope. The outer scope's value is covered by the older "the scope publishes the flow's route and whether it is current" test. |
+| D4: double Retry | The outline covers all 5 sections (banners, deals, categories, featured, cart), each with 4 requests, the other 4 still failing, and 1 view. |
+| D4: flag off | "With the flag off, no featured request even after Retry elsewhere and pull to refresh" asserts 0 featured requests. |
+| D4: flag read once | `flow_scope_test` covers it. |
+| D4: dead terms | `grep ModalRoute` in `store_home/lib` finds nothing. `FlowScope.updateShouldNotify` now compares `container`, `outerCanPop` and `outerIsCurrent`. The whole store_home and `mc_feature_flow` suites (including the probes VP01 to VP11) pass, and the mutation above for the composition goes red. |
+| ADR-0012 | §3 names the ordering (route observer first, the flow builds a frame later) and §4 says "shown" is visible in the app, composed through nested flows. The Consequences state the nested-observer limitation. Both match `feature_flow.dart` and `flow_context.dart`. The test "a flow builds its first page a frame after it is built itself" exists. Scratch mutation (build the flow's `FlowBuilder` while the container future is still pending) makes it fail with "the first page waits for the flow container" (and 3 other flow tests). Restored. |
+| Gates | `T-0056-AC8_gates.sh`: **PASS** ([report](reverify/T-0056-AC8_gates.md)), 195 tests, coverage store_home 99.1 %, commerce_wiring 100 %, app_core 97.2 %, mc_analytics 100 %, mc_feature_flow 99.4 %, mc_monitoring 96.7 %, mc_formatters 100 %. `test --lockfile_mode=error //...`: 195/195 pass. |
+| Flake | `--runs_per_test=50` over every test target in store_home, commerce_wiring and mc_feature_flow (11 targets): 11/11 pass, 0 failures. |
+| E2E | The 3 store targets on my own `mc-T-0056-verifier-48548`: **3/3 PASS** ([summary](reverify/e2e/e2e-summary.md)). No build-failure marker, each log names `T-0056-AC5`, 12 screenshots. The simulator is deleted (`simctl list` shows no `mc-T-0056`). |
+| Merge check | `git merge --no-commit origin/main` (3f1e84f; T-0060 and T-0061) has **one conflict**: `app/wiring/app_core/test/app_layer_test.dart`. Both sides added an import and a test at the same places (the commerce domain's and the trivia domain's `appMockDomains` tests). Keeping both resolves it. With that resolution, `test --lockfile_mode=error //...` is **201/201 pass**. Merge aborted, tree reset. The Tech Lead will meet this conflict at integration. |
+
+### Notes
+- Minor, not a defect: `category_page.dart:88-91` and `category_products_bloc.dart:84-86` (the category refresh) are still not run by `bdd_test` (0 hits). It was not in this re-verify's scope. Package coverage is 99.1 %.
+- E2E setup for a fresh checkout: the first run failed twice because the checkout had no Xcode project and no generated code (not committed). Fix: `MC_OUTPUT_BASE=<base> tool/ide_sync --env e2e`, then `tool/e2e_ios.sh`. The two failed runs are not in the evidence (the passing run replaced them). This is an environment step, not a code defect.
