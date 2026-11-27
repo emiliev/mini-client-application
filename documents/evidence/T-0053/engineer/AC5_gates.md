@@ -30,6 +30,7 @@ control without the exclusion: exit 1 (must be 1)
 | workspace registration | PASS |
 | test //... (touched packages uncached) | PASS |
 | test --lockfile_mode=error //... | PASS |
+| bundled configs (dev, e2e, perf) | PASS |
 | build --config=lint //... | PASS |
 | mc_arch_check | PASS |
 | rules_fork.sh check | PASS |
@@ -37,7 +38,7 @@ control without the exclusion: exit 1 (must be 1)
 | l10n_check | PASS |
 | coverage >= 90 % (touched packages) | PASS |
 
-- tests: Executed 0 out of 161 tests: 161 tests pass.
+- tests: Executed 39 out of 39 tests: 39 tests pass.
 - coverage: == utility/mc_analytics TOTAL 275/275 100.0% == utility/mc_config TOTAL 25/25 100.0% == app/wiring/app_core TOTAL 428/447 95.7% == app/mini_client TOTAL 105/110 95.5% (threshold 90 %)
 
 **PASS T-0053-AC5-gates**
