@@ -120,3 +120,22 @@ Most bricks, and the DB, SR, FW and IX exemplars, track screens and events. They
 Mutations: `documents/evidence/T-0053/engineer/mutations.sh` (`MC_TASK=T-0053 MC_ROLE=engineer`; specs in `mutation_specs.py`; refuses any dirty tree, sets its restore trap before the first edit, counts `Build did NOT complete` and timeouts as **broken** and only `FAILED in` as **killed**, builds mutants without the analyzer so dead code left by a mutation cannot hide a surviving test), log `mutations.log`: **88/88 killed**, none survived, none broken. The first run found 4 survivors (`consent` re-read per entry only pinned for `denied`, a reserved-prefix list checked through itself, a failing `ConsentStore.save`, the e2e config); each got a test and now dies. e2e negative control as above.
 
 Test integrity: no test deleted, skipped or weakened; no `// ignore:`; no golden touched. Two existing tests were edited, see the Log. Globs use `MC_GENERATED_DART`. The simulator `mc-T-0053-engineer-*` was deleted after every e2e run, and Bazel was shut down.
+
+## Review round
+`/code-review` found 2 important bugs and 6 nits; all are fixed. `origin/main` was merged first (T-0049, T-0050 and the rest): no conflict, the lockfiles did not change, the route names survive `nestUnderHome` (a test walks the nested tree), and the `isolation_test` count stays 10.
+
+| # | Finding | Fix | Test (and mutation) |
+|---|---|---|---|
+| 1 | The BDD screen scenarios were vacuous (`contains`) | New exact, ordered step `the screens tracked are {'home, characters_list, home'}`; the three scenarios use it | `analytics_steps_test` (missing, extra, repeated, reordered, renamed, empty); `app_screens.feature`. X11 (no re-track on pop) and X12 (home twice on start) are killed by `bdd_test`; X13, X14 by the step test |
+| 2 | `reset()` dropped this turn's events | `reset()` keeps entries already queued (granted), delivered under their own session and `seq`; only the buffer waiting for a choice (`unknown`) is dropped; documented in the code and README | `consent_gate_test`: granted, unknown, denied. G18 and G18B (clear again) killed |
+| 3 | Unnamed nested routes tracked under their path | The observer takes the router's declared names (`screenNames`, `goRouteNames` from `GoRoute.name`); the app passes them lazily. The route-tree naming test stays | `route_observer_test` (unnamed `settings` not tracked, `profile_page` is; control without the set tracks `settings`), `router_observers_test`. X06 killed |
+| 4 | `dispose()` | `track`, `screen`, `setUserProperty`, `setConsent`, `reset` and the lifecycle calls are no-ops; nothing is saved | `consent_gate_test` group "a disposed Analytics". X01, X02 killed. The guard in the drain was redundant (dispose clears the queue), so it was removed |
+| 5 | The observer must never break navigation | `appRouterObservers` returns null when `Analytics` is not registered; the observer then tracks nothing | `router_observers_test` and `route_observer_test` navigate with no container. X07, X08 killed |
+| 6 | `screen()` param cap | 24 own params are accepted, 25 are rejected (`screen_name` counts) | `validation_test` boundary (debug and release). X04, X05 killed |
+| 7 | Wrong-typed `defaultConsent` | A non-string value, or a section that is not an object, is `unknown` | `app_config_test`. X09 killed |
+| 8 | DI ordering | Register `Analytics` first, then add the lifecycle observer; the observer is also registered so a test can prove disposing removed it | `di_test` (double registration leaves no observer; `removeObserver` is false after reset). X10 and S22 killed |
+
+Decisions: the ordered step splits its text on commas and ignores spaces, and `{''}` means no screens. `screenNames` is a lazy callback because the router does not exist when its observers are made. Mutants of the review run: **102/102 killed** (88 earlier ones plus G18B and X01 to X14, minus the dropped X03), `mutations.log`.
+
+New Definition of Done rule: the targets this task adds or changes that touch storage, lifecycle or races pass `test --runs_per_test=50 --nocache_test_results` with 0 failures (14 targets, `runs_per_test_50.log`). Two widget tests dropped a consent save (`unawaited(setConsent(...))` under fake async): they now `await tester.runAsync(...)`, so the write finishes before the directory is deleted.
+

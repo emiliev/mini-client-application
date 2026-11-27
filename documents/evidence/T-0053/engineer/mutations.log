@@ -16,7 +16,8 @@ G14: KILLED by utility/mc_analytics:consent_gate_test -- a new unknown period ke
 G15: KILLED by utility/mc_analytics:consent_gate_test -- going back to unknown does not trim to 100
 G16: KILLED by utility/mc_analytics:consent_gate_test -- consentChanges repeats an unchanged value
 G17: KILLED by utility/mc_analytics:consent_gate_test -- a failed save is not reported
-G18: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- reset keeps what was waiting
+G18: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- reset keeps the buffer that waits for a consent choice
+G18B: KILLED by utility/mc_analytics:consent_gate_test -- reset clears the entries already queued (this turn's events are lost)
 G19: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:di_test -- an unrecognised consent value grants
 G20: KILLED by utility/mc_analytics:consent_gate_test -- a damaged saved value falls back to the default
 G21: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:di_test -- the saved choice is ignored at restore
@@ -52,7 +53,7 @@ S03: KILLED by utility/mc_analytics:di_test utility/mc_analytics:sessions_sinks_
 S04: KILLED by utility/mc_analytics:sessions_sinks_test -- a second backgrounding moves the start time
 S05: KILLED by utility/mc_analytics:sessions_sinks_test -- coming back does not clear the background time
 S06: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- a rotation starts no session event
-S07: KILLED by utility/mc_analytics:sessions_sinks_test -- reset does not start a new session
+S07: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- reset does not start a new session
 S08: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- seq is counted across sessions
 S09: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test utility/mc_analytics:validation_test -- seq starts at 0
 S10: KILLED by utility/mc_analytics:consent_gate_test -- seq is counted against the current session, not the entry's
@@ -87,5 +88,18 @@ W09: KILLED by utility/mc_test_steps:analytics_steps_test -- the event step igno
 W10: KILLED by utility/mc_test_steps:analytics_steps_test -- the event-with-params step ignores the params
 W11: KILLED by utility/mc_test_steps:analytics_steps_test -- the no-event step counts nothing
 W12: KILLED by utility/mc_test_steps:analytics_steps_test -- the no-event step counts the kit's session start
+X01: KILLED by utility/mc_analytics:consent_gate_test -- track still works after dispose
+X02: KILLED by utility/mc_analytics:consent_gate_test -- setConsent still changes and saves after dispose
+X04: KILLED by utility/mc_analytics:validation_test -- screen() ignores the screen_name param in the cap
+X05: KILLED by utility/mc_analytics:validation_test -- screen() counts screen_name twice
+X06: KILLED by utility/mc_analytics:route_observer_test -- the observer ignores the router's declared names
+X07: KILLED by app/wiring/app_core:router_observers_test utility/mc_analytics:route_observer_test -- the observer throws when there is no Analytics
+X08: KILLED by app/wiring/app_core:router_observers_test -- appRouterObservers resolves Analytics even when it is not registered
+X09: KILLED by utility/mc_config:app_config_test -- a wrong-typed defaultConsent crashes
+X10: KILLED by utility/mc_analytics:di_test -- the lifecycle observer is added before registering
+X11: KILLED by app/mini_client:bdd_test -- the observer does not re-track on pop
+X12: KILLED by app/mini_client:bdd_test -- home is tracked twice on start
+X13: KILLED by utility/mc_test_steps:analytics_steps_test -- the ordered screens step compares as a set
+X14: KILLED by utility/mc_test_steps:analytics_steps_test -- the ordered screens step only checks they are all there
 ---
-mutations: 88, killed: 88, survived: 0, broken: 0, not applied: 0; tree: clean
+mutations: 102, killed: 102, survived: 0, broken: 0, not applied: 0; tree: clean
