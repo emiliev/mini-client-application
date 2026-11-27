@@ -1,10 +1,10 @@
-import 'package:app_core/app_core.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
 import 'package:mc_e2e_utils/mc_e2e_utils.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_session/mc_session.dart';
@@ -55,9 +55,23 @@ void main() {
     await pumpUntil(tester, find.byKey(_settingsBody), 'the settings');
 
     await tester.tap(find.byKey(_syncCta));
-    await pumpUntil(tester, find.byKey(fixtureSignInButtonKey), 'the sheet');
-    await shot(binding, tester, '65_sync_sign_in_sheet');
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
+    await pumpUntil(
+      tester,
+      find.byKey(const ValueKey<String>('auth_signin.form')),
+      'the sign-in form',
+    );
+    expect(
+      find.text('Sign in to sync your appearance across devices.'),
+      findsOneWidget,
+    );
+    await shot(binding, tester, '65_sync_sign_in_form');
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('auth_signin.demo.reader@mini-client.test'),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
     await pumpUntil(
       tester,
       find.text('Synced with your account.'),

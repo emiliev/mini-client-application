@@ -57,7 +57,7 @@ class AuthSignInFlow extends StatelessWidget {
     onComplete: (result) => onComplete(result! as SignInResult),
     onGeneratePages: (state) => [
       McFlowPage(
-        name: 'sign_in',
+        name: 'auth_sign_in',
         child: SignInPage(
           reason: state.reason,
           demoAccounts: state.demoAccounts,

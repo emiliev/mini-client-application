@@ -1,4 +1,5 @@
 import 'package:app_core/app_core.dart';
+import 'package:app_core/testing.dart';
 import 'package:commerce_wiring/commerce_wiring.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,7 +91,7 @@ Future<GoRouter> _boot(
   final router = ref.attach(
     GoRouter(
       initialLocation: initial,
-      routes: [...commerceRoutes, ..._standIns],
+      routes: [...commerceRoutes, ..._standIns, standInSignInRoute()],
       errorBuilder: (context, state) =>
           Text('not found ${state.uri}', key: const Key('not.found')),
     ),
@@ -197,7 +198,7 @@ void main() {
   });
 
   mcTestWidgets('T-0056-AC3 requestSignIn: signed in it answers true at '
-      'once, with no sheet', (tester) async {
+      'once, with no sign-in screen', (tester) async {
     McTestSession.current.backend.useFixtureSet('identity.default');
     await _boot(tester);
     final user = fixtureUsers.first;
@@ -210,11 +211,11 @@ void main() {
 
     final answer = await diContainer<StoreHomeNavigator>().requestSignIn();
     expect(answer, isTrue);
-    expect(find.byType(BottomSheet), findsNothing);
+    expect(find.byKey(standInSignInKey), findsNothing);
   });
 
-  mcTestWidgets('T-0056-AC3 requestSignIn: signed out it shows the shared '
-      'sheet with the cart reason, and Cancel answers false', (tester) async {
+  mcTestWidgets('T-0056-AC3 requestSignIn: signed out it opens the sign-in '
+      'screen for the cart, and Not now answers false', (tester) async {
     await _boot(tester);
 
     var answered = false;
@@ -224,10 +225,10 @@ void main() {
       answer = a;
     });
     await tester.pumpAndSettle();
-    expect(find.textContaining('to see your cart'), findsOneWidget);
+    expect(find.text(standInSignInText('cart')), findsOneWidget);
     expect(answered, isFalse);
 
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
+    await tester.tap(find.byKey(standInSignInNotNowKey));
     await tester.pumpAndSettle();
     await pending;
     expect(answer, isFalse);

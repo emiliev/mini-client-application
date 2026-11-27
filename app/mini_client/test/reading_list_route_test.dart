@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
@@ -19,6 +20,7 @@ const _config =
     '"apiBaseUrl":"https://mock.mini-client.invalid/","build":"1"}';
 
 const _details = ValueKey<String>('reading_list_editor.details');
+const _signInForm = ValueKey<String>('auth_signin.form');
 
 /// The search result of comic [id] in the editor's step 2.
 ValueKey<String> _result(int id) =>
@@ -78,22 +80,32 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  /// Signs in on the shared fixture sheet: the session's real file write
-  /// needs real time (F-0038).
-  Future<void> signInOnTheSheet(WidgetTester tester) async {
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    expect(find.textContaining('to save your reading lists'), findsOneWidget);
-    await tester.tap(find.byKey(fixtureSignInButtonKey));
+  /// Signs in on the sign-in form with the first demo account: the session's
+  /// real file write needs real time (F-0038).
+  Future<void> signInOnTheForm(WidgetTester tester, {String? reason}) async {
+    expect(find.byKey(_signInForm), findsOneWidget);
+    if (reason != null) {
+      expect(find.text(reason), findsOneWidget);
+    }
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('auth_signin.demo.reader@mini-client.test'),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
     for (var i = 0; i < 20; i++) {
       await tester.runAsync(
         () => Future<void>.delayed(const Duration(milliseconds: 20)),
       );
-      await tester.pumpAndSettle();
-      if (find.byKey(fixtureSignInSheetKey).evaluate().isEmpty) {
+      // Not `pumpAndSettle`: the form's spinner runs until the answer.
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.byKey(_signInForm).evaluate().isEmpty) {
         break;
       }
     }
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_signInForm), findsNothing);
     expect(diContainer<SessionReader>().isSignedIn, isTrue);
   }
 
@@ -105,12 +117,20 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  /// Home's own Sign in entry (T-0066), then the form.
+  Future<void> signInFromHome(WidgetTester tester) async {
+    expect(find.text('Signed out'), findsOneWidget);
+    await tap(tester, find.byKey(signInKey));
+    await signInOnTheForm(tester);
+    expect(find.text('Signed in as u-100'), findsOneWidget);
+  }
+
   testWidgets('T-0048-AC6 home awaits the editor and shows the list id the '
       'wiring returned', (tester) async {
     await boot(tester);
+    await signInFromHome(tester);
 
     await tap(tester, find.byKey(newReadingListKey));
-    await signInOnTheSheet(tester);
     expect(find.text('New reading list'), findsWidgets);
     await tester.enterText(find.byType(TextField).first, 'Amber reads');
     await tester.pumpAndSettle();
@@ -127,8 +147,8 @@ void main() {
   testWidgets('T-0048-AC3 home opens the created list in the editor, which '
       'returns the same id once saved', (tester) async {
     await boot(tester);
+    await signInFromHome(tester);
     await tap(tester, find.byKey(newReadingListKey));
-    await signInOnTheSheet(tester);
     await tester.enterText(find.byType(TextField).first, 'Amber reads');
     await tester.pumpAndSettle();
     await tap(tester, find.text('Next'));
@@ -153,8 +173,8 @@ void main() {
     tester,
   ) async {
     await boot(tester);
+    await signInFromHome(tester);
     await tap(tester, find.byKey(newReadingListKey));
-    await signInOnTheSheet(tester);
 
     await tap(tester, find.byType(BackButton));
 
@@ -168,7 +188,7 @@ void main() {
 
     await _pushLink(tester, 'miniclient://app/me/lists/new');
     await tester.pumpAndSettle();
-    await signInOnTheSheet(tester);
+    await signInOnTheForm(tester);
 
     expect(find.byKey(_details), findsOneWidget);
     expect(find.text('New reading list'), findsOneWidget);
@@ -185,12 +205,8 @@ void main() {
     await tester.tap(find.byKey(newReadingListKey));
     await tester.tap(find.byKey(newReadingListKey), warnIfMissed: false);
     await tester.pumpAndSettle();
-    await signInOnTheSheet(tester);
-    expect(
-      find.byKey(fixtureSignInSheetKey),
-      findsNothing,
-      reason: 'one sheet',
-    );
+    await signInOnTheForm(tester);
+    expect(find.byKey(_signInForm), findsNothing, reason: 'one sign-in');
 
     await tap(tester, find.byType(BackButton));
     expect(

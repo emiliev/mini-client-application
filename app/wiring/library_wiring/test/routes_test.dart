@@ -1,10 +1,10 @@
 import 'package:app_core/app_core.dart';
+import 'package:app_core/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:library_reading_list_editor/library_reading_list_editor.dart';
 import 'package:library_wiring/library_wiring.dart';
-import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
@@ -101,6 +101,7 @@ Future<GoRouter> _boot(WidgetTester tester, {String initial = '/'}) async {
           builder: (context, state) => const Text('home', key: Key('home')),
         ),
         ...libraryRoutes,
+        standInSignInRoute(),
       ],
       errorBuilder: (context, state) =>
           Text('not found ${state.uri}', key: const Key('not.found')),
@@ -172,22 +173,22 @@ void main() {
     expect(router.state.uri.toString(), AppLocations.home);
   });
 
-  mcTestWidgets('T-0048-AC6 requestSignIn shows the shared sheet with the '
-      "library's reason, and answers its outcome", (tester) async {
+  mcTestWidgets('T-0048-AC6 requestSignIn opens the sign-in screen for the '
+      "reading lists, and answers its outcome (T-0066)", (tester) async {
     await _boot(tester);
 
     final answer = diContainer<ReadingListEditorNavigator>().requestSignIn();
     await tester.pumpAndSettle();
-    expect(find.byKey(fixtureSignInSheetKey), findsOneWidget);
-    expect(find.textContaining('to save your reading lists'), findsOneWidget);
-    await tester.tap(find.byKey(fixtureSignInCancelKey));
+    expect(find.byKey(standInSignInKey), findsOneWidget);
+    expect(find.text(standInSignInText('readingLists')), findsOneWidget);
+    await tester.tap(find.byKey(standInSignInNotNowKey));
     await tester.pumpAndSettle();
 
     expect(await answer, isFalse);
   });
 
   mcTestWidgets('T-0048-AC6 requestSignIn: signed in answers true without a '
-      'sheet', (tester) async {
+      'sign-in screen', (tester) async {
     await _boot(tester);
     final user = fixtureUsers.first;
     await tester.runAsync(
@@ -203,7 +204,7 @@ void main() {
     final answer = diContainer<ReadingListEditorNavigator>().requestSignIn();
     await tester.pumpAndSettle();
 
-    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+    expect(find.byKey(standInSignInKey), findsNothing);
     expect(await answer, isTrue);
   });
 
@@ -215,9 +216,7 @@ void main() {
     await initializeDIContainer([
       RouterDIInitializer(ref),
       McDIInitializer((getIt, _) {
-        getIt
-          ..registerSingleton<SessionReader>(_SignedOut())
-          ..registerSingleton<AuthApi>(_NoAuth());
+        getIt.registerSingleton<SessionReader>(_SignedOut());
       }),
       const LibraryWiringDIInitializer(),
     ]);
@@ -278,9 +277,4 @@ class _SignedOut implements SessionReader {
 
   @override
   bool get isSignedIn => false;
-}
-
-class _NoAuth implements AuthApi {
-  @override
-  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

@@ -9,9 +9,9 @@ export 'package:account_wiring/src/di/account_wiring_di_initializer.dart'
     show AccountWiringDIInitializer;
 export 'package:account_wiring/src/di/di_initializer.dart'
     show AccountNavigatorsDIInitializer;
+export 'package:account_wiring/src/routes/auth_routes.dart' show SignInRoute;
 export 'package:account_wiring/src/routes/route_targets.dart'
     show AccountRouteTargets;
-export 'package:account_wiring/src/routes/auth_routes.dart' show SignInRoute;
 export 'package:account_wiring/src/routes/settings_routes.dart'
     show SettingsAppearanceRoute;
 

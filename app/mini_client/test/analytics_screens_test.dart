@@ -44,6 +44,8 @@ const _expectedRouteNames = {
   'trivia_play',
   // T-0063: the appearance settings.
   'settings_appearance',
+  // T-0066: the sign-in form.
+  'auth_sign_in',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {

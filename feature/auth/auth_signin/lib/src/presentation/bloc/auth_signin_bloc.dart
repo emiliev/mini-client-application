@@ -125,4 +125,13 @@ final class AuthSignInBloc extends McBloc<AuthSignInEvent, AuthSignInState> {
       _flow.complete(SignInResult.signedIn);
     }, (_) {});
   }
+
+  /// The flow's container disposes the bloc with the flow (`@disposeMethod`:
+  /// injectable registers nothing to close a bloc otherwise).
+  @disposeMethod
+  @override
+  Future<void> close() {
+    _form.dispose();
+    return super.close();
+  }
 }
