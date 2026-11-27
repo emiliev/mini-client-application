@@ -16,6 +16,7 @@ dependencies:
   mc_analytics: any
   mc_api_auth: any
   mc_di: any
+  mc_ds_overlays: any
   mc_fixtures_identity: any
   mc_mocked_backend: any
   mc_session: any
@@ -23,4 +24,5 @@ dependencies:
 
 dev_dependencies:
   mc_analysis: any
+  mc_ds_theme: any
   mc_feature_flags: any

@@ -11,6 +11,7 @@ _DEPS = [
     "//utility/mc_analytics",
     "//utility/mc_api_auth",
     "//utility/mc_di",
+    "//utility/mc_ds_overlays",
     "//utility/mc_fixtures_identity",
     "//utility/mc_mocked_backend",
     "//utility/mc_session",
@@ -71,5 +72,18 @@ flutter_test(
     deps = _DEPS + [
         ":mc_test_steps",
         "//utility/mc_feature_flags",
+    ],
+)
+
+# T-0058-AC4: the dialog, sheet and toast steps and their negative controls.
+flutter_test(
+    name = "overlay_steps_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/overlay_steps_test.dart",
+    package_name = "mc_test_steps",
+    deps = _DEPS + [
+        ":mc_test_steps",
+        "//utility/mc_ds_theme",
     ],
 )
