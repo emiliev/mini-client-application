@@ -23,7 +23,12 @@ s = open(p).read()
 t = s.replace("signs in just before the app sends {'"'"'PUT /v1/me/favourites/comic/501500'"'"'}",
               "signs in just before the app sends {'"'"'PUT /v1/me/favourites/comic/999999'"'"'}", 1)
 if drop:
-    t = "\n".join(l for l in t.split("\n") if "the session belongs to" not in l)
+    # No tap either: nothing but the step's own teardown check can fail.
+    lines = [l for l in t.split("\n") if "the session belongs to" not in l]
+    i = next(k for k, l in enumerate(lines) if "999999" in l)
+    assert "I tap" in lines[i + 1]
+    del lines[i + 1]
+    t = "\n".join(lines)
 assert t != s
 open(p, "w").write(t)
 '
@@ -42,8 +47,8 @@ rc=0
   echo "# negative control: the step points at a route no request matches"
   run_variant "A: wrong route, 'session belongs' kept" 0
   grep -a -q "^  FAIL  .*sends nothing for the wrong user" <<< "$LAST" || { echo "VARIANT A DID NOT GO RED"; rc=1; }
-  run_variant "B: wrong route, 'session belongs' removed (the teardown check)" 1
-  if ! { grep -a -q "^  FAIL  .*sends nothing for the wrong user" <<< "$LAST" && grep -a -q "never signed in" <<< "$LAST"; }; then
+  run_variant "B: wrong route, no tap, 'session belongs' removed (only the teardown check can fail)" 1
+  if ! { grep -a -q "never signed in" <<< "$LAST"; }; then
     echo "VARIANT B DID NOT GO RED FOR THE RIGHT REASON"; rc=1
   fi
   if [[ $rc == 0 ]]; then echo "NEGATIVE CONTROL OK: both variants went red"; else echo "NEGATIVE CONTROL FAILED"; fi

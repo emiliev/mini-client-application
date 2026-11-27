@@ -1,0 +1,7 @@
+# negative control: the step points at a route no request matches
+## variant A: wrong route, 'session belongs' kept
+  FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is sent sends nothing for the wrong user [T-0050-AC2]
+## variant B: wrong route, 'session belongs' removed (the teardown check)
+  FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is sent sends nothing for the wrong user [T-0050-AC2]
+VARIANT B DID NOT GO RED FOR THE RIGHT REASON
+NEGATIVE CONTROL FAILED
