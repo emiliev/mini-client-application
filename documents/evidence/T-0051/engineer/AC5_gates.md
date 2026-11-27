@@ -40,7 +40,7 @@ throwaway package removed, tree clean: yes
 | coverage >= 90 % | PASS |
 
 - commerce tests, uncached: Executed 6 out of 6 tests: 6 tests pass.
-- test //...: Executed 0 out of 150 tests: 150 tests pass.
-- mc_fixtures_commerce coverage: TOTAL 377/382 98.7% (threshold 90 %)
+- test //...: Executed 45 out of 150 tests: 150 tests pass.
+- mc_fixtures_commerce coverage: TOTAL 388/393 98.7% (threshold 90 %)
 
 **PASS T-0051-AC5-gates**

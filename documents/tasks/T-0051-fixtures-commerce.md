@@ -80,3 +80,12 @@ Mutations: `documents/evidence/T-0051/engineer/mutations.sh` (`MC_TASK=T-0051 MC
 Test integrity: no tests deleted, skipped or weakened; no `// ignore:`. Globs use `MC_GENERATED_DART`. The mutation run also found and fixed one defect in the package: an error `extra` key named `code` overwrote `error.code` (now `promoCode`), see F-0051.
 
 Follow-ups: none. Questions for the PO: none.
+
+## Review round (2026-11-27, Engineer)
+1. Overlong product ids: the id pattern is `^(0|[1-9]\d{0,17})$`, so `99999999999999999999` is `404 unknown_product`, not a 500. Test `T-0051-AC4 an overlong or zero-padded product id...`; mutation R1.
+2. Leading zeros (`0500060`, `00`) are `404 unknown_product`, echoed as sent. Same test; mutation R2.
+3. `mutations.sh` checks `Build did NOT complete` first and counts a test failure only on `FAILED in`. Re-run: **100/100 killed**, 0 survived, 0 broken (95 plus R1 to R5).
+4. The category base uses `seriesIdBase`, now exported from `mc_fixtures_comics` (one line in its barrel). Test `T-0051-AC2 a product category follows the comics series id base`; mutation R4.
+5. `SectionFailingCommerceDomain` throws an `ArgumentError` listing the valid sections (its constructor is no longer `const`). Test `T-0051-AC2 an unknown section...`; mutation R5.
+6. `DELETE .../promo?code=` with a blank value is `400 invalid_parameter` (documented). Test `T-0051-AC4 DELETE promo with a blank code...`; mutation R3.
+Gates re-run after merging `origin/main` (already up to date): all PASS, `test //...` 150/150, coverage 98.7 %.
