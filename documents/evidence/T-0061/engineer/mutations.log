@@ -134,15 +134,11 @@ baseline PASS
 === S7 the conflict is used up by a rejected request
     KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === S8 the conflict writes before it answers
-pattern not found:         context.store[_conflictFiredKey] = true;
-        return conflict();
-    PATTERN NOT FOUND
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === S9 the conflict scenario overrides the wrong route
     KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === S10 the conflict is never marked fired
-pattern not found:         context.store[_conflictFiredKey] = true;
-        return conflict();
-    PATTERN NOT FOUND
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === R1 the conflict scenario is not wired to the hook
     KILLED by: //utility/mc_fixtures_identity:preferences_test 
 === R2 the engine never calls onSelect
@@ -156,4 +152,4 @@ pattern not found:         context.store[_conflictFiredKey] = true;
 === R6 the engine runs onSelect before the scenario is chosen
     KILLED by: //utility/mc_mocked_backend:mocked_backend_test 
 
-killed=74 survived=0 broken=2
+killed=76 survived=0 broken=0

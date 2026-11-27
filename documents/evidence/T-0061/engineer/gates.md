@@ -41,7 +41,7 @@ throwaway package removed, tree clean: yes
 | coverage >= 90 % | PASS |
 
 - identity tests, uncached: Executed 4 out of 4 tests: 4 tests pass.
-- test //...: Executed 72 out of 191 tests: 191 tests pass.
-- mc_fixtures_identity coverage: TOTAL 205/207 99.0% (threshold 90 %)
+- test //...: Executed 114 out of 191 tests: 191 tests pass.
+- mc_fixtures_identity coverage: TOTAL 208/210 99.0% (threshold 90 %)
 
 **PASS T-0061-AC5-gates**
