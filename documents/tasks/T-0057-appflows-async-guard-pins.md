@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `95396a7`; Verifier PASS `2ba0f46`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier**. Test-only task: production code changes need TL approval, and any approved change makes this Opus tier (navigation, ADR-0011). |
 | Branch | `fleet/T-0057-appflows-async-guard-pins` |
@@ -39,3 +39,6 @@ All three ACs pass. Test, script and doc files only.
 | T-0057-AC1 | 4 tests in `app/wiring/app_core/test/flow_results_hardening_test.dart`, group `T-0057-AC1 the async-guard paths (P-110)`: slow async guard (VP07b), async guard plus `go` in one span (VP16), `replace` and `pushReplacement` (VP23). Each checks the exact completions (once, expected value) and that no delegate listener is left. They pass at HEAD |
 | T-0057-AC2 | [mutations.log](../evidence/T-0057/engineer/mutations.log) from `tool/checks/T-0057-AC2_mutations.sh`: X02, X03 and X06 each SURVIVE the control (the suite without the new group) and are each KILLED by a `T-0057-AC1` test (X02 by the slow guard, X03 by the same-span test, X06 by the `replace` test). Flake check: [runs_per_test_50.log](../evidence/T-0057/engineer/runs_per_test_50.log), 50 runs, 0 failures |
 | T-0057-AC3 | [gates.txt](../evidence/T-0057/engineer/gates.txt): `test --lockfile_mode=error //...` 178 pass, lint, format and `mc_arch_check` OK. `git diff origin/main --stat` shows only the test, the script, F-0049, this task file and evidence |
+
+## Merge (TL)
+- 2026-11-27: Test-only task. `/code-review` (low) found 1 nit (a control timeout counted as a survival), fixed at `5e3956f`. A Sonnet Verifier pass gave PASS `2ba0f46` (about 51k tokens; mutations applied by hand with controls; 50-run flake check). The TL merged `--no-ff`; on the merge result 178/178 tests passed, lint was clean, `mc_arch_check` reported OK and `check` passed. P-110 is done; the guard task decides how home learns the editor's result after `go(from)` (F-0049 note 11).

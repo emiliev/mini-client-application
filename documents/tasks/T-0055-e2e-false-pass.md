@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `5e33a15`; Verifier PASS `829d672`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (verification tooling; negative controls required; ADR-0011) |
 | Branch | `fleet/T-0055-e2e-false-pass` |
@@ -80,3 +80,6 @@ Re-runs: the full `tool/test/e2e_ios_test.sh` (`e2e_ios_test-full-suite.txt`), a
 Answers for the TL:
 - The `mc-T-0012-*` simulators were created by my own runs of `tool/test/e2e_ios_test.sh` (it uses `T-0012` as its task id). I never deleted one by hand; the suite deletes its own simulators on exit. The only simulator I saw that was not mine, `mc-T-0052-verifier-*`, was left alone.
 - Bundle id mismatch (`miniClient` built, `miniclient` in Q-004): recorded in F-0055 for the TL to file.
+
+## Merge (TL)
+- 2026-11-27: Found by the T-0054 engineer. Review-first: `/code-review` found 2 important issues (a launch-retry marker would false-FAIL; the unconditional build-dir delete broke custom runners) and 6 nits, all fixed at `5d8f6f5`. A single Sonnet Verifier pass gave PASS `829d672` (about 82k tokens, interrupted once by the usage limit). It reproduced the false PASS on the old script and proved each defence alone; 5 kinds of real breakage were all caught. Re-baseline: the full suite on `main` passed 11/11, so no earlier evidence hid a failure. The TL merged `--no-ff`; on the merge result `tool/test/e2e_ios_test.sh` passed 20/20 and `test //...` 178/178.

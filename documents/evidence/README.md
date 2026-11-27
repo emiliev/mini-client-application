@@ -53,3 +53,5 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0053](T-0053/verification-report.md) | PASS (Sonnet, single pass) | Analytics: consent gate and same-turn races, reset delivery, session rotation boundaries, exact screen order, 50-run flake check, e2e 11/11 |
 | [T-0052](T-0052/verification-report.md) | PASS (Sonnet), then a narrow Sonnet re-verify PASS after a merge-gate flake | Feature flags: evaluation-order probe, all 28 FNV rows by hand, weight cap, epoch drop, 200-run flake proofs |
 | [T-0054](T-0054/verification-report.md) | PASS (Opus, single pass) | AppFlows: 42 own probes (re-parse, async guards, same-frame, overlays), go_router source read, 550-run flake check, e2e 17/17; 2 Minor test gaps → P-110 |
+| [T-0055](T-0055/verification-report.md) | PASS (Sonnet, single pass) | e2e false PASS reproduced on the old script; each defence proven alone; 5 real breakage kinds caught |
+| [T-0057](T-0057/verification-report.md) | PASS (Sonnet, single pass) | Async-guard probes faithful; X02, X03 and X06 killed, with controls |
