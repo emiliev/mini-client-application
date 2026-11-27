@@ -20,6 +20,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0052](T-0052-feature-flags.md) | `mc_feature_flags` (typed flags, experiments, overrides, remote fetch) + flags slice of `mc_fixtures_platform` | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0039 | `fleet/T-0052-feature-flags` |
 | [T-0053](T-0053-analytics.md) | `mc_analytics`: typed events, consent gate, app sessions, screen observer, BDD steps | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0053-analytics` |
+| [T-0054](T-0054-flow-results-hardening.md) | `AppFlows` hardening: per-call tokens, safe extras, results under overlays, not-found way home (P-094 to P-098) | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0049 | `fleet/T-0054-flow-results-hardening` |
 
 ## Done
 | ID | Title | Result |

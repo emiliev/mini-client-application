@@ -10,7 +10,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0052 engineer (review round), T-0053 engineer (Sonnet) |
+| **Active crew** | T-0052 engineer (review round), T-0053 engineer, T-0054 engineer (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -36,7 +36,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - Resumed 2026-11-27.
 - **Next, in order:**
   1. DB prerequisites: `mc_feature_flags` (T-0052, in progress), `mc_analytics`, then the DB exemplar `store_home` (P1-21) on `mc_fixtures_commerce`.
-  2. P-094 to P-098 (`AppFlows` follow-ups) before the `/me/**` auth guard or the first picker.
+  2. T-0054 (P-094 to P-098, the `AppFlows` follow-ups): in progress. It must land before the `/me/**` auth guard or the first picker.
   3. ST (`settings_appearance`) and IX (`trivia_quiz`) exemplars, then the P1-24 bricks.
 
 ## Next
