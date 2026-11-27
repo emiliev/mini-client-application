@@ -1,0 +1,82 @@
+# T-0051 (P1-09 subset, U45): the store and cart domain of the mocked backend.
+# Data plus small pure-Dart handlers (R3). The library is pure Dart (AC5); the
+# tests may use Flutter and the other fixture domains to check the cross-links.
+load("@rules_dart//dart:defs.bzl", "dart_library")
+load("@rules_flutter//flutter:defs.bzl", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+dart_library(
+    name = "mc_fixtures_commerce",
+    package_name = "mc_fixtures_commerce",
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    deps = [
+        "//utility/mc_fixtures_comics",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_media",
+        "//utility/mc_mocked_backend",
+    ],
+)
+
+_TEST_DEPS = [
+    ":mc_fixtures_commerce",
+    "//utility/mc_fixtures_comics",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_fixtures_media",
+    "//utility/mc_media",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:dio",
+    "@pub_deps//:flutter_test",
+]
+
+[
+    flutter_test(
+        name = name,
+        package_name = "mc_fixtures_commerce",
+        language_version = _LANG,
+        size = "small",
+        srcs = ["test/support.dart"],
+        main = "test/%s.dart" % name,
+        deps = _TEST_DEPS,
+    )
+    for name in [
+        "store_test",
+        "cart_test",
+        "validation_test",
+        "fixture_sets_test",
+    ]
+]
+
+flutter_test(
+    name = "money_test",
+    package_name = "mc_fixtures_commerce",
+    language_version = _LANG,
+    size = "small",
+    srcs = ["test/support.dart"],
+    main = "test/money_test.dart",
+    # The source scan reads lib/ (AC3: no double on a money path).
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "provider_contract_test",
+    package_name = "mc_fixtures_commerce",
+    language_version = _LANG,
+    size = "small",
+    srcs = [
+        "test/contract/snapshot_cases.dart",
+        "test/support.dart",
+    ],
+    data = glob(["test/contract/snapshots/*.json"]) + [
+        "CONTRACT.md",
+        "fixtures/routes.json",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/contract/provider_contract_test.dart",
+    deps = _TEST_DEPS,
+)
