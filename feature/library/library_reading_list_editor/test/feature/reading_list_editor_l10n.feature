@@ -134,3 +134,47 @@ Feature: The reading list editor speaks the reader's language
       | scale |
       | 1     |
       | 2     |
+
+  @T-0050-AC3 @l10n
+  Scenario: In German the backend's refusal of a name is German, under the name
+    Given the device locale is {'de'}
+    And I am signed in as {'reader@mini-client.test'}
+    When I open the reading list editor
+    And I enter {' weekend reads '} as the name
+    And I tap {'Weiter'}
+    And I pick {'Amber Chronicles #1'}
+    And I tap {'Weiter'}
+    And I tap {'Liste erstellen'}
+    Then the backend answered {'POST /v1/me/lists'} with {400}
+    And I see {'Schritt 1 von 3'}
+    And the error {'Du hast schon eine Liste mit diesem Namen. Bitte wähle einen anderen.'} shows under the field {'Name'}
+
+  @T-0050-AC3 @l10n
+  Scenario Outline: In the pseudo-locale a list that is not the reader's fits at <scale>x
+    Given the pseudo-locale is active
+    And the text scale is <scale>
+    And I am signed in as {'reader@mini-client.test'}
+    When I open the reading list editor for {'l-4'}
+    Then I see {'[Ļíšţ ñóţ ƒóúñð ~~~~~~]'}
+    And I see {'[Ţĥíš ŕéàðíñĝ ļíšţ ðóéš ñóţ éxíšţ óŕ íš ñóţ ýóúŕš. ~~~~~~~~~~~~~~~~~~~~]'}
+    And nothing overflows
+
+    Examples:
+      | scale |
+      | 1     |
+      | 2     |
+
+  @T-0050-AC3 @l10n
+  Scenario Outline: In the pseudo-locale a list that could not be loaded fits at <scale>x
+    Given the pseudo-locale is active
+    And the text scale is <scale>
+    And I am signed in as {'reader@mini-client.test'}
+    And the backend fails {'GET /v1/me/lists/l-1'} with {'server_error'}
+    When I open the reading list editor for {'l-1'}
+    Then I see {'[Ţĥé ŕéàðíñĝ ļíšţ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~~]'}
+    And nothing overflows
+
+    Examples:
+      | scale |
+      | 1     |
+      | 2     |

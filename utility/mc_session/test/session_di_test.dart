@@ -1,10 +1,26 @@
 import 'dart:io';
 
 import 'package:get_it/get_it.dart';
+import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_prelude/mc_prelude.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mc_storage/mc_storage.dart';
 import 'package:test/test.dart';
+
+/// A store that records every asynchronous read, to tell the skip path of the
+/// initializer (no read) from the restore path (one read).
+final class _SpyStore extends FileStore {
+  _SpyStore(super.directory);
+
+  final List<String> reads = [];
+
+  @override
+  Future<Result<Object?, StorageFailure>> read(String key) {
+    reads.add(key);
+    return super.read(key);
+  }
+}
 
 void main() {
   late Directory dir;
@@ -105,6 +121,48 @@ void main() {
     expect(getIt<SessionReader>().userId, 'u-9');
     await getIt.reset();
   });
+
+  Future<(GetIt, _SpyStore)> bootSpied() async {
+    final spy = _SpyStore(dir);
+    final getIt = GetIt.asNewInstance();
+    for (final init in <McDIInitializer>[
+      McDIInitializer((g, _) => g.registerSingleton<FileStore>(spy)),
+      const EventBusDIInitializer(),
+      const SessionDIInitializer(),
+    ]) {
+      await init.init(getIt);
+    }
+    return (getIt, spy);
+  }
+
+  test('T-0050-AC3 (P-080) with no session file nothing is read at boot, '
+      'whatever else is in the directory', () async {
+    await FileStore(dir).write('search_history', ['x']);
+    File('${dir.path}/stray.txt').writeAsStringSync('junk');
+
+    final (getIt, spy) = await bootSpied();
+
+    expect(spy.reads, isEmpty, reason: 'the skip path read the store');
+    expect(getIt<SessionReader>().isSignedIn, isFalse);
+    await getIt.reset();
+  });
+
+  test(
+    'T-0050-AC3 (P-080) a saved session is read once and restored',
+    () async {
+      await FileStore(dir).write('session', {
+        'userId': 'u-1',
+        'accessToken': 'a',
+        'refreshToken': 'r',
+      });
+
+      final (getIt, spy) = await bootSpied();
+
+      expect(spy.reads, ['session']);
+      expect(getIt<SessionReader>().userId, 'u-1');
+      await getIt.reset();
+    },
+  );
 
   test(
     'T-0039-AC5 the session needs storage and the event bus first',

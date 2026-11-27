@@ -156,7 +156,16 @@ final class Rig {
     }
   }
 
+  final List<Future<Object?>> _pending = [];
+
+  /// Keeps a session save the test did not await (a synchronous switch whose
+  /// in-memory part is what the test needs): [dispose] awaits it before it
+  /// deletes the storage folder, so a save never writes into a folder that is
+  /// being removed (errno 66, T-0050 D1). Never drop a session future.
+  void track(Future<Object?> save) => _pending.add(save);
+
   Future<void> dispose() async {
+    await Future.wait(_pending);
     await bus.dispose();
     await session.dispose();
     dir.deleteSync(recursive: true);
@@ -221,6 +230,33 @@ final class ThrowingAdapter implements HttpClientAdapter {
     if (options.path.endsWith(path)) {
       throw error(options);
     }
+    return inner.fetch(options, requestStream, cancelFuture);
+  }
+
+  @override
+  void close({bool force = false}) => inner.close(force: force);
+}
+
+/// Calls [onArrive] synchronously when a request reaches the adapter (before
+/// the backend answers it), then passes it on. A deterministic point in time
+/// for a session change, with no wall-clock wait.
+final class ArrivalAdapter implements HttpClientAdapter {
+  ArrivalAdapter(this.inner, this.onArrive);
+
+  final HttpClientAdapter inner;
+  final void Function(RequestOptions) onArrive;
+
+  /// Every request that reached the adapter: method, path, Authorization.
+  final List<(String, String, Object?)> seen = [];
+
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<Uint8List>? requestStream,
+    Future<void>? cancelFuture,
+  ) {
+    seen.add((options.method, options.path, options.headers['Authorization']));
+    onArrive(options);
     return inner.fetch(options, requestStream, cancelFuture);
   }
 

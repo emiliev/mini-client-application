@@ -1,0 +1,15 @@
+baseline: PASS (      16 targets)
+K2 the pin guard only rejects while someone is signed in: KILLED (00:00 +1 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 a sign-out right after the call: no request [E])
+K5 every unpinned request is rejected as if pinned: KILLED (00:00 +8 -1: T-0050-AC1 a pinned request never leaves for another session T-0050-AC1 unpinned requests are unchanged: the switch gives the new bearer [E])
+P80-b a replay after a local sign-out mid-refresh is sent without a token: KILLED (00:00 +8 -1: T-0039-AC2 a refresh outcome belongs to the session it started for T-0050-AC3 (P-080) a PUT of user A after a local sign-out during the refresh is not replayed without a token [E])
+C3 reading list: the create POST is not pinned: KILLED (FAIL  T-0050-AC2 every write of the repository is pinned to the epoch it is given, and no read is)
+C5 reading list: the items PUT is not pinned: KILLED (FAIL  T-0050-AC2 every write of the repository is pinned to the epoch it is given, and no read is)
+H1 the switch step never switches (the race would pass vacuously): KILLED (FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is sent sends nothing for the wrong user [T-0050-AC2])
+P89-c the guard is 400 ms: a tap at 499 ms opens again: KILLED (FAIL  comics_details A comic's page A second tap 499 ms after the first is still the same tap (P-089) [T-0050-AC3])
+P89-f the guard is not per target: a different character within 450 ms is dropped: KILLED (FAIL  comics_details A comic's page Tapping a different character 450 ms later is not a double tap (P-089) [T-0050-AC3])
+R1-b the favourite tap is not dropped and the write pins the current epoch: KILLED (FAIL  T-0050-AC2 a tap handled after another user signed in, before the bloc heard of it, writes nothing for them)
+P93-V03 the items write does not check the session before writing: KILLED (FAIL  T-0050-AC3 the bloc guards (P-093) T-0050-AC3 a switch between the two writes of an edit sends no second write (P-093 V03))
+P93-V20-b the loading flag alone is removed (equivalent): SURVIVED, as expected (equivalent: a second Retry already finds the state 'loading', so the state check stops it first)
+P93-V23 the session listener adds to a closed bloc: KILLED (FAIL  T-0050-AC3 the bloc guards (P-093) T-0050-AC3 a session change that arrives while the bloc is closing is not added to it (P-093 V23))
+
+12 of 12 mutations behaved as expected

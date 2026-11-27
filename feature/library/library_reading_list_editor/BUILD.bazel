@@ -36,6 +36,7 @@ _INIT = "lib/src/di/di_initializer.dart"
 
 # Pure-Dart deps of the hand-written, generator-read files.
 _PURE_DEPS = [
+    "//utility/mc_api_auth",
     "//utility/mc_api_client",
     "//utility/mc_api_errors",
     "//utility/mc_bloc_kit",
@@ -300,6 +301,7 @@ flutter_test(
     package_name = _PKG,
     deps = [
         ":library_reading_list_editor",
+        "//utility/mc_api_auth",
         "//utility/mc_api_errors",
         "//utility/mc_fixtures_comics",
         "//utility/mc_fixtures_identity",
@@ -308,6 +310,30 @@ flutter_test(
         "//utility/mc_mocked_backend",
         "//utility/mc_prelude",
         "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# The editor bloc's own guards, one at a time (P-093): the real bloc and
+# repository over the mocked backend, with no auth interceptor.
+flutter_test(
+    name = "bloc_guards_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/reading_list_editor_bloc_guards_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":library_reading_list_editor",
+        "//utility/mc_bloc_kit",
+        "//utility/mc_event_bus",
+        "//utility/mc_fixtures_comics",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_fixtures_library",
+        "//utility/mc_forms",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_session",
+        "//utility/mc_storage",
         "@pub_deps//:flutter_test",
     ],
 )

@@ -24,6 +24,7 @@ dependencies:
   injectable: 3.0.0
   intl: any
   json_annotation: 4.12.0
+  mc_api_auth: any
   mc_api_client: any
   mc_api_errors: any
   mc_bloc_kit: any
@@ -52,12 +53,12 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mc_analysis: any
-  mc_api_auth: any
   mc_fixtures_comics: any
   mc_fixtures_identity: any
   mc_fixtures_library: any
   mc_fixtures_media: any
   mc_mocked_backend: any
+  mc_storage: any
   mc_test_steps: any
   mc_test_utils: any
   mocktail: ^1.0.4
