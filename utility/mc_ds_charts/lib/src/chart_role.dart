@@ -68,10 +68,10 @@ enum McChartRole {
       if (out[i] != null) {
         continue;
       }
+      // Both neighbours on the ring (the first and the last are neighbours).
       final avoid = <McChartRole?>{
-        if (i > 0) out[i - 1],
-        if (i + 1 < n) out[i + 1],
-        if (i == n - 1 && n > 1) out[0],
+        if (n > 1) out[(i + n - 1) % n],
+        if (n > 1) out[(i + 1) % n],
       };
       var best = _fallbackOrder.first;
       var bestUse = 1 << 30;

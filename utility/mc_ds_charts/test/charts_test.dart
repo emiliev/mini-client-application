@@ -1543,6 +1543,27 @@ void main() {
     });
 
     test(
+      'T-0059-AC3 role resolution: a default avoids a named role after it',
+      () {
+        final roles = McChartRole.resolveAll([null, ...McChartRole.values]);
+        expect(roles.first, isNot(McChartRole.series1));
+        expect(roles.first, isNot(roles.last));
+        final wrap = McChartRole.resolveAll([
+          null,
+          ...McChartRole.values.skip(1),
+          McChartRole.values.first,
+        ]);
+        expect(wrap.first, isNot(McChartRole.series1));
+        expect(wrap.first, isNot(McChartRole.series2));
+        // a default first with a named last: the ring closes on different roles
+        final ring = McChartRole.resolveAll([null, null, McChartRole.series1]);
+        expect(ring.first, isNot(McChartRole.series1));
+        expect(ring[1], isNot(ring[0]));
+        expect(ring[1], isNot(McChartRole.series1));
+      },
+    );
+
+    test(
       'T-0059-AC3 role resolution: explicit roles are kept and respected',
       () {
         final roles = McChartRole.resolveAll(const [
