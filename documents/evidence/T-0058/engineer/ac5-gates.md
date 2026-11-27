@@ -15,6 +15,6 @@
 | coverage >= 90 % (touched packages) | PASS |
 
 - tests: Executed 23 out of 181 tests: 181 tests pass.
-- coverage: == utility/mc_ds_overlays TOTAL 222/224 99.1% (threshold 90 %)
+- coverage: == utility/mc_ds_overlays TOTAL 220/222 99.1% (threshold 90 %)
 
 **PASS T-0058-AC5-gates**
