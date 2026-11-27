@@ -50,7 +50,7 @@ FILES=(
   "$W/routes/store_routes.dart" app/wiring/app_core/lib/src/locations/app_locations.dart
   utility/mc_formatters/lib/src/formatters.dart utility/mc_formatters/lib/src/money.dart
   utility/mc_analytics/lib/src/route_observer.dart utility/mc_analytics/lib/src/analytics.dart
-  utility/mc_feature_flow/lib/src/feature_flow.dart
+  utility/mc_feature_flow/lib/src/feature_flow.dart utility/mc_feature_flow/lib/src/flow_context.dart
   utility/mc_test_utils/lib/src/backend_harness.dart utility/mc_test_utils/lib/src/test_flags.dart
 )
 restore_all() { git checkout -- "${FILES[@]}" 2>/dev/null; }
@@ -145,8 +145,8 @@ mutate M12 "a search banner is tracked as a comic" "$BLOC/banners_bloc.dart" "$T
   'tracker.itemTapped(section, StoreItemKind.search, query);' 'tracker.itemTapped(section, StoreItemKind.comic, query);'
 mutate M13 "deals Retry ignores the state (double tap loads twice)" "$BLOC/deals_bloc.dart" "$T_BDD" \
   $'      case _Retry():\n        if (state is _Failure) {' $'      case _Retry():\n        if (state is _Failure || state is _Loading) {'
-mutate M14 "deals count down against the device time" "$BLOC/deals_bloc.dart" "$T_BDD //feature/store/store_home:flow_scope_test" \
-  'DealsState.ready(data, _clock.now());' 'DealsState.ready(data, _clock.now().add(const Duration(days: 1)));'
+mutate M14 "deals count down a day off the injected clock" "$BLOC/deals_bloc.dart" "$T_BDD //feature/store/store_home:flow_scope_test" \
+  '    final now = _clock.now();' '    final now = _clock.now().add(const Duration(days: 1));'
 mutate M15 "a deal tap is tracked with the wrong id" "$BLOC/deals_bloc.dart" "$T_BDD" \
   "tracker.itemTapped(section, StoreItemKind.comic, '\${id.value}');" "tracker.itemTapped(section, StoreItemKind.comic, 'deal');"
 mutate M16 "a category opens without its name" "$BLOC/categories_bloc.dart" "$T_BDD" \
@@ -159,13 +159,13 @@ mutate M18 "a featured comic opens nothing" "$BLOC/featured_bloc.dart" "$T_BDD" 
 # --- the cart: the session rules ------------------------------------------
 C="$BLOC/cart_summary_bloc.dart"
 mutate C01 "an answer for a session that is gone is shown" "$C" "$T_BDD" \
-  'return _session.epoch == epoch ? result : null;' 'return result;'
+  '    if (_session.epoch == epoch) {' '    if (_session.epoch == epoch || epoch >= 0) {'
 mutate C02 "a double tap asks to sign in twice" "$C" "$T_BDD" \
   '    if (state is! _SignedOut) {' '    if (state is! _SignedOut && state is! _SigningIn) {'
 mutate C03 "a declined sign-in leaves the section waiting" "$C" "$T_BDD" \
   'if (_session.epoch != _shownEpoch || state is _SigningIn) {' 'if (_session.epoch != _shownEpoch) {'
 mutate C04 "a session change elsewhere is ignored" "$C" "$T_BDD" \
-  $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch) {' $'      case _SessionChanged():\n        if (_session.epoch != _shownEpoch && _shownEpoch == null) {'
+  'if (_shownEpoch != null && _session.epoch != _shownEpoch) {' 'if (_shownEpoch != null && _session.epoch != _shownEpoch && _shownEpoch == null) {'
 mutate C05 "pull to refresh asks for the cart while signed out" "$C" "$T_BDD" \
   $'      case _Refresh(:final done):\n        if (_session.isSignedIn) {' $'      case _Refresh(:final done):\n        if (_session.isSignedIn || !_session.isSignedIn) {'
 mutate C06 "signed out still asks for the cart" "$C" "$T_BDD" \
@@ -203,8 +203,8 @@ mutate D04 "a product never has a deal price" "$F/domain/model/store_mapper.dart
   '        final cents? => Money(cents, money),' '        final cents? => cents < 0 ? Money(cents, money) : null,'
 mutate D05 "a search banner leads to a comic" "$F/domain/model/store_mapper.dart" "$T_FEAT" \
   "('search', _, _, final q?) => BannerTarget.search(q)," "('search', _, _, final q?) => BannerTarget.comic(ComicId(q.length)),"
-mutate D06 "days left round down" "$F/domain/model/store.dart" "$T_FEAT" \
-  'return (left.inMicroseconds + day - 1) ~/ day;' 'return left.inMicroseconds ~/ day;'
+mutate D06 "days left round up" "$F/domain/model/store.dart" "$T_FEAT" \
+  'int daysLeftAt(DateTime now) => endsAt.difference(now).inDays;' 'int daysLeftAt(DateTime now) => (endsAt.difference(now).inHours + 23) ~/ 24;'
 
 # --- the wiring -----------------------------------------------------------
 N="$W/navigators/store_home_navigator_impl.dart"
@@ -234,9 +234,9 @@ mutate F4 "Currency.parse accepts lower case" utility/mc_formatters/lib/src/mone
 # --- the kit: screens inside a flow, the tracker port ---------------------
 R=utility/mc_analytics/lib/src/route_observer.dart
 mutate K1 "a flow's first page is tracked again" "$R" "$T_AN" \
-  'if (previousTopRoute == null && _reported[host] == name) {' 'if (previousTopRoute == null && _reported[host] == name && name.isEmpty) {'
+  'if (previousTopRoute == null && _reported[hostRoute] == name) {' 'if (previousTopRoute == null && _reported[hostRoute] == name && name.isEmpty) {'
 mutate K2 "a flow page is tracked while hidden under another screen" "$R" "$T_AN" \
-  '      if (!host.isCurrent) {' '      if (!host.isCurrent && name.isEmpty) {'
+  '      if (!hostRoute.isCurrent) {' '      if (!hostRoute.isCurrent && name.isEmpty) {'
 mutate K3 "the route observer ignores what the flow shows" "$R" "$T_AN" \
   '    final flowPage = _flowScreens[topRoute];' '    final flowPage = topRoute.isActive ? null : _flowScreens[topRoute];'
 mutate K4 "the route observer does not record what it tracked" "$R" "$T_AN" \
@@ -251,6 +251,32 @@ mutate U1 "holdNext holds every request" utility/mc_test_utils/lib/src/backend_h
   '    taken = once;' '    taken = once && !once;'
 mutate U2 "the flag stub never reads the snapshot" utility/mc_test_utils/lib/src/test_flags.dart "$T_TU" \
   '      flag.codec.decode(_remote[flag.key]) ?? flag.defaultValue;' '      flag.codec.decode(_remote[flag.key]) == null ? flag.defaultValue : flag.defaultValue;'
+
+# --- review round (TL /code-review items 1 to 6) ---------------------------
+mutate V01 "a dropped cart answer does not reload (item 1)" "$C" "$T_BDD" \
+  $'    add(const _SessionChanged());\n    return null;' $'    return null;'
+mutate V02 "the store page starts while hidden (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
+  '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true);' '(FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true;'
+mutate V03 "the store page starts again on every showing (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
+  '    if (shown && !_started) {' '    if (shown) {'
+mutate V04 "the cart loads on a session event before the visit starts (item 2)" "$C" "$T_BDD //feature/store/store_home:flow_scope_test" \
+  'if (_shownEpoch != null && _session.epoch != _shownEpoch) {' 'if (_session.epoch != _shownEpoch) {'
+mutate V05 "a flow page changed under a popup is never tracked (item 3)" "$R" "$T_AN" \
+  '      if (flowPage != null && flowPage != _reported[topRoute]) {' '      if (flowPage != null && flowPage != _reported[topRoute] && flowPage.isEmpty) {'
+mutate V06 "the flow observer depends on the host route (item 4)" "$R" "$T_AN" \
+  '    final hostRoute = host(context);' '    final hostRoute = ModalRoute.of(context);'
+mutate V07 "FeatureFlow does not publish its route (item 4)" utility/mc_feature_flow/lib/src/feature_flow.dart "$T_FF $T_AN" \
+  '      outerRoute: route,' '      outerRoute: null,'
+mutate V08 "FlowScope does not notify a status flip (item 2, 4)" utility/mc_feature_flow/lib/src/flow_context.dart "$T_FF //feature/store/store_home:flow_scope_test" \
+  $'      outerIsCurrent != oldWidget.outerIsCurrent ||\n' ''
+mutate V09 "an ended deal is shown (item 5)" "$BLOC/deals_bloc.dart" "$T_FEAT" \
+  '            if (deal.runsAt(now)) deal,' '            if (deal.runsAt(now) || !deal.runsAt(now)) deal,'
+mutate V10 "a deal still runs exactly at its end (item 5)" "$F/domain/model/store.dart" "$T_FEAT" \
+  'bool runsAt(DateTime now) => endsAt.isAfter(now);' 'bool runsAt(DateTime now) => !endsAt.isBefore(now);'
+mutate V11 "an invalid flow page name is tracked (item 6)" "$R" "$T_AN" \
+  '    if (!AnalyticsRules.isValidName(name)) {' '    if (name.isEmpty) {'
+mutate V12 "an invalid flow page is not recorded, so the page before it is reported (item 6)" "$R" "$T_AN" \
+  $'      _flowScreens[hostRoute] = name;\n' $'      if (AnalyticsRules.isValidName(name)) {\n        _flowScreens[hostRoute] = name;\n      }\n'
 
 say ""
 say "mutations: $n, killed: $killed"
