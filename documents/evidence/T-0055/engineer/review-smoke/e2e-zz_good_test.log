@@ -1,0 +1,38 @@
+# e2e_ios.sh: T-0055 engineer on mc-T-0055-engineer-40947 (2AD449A4-F957-419A-8130-39950B1E9765)
+# cwd: /tmp/mc-T-0055-engineer-smoke/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BV19Dj/screenshots/1-zz_good_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_good_test.dart -d 2AD449A4-F957-419A-8130-39950B1E9765
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient
+# --- runner output ---
+Resolving dependencies in `/private/tmp/mc-T-0055-engineer-smoke`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0055-engineer-smoke`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           23.9s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55006/jpRk1lIJ-3A=/
+VMServiceFlutterDriver: Isolate found with number: 7213532431239003
+VMServiceFlutterDriver: Isolate 7213532431239003 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0055 good target
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: 00:00 +1: (tearDownAll)
+flutter: 00:00 +2: All tests passed!
+All tests passed.
+
+# exit code: 0

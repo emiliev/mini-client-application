@@ -41,9 +41,13 @@ The bundle id the build installs under is `com.emiliev.miniClient` (from the Run
 
 ## Fix: two independent defences (both in `tool/e2e_ios.sh`)
 1. Before each target: `simctl uninstall <udid> <bundle id>` and `rm -rf <project>/build/ios/iphonesimulator`. Xcode's intermediates (`build/ios/Debug-iphonesimulator`) stay, so builds remain incremental.
-2. After each target: scan the log (skipping the 6 header lines the script wrote itself) for the markers in `E2E_BUILD_FAIL_MARKERS` and for the regex `\.dart:[0-9]+:[0-9]+: Error:`. A hit makes the target FAIL, whatever the exit code, with `FAIL (build failed: <marker>)` in the summary and a note line at the end of the log.
+2. After each target: scan the log (only what follows the `# --- runner output ---` line the script writes, so the echoed command is not scanned) for the markers in `E2E_BUILD_FAIL_MARKERS` and for the regex `\.dart:[0-9]+:[0-9]+: Error:`. A hit makes the target FAIL, whatever the exit code, with `FAIL (build failed: <marker>)` in the summary and a note line at the end of the log.
 
-Markers: `BUILD FAILED`, `Error (Xcode)`, `Failed to build iOS app`, `Could not build the application`, `Error: Compilation failed`, `Application failed to start on attempt`, and a Dart compile error line. `Application failed to start on attempt` is the exact signature of the false PASS, so even a failure the other markers miss is caught.
+Markers: `BUILD FAILED`, `Error (Xcode)`, `Failed to build iOS app`, `Could not build the application`, `Error: Compilation failed`, and a Dart compile error line.
+
+**`Application failed to start on attempt` is not a marker (review round).** It was one at first, as the signature of the false PASS. But `flutter drive` prints it for any failed launch attempt, so a launch timeout that a later attempt recovered would be a false FAIL. The before-fix log (`before-fix/e2e-zz_broken_test.log`) shows it is redundant: the same real failure also prints `Failed to build iOS app`, `BUILD FAILED`, the Dart error line and `Could not build the application`. A good log has no "Built ..." success line to test against (only `Xcode build done.`, which a failed build prints too), so a conditional marker is not possible. Tests: attempt-1 line then a good run, exit 0, is PASS; attempt-1 line next to `Could not build the application` is FAIL.
+
+**Bundle id mismatch, for the TL to file.** The built app installs as `com.emiliev.miniClient` (capital C), while Q-004 answered `com.emiliev.miniclient`. `flutter create --org com.emiliev` made the Xcode project from the project name `mini_client`; the Info.plist URL name uses the lowercase spelling. The scripts read the id from the Xcode project, so they work either way, but a store release would need one spelling decided.
 
 Each defence was proven alone through the real script (T-0055-AC1e), by running a copy of the script with the other defence switched off:
 

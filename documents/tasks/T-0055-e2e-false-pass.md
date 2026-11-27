@@ -54,9 +54,29 @@ The runner can no longer report PASS for a target whose app did not build. Two i
 | Before the fix | `before-fix/`: the false PASS. |
 | AC2 | `tool/test/e2e_ios_test.sh`: `test_T-0055-AC2_every_marker_is_found_in_a_log` and `test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail`. Full suite 15 of 15 PASS: `e2e_ios_test-full-suite.txt`. Negative control (marker scan disabled, both tests FAIL): `ac2-negative-control.txt`. |
 | AC3 | `rebaseline/`: all 11 mini_client targets PASS on origin/main 5fdcf80 plus this branch; `e2e-summary.md`, `run.out`. No hidden failure. |
-| AC4 | `bazel-test.txt`: `test //...` 176 of 176 pass. `shellcheck` is not installed here (`bash -n` is clean). F-0055 and `tool/README.md` updated. |
+| AC4 | `test-all-bazel.txt`: `test //...` 176 of 176 pass. `shellcheck` is not installed here (`bash -n` is clean). F-0055 and `tool/README.md` updated. |
 
 Notes for the TL:
 - Positive identity check was not added (see F-0055, "Not done").
 - The bundle id the build installs under is `com.emiliev.miniClient` (from `flutter create`), not Q-004's `com.emiliev.miniclient`. The script reads the Xcode project, so it does not matter, but the Bazel and pub builds differ in case.
 - Earlier T-0036 / T-0053 / T-0054 e2e PASSes that ran several targets in a row could in principle have been false; the re-baseline shows the current targets all build and pass, so none of them was hiding a failure now.
+
+## Review round
+`/code-review` found 2 important issues and 6 nits. All are fixed on this branch.
+
+| # | Finding | Fix | Proof |
+|---|---|---|---|
+| 1 | `Application failed to start on attempt` is also printed when a launch retry recovered (false FAIL) | Dropped as a marker. The before-fix log shows a real build failure always also prints `BUILD FAILED`, `Failed to build iOS app` and `Could not build the application`; there is no "Built ..." success line to condition on (a good log only has `Xcode build done.`, which a failed build prints too). F-0055 explains. | `test_T-0055-AC2_every_marker_is_found_in_a_log` (retry alone not reported), `test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail` (attempt-1 + good run, exit 0 = PASS; attempt-1 + `Could not build the application` = FAIL). Mutation (marker restored) fails the unit test: `review-negative-controls.txt`. |
+| 2 | Build-dir delete breaks custom runners | Deleted only for a runner command with `flutter drive` and without `--use-application-binary` / `--no-build`; new `--keep-build` opt-out; documented in `tool/README.md` and `--help`. | `test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner` (unit), `test_T-0055-AC1_keep_build_flag_through_the_script` (real script, fake runner). Mutation fails. |
+| 3 | Bundle id | `xcodebuild -showBuildSettings -scheme Runner -configuration Debug`, pbxproj parse as fallback, `$(VAR)` refused. Resolved once per run. Real project gives `com.emiliev.miniClient`. | `test_T-0055-AC1_bundle_id_resolution`; the smoke log shows `uninstalled com.emiliev.miniClient`. |
+| 4 | Log claimed a failed uninstall | `uninstalled <id>` only when `simctl` returns 0, else `uninstall of <id> failed or app not installed`. | same unit test; mutation fails. |
+| 5 | Header line count fragile | The script writes `# --- runner output ---`; only what follows is scanned. | `test_T-0055-AC2_command_text_with_marker_is_not_a_failure` (command text has `BUILD FAILED`: PASS), unit control; mutation fails. |
+| 6 | `bazel-test.txt` missing | It was never committed: `.gitignore` has `bazel-*`. Renamed to `evidence/T-0055/engineer/test-all-bazel.txt` and committed (176 of 176; re-run at the end of this round, see below). | |
+| 7 | AC IDs in test names | New `T-0055-AC1` tests: `..._good_pass_runtime_fail_build_fail` (good PASS, runtime failure plain FAIL, build failure FAIL, broken alone FAIL), `..._stale_build_dir_...`, `..._keep_build_flag_...`, `..._bundle_id_resolution`. AC1e, AC3 and AC4 are run logs, not tests: AC1e = `ac1e-*` dirs, AC3 = `rebaseline/`, AC4 = `test-all-bazel.txt`. | |
+| 8 | Leaking test helpers | Helpers are defined once at top level with a `t55_` prefix; test-local functions are unset. | |
+
+Re-runs: the full `tool/test/e2e_ios_test.sh` (`e2e_ios_test-full-suite.txt`), and a real smoke on an own simulator, a good target then the broken throwaway (`review-smoke/`): good PASS, broken `FAIL (build failed: BUILD FAILED)`, simulator deleted.
+
+Answers for the TL:
+- The `mc-T-0012-*` simulators were created by my own runs of `tool/test/e2e_ios_test.sh` (it uses `T-0012` as its task id). I never deleted one by hand; the suite deletes its own simulators on exit. The only simulator I saw that was not mine, `mc-T-0052-verifier-*`, was left alone.
+- Bundle id mismatch (`miniClient` built, `miniclient` in Q-004): recorded in F-0055 for the TL to file.
