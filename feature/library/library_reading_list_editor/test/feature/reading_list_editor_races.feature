@@ -189,6 +189,60 @@ Feature: The editor stays consistent while requests are in flight
       | 'Amber Frontier #1'   |
       | 'Amber Legacy #1'     |
 
+  @T-0050-AC2
+  Scenario: Another user signing in right before the POST is sent writes nothing for them
+    When I open the reading list editor
+    And I enter {'Amber reads'} as the name
+    And I tap {'Next'}
+    And I pick {'Amber Chronicles #1'}
+    And I tap {'Next'}
+    And {'collector@mini-client.test'} signs in just before the app sends {'POST /v1/me/lists'}
+    And I tap {'Create list'}
+    And the app finishes writing to storage
+    Then the backend received {0} requests for {'POST /v1/me/lists'}
+    And I see {'You are no longer signed in as before'}
+    And the editor has not ended
+    And {'collector@mini-client.test'} has {1} reading lists
+    And {'reader@mini-client.test'} has {3} reading lists
+    And the app announced {0} change to {'readingLists'}
+    When I tap {'Close'}
+    Then the editor ended without a list
+
+  @T-0050-AC2
+  Scenario: Another user signing in right before the second write of an edit sends it for no one
+    When I open the reading list editor for {'l-1'}
+    And I enter {'Spider-Verse Basics'} as the name
+    And I tap {'Next'}
+    And I tap {'Next'}
+    And I move {'Amber Legacy #1'} up
+    And {'collector@mini-client.test'} signs in just before the app sends {'PUT /v1/me/lists/l-1/items'}
+    And I tap {'Save changes'}
+    And the app finishes writing to storage
+    Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}
+    And the backend received {'PUT /v1/me/lists/l-1'} with a token of {'reader@mini-client.test'}
+    And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}
+    And I see {'You are no longer signed in as before'}
+    And list {'l-1'} of {'reader@mini-client.test'} holds the comics
+      | 'title'               |
+      | 'Amber Chronicles #1' |
+      | 'Amber Frontier #1'   |
+      | 'Amber Legacy #1'     |
+
+  @T-0050-AC2
+  Scenario: Another user signing in right before the first write of an edit sends nothing
+    When I open the reading list editor for {'l-1'}
+    And I enter {'Spider-Verse Basics'} as the name
+    And I tap {'Next'}
+    And I tap {'Next'}
+    And I move {'Amber Legacy #1'} up
+    And {'collector@mini-client.test'} signs in just before the app sends {'PUT /v1/me/lists/l-1'}
+    And I tap {'Save changes'}
+    And the app finishes writing to storage
+    Then the backend received {0} requests for {'PUT /v1/me/lists/l-1'}
+    And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}
+    And I see {'You are no longer signed in as before'}
+    And the app announced {0} change to {'readingLists'}
+
   @T-0048-AC6
   Scenario: A session change while the list loads shows no list of the old session
     Given the backend holds {'GET /v1/me/lists/l-1'}

@@ -58,6 +58,7 @@ dev_dependencies:
   mc_fixtures_library: any
   mc_fixtures_media: any
   mc_mocked_backend: any
+  mc_storage: any
   mc_test_steps: any
   mc_test_utils: any
   mocktail: ^1.0.4
