@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-9801 (33FE038C-A654-4E92-8F8A-68DCE6EA12CA)
+# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-96652 (6F0125E5-334B-4B01-BC81-1BA4396C920E)
 # cwd: /tmp/mc-T-0053-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/10-search_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 33FE038C-A654-4E92-8F8A-68DCE6EA12CA
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/10-search_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 6F0125E5-334B-4B01-BC81-1BA4396C920E
 
 Resolving dependencies in `/private/tmp/mc-T-0053-engineer-e2e`...
 Downloading packages...
@@ -21,24 +21,24 @@ Got dependencies in `/private/tmp/mc-T-0053-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           11.2s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51795/IaJPyxUrYeo=/
-VMServiceFlutterDriver: Isolate found with number: 3225339523691787
-VMServiceFlutterDriver: Isolate 3225339523691787 is runnable.
+Xcode build done.                                            9.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:61752/wBGaEHCp7LA=/
+VMServiceFlutterDriver: Isolate found with number: 8059300030080883
+VMServiceFlutterDriver: Isolate 8059300030080883 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0046-AC5 the deep link miniclient://app/search?q=spi opens the search with its results
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: 4d98b151e2d09e441a34f0ffbd0e3134, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: ef5ab1b11fbb7ed9147375068284b234, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: 4d98b151e2d09e441a34f0ffbd0e3134, seq: 2}
+flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: ef5ab1b11fbb7ed9147375068284b234, seq: 2}
 flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
 flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
-flutter: [event] mc_screen_view {screen_name: home, session_id: 4d98b151e2d09e441a34f0ffbd0e3134, seq: 3}
+flutter: [event] mc_screen_view {screen_name: home, session_id: ef5ab1b11fbb7ed9147375068284b234, seq: 3}
 VMServiceFlutterDriver: request_data message is taking a long time to complete...
-flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: 4d98b151e2d09e441a34f0ffbd0e3134, seq: 4}
+flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: ef5ab1b11fbb7ed9147375068284b234, seq: 4}
 flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
 flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
@@ -47,9 +47,9 @@ flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
 flutter: 00:10 +1: (tearDownAll)
 flutter: 00:10 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/10-search_deeplink_test/36_deep_link_search.png (411725)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/10-search_deeplink_test/36b_back_from_search_is_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/10-search_deeplink_test/37_link_to_running_app_search.png (413127)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/10-search_deeplink_test/36_deep_link_search.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/10-search_deeplink_test/36b_back_from_search_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/10-search_deeplink_test/37_link_to_running_app_search.png (413127)
 All tests passed.
 
 # exit code: 0

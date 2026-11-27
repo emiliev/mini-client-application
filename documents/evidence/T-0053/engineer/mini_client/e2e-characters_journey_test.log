@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-9801 (33FE038C-A654-4E92-8F8A-68DCE6EA12CA)
+# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-96652 (6F0125E5-334B-4B01-BC81-1BA4396C920E)
 # cwd: /tmp/mc-T-0053-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/4-characters_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 33FE038C-A654-4E92-8F8A-68DCE6EA12CA
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/4-characters_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 6F0125E5-334B-4B01-BC81-1BA4396C920E
 
 Resolving dependencies in `/private/tmp/mc-T-0053-engineer-e2e`...
 Downloading packages...
@@ -21,19 +21,19 @@ Got dependencies in `/private/tmp/mc-T-0053-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           11.9s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51200/PkWfNRf6P74=/
-VMServiceFlutterDriver: Isolate found with number: 7375680479445563
-VMServiceFlutterDriver: Isolate 7375680479445563 is runnable.
+Xcode build done.                                            9.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:61596/txUQR4Kt_1k=/
+VMServiceFlutterDriver: Isolate found with number: 5988002947372123
+VMServiceFlutterDriver: Isolate 5988002947372123 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 home to the characters list, a preview, the full profile placeholder
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: aef5ae55af4fe0678906ce2ed524ed30, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: 4a2ee360128d230ca23a57710107fcc2, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-flutter: [event] mc_screen_view {screen_name: home, session_id: aef5ae55af4fe0678906ce2ed524ed30, seq: 2}
-flutter: [event] mc_screen_view {screen_name: characters_list, session_id: aef5ae55af4fe0678906ce2ed524ed30, seq: 3}
+flutter: [event] mc_screen_view {screen_name: home, session_id: 4a2ee360128d230ca23a57710107fcc2, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 4a2ee360128d230ca23a57710107fcc2, seq: 3}
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
 flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
@@ -41,13 +41,13 @@ VMServiceFlutterDriver: request_data message is taking a long time to complete..
 flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Loading
 flutter: [debug] GET /v1/comics -> 200
 flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
-flutter: [event] mc_screen_view {screen_name: character_details, session_id: aef5ae55af4fe0678906ce2ed524ed30, seq: 4}
+flutter: [event] mc_screen_view {screen_name: character_details, session_id: 4a2ee360128d230ca23a57710107fcc2, seq: 4}
 flutter: 00:07 +1: (tearDownAll)
 flutter: 00:07 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/4-characters_journey_test/01_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/4-characters_journey_test/02_characters_list.png (405341)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/4-characters_journey_test/03_preview.png (324738)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/4-characters_journey_test/04_full_profile_placeholder.png (222291)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/4-characters_journey_test/01_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/4-characters_journey_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/4-characters_journey_test/03_preview.png (324738)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/4-characters_journey_test/04_full_profile_placeholder.png (222291)
 All tests passed.
 
 # exit code: 0

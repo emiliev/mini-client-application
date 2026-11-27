@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-9801 (33FE038C-A654-4E92-8F8A-68DCE6EA12CA)
+# e2e_ios.sh: T-0053 engineer on mc-T-0053-engineer-96652 (6F0125E5-334B-4B01-BC81-1BA4396C920E)
 # cwd: /tmp/mc-T-0053-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/5-characters_link_after_flow_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d 33FE038C-A654-4E92-8F8A-68DCE6EA12CA
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/5-characters_link_after_flow_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d 6F0125E5-334B-4B01-BC81-1BA4396C920E
 
 Resolving dependencies in `/private/tmp/mc-T-0053-engineer-e2e`...
 Downloading packages...
@@ -21,26 +21,26 @@ Got dependencies in `/private/tmp/mc-T-0053-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           10.1s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51276/oKGQKdxe7-c=/
-VMServiceFlutterDriver: Isolate found with number: 6614070179336487
-VMServiceFlutterDriver: Isolate 6614070179336487 is runnable.
+Xcode build done.                                            9.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:61615/hjVxDgb_Fgg=/
+VMServiceFlutterDriver: Isolate found with number: 6054108773406979
+VMServiceFlutterDriver: Isolate 6054108773406979 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0033-AC4 a link sent to the running app opens its route while the characters list is shown
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: 95ea6d8f95d943177c0c78d9038027e3, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: d68f754bbbcdc9550b9bedbd9d80f4de, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-flutter: [event] mc_screen_view {screen_name: home, session_id: 95ea6d8f95d943177c0c78d9038027e3, seq: 2}
-flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 95ea6d8f95d943177c0c78d9038027e3, seq: 3}
+flutter: [event] mc_screen_view {screen_name: home, session_id: d68f754bbbcdc9550b9bedbd9d80f4de, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: d68f754bbbcdc9550b9bedbd9d80f4de, seq: 3}
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
 flutter: [debug] GET /v1/characters -> 200
 flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
-flutter: [event] mc_screen_view {screen_name: placeholder_detail, session_id: 95ea6d8f95d943177c0c78d9038027e3, seq: 4}
+flutter: [event] mc_screen_view {screen_name: placeholder_detail, session_id: d68f754bbbcdc9550b9bedbd9d80f4de, seq: 4}
 flutter: 00:03 +1: (tearDownAll)
 flutter: 00:03 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.QnQXCf/screenshots/5-characters_link_after_flow_test/06_link_after_flow.png (215719)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.yCqk01/screenshots/5-characters_link_after_flow_test/06_link_after_flow.png (215719)
 All tests passed.
 
 # exit code: 0
