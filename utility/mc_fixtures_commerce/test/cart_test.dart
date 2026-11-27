@@ -166,7 +166,7 @@ void main() {
         expect(cart.lines.map((l) => l.buyTwoGetOneCents), [0, 300]);
         expect(cart.totalCents, 1800);
         // Six units, dearest first in groups of three (900 900 900 | 300 300
-      // 300): the last of each group is free.
+        // 300): the last of each group is free.
         final six = priceCart(
           [_line(1, 'heroes', 900, 3), _line(2, 'heroes', 300, 3)],
           [_promo('HEROES3')],

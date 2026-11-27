@@ -1,0 +1,14 @@
+{
+  "body": {
+    "error": {
+      "code": "unknown_product",
+      "message": "No product \"12345\"",
+      "productId": "12345"
+    }
+  },
+  "request": "PUT /v1/me/cart/items/12345 as u-100",
+  "requestBody": {
+    "quantity": 1
+  },
+  "status": 404
+}

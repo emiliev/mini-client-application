@@ -1,0 +1,16 @@
+{
+  "body": {
+    "error": {
+      "available": 6,
+      "code": "out_of_stock",
+      "message": "Only 6 of \"Amber Harbor #3\" in stock",
+      "productId": 501022,
+      "requested": 7
+    }
+  },
+  "request": "PUT /v1/me/cart/items/501022 as u-100",
+  "requestBody": {
+    "quantity": 7
+  },
+  "status": 409
+}

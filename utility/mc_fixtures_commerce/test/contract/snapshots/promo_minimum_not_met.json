@@ -1,0 +1,18 @@
+{
+  "body": {
+    "error": {
+      "code": "promo_not_applicable",
+      "message": "TAKE15 cannot be applied: minimum_not_met",
+      "promoCode": "TAKE15",
+      "reason": "minimum_not_met"
+    }
+  },
+  "request": "POST /v1/me/cart/promo as u-100",
+  "requestBody": {
+    "code": "TAKE15"
+  },
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":1}"
+  ],
+  "status": 409
+}

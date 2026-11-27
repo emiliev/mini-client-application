@@ -65,15 +65,18 @@ void main() {
       }
     });
 
-    test('T-0051-AC4: auth is checked before the product and the body', () async {
-      final r = await call<Json>(
-        dio,
-        'PUT',
-        '/v1/me/cart/items/not-a-product',
-        body: [1, 2],
-      );
-      expect(r.statusCode, 401);
-    });
+    test(
+      'T-0051-AC4: auth is checked before the product and the body',
+      () async {
+        final r = await call<Json>(
+          dio,
+          'PUT',
+          '/v1/me/cart/items/not-a-product',
+          body: [1, 2],
+        );
+        expect(r.statusCode, 401);
+      },
+    );
 
     test('T-0051-AC4: the store sections need no bearer', () async {
       for (final path in const [
@@ -89,36 +92,49 @@ void main() {
   });
 
   group('T-0051-AC4 typed codes', () {
-    test('T-0051-AC4: unknown_product (404) for an id that is not sold', () async {
-      final notSold = ComicUniverse(
-        42,
-      ).byTitle.firstWhere((c) => c.issueNumber > issuesSold);
-      for (final raw in ['999', 'abc', '${notSold.id}', '-1', '1.5']) {
-        final r = await call<Json>(
+    test(
+      'T-0051-AC4: unknown_product (404) for an id that is not sold',
+      () async {
+        final notSold = ComicUniverse(
+          42,
+        ).byTitle.firstWhere((c) => c.issueNumber > issuesSold);
+        for (final raw in ['999', 'abc', '${notSold.id}', '-1', '1.5']) {
+          final r = await call<Json>(
+            dio,
+            'PUT',
+            '/v1/me/cart/items/$raw',
+            body: {'quantity': 1},
+            headers: bearer(reader),
+          );
+          expect(r.statusCode, 404, reason: raw);
+          expect(_error(r), containsPair('code', 'unknown_product'));
+          expect(_error(r)['productId'], raw);
+        }
+        // The product check comes before the quantity check.
+        final first = await call<Json>(
           dio,
           'PUT',
-          '/v1/me/cart/items/$raw',
-          body: {'quantity': 1},
+          '/v1/me/cart/items/999',
+          body: {'quantity': 1000},
           headers: bearer(reader),
         );
-        expect(r.statusCode, 404, reason: raw);
-        expect(_error(r), containsPair('code', 'unknown_product'));
-        expect(_error(r)['productId'], raw);
-      }
-      // The product check comes before the quantity check.
-      final first = await call<Json>(
-        dio,
-        'PUT',
-        '/v1/me/cart/items/999',
-        body: {'quantity': 1000},
-        headers: bearer(reader),
-      );
-      expect(_error(first)['code'], 'unknown_product');
-    });
+        expect(_error(first)['code'], 'unknown_product');
+      },
+    );
 
     test('T-0051-AC4: invalid_quantity (400) outside 0 to 99 or not a whole number', () async {
       final p = _withStock(products, 99);
-      for (final q in <Object?>[-1, 100, 1000, 1.5, 2.0, '2', null, true, <int>[]]) {
+      for (final q in <Object?>[
+        -1,
+        100,
+        1000,
+        1.5,
+        2.0,
+        '2',
+        null,
+        true,
+        <int>[],
+      ]) {
         final r = await putQuantity(dio, p.id, q);
         expect(r.statusCode, 400, reason: '$q');
         expect(_error(r)['code'], 'invalid_quantity', reason: '$q');
@@ -146,53 +162,59 @@ void main() {
       );
     });
 
-    test('T-0051-AC4: invalid_body (400) for a body that is not an object', () async {
-      final p = _withStock(products, 1);
-      final r = await call<Json>(
-        dio,
-        'PUT',
-        '/v1/me/cart/items/${p.id}',
-        body: [1],
-        headers: bearer(reader),
-      );
-      expect(r.statusCode, 400);
-      expect(_error(r), containsPair('code', 'invalid_body'));
-      for (final body in <Object?>[
-        [1],
-        <String, Object?>{},
-        {'code': 5},
-      ]) {
-        final promo = await call<Json>(
+    test(
+      'T-0051-AC4: invalid_body (400) for a body that is not an object',
+      () async {
+        final p = _withStock(products, 1);
+        final r = await call<Json>(
           dio,
-          'POST',
-          '/v1/me/cart/promo',
-          body: body,
+          'PUT',
+          '/v1/me/cart/items/${p.id}',
+          body: [1],
           headers: bearer(reader),
         );
-        expect(promo.statusCode, 400, reason: '$body');
-        expect(_error(promo)['code'], 'invalid_body', reason: '$body');
-      }
-    });
+        expect(r.statusCode, 400);
+        expect(_error(r), containsPair('code', 'invalid_body'));
+        for (final body in <Object?>[
+          [1],
+          <String, Object?>{},
+          {'code': 5},
+        ]) {
+          final promo = await call<Json>(
+            dio,
+            'POST',
+            '/v1/me/cart/promo',
+            body: body,
+            headers: bearer(reader),
+          );
+          expect(promo.statusCode, 400, reason: '$body');
+          expect(_error(promo)['code'], 'invalid_body', reason: '$body');
+        }
+      },
+    );
 
-    test('T-0051-AC4: out_of_stock (409) above the stock, with the stock named', () async {
-      final empty = products.values.firstWhere((p) => p.stock == 0);
-      final r = await putQuantity(dio, empty.id, 1);
-      expect(r.statusCode, 409);
-      expect(_error(r), containsPair('code', 'out_of_stock'));
-      expect(_error(r)['available'], 0);
-      expect(_error(r)['requested'], 1);
-      expect(_error(r)['productId'], empty.id);
-      final limited = products.values.firstWhere((p) => p.stock == 3);
-      expect((await putQuantity(dio, limited.id, 3)).statusCode, 200);
-      final over = await putQuantity(dio, limited.id, 4);
-      expect(over.statusCode, 409);
-      expect(_error(over)['available'], 3);
-      // A rejected write changes nothing.
-      final cart = (await _cart(dio)).data!;
-      expect((cart['items']! as List).cast<Json>().single['quantity'], 3);
-      // Taking an out-of-stock product out is still allowed.
-      expect((await putQuantity(dio, empty.id, 0)).statusCode, 200);
-    });
+    test(
+      'T-0051-AC4: out_of_stock (409) above the stock, with the stock named',
+      () async {
+        final empty = products.values.firstWhere((p) => p.stock == 0);
+        final r = await putQuantity(dio, empty.id, 1);
+        expect(r.statusCode, 409);
+        expect(_error(r), containsPair('code', 'out_of_stock'));
+        expect(_error(r)['available'], 0);
+        expect(_error(r)['requested'], 1);
+        expect(_error(r)['productId'], empty.id);
+        final limited = products.values.firstWhere((p) => p.stock == 3);
+        expect((await putQuantity(dio, limited.id, 3)).statusCode, 200);
+        final over = await putQuantity(dio, limited.id, 4);
+        expect(over.statusCode, 409);
+        expect(_error(over)['available'], 3);
+        // A rejected write changes nothing.
+        final cart = (await _cart(dio)).data!;
+        expect((cart['items']! as List).cast<Json>().single['quantity'], 3);
+        // Taking an out-of-stock product out is still allowed.
+        expect((await putQuantity(dio, empty.id, 0)).statusCode, 200);
+      },
+    );
 
     test('T-0051-AC4: unknown_promo (404), and codes are trimmed and case-insensitive', () async {
       final p = _withStock(products, 1);
@@ -227,8 +249,11 @@ void main() {
       }
 
       expect(await reasonOf('SAVE10'), 'empty_cart');
-      final cosmic = inCategory(products, 'cosmic', minStock: 1)
-          .firstWhere((p) => p.unitCents < 1500);
+      final cosmic = inCategory(
+        products,
+        'cosmic',
+        minStock: 1,
+      ).firstWhere((p) => p.unitCents < 1500);
       await putQuantity(dio, cosmic.id, 1);
       expect(await reasonOf('HEROES3'), 'no_matching_items');
       expect(await reasonOf('TAKE5'), 'minimum_not_met');
@@ -281,50 +306,65 @@ void main() {
       expect((await putQuantity(dio, p.id, 1)).statusCode, 200);
     });
 
-    test('T-0051-AC4: another user\'s cart is never visible or touched', () async {
-      final a = products.values.firstWhere((p) => p.stock >= 5);
-      final b = products.values.lastWhere((p) => p.stock >= 5);
-      expect(a.id, isNot(b.id));
-      await putQuantity(dio, a.id, 3, user: reader);
-      await putQuantity(dio, b.id, 2, user: collector);
-      await applyCode(dio, 'SAVE10', user: reader);
-      final mine = (await _cart(dio, user: reader)).data!;
-      final theirs = (await _cart(dio, user: collector)).data!;
-      expect((mine['items']! as List).cast<Json>().single['productId'], a.id);
-      expect((theirs['items']! as List).cast<Json>().single['productId'], b.id);
-      expect(mine['promotions'], hasLength(1));
-      expect(theirs['promotions'], isEmpty, reason: 'codes are per user');
-      // Removing one's own line leaves the other's alone.
-      await putQuantity(dio, a.id, 0, user: reader);
-      expect(((await _cart(dio, user: collector)).data!['items']! as List), hasLength(1));
-      expect(((await _cart(dio, user: reader)).data!['items']! as List), isEmpty);
-      // DELETE promo only clears the caller's.
-      await applyCode(dio, 'SAVE25', user: collector);
-      await putQuantity(dio, a.id, 1, user: reader);
-      await applyCode(dio, 'SAVE10', user: reader);
-      await call<Json>(
-        dio,
-        'DELETE',
-        '/v1/me/cart/promo',
-        headers: bearer(reader),
-      );
-      expect(
-        ((await _cart(dio, user: collector)).data!['promotions']! as List),
-        hasLength(1),
-      );
-    });
+    test(
+      'T-0051-AC4: another user\'s cart is never visible or touched',
+      () async {
+        final a = products.values.firstWhere((p) => p.stock >= 5);
+        final b = products.values.lastWhere((p) => p.stock >= 5);
+        expect(a.id, isNot(b.id));
+        await putQuantity(dio, a.id, 3, user: reader);
+        await putQuantity(dio, b.id, 2, user: collector);
+        await applyCode(dio, 'SAVE10', user: reader);
+        final mine = (await _cart(dio, user: reader)).data!;
+        final theirs = (await _cart(dio, user: collector)).data!;
+        expect((mine['items']! as List).cast<Json>().single['productId'], a.id);
+        expect(
+          (theirs['items']! as List).cast<Json>().single['productId'],
+          b.id,
+        );
+        expect(mine['promotions'], hasLength(1));
+        expect(theirs['promotions'], isEmpty, reason: 'codes are per user');
+        // Removing one's own line leaves the other's alone.
+        await putQuantity(dio, a.id, 0, user: reader);
+        expect(
+          ((await _cart(dio, user: collector)).data!['items']! as List),
+          hasLength(1),
+        );
+        expect(
+          ((await _cart(dio, user: reader)).data!['items']! as List),
+          isEmpty,
+        );
+        // DELETE promo only clears the caller's.
+        await applyCode(dio, 'SAVE25', user: collector);
+        await putQuantity(dio, a.id, 1, user: reader);
+        await applyCode(dio, 'SAVE10', user: reader);
+        await call<Json>(
+          dio,
+          'DELETE',
+          '/v1/me/cart/promo',
+          headers: bearer(reader),
+        );
+        expect(
+          ((await _cart(dio, user: collector)).data!['promotions']! as List),
+          hasLength(1),
+        );
+      },
+    );
 
-    test('T-0051-AC4: the same user with a refreshed token keeps the cart', () async {
-      final p = _withStock(products, 2);
-      await putQuantity(dio, p.id, 2);
-      final r = await call<Json>(
-        dio,
-        'GET',
-        '/v1/me/cart',
-        headers: bearer(reader, 7),
-      );
-      expect((r.data!['items']! as List), hasLength(1));
-    });
+    test(
+      'T-0051-AC4: the same user with a refreshed token keeps the cart',
+      () async {
+        final p = _withStock(products, 2);
+        await putQuantity(dio, p.id, 2);
+        final r = await call<Json>(
+          dio,
+          'GET',
+          '/v1/me/cart',
+          headers: bearer(reader, 7),
+        );
+        expect((r.data!['items']! as List), hasLength(1));
+      },
+    );
 
     test('T-0051-AC4: the empty store keeps its own carts, so no line names a missing product', () async {
       final p = _withStock(products, 2);

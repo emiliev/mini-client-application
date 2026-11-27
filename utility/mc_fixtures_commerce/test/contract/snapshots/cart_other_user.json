@@ -1,0 +1,31 @@
+{
+  "body": {
+    "currency": "EUR",
+    "discountCents": 0,
+    "itemCount": 2,
+    "items": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/019",
+          "variant": "portrait_large"
+        },
+        "discountCents": 0,
+        "listPriceCents": 1443,
+        "productId": 500120,
+        "quantity": 2,
+        "subtotalCents": 2886,
+        "title": "Ember Chronicles #1",
+        "totalCents": 2886,
+        "unitPriceCents": 1443
+      }
+    ],
+    "promotions": [],
+    "subtotalCents": 2886,
+    "totalCents": 2886
+  },
+  "request": "GET /v1/me/cart as u-101",
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":2}"
+  ],
+  "status": 200
+}

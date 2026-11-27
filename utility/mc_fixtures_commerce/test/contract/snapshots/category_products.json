@@ -1,0 +1,57 @@
+{
+  "body": {
+    "count": 3,
+    "limit": 3,
+    "offset": 0,
+    "results": [
+      {
+        "categoryId": "heroes",
+        "cover": {
+          "path": "mock-asset://characters/019",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500120,
+        "issueNumber": 1,
+        "priceCents": 1443,
+        "seriesId": 400006,
+        "stock": 36,
+        "title": "Ember Chronicles #1"
+      },
+      {
+        "categoryId": "heroes",
+        "cover": {
+          "path": "mock-asset://characters/012",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500121,
+        "issueNumber": 2,
+        "priceCents": 1510,
+        "seriesId": 400006,
+        "stock": 120,
+        "title": "Ember Chronicles #2"
+      },
+      {
+        "categoryId": "heroes",
+        "cover": {
+          "path": "mock-asset://characters/006",
+          "variant": "portrait_large"
+        },
+        "currency": "EUR",
+        "dealPriceCents": null,
+        "id": 500122,
+        "issueNumber": 3,
+        "priceCents": 1965,
+        "seriesId": 400006,
+        "stock": 35,
+        "title": "Ember Chronicles #3"
+      }
+    ],
+    "total": 60
+  },
+  "request": "GET /v1/store/categories/heroes/products?limit=3 as u-100",
+  "status": 200
+}

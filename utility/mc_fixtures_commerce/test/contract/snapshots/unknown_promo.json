@@ -1,0 +1,17 @@
+{
+  "body": {
+    "error": {
+      "code": "unknown_promo",
+      "message": "No promotion code \"FREEBIES\"",
+      "promoCode": "FREEBIES"
+    }
+  },
+  "request": "POST /v1/me/cart/promo as u-100",
+  "requestBody": {
+    "code": "FREEBIES"
+  },
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":1}"
+  ],
+  "status": 404
+}

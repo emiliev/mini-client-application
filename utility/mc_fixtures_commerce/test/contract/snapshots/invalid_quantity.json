@@ -1,0 +1,16 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_quantity",
+      "max": 99,
+      "message": "quantity must be a whole number from 0 to 99",
+      "min": 0,
+      "parameter": "quantity"
+    }
+  },
+  "request": "PUT /v1/me/cart/items/500120 as u-100",
+  "requestBody": {
+    "quantity": 100
+  },
+  "status": 400
+}

@@ -1,0 +1,13 @@
+{
+  "body": {
+    "currency": "EUR",
+    "discountCents": 0,
+    "itemCount": 0,
+    "items": [],
+    "promotions": [],
+    "subtotalCents": 0,
+    "totalCents": 0
+  },
+  "request": "GET /v1/me/cart as u-100",
+  "status": 200
+}

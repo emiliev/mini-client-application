@@ -1,0 +1,72 @@
+{
+  "body": {
+    "currency": "EUR",
+    "discountCents": 984,
+    "itemCount": 6,
+    "items": [
+      {
+        "cover": {
+          "path": "mock-asset://characters/019",
+          "variant": "portrait_large"
+        },
+        "discountCents": 289,
+        "listPriceCents": 1443,
+        "productId": 500120,
+        "quantity": 2,
+        "subtotalCents": 2886,
+        "title": "Ember Chronicles #1",
+        "totalCents": 2597,
+        "unitPriceCents": 1443
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/012",
+          "variant": "portrait_large"
+        },
+        "discountCents": 302,
+        "listPriceCents": 1510,
+        "productId": 500121,
+        "quantity": 2,
+        "subtotalCents": 3020,
+        "title": "Ember Chronicles #2",
+        "totalCents": 2718,
+        "unitPriceCents": 1510
+      },
+      {
+        "cover": {
+          "path": "mock-asset://characters/006",
+          "variant": "portrait_large"
+        },
+        "discountCents": 393,
+        "listPriceCents": 1965,
+        "productId": 500122,
+        "quantity": 2,
+        "subtotalCents": 3930,
+        "title": "Ember Chronicles #3",
+        "totalCents": 3537,
+        "unitPriceCents": 1965
+      }
+    ],
+    "promotions": [
+      {
+        "code": "SAVE10",
+        "discountCents": 984,
+        "eligible": true,
+        "kind": "percent_off",
+        "title": "10% off your order"
+      }
+    ],
+    "subtotalCents": 9836,
+    "totalCents": 8852
+  },
+  "request": "POST /v1/me/cart/promo as u-100",
+  "requestBody": {
+    "code": "save10"
+  },
+  "setup": [
+    "PUT /v1/me/cart/items/500120 {\"quantity\":2}",
+    "PUT /v1/me/cart/items/500121 {\"quantity\":2}",
+    "PUT /v1/me/cart/items/500122 {\"quantity\":2}"
+  ],
+  "status": 200
+}
