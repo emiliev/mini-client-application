@@ -37,3 +37,26 @@ The T-0054 engineer saw `tool/e2e_ios.sh` report PASS for two targets that did n
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27 (Engineer): Repro first. A scratch copy of mini_client (`prepare_pub_project.sh`) with `zz_good_test` then `zz_broken_test` (compile error), through the unmodified script: `RESULT: PASS (2 targets)`, broken target log ends `# exit code: 0` (`evidence/T-0055/engineer/before-fix/`).
+- Root cause: `flutter drive` itself exits 0. After "Application failed to start on attempt: 1" it installs and runs the leftover `build/ios/iphonesimulator/Runner.app` of the previous target. Written up in F-0055.
+- Found that `simctl uninstall` alone (the task's defence 1) does NOT fix it: a broken target alone on a brand-new simulator still ran the other target's test, exit 0 (`intermediate-uninstall-only-*`). Defence 1 therefore also deletes `build/ios/iphonesimulator`; the marker scan (defence 2) caught the run.
+- Implemented both defences in `tool/e2e_ios.sh` (markers in `E2E_BUILD_FAIL_MARKERS`, new `--bundle-id`), tests `T-0055-AC2` in `tool/test/e2e_ios_test.sh`, README e2e section, F-0055.
+- Merged origin/main (5fdcf80) and ran the full mini_client e2e with the fixed script: 11 of 11 PASS.
+
+## Outcome
+The runner can no longer report PASS for a target whose app did not build. Two independent defences were proven alone and together; the full suite still passes.
+
+| AC | Evidence (all under `documents/evidence/T-0055/engineer/`) |
+|---|---|
+| AC1a, c, d | `ac1abcd-both-defences/`: good PASS, broken `FAIL (build failed: BUILD FAILED)`, runtime-failing target FAIL (exit 1), good again PASS. Overall exit 1. `e2e-summary.md`, `run.out`. |
+| AC1b | `ac1b-broken-alone/`: broken as the only target is `FAIL (build failed: BUILD FAILED)`. |
+| AC1e | `ac1e-defence1-only/` (marker scan off): broken FAIL, exit 1, good PASS. `ac1e-defence2-only/` (no uninstall, no delete): broken `FAIL (build failed: BUILD FAILED)`. Run with temporary copies of the script (deleted). `intermediate-uninstall-only-*` show uninstall alone is not enough. |
+| Before the fix | `before-fix/`: the false PASS. |
+| AC2 | `tool/test/e2e_ios_test.sh`: `test_T-0055-AC2_every_marker_is_found_in_a_log` and `test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail`. Full suite 15 of 15 PASS: `e2e_ios_test-full-suite.txt`. Negative control (marker scan disabled, both tests FAIL): `ac2-negative-control.txt`. |
+| AC3 | `rebaseline/`: all 11 mini_client targets PASS on origin/main 5fdcf80 plus this branch; `e2e-summary.md`, `run.out`. No hidden failure. |
+| AC4 | `bazel-test.txt`: `test //...` 176 of 176 pass. `shellcheck` is not installed here (`bash -n` is clean). F-0055 and `tool/README.md` updated. |
+
+Notes for the TL:
+- Positive identity check was not added (see F-0055, "Not done").
+- The bundle id the build installs under is `com.emiliev.miniClient` (from `flutter create`), not Q-004's `com.emiliev.miniclient`. The script reads the Xcode project, so it does not matter, but the Bazel and pub builds differ in case.
+- Earlier T-0036 / T-0053 / T-0054 e2e PASSes that ran several targets in a row could in principle have been false; the re-baseline shows the current targets all build and pass, so none of them was hiding a failure now.
