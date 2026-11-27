@@ -35,7 +35,7 @@ sequenceDiagram
     E->>E: tool/verify.sh (L0–L3) + e2e (L4) for feature tasks
     E-->>TL: handoff report + evidence
     TL->>TL: /code-review on the diff (ADR-0011: review first)
-    TL->>E: accepted review findings (one fix round)
+    TL->>E: important review findings only (one fix round); nits go to pending-work.md
     E-->>TL: fixed branch
     opt ADR-0015 exception only (rules/codegen, vendored, auth/security, TL unsure)
         TL->>V: narrow verification brief
@@ -61,7 +61,7 @@ sequenceDiagram
 - [ ] **Merge gates green on the merge result** (ADR-0015): it compiles and every test passes. A Verifier report is needed only for an ADR-0015 exception.
 - [ ] `/code-review` has no unresolved important findings.
 - [ ] No tests deleted, skipped or weakened, and no lint suppressions, unless approved by the TL in the task log.
-- [ ] **Tests per ADR-0015:** features use BDD plus contract tests, with plain unit tests allowed for pure logic and **no goldens**. DS kits keep their goldens. About 15 targeted mutants on the risky logic, with no full sweeps.
+- [ ] **Tests per ADR-0015:** features use BDD plus contract tests, with plain unit tests allowed for pure logic and **no goldens**. DS kits keep their goldens. **No mutation testing.**
 - [ ] **Flake check:** every test target the task adds or changes that touches storage, timers, streams or races passes `test --runs_per_test=50 --nocache_test_results` with 0 failures, and the log is in the evidence. Tests never drop a future that writes to storage (`.ignore()`, `unawaited`): they await it before teardown deletes the directory (F-0050 §7).
 - [ ] The TL re-ran `tool/verify.sh` on the merge result before pushing; CI is green on `main` once T-0005 is done.
 - [ ] Task file Log and Outcome filled in, with evidence links. Decisions are ADRs, gotchas are findings, and leftover work goes to `pending-work.md`.
@@ -141,6 +141,7 @@ Questions for PO: <only direction-level, or "none">
 - _Lesson 2026-11-24:_ two Verifiers shared one output base, and one's `bazel shutdown` killed the other's server mid-run.
 
 ## Scratch files (all crew)
+- **Every shell command starts with `cd <your worktree> || exit 1`.** A shell's working directory can be another worktree. _Lesson 2026-11-27:_ a T-0063 command with no `cd` overwrote the TL worktree's root `BUILD.bazel`. It was restored at once, and nothing was lost.
 - The session scratchpad is shared between agents. Every agent works in **its own subfolder** named for its task and role (`<scratchpad>/T-XXXX-<role>/`), or under `/tmp/mc-<task>-<role>-*` via `mktemp -d`. Never write a generic name at the scratchpad root (`mut.sh`, `probe.dart`), and never run a script you didn't just write.
 - Fixed log paths such as `/tmp/mc-mut.log` collide across agents too: include the task and role in the name.
 - _Lesson 2026-11-26:_ the T-0035 Verifier overwrote the T-0033 Verifier's `mut.sh` at the scratchpad root. The T-0033 Verifier then ran it, and its restore step wrote into the T-0035 worktree. The file ended up byte-identical to HEAD, and T-0035 was already merged, so nothing was lost.
