@@ -1,0 +1,91 @@
+baseline: PASS
+G01: KILLED by utility/mc_analytics:consent_gate_test -- the gate is removed from the drain loop (delivers whatever the consent)
+G02: KILLED by utility/mc_analytics:consent_gate_test -- unknown delivers too
+G03: KILLED by utility/mc_analytics:consent_gate_test -- denied still buffers what is tracked
+G04: KILLED by utility/mc_analytics:consent_gate_test -- switching to denied keeps the buffer
+G05: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test utility/mc_analytics:validation_test -- granting does not flush the buffer
+G06: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:di_test utility/mc_analytics:sessions_sinks_test utility/mc_analytics:validation_test -- the flush runs newest first (order)
+G07: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- delivery is inline (a same-turn denied cannot stop it)
+G08: KILLED by utility/mc_analytics:consent_gate_test -- consent is read once per flush, not per entry
+G09: KILLED by utility/mc_analytics:consent_gate_test -- buffer cap 101 (boundary)
+G10: KILLED by utility/mc_analytics:consent_gate_test -- buffer cap 99 (boundary)
+G11: KILLED by utility/mc_analytics:consent_gate_test -- the newest is dropped instead of the oldest
+G12: KILLED by utility/mc_analytics:consent_gate_test -- the first overflow is not reported
+G13: KILLED by utility/mc_analytics:consent_gate_test -- the total dropped is not reported when consent is chosen
+G14: KILLED by utility/mc_analytics:consent_gate_test -- a new unknown period keeps the old counters
+G15: KILLED by utility/mc_analytics:consent_gate_test -- going back to unknown does not trim to 100
+G16: KILLED by utility/mc_analytics:consent_gate_test -- consentChanges repeats an unchanged value
+G17: KILLED by utility/mc_analytics:consent_gate_test -- a failed save is not reported
+G18: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- reset keeps what was waiting
+G19: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:di_test -- an unrecognised consent value grants
+G20: KILLED by utility/mc_analytics:consent_gate_test -- a damaged saved value falls back to the default
+G21: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:di_test -- the saved choice is ignored at restore
+G22: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:di_test -- the wrong value is saved
+G23: KILLED by utility/mc_analytics:consent_gate_test -- a failed write is swallowed
+G24: KILLED by utility/mc_analytics:di_test -- the saved choice is not read at boot (DI)
+G25: KILLED by utility/mc_analytics:di_test -- the choice is not persisted (DI)
+G26: KILLED by utility/mc_analytics:di_test -- the config default is ignored (DI)
+G27: KILLED by utility/mc_config:app_config_test -- the config default parses to granted when missing
+G28: KILLED by utility/mc_config:bundled_config_test -- e2e config no longer grants consent
+V01: KILLED by utility/mc_analytics:route_observer_test utility/mc_analytics:validation_test -- name limit 41
+V02: KILLED by utility/mc_analytics:validation_test -- name limit 39
+V03: KILLED by utility/mc_analytics:validation_test -- 25 params limit becomes 26
+V04: KILLED by utility/mc_analytics:validation_test -- 25 params limit becomes 24
+V05: KILLED by utility/mc_analytics:validation_test -- string limit 101
+V06: KILLED by utility/mc_analytics:validation_test -- string length counted in UTF-16 units
+V07: KILLED by utility/mc_analytics:validation_test -- the ga_ prefix is not reserved
+V08: KILLED by utility/mc_analytics:validation_test -- the mc_ prefix is not reserved
+V09: KILLED by utility/mc_analytics:validation_test -- snake_case allows trailing and double underscores
+V10: KILLED by utility/mc_analytics:validation_test -- NaN and infinity are accepted
+V11: KILLED by utility/mc_analytics:validation_test -- the kit's param keys can be passed
+V12: KILLED by utility/mc_analytics:route_observer_test -- isValidName ignores the length
+V13: KILLED by utility/mc_analytics:validation_test -- any value type is accepted
+V14: KILLED by utility/mc_analytics:validation_test -- debug mode does not throw
+V15: KILLED by utility/mc_analytics:validation_test -- release mode throws too
+V16: KILLED by utility/mc_analytics:validation_test -- release mode drops without reporting
+V17: KILLED by utility/mc_analytics:validation_test -- the screen name is not validated
+V18: KILLED by utility/mc_analytics:validation_test -- the user property is not validated
+V19: KILLED by utility/mc_analytics:validation_test -- the caller's params map is kept, not copied
+S01: KILLED by utility/mc_analytics:di_test utility/mc_analytics:sessions_sinks_test -- rotation needs more than 30:00
+S02: KILLED by utility/mc_analytics:sessions_sinks_test -- the timeout is 29 minutes
+S03: KILLED by utility/mc_analytics:di_test utility/mc_analytics:sessions_sinks_test -- the timeout is 31 minutes
+S04: KILLED by utility/mc_analytics:sessions_sinks_test -- a second backgrounding moves the start time
+S05: KILLED by utility/mc_analytics:sessions_sinks_test -- coming back does not clear the background time
+S06: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- a rotation starts no session event
+S07: KILLED by utility/mc_analytics:sessions_sinks_test -- reset does not start a new session
+S08: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test -- seq is counted across sessions
+S09: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:sessions_sinks_test utility/mc_analytics:validation_test -- seq starts at 0
+S10: KILLED by utility/mc_analytics:consent_gate_test -- seq is counted against the current session, not the entry's
+S11: KILLED by utility/mc_analytics:sessions_sinks_test -- the session id does not come from the injected random
+S12: KILLED by utility/mc_analytics:sessions_sinks_test -- the session start reason is wrong
+S13: KILLED by utility/mc_analytics:sessions_sinks_test -- a throwing sink stops the others
+S14: KILLED by utility/mc_analytics:sessions_sinks_test -- a throwing sink is reported every time
+S15: KILLED by utility/mc_analytics:sessions_sinks_test -- a throwing sink is not reported
+S16: KILLED by utility/mc_analytics:sessions_sinks_test -- inactive counts as background
+S17: KILLED by utility/mc_analytics:sessions_sinks_test -- hidden does not count as background
+S18: KILLED by utility/mc_analytics:di_test utility/mc_analytics:sessions_sinks_test -- resumed does not foreground
+S19: KILLED by utility/mc_analytics:sessions_sinks_test -- the monitoring sink drops seq
+S20: KILLED by utility/mc_analytics:sessions_sinks_test -- the monitoring sink names a user property differently
+S21: KILLED by utility/mc_analytics:consent_gate_test utility/mc_analytics:route_observer_test utility/mc_analytics:sessions_sinks_test utility/mc_analytics:validation_test -- the in-memory sink reads the wrong screen key
+S22: KILLED by utility/mc_analytics:di_test -- the observer is not removed on dispose
+S23: KILLED by utility/mc_analytics:di_test -- observeLifecycle false is ignored
+S24: KILLED by utility/mc_analytics:di_test -- the default sink is not the monitoring sink
+R01: KILLED by utility/mc_analytics:route_observer_test -- popup routes are tracked as the last page (a dialog repeats the page)
+R02: KILLED by utility/mc_analytics:route_observer_test -- the same route becoming top again is tracked again
+R03: KILLED by utility/mc_analytics:route_observer_test -- an unnamed page does not count as a change
+R04: KILLED by utility/mc_analytics:route_observer_test -- names that are not screen names are passed on
+R05: KILLED by utility/mc_analytics:route_observer_test -- the observer reports the route's arguments instead of its name
+W01: KILLED by app/mini_client:analytics_screens_test -- the analytics initializer leaves the root list
+W02: KILLED by app/mini_client:analytics_screens_test app/mini_client:bdd_test -- the router has no analytics observer
+W03: KILLED by app/mini_client:analytics_screens_test app/mini_client:bdd_test -- appRouterObservers returns nothing
+W04: KILLED by app/mini_client:analytics_screens_test app/mini_client:bdd_test -- home has no page name
+W05: KILLED by app/mini_client:analytics_screens_test app/mini_client:bdd_test -- characters has no page name
+W06: KILLED by app/mini_client:bdd_test utility/mc_test_steps:analytics_steps_test -- the test container has no analytics
+W07: KILLED by app/mini_client:bdd_test utility/mc_test_steps:analytics_steps_test -- the test container's sink is not the session's
+W08: KILLED by utility/mc_test_steps:analytics_steps_test -- the screen step accepts any screen
+W09: KILLED by utility/mc_test_steps:analytics_steps_test -- the event step ignores the name
+W10: KILLED by utility/mc_test_steps:analytics_steps_test -- the event-with-params step ignores the params
+W11: KILLED by utility/mc_test_steps:analytics_steps_test -- the no-event step counts nothing
+W12: KILLED by utility/mc_test_steps:analytics_steps_test -- the no-event step counts the kit's session start
+---
+mutations: 88, killed: 88, survived: 0, broken: 0, not applied: 0; tree: clean
