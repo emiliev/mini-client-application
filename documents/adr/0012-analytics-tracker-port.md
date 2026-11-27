@@ -51,11 +51,12 @@ For screens inside a flow:
 2. **A feature spells its analytics vocabulary once:** event names, parameter enums, and an extension on the port (`store_analytics.dart`). Blocs call intents, never raw names.
 3. **A flow's pages are screens.** The flow passes `observers: [AnalyticsFlowObserver((c) => c.di<AnalyticsTracker>(), host: (c) => FlowScope.read(c).outerRoute)]`. The host is looked up without a dependency, so its status changes do not rebuild the flow.
    - **Rule: a flow's first page has the same name as its route** (`store_home` for the route `store_home`). The route observer tracks the route, and the flow observer does not repeat the first page.
+   - **The order this relies on:** the route observer reports the route first. `FeatureFlow` builds its own navigator, and so its first page, only after its container's future resolves, which is a frame after the route. The flow observer then finds the route already reported under the same name and skips it. If a flow ever built its first page in the same frame (a synchronous container), that page would be tracked twice. `mc_feature_flow:feature_flow_test` ("a flow builds its first page a frame after it is built itself") fails in that case.
    - A page pushed or popped inside the flow is tracked while the route is current.
    - A page changed while another screen or a popup covers the route is tracked when the route comes back.
    - Coming back to the route tracks the page the flow shows, not the route's name.
    - A flow page name passes `AnalyticsRules.isValidName`. The router's declared-name filter does not apply: it exists because go_router names an unnamed page by its path, and a flow page has no path.
-4. **A visit** (for "once per visit" events) is the page's life, from the first time it is shown to its disposal. "Shown" means that it is its flow's top page and its flow's route is the app's current route (`FlowScope.outerIsCurrent`). A page built under another screen (the store below a cold category link) does no work and tracks nothing until it is shown. A screen opened and closed over it is the same visit.
+4. **A visit** (for "once per visit" events) is the page's life, from the first time it is shown to its disposal. "Shown" means that the page is visible in the app. `FlowScope.outerIsCurrent` is true when the flow's own route is current in its navigator **and**, for a flow nested in another flow's page, the outer flow is visible too. `FeatureFlow` composes the two, so a covered app route hides every flow inside it. A page that is not its flow's first page only ever opens above a shown one, so it needs no check of its own. A page built under another screen (the store below a cold category link) does no work and tracks nothing until it is shown. A screen opened and closed over it is the same visit.
 
 ## Consequences
 - **Positive:**
@@ -66,6 +67,7 @@ For screens inside a flow:
   - An analytics type lives in `mc_monitoring`.
   - The port is minimal; a feature that needs user properties uses `Analytics` from Flutter code.
   - A flow whose first page is named unlike its route reports both names; the rule must be followed.
+  - For a nested flow, `AnalyticsFlowObserver`'s host is the outer flow's page, so its pages are tracked as the outer flow sees them, and the route observer never sees the nested flow's record. No flow is nested today.
 - **Follow-ups:**
   - `mcgen wire` lists `AnalyticsTracker` among a flow's root imports.
   - The characters preview and the wizard steps adopt `AnalyticsFlowObserver` and screen names.

@@ -40,10 +40,10 @@ class FlowScope extends InheritedWidget {
   /// The route the flow itself is shown in (in [outerNavigator]; for a
   /// nested flow, the outer flow's page); null when the flow is not inside a
   /// route. It is the same route for the scope's whole life (the flow's state
-  /// lives in it), so a change of it notifies nobody. Read it with [read] to look the route up
-  /// without depending on its status (`ModalRoute.of` would make the caller
-  /// rebuild whenever the route's status changes), as `mc_analytics`'
-  /// `AnalyticsFlowObserver` does (T-0056).
+  /// lives in it), so a change of it notifies nobody. Read it with [read] to
+  /// look the route up without depending on its status (`ModalRoute.of` would
+  /// make the caller rebuild whenever the route's status changes), as
+  /// `mc_analytics`' `AnalyticsFlowObserver` does (T-0056).
   final ModalRoute<Object?>? outerRoute;
 
   /// Whether the flow is visible in the app: its own route is the current

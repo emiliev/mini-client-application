@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (engineer handoff) |
+| Status | In Verification (Verifier round handoff) |
 | Owner | crew: Engineer (**Opus**: first DB exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0056-store-home` |
@@ -108,6 +108,10 @@ As with T-0032, T-0041, T-0046 and T-0048, this package is the shape the P1-24 b
 - 2026-11-27: Engineer (Opus). Kit support first (the `AnalyticsTracker` port, flow screen tracking, stub flags, `holdNext`, `Currency.parse`), then the feature, the wiring, the app entry and the links. A usage-limit pause mid-task; resumed from the WIP commit, with the tree and the simulators checked clean.
 - 2026-11-27: `origin/main` merged again (T-0055, T-0057; no conflicts): `test --lockfile_mode=error //...` 188/188, lint and format clean, store e2e 3/3 with T-0055's script.
 - 2026-11-27: BDD 59 scenarios green; 11 goldens; e2e 3/3 on `mc-T-0056-engineer-*` (deleted); mutations 57/57 killed; `origin/main` (T-0054) merged, with 2 "both sides added" conflicts in `app/mini_client` resolved by keeping both; gates PASS on the merge result; 50-run flake check. Handed off.
+- 2026-11-27: Review round (TL `/code-review`): see the section below. Handed off at `4218950`.
+- 2026-11-27: Verifier (Opus) **FAIL** at `4218950` (`861f49c`): D1 to D4.
+- 2026-11-27: **Process failure (D1).** The Outcome's AC2 row listed two category-paging scenarios ("the category's next page failing, then Retry (footer); the first page failing") that never existed in the branch's history. I wrote the evidence row from the plan of what I meant to test, not from the test files, and did not check the row against them before either handoff. From now on every evidence row names a test that I have grepped for in the tree at the handoff commit. Both scenarios now exist (the Verifier's VP03 and VP04), and the row is corrected.
+- 2026-11-27: Verifier round: D1 to D4 fixed, ADR-0012 edited, `origin/main` (T-0058) merged. See the section below.
 
 ## Outcome
 **Handed off** for review and verification on `fleet/T-0056-store-home`. Finding: [F-0056](../findings/F-0056-dashboard-exemplar.md) (the rules the DB bricks copy). Evidence: [`documents/evidence/T-0056/engineer/`](../evidence/T-0056/engineer/).
@@ -132,7 +136,7 @@ As with T-0032, T-0041, T-0046 and T-0048, this package is the shape the P1-24 b
 | AC | Tests and evidence |
 |---|---|
 | AC1 | `:bdd_test` "Signed in, the five sections show the store in order" (the section order; every banner; every deal with both prices, struck through and not, and "ends in"; every category with its count; every featured comic with its price; the cart's count and total as the backend engine holds them; one request per section; the cart's bearer); signed out (no cart request); the flag off, on (control) and of the wrong type. `:contract_test` the mapper keeps integer cents, days left; `:flow_scope_test` the injected clock; `:architecture_test` no floating point; `mc_formatters:formatters_test` en `€12.99`, every cent below €100, `Currency.parse`; golden of the lower sections |
-| AC2 | `:bdd_test` "When every store route fails, each section shows its own error and each Retry recovers only its own section" (request counts per section); a double Retry loads once; the empty store (`commerce.empty`); the category's next page failing, then Retry (footer); the first page failing. Goldens: failed, empty |
+| AC2 | `:bdd_test` "When every store route fails, each section shows its own error and each Retry recovers only its own section" (request counts per section); a double Retry loads once, for every section (outline, Verifier round); the empty store (`commerce.empty`). **Category paging (added in the Verifier round; the first handoff and the review round claimed these but they did not exist, D1):** "The category's next page fails, the footer offers Retry, and Retry loads it" (40 products in order) and "The category's first page fails with a full-page error, and Retry loads it". Goldens: failed, empty |
 | AC3 | `:bdd_test`: a deal, a featured comic and a comic banner each call `openComic` exactly once; the 499/500 ms guard; two deals in one frame open both; a search banner calls `openSearch('amber')`; a category banner opens the category, named by lookup; a category opens in the flow and page 2 loads at the end (`offset=20&limit=20`); Back keeps the sections; View cart. `store_home_cart.feature` (11): signed out awaits `requestSignIn()`; declined; a double tap; a user switch reloads; a stale load is dropped (held); a sign-out while loading; a switch right before the read is sent (pinned, no error reported); a sign-in elsewhere during the store's own sign-in; failure and Retry; refresh while signed out. `commerce_wiring:routes_test` pushes the right location for every method, the sheet's reason, the drift table; `mini_client:store_route_test` |
 | AC4 | `:bdd_test`: German sections, deal prices (`10,83 €`, `Endet in 1 Tag`), cart (`Summe 24,24 €`), errors and the category page; `en_XA` at 1x and 2x over the whole store, the category page to its end, and every section failed: `nothing overflows`. `mc_formatters` de `12,99 €`. Goldens: the store home in all 4 themes, the category page light and dark, the pseudo-locale at 2x. `l10n_check:workspace_gate_test` |
 | AC5 | e2e on a fresh `mc-T-0056-engineer-*` (iOS 26.2, deleted), [summary](../evidence/T-0056/engineer/e2e/e2e-summary.md): `store_journey_test` 40–46 (home → Store → sections → a deal → the comic page → Back → Heroes in the flow → page 2), `store_deeplink_test` 47 (`miniclient://app/store` cold, Back home), `store_category_deeplink_test` 48 (`…/store/categories/heroes` cold, Back → store → home). Re-run at `c71da60` (the merge with T-0054) over **all 16 targets: 16/16 PASS** (the earlier journeys as a regression check). No build-failure marker in any target log, and each store log names its own `T-0056-AC5` test. After merging T-0055 (the e2e false-PASS fix, which uninstalls the app before each target), the 3 store targets ran again at `520a25c`: [3/3 PASS](../evidence/T-0056/engineer/e2e_after_t0055/e2e-summary.md). Also `mini_client:store_route_test` and `commerce_wiring:routes_test` |
@@ -202,3 +206,28 @@ Results, on the merge with `origin/main` (T-0059):
 - **Coverage:** store_home 98.3 %, commerce_wiring 100 %, app_core 97.2 %, mc_analytics 100 %, mc_feature_flow 99.4 %, mc_monitoring 96.7 %, mc_formatters 100 %.
 - **[50-run flake check](../evidence/T-0056/engineer/runs_per_test_50.md):** 19 targets, 0 failures.
 - **e2e:** on a fresh `mc-T-0056-engineer-*` (deleted), [4/4 PASS](../evidence/T-0056/engineer/e2e_review/e2e-summary.md): the 3 store targets and `search_journey_test`, with no build-failure marker.
+
+## Verifier round (Opus Verifier FAIL at `4218950`, report `861f49c`)
+Fast-forwarded to `861f49c` first. The Verifier's probes were copied, not rewritten: the 4 new steps in `test/feature/step/` (`i_leave_the_store`, `every_section_but_is_ready`, `every_section_but_shows_its_error`, `i_open_a_dialog_over_the_store_and_close_it`) and the scenarios VP01 to VP11, appended to `store_home.feature` and `store_home_sections.feature` with "(Verifier round)" in their titles. BDD now has 78 tests.
+
+| # | Finding | Fix | Pinned by |
+|---|---|---|---|
+| D1 (Major, AC2) | The category page's paging error and Retry had no test, although the Outcome claimed they did | The two scenarios (VP03: page 2 fails, the footer, Retry, 40 products; VP04: page 1 fails, the full-page error, Retry). The AC2 row is corrected and the Log records the false claim | Both scenarios; mutant W05 (the Retry calls `loadMore`, the Verifier's X12) |
+| D2 (Medium, AC3) | `CartSummaryBloc.fetch` added `_SessionChanged` to a closed bloc when the store was left during a held cart read and the session then changed (`StateError`, uncaught, 2 monitoring errors) | `if (!isClosed) add(const _SessionChanged());` (F-0056 §2: the bricks copy the guard with the pattern). **Audit:** no other bloc in the package adds after an await. The category paging writes go through `PagingController`, which drops answers after its disposal, and the name lookup checks `isClosed` | "Leaving the store while the cart loads, …: nothing fails" (VP05 as the control, VP06, VP07); W01 |
+| D3 (Minor, kit) | In a nested flow, `FlowScope.outerIsCurrent` described the outer flow's page, not visibility in the app | `FeatureFlow` composes it with the parent scope's: `(route?.isCurrent ?? true) && (FlowScope.maybeOf(context)?.outerIsCurrent ?? true)`. The field's doc says "visible in the app" | `mc_feature_flow:feature_flow_test` "a nested flow is visible only while the flow around it is" (the app route covered, then the outer flow's page covered); W02 |
+| D4 (Minor) | Test gaps: double Retry only for deals (X02, X03); refresh with the flag off (X10); the unreachable `ModalRoute.of(...).isCurrent` term (X04); no "flag read once" test (X09); the `outerRoute` identity term (X11) | Tests for each, and the two dead terms removed. `X04`: the store page is always its flow's first page when built, so the term could never be false. `X11`: `outerRoute` is the same route for the scope's life; `updateShouldNotify` now compares `outerIsCurrent` directly | Double-Retry outline over all 5 sections (VP02): W03, W04. Flag off with Retry and pull to refresh, 0 featured requests (VP11): W06. `flow_scope_test` "the flag is read once per visit" (the flag turns on, the page rebuilds, featured stays absent with 0 requests; the next visit shows it): W07. The re-anchored V02 and V08 cover the simplified conditions |
+
+Also from the probes: VP01 (each section held in turn blocks none of the other four), VP08 (leaving while deals load tracks nothing), VP09 (a dialog over the store: no reload, no second view) and VP10 (store, category, back, twice: one view each, screens in order).
+
+**ADR-0012** (still Proposed):
+- §4: "shown" means visible in the app, which is true at any nesting depth now that `FeatureFlow` composes the scopes.
+- §3: the order the first-page rule relies on (the route observer reports first, because the flow builds its navigator a frame later), and the test that fails if a flow ever builds its first page synchronously: `feature_flow_test` "a flow builds its first page a frame after it is built itself" (after `pumpWidget` the first page is not built yet; one `pump` later it is).
+- Consequences: for a nested flow, `AnalyticsFlowObserver`'s host is the outer flow's page. No flow is nested today.
+
+**D5** (the comic's USD price against the store's EUR price) is out of scope, as the TL said.
+
+**`origin/main` merged (T-0058, `mc_ds_overlays` and the sign-in sheet on `McSheet`).** One conflict, in `utility/mc_test_steps` (`BUILD.bazel`, `pubspec.yaml`): both sides added a test target and dev dependencies, and both were kept. The cart's sign-in on top of T-0058 was re-checked: `commerce_wiring:routes_test` (the sheet and its reason) and the cart sign-in scenarios pass.
+
+**Mutants:** W01 to W07 are new. V01 was re-anchored on the guarded add, V02 on the simpler start condition, and V08 on the new `updateShouldNotify`. That makes 76 in all.
+
+**Results:** _filled in after the runs below._
