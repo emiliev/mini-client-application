@@ -1,0 +1,24 @@
+INFO: Invocation ID: 41a61a74-5adb-4573-8de0-22b8a873d67e
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --collect_code_coverage and --instrumentation_filter have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 4 targets (0 packages loaded, 0 targets configured)
+Analyzing: 4 targets (0 packages loaded, 1 target configured)
+
+INFO: Analyzed 4 targets (214 packages loaded, 10611 targets configured, 493 aspect applications).
+INFO: Found 4 test targets...
+INFO: Elapsed time: 71.329s, Critical Path: 13.66s
+INFO: 232 processes: 3188 action cache hit, 18 disk cache hit, 14 internal, 200 darwin-sandbox.
+INFO: Build completed successfully, 232 total actions
+//utility/mc_ds_charts:charts_test                                       PASSED in 3.5s
+  Stats over 50 runs: max = 3.5s, min = 2.5s, avg = 3.3s, dev = 0.2s
+//utility/mc_ds_charts:geometry_test                                     PASSED in 0.5s
+  Stats over 50 runs: max = 0.5s, min = 0.4s, avg = 0.4s, dev = 0.0s
+//utility/mc_ds_charts:golden_test                                       PASSED in 7.0s
+  Stats over 50 runs: max = 7.0s, min = 6.7s, avg = 6.8s, dev = 0.1s
+//utility/mc_ds_charts:painter_test                                      PASSED in 0.6s
+  Stats over 50 runs: max = 0.6s, min = 0.5s, avg = 0.5s, dev = 0.0s
+
+Executed 4 out of 4 tests: 4 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
