@@ -304,11 +304,11 @@ abstract final class AppFlows {
   static Future<String?> editReadingList(GoRouter router, String id) =>
       _open(router, AppLocations.editReadingList(id));
 
-  /// How many calls are being watched right now (for tests: it is back to
-  /// what it was when every call has ended).
+  /// Called on every change a watch of a call hears (for tests: after every
+  /// call has ended, no change reaches a watch any more, so no listener is
+  /// left on the router's delegate).
   @visibleForTesting
-  static int get watchers => _watchers;
-  static int _watchers = 0;
+  static VoidCallback? debugOnChange;
 
   /// Pushes [location] and waits for a [FlowCall], which completes exactly
   /// once, whatever happens to the push (see [FlowResultRoute]):
@@ -386,6 +386,7 @@ abstract final class AppFlows {
     }
 
     void onChange() {
+      debugOnChange?.call();
       locate();
       WidgetsBinding.instance
         ..addPostFrameCallback((_) => check())
@@ -394,11 +395,9 @@ abstract final class AppFlows {
 
     // Listening before the push: the router may apply it at once.
     delegate.addListener(onChange);
-    _watchers++;
     unawaited(
       call.result.whenComplete(() {
         delegate.removeListener(onChange);
-        _watchers--;
       }),
     );
     final pushed = push = provider.push<Object?>(

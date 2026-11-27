@@ -300,9 +300,23 @@ void main() {
   });
 
   group('T-0054-AC1 review: re-parses, same-frame replacement, listeners', () {
-    // Calls of earlier tests that never ended (a route that threw) stay.
-    late int baseline;
-    setUp(() => baseline = AppFlows.watchers);
+    var changes = 0;
+    setUp(() {
+      changes = 0;
+      AppFlows.debugOnChange = () => changes++;
+      addTearDown(() => AppFlows.debugOnChange = null);
+    });
+
+    /// After every call ended, router changes reach no watch any more: no
+    /// listener of a call is left on the delegate.
+    Future<void> expectNoListenerLeft(WidgetTester tester, _App app) async {
+      final before = changes;
+      app.router.go('/signin?from=%2F');
+      await tester.pumpAndSettle();
+      app.router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+      expect(changes, before, reason: 'a call still listens');
+    }
 
     testWidgets('T-0054-AC1 router.refresh() during a flow, then save: the '
         'result, once', (tester) async {
@@ -317,7 +331,7 @@ void main() {
 
       expect(app.got, ['l-5']);
       expect(tester.takeException(), isNull);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
 
     testWidgets('T-0054-AC1 router.refresh() then Back: null, once', (
@@ -332,7 +346,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(app.got, [null]);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
 
     testWidgets('T-0054-AC1 a refreshListenable tick during a flow, then '
@@ -349,7 +363,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(app.got, ['l-5']);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
 
     testWidgets('T-0054-AC1 a refresh, then a go elsewhere: null, once', (
@@ -364,7 +378,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(app.got, [null]);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
 
     testWidgets('T-0054-AC1 a restore of the saved route state during a flow, '
@@ -391,21 +405,18 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(app.got, ['l-5']);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
 
     testWidgets('T-0054-AC1 a go in the same synchronous span as the push: '
         'null, once, and nothing is left listening', (tester) async {
       final app = await _app(tester);
-      final before = baseline;
-
       unawaited(AppFlows.createReadingList(app.router).then(app.got.add));
-      expect(AppFlows.watchers, before + 1);
       app.router.go(AppLocations.characters);
       await tester.pumpAndSettle();
 
       expect(app.got, [null]);
-      expect(AppFlows.watchers, before);
+      await expectNoListenerLeft(tester, app);
       expect(find.byKey(_finish), findsNothing);
     });
 
@@ -418,7 +429,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(app.got, [null]);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
       expect(tester.takeException(), isNull);
     });
 
@@ -432,22 +443,21 @@ void main() {
 
       expect(app.got, [null]);
       expect(tester.takeException(), isNull);
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
 
     testWidgets('T-0054-AC1 every end removes the listener', (tester) async {
       final app = await _app(tester, signedIn: false);
       await app.open(tester);
-      expect(AppFlows.watchers, baseline + 1);
 
       app.router.pop();
       await tester.pumpAndSettle();
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
 
       await app.open(tester);
       await tester.tap(find.byKey(_signIn));
       await tester.pumpAndSettle();
-      expect(AppFlows.watchers, baseline);
+      await expectNoListenerLeft(tester, app);
     });
   });
 

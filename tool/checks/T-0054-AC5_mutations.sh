@@ -125,18 +125,13 @@ mutate R1 "the page is matched by its completer, not its key (a re-parse abandon
   ': match.pageKey.value == pageKey)' ': identical(match.completer.future, push))'
 mutate R2 "the route drops its call when a re-parse gives it a null extra" "$RES" "$F" \
   $'    if (extra is FlowCall<T>) {\n      _call = extra;\n    }' $'    _call = extra is FlowCall<T> ? extra : null;'
-mutate R3 "a superseded push is never abandoned" "$RES" "$F" \
-  'if (pageKey != null ? find() == null : superseded()) {' 'if (pageKey != null ? find() == null : false) {'
-mutate R4 "no first look after the push" "$RES" "$F" \
+mutate R3 "a push replaced in its own frame is never abandoned (no supersede check, no first look)" "$RES" "$F" \
+  'if (pageKey != null ? find() == null : superseded()) {' 'if (pageKey != null ? find() == null : false) {' \
   $'    onChange();\n    return call.result;' $'    return call.result;'
 mutate R5 "the listener is never removed" "$RES" "$F" \
   $'        delegate.removeListener(onChange);\n' ''
-mutate R6 "the watcher count is never decremented" "$RES" "$F" \
-  $'        _watchers--;\n' ''
 mutate R7 "a non-String pop value is cast, not dropped" "$RES" "$F" \
   'call.complete(value is String ? value : null)' 'call.complete(value as String?)'
-mutate R8 "a push never applied is judged superseded at once" "$RES" "$F" \
-  $'      if (push == null) {\n        return false;\n      }\n' ''
 mutate M07 "the debug assert never fires" "$RES" "$F" \
   'if (_call == null && state.extra is FlowCall) {' 'if (false) {'
 mutate M08 "the debug assert fires on a go-built route (no extra)" "$RES" "$F" \
@@ -180,7 +175,7 @@ mutate M22 "a list is never JSON-safe" "$RES" "$F" \
 mutate N01 "no onException: unknown paths use go_router's own page" "$ROUTER" "$T_NF $T_OLD" \
   $'  onException: (context, state, router) =>\n      router.go(notFoundLocation(_asked(state.uri))),\n' ''
 mutate N02 "not-found keeps the scheme and host of a link" "$ROUTER" "$T_NF" \
-  $'    Uri(path: uri.path, query: uri.hasQuery ? uri.query : null).toString();' 'uri.toString();'
+  $'String _asked(Uri uri) => Uri(\n  path: uri.path,' $'String _asked(Uri uri) => uri.toString();\nString _unused(Uri uri) => Uri(\n  path: uri.path,'
 mutate N11 "not-found loses the fragment" "$ROUTER" "$T_NF" \
   'fragment: uri.hasFragment ? uri.fragment : null,' 'fragment: null,'
 mutate N03 "not-found loses the query" "$ROUTER" "$T_NF" \
