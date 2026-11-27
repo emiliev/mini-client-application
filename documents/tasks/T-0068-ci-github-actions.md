@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-28 `fe063d24`; green cold and warm on GitHub, red on failure) |
 | Owner | crew: Engineer (Sonnet, worktree). The TL pushes the branch and relays CI logs, because crew never push. |
 | Verification | ADR-0015: `/code-review`, then the TL merge gates, **plus a green CI run on GitHub** |
 | Branch | `fleet/T-0068-ci` |
@@ -71,3 +71,18 @@ Every delivery runs the same gates as the TL's merge gate, on a clean machine. A
 Implemented and proven locally (AC1, AC2, AC5). Cache sizes: repository 3.5 GB, disk 1.3 GB, bazelisk 0.2 GB. AC3 (cold and warm GitHub runs) and AC4 (failing-test branch) are waiting for the TL push; the GitHub durations go in F-0068 after that. Details: [F-0068](../findings/F-0068-ci-github-actions.md).
 - 2026-11-27 (Engineer): CI run 1 failed at the format gate (`sky_engine` missing in a fresh Flutter clone). Fixed: `MC_PUB_GET=flutter pub get` in the workflow and gate, plus `flutter precache --universal` after the clone or cache restore. Verified with a fresh local clone; see F-0068.
 - 2026-11-27 (Engineer): Merged origin/main (T-0065) and added gate 6, `tool/mcgen` (`pub get` in `tool/loc` and `tool/mcgen`, `dart analyze --fatal-infos`, `dart test`, 96 tests): PASS locally with `fvm` (27 s) and in CI mode (`MC_DART=dart`, online pub get, 18 s). Gates 7 to 11 are the former 6 to 10.
+
+## Merge (TL)
+- 2026-11-27/28: `/code-review` (low): one finding, a false positive (the format gate does run when it is executed directly).
+- Runs on GitHub (`macos-26`):
+
+| Run | Commit | Cache | Result | Total | `bazel test //...` | sim build |
+|---|---|---|---|---|---|---|
+| 46057929555 | `2ba04a06` | cold | **FAIL** at the format gate: no `sky_engine` in a freshly cloned Flutter SDK; fixed in `46fb9581` | 27 min | 1496 s | — |
+| 46067936968 | `46fb9581` | cold | **PASS**, all 10 gates; disk cache saved (1.3 GB) | 44 min | 1373 s | 963 s |
+| 46072805534 | `e5b33b32` (adds gate 6, mcgen) | warm | **PASS**, all 11 gates | 25 min | 750 s | 403 s |
+| 46075480500 | `6ad5dc02` (throwaway, deliberately failing test) | warm | **FAIL as intended**: the format aspect and the `result_test` assertion fail; the `ci-logs` artifact (16 KB) was uploaded; the branch was deleted after the run | 18 min | — | — |
+
+- On this Mac, a fresh clone takes 341 s cold and 49 s warm. GitHub's runner is about 4× slower on the cold build.
+- At 10× minutes for private-repo macOS, a warm run costs about 250 billed minutes and a cold one about 440.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 236/236 tests, lint clean, the format gate passed, and `tool/test/bazelw_test.sh` passed. The push to `main` starts the first CI run on `main`.

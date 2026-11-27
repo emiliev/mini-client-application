@@ -10,8 +10,9 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
+| **CI** | GitHub Actions (`.github/workflows/ci.yml`, `tool/ci/ci.sh`, 11 gates) on `main`, `fleet/**`, PRs and on demand; cold 44 min, warm 25 min (T-0068) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0068 (CI) |
+| **Active crew** | none (paused by PO until the next session) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -29,6 +30,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0068 merged: CI.** Every push to `main` runs the 11 merge gates on a GitHub macOS runner, with Bazel caches. It proved green on cold and warm caches and red on a broken test.
 - **T-0066 merged: real sign-in and the `/me/**` guard.** A sign-in screen with demo accounts. Signed-out links to `/me/**`, `/library/**` and `/store/checkout` go to sign-in, then on to the target. Every "sign in to continue" uses it, and the fixture sheet is gone. A narrow auth Verifier passed it.
 - **T-0067 merged: the character profile** (F002). Portrait, bio, a stats chart, the character's comics and a favourite now sit behind "See full profile". The comic page's favourite got the same race fixes.
 - **T-0065 merged: the `tool/mcgen` core** (P2-01). Spec model and lint, seeded RNG, deterministic writer, manifest, keep regions, clobber guard, `gen --check`, and import resolution. The per-archetype templates (P2-04 to P2-07) come next. ADR-0016 accepted.
@@ -53,7 +55,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - Resumed 2026-11-27.
 - **Pause (PO, 2026-11-27 night):** finish T-0068 (CI), then start no new tasks until the next session.
 - **Next session, in order:**
-  1. If T-0068 isn't merged yet, finish it: green cold and warm runs, the red-on-failure check (AC4), then merge, so every push to `main` runs CI.
+  1. Check that the first CI run on `main` (triggered by the T-0068 merge push) is green.
   2. Second hybrid wave:
      - P2-04, templatise the list-detail exemplar (`characters_list`) with a round-trip golden on the `mcgen` core. Address P-120(a) and (b) first.
      - One or two hand-built features, e.g. `settings_home` with a `/settings` parent route, or `characters_search`.
