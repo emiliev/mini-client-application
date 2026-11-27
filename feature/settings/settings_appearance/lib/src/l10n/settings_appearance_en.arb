@@ -1,0 +1,119 @@
+{
+  "@@locale": "en",
+  "settingsAppearanceTitle": "Appearance",
+  "@settingsAppearanceTitle": {
+    "description": "The appearance settings page title."
+  },
+  "settingsAppearanceThemeHeader": "Theme",
+  "@settingsAppearanceThemeHeader": {
+    "description": "Header of the theme mode choice."
+  },
+  "settingsAppearanceThemeSystem": "System",
+  "@settingsAppearanceThemeSystem": {
+    "description": "Theme mode: follow the device."
+  },
+  "settingsAppearanceThemeLight": "Light",
+  "@settingsAppearanceThemeLight": {
+    "description": "Theme mode: always light."
+  },
+  "settingsAppearanceThemeDark": "Dark",
+  "@settingsAppearanceThemeDark": {
+    "description": "Theme mode: always dark."
+  },
+  "settingsAppearanceDensityHeader": "Density",
+  "@settingsAppearanceDensityHeader": {
+    "description": "Header of the density choice."
+  },
+  "settingsAppearanceDensityComfortable": "Comfortable",
+  "@settingsAppearanceDensityComfortable": {
+    "description": "Density: the default spacing."
+  },
+  "settingsAppearanceDensityCompact": "Compact",
+  "@settingsAppearanceDensityCompact": {
+    "description": "Density: tighter spacing."
+  },
+  "settingsAppearanceReduceMotion": "Reduce motion",
+  "@settingsAppearanceReduceMotion": {
+    "description": "The reduce motion switch."
+  },
+  "settingsAppearanceReduceMotionHint": "Turns off the app's own animations.",
+  "@settingsAppearanceReduceMotionHint": {
+    "description": "Below the reduce motion switch."
+  },
+  "settingsAppearanceSyncLocal": "Saved on this device.",
+  "@settingsAppearanceSyncLocal": {
+    "description": "Sync status when signed out."
+  },
+  "settingsAppearanceSyncPending": "Syncing with your account…",
+  "@settingsAppearanceSyncPending": {
+    "description": "Sync status while a sync is on its way."
+  },
+  "settingsAppearanceSyncSynced": "Synced with your account.",
+  "@settingsAppearanceSyncSynced": {
+    "description": "Sync status when the account holds what is shown."
+  },
+  "settingsAppearanceSyncOffline": "Not synced. Your choice is kept on this device.",
+  "@settingsAppearanceSyncOffline": {
+    "description": "Sync status after a failed sync."
+  },
+  "settingsAppearanceSyncConflictResolved": "Synced. A change from another device was kept too.",
+  "@settingsAppearanceSyncConflictResolved": {
+    "description": "Sync status after a conflict was resolved."
+  },
+  "settingsAppearanceSyncAcrossDevices": "Sync across devices",
+  "@settingsAppearanceSyncAcrossDevices": {
+    "description": "Signed out: the button that asks to sign in."
+  },
+  "settingsAppearanceSigningIn": "Waiting for you to sign in.",
+  "@settingsAppearanceSigningIn": {
+    "description": "While the app signs the user in."
+  },
+  "settingsAppearanceAbout": "About themes",
+  "@settingsAppearanceAbout": {
+    "description": "Opens the explainer, and its title."
+  },
+  "settingsAppearanceAboutSystem": "System follows your device: the app is dark when your device is.",
+  "@settingsAppearanceAboutSystem": {
+    "description": "Explainer: the system theme."
+  },
+  "settingsAppearanceAboutLightDark": "Light and Dark keep the app in one look, whatever your device does.",
+  "@settingsAppearanceAboutLightDark": {
+    "description": "Explainer: light and dark."
+  },
+  "settingsAppearanceAboutDensity": "Compact fits more on the screen by tightening the spacing.",
+  "@settingsAppearanceAboutDensity": {
+    "description": "Explainer: density."
+  },
+  "settingsAppearanceAboutReduceMotion": "Reduce motion turns off the app's own animations, such as charts drawing in. Your device's setting still applies.",
+  "@settingsAppearanceAboutReduceMotion": {
+    "description": "Explainer: reduce motion."
+  },
+  "settingsAppearanceAboutSync": "Signed in, your choice follows you to every device. Signed out, it stays on this one.",
+  "@settingsAppearanceAboutSync": {
+    "description": "Explainer: sync."
+  },
+  "settingsAppearanceReset": "Reset to defaults",
+  "@settingsAppearanceReset": {
+    "description": "The reset button."
+  },
+  "settingsAppearanceResetTitle": "Reset the appearance?",
+  "@settingsAppearanceResetTitle": {
+    "description": "Title of the reset confirmation."
+  },
+  "settingsAppearanceResetMessage": "The app goes back to System, Comfortable and Reduce motion off.",
+  "@settingsAppearanceResetMessage": {
+    "description": "Body of the reset confirmation."
+  },
+  "settingsAppearanceResetConfirm": "Reset",
+  "@settingsAppearanceResetConfirm": {
+    "description": "Confirm button of the reset confirmation."
+  },
+  "settingsAppearanceSaveFailedTitle": "Not saved",
+  "@settingsAppearanceSaveFailedTitle": {
+    "description": "Title when the device could not save."
+  },
+  "settingsAppearanceSaveFailed": "Your choice applies now, but this device could not save it.",
+  "@settingsAppearanceSaveFailed": {
+    "description": "Message when the device could not save."
+  }
+}

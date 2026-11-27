@@ -22,6 +22,7 @@ workspace:
   - feature/comics/comics_details
   - feature/discovery/discovery_search
   - feature/library/library_reading_list_editor
+  - feature/settings/settings_appearance
   - feature/store/store_home
   - spike/api_envelope
   - spike/bdd_sample
