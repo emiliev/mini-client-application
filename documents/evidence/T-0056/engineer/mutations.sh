@@ -256,7 +256,7 @@ mutate U2 "the flag stub never reads the snapshot" utility/mc_test_utils/lib/src
 
 # --- review round (TL /code-review items 1 to 6) ---------------------------
 mutate V01 "a dropped cart answer does not reload (item 1)" "$C" "$T_BDD" \
-  $'    add(const _SessionChanged());\n    return null;' $'    return null;'
+  $'    if (!isClosed) {\n      add(const _SessionChanged());\n    }\n    return null;' '    return null;'
 mutate V02 "the store page starts while hidden (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
   '    final shown = FlowScope.maybeOf(context)?.outerIsCurrent ?? true;' '    final shown = (FlowScope.maybeOf(context)?.outerIsCurrent ?? true) || true;'
 mutate V03 "the store page starts again on every showing (item 2)" "$F/presentation/page/store_home_page.dart" "$T_FEAT //app/mini_client:analytics_screens_test" \
