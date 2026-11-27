@@ -55,3 +55,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0054](T-0054/verification-report.md) | PASS (Opus, single pass) | AppFlows: 42 own probes (re-parse, async guards, same-frame, overlays), go_router source read, 550-run flake check, e2e 17/17; 2 Minor test gaps → P-110 |
 | [T-0055](T-0055/verification-report.md) | PASS (Sonnet, single pass) | e2e false PASS reproduced on the old script; each defence proven alone; 5 real breakage kinds caught |
 | [T-0057](T-0057/verification-report.md) | PASS (Sonnet, single pass) | Async-guard probes faithful; X02, X03 and X06 killed, with controls |
+| [T-0059](T-0059/verification-report.md) | PASS (Sonnet, single pass) | Charts: own geometry probe, release-path sanitising, donut neighbour colours, contrast ratios by hand, 50-run flake check |

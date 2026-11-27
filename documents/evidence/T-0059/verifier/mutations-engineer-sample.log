@@ -1,0 +1,10 @@
+[1] tick: 2 step becomes 3 (plain): KILLED
+[6] tick: last tick floors instead of ceiling (plain): KILLED
+[20] bar: value axis not inverted (plain): KILLED
+[30] radar: axes run anticlockwise (plain): KILLED
+[45] bar chart: NaN guard removed (plain): KILLED
+[60] timeline: first line starts at the top (plain): KILLED
+[80] bar: highlight not mapped past a skipped bar (plain): KILLED
+[95] animation: curved animation not disposed when switched off (plain): KILLED
+[99] canvas: summary label dropped (plain): KILLED
+[100] equality: NaN differs from NaN (plain): KILLED

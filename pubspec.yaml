@@ -41,6 +41,7 @@ workspace:
   - utility/mc_config
   - utility/mc_di
   - utility/mc_ds_buttons
+  - utility/mc_ds_charts
   - utility/mc_ds_cards
   - utility/mc_ds_feedback
   - utility/mc_ds_forms

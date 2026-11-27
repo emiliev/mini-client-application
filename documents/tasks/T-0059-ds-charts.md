@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `6ae4a7f`; Verifier PASS `b5d646b`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (DS widgets; ADR-0011) |
 | Branch | `fleet/T-0059-ds-charts` |
@@ -55,3 +55,71 @@ Features need charts that look the same on every run, are themed and accessible,
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27: Engineer (Sonnet) built `utility/mc_ds_charts`: `McBarChart`, `McLineChart`, `McDonutChart`, `McRadarChart`, `McTimeline`, the pure geometry in `chart_math.dart`, `McChartRole` and `McChartValidation`. Added the series colour roles to `McPalette` (`mc_ds_tokens`). 236 non-golden tests, 232 goldens, a layering check, a gates check and an 84-mutant script. First mutation run: 78 killed, 5 survived, 1 broken; the survivors were fixed with tests (a tick-rounding case, an edge label that would leave the canvas, the donut track while drawing in, palette equality for `series3`, and the debug path thrown rather than reported) and the broken mutant was rewritten. Second run: 84 of 84 killed. Handed off.
+
+## Outcome
+**Status:** Done, ready for verification. Branch `fleet/T-0059-ds-charts`. Finding: [F-0059](../findings/F-0059-ds-charts.md). Evidence: `documents/evidence/T-0059/engineer/`.
+
+### Public API
+Barrel `package:mc_ds_charts/mc_ds_charts.dart`. Every chart takes a localised `semanticLabel` (summary) and `emptyMessage` (plus optional `emptyTitle`), because the DS has no l10n; optional `valueFormatter` (default `mcFormatValue`); `animate` (default false).
+- `McBarChart({data: List<McBarDatum>, orientation = Axis.vertical, highlightIndex, height = 240})`; `McBarDatum({label, value, role})`.
+- `McLineChart({xLabels, series: List<McLineSeries> (1 to 3), height = 240})`; `McLineSeries({label, values, role})`; NaN is a gap.
+- `McDonutChart({data: List<McDonutSegment>, centerLabel, centerCaption, size = 200, minSweepDegrees = 4, showLegend = true})`.
+- `McRadarChart({axes (3 to 8), series: List<McRadarSeries> (1 or 2), height = 280})`; values 0 to 1, clamped.
+- `McTimeline({events: List<McTimelineEvent>})`; `McTimelineEvent({date, title, description, role})`. Not scrollable: the caller scrolls.
+- `McChartRole` (`series1..3`, `positive`, `negative`, `neutral`, `resolve(palette)`), `McChartValidation` (release flag and reporter, `@visibleForTesting`), and the pure helpers `mcNiceTicks`, `mcLayoutBars`, `mcDonutSweeps`, `mcDonutArcs`, `mcRadarVertex`, `mcFormatTick`, `mcFormatValue`.
+- Painters (`McBarPainter`, `McDonutPainter`, `McLinePainter`, `McRadarPainter`, `McTimelineRailPainter`) are public so tests can drive them with a recording canvas.
+
+### AC to evidence
+| AC | Evidence |
+|---|---|
+| AC1 | `test/golden_test.dart`: 29 states x 4 themes x 2 scales = 232 goldens (bar: vertical, roles and highlight, negative, long German labels, 30 bars, horizontal, horizontal German with negatives, single, all zero, empty, empty German; donut: basic, tiny segments, German, single, all zero, empty; line: one series, three series, negative and German, single point, empty; radar: one series, two series on eight axes, three axes German, empty; timeline: basic, German single, empty). All looked at; charts sit on `surface`. No overflow: `charts_test.dart` "T-0059-AC1 <chart> at 1x / 2x / 3x has no overflow" for 7 chart variants with long German labels, "a 3x probe on a narrow column" (280 pt), an unbounded width (320 pt fallback), a narrow parent for the donut |
+| AC2 | `test/geometry_test.dart`: nice ticks (zero, negative, single value, huge 1e12 and 1e300, tiny 3e-9, noise, bad bounds), bar extents (positive, negative, negative-only, horizontal, progress, 30 bars), donut sweeps (sum to 360 degrees, minimum sweep, cascade, equal-share fallback, zero stays zero, single, 200 random inputs), radar vertices (3 to 8 axes). `test/painter_test.dart` with a recording canvas: drawn rects, zero line (position, width, drawn over the bars), grid lines, highlight, arcs and gaps, track ring, markers and paths, radar rings, spokes and polygon, timeline rail. Mutation script: tick steps, zero line, sweep sum and minimum sweep, radar vertices all killed (84 of 84) |
+| AC3 | `charts_test.dart`: empty state for every chart (8 cases); NaN, +/-infinity and negative donut values throw `ArgumentError` in debug (4 charts x 3 values + 1); release path through the injected flag: skipped or drawn as a gap or 0, reported once per data change, not again on rebuild; unsupported shapes (4 line series, 2 or 9 radar axes, 3 radar series, wrong lengths); all-zero, single datum, constant line, single point, single timeline event draw without a non-finite number |
+| AC4 | `charts_test.dart`: summary label then per-datum nodes in data order for every chart (traversal order, also when data order differs from visual order, horizontal, 30 bars); legend and centre text hidden; `meetsGuideline` text contrast, labelled tap target and iOS tap target for 8 states in all 4 themes (32 tests). `geometry_test.dart`: every series and role colour at least 3:1 on `surface` in the 4 themes, roles map to the palette fields, series colours differ. `charts_test.dart` re-checks the colours actually drawn in the 4 themes |
+| AC5 | `tool/checks/T-0059-AC5_layering.sh` ([report](../evidence/T-0059/engineer/ac5-layering.md)): closure of the library holds only theme, layout, tokens, feedback and buttons (via feedback); sources, pubspec and BUILD name only allowed packages; no lower DS package names the charts; positive controls; 19 negative controls. `tool/checks/T-0059-AC5_gates.sh` ([report](../evidence/T-0059/engineer/ac5-gates.md)): `test //...`, lint, `mc_arch_check`, `rules_fork.sh check`, format (gated directories only), l10n_check, provenance, fixtures closure, layering, no other package's goldens changed, no suppressions; **coverage `mc_ds_charts` 99.1 % (982/991)**. Flake: 50 runs of all 4 test targets, 0 failures ([log](../evidence/T-0059/engineer/flake-50.log)) |
+
+Mutations ([script](../evidence/T-0059/engineer/mutations.sh), [table](../evidence/T-0059/engineer/mutants.py), [log](../evidence/T-0059/engineer/mutations.log)): **84 of 84 killed**, 0 survived, 0 broken. The script refuses a dirty tree, sets its restore trap before the first edit, counts `Build did NOT complete` as broken and only `FAILED in` as killed.
+
+### Decisions (no ADR needed; all cheap to reverse)
+- **Colour roles:** `McPalette` gets `series1`, `series2`, `series3` (new colours; series1 equals `primary`, series 2 is blue, series 3 teal, each at least 3:1 on `surface` in all 4 themes) and the getters `positive` (= `success`), `negative` (= `error`), `neutral` (= `outline`). No existing colour or pixel changed: the gates diff every other package's goldens against `origin/main`. This is the one edit outside the package besides the workspace list (`mc_ds_tokens/lib/src/colors.dart`).
+- **`mc_ds_feedback` dependency:** for `McEmptyView` only (the brief asks for the empty-view style). It brings `mc_ds_buttons` into the closure; the layering check allows exactly that.
+- **No chart package, no freezed:** plain immutable classes with value equality.
+- **Painters, not widgets, for labels:** axis and category labels are `TextPainter`s inside the painter, scaled with the text scale and ellipsised; long labels thin out by stride, and labels that would be cut off are skipped. The timeline uses widgets for the text and one painter for the rail.
+- **Validation extras beyond the brief:** a negative donut value is rejected like NaN; a line series longer than its labels, more than 3 line series, more than 2 radar series, 3 to 8 radar axes and a radar series of the wrong length throw in debug and degrade in release.
+- **Radar non-finite values** are drawn as 0 (not skipped), because dropping a value would shift the axes.
+- **Bar value labels, tooltips, stacked bars:** not built (out of scope).
+
+### Test integrity
+New package; nothing deleted, skipped or weakened; no `// ignore:`; no existing golden changed. Edits outside the package: the workspace `pubspec.yaml` list (`utility/mc_ds_charts`), `utility/mc_ds_tokens/lib/src/colors.dart` (the palette roles), and two new checks in `tool/checks/`. `mc_ds_theme` needed no change.
+
+### Notes
+- `charts_test`, `painter_test` and `geometry_test` run under plain `fvm flutter test` (3 s); see F-0059 fact 5.
+- Follow-ups: restrict package visibility with the P3-06 package_group (as for every DS package); a `McBarChart` value-label option and tap-to-select if a brick needs them.
+
+## Review round
+`/code-review` found 4 important bugs and 4 nits. All fixed on the branch (merged `origin/main` first: docs only).
+
+| # | Finding | Fix | Tests (all in `utility/mc_ds_charts/test/`) |
+|---|---|---|---|
+| 1 | Release: dropping a NaN datum shifted `highlightIndex` and the default donut colours | Bar: the highlight is mapped across skipped values (null when the highlighted bar itself is skipped), and a changed highlight alone now updates the chart. Donut: roles are resolved on the original indices, then bad values are dropped | `charts_test`: "release: the highlight follows its bar past a skipped one", "a changed highlight alone updates the chart", "release: donut colours stay put past a skipped segment" |
+| 2 | More than 4 default donut roles repeated a colour on neighbours | Option chosen: both. `McChartRole.resolveAll` gives each default the least-used role that differs from **both ring neighbours** (first and last included), falling back to `positive` and `negative` after the four cycle roles. Debug: more than 4 segments without a role is an `ArgumentError`. Release: degrades through `resolveAll`. Documented on `McChartRole.resolveAll` and `McDonutChart` | "a donut of more than four default roles throws in debug", "release: default segments never repeat a neighbour, ring included" (5, 6, 9), role resolution tests for lengths 2 to 24, up to four defaults equal the cycle, named roles kept, default next to a named role, wrap-around |
+| 3 | No line at 0 when the line axis starts or ends at 0 | The zero line is drawn whenever `min <= 0 <= max`. The bar chart had no gap (its axis always includes 0 and it always draws the zero line); a test now pins that for all-positive, all-negative and all-zero data | `painter_test` "zero lines": 0..10, -10..0, constant zero, crossing zero, none when 0 is off the axis, and the bar cases |
+| 4 | `_hasData` read the untruncated series | Computed over the first three series | "release: only the fourth series has data, so it is empty" and "a fourth series is dropped, the first three stay" |
+| 5 | Turning Reduce Motion off replayed the draw-in; `CurvedAnimation` not disposed | Only the first build and a data change animate; switching the animation on later (Reduce Motion off, or `animate` flipped) shows the finished chart. The `CurvedAnimation` is disposed with its controller in both places | "Reduce Motion turned off does not replay" (bar and donut, new data still animates), "switching animate on later does not replay", "every CurvedAnimation is disposed with its controller" (counts `ObjectCreated` and `ObjectDisposed` events from `FlutterMemoryAllocations`) |
+| 6 | `McLineChart` docs | Rewritten: more values than labels is an `ArgumentError` in debug and ignored in release; more than 3 series likewise; no series is the empty view, not an error | n/a (docs) |
+| 7 | `mcFormatValue` printed `-0` | Normalised | `painter_test` "no negative zero in value text" (-0.0, -0.001, 0.001, -1.5, -2, 0.005) |
+| 8 | Radar semantics skipped axes | Every axis is read; a missing value reads as 0, as the painter draws it | `painter_test` "every axis is read, a missing value as 0 like the painter"; `charts_test` release case with 5 axes and 3 values |
+
+**Changed goldens (12 of 232), all from item 3:** `line_one_series` at 2x in the 4 themes (4 files), and `line_three_series` at 1x and 2x in the 4 themes (8 files). In these the y axis now starts at 0, so the zero line is drawn along the baseline (checked by eye: `line_three_series.light.x1`). No other golden changed.
+
+**Results at the review-round HEAD:** gates script PASS (report `ac5-gates.md`), mutations 101 of 101 killed (17 new mutants for items 1 to 5, 7 and 8; an extra survivor, "next neighbour ignored", led to a test and to resolving defaults against both ring neighbours), 50-run flake check 0 failures on all 4 targets (`flake-50.log`).
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 4 important bugs and 4 nits:
+  - the highlight and default roles shifted after sanitising;
+  - adjacent donut segments shared a colour at 5 or more segments;
+  - there was no line at 0 when the scale started at 0;
+  - `_hasData` ignored truncation.
+
+  Review round `eb9879a`: 101/101 mutations, 12 line goldens changed. A single Sonnet Verifier pass gave PASS `b5d646b` (about 124k tokens; own geometry probe; 5 contrast ratios worked out by hand; 19 of 21 mutations killed, the 2 survivors are test gaps → P-112). The TL merged `--no-ff`. On the merge result `check` passed, 182/182 tests passed, lint was clean, `mc_arch_check` reported OK, provenance passed, and only chart goldens were added.

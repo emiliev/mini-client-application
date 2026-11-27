@@ -1,0 +1,77 @@
+# T-0059: McBarChart, McLineChart, McDonutChart, McRadarChart, McTimeline.
+# Layering: only //utility/mc_ds_{theme,layout,tokens} plus mc_ds_feedback for
+# McEmptyView (T-0059-AC5 checks the closure with cquery).
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+# Public until the P3-06 package_group exists (follow-up: restrict to layers).
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
+    "@pub_deps//:flutter",
+]
+
+flutter_library(
+    name = "mc_ds_charts",
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    package_name = "mc_ds_charts",
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_ds_charts",
+    "//utility/mc_test_utils",
+    "@pub_deps//:flutter_test",
+]
+
+_DATA = ["//utility/mc_ds_theme:fonts"]
+
+flutter_test(
+    name = "geometry_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/geometry_test.dart",
+    package_name = "mc_ds_charts",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "painter_test",
+    size = "small",
+    srcs = glob(["test/support/*.dart"]),
+    data = _DATA,
+    language_version = _LANG,
+    main = "test/painter_test.dart",
+    package_name = "mc_ds_charts",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "charts_test",
+    size = "small",
+    srcs = glob(["test/support/*.dart"]),
+    data = _DATA,
+    language_version = _LANG,
+    main = "test/charts_test.dart",
+    package_name = "mc_ds_charts",
+    deps = _TEST_DEPS,
+)
+
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    data = _DATA + glob(["test/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden_test.dart",
+    package_name = "mc_ds_charts",
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS,
+)

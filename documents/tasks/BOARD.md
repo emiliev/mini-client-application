@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0059](T-0059-ds-charts.md) | `mc_ds_charts`: bar, line, donut, radar, timeline | merged `6ae4a7f` |
 | [T-0057](T-0057-appflows-async-guard-pins.md) | Pin the `AppFlows` async-guard paths (P-110) | merged `95396a7` |
 | [T-0055](T-0055-e2e-false-pass.md) | `tool/e2e_ios.sh` false PASS fixed; e2e re-baselined 11/11 | merged `5e33a15` |
 | [T-0054](T-0054-flow-results-hardening.md) | `AppFlows` hardening: per-call page keys, safe extras, results under overlays, not-found way home | merged `5c9053a` |
@@ -25,7 +26,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0056](T-0056-store-home-exemplar.md) | `store_home`, the DB exemplar (P1-21): 5 independent sections, category paging, first flag and analytics use | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0051, T-0052, T-0053 | `fleet/T-0056-store-home` |
 | [T-0058](T-0058-ds-overlays.md) | `mc_ds_overlays`: dialogs, sheets, menus, tooltip, toasts; sign-in sheet migrated | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0058-ds-overlays` |
-| [T-0059](T-0059-ds-charts.md) | `mc_ds_charts`: bar, line, donut, radar, timeline painters | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0059-ds-charts` |
+| [T-0060](T-0060-fixtures-editorial-trivia.md) | `mc_fixtures_editorial` trivia slice: seeded rounds, server-side scoring, best scores | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0038, T-0039 | `fleet/T-0060-fixtures-editorial-trivia` |
 
 ## Done
 | ID | Title | Result |
