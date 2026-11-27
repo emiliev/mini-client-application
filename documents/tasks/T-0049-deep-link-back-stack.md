@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-27 `d6ef20d`; Verifier PASS `906efe9`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Opus tier** (app navigation; ADR-0011) |
 | Branch | `fleet/T-0049-deep-link-back-stack` |
@@ -73,3 +73,6 @@
 3. `FlowExtraCodec` as `extraCodec` (unit test, a restoration-state test, and a `buildAppRouter` check); mutations R7 and R8.
 4. Direct completion restored (`T-0049-AC3 the result reaches the call directly ...`); mutation R5 now dies.
 5. `nestUnderHome` rejects `/` (test, mutation N8).
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011): `/code-review` found loose back-stack tests and a forgotten `extra` that would hang silently. AC1 was amended (details → list → home). The review round at `bbb903b` added exact `walkHome` tests, a debug assert, `FlowExtraCodec` and direct completion in `_deliver`, with 17/17 mutations killed. A single Opus Verifier pass gave PASS `906efe9` (about 240k tokens; e2e 15/15 including probes; 11/12 of its own mutations killed). It reported 5 Minor defects, now P-094 to P-098; P-094 must be done before the `/me/**` auth guard. The TL merged `--no-ff`; on the merge result `check` passed, 152/152 tests, lint was clean, `mc_arch_check` reported OK, provenance passed and the sim app built. Docs: plan 01 §4.2 (`nestUnderHome`) and F-0048 (a result future always completes).
