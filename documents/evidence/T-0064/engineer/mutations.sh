@@ -19,11 +19,21 @@
 #   MC_ONLY="M01 W2" ...   only the named mutations (after the baseline)
 #   MC_CHECK_ONLY=1 ...    only check that every pattern applies (no Bazel)
 #
+# ADR-0015 caps a task at about 15 targeted mutants: by default only
+# MC_TARGETED runs (scoring: bonus, streak, timeout boundary; pause and
+# resume; the hint; the results POST's epoch pin; local vs server score).
+# The other mutants stay listed as documentation of the first, full pass
+# (85 of 85 killed, mutations_full_pass.log); MC_ALL=1 runs them all.
+#
 # Exit 0 only if every mutation was applied and killed. The log goes to
 # /tmp/mc-$MC_TASK-$MC_ROLE-mutations.log.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 TASK="${MC_TASK:-T-0064}"
+MC_TARGETED="S01 S04 S08 E01 P01 P02 P03 P13 S09 E03 P05 R02 R03 R08 R10"
+if [[ -z "${MC_ONLY:-}" && -z "${MC_ALL:-}" ]]; then
+  MC_ONLY="$MC_TARGETED"
+fi
 ROLE="${MC_ROLE:-engineer}"
 OB="${MC_OUTPUT_BASE:-/tmp/mc-ob-$TASK-$ROLE}"
 LOG="/tmp/mc-$TASK-$ROLE-mutations.log"

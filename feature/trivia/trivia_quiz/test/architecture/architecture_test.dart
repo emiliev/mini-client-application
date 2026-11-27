@@ -1,6 +1,6 @@
 // Conformance of the package's shape (plan 01 §3.3), not a test of feature
-// behaviour: R4 (the barrel), R15 (generators read Flutter-free files), R6/R7
-// (no test/unit, src/ only from test/contract) and ADR-0014 (the engine is
+// behaviour: R4 (the barrel), R15 (generators read Flutter-free files), R7
+// (src/ only from test/contract and, ADR-0015, test/unit) and ADR-0014 (the engine is
 // pure Dart: no Flutter, no timers, no clock, integer arithmetic only).
 import 'dart:io';
 
@@ -186,19 +186,33 @@ void main() {
     }
   });
 
-  test('T-0064-AC7 no solitary unit tests, and src/ only from test/contract '
-      '(R6, R7)', () {
-    expect(Directory(_path('test/unit')).existsSync(), isFalse);
+  test('T-0064-AC7 src/ is imported only from test/contract and test/unit '
+      '(R7; plain unit tests of pure logic are allowed, ADR-0015)', () {
     final offenders = [
       for (final f in _dartFiles('test'))
         if (!f.path.contains('/test/contract/') &&
+            !f.path.contains('/test/unit/') &&
             _directive
                 .allMatches(f.readAsStringSync())
                 .any((m) => m.group(2)!.startsWith('package:trivia_quiz/src/')))
           f.path,
     ];
     expect(offenders, isEmpty);
-    expect(_dartFiles('test'), isNotEmpty);
+    // Unit tests reach only the pure-Dart engine and its model, never a
+    // bloc, page or the flow (those are tested through BDD, ADR-0015).
+    final engine = _lines('test/architecture/engine_srcs.txt').toSet();
+    for (final f in _dartFiles('test/unit')) {
+      for (final m in _directive.allMatches(f.readAsStringSync())) {
+        final uri = m.group(2)!;
+        if (uri.startsWith('package:trivia_quiz/')) {
+          expect(
+            engine,
+            contains('lib/${uri.substring('package:trivia_quiz/'.length)}'),
+            reason: '${f.path} imports $uri',
+          );
+        }
+      }
+    }
   });
 
   test('T-0064-AC7 no lint is suppressed in the package', () {

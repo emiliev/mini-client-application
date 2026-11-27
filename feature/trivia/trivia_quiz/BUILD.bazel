@@ -276,8 +276,8 @@ flutter_library(
     deps = _PURE_DEPS + _FLUTTER_DEPS,
 )
 
-# --- tests (R6: BDD + contract + l10n; no solitary unit tests; no feature
-# goldens, PO 2026-11-27: the painters are checked on a recording canvas) --
+# --- tests (BDD + contract + l10n, plus plain unit tests of the engine; no
+# feature goldens: the painters are checked on a recording canvas; ADR-0015) --
 _TEST_DEPS = [
     "//utility/mc_analytics",
     "//utility/mc_api_auth",
@@ -402,6 +402,21 @@ dart_test(
     main = "test/architecture/architecture_test.dart",
     package_name = _PKG,
     deps = ["@pub_deps//:test"],
+)
+
+# Plain unit tests of the pure-Dart engine (ADR-0015 allows them for pure
+# logic in a feature). Pure Dart: they run on the engine lane alone.
+dart_test(
+    name = "engine_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/unit/trivia_engine_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":_engine",
+        "//utility/mc_media",
+        "@pub_deps//:test",
+    ],
 )
 
 # The Scenario Outline copies CONTRACT.md's worked examples verbatim
