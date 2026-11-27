@@ -106,6 +106,7 @@ final class Rig {
     MockBackend? backend,
     String? signedInAs,
     bool start = true,
+    bool followAccount = true,
   }) async {
     final directory = dir ?? Directory.systemTemp.createTempSync('mc_app_');
     final server =
@@ -129,6 +130,7 @@ final class Rig {
         session: session,
         store: store,
         monitoring: Monitoring([sink]),
+        followAccount: followAccount,
       ),
     );
     if (signedInAs != null) {

@@ -56,7 +56,9 @@ final class Appearance implements AppearanceSettings {
     required Monitoring? monitoring,
     required AppearanceRecord? restored,
     required StorageFailure? restoreFailure,
-  }) : _api = PreferencesApi(dio),
+    required bool followAccount,
+  }) : _followAccount = followAccount,
+       _api = PreferencesApi(dio),
        _session = session,
        _store = store,
        _monitoring = monitoring {
@@ -77,11 +79,17 @@ final class Appearance implements AppearanceSettings {
   /// Builds the appearance on [store], reading what was saved there
   /// (synchronously: boot never awaits it). Call [start] to follow the
   /// session.
+  ///
+  /// With [followAccount] false it keeps the device's copy only, as if
+  /// nobody were ever signed in: no request, status `local` (the test
+  /// container's default, so a feature test that signs in sends no
+  /// preferences read it never asked for; T-0063).
   factory Appearance.open({
     required Dio dio,
     required SessionReader session,
     required FileStore store,
     Monitoring? monitoring,
+    bool followAccount = true,
   }) {
     final appearanceStore = AppearanceStore(store);
     final read = appearanceStore.read();
@@ -92,9 +100,11 @@ final class Appearance implements AppearanceSettings {
       monitoring: monitoring,
       restored: read.getOrNull(),
       restoreFailure: read.fold((_) => null, (f) => f),
+      followAccount: followAccount,
     );
   }
 
+  final bool _followAccount;
   final PreferencesApi _api;
   final SessionReader _session;
   final AppearanceStore _store;
@@ -136,6 +146,9 @@ final class Appearance implements AppearanceSettings {
 
   /// Follows the session from now on and syncs for the current one.
   void start() {
+    if (!_followAccount) {
+      return;
+    }
     _authSubscription = _session.authState.listen((_) => _observeEpoch());
     // A same-user re-sign-in starts an epoch without an `authState` event.
     final Object session = _session;
@@ -202,9 +215,9 @@ final class Appearance implements AppearanceSettings {
     _pending.addAll(changed);
     // Signed in, the change is this user's; signed out, the device's (it
     // goes to whoever signs in next).
-    _pendingFor = _session.userId;
+    _pendingFor = _userId;
     _save();
-    if (!_session.isSignedIn) {
+    if (_userId == null) {
       _publish();
       return Future<void>.value();
     }
@@ -223,7 +236,7 @@ final class Appearance implements AppearanceSettings {
       _save();
       _publish();
     }
-    if (!_session.isSignedIn || _status != AppearanceSyncStatus.offline) {
+    if (_userId == null || _status != AppearanceSyncStatus.offline) {
       return Future<void>.value();
     }
     // Read the account's copy again: it may have moved while we were out.
@@ -235,9 +248,12 @@ final class Appearance implements AppearanceSettings {
 
   // --- the session -----------------------------------------------------------
 
+  /// Who is signed in, as far as the account sync goes.
+  String? get _userId => _followAccount ? _session.userId : null;
+
   void _observeEpoch() {
     final epoch = _session.epoch;
-    if (_disposed || epoch == _seenEpoch) {
+    if (_disposed || !_followAccount || epoch == _seenEpoch) {
       return;
     }
     _seenEpoch = epoch;

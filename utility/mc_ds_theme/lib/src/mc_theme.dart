@@ -25,7 +25,12 @@ abstract final class McTheme {
         : McThemeVariant.light;
   }
 
-  static ThemeData of(McThemeVariant variant) {
+  /// The theme of [variant]. [visualDensity] is the app's density
+  /// (`VisualDensity.compact` for the user's "Compact", T-0063, ADR-0013):
+  /// Material widgets size themselves by it, and a screen reads it from
+  /// `Theme.of(context).visualDensity` to tighten its own spacing. Null
+  /// keeps Flutter's default for the platform (standard on iOS).
+  static ThemeData of(McThemeVariant variant, {VisualDensity? visualDensity}) {
     final p = McPalette.of(variant);
     final scheme = ColorScheme(
       brightness: p.brightness,
@@ -51,6 +56,7 @@ abstract final class McTheme {
       scaffoldBackgroundColor: p.background,
       canvasColor: p.background,
       dividerColor: p.outline,
+      visualDensity: visualDensity,
       extensions: [McThemeExtension(variant: variant, palette: p)],
     );
   }

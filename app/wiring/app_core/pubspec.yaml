@@ -20,6 +20,7 @@ dependencies:
   mc_analytics: any
   mc_api_auth: any
   mc_api_client: any
+  mc_appearance: any
   mc_bloc_kit: any
   mc_config: any
   mc_di: any
@@ -29,6 +30,7 @@ dependencies:
   mc_ds_media: any
   mc_ds_overlays: any
   mc_ds_theme: any
+  mc_ds_tokens: any
   mc_event_bus: any
   mc_feature_flags: any
   mc_formatters: any

@@ -10,6 +10,7 @@ _DEPS = [
     "//utility/mc_analytics",
     "//utility/mc_api_auth",
     "//utility/mc_api_client",
+    "//utility/mc_appearance",
     "//utility/mc_config",
     "//utility/mc_di",
     "//utility/mc_ds_theme",

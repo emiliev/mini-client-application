@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
@@ -141,9 +142,24 @@ void main() {
     await McTestContainer.initialize(McTestSession.current);
     final session = McTestSession.current;
     // Config, monitoring, storage, analytics (T-0053), event bus, session,
-    // mocked backend, API client, API auth, the flags' stub snapshot (T-0056)
-    // and formatters.
-    expect(McTestContainer.initializers(session, wirings: const []).length, 11);
+    // mocked backend, API client, API auth, the flags' stub snapshot (T-0056),
+    // the appearance (T-0063) and formatters.
+    expect(McTestContainer.initializers(session, wirings: const []).length, 12);
     expect(diContainer.isRegistered<Dio>(), isTrue);
+    expect(diContainer.isRegistered<AppearanceSettings>(), isTrue);
+  });
+
+  mcTestWidgets('T-0063-AC7 by default the appearance does not follow the '
+      'account: a change sends nothing and the status stays local', (
+    tester,
+  ) async {
+    expect(McTestContainer.appearanceFollowsAccount, isFalse);
+    final session = McTestSession.current;
+    await McTestContainer.initialize(session);
+    final appearance = diContainer<AppearanceSettings>();
+    expect(appearance.snapshot.status, AppearanceSyncStatus.local);
+    await appearance.change(themeMode: AppearanceThemeMode.dark);
+    expect(session.backend.requests, isEmpty);
+    expect(appearance.snapshot.preferences.themeMode, AppearanceThemeMode.dark);
   });
 }

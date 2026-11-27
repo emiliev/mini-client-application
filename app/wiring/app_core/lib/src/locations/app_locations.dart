@@ -49,4 +49,8 @@ abstract final class AppLocations {
   /// in commerce_wiring.
   static String storeCategory(String id) =>
       '/store/categories/${Uri.encodeComponent(id)}';
+
+  /// The appearance settings (T-0063). Equals
+  /// `SettingsAppearanceRoute().location` in account_wiring.
+  static const String settingsAppearance = '/settings/appearance';
 }

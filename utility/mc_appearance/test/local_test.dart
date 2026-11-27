@@ -176,6 +176,23 @@ void main() {
     expect(rig.shown, AppearancePreferences.defaults);
     expect(rig.saved, isNull);
   });
+  test(
+    'T-0063-AC7 without followAccount it keeps the device copy only: '
+    'signed in, nothing is read or sent and the status stays local',
+    () async {
+      final rig = await Rig.create(signedInAs: collector, followAccount: false);
+      rigs.add(rig);
+      await rig.settle();
+      await rig.appearance.change(themeMode: AppearanceThemeMode.light);
+      await rig.signIn(reader);
+      await rig.appearance.retry();
+      await rig.settle();
+      expect(rig.preferencesTraffic, isEmpty);
+      expect(rig.status, AppearanceSyncStatus.local);
+      expect(rig.shown.themeMode, AppearanceThemeMode.light);
+      expect((rig.saved! as Map)['pendingFor'], isNull);
+    },
+  );
 }
 
 bool _isAppearance(FileSystemEntity f) {
