@@ -18,6 +18,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0049](T-0049-deep-link-back-stack.md) | Cold deep links get a back stack (entity routes under home); home flow buttons survive a link (P-087, P-092) | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0048 | `fleet/T-0049-deep-link-back-stack` |
 | [T-0050](T-0050-auth-first-send-pin.md) | `mc_api_auth` epoch pin on the first send; P-080, P-089, P-093 test gaps | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0039, T-0048 | `fleet/T-0050-auth-first-send-pin` |
+| [T-0052](T-0052-feature-flags.md) | `mc_feature_flags` (typed flags, experiments, overrides, remote fetch) + flags slice of `mc_fixtures_platform` | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0039 | `fleet/T-0052-feature-flags` |
 
 ## Done
 | ID | Title | Result |
