@@ -34,7 +34,7 @@ Future<Object?> _accountTheme() async {
 }
 
 /// T-0063-AC5 signed in, on a simulator: Settings → "Sync across devices" →
-/// the fixture sign-in sheet → Light; the account holds Light; relaunched
+/// the sign-in form → Light; the account holds Light; relaunched
 /// (as in `settings_journey_test`: a second `main()` over the same files and
 /// a fresh mocked backend), it is still Light and the account holds Light
 /// again (the device sends the copy the new backend lost, ADR-0013).

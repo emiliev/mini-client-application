@@ -1,0 +1,93 @@
+# e2e_ios.sh: T-0066 engineer on mc-T-0066-engineer-45844 (6D3E510A-07C0-4DC5-A7DC-D770B73BFD92)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-ab19efba427986994/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/auth_signin_journey_test.dart -d 6D3E510A-07C0-4DC5-A7DC-D770B73BFD92
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-ab19efba427986994`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-ab19efba427986994`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           27.7s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:64698/L9_8SfkCY6w=/
+VMServiceFlutterDriver: Isolate found with number: 873921705960091
+VMServiceFlutterDriver: Isolate 873921705960091 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0066-AC4 home, Sign in, a favourite, Sign out, then the cold link to the editor asks for sign-in and opens the editor, and Back leads home
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: fc0ca1959dbe6ea9ed3061fa8c643410, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: fc0ca1959dbe6ea9ed3061fa8c643410, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: auth_sign_in, session_id: fc0ca1959dbe6ea9ed3061fa8c643410, seq: 3}
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] POST /v1/auth/sign-in -> 200
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] GET /v1/me/preferences -> 200
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [event] mc_screen_view {screen_name: home, session_id: fc0ca1959dbe6ea9ed3061fa8c643410, seq: 4}
+flutter: [event] mc_screen_view {screen_name: comics_details, session_id: fc0ca1959dbe6ea9ed3061fa8c643410, seq: 5}
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501500 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Loading
+flutter: [warning] GET /v1/me/favourites/comic/501500 failed: 404
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _Ready
+flutter: [debug] PUT /v1/me/favourites/comic/501500 -> 200
+flutter: [debug] ComicFavouriteBloc: _Toggle _Ready -> _Ready
+flutter: [event] mc_screen_view {screen_name: home, session_id: fc0ca1959dbe6ea9ed3061fa8c643410, seq: 6}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] POST /v1/auth/sign-out -> 204
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 5f1c581fb03ef1bdb0527635737cfcc7, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: auth_sign_in, session_id: 5f1c581fb03ef1bdb0527635737cfcc7, seq: 2}
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] POST /v1/auth/sign-in -> 200
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] GET /v1/me/preferences -> 200
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: 5f1c581fb03ef1bdb0527635737cfcc7, seq: 3}
+flutter: [debug] ReadingListEditorBloc: _WizardChanged _Loading -> _Editing
+flutter: [event] mc_screen_view {screen_name: home, session_id: 5f1c581fb03ef1bdb0527635737cfcc7, seq: 4}
+flutter: 00:13 +1: (tearDownAll)
+flutter: 00:13 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/70_home_signed_out.png (341307)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/71_sign_in_form.png (268390)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/72_home_signed_in.png (346383)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/73_favourite_saved.png (377688)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/74_home_signed_out_again.png (341307)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/75_cold_link_sign_in.png (268390)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/76_editor_after_sign_in.png (246054)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.V18bPO/screenshots/1-auth_signin_journey_test/77_back_to_home.png (346383)
+All tests passed.
+
+# exit code: 0

@@ -11,6 +11,7 @@ import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_fixtures_commerce/mc_fixtures_commerce.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:store_home/store_home.dart';
 
@@ -91,7 +92,11 @@ Future<GoRouter> _boot(
   final router = ref.attach(
     GoRouter(
       initialLocation: initial,
-      routes: [...commerceRoutes, ..._standIns, standInSignInRoute()],
+      routes: [
+        ...commerceRoutes,
+        ..._standIns,
+        standInSignInRoute(signIn: _signInFixtureUser),
+      ],
       errorBuilder: (context, state) =>
           Text('not found ${state.uri}', key: const Key('not.found')),
     ),
@@ -105,6 +110,31 @@ Future<GoRouter> _boot(
   );
   await tester.pumpAndSettle();
   return router;
+}
+
+/// What the stand-in's "Sign in" does: the real `AuthApi` signs the first
+/// fixture user in; true when it did.
+Future<bool> _signInFixtureUser() async {
+  final user = fixtureUsers.first;
+  final result = await diContainer<AuthApi>().signIn(
+    email: user.email,
+    password: user.password,
+  );
+  return result.getOrNull() != null;
+}
+
+/// Lets the session's real file write finish (F-0038), then settles, until
+/// the stand-in sign-in screen is gone.
+Future<void> _settleRealIo(WidgetTester tester) async {
+  for (var i = 0; i < 20; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 20)),
+    );
+    await tester.pumpAndSettle();
+    if (find.byKey(standInSignInKey).evaluate().isEmpty) {
+      return;
+    }
+  }
 }
 
 void main() {
@@ -197,42 +227,73 @@ void main() {
     expect(find.text('fake store (home)'), findsOneWidget);
   });
 
-  mcTestWidgets('T-0056-AC3 requestSignIn: signed in it answers true at '
-      'once, with no sign-in screen', (tester) async {
+  mcTestWidgets('T-0066-AC3 requestSignIn: the store signs in on the screen '
+      'and gets true only once a session exists', (tester) async {
     McTestSession.current.backend.useFixtureSet('identity.default');
     await _boot(tester);
-    final user = fixtureUsers.first;
-    await tester.runAsync(
-      () => diContainer<AuthApi>().signIn(
-        email: user.email,
-        password: user.password,
-      ),
-    );
+    final reader = diContainer<SessionReader>();
+    expect(reader.isSignedIn, isFalse);
 
-    final answer = await diContainer<StoreHomeNavigator>().requestSignIn();
-    expect(answer, isTrue);
-    expect(find.byKey(standInSignInKey), findsNothing);
-  });
-
-  mcTestWidgets('T-0056-AC3 requestSignIn: signed out it opens the sign-in '
-      'screen for the cart, and Not now answers false', (tester) async {
-    await _boot(tester);
-
-    var answered = false;
     bool? answer;
-    final pending = diContainer<StoreHomeNavigator>().requestSignIn().then((a) {
-      answered = true;
-      answer = a;
-    });
+    final pending = diContainer<StoreHomeNavigator>().requestSignIn().then(
+      (a) => answer = a,
+    );
     await tester.pumpAndSettle();
     expect(find.text(standInSignInText('cart')), findsOneWidget);
-    expect(answered, isFalse);
+    expect(answer, isNull, reason: 'the caller waits');
 
-    await tester.tap(find.byKey(standInSignInNotNowKey));
-    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(standInSignInConfirmKey));
+    await _settleRealIo(tester);
     await pending;
-    expect(answer, isFalse);
+
+    expect(answer, isTrue);
+    expect(reader.userId, fixtureUsers.first.id);
   });
+
+  mcTestWidgets(
+    'T-0056-AC3 T-0066-AC3 requestSignIn: signed in it answers true at '
+    'once, with no sign-in screen',
+    (tester) async {
+      McTestSession.current.backend.useFixtureSet('identity.default');
+      await _boot(tester);
+      final user = fixtureUsers.first;
+      await tester.runAsync(
+        () => diContainer<AuthApi>().signIn(
+          email: user.email,
+          password: user.password,
+        ),
+      );
+
+      final answer = await diContainer<StoreHomeNavigator>().requestSignIn();
+      expect(answer, isTrue);
+      expect(find.byKey(standInSignInKey), findsNothing);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0056-AC3 T-0066-AC3 requestSignIn: signed out it opens the sign-in '
+    'screen for the cart, and Not now answers false',
+    (tester) async {
+      await _boot(tester);
+
+      var answered = false;
+      bool? answer;
+      final pending = diContainer<StoreHomeNavigator>().requestSignIn().then((
+        a,
+      ) {
+        answered = true;
+        answer = a;
+      });
+      await tester.pumpAndSettle();
+      expect(find.text(standInSignInText('cart')), findsOneWidget);
+      expect(answered, isFalse);
+
+      await tester.tap(find.byKey(standInSignInNotNowKey));
+      await tester.pumpAndSettle();
+      await pending;
+      expect(answer, isFalse);
+    },
+  );
 
   mcTestWidgets('T-0056-AC5 the wiring initializer registers the navigator '
       'and route targets that build the real flow, on the backend clock', (

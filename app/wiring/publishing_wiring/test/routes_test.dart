@@ -187,80 +187,92 @@ void main() {
     expect(router.canPop(), isTrue);
   });
 
-  mcTestWidgets('T-0041-AC6 requestSignIn: Sign in on the sign-in screen '
-      'signs the fixture user in and answers true', (tester) async {
-    await _boot(tester);
-    final reader = diContainer<SessionReader>();
-    expect(reader.isSignedIn, isFalse);
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: Sign in on the sign-in screen '
+    'signs the fixture user in and answers true',
+    (tester) async {
+      await _boot(tester);
+      final reader = diContainer<SessionReader>();
+      expect(reader.isSignedIn, isFalse);
 
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    expect(find.byKey(standInSignInKey), findsOneWidget);
-    // T-0066: it is opened for the favourite.
-    expect(find.text(standInSignInText('favourites')), findsOneWidget);
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+      expect(find.byKey(standInSignInKey), findsOneWidget);
+      // T-0066: it is opened for the favourite.
+      expect(find.text(standInSignInText('favourites')), findsOneWidget);
 
-    await tester.tap(find.byKey(standInSignInConfirmKey));
-    await _settleRealIo(tester);
+      await tester.tap(find.byKey(standInSignInConfirmKey));
+      await _settleRealIo(tester);
 
-    expect(await answer, isTrue);
-    expect(reader.userId, fixtureUsers.first.id);
-    expect(find.byKey(standInSignInKey), findsNothing);
-  });
+      expect(await answer, isTrue);
+      expect(reader.userId, fixtureUsers.first.id);
+      expect(find.byKey(standInSignInKey), findsNothing);
+    },
+  );
 
-  mcTestWidgets('T-0041-AC6 requestSignIn: Not now answers false and leaves '
-      'the user signed out', (tester) async {
-    await _boot(tester);
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: Not now answers false and leaves '
+    'the user signed out',
+    (tester) async {
+      await _boot(tester);
 
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(standInSignInNotNowKey));
-    await tester.pumpAndSettle();
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(standInSignInNotNowKey));
+      await tester.pumpAndSettle();
 
-    expect(await answer, isFalse);
-    expect(diContainer<SessionReader>().isSignedIn, isFalse);
-    expect(find.byKey(standInSignInKey), findsNothing);
-    expect(
-      McTestSession.current.backend.requests.where(
-        (r) => r.path.startsWith('/v1/auth/'),
-      ),
-      isEmpty,
-    );
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: leaving the sign-in screen by Back '
-      'answers false', (tester) async {
-    final router = await _boot(tester);
-
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
-    router.pop();
-    await tester.pumpAndSettle();
-
-    expect(await answer, isFalse);
-    expect(diContainer<SessionReader>().isSignedIn, isFalse);
-    expect(find.byKey(standInSignInKey), findsNothing);
-  });
-
-  mcTestWidgets('T-0041-AC6 requestSignIn: already signed in answers true '
-      'without a sign-in screen', (tester) async {
-    await _boot(tester);
-    final user = fixtureUsers.first;
-    await tester.runAsync(
-      () => diContainer<SessionWriter>().signIn(
-        userId: user.id,
-        tokens: AuthTokens(
-          accessToken: mintAccessToken(user.id, 1),
-          refreshToken: mintRefreshToken(user.id, 1),
+      expect(await answer, isFalse);
+      expect(diContainer<SessionReader>().isSignedIn, isFalse);
+      expect(find.byKey(standInSignInKey), findsNothing);
+      expect(
+        McTestSession.current.backend.requests.where(
+          (r) => r.path.startsWith('/v1/auth/'),
         ),
-      ),
-    );
+        isEmpty,
+      );
+    },
+  );
 
-    final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
-    await tester.pumpAndSettle();
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: leaving the sign-in screen by Back '
+    'answers false',
+    (tester) async {
+      final router = await _boot(tester);
 
-    expect(find.byKey(standInSignInKey), findsNothing);
-    expect(await answer, isTrue);
-  });
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+      router.pop();
+      await tester.pumpAndSettle();
+
+      expect(await answer, isFalse);
+      expect(diContainer<SessionReader>().isSignedIn, isFalse);
+      expect(find.byKey(standInSignInKey), findsNothing);
+    },
+  );
+
+  mcTestWidgets(
+    'T-0041-AC6 T-0066-AC3 requestSignIn: already signed in answers true '
+    'without a sign-in screen',
+    (tester) async {
+      await _boot(tester);
+      final user = fixtureUsers.first;
+      await tester.runAsync(
+        () => diContainer<SessionWriter>().signIn(
+          userId: user.id,
+          tokens: AuthTokens(
+            accessToken: mintAccessToken(user.id, 1),
+            refreshToken: mintRefreshToken(user.id, 1),
+          ),
+        ),
+      );
+
+      final answer = diContainer<ComicsDetailsNavigator>().requestSignIn();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(standInSignInKey), findsNothing);
+      expect(await answer, isTrue);
+    },
+  );
 
   test('T-0041-AC6 requestSignIn before the router shows anything answers '
       'false', () async {

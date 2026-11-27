@@ -1,6 +1,6 @@
 # T-0021 (P1-16): the shared app layer. McApp, boot, the root DI list,
 # PendingLinks and AppLocations; the flow-result helpers (AppFlows) and the
-# temporary fixture sign-in sheet that the wirings share (T-0048).
+# sign-in request, guard and stand-in the wirings share (T-0066).
 name: app_core
 version: 0.1.0
 publish_to: none

@@ -188,73 +188,84 @@ void main() {
     expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
   });
 
-  mcTestWidgets('T-0063-AC3 requestSignIn: signed in it answers true at '
-      'once, with no sign-in screen', (tester) async {
-    McTestSession.current.backend.useFixtureSet('identity.default');
-    await _boot(tester);
-    final user = fixtureUsers.first;
-    await tester.runAsync(
-      () => diContainer<AuthApi>().signIn(
-        email: user.email,
-        password: user.password,
-      ),
-    );
+  mcTestWidgets(
+    'T-0063-AC3 T-0066-AC3 requestSignIn: signed in it answers true at '
+    'once, with no sign-in screen',
+    (tester) async {
+      McTestSession.current.backend.useFixtureSet('identity.default');
+      await _boot(tester);
+      final user = fixtureUsers.first;
+      await tester.runAsync(
+        () => diContainer<AuthApi>().signIn(
+          email: user.email,
+          password: user.password,
+        ),
+      );
 
-    final answer = await diContainer<SettingsAppearanceNavigator>()
-        .requestSignIn();
-    expect(answer, isTrue);
-    expect(find.byType(BottomSheet), findsNothing);
-  });
+      final answer = await diContainer<SettingsAppearanceNavigator>()
+          .requestSignIn();
+      expect(answer, isTrue);
+      expect(find.byType(BottomSheet), findsNothing);
+    },
+  );
 
-  mcTestWidgets('T-0063-AC3 requestSignIn: signed out it opens the sign-in '
-      'screen for the sync, and Not now answers false (T-0066)', (
-    tester,
-  ) async {
-    final router = await _bootReal(tester);
+  mcTestWidgets(
+    'T-0063-AC3 T-0066-AC3 requestSignIn: signed out it opens the sign-in '
+    'screen for the sync, and Not now answers false (T-0066)',
+    (
+      tester,
+    ) async {
+      final router = await _bootReal(tester);
 
-    var answered = false;
-    bool? answer;
-    final pending = diContainer<SettingsAppearanceNavigator>()
-        .requestSignIn()
-        .then((a) {
-          answered = true;
-          answer = a;
-        });
-    await tester.pumpAndSettle();
-    expect(
-      router.state.uri.toString(),
-      AppLocations.signIn(reason: SignInPurpose.appearanceSync),
-    );
-    expect(
-      find.text('Sign in to sync your appearance across devices.'),
-      findsOneWidget,
-    );
-    expect(answered, isFalse);
+      var answered = false;
+      bool? answer;
+      final pending = diContainer<SettingsAppearanceNavigator>()
+          .requestSignIn()
+          .then((a) {
+            answered = true;
+            answer = a;
+          });
+      await tester.pumpAndSettle();
+      expect(
+        router.state.uri.toString(),
+        AppLocations.signIn(reason: SignInPurpose.appearanceSync),
+      );
+      expect(
+        find.text('Sign in to sync your appearance across devices.'),
+        findsOneWidget,
+      );
+      expect(answered, isFalse);
 
-    await tester.tap(find.byKey(const ValueKey<String>('auth_signin.not_now')));
-    await tester.pumpAndSettle();
-    await pending;
-    expect(answer, isFalse);
-    expect(diContainer<SessionReader>().isSignedIn, isFalse);
-  });
+      await tester.tap(
+        find.byKey(const ValueKey<String>('auth_signin.not_now')),
+      );
+      await tester.pumpAndSettle();
+      await pending;
+      expect(answer, isFalse);
+      expect(diContainer<SessionReader>().isSignedIn, isFalse);
+    },
+  );
 
-  mcTestWidgets('T-0063-AC3 requestSignIn: signing in on the form answers '
-      'true', (tester) async {
-    await _bootReal(tester);
+  mcTestWidgets(
+    'T-0063-AC3 T-0066-AC3 requestSignIn: signing in on the form answers '
+    'true',
+    (tester) async {
+      await _bootReal(tester);
 
-    bool? answer;
-    final pending = diContainer<SettingsAppearanceNavigator>()
-        .requestSignIn()
-        .then((a) => answer = a);
-    await tester.pumpAndSettle();
-    await _useDemoAccount(tester, fixtureUsers.first.email);
-    await _submitForm(tester);
-    await pending;
+      bool? answer;
+      final pending = diContainer<SettingsAppearanceNavigator>()
+          .requestSignIn()
+          .then((a) => answer = a);
+      await tester.pumpAndSettle();
+      await _useDemoAccount(tester, fixtureUsers.first.email);
+      await _submitForm(tester);
+      await pending;
 
-    expect(answer, isTrue);
-    expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
-    expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
-  });
+      expect(answer, isTrue);
+      expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
+      expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+    },
+  );
 
   mcTestWidgets('T-0066-AC3 requestSignIn: leaving the form by Back while the '
       'request is on its way answers false, and the sign-in that lands is '
