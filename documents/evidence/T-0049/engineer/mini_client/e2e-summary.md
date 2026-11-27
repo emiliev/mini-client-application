@@ -2,37 +2,40 @@
 
 | Field | Value |
 |---|---|
-| Result | **FAIL** |
+| Result | **PASS** |
 | Task | T-0049 |
 | Role | engineer |
 | Project | `/tmp/mc-T-0049-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0049-engineer-47445` |
-| Simulator UDID | `1CD98248-BD21-4664-B874-E816E1FC962A` |
+| Simulator | `mc-T-0049-engineer-83733` |
+| Simulator UDID | `9F6E0842-037B-4018-8E17-5F69F20C14D7` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-27T06:09:36Z |
-| Finished | 2026-11-27T06:14:50Z |
+| Started | 2026-11-27T06:19:55Z |
+| Finished | 2026-11-27T06:25:53Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/character_details_deeplink_test.dart` | FAIL | 25 s | [e2e-character_details_deeplink_test.log](e2e-character_details_deeplink_test.log) |
-| `integration_test/characters_deeplink_test.dart` | PASS | 35 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
-| `integration_test/characters_journey_test.dart` | PASS | 24 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
-| `integration_test/characters_link_after_flow_test.dart` | PASS | 20 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
-| `integration_test/comic_deeplink_test.dart` | PASS | 28 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
-| `integration_test/comics_journey_test.dart` | PASS | 34 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
-| `integration_test/reading_list_deeplink_test.dart` | PASS | 25 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
-| `integration_test/reading_list_journey_test.dart` | PASS | 37 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
-| `integration_test/search_deeplink_test.dart` | PASS | 30 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
-| `integration_test/search_journey_test.dart` | PASS | 34 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
+| `integration_test/character_details_deeplink_test.dart` | PASS | 45 s | [e2e-character_details_deeplink_test.log](e2e-character_details_deeplink_test.log) |
+| `integration_test/characters_deeplink_test.dart` | PASS | 25 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
+| `integration_test/characters_journey_test.dart` | PASS | 26 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
+| `integration_test/characters_link_after_flow_test.dart` | PASS | 23 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
+| `integration_test/comic_deeplink_test.dart` | PASS | 32 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
+| `integration_test/comics_journey_test.dart` | PASS | 41 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
+| `integration_test/reading_list_deeplink_test.dart` | PASS | 35 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
+| `integration_test/reading_list_journey_test.dart` | PASS | 41 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
+| `integration_test/search_deeplink_test.dart` | PASS | 32 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
+| `integration_test/search_journey_test.dart` | PASS | 36 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
 
 ## Screenshots
 
 | File | Target | Note |
 |---|---|---|
+| [55_deep_link_character_details.png](55_deep_link_character_details.png) | `integration_test/character_details_deeplink_test.dart` | downscaled from 1206x2622 |
+| [55b_back_from_details_is_list.png](55b_back_from_details_is_list.png) | `integration_test/character_details_deeplink_test.dart` | downscaled from 1206x2622 |
+| [55c_back_from_list_is_home.png](55c_back_from_list_is_home.png) | `integration_test/character_details_deeplink_test.dart` | downscaled from 1206x2622 |
 | [05_deep_link_characters.png](05_deep_link_characters.png) | `integration_test/characters_deeplink_test.dart` | downscaled from 1206x2622 |
 | [05b_back_from_characters_is_home.png](05b_back_from_characters_is_home.png) | `integration_test/characters_deeplink_test.dart` | downscaled from 1206x2622 |
 | [01_home.png](01_home.png) | `integration_test/characters_journey_test.dart` | downscaled from 1206x2622 |

@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0049 engineer on mc-T-0049-engineer-47445 (1CD98248-BD21-4664-B874-E816E1FC962A)
+# e2e_ios.sh: T-0049 engineer on mc-T-0049-engineer-83733 (9F6E0842-037B-4018-8E17-5F69F20C14D7)
 # cwd: /tmp/mc-T-0049-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.WrS9iA/screenshots/1-character_details_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/character_details_deeplink_test.dart -d 1CD98248-BD21-4664-B874-E816E1FC962A
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/1-character_details_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/character_details_deeplink_test.dart -d 9F6E0842-037B-4018-8E17-5F69F20C14D7
 
 Resolving dependencies in `/private/tmp/mc-T-0049-engineer-e2e`...
 Downloading packages...
@@ -21,31 +21,25 @@ Got dependencies in `/private/tmp/mc-T-0049-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           12.0s
-Failed to build iOS app
-Error output from Xcode build:
-↳
-    ** BUILD FAILED **
+Xcode build done.                                           20.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:65026/Hnbhf_ESQ1o=/
+VMServiceFlutterDriver: Isolate found with number: 539920577573859
+VMServiceFlutterDriver: Isolate 539920577573859 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0049-AC1 the cold link miniclient://app/characters/100366 has a back stack: details, the list, home
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: 00:06 +1: (tearDownAll)
+flutter: 00:06 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/1-character_details_deeplink_test/55_deep_link_character_details.png (222899)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/1-character_details_deeplink_test/55b_back_from_details_is_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/1-character_details_deeplink_test/55c_back_from_list_is_home.png (310591)
+All tests passed.
 
-
-Xcode's output:
-↳
-    Writing result bundle at path:
-    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.Zf1Kdv/flutter_ios_build_temp_dir3CUvys/temporary_xcresult_bundle
-
-    integration_test/character_details_deeplink_test.dart:18:41: Error: Undefined name 'e2eStartLinkFile'.
-        File('${Directory.systemTemp.path}/$e2eStartLinkFile').writeAsStringSync(
-                                            ^^^^^^^^^^^^^^^^
-    Target kernel_snapshot_program failed: Exception
-    Failed to package /private/tmp/mc-T-0049-engineer-e2e/app/mini_client.
-    Command PhaseScriptExecution failed with a nonzero exit code
-    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
-    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
-
-Could not build the application for the simulator.
-Application failed to start on attempt: 1
-Application failed to start on attempt: 2
-Application failed to start on attempt: 3
-Application failed to start. Will not run test. Quitting.
-
-# exit code: 1
+# exit code: 0

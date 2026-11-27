@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0049 engineer on mc-T-0049-engineer-47445 (1CD98248-BD21-4664-B874-E816E1FC962A)
+# e2e_ios.sh: T-0049 engineer on mc-T-0049-engineer-83733 (9F6E0842-037B-4018-8E17-5F69F20C14D7)
 # cwd: /tmp/mc-T-0049-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.WrS9iA/screenshots/7-reading_list_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_deeplink_test.dart -d 1CD98248-BD21-4664-B874-E816E1FC962A
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/7-reading_list_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_deeplink_test.dart -d 9F6E0842-037B-4018-8E17-5F69F20C14D7
 
 Resolving dependencies in `/private/tmp/mc-T-0049-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0049-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           10.0s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62083/FEEPRLj1HCU=/
-VMServiceFlutterDriver: Isolate found with number: 5723088653949443
-VMServiceFlutterDriver: Isolate 5723088653949443 is runnable.
+Xcode build done.                                           12.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:49714/j-38nubk6A0=/
+VMServiceFlutterDriver: Isolate found with number: 1021106954741415
+VMServiceFlutterDriver: Isolate 1021106954741415 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0048-AC5 the deep link miniclient://app/me/lists/new opens the editor
@@ -42,10 +42,10 @@ flutter: [debug] GET /v1/me/lists/l-1 -> 200
 flutter: [debug] ReadingListEditorBloc: _WizardChanged _Loading -> _Editing
 flutter: 00:07 +1: (tearDownAll)
 flutter: 00:07 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.WrS9iA/screenshots/7-reading_list_deeplink_test/37_deep_link_new_list.png (246054)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.WrS9iA/screenshots/7-reading_list_deeplink_test/37b_back_from_new_list_is_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.WrS9iA/screenshots/7-reading_list_deeplink_test/37c_editor_after_link_replaced_it.png (246054)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.WrS9iA/screenshots/7-reading_list_deeplink_test/38_link_edit_list.png (260030)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/7-reading_list_deeplink_test/37_deep_link_new_list.png (246054)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/7-reading_list_deeplink_test/37b_back_from_new_list_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/7-reading_list_deeplink_test/37c_editor_after_link_replaced_it.png (246054)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/7-reading_list_deeplink_test/38_link_edit_list.png (260030)
 All tests passed.
 
 # exit code: 0
