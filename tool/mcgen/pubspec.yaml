@@ -1,0 +1,16 @@
+name: mcgen
+description: The mini-client module generator (plan 02 section 2). Specs in, packages out.
+version: 0.1.0
+publish_to: none
+# Standalone on purpose (plan 02 section 2.1, F-0065): not a workspace member,
+# so its own lockfile never touches the app's single-version resolution.
+environment:
+  sdk: ^3.13.0
+dependencies:
+  args: ^2.5.0
+  crypto: ^3.0.0
+  mustache_template: ^2.0.5
+  path: ^1.9.0
+  yaml: ^3.1.0
+dev_dependencies:
+  test: ^1.25.0

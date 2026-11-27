@@ -21,6 +21,7 @@ const _config =
 const _searchField = ValueKey<String>('discovery_search.field');
 const _results = ValueKey<String>('discovery_search.results');
 const _comicTitle = ValueKey<String>('comics_details.title');
+const _characterName = ValueKey<String>('characters_details.name');
 
 /// The fixture facts (seed 42): the first character and the first comic for
 /// "spi", from the discovery fixture's own ranking.
@@ -179,7 +180,7 @@ void main() {
   });
 
   testWidgets('T-0046-AC3 in the app, a character result opens the '
-      'character placeholder', (tester) async {
+      'character profile', (tester) async {
     await boot(tester);
     await _pushLink(tester, 'miniclient://app/search?q=spi');
     await _settleRealIo(tester);
@@ -188,9 +189,8 @@ void main() {
     await tapResult(tester, character.title);
 
     expect(
-      find.byKey(const Key('character.details.placeholder')),
-      findsOneWidget,
+      tester.widget<Text>(find.byKey(_characterName)).data,
+      character.title,
     );
-    expect(find.text('Character details ${character.id}'), findsOneWidget);
   });
 }

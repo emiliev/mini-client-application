@@ -25,7 +25,7 @@ class CharactersRoute extends GoRouteData with $CharactersRoute {
       diContainer<UniverseRouteTargets>().characters();
 }
 
-/// `/characters/:id`: the character's details (a placeholder for now).
+/// `/characters/:id`: the character's profile.
 class CharacterDetailsRoute extends GoRouteData with $CharacterDetailsRoute {
   const CharacterDetailsRoute({required this.id});
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:characters_details/characters_details.dart';
 import 'package:characters_list/characters_list.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mc_di/mc_di.dart';
@@ -19,6 +20,7 @@ class UniverseWiringDIInitializer extends McDIInitializer {
     getIt.registerLazySingleton<UniverseRouteTargets>(
       () => UniverseRouteTargetsImpl(
         charactersList: getIt<CharactersListNavigator>(),
+        characterDetails: getIt<CharacterDetailsNavigator>(),
       ),
     );
   }

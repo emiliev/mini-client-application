@@ -22,12 +22,18 @@ _ROUTES = "lib/src/routes/characters_routes.dart"
 
 _INIT = "lib/src/di/di_initializer.dart"
 
-_NAVIGATOR = "lib/src/navigators/characters_list_navigator_impl.dart"
+_NAVIGATORS = [
+    "lib/src/navigators/character_details_navigator_impl.dart",
+    "lib/src/navigators/characters_list_navigator_impl.dart",
+]
 
 _DEPS = [
     "//app/wiring/app_core",
+    "//feature/characters/characters_details",
     "//feature/characters/characters_list",
+    "//utility/mc_api_auth",
     "//utility/mc_di",
+    "//utility/mc_session",
     "@pub_deps//:flutter",
     "@pub_deps//:get_it",
     "@pub_deps//:go_router",
@@ -38,10 +44,7 @@ _DEPS = [
 flutter_library(
     name = "_stage",
     package_name = _PKG,
-    srcs = [
-        "lib/src/flows/character_details_placeholder_flow.dart",
-        "lib/src/routes/route_targets.dart",
-    ],
+    srcs = ["lib/src/routes/route_targets.dart"],
     language_version = _LANG,
     tags = [
         "no-dart-analyze",
@@ -77,7 +80,7 @@ dart_codegen(
 # --- injectable (fork patch 0002) -------------------------------------------
 injectable_package(
     name = "di_config",
-    srcs = [_NAVIGATOR],
+    srcs = _NAVIGATORS,
     init = _INIT,
     init_deps = ["//utility/mc_di"],
     language_version = _LANG,
@@ -106,6 +109,9 @@ flutter_library(
 
 _TEST_DEPS = _DEPS + [
     ":universe_wiring",
+    "//utility/mc_ds_theme",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_test_utils",
     "@pub_deps//:flutter_test",
 ]
 
@@ -113,6 +119,10 @@ _TEST_DEPS = _DEPS + [
     name = t,
     size = "small",
     package_name = _PKG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
     language_version = _LANG,
     main = "test/%s.dart" % t,
     deps = _TEST_DEPS,

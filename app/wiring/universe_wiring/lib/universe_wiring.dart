@@ -7,8 +7,6 @@ export 'package:universe_wiring/src/di/di_initializer.dart'
     show UniverseNavigatorsDIInitializer;
 export 'package:universe_wiring/src/di/universe_wiring_di_initializer.dart'
     show UniverseWiringDIInitializer;
-export 'package:universe_wiring/src/flows/character_details_placeholder_flow.dart'
-    show CharacterDetailsPlaceholderFlow;
 export 'package:universe_wiring/src/routes/characters_routes.dart'
     show CharacterDetailsRoute, CharactersRoute;
 export 'package:universe_wiring/src/routes/route_targets.dart'

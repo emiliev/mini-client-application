@@ -2,7 +2,7 @@ name: loc
 description: LOC counter implementing the D8 / R1 rule (mc-loc/1).
 publish_to: none
 environment:
-  sdk: ^3.11.0
+  sdk: ^3.13.0
 dependencies:
   analyzer: ^8.1.1
   args: ^2.5.0
