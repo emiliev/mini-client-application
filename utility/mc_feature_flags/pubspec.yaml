@@ -1,0 +1,29 @@
+name: mc_feature_flags
+description: Typed feature flags and experiments with an evaluation order, local overrides, deterministic bucketing and a remote fetch that follows the session epoch (T-0052, U09).
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  dio: ^5.11.0
+  get_it: ^8.0.0
+  mc_api_client: any
+  mc_api_errors: any
+  mc_config: any
+  mc_di: any
+  mc_monitoring: any
+  mc_prelude: any
+  mc_session: any
+  mc_storage: any
+
+dev_dependencies:
+  mc_analysis: any
+  mc_api_auth: any
+  mc_event_bus: any
+  mc_fixtures_identity: any
+  mc_fixtures_platform: any
+  mc_mocked_backend: any
+  test: ^1.25.0

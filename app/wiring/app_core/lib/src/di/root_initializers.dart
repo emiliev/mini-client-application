@@ -8,6 +8,7 @@ import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
+import 'package:mc_feature_flags/mc_feature_flags.dart';
 import 'package:mc_formatters/mc_formatters.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
@@ -25,8 +26,11 @@ import 'package:mc_storage/mc_storage.dart';
 /// data loads where plan 01 has `L10nCoreDIInitializer` (T-0041), last before
 /// the wirings. Analytics (T-0053) comes right after storage, not right after
 /// monitoring as plan 01 has it: it keeps the consent choice in `mc_storage`.
-/// Not in the list yet, because their packages do not exist: feature flags and
-/// l10n core.
+/// The feature flags (T-0052) go right after api auth, as plan 01 orders them:
+/// they fetch through the shared `Dio` with the bearer, and they register at
+/// once with saved or default values (the first fetch runs in the background,
+/// so boot never waits on the network). Not in the list yet, because their
+/// package does not exist: l10n core.
 List<McDIInitializer> rootInitializers({
   required ConfigSource config,
   required Directory storageDirectory,
@@ -47,6 +51,7 @@ List<McDIInitializer> rootInitializers({
     MockedBackendDIInitializer(adapter: backendAdapter, domains: mockDomains),
     ApiClientDIInitializer(adapter: backendAdapter),
     const ApiAuthDIInitializer(),
+    const FeatureFlagsDIInitializer(),
     const FormattersDIInitializer(),
     if (routerRef != null) RouterDIInitializer(routerRef),
     ...wirings,

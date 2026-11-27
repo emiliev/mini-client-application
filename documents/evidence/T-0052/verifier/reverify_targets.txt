@@ -1,0 +1,1 @@
+//utility/mc_feature_flags:di_test //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:no_flutter_test //utility/mc_feature_flags:registry_overrides_test //utility/mc_feature_flags:session_fetch_test //app/wiring/app_core:feature_flags_boot_test

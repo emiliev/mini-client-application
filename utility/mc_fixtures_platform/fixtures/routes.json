@@ -1,0 +1,17 @@
+{
+  "domain": "platform",
+  "routes": [
+    "GET /v1/flags"
+  ],
+  "scenarios": [
+    "platform.empty",
+    "platform.flags_malformed",
+    "platform.server_error"
+  ],
+  "sets": [
+    "platform.default",
+    "platform.empty",
+    "platform.flags_malformed",
+    "platform.server_error"
+  ]
+}

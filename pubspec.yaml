@@ -53,6 +53,7 @@ workspace:
   - utility/mc_ds_tokens
   - utility/mc_e2e_utils
   - utility/mc_event_bus
+  - utility/mc_feature_flags
   - utility/mc_feature_flow
   - utility/mc_formatters
   - utility/mc_forms
@@ -63,6 +64,7 @@ workspace:
   - utility/mc_fixtures_identity
   - utility/mc_fixtures_library
   - utility/mc_fixtures_media
+  - utility/mc_fixtures_platform
   - utility/mc_l10n_core
   - utility/mc_media
   - utility/mc_mocked_backend

@@ -6,6 +6,7 @@ import 'package:mc_fixtures_discovery/mc_fixtures_discovery.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_fixtures_library/mc_fixtures_library.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
+import 'package:mc_fixtures_platform/mc_fixtures_platform.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
 /// The mocked backend's domains in the apps (D5). Fixtures are allowed only
@@ -17,6 +18,7 @@ const List<MockDomain> appMockDomains = [
   DiscoveryMockDomain(),
   IdentityMockDomain(),
   LibraryMockDomain(),
+  PlatformMockDomain(),
 ];
 
 /// The app root's media scope: `McImage` resolves `mock-asset://` art from the
