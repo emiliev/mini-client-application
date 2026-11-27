@@ -4,6 +4,7 @@
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -247,17 +248,27 @@ void main() {
 
   testWidgets('T-0064-AC3 the iOS back swipe does not pop a round in play '
       '(review round)', (tester) async {
-    await openLinkedRound(tester);
-    final location = router(tester).state.uri.toString();
+    // The swipe exists only on iOS pages (the test default is Android).
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    try {
+      await openLinkedRound(tester);
+      final location = router(tester).state.uri.toString();
 
-    // A drag from the left edge, as the Cupertino back gesture expects.
-    final gesture = await tester.startGesture(const Offset(2, 400));
-    await gesture.moveBy(const Offset(300, 0));
-    await gesture.up();
-    await tester.pumpAndSettle();
+      // A drag from the left edge, as the Cupertino back gesture expects.
+      final gesture = await tester.startGesture(const Offset(2, 400));
+      for (var i = 0; i < 10; i++) {
+        await gesture.moveBy(const Offset(35, 0));
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await gesture.up();
+      await tester.pumpAndSettle();
 
-    expect(find.byKey(_prompt), findsOneWidget);
-    expect(router(tester).state.uri.toString(), location);
-    expect(find.byKey(_setupBody), findsNothing);
+      expect(find.byKey(_prompt), findsOneWidget);
+      expect(router(tester).state.uri.toString(), location);
+      expect(find.byKey(_setupBody), findsNothing);
+    } finally {
+      // Reset inside the body: the binding checks before tear-downs run.
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 }

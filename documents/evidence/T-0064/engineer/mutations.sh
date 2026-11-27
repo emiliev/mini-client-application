@@ -21,7 +21,9 @@
 #
 # ADR-0015 caps a task at about 15 targeted mutants: by default only
 # MC_TARGETED runs (scoring: bonus, streak, timeout boundary; pause and
-# resume; the hint; the results POST's epoch pin; local vs server score).
+# resume; the hint; the results POST's epoch pin; local vs server score;
+# and the review round's three fixes: quitting while loading, the dialog's
+# answer after close, the outer-route pop guard).
 # The other mutants stay listed as documentation of the first, full pass
 # (85 of 85 killed, mutations_full_pass.log); MC_ALL=1 runs them all.
 #
@@ -30,7 +32,7 @@
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 TASK="${MC_TASK:-T-0064}"
-MC_TARGETED="S01 S04 S08 E01 P01 P02 P03 P13 S09 E03 P05 R02 R03 R08 R10"
+MC_TARGETED="S01 S08 E01 P01 P03 P13 S09 P05 R02 R03 R08 R10 L01 Q01 B01"
 if [[ -z "${MC_ONLY:-}" && -z "${MC_ALL:-}" ]]; then
   MC_ONLY="$MC_TARGETED"
 fi
@@ -83,12 +85,13 @@ T_PAINT=//feature/trivia/trivia_quiz:painter_test
 T_CONTRACT=//feature/trivia/trivia_quiz:contract_test
 T_FEAT="$T_BDD $T_SCOPE $T_PAINT $T_CONTRACT"
 T_WIRE=//app/wiring/chronicle_wiring:routes_test
+T_APP=//app/mini_client:trivia_route_test
 T_FIX="//utility/mc_fixtures_editorial:scoring_test //utility/mc_fixtures_editorial:validation_test //utility/mc_fixtures_editorial:provider_contract_test"
 
 run() { bz test --nocache_test_results --test_timeout=900 "$@" 2>&1 | tr '\r' '\n'; }
 
 if [[ -z "$CHECK_ONLY" ]]; then
-  base="$(run $T_FEAT $T_WIRE $T_FIX)"
+  base="$(run $T_FEAT $T_WIRE $T_FIX $T_APP)"
   if grep -q -a -E "FAILED|NO STATUS|^ERROR|Build did NOT complete" <<< "$base"; then
     say "BASELINE FAILS"
     grep -a -E "FAILED|^ERROR|Build did NOT" <<< "$base" | tee -a "$LOG"
@@ -201,6 +204,14 @@ mutate P11 "a timeout is tracked as correct" "$AN" "$T_BDD" \
   "'correct': outcome == AnswerOutcome.correct," "'correct': outcome != AnswerOutcome.wrong,"
 mutate P12 "round_started swaps its params" "$AN" "$T_BDD" \
   "{'category': category, 'difficulty': difficulty}," "{'category': difficulty, 'difficulty': category},"
+
+# --- the review round: leaving while loading, the dialog, the back swipe --
+mutate L01 "a round that loads after quitting starts anyway" "$P" "$T_BDD" \
+  '    if (isClosed || _left) {' '    if (isClosed || (_left && _seed! < 0)) {'
+mutate Q01 "the dialog's answer is added to a closed bloc" "$F/presentation/page/trivia_play_page.dart" "$T_APP" \
+  '    if (!bloc.isClosed) {' '    if (!bloc.isClosed || bloc.isClosed) {'
+mutate B01 "the outer route is not guarded (back swipe, system back)" "$F/presentation/page/trivia_play_page.dart" "$T_APP" \
+  $'      outer?.registerPopEntry(_outerPop);\n' ''
 
 # --- the results bloc: the POST, the session, the mismatch, the comic ------
 mutate R01 "signed in, nothing is saved" "$R" "$T_BDD" \
