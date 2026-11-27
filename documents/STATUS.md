@@ -10,7 +10,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0062 (Sonnet) |
+| **Active crew** | T-0062 (Sonnet), T-0063 (Opus), T-0064 (Opus) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -45,7 +45,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0046 merged: `discovery_search`, the SR exemplar.** Debounced search across characters and comics, grouped results, type chips, recent-search history, and a Search entry on home with a `miniclient://app/search?q=` link.
 - Resumed 2026-11-27.
 - **Next, in order:**
-  1. The ST `settings_appearance` (P1-22) and IX `trivia_quiz` (P1-23) exemplars, in parallel. All their prerequisites are merged (overlays, charts, trivia fixtures, identity preferences), and both copy ADR-0012.
+  1. The ST `settings_appearance` (T-0063) and IX `trivia_quiz` (T-0064) exemplars, in parallel and in progress. Both copy ADR-0012.
   2. Then the P1-24 bricks (generators from the 7 exemplars).
   - The `/me/**` auth guard is **deferred until the sign-in feature exists**: it needs a `/auth/sign-in?from=` route, and today sign-in is the temporary fixture sheet (P-044). P-110 is ready for it.
 

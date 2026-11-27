@@ -29,6 +29,8 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 | [T-0062](T-0062-tooling-hygiene.md) | Tooling hygiene: format gate, fresh-worktree gates, e2e bundle id and names, sheet handle pin (P-101, P-108, P-109, P-111, P-114) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0055, T-0058 | `fleet/T-0062-tooling-hygiene` |
+| [T-0063](T-0063-settings-appearance-exemplar.md) | `settings_appearance`, the ST exemplar (P1-22): app-wide theme, density, reduce motion; local + identity sync | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0061, T-0058 | `fleet/T-0063-settings-appearance` |
+| [T-0064](T-0064-trivia-quiz-exemplar.md) | `trivia_quiz`, the IX exemplar (P1-23): pure-Dart engine, timed rounds, painters, server-agreed scoring | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0060, T-0059, T-0058 | `fleet/T-0064-trivia-quiz` |
 
 ## Done
 | ID | Title | Result |
