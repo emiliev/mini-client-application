@@ -1,0 +1,62 @@
+# T-0046 (P1-19): the discovery_search exemplar feature (archetype SR). Phase
+# D's generators copy this package's shape for every search feature (plan 01
+# §3.3).
+name: discovery_search
+description: Search across characters and comics, with a type filter and recent searches.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  bloc: ^9.0.0
+  dio: ^5.11.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.0
+  flutter_localizations:
+    sdk: flutter
+  freezed_annotation: 3.1.0
+  get_it: ^8.0.0
+  injectable: 3.0.0
+  intl: any
+  json_annotation: 4.12.0
+  mc_api_client: any
+  mc_api_errors: any
+  mc_bloc_kit: any
+  mc_di: any
+  mc_ds_feedback: any
+  mc_ds_inputs: any
+  mc_ds_layout: any
+  mc_ds_media: any
+  mc_ds_navigation: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_feature_flow: any
+  mc_l10n_core: any
+  mc_media: any
+  mc_monitoring: any
+  mc_paging: any
+  mc_prelude: any
+  mc_storage: any
+  retrofit: 4.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_fixtures_characters: any
+  mc_fixtures_comics: any
+  mc_fixtures_discovery: any
+  mc_fixtures_media: any
+  mc_mocked_backend: any
+  mc_test_steps: any
+  mc_test_utils: any
+  mocktail: ^1.0.4
+  test: ^1.25.0
+
+flutter:
+  generate: true

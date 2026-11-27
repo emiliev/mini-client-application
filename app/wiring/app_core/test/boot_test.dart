@@ -381,4 +381,25 @@ void main() {
     expect(AppLocations.home, '/');
     expect(AppLocations.placeholder(7), '/placeholder/7');
   });
+
+  test('T-0046-AC5 AppLocations.search carries the query as an encoded '
+      'parameter', () {
+    expect(AppLocations.search(), '/search');
+    expect(AppLocations.search('spi'), '/search?q=spi');
+    final uri = Uri.parse(AppLocations.search('Spire Warden & #1'));
+    expect(uri.path, '/search');
+    expect(uri.queryParameters, {'q': 'Spire Warden & #1'});
+  });
+
+  test('T-0046-AC5 the app mock domains serve the search', () async {
+    final dio = MockBackend(domains: appMockDomains).createDio();
+
+    final answer = await dio.get<Map<String, dynamic>>(
+      'v1/search',
+      queryParameters: {'q': 'spi'},
+    );
+
+    expect(answer.statusCode, 200);
+    expect(answer.data!['query'], 'spi');
+  });
 }

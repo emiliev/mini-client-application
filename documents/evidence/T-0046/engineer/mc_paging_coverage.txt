@@ -1,0 +1,6 @@
+package:mc_paging/src/page.dart: 18/18 100.0% missed=[]
+package:mc_paging/src/paged_state.dart: 0/0 0.0% missed=[]
+package:mc_paging/src/paging_controller.dart: 58/58 100.0% missed=[]
+package:mc_paging/src/query/debounced_query.dart: 32/32 100.0% missed=[]
+package:mc_paging/src/query/search_history.dart: 21/21 100.0% missed=[]
+TOTAL 129/129 100.0%

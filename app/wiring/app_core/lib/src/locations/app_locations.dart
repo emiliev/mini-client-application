@@ -21,6 +21,14 @@ abstract final class AppLocations {
   /// `ComicDetailsRoute(id: id).location` in publishing_wiring.
   static String comic(int id) => '/comics/$id';
 
+  /// The search (T-0046), starting with [query] when given (encoded as a
+  /// query parameter). Equals `SearchRoute(q: query).location` in
+  /// discovery_wiring.
+  static String search([String? query]) => Uri(
+    path: '/search',
+    queryParameters: query == null ? null : {'q': query},
+  ).toString();
+
   /// The reading-list editor on a new list (T-0048). Equals
   /// `NewReadingListRoute().location` in library_wiring. It ends with a
   /// result: push it through `AppFlows.createReadingList`.

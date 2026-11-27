@@ -1,0 +1,9 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+/// Usage: the probe prints the monitoring logs
+Future<void> theProbePrintsTheMonitoringLogs(WidgetTester tester) async {
+  for (final log in McTestSession.current.monitoring.logs) {
+    print('PROBE P3 log: ${log.level} ${log.message}');
+  }
+}

@@ -85,6 +85,40 @@ void main() {
     );
   });
 
+  test('T-0046-AC8 the gate checks the discovery_search ARB set', () {
+    const dir = 'feature/discovery/discovery_search/lib/src/l10n';
+    for (final locale in ['en', 'de', 'en_XA']) {
+      expect(
+        File('$dir/discovery_search_$locale.arb').existsSync(),
+        isTrue,
+        reason: 'discovery_search_$locale.arb is not in the gate runfiles',
+      );
+    }
+    // The same files with one German key removed: the check must name it,
+    // so the gate really reads this package's set.
+    final copy = Directory.systemTemp.createTempSync('l10n_gate_');
+    addTearDown(() => copy.deleteSync(recursive: true));
+    final target = Directory('${copy.path}/$dir')..createSync(recursive: true);
+    for (final arb in Directory(dir).listSync().whereType<File>()) {
+      arb.copySync('${target.path}/${arb.uri.pathSegments.last}');
+    }
+    final de = File('${target.path}/discovery_search_de.arb');
+    final json = jsonDecode(de.readAsStringSync()) as Map<String, dynamic>
+      ..remove('discoverySearchShowMore');
+    de.writeAsStringSync(jsonEncode(json));
+
+    expect(
+      checkL10n(copy.path).map((v) => '$v'),
+      contains(
+        allOf(
+          contains('discovery_search'),
+          contains('de'),
+          contains('discoverySearchShowMore'),
+        ),
+      ),
+    );
+  });
+
   test(
     'T-0048-AC8 the gate checks the library_reading_list_editor ARB set',
     () {

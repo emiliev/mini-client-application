@@ -1,0 +1,23 @@
+{
+  "@@locale": "de",
+  "discoverySearchTitle": "Suche",
+  "discoverySearchFieldLabel": "Figuren und Comics suchen",
+  "discoverySearchClearQuery": "Suche löschen",
+  "discoverySearchFilterAll": "Alle",
+  "discoverySearchCharacters": "Figuren",
+  "discoverySearchComics": "Comics",
+  "discoverySearchCharactersSection": "Figuren ({count})",
+  "discoverySearchComicsSection": "Comics ({count})",
+  "discoverySearchShowMore": "{shown} zeigen",
+  "discoverySearchShowing": "{shown} von {total} angezeigt",
+  "discoverySearchSearching": "Suche läuft",
+  "discoverySearchEmptyTitle": "Keine Treffer",
+  "discoverySearchEmptyMessage": "Nichts passt zu „{query}“. Prüfe die Schreibweise oder versuche einen anderen Namen.",
+  "discoverySearchNoCharacters": "Keine Figuren passen zu „{query}“.",
+  "discoverySearchNoComics": "Keine Comics passen zu „{query}“.",
+  "discoverySearchErrorTitle": "Die Suche ist fehlgeschlagen",
+  "discoverySearchRecent": "Letzte Suchen",
+  "discoverySearchClearRecent": "Löschen",
+  "discoverySearchClearFailed": "Deine letzten Suchen konnten nicht gelöscht werden. Bitte versuche es erneut.",
+  "discoverySearchNoRecent": "Suche Figuren und Comics nach ihrem Namen."
+}

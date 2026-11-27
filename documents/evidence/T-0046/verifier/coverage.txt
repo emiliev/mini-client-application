@@ -1,0 +1,39 @@
+   3/3    feature/discovery/discovery_search/lib/src/di/di_initializer.dart
+   2/2    feature/discovery/discovery_search/lib/src/di/di_module.dart
+   1/1    feature/discovery/discovery_search/lib/src/domain/model/character_id.dart
+   1/1    feature/discovery/discovery_search/lib/src/domain/model/comic_id.dart
+   8/8    feature/discovery/discovery_search/lib/src/domain/model/search_dto.dart
+  32/32   feature/discovery/discovery_search/lib/src/domain/model/search_mapper.dart
+  12/12   feature/discovery/discovery_search/lib/src/domain/model/search_results.dart
+  12/12   feature/discovery/discovery_search/lib/src/domain/repository/discovery_search_repository.dart
+  14/14   feature/discovery/discovery_search/lib/src/flow/discovery_search_flow.dart
+  86/86   feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_bloc.dart
+  10/10   feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_event.dart
+  51/51   feature/discovery/discovery_search/lib/src/presentation/page/discovery_search_page.dart
+   5/5    feature/discovery/discovery_search/lib/src/presentation/widget/failure_message.dart
+  28/28   feature/discovery/discovery_search/lib/src/presentation/widget/search_history_view.dart
+  14/14   feature/discovery/discovery_search/lib/src/presentation/widget/search_result_tile.dart
+  54/54   feature/discovery/discovery_search/lib/src/presentation/widget/search_results_view.dart
+   -/-    feature/discovery/discovery_search/lib/discovery_search.dart  (in no report)
+   -/-    feature/discovery/discovery_search/lib/src/di/flow_scope.dart  (in no report)
+   -/-    feature/discovery/discovery_search/lib/src/domain/api/discovery_search_api.dart  (in no report)
+   -/-    feature/discovery/discovery_search/lib/src/flow/discovery_search_flow_state.dart  (in no report)
+   -/-    feature/discovery/discovery_search/lib/src/navigator/discovery_search_navigator.dart  (in no report)
+   -/-    feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_state.dart  (in no report)
+TOTAL feature/discovery/discovery_search: 333/333 = 100.0 %
+   1/1    app/wiring/discovery_wiring/lib/discovery_wiring.dart
+   3/3    app/wiring/discovery_wiring/lib/src/di/di_initializer.dart
+   6/6    app/wiring/discovery_wiring/lib/src/di/discovery_wiring_di_initializer.dart
+   5/5    app/wiring/discovery_wiring/lib/src/navigators/discovery_search_navigator_impl.dart
+   3/3    app/wiring/discovery_wiring/lib/src/routes/route_targets_impl.dart
+   4/4    app/wiring/discovery_wiring/lib/src/routes/search_routes.dart
+   -/-    app/wiring/discovery_wiring/lib/src/routes/route_targets.dart  (in no report)
+TOTAL app/wiring/discovery_wiring: 22/22 = 100.0 %
+(mc_paging: dart_test targets report under the darwin_arm64-fastbuild-ST-bdcb722b2755 testlogs)
+  18/18   utility/mc_paging/lib/src/page.dart
+  58/58   utility/mc_paging/lib/src/paging_controller.dart
+  32/32   utility/mc_paging/lib/src/query/debounced_query.dart
+  21/21   utility/mc_paging/lib/src/query/search_history.dart
+   -/-    utility/mc_paging/lib/mc_paging.dart  (in no report)
+   -/-    utility/mc_paging/lib/src/paged_state.dart  (in no report)
+TOTAL utility/mc_paging: 129/129 = 100.0 %

@@ -1,0 +1,24 @@
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
+
+/// Usage: the read-only storage still reads and refuses a write
+Future<void> theReadOnlyStorageStillReadsAndRefusesAWrite(
+  WidgetTester tester,
+) async {
+  final dir = McTestSession.current.storageDirectory;
+  expect(FileSystemEntity.isLinkSync(dir.path), isTrue, reason: 'a link');
+  final files = dir.listSync().whereType<File>().toList();
+  expect(files, isNotEmpty, reason: 'the stored file was copied');
+  expect(files.first.readAsStringSync(), contains('amber'));
+  expect(
+    () => File('${dir.path}/probe.tmp').writeAsStringSync('x'),
+    throwsA(isA<FileSystemException>()),
+  );
+  expect(
+    () => files.first.renameSync('${dir.path}/renamed'),
+    throwsA(isA<FileSystemException>()),
+  );
+  print('PROBE P1 link -> ${Link(dir.path).targetSync()}');
+}
