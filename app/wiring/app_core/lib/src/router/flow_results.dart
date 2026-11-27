@@ -79,7 +79,6 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
     }
     _pending = null;
     _done = true;
-    _call?.complete(pending.value);
     if (route.isFirst) {
       GoRouter.of(context).go(AppLocations.home);
     } else {

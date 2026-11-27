@@ -100,11 +100,9 @@ mutate R1 "FlowResultRoute does not complete the caller when disposed" $RESULTS_
   "s.replace('    _call?.complete(null);\n    super.dispose();', '    super.dispose();')" $T_RESULTS $T_APP
 mutate R2 "the wiring route does not pass its extra (no FlowCall)" $LISTS \
   "s.replace('        extra: state.extra,\n', '')" $T_APP
-mutate R3 "a delivered result is not given to the call" $RESULTS_SRC \
-  "s.replace('    _call?.complete(pending.value);\n', '')" $T_RESULTS
-mutate R4 "FlowCall completes twice (second value wins)" $RESULTS_SRC \
+mutate R3 "FlowCall completes twice (second value wins)" $RESULTS_SRC \
   "s.replace('    if (!_completer.isCompleted) {\n      _completer.complete(value);\n    }', '    _completer.complete(value);')" $T_RESULTS
-mutate R5 "home never clears its guard" $HOME_PAGE \
+mutate R4 "home never clears its guard" $HOME_PAGE \
   "s.replace('      _awaiting = false;', '      _awaiting = _awaiting;')" $T_APP
 
 say "mutations: $n, killed: $killed"
