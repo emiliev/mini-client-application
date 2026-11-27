@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `acfe0c5`; Verifier PASS `9932ae8`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (tooling and tests; negative controls required; ADR-0011) |
 | Branch | `fleet/T-0062-tooling-hygiene` |
@@ -73,3 +73,7 @@ All ACs met. Changes outside `tool/` and `mc_ds_overlays/test`: the evidence ren
 | AC3 | `tool/e2e_ios.sh` accepts `[a-z0-9-]+` roles and has `preflight_xcode_project`. New tests `test_T-0062-AC3_*` (3); full suite 23/23 PASS (`e2e_ios_test_full.log`). Negative controls: reverting the role regex fails the role test; removing the xcodeproj preflight fails the raw-tree test. The `reverify` run created and deleted `mc-T-0062-reverify-<pid>`. Raw-tree path: fails once with exit 2 naming `tool/e2e/prepare_pub_project.sh`; prepared path: passes the check. I chose "fail with one clear message" over auto-preparing, since preparing needs Bazel and a scratch copy. |
 | AC4 | Two tests in `overlays_test.dart` named `T-0062-AC4` (handle tap and semantics activate under `PopScope(canPop: false)`; plain toast up at 3.9 s, gone after 4.1 s). `tool/checks/T-0062-AC4_mutations.sh`, log `AC4_mutations.log`: `maybePop` to `pop` (tap, semantics, both) survives without the new tests and is KILLED with them. Toast 3 s: survives without the new tests, KILLED with them. Toast 5 s: killed by the new tests and also by the older 4/8 s test. 50-run flake check: 0 failures (`AC4_flake50.log`). |
 | AC5 | `test --lockfile_mode=error //...`: 191/191 pass; `build --config=lint //...`, `mc_arch_check` ("OK"), `rules_fork.sh check`, format gate: all exit 0. The mini_client e2e suite passed 13/13 on the own simulator with the new id. |
+
+## Merge (TL)
+- 2026-11-27: `/code-review` (low) found nothing. The first run diffed an empty range; a re-run on `origin/main...ff78508` also found nothing. A single Sonnet Verifier pass gave PASS `9932ae8` (about 72k tokens). It checked the bundle id on the simulator, the fresh-worktree format gate with 3 negative controls, 23/23 script tests and the overlay mutations. Its merge check passed 201/201.
+- The TL merged `--no-ff`. On the merge result `check` passed, 201/201 tests, lint was clean, `mc_arch_check` reported OK and provenance passed. The format gate first failed in the TL worktree because of a stale ignored `tool/loc/.dart_tool`; it passed once that was removed. That gap is filed as P-117. TL decision: keep the explicit raw-tree failure message instead of auto-preparing the project.
