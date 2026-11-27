@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
+import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_ds_navigation/mc_ds_navigation.dart';
 import 'package:mc_feature_flow/testing.dart';
@@ -346,6 +348,19 @@ Future<void> putInCart(
     ),
   );
   expect(response?.statusCode, 200, reason: 'the cart line was set');
+}
+
+/// Signs [email] in through the real `AuthApi` of the test container
+/// (inside `runAsync`: the session saves to a real file, F-0038).
+Future<void> signIn(WidgetTester tester, String email) async {
+  final user = fixtureUser(email);
+  final result = await tester.runAsync(
+    () => diContainer<AuthApi>().signIn(
+      email: user.email,
+      password: user.password,
+    ),
+  );
+  expect(result?.getOrNull()?.id, user.id, reason: '$email signed in');
 }
 
 /// The shared Retry label in the running test's locale (`mc_l10n_core`).

@@ -274,6 +274,7 @@ _TEST_DEPS = [
     "//utility/mc_ds_lists",
     "//utility/mc_ds_media",
     "//utility/mc_ds_navigation",
+    "//utility/mc_feature_flags",
     "//utility/mc_feature_flow",
     "//utility/mc_fixtures_commerce",
     "//utility/mc_fixtures_identity",
@@ -357,6 +358,7 @@ flutter_test(
     target_compatible_with = ["@platforms//os:macos"],
     deps = _TEST_DEPS + [
         ":store_home",
+        "//utility/mc_ds_tokens",
         "//utility/mc_test_utils",
         "@pub_deps//:flutter",
         "@pub_deps//:flutter_test",
