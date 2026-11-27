@@ -321,13 +321,18 @@ final class ReadingListEditorBloc
   Future<Result<ReadingListId, ApiFailure>> _save(FormValues values) async {
     _wrote = false;
     final epoch = _epoch;
+    if (epoch == null) {
+      // Unreachable today: the wizard only exists once the editor has a
+      // session epoch. Never write without one.
+      return failure(_stopped);
+    }
     final draft = readingListDraftOf(values);
     final editing = _editing;
     if (editing == null) {
       if (!_canWrite(epoch)) {
         return failure(_stopped);
       }
-      final created = await _repository.create(draft);
+      final created = await _repository.create(draft, epoch: epoch);
       return created.fold((list) {
         _wrote = true;
         return success(list.id);
@@ -338,7 +343,11 @@ final class ReadingListEditorBloc
       if (!_canWrite(epoch)) {
         return failure(_stopped);
       }
-      final written = await _repository.updateDetails(editing, draft);
+      final written = await _repository.updateDetails(
+        editing,
+        draft,
+        epoch: epoch,
+      );
       final list = written.getOrNull();
       if (list == null) {
         return failure(written.fold((_) => _stopped, (error) => error));
@@ -350,7 +359,11 @@ final class ReadingListEditorBloc
       if (!_canWrite(epoch)) {
         return failure(_stopped);
       }
-      final written = await _repository.replaceItems(editing, draft);
+      final written = await _repository.replaceItems(
+        editing,
+        draft,
+        epoch: epoch,
+      );
       final list = written.getOrNull();
       if (list == null) {
         return failure(written.fold((_) => _stopped, (error) => error));

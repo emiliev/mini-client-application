@@ -159,8 +159,29 @@ void main() {
       });
 
       test('T-0039-AC2 a request retried after B signed in is failed, not sent with B', () async {
+        // Root cause of the old flake (T-0050 D4): the test slept 10 ms in
+        // real time hoping to land inside the 50 ms retry delay, so a loaded
+        // machine could run the retry first. The switch now happens when the
+        // first send arrives at the adapter, before its 503 is answered: it
+        // is certain to precede the retry, whatever the clock does.
+        var switched = false;
+        final arrivals = ArrivalAdapter(rig.backend.adapter, (options) {
+          if (!switched && options.path.endsWith('/v1/echo-auth')) {
+            switched = true;
+            rig.track(rig.session.signOut());
+            rig.track(
+              rig.session.signIn(
+                userId: 'u-101',
+                tokens: AuthTokens(
+                  accessToken: mintAccessToken('u-101', 1),
+                  refreshToken: mintRefreshToken('u-101', 1),
+                ),
+              ),
+            );
+          }
+        });
         final (dio, api) = rig.dioOver(
-          rig.backend.adapter,
+          arrivals,
           retryDelay: const Duration(milliseconds: 50),
         );
         await api.signIn(
@@ -173,19 +194,68 @@ void main() {
           const FailureKind.http(503),
         );
 
-        final pending = apiCall(
+        final result = await apiCall(
           () => dio.get<Map<String, Object?>>('/v1/echo-auth'),
         );
-        await Future<void>.delayed(const Duration(milliseconds: 10));
-        await api.signOut();
-        await _signInCollector(api);
-        final result = await pending;
 
+        expect(switched, isTrue, reason: 'the first send arrived');
         expect(_failure(result), isA<ApiUnauthorized>());
         expect(
           rig.calls('GET', '/v1/echo-auth'),
           1,
           reason: 'the retry never left',
+        );
+      });
+
+      test('T-0050-AC3 (P-080) one refresh per session: user A is in flight, user B starts its own', () async {
+        final gated = GatedAdapter(rig.backend.adapter, '/v1/auth/refresh');
+        final (dio, _) = rig.dioOver(gated);
+        await rig.startExpiredSession();
+        final a = _get(dio, '/v1/me');
+        await gated.arrived.future;
+        await rig.session.signOut();
+        await rig.session.signIn(
+          userId: 'u-101',
+          tokens: AuthTokens(
+            accessToken: expiredAccessToken('u-101'),
+            refreshToken: mintRefreshToken('u-101', 0),
+          ),
+        );
+        final b = _get(dio, '/v1/me');
+        await rig.settle();
+        gated.gate.complete();
+        final resultA = await a;
+        final resultB = await b;
+        await rig.settle();
+
+        expect(_failure(resultA), isA<ApiUnauthorized>());
+        expect(resultB.getOrNull()?.data?['id'], 'u-101');
+        expect(rig.session.userId, 'u-101');
+        expect(rig.session.accessToken, startsWith('mc-access-u-101-'));
+        expect(
+          rig.calls('POST', '/v1/auth/refresh'),
+          2,
+          reason: 'B did not wait for, or share, the refresh of A',
+        );
+      });
+
+      test('T-0050-AC3 (P-080) a PUT of user A after a local sign-out during the refresh is not replayed without a token', () async {
+        final gated = GatedAdapter(rig.backend.adapter, '/v1/auth/refresh');
+        final (dio, _) = rig.dioOver(gated);
+        await rig.startExpiredSession();
+        final put = apiCall(
+          () => dio.put<Map<String, Object?>>('/v1/me/favourites/comic/5'),
+        );
+        await gated.arrived.future;
+        await rig.session.signOut();
+        gated.gate.complete();
+        final result = await put;
+
+        expect(_failure(result), isA<ApiUnauthorized>());
+        expect(
+          rig.calls('PUT', '/v1/me/favourites/comic/5'),
+          1,
+          reason: 'the 401 reaches the caller; there is no anonymous replay',
         );
       });
 

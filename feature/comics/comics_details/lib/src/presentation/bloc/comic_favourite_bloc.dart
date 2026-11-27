@@ -175,11 +175,22 @@ final class ComicFavouriteBloc
       }
       current = false;
     }
+    // The toggle came from the state of `_shownEpoch`. If the session has
+    // moved on and the bloc has not heard yet (its `_SessionChanged` is still
+    // queued), the tap is dropped: it would write what another user never
+    // saw. The tap's ending reloads for the current session.
+    final epoch = _shownEpoch;
+    if (epoch == null || epoch != _session.epoch) {
+      return;
+    }
     final wanted = !current;
     emit(ComicFavouriteState.ready(favourite: wanted, saving: true));
     final result = await _repository.setFavourite(
       _comicId,
       favourite: wanted,
+      // The epoch checked just above: the request is not sent for any
+      // other (T-0050), whatever happens before it leaves.
+      epoch: epoch,
     );
     result.fold(
       (saved) {
