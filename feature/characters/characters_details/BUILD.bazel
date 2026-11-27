@@ -324,6 +324,7 @@ flutter_test(
         "//utility/mc_monitoring",
         "//utility/mc_session",
         "//utility/mc_storage",
+        "@pub_deps//:dio",
         "@pub_deps//:flutter_test",
     ],
 )

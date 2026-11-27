@@ -19,7 +19,8 @@ class CharacterFacts extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = CharacterDetailsL10n.of(context);
     final facts = [
-      (l10n.characterDetailsFactOrigin, character.origin),
+      if (character.origin.isNotEmpty)
+        (l10n.characterDetailsFactOrigin, character.origin),
       if (character.team.isNotEmpty)
         (l10n.characterDetailsFactTeam, character.team),
       (

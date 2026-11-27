@@ -8,6 +8,7 @@
 // the real bloc and repository over the mocked backend with NO auth
 // interceptor, so the bloc's check is the only protection. A reach into
 // `src/` like the contract test (R7).
+import 'dart:async';
 import 'dart:io';
 
 import 'package:characters_details/src/domain/api/characters_details_api.dart';
@@ -18,6 +19,7 @@ import 'package:characters_details/src/flow/characters_details_flow_state.dart';
 import 'package:characters_details/src/navigator/characters_details_navigator.dart';
 import 'package:characters_details/src/presentation/bloc/character_details_bloc.dart';
 import 'package:characters_details/src/presentation/bloc/character_favourite_bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
@@ -70,6 +72,11 @@ void main() {
   late Session session;
   late _Tracker tracker;
   late CharacterFavouriteBloc bloc;
+  late EventBus bus;
+  late Dio other;
+  // Reads of the favourite flag the app's Dio holds while [holding] is set.
+  final held = <Completer<void>>[];
+  var holding = false;
   // Saves the tests did not await: tearDown awaits them before it deletes
   // the storage folder (T-0050 D1).
   final saves = <Future<Object?>>[];
@@ -89,6 +96,26 @@ void main() {
     final dio = backend.createDio()
       ..options.headers['Authorization'] =
           'Bearer ${mintAccessToken('u-100', 1)}';
+    other = backend.createDio()
+      ..options.headers['Authorization'] =
+          'Bearer ${mintAccessToken('u-100', 1)}';
+    holding = false;
+    held.clear();
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          if (holding &&
+              options.method == 'GET' &&
+              options.path.contains('me/favourites')) {
+            final gate = Completer<void>();
+            held.add(gate);
+            await gate.future;
+          }
+          handler.next(options);
+        },
+      ),
+    );
+    bus = EventBus();
     bloc = CharacterFavouriteBloc(
       CharacterDetailsRepository(CharacterDetailsApi(dio)),
       FeatureFlowController<CharacterDetailsFlowState>(
@@ -96,7 +123,7 @@ void main() {
       ),
       _Navigator(),
       session,
-      EventBus(),
+      bus,
       tracker,
       Monitoring([]),
     );
@@ -104,6 +131,11 @@ void main() {
   });
 
   tearDown(() async {
+    for (final gate in held) {
+      if (!gate.isCompleted) {
+        gate.complete();
+      }
+    }
     await Future.wait(saves);
     saves.clear();
     await bloc.close();
@@ -116,6 +148,76 @@ void main() {
         (t) => t.method == method && t.path.startsWith('/v1/me/favourites'),
       )
       .length;
+
+  bool? shown() => bloc.state.maybeWhen(
+    ready: (favourite, saving) => favourite,
+    orElse: () => null,
+  );
+
+  test('T-0067-AC3 two reads that finish out of order leave the newest '
+      "read's value on screen", () async {
+    holding = true;
+    bus
+      ..publish(const DataChanged(favouritesTopic))
+      ..publish(const DataChanged(favouritesTopic));
+    await _settle();
+    expect(held, hasLength(2), reason: 'two reads are in flight');
+
+    // The newest read is answered first, with "not a favourite" ...
+    held[1].complete();
+    await _settle();
+    expect(shown(), isFalse);
+    // ... then the server changes and the older read is answered with the
+    // newer data: it must not overwrite what the newest read showed.
+    await other.put<Object?>('v1/me/favourites/character/100002');
+    held[0].complete();
+    await _settle();
+
+    expect(shown(), isFalse, reason: 'the newest read owns the answer');
+  });
+
+  test('T-0067-AC3 a tap during a background read is not overwritten by '
+      'that read', () async {
+    holding = true;
+    bus.publish(const DataChanged(favouritesTopic));
+    await _settle();
+    expect(held, hasLength(1));
+
+    bloc.add(const CharacterFavouriteEvent.toggle());
+    await _settle();
+    expect(writes('PUT'), 1);
+    expect(shown(), isTrue);
+    held.single.complete();
+    await _settle();
+
+    expect(shown(), isTrue, reason: 'the older read did not undo the write');
+  });
+
+  test('T-0067-AC3 a background refresh never emits loading', () async {
+    final states = <String>[];
+    final sub = bloc.stream.listen(
+      (s) => states.add(
+        s.when(
+          loading: () => 'loading',
+          signingIn: () => 'signingIn',
+          ready: (favourite, saving) => 'ready($favourite,$saving)',
+          loadFailed: (_, _) => 'loadFailed',
+          saveFailed: (_, favourite, _) => 'saveFailed($favourite)',
+        ),
+      ),
+    );
+    addTearDown(sub.cancel);
+
+    holding = true;
+    bus.publish(const DataChanged(favouritesTopic));
+    await _settle();
+    expect(shown(), isFalse, reason: 'the value stays while the read is out');
+    held.single.complete();
+    await _settle();
+
+    expect(states.where((s) => s == 'loading'), isEmpty);
+    expect(shown(), isFalse);
+  });
 
   test('T-0067-AC3 a tap handled after another user signed in, before the '
       'bloc heard of it, writes nothing for them', () async {

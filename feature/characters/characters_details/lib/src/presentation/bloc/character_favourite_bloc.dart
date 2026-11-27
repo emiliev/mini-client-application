@@ -79,6 +79,14 @@ final class CharacterFavouriteBloc
   /// True from a tap until its sign-in and write settled.
   bool _busy = false;
 
+  /// An announcement arrived while a tap was in flight: read the flag again
+  /// once the tap settles (it was dropped for good before the review round).
+  bool _stale = false;
+
+  /// Numbers every read; only the newest one may write its answer, so reads
+  /// that finish out of order cannot show an older value.
+  int _loadSeq = 0;
+
   /// The session epoch the shown state belongs to; null before the first
   /// read. A session event for this same epoch changes nothing.
   int? _shownEpoch;
@@ -99,6 +107,8 @@ final class CharacterFavouriteBloc
           _ownAnnouncements--;
         } else if (!_busy) {
           await _load(emit);
+        } else {
+          _stale = true;
         }
       case _SessionChanged():
         // During a tap the tap's own ending re-checks the session.
@@ -110,12 +120,15 @@ final class CharacterFavouriteBloc
           return;
         }
         _busy = true;
+        // A read still in flight predates this tap: it must not overwrite
+        // what the tap shows or saves.
+        _loadSeq++;
         try {
           await _toggle(emit);
         } finally {
           _busy = false;
         }
-        if (_session.epoch != _shownEpoch) {
+        if (_session.epoch != _shownEpoch || _stale) {
           await _load(emit);
         }
     }
@@ -131,8 +144,18 @@ final class CharacterFavouriteBloc
       emit(const CharacterFavouriteState.ready(favourite: false));
       return;
     }
-    emit(const CharacterFavouriteState.loading());
+    // A background refresh (same session, a value already shown) keeps that
+    // value on screen: `loading` is for the first read and a new session.
+    if (_shownEpoch != epoch || state is! _Ready) {
+      emit(const CharacterFavouriteState.loading());
+    }
+    final seq = ++_loadSeq;
+    _stale = false;
     final result = await _repository.isFavourite(_characterId);
+    if (seq != _loadSeq) {
+      // A newer read started meanwhile and owns the answer.
+      return;
+    }
     if (_session.epoch != epoch) {
       return _load(emit);
     }
