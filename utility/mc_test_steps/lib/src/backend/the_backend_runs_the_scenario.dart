@@ -10,5 +10,7 @@ import 'package:mc_test_utils/mc_test_utils.dart';
 /// `the backend fails ...` step, because switching scenarios resets the
 /// engine's failure rules. `the backend recovers` ends it. An unknown name
 /// fails, listing the known ones.
-Future<void> theBackendRunsTheScenario(WidgetTester tester, String name) async =>
-    McTestSession.current.backend.backend.useScenario(name);
+Future<void> theBackendRunsTheScenario(
+  WidgetTester tester,
+  String name,
+) async => McTestSession.current.backend.backend.useScenario(name);
