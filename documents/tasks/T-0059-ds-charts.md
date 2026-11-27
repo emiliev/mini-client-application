@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (Engineer done) |
+| Status | Done (merged 2026-11-27 `6ae4a7f`; Verifier PASS `b5d646b`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (DS widgets; ADR-0011) |
 | Branch | `fleet/T-0059-ds-charts` |
@@ -114,3 +114,12 @@ New package; nothing deleted, skipped or weakened; no `// ignore:`; no existing 
 **Changed goldens (12 of 232), all from item 3:** `line_one_series` at 2x in the 4 themes (4 files), and `line_three_series` at 1x and 2x in the 4 themes (8 files). In these the y axis now starts at 0, so the zero line is drawn along the baseline (checked by eye: `line_three_series.light.x1`). No other golden changed.
 
 **Results at the review-round HEAD:** gates script PASS (report `ac5-gates.md`), mutations 101 of 101 killed (17 new mutants for items 1 to 5, 7 and 8; an extra survivor, "next neighbour ignored", led to a test and to resolving defaults against both ring neighbours), 50-run flake check 0 failures on all 4 targets (`flake-50.log`).
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 4 important bugs and 4 nits:
+  - the highlight and default roles shifted after sanitising;
+  - adjacent donut segments shared a colour at 5 or more segments;
+  - there was no line at 0 when the scale started at 0;
+  - `_hasData` ignored truncation.
+
+  Review round `eb9879a`: 101/101 mutations, 12 line goldens changed. A single Sonnet Verifier pass gave PASS `b5d646b` (about 124k tokens; own geometry probe; 5 contrast ratios worked out by hand; 19 of 21 mutations killed, the 2 survivors are test gaps → P-112). The TL merged `--no-ff`. On the merge result `check` passed, 182/182 tests passed, lint was clean, `mc_arch_check` reported OK, provenance passed, and only chart goldens were added.
