@@ -1,0 +1,8 @@
+PASS test_T-0062-AC3_a_role_outside_a_z_0_9_dash_is_refused_before_any_simulator (0 s)
+RUN  test_T-0062-AC3_raw_tree_fails_with_the_prepare_command_and_a_prepared_tree_runs
+    raw tree: exit 2: e2e_ios: error: '/private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.9u8GIT/t0062-raw/raw' has no ios/Runner.xcodeproj (a raw tree: the repo h
+    prepared tree: exit 0 on 'mc-T-0062-reverify-40330'
+PASS test_T-0062-AC3_raw_tree_fails_with_the_prepare_command_and_a_prepared_tree_runs (52 s)
+
+Summary: 23 passed, 0 failed, 23 total in 733 s
+RESULT: PASS
