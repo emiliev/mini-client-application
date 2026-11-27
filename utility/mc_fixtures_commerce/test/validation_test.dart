@@ -289,7 +289,7 @@ void main() {
       }
       // A second client of the same backend sees it too.
       final other = jsonDio(backend);
-      expect(((await _cart(other)).data!['items']! as List), hasLength(1));
+      expect((await _cart(other)).data!['items']! as List, hasLength(1));
     });
 
     test('T-0051-AC4: reset() clears every cart', () async {
@@ -327,11 +327,11 @@ void main() {
         // Removing one's own line leaves the other's alone.
         await putQuantity(dio, a.id, 0, user: reader);
         expect(
-          ((await _cart(dio, user: collector)).data!['items']! as List),
+          (await _cart(dio, user: collector)).data!['items']! as List,
           hasLength(1),
         );
         expect(
-          ((await _cart(dio, user: reader)).data!['items']! as List),
+          (await _cart(dio, user: reader)).data!['items']! as List,
           isEmpty,
         );
         // DELETE promo only clears the caller's.
@@ -345,7 +345,7 @@ void main() {
           headers: bearer(reader),
         );
         expect(
-          ((await _cart(dio, user: collector)).data!['promotions']! as List),
+          (await _cart(dio, user: collector)).data!['promotions']! as List,
           hasLength(1),
         );
       },
@@ -362,7 +362,7 @@ void main() {
           '/v1/me/cart',
           headers: bearer(reader, 7),
         );
-        expect((r.data!['items']! as List), hasLength(1));
+        expect(r.data!['items']! as List, hasLength(1));
       },
     );
 
@@ -370,10 +370,10 @@ void main() {
       final p = _withStock(products, 2);
       await putQuantity(dio, p.id, 2);
       backend.useScenario('commerce.empty');
-      expect(((await _cart(dio)).data!['items']! as List), isEmpty);
+      expect((await _cart(dio)).data!['items']! as List, isEmpty);
       expect((await putQuantity(dio, p.id, 1)).statusCode, 404);
       backend.useScenario(null);
-      expect(((await _cart(dio)).data!['items']! as List), hasLength(1));
+      expect((await _cart(dio)).data!['items']! as List, hasLength(1));
     });
   });
 }

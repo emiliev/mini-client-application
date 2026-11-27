@@ -39,7 +39,10 @@ _TEST_DEPS = [
         package_name = "mc_fixtures_commerce",
         language_version = _LANG,
         size = "small",
-        srcs = ["test/support.dart"],
+        srcs = [
+            "test/oracle.dart",
+            "test/support.dart",
+        ],
         main = "test/%s.dart" % name,
         deps = _TEST_DEPS,
     )

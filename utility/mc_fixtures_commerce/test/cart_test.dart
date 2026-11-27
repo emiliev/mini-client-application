@@ -119,12 +119,18 @@ void main() {
           for (final p in (cart['promotions']! as List).cast<Json>())
             p['code']! as String: p['discountCents']! as int,
         };
-        if ((byCode['HEROES3'] ?? 0) + (byCode['COSMIC3'] ?? 0) > 0) withB2g1++;
+        if ((byCode['HEROES3'] ?? 0) + (byCode['COSMIC3'] ?? 0) > 0) {
+          withB2g1++;
+        }
         if ((byCode['SAVE10'] ?? 0) + (byCode['SAVE25'] ?? 0) > 0) {
           withPercent++;
         }
-        if ((byCode['TAKE5'] ?? 0) + (byCode['TAKE15'] ?? 0) > 0) withFixed++;
-        if (byCode.values.where((v) => v > 0).length >= 3) withAllThree++;
+        if ((byCode['TAKE5'] ?? 0) + (byCode['TAKE15'] ?? 0) > 0) {
+          withFixed++;
+        }
+        if (byCode.values.where((v) => v > 0).length >= 3) {
+          withAllThree++;
+        }
       }
       // The sample is not vacuous: every promotion kind took something off
       // in several carts.
@@ -409,12 +415,12 @@ void main() {
         expect(cleared['promotions'], isEmpty);
         await putQuantity(dio, p.id, 1);
         expect(
-          ((await getJson(
+          (await getJson(
                 dio,
                 '/v1/me/cart',
                 user: reader,
               )).data!['promotions']!
-              as List),
+              as List,
           isEmpty,
           reason: 'the code does not come back',
         );

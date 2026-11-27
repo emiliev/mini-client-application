@@ -1,7 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_fixtures_commerce/mc_fixtures_commerce.dart';
-import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
 import 'support.dart';
 

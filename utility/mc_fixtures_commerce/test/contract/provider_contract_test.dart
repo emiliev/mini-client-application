@@ -297,7 +297,7 @@ void main() {
       )..useScenario('commerce.empty');
       final dio = jsonDio(backend);
       expect(
-        ((await getJson(dio, '/v1/store/featured')).data!['products']! as List),
+        (await getJson(dio, '/v1/store/featured')).data!['products']! as List,
         isEmpty,
       );
       expect((await getJson(dio, '/v1/comics/500060')).statusCode, 200);
