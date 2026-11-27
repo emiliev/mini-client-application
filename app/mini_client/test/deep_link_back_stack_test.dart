@@ -19,6 +19,7 @@ const _config =
     '"apiBaseUrl":"https://mock.mini-client.invalid/","build":"1"}';
 
 const _home = Key('home.placeholder');
+const _details = ValueKey<String>('reading_list_editor.details');
 
 /// The links of AC1, each with a finder for its own screen.
 final _links = <String, Finder>{
@@ -32,7 +33,7 @@ final _links = <String, Finder>{
     const ValueKey<String>('comics_details.title'),
   ),
   AppLocations.search('spi'): find.byType(TextField),
-  AppLocations.newReadingList: find.text('New reading list'),
+  AppLocations.newReadingList: find.byKey(_details),
 };
 
 /// What iOS sends for a link once the app runs.
@@ -159,12 +160,12 @@ void main() {
     await tester.tap(find.byKey(newReadingListKey));
     await tester.pumpAndSettle();
     await signInOnTheSheet(tester);
-    expect(find.text('New reading list'), findsWidgets);
+    expect(find.byKey(_details), findsOneWidget);
 
     await _pushLink(tester, 'miniclient://app/');
     await tester.pumpAndSettle();
     expect(find.byKey(_home), findsOneWidget);
-    expect(find.text('New reading list'), findsNothing);
+    expect(find.byKey(_details), findsNothing);
 
     await tester.ensureVisible(find.byKey(newReadingListKey));
     await tester.pumpAndSettle();
@@ -172,8 +173,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.text('New reading list'),
-      findsWidgets,
+      find.byKey(_details),
+      findsOneWidget,
       reason: 'the second tap opened the editor (the first caller got null)',
     );
   });

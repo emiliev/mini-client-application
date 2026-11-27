@@ -1,6 +1,6 @@
 // T-0049: the app shell re-roots each wiring's absolute routes under home.
 import 'package:app_core/app_core.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
@@ -15,7 +15,9 @@ void main() {
   test('T-0049-AC1 entity routes become relative children of home, '
       'children kept', () {
     final routes = nestUnderHome(
-      [_route('/', routes: [_route('placeholder/:id')])],
+      [
+        _route('/', routes: [_route('placeholder/:id')]),
+      ],
       [
         _route('/characters', routes: [_route(':id')]),
         _route('/comics/:id'),
@@ -68,7 +70,9 @@ void main() {
     expect(
       () => nestUnderHome(
         [_route('/')],
-        [ShellRoute(builder: (_, _, child) => child, routes: [_route('/a')])],
+        [
+          ShellRoute(builder: (_, _, child) => child, routes: [_route('/a')]),
+        ],
       ),
       throwsStateError,
     );
