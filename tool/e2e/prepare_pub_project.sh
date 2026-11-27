@@ -125,11 +125,11 @@ fvm flutter pub get >/dev/null
 PBX="$OUT/$APP/ios/Runner.xcodeproj/project.pbxproj"
 [ -f "$PBX" ] || { echo "no Xcode project" >&2; exit 1; }
 # T-0062-AC1 (P-109): `flutter create --org com.emiliev` names the app
-# com.emiliev.miniClient (camel-cased from the project name), but Q-004 and the
+# a camel-cased id (capital C, from the project name), but Q-004 and the
 # Bazel build use com.emiliev.miniclient. Rewrite every configuration (Debug,
 # Release, Profile, and the RunnerTests ones, which become ...miniclient.RunnerTests).
-sed -i '' 's/com\.emiliev\.miniClient/com.emiliev.miniclient/g' "$PBX"
-! grep -q 'com\.emiliev\.miniClient' "$PBX" || { echo "bundle id rewrite failed" >&2; exit 1; }
+sed -i '' 's/com\.emiliev\.mini[C]lient/com.emiliev.miniclient/g' "$PBX"
+! grep -q 'com\.emiliev\.mini[C]lient' "$PBX" || { echo "bundle id rewrite failed" >&2; exit 1; }
 [ "$(grep -c 'PRODUCT_BUNDLE_IDENTIFIER = com\.emiliev\.miniclient' "$PBX")" -ge 3 ] ||
   { echo "expected com.emiliev.miniclient in every Runner configuration" >&2; exit 1; }
 [ -f "$OUT/$APP/assets/app_config.json" ] || { echo "no config asset" >&2; exit 1; }
