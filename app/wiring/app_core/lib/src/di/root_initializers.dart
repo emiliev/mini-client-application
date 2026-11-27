@@ -5,6 +5,7 @@ import 'package:app_core/src/router/router_ref.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
+import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
@@ -29,7 +30,10 @@ import 'package:mc_storage/mc_storage.dart';
 /// The feature flags (T-0052) go right after api auth, as plan 01 orders them:
 /// they fetch through the shared `Dio` with the bearer, and they register at
 /// once with saved or default values (the first fetch runs in the background,
-/// so boot never waits on the network). Not in the list yet, because their
+/// so boot never waits on the network). The appearance (T-0063, ADR-0013)
+/// comes after the flags for the same reasons: it syncs through the shared
+/// `Dio` with the bearer, and registers at once with the device's saved
+/// values. Not in the list yet, because their
 /// package does not exist: l10n core.
 List<McDIInitializer> rootInitializers({
   required ConfigSource config,
@@ -52,6 +56,7 @@ List<McDIInitializer> rootInitializers({
     ApiClientDIInitializer(adapter: backendAdapter),
     const ApiAuthDIInitializer(),
     const FeatureFlagsDIInitializer(),
+    const AppearanceDIInitializer(),
     const FormattersDIInitializer(),
     if (routerRef != null) RouterDIInitializer(routerRef),
     ...wirings,

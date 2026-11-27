@@ -1,0 +1,20 @@
+baseline: PASS
+A01 answers of a gone epoch are applied: KILLED (//utility/mc_appearance:races_test)
+A02 a change does not look at an undelivered session change first: KILLED (//utility/mc_appearance:races_test)
+A05 another user's pending settings are kept: KILLED (//utility/mc_appearance:races_test)
+A06 sign-out keeps what was pending: KILLED (//utility/mc_appearance:races_test)
+A07 the account wins over pending settings too: KILLED (//feature/settings/settings_appearance:bdd_test)
+A08 pending settings are not adopted by the account that signs in: KILLED (//utility/mc_appearance:sync_test)
+A09 a lost write is never re-sent: KILLED (//app/mini_client:settings_route_test)
+A16 a PATCH always says ifVersion 0: KILLED (//utility/mc_appearance:sync_test)
+A17 a setting changed again while its PATCH was out is confirmed anyway: KILLED (//utility/mc_appearance:sync_test)
+A18 a 409 is never retried: KILLED (//feature/settings/settings_appearance:bdd_test)
+A19 a second 409 is retried too: KILLED (//utility/mc_appearance:sync_test)
+A21 a conflict is always reported as resolved with another device: KILLED (//feature/settings/settings_appearance:bdd_test)
+A26 the write is not pinned to its epoch: KILLED (//feature/settings/settings_appearance:bdd_test)
+S01 writeSync never renames into place: KILLED (//utility/mc_appearance:di_test)
+B05 reduce motion never reaches the routed app: KILLED (//app/wiring/app_core:appearance_shell_test)
+B08 reduce motion off turns the platform's setting off: KILLED (//app/wiring/app_core:appearance_shell_test)
+
+mutations: 16, killed: 16
+RESULT: PASS

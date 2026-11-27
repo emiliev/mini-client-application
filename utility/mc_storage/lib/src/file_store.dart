@@ -84,6 +84,52 @@ class FileStore {
     }
   }
 
+  /// The value under [key], read synchronously: success(null) when absent, a
+  /// failure when the file is corrupt or unreadable (T-0063).
+  ///
+  /// For a small value that must be known before the first frame (the
+  /// appearance) and for code that runs under fake time, where an
+  /// asynchronous read would never complete. Use one style per key: a key
+  /// written with [writeSync] is read with [readSync].
+  Result<Object?, StorageFailure> readSync(String key) {
+    try {
+      return success(jsonDecode(_file(key).readAsStringSync()));
+    } on PathNotFoundException {
+      return success(null);
+    } on Object catch (e) {
+      return failure(StorageFailure(key, 'corrupt or unreadable: $e'));
+    }
+  }
+
+  /// Writes [value] under [key] synchronously, through a temp file renamed
+  /// into place, as [write] does (T-0063).
+  ///
+  /// When it returns, the value is on disk or the failure is returned: no
+  /// write is left running, so nothing can race a later delete of
+  /// [directory]. Only for small values (it blocks the isolate for the
+  /// duration of the I/O). Do not mix it with [write] for the same key: an
+  /// asynchronous write queued earlier could land after it.
+  Result<void, StorageFailure> writeSync(String key, Object? value) {
+    try {
+      directory.createSync(recursive: true);
+      final target = _file(key);
+      final temp = File('${target.path}.${_tempCounter++}.tmp');
+      try {
+        temp
+          ..writeAsStringSync(jsonEncode(value), flush: true)
+          ..renameSync(target.path);
+      } on Object {
+        if (temp.existsSync()) {
+          temp.deleteSync();
+        }
+        rethrow;
+      }
+      return success(null);
+    } on Object catch (e) {
+      return failure(StorageFailure(key, 'write failed: $e'));
+    }
+  }
+
   /// Removes [key]; deleting an absent key succeeds.
   Future<Result<void, StorageFailure>> delete(String key) =>
       _serialised(key, () async {

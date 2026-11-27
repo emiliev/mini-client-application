@@ -12,6 +12,7 @@ export 'package:app_core/src/router/route_nesting.dart';
 export 'package:app_core/src/router/router_observers.dart';
 export 'package:app_core/src/router/router_ref.dart';
 export 'package:app_core/src/sandbox/stub_page.dart';
+export 'package:app_core/src/shell/app_appearance.dart';
 export 'package:app_core/src/shell/error_hooks.dart';
 export 'package:app_core/src/shell/mc_app.dart';
 export 'package:app_core/src/shell/route_probe.dart';

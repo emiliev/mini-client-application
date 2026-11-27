@@ -1,0 +1,56 @@
+# T-0063 (P1-22): the settings_appearance exemplar feature (archetype ST).
+# Phase D's generators copy this package's shape for every settings feature
+# (plan 01 §3.3).
+name: settings_appearance
+description: The appearance settings (theme mode, density, reduce motion), applied app-wide and synced with the account.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  bloc: ^9.0.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.0
+  flutter_localizations:
+    sdk: flutter
+  freezed_annotation: 3.1.0
+  get_it: ^8.0.0
+  injectable: 3.0.0
+  intl: any
+  mc_analytics: any
+  mc_appearance: any
+  mc_bloc_kit: any
+  mc_di: any
+  mc_ds_buttons: any
+  mc_ds_feedback: any
+  mc_ds_inputs: any
+  mc_ds_navigation: any
+  mc_ds_overlays: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_feature_flow: any
+  mc_l10n_core: any
+  mc_monitoring: any
+  mc_storage: any
+
+dev_dependencies:
+  dio: ^5.11.0
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_api_auth: any
+  mc_fixtures_identity: any
+  mc_mocked_backend: any
+  mc_session: any
+  mc_test_steps: any
+  mc_test_utils: any
+  mocktail: ^1.0.4
+  test: ^1.25.0
+
+flutter:
+  generate: true

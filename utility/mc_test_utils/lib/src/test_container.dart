@@ -3,6 +3,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
+import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_config/mc_config.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_event_bus/mc_event_bus.dart';
@@ -46,7 +47,7 @@ final class ExternalDouble<T extends Object> {
 ///
 /// It mirrors the production root list of `app_core`'s `rootInitializers`
 /// (config, monitoring, storage, analytics, event bus, session, mocked
-/// backend, API client, API auth, feature flags, formatters), with
+/// backend, API client, API auth, feature flags, appearance, formatters), with
 /// doubles only at the edges: `MockMonitoring`, the session's
 /// `McBackendHarness` transport, a temporary storage directory, a fixed
 /// config and the session's stub flag snapshot (`McTestFlags`). The real `Dio` with its interceptors runs over the harness.
@@ -54,6 +55,14 @@ final class ExternalDouble<T extends Object> {
 /// A utility cannot import `app_core` (layering), so the list is repeated here;
 /// F-0024 records how drift is guarded.
 abstract final class McTestContainer {
+  /// Whether the appearance syncs with the signed-in user's account, as in
+  /// the app. Off by default, so a feature test that signs in sends no
+  /// `GET /v1/me/preferences` it never asked for (and leaves none in flight
+  /// when it ends), as the flags' stub snapshot does for `/v1/flags`. A
+  /// package whose tests are about the appearance (`settings_appearance`)
+  /// sets it to true once, in its `setUpAll`.
+  static bool appearanceFollowsAccount = false;
+
   /// The `AppConfig` tests run on: seed 42, no latency, the happy scenario.
   static final AppConfig config = AppConfig(
     env: 'test',
@@ -101,6 +110,10 @@ abstract final class McTestContainer {
     McDIInitializer(
       (getIt, _) => getIt.registerSingleton<FeatureFlagsReader>(session.flags),
     ),
+    // The real appearance (T-0063). Its device copy is saved synchronously,
+    // so no save outlives a test. It follows the account only where a
+    // package asks for it ([appearanceFollowsAccount]).
+    AppearanceDIInitializer(followAccount: appearanceFollowsAccount),
     const FormattersDIInitializer(),
     ...wirings,
     for (final external in externals) external.toInitializer(),

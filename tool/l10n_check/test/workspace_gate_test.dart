@@ -192,4 +192,38 @@ void main() {
       ),
     );
   });
+
+  test('T-0063-AC7 the gate checks the settings_appearance ARB set', () {
+    const dir = 'feature/settings/settings_appearance/lib/src/l10n';
+    for (final locale in ['en', 'de', 'en_XA']) {
+      expect(
+        File('$dir/settings_appearance_$locale.arb').existsSync(),
+        isTrue,
+        reason: 'settings_appearance_$locale.arb is not in the gate runfiles',
+      );
+    }
+    // The same files with one German key removed: the check must name it,
+    // so the gate really reads this package's set.
+    final copy = Directory.systemTemp.createTempSync('l10n_gate_');
+    addTearDown(() => copy.deleteSync(recursive: true));
+    final target = Directory('${copy.path}/$dir')..createSync(recursive: true);
+    for (final arb in Directory(dir).listSync().whereType<File>()) {
+      arb.copySync('${target.path}/${arb.uri.pathSegments.last}');
+    }
+    final de = File('${target.path}/settings_appearance_de.arb');
+    final json = jsonDecode(de.readAsStringSync()) as Map<String, dynamic>
+      ..remove('settingsAppearanceSyncOffline');
+    de.writeAsStringSync(jsonEncode(json));
+
+    expect(
+      checkL10n(copy.path).map((v) => '$v'),
+      contains(
+        allOf(
+          contains('settings_appearance'),
+          contains('de'),
+          contains('settingsAppearanceSyncOffline'),
+        ),
+      ),
+    );
+  });
 }

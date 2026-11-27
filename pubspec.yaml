@@ -22,6 +22,7 @@ workspace:
   - feature/comics/comics_details
   - feature/discovery/discovery_search
   - feature/library/library_reading_list_editor
+  - feature/settings/settings_appearance
   - feature/store/store_home
   - feature/trivia/trivia_quiz
   - spike/api_envelope
@@ -38,6 +39,7 @@ workspace:
   - utility/mc_api_auth
   - utility/mc_api_client
   - utility/mc_api_errors
+  - utility/mc_appearance
   - utility/mc_bloc_kit
   - utility/mc_config
   - utility/mc_di

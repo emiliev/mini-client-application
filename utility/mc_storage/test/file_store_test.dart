@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:get_it/get_it.dart';
 import 'package:mc_prelude/mc_prelude.dart';
 import 'package:mc_storage/mc_storage.dart';
 import 'package:test/test.dart';
@@ -112,4 +113,102 @@ void main() {
     expect(failure, isA<StorageFailure>());
     expect(failure!.key, 'k');
   });
+
+  group('T-0063-AC6 synchronous read and write (the appearance)', () {
+    test('T-0063-AC6 writeSync is on disk when it returns, and readSync and '
+        'read see it', () async {
+      final store = FileStore(Directory('${dir.path}/new'));
+      expect(
+        _failureOf(store.writeSync('prefs', {'themeMode': 'dark'})),
+        isNull,
+      );
+      // No temp file left behind, and no write still running.
+      final files = Directory('${dir.path}/new').listSync();
+      expect(files, hasLength(1));
+      expect(files.single.path, endsWith('.json'));
+      expect(
+        FileStore(Directory('${dir.path}/new')).readSync('prefs').getOrNull(),
+        {'themeMode': 'dark'},
+      );
+      expect((await store.read('prefs')).getOrNull(), {'themeMode': 'dark'});
+    });
+
+    test('T-0063-AC6 a second writeSync replaces the value', () {
+      final store = FileStore(dir)
+        ..writeSync('k', 1)
+        ..writeSync('k', 2);
+      expect(store.readSync('k').getOrNull(), 2);
+      expect(dir.listSync(), hasLength(1));
+    });
+
+    test('T-0063-AC6 readSync: a missing key is null, a corrupt file a '
+        'typed failure', () {
+      final store = FileStore(dir);
+      expect(_failureOf(store.readSync('nope')), isNull);
+      expect(store.readSync('nope').getOrNull(), isNull);
+      store.writeSync('bad', 1);
+      dir.listSync().whereType<File>().single.writeAsStringSync('{not json');
+      final failure = _failureOf(store.readSync('bad'));
+      expect(failure, isA<StorageFailure>());
+      expect(failure!.key, 'bad');
+    });
+
+    test('T-0063-AC6 a writeSync that cannot rename into place is a typed '
+        'failure and leaves no temp file', () {
+      final store = FileStore(dir)..writeSync('k', 'old');
+      final file = dir.listSync().whereType<File>().single;
+      // A directory where the value's file goes: the rename fails.
+      file.deleteSync();
+      Directory(file.path).createSync();
+      final failure = _failureOf(store.writeSync('k', 'new'));
+      expect(failure, isA<StorageFailure>());
+      expect(failure!.key, 'k');
+      expect(
+        dir.listSync().where((e) => e.path.endsWith('.tmp')),
+        isEmpty,
+        reason: 'the temp file is removed',
+      );
+    });
+
+    test('T-0063-AC6 writeSync under a file (no directory) is a typed '
+        'failure', () {
+      final blocker = File('${dir.path}/file')..writeAsStringSync('x');
+      final failure = _failureOf(
+        FileStore(Directory('${blocker.path}/sub')).writeSync('k', 1),
+      );
+      expect(failure, isA<StorageFailure>());
+    });
+  });
+
+  group(
+    'T-0063-AC7 the rest of the package (coverage of a touched package)',
+    () {
+      test('T-0063-AC7 a StorageFailure names its key and message', () {
+        expect(
+          '${const StorageFailure('k', 'broke')}',
+          'StorageFailure(k): broke',
+        );
+      });
+
+      test('T-0063-AC7 deleting a key that cannot be removed is a typed '
+          'failure', () async {
+        final store = FileStore(dir);
+        await store.write('k', 1);
+        final file = dir.listSync().whereType<File>().single;
+        file.deleteSync();
+        // A non-empty directory where the value's file goes cannot be deleted.
+        Directory('${file.path}/inner').createSync(recursive: true);
+        final failure = _failureOf(await store.delete('k'));
+        expect(failure, isA<StorageFailure>());
+        expect(failure!.message, contains('delete failed'));
+      });
+
+      test('T-0063-AC7 the DI initializer registers one store on the given '
+          'directory', () async {
+        final getIt = GetIt.asNewInstance();
+        await StorageDIInitializer(dir).init(getIt);
+        expect(getIt<FileStore>().directory.path, dir.path);
+      });
+    },
+  );
 }

@@ -67,4 +67,8 @@ abstract final class AppLocations {
       queryParameters: query.isEmpty ? null : query,
     ).toString();
   }
+
+  /// The appearance settings (T-0063). Equals
+  /// `SettingsAppearanceRoute().location` in account_wiring.
+  static const String settingsAppearance = '/settings/appearance';
 }

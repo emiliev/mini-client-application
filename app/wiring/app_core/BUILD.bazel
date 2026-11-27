@@ -10,6 +10,7 @@ _DEPS = [
     "//utility/mc_analytics",
     "//utility/mc_api_auth",
     "//utility/mc_api_client",
+    "//utility/mc_appearance",
     "//utility/mc_bloc_kit",
     "//utility/mc_config",
     "//utility/mc_di",
@@ -19,6 +20,7 @@ _DEPS = [
     "//utility/mc_ds_media",
     "//utility/mc_ds_overlays",
     "//utility/mc_ds_theme",
+    "//utility/mc_ds_tokens",
     "//utility/mc_event_bus",
     "//utility/mc_feature_flags",
     "//utility/mc_formatters",
@@ -70,6 +72,21 @@ flutter_library(
     "route_nesting_test",
     "router_observers_test",
 ]]
+
+# T-0063: McApp follows the appearance (charts: the reduce-motion draw-in).
+flutter_test(
+    name = "appearance_shell_test",
+    size = "small",
+    data = ["//utility/mc_ds_theme:fonts"],
+    package_name = "app_core",
+    language_version = _LANG,
+    main = "test/appearance_shell_test.dart",
+    deps = _DEPS + [
+        ":app_core",
+        "//utility/mc_ds_charts",
+        "@pub_deps//:flutter_test",
+    ],
+)
 
 # T-0048: the flow-result helpers.
 flutter_test(

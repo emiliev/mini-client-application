@@ -5,12 +5,15 @@ import 'package:app_core/src/boot/boot_page.dart';
 import 'package:app_core/src/boot/boot_state.dart';
 import 'package:app_core/src/links/pending_links.dart';
 import 'package:app_core/src/router/router_ref.dart';
+import 'package:app_core/src/shell/app_appearance.dart';
 import 'package:app_core/src/shell/route_probe.dart';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 
 /// Builds the app's router once boot is ready, starting at
@@ -26,6 +29,16 @@ typedef McRouterFactory = GoRouter Function(String initialLocation);
 /// attached until that frame has built the router (so a link arriving in
 /// between never reaches the dying boot navigator); then it detaches, later
 /// links go to go_router, and a link caught in the gap is forwarded.
+///
+/// **The appearance** (T-0063, ADR-0013). Once boot is ready, the routed app
+/// follows the user's appearance ([appearance]; by default the root
+/// container's `AppearanceReader`): the theme mode drives [themeMode], the
+/// density is every theme's `visualDensity`, and Reduce motion turns
+/// `MediaQuery.disableAnimations` on for everything under the router. A
+/// change re-themes the whole app at once, without a restart. The boot page
+/// uses [themeMode] as it is (the appearance does not exist before boot):
+/// an app seeds it from the saved appearance (`savedAppearance`, read
+/// synchronously), so a saved Dark does not flash light while booting.
 class McApp extends StatefulWidget {
   const McApp({
     required this.boot,
@@ -39,6 +52,7 @@ class McApp extends StatefulWidget {
     this.appBuilder,
     this.bootMonitoring,
     this.abandonBoot = abandonDIContainerInitialization,
+    this.appearance = rootAppearance,
     super.key,
   });
 
@@ -69,6 +83,17 @@ class McApp extends StatefulWidget {
   /// Gives up a boot that timed out, before Retry starts a fresh one.
   final void Function() abandonBoot;
 
+  /// Where the routed app reads the user's appearance, once boot is ready;
+  /// null from it: the platform's defaults.
+  final AppearanceReader? Function() appearance;
+
+  /// The root container's appearance, if boot registered one
+  /// (`AppearanceDIInitializer` in `rootInitializers`).
+  static AppearanceReader? rootAppearance() =>
+      diContainer.isRegistered<AppearanceReader>()
+      ? diContainer<AppearanceReader>()
+      : null;
+
   @override
   State<McApp> createState() => _McAppState();
 }
@@ -84,6 +109,10 @@ class _McAppState extends State<McApp> {
   late final McThemeModeController _themeMode =
       widget.themeMode ?? McThemeModeController();
   GoRouter? _router;
+  StreamSubscription<AppearanceSnapshot>? _appearanceChanges;
+
+  /// What the routed app shows (the defaults until boot is ready).
+  AppearancePreferences _appearance = AppearancePreferences.defaults;
 
   @override
   void initState() {
@@ -95,6 +124,7 @@ class _McAppState extends State<McApp> {
   void _onBoot(BootState state) {
     if (state is BootReady && _router == null && mounted) {
       widget.probe?.markReady();
+      _followAppearance();
       final router = widget.router(widget.links.take());
       widget.routerRef?.attach(router);
       setState(() => _router = router);
@@ -109,8 +139,31 @@ class _McAppState extends State<McApp> {
     }
   }
 
+  /// Reads the appearance once, then follows each change: the whole app
+  /// rebuilds with it in the same frame.
+  void _followAppearance() {
+    final reader = widget.appearance();
+    if (reader == null) {
+      return;
+    }
+    _applyAppearance(reader.snapshot.preferences);
+    _appearanceChanges = reader.changes.listen((snapshot) {
+      if (mounted && snapshot.preferences != _appearance) {
+        setState(() => _applyAppearance(snapshot.preferences));
+      }
+    });
+  }
+
+  void _applyAppearance(AppearancePreferences preferences) {
+    _appearance = preferences;
+    _themeMode.setMode(preferences.flutterThemeMode);
+  }
+
   @override
   void dispose() {
+    // Not awaited: a cancel future from the root zone never completes under
+    // fake async (F-0052).
+    unawaited(_appearanceChanges?.cancel());
     unawaited(_bootStates?.cancel());
     unawaited(_boot.close());
     widget.routerRef?.detach();
@@ -155,16 +208,35 @@ class _McAppState extends State<McApp> {
             onGenerateRoute: (_) => _bootRoute(),
           );
         }
+        final density = _appearance.flutterVisualDensity;
+        final appBuilder = widget.appBuilder;
         return MaterialApp.router(
           key: const ValueKey('mc.router'),
           title: widget.title,
-          theme: McTheme.light,
-          darkTheme: McTheme.dark,
-          highContrastTheme: McTheme.highContrast,
-          highContrastDarkTheme: McTheme.highContrastDarkTheme,
+          theme: McTheme.of(McThemeVariant.light, visualDensity: density),
+          darkTheme: McTheme.of(McThemeVariant.dark, visualDensity: density),
+          highContrastTheme: McTheme.of(
+            McThemeVariant.highContrast,
+            visualDensity: density,
+          ),
+          highContrastDarkTheme: McTheme.of(
+            McThemeVariant.highContrastDark,
+            visualDensity: density,
+          ),
           themeMode: mode,
+          // Reduce motion: a new theme applies at once, without the
+          // cross-fade (review round).
+          themeAnimationDuration: _appearance.reduceMotion
+              ? Duration.zero
+              : kThemeAnimationDuration,
           routerConfig: router,
-          builder: widget.appBuilder,
+          // Reduce motion for every routed page and overlay.
+          builder: (context, child) => MediaQuery(
+            data: _appearance.applyMotion(MediaQuery.of(context)),
+            child: appBuilder == null
+                ? child!
+                : Builder(builder: (context) => appBuilder(context, child)),
+          ),
         );
       },
     );

@@ -1,0 +1,47 @@
+# e2e_ios.sh: T-0063 engineer on mc-T-0063-engineer-4113 (58773A6E-E7A7-49A4-8A5F-1C892C504B47)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/mc-T-0063-engineer/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.oEwxED/screenshots/3-settings_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/settings_deeplink_test.dart -d 58773A6E-E7A7-49A4-8A5F-1C892C504B47
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/mc-T-0063-engineer`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/mc-T-0063-engineer`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            6.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:53949/aAN1wFBXXp4=/
+VMServiceFlutterDriver: Isolate found with number: 7889727090441847
+VMServiceFlutterDriver: Isolate 7889727090441847 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0063-AC5 the cold link miniclient://app/settings/appearance opens the settings, and Back goes home
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 8af116b7edfdc35237f113ff19b793d5, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: settings_appearance, session_id: 8af116b7edfdc35237f113ff19b793d5, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] AppearanceBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: home, session_id: 8af116b7edfdc35237f113ff19b793d5, seq: 3}
+flutter: 00:03 +1: (tearDownAll)
+flutter: 00:03 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.oEwxED/screenshots/3-settings_deeplink_test/68_deep_link_settings.png (290226)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.oEwxED/screenshots/3-settings_deeplink_test/68b_back_from_settings_is_home.png (322955)
+All tests passed.
+
+# exit code: 0

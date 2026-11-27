@@ -25,6 +25,7 @@ class HomePlaceholderPage extends StatefulWidget {
     required this.onOpenSearch,
     required this.onOpenStore,
     required this.onOpenTrivia,
+    required this.onOpenSettings,
     required this.onNewReadingList,
     required this.onEditReadingList,
     super.key,
@@ -41,6 +42,9 @@ class HomePlaceholderPage extends StatefulWidget {
 
   /// Opens the trivia quiz (T-0064).
   final VoidCallback onOpenTrivia;
+
+  /// Opens the appearance settings (T-0063).
+  final VoidCallback onOpenSettings;
 
   /// Opens the editor on a new list; completes with its id, or null.
   final Future<String?> Function() onNewReadingList;
@@ -149,6 +153,8 @@ class _HomePlaceholderPageState extends State<HomePlaceholderPage> {
           // Last, so the entries above keep their place on screen (T-0064).
           const McGap.md(),
           McButton(label: 'Trivia', onPressed: widget.onOpenTrivia),
+          const McGap.md(),
+          McButton(label: 'Settings', onPressed: widget.onOpenSettings),
         ],
       ),
     );

@@ -42,6 +42,8 @@ const _expectedRouteNames = {
   // T-0064: the quiz's setup and a linked round.
   'trivia_setup',
   'trivia_play',
+  // T-0063: the appearance settings.
+  'settings_appearance',
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {

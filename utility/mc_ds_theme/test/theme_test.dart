@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
@@ -14,6 +15,23 @@ void main() {
     expect(McTheme.dark.brightness, Brightness.dark);
     expect(McTheme.highContrast.brightness, Brightness.light);
     expect(McTheme.highContrastDarkTheme.brightness, Brightness.dark);
+  });
+
+  test("T-0063-AC4 theme: the density is the platform's unless given, and "
+      'compact when asked for, in every variant', () {
+    for (final v in McThemeVariant.values) {
+      expect(McTheme.of(v).visualDensity, ThemeData().visualDensity);
+      final compact = McTheme.of(v, visualDensity: VisualDensity.compact);
+      expect(compact.visualDensity, VisualDensity.compact);
+      // Only the density differs.
+      expect(compact.colorScheme, McTheme.of(v).colorScheme);
+    }
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    try {
+      expect(McTheme.light.visualDensity, VisualDensity.standard);
+    } finally {
+      debugDefaultTargetPlatformOverride = null;
+    }
   });
 
   test('T-0019-AC1 theme: variantFor honours high contrast first', () {

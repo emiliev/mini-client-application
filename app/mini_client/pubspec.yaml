@@ -20,11 +20,13 @@ dependencies:
   get_it: ^8.0.0
   go_router: 17.5.0
   library_wiring: any
+  mc_appearance: any
   mc_config: any
   mc_di: any
   mc_ds_buttons: any
   mc_ds_layout: any
   mc_ds_theme: any
+  mc_storage: any
   publishing_wiring: any
   universe_wiring: any
 
@@ -36,6 +38,7 @@ dev_dependencies:
     sdk: flutter
   mc_analysis: any
   mc_analytics: any
+  mc_api_auth: any
   mc_ds_overlays: any
   mc_e2e_utils: any
   mc_event_bus: any
@@ -45,7 +48,6 @@ dev_dependencies:
   mc_mocked_backend: any
   mc_monitoring: any
   mc_session: any
-  mc_storage: any
   mc_test_steps: any
   mc_test_utils: any
 
