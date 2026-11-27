@@ -1,0 +1,282 @@
+{
+  "body": {
+    "category": "creators",
+    "difficulty": "easy",
+    "questions": [
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Bruno Holt"
+          },
+          {
+            "id": "c2",
+            "text": "Greta Ivers"
+          },
+          {
+            "id": "c4",
+            "text": "Dmitri Holt"
+          },
+          {
+            "id": "c3",
+            "text": "Greta Castell"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-creator_writer-09",
+        "imageUrl": "mock-asset://characters/020",
+        "prompt": "Who wrote Slate Legacy #8?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Lev Holt"
+          },
+          {
+            "id": "c4",
+            "text": "Calla Alder"
+          },
+          {
+            "id": "c3",
+            "text": "Ada Alder"
+          },
+          {
+            "id": "c2",
+            "text": "Calla Garrow"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "easy",
+        "id": "q-creator_writer-20",
+        "imageUrl": "mock-asset://characters/020",
+        "prompt": "Who wrote Gale Vanguard #7?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "Ada Eastwick"
+          },
+          {
+            "id": "c3",
+            "text": "Hiro Brook"
+          },
+          {
+            "id": "c4",
+            "text": "Lev Fenn"
+          },
+          {
+            "id": "c1",
+            "text": "Bruno Kestrel"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "easy",
+        "id": "q-creator_writer-18",
+        "imageUrl": "mock-asset://characters/011",
+        "prompt": "Who wrote Brass Crossing #1?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "Hiro Dunmore"
+          },
+          {
+            "id": "c3",
+            "text": "Bruno Dunmore"
+          },
+          {
+            "id": "c2",
+            "text": "Bruno Holt"
+          },
+          {
+            "id": "c1",
+            "text": "Farid Dunmore"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "easy",
+        "id": "q-creator_writer-15",
+        "imageUrl": "mock-asset://characters/015",
+        "prompt": "Who wrote Sparrow Station #2?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "Hiro Brook"
+          },
+          {
+            "id": "c2",
+            "text": "Farid Brook"
+          },
+          {
+            "id": "c3",
+            "text": "Bruno Holt"
+          },
+          {
+            "id": "c1",
+            "text": "Calla Ivers"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-creator_writer-12",
+        "imageUrl": "mock-asset://characters/018",
+        "prompt": "Who wrote Amber Harbor #4?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Greta Eastwick"
+          },
+          {
+            "id": "c4",
+            "text": "Kira Castell"
+          },
+          {
+            "id": "c3",
+            "text": "Lev Fenn"
+          },
+          {
+            "id": "c2",
+            "text": "Hiro Dunmore"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "easy",
+        "id": "q-creator_writer-11",
+        "imageUrl": "mock-asset://characters/016",
+        "prompt": "Who wrote Amber Vanguard #3?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Jonas Brook"
+          },
+          {
+            "id": "c2",
+            "text": "Ada Ivers"
+          },
+          {
+            "id": "c4",
+            "text": "Kira Alder"
+          },
+          {
+            "id": "c3",
+            "text": "Lev Brook"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "easy",
+        "id": "q-creator_writer-14",
+        "imageUrl": "mock-asset://characters/020",
+        "prompt": "Who wrote Spindle Legacy #5?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c3",
+            "text": "Lev Kestrel"
+          },
+          {
+            "id": "c2",
+            "text": "Jonas Kestrel"
+          },
+          {
+            "id": "c4",
+            "text": "Lev Brook"
+          },
+          {
+            "id": "c1",
+            "text": "Hiro Fenn"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-creator_writer-10",
+        "imageUrl": "mock-asset://characters/006",
+        "prompt": "Who wrote Spindle Crossing #2?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Dmitri Dunmore"
+          },
+          {
+            "id": "c3",
+            "text": "Ada Alder"
+          },
+          {
+            "id": "c2",
+            "text": "Calla Garrow"
+          },
+          {
+            "id": "c4",
+            "text": "Ines Castell"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "easy",
+        "id": "q-creator_writer-03",
+        "imageUrl": "mock-asset://characters/010",
+        "prompt": "Who wrote Ember Crossing #6?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "Greta Garrow"
+          },
+          {
+            "id": "c1",
+            "text": "Ada Ivers"
+          },
+          {
+            "id": "c3",
+            "text": "Greta Eastwick"
+          },
+          {
+            "id": "c2",
+            "text": "Ada Garrow"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-creator_writer-16",
+        "imageUrl": "mock-asset://characters/023",
+        "prompt": "Who wrote Sparrow Harbor #8?",
+        "timeLimitSeconds": 20
+      }
+    ],
+    "roundId": "r-creators-easy-0",
+    "seed": 0
+  },
+  "request": "GET /v1/trivia/rounds?category=creators&difficulty=easy&seed=0 as none",
+  "status": 200
+}

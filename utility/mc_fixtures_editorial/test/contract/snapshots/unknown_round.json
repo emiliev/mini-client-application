@@ -1,0 +1,15 @@
+{
+  "body": {
+    "error": {
+      "code": "unknown_round",
+      "message": "No round \"r-all-easy-007\"",
+      "parameter": "roundId"
+    }
+  },
+  "request": "POST /v1/me/trivia/results as u-100",
+  "requestBody": {
+    "answers": [],
+    "roundId": "r-all-easy-007"
+  },
+  "status": 400
+}

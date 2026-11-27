@@ -1,0 +1,119 @@
+{
+  "body": {
+    "bestScore": 870,
+    "breakdown": [
+      {
+        "outcome": "correct",
+        "points": 150,
+        "questionId": "q-character_team-07"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-creator_writer-16"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-creator_writer-17"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-creator_writer-04"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-comic_cast-19"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-comic_cast-03"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-creator_writer-03"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-comic_cast-24"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-character_team-05"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-creator_writer-09"
+      }
+    ],
+    "category": "all",
+    "correct": 1,
+    "isNewBest": false,
+    "roundId": "r-all-easy-42",
+    "score": 150
+  },
+  "request": "POST /v1/me/trivia/results as u-100",
+  "requestBody": {
+    "answers": [
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-character_team-07"
+      },
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-16"
+      },
+      {
+        "choiceId": "c1",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-17"
+      },
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-04"
+      },
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-comic_cast-19"
+      },
+      {
+        "choiceId": "c1",
+        "elapsedMs": 0,
+        "questionId": "q-comic_cast-03"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-03"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 0,
+        "questionId": "q-comic_cast-24"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 0,
+        "questionId": "q-character_team-05"
+      },
+      {
+        "choiceId": "c1",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-09"
+      }
+    ],
+    "roundId": "r-all-easy-42"
+  },
+  "status": 200
+}

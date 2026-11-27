@@ -1,0 +1,282 @@
+{
+  "body": {
+    "category": "comics",
+    "difficulty": "hard",
+    "questions": [
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "2016"
+          },
+          {
+            "id": "c3",
+            "text": "2009"
+          },
+          {
+            "id": "c4",
+            "text": "2013"
+          },
+          {
+            "id": "c2",
+            "text": "2012"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "hard",
+        "id": "q-series_end-17",
+        "imageUrl": "mock-asset://characters/016",
+        "prompt": "In which year did the series Brass Requiem end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "2009"
+          },
+          {
+            "id": "c1",
+            "text": "2014"
+          },
+          {
+            "id": "c2",
+            "text": "2012"
+          },
+          {
+            "id": "c3",
+            "text": "2013"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "hard",
+        "id": "q-series_end-23",
+        "imageUrl": "mock-asset://characters/000",
+        "prompt": "In which year did the series Spindle Legacy end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "1985"
+          },
+          {
+            "id": "c3",
+            "text": "1988"
+          },
+          {
+            "id": "c4",
+            "text": "1992"
+          },
+          {
+            "id": "c1",
+            "text": "1987"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "hard",
+        "id": "q-series_end-12",
+        "imageUrl": "mock-asset://characters/022",
+        "prompt": "In which year did the series Slate Vanguard end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "1996"
+          },
+          {
+            "id": "c2",
+            "text": "1993"
+          },
+          {
+            "id": "c4",
+            "text": "1991"
+          },
+          {
+            "id": "c3",
+            "text": "1992"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "hard",
+        "id": "q-series_end-07",
+        "imageUrl": "mock-asset://characters/013",
+        "prompt": "In which year did the series Spire Vanguard end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "1996"
+          },
+          {
+            "id": "c3",
+            "text": "1992"
+          },
+          {
+            "id": "c2",
+            "text": "1995"
+          },
+          {
+            "id": "c4",
+            "text": "1999"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "hard",
+        "id": "q-series_end-16",
+        "imageUrl": "mock-asset://characters/009",
+        "prompt": "In which year did the series Hollow Harbor end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "2000"
+          },
+          {
+            "id": "c3",
+            "text": "2001"
+          },
+          {
+            "id": "c2",
+            "text": "1997"
+          },
+          {
+            "id": "c1",
+            "text": "2004"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "hard",
+        "id": "q-series_end-22",
+        "imageUrl": "mock-asset://characters/013",
+        "prompt": "In which year did the series Spire Reckoning end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "2003"
+          },
+          {
+            "id": "c4",
+            "text": "2002"
+          },
+          {
+            "id": "c3",
+            "text": "2004"
+          },
+          {
+            "id": "c1",
+            "text": "1999"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "hard",
+        "id": "q-series_end-20",
+        "imageUrl": "mock-asset://characters/017",
+        "prompt": "In which year did the series Cinder Requiem end?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "40"
+          },
+          {
+            "id": "c4",
+            "text": "48"
+          },
+          {
+            "id": "c3",
+            "text": "24"
+          },
+          {
+            "id": "c2",
+            "text": "32"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "hard",
+        "id": "q-comic_pages-02",
+        "imageUrl": "mock-asset://characters/011",
+        "prompt": "How many pages does Spire Crossing #6 have?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "48"
+          },
+          {
+            "id": "c3",
+            "text": "40"
+          },
+          {
+            "id": "c4",
+            "text": "32"
+          },
+          {
+            "id": "c2",
+            "text": "56"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "hard",
+        "id": "q-comic_pages-09",
+        "imageUrl": "mock-asset://characters/022",
+        "prompt": "How many pages does Gale Station #17 have?",
+        "timeLimitSeconds": 10
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c3",
+            "text": "2010"
+          },
+          {
+            "id": "c2",
+            "text": "2012"
+          },
+          {
+            "id": "c4",
+            "text": "2009"
+          },
+          {
+            "id": "c1",
+            "text": "2014"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "hard",
+        "id": "q-series_end-18",
+        "imageUrl": "mock-asset://characters/005",
+        "prompt": "In which year did the series Cinder Orbit end?",
+        "timeLimitSeconds": 10
+      }
+    ],
+    "roundId": "r-comics-hard-2147483647",
+    "seed": 2147483647
+  },
+  "request": "GET /v1/trivia/rounds?category=comics&difficulty=hard&seed=2147483647 as none",
+  "status": 200
+}

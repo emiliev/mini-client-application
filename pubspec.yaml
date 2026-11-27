@@ -62,6 +62,7 @@ workspace:
   - utility/mc_fixtures_comics
   - utility/mc_fixtures_commerce
   - utility/mc_fixtures_discovery
+  - utility/mc_fixtures_editorial
   - utility/mc_fixtures_identity
   - utility/mc_fixtures_library
   - utility/mc_fixtures_media

@@ -1,0 +1,16 @@
+{
+  "body": {
+    "error": {
+      "code": "answer_count_mismatch",
+      "expected": 10,
+      "message": "the round has 10 questions, got 0 answers",
+      "parameter": "answers"
+    }
+  },
+  "request": "POST /v1/me/trivia/results as u-100",
+  "requestBody": {
+    "answers": [],
+    "roundId": "r-all-easy-42"
+  },
+  "status": 400
+}

@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "unknown_category",
+      "message": "category must be one of all, characters, comics, creators",
+      "parameter": "category"
+    }
+  },
+  "request": "GET /v1/trivia/rounds?category=nope&difficulty=easy&seed=42 as none",
+  "status": 400
+}

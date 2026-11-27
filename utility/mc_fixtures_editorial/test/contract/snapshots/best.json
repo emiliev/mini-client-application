@@ -1,0 +1,16 @@
+{
+  "body": {
+    "best": [
+      {
+        "bestScore": 870,
+        "category": "all"
+      },
+      {
+        "bestScore": 1340,
+        "category": "characters"
+      }
+    ]
+  },
+  "request": "GET /v1/me/trivia/best as u-100",
+  "status": 200
+}

@@ -1,0 +1,282 @@
+{
+  "body": {
+    "category": "all",
+    "difficulty": "easy",
+    "questions": [
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "The Quiet Ones"
+          },
+          {
+            "id": "c1",
+            "text": "Northern Compass"
+          },
+          {
+            "id": "c4",
+            "text": "The Undertow"
+          },
+          {
+            "id": "c3",
+            "text": "The Lantern Circle"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "easy",
+        "id": "q-character_team-07",
+        "imageUrl": "mock-asset://characters/001",
+        "prompt": "Which team does Midnight Ranger belong to?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "Ada Garrow"
+          },
+          {
+            "id": "c3",
+            "text": "Greta Eastwick"
+          },
+          {
+            "id": "c4",
+            "text": "Greta Garrow"
+          },
+          {
+            "id": "c1",
+            "text": "Ada Ivers"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-creator_writer-16",
+        "imageUrl": "mock-asset://characters/023",
+        "prompt": "Who wrote Sparrow Harbor #8?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Lev Kestrel"
+          },
+          {
+            "id": "c2",
+            "text": "Greta Garrow"
+          },
+          {
+            "id": "c4",
+            "text": "Ada Eastwick"
+          },
+          {
+            "id": "c3",
+            "text": "Jonas Holt"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "easy",
+        "id": "q-creator_writer-17",
+        "imageUrl": "mock-asset://characters/022",
+        "prompt": "Who wrote Gale Station #1?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c3",
+            "text": "Ines Garrow"
+          },
+          {
+            "id": "c4",
+            "text": "Ines Ivers"
+          },
+          {
+            "id": "c2",
+            "text": "Bruno Fenn"
+          },
+          {
+            "id": "c1",
+            "text": "Farid Holt"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "easy",
+        "id": "q-creator_writer-04",
+        "imageUrl": "mock-asset://characters/018",
+        "prompt": "Who wrote Jade Vanguard #14?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c3",
+            "text": "Lumen Captain"
+          },
+          {
+            "id": "c2",
+            "text": "Crimson Courier"
+          },
+          {
+            "id": "c4",
+            "text": "Amber Oracle"
+          },
+          {
+            "id": "c1",
+            "text": "Amber Navigator"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "easy",
+        "id": "q-comic_cast-19",
+        "imageUrl": "mock-asset://characters/009",
+        "prompt": "Which character appears in Hollow Harbor #5?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "Ember Courier"
+          },
+          {
+            "id": "c1",
+            "text": "Iron Weaver"
+          },
+          {
+            "id": "c3",
+            "text": "Jade Marshal"
+          },
+          {
+            "id": "c2",
+            "text": "Obsidian Keeper"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "easy",
+        "id": "q-comic_cast-03",
+        "imageUrl": "mock-asset://characters/000",
+        "prompt": "Which character appears in Brass Chronicles #7?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "Ines Castell"
+          },
+          {
+            "id": "c3",
+            "text": "Ada Alder"
+          },
+          {
+            "id": "c1",
+            "text": "Dmitri Dunmore"
+          },
+          {
+            "id": "c2",
+            "text": "Calla Garrow"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "easy",
+        "id": "q-creator_writer-03",
+        "imageUrl": "mock-asset://characters/010",
+        "prompt": "Who wrote Ember Crossing #6?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "comics",
+        "choices": [
+          {
+            "id": "c4",
+            "text": "Spirit Vanguard"
+          },
+          {
+            "id": "c3",
+            "text": "Spirit Mender"
+          },
+          {
+            "id": "c2",
+            "text": "Static Weaver"
+          },
+          {
+            "id": "c1",
+            "text": "Static Beacon"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-comic_cast-24",
+        "imageUrl": "mock-asset://characters/022",
+        "prompt": "Which character appears in Ember Reckoning #8?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "The Quiet Ones"
+          },
+          {
+            "id": "c1",
+            "text": "Northern Compass"
+          },
+          {
+            "id": "c4",
+            "text": "The Undertow"
+          },
+          {
+            "id": "c3",
+            "text": "The Lantern Circle"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "easy",
+        "id": "q-character_team-05",
+        "imageUrl": "mock-asset://characters/019",
+        "prompt": "Which team does Cinder Beacon belong to?",
+        "timeLimitSeconds": 20
+      },
+      {
+        "category": "creators",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Bruno Holt"
+          },
+          {
+            "id": "c3",
+            "text": "Greta Castell"
+          },
+          {
+            "id": "c4",
+            "text": "Dmitri Holt"
+          },
+          {
+            "id": "c2",
+            "text": "Greta Ivers"
+          }
+        ],
+        "correctChoiceId": "c2",
+        "difficulty": "easy",
+        "id": "q-creator_writer-09",
+        "imageUrl": "mock-asset://characters/020",
+        "prompt": "Who wrote Slate Legacy #8?",
+        "timeLimitSeconds": 20
+      }
+    ],
+    "roundId": "r-all-easy-42",
+    "seed": 42
+  },
+  "request": "GET /v1/trivia/rounds?category=all&difficulty=easy&seed=42 as none",
+  "status": 200
+}
