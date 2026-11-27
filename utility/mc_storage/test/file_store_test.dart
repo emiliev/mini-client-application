@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:get_it/get_it.dart';
 import 'package:mc_prelude/mc_prelude.dart';
 import 'package:mc_storage/mc_storage.dart';
 import 'package:test/test.dart';
@@ -178,4 +179,36 @@ void main() {
       expect(failure, isA<StorageFailure>());
     });
   });
+
+  group(
+    'T-0063-AC7 the rest of the package (coverage of a touched package)',
+    () {
+      test('T-0063-AC7 a StorageFailure names its key and message', () {
+        expect(
+          '${const StorageFailure('k', 'broke')}',
+          'StorageFailure(k): broke',
+        );
+      });
+
+      test('T-0063-AC7 deleting a key that cannot be removed is a typed '
+          'failure', () async {
+        final store = FileStore(dir);
+        await store.write('k', 1);
+        final file = dir.listSync().whereType<File>().single;
+        file.deleteSync();
+        // A non-empty directory where the value's file goes cannot be deleted.
+        Directory('${file.path}/inner').createSync(recursive: true);
+        final failure = _failureOf(await store.delete('k'));
+        expect(failure, isA<StorageFailure>());
+        expect(failure!.message, contains('delete failed'));
+      });
+
+      test('T-0063-AC7 the DI initializer registers one store on the given '
+          'directory', () async {
+        final getIt = GetIt.asNewInstance();
+        await StorageDIInitializer(dir).init(getIt);
+        expect(getIt<FileStore>().directory.path, dir.path);
+      });
+    },
+  );
 }
