@@ -63,6 +63,7 @@ sequenceDiagram
 - [ ] **Verifier report: PASS on every AC** (`documents/evidence/T-XXXX/verification-report.md`), from a fresh agent that isn't the implementer.
 - [ ] `/code-review` has no unresolved important findings.
 - [ ] No tests deleted, skipped or weakened, and no lint suppressions, unless approved by the TL in the task log.
+- [ ] **Flake check:** every test target the task adds or changes that touches storage, timers, streams or races passes `test --runs_per_test=50 --nocache_test_results` with 0 failures, and the log is in the evidence. Tests never drop a future that writes to storage (`.ignore()`, `unawaited`): they await it before teardown deletes the directory (F-0050 §7).
 - [ ] The TL re-ran `tool/verify.sh` on the merge result before pushing; CI is green on `main` once T-0005 is done.
 - [ ] Task file Log and Outcome filled in, with evidence links. Decisions are ADRs, gotchas are findings, and leftover work goes to `pending-work.md`.
 - [ ] Architecture overview updated if the structure changed. BOARD, STATUS and journal updated.
@@ -141,6 +142,10 @@ Questions for PO: <only direction-level, or "none">
 - The session scratchpad is shared between agents. Every agent works in **its own subfolder** named for its task and role (`<scratchpad>/T-XXXX-<role>/`), or under `/tmp/mc-<task>-<role>-*` via `mktemp -d`. Never write a generic name at the scratchpad root (`mut.sh`, `probe.dart`), and never run a script you didn't just write.
 - Fixed log paths such as `/tmp/mc-mut.log` collide across agents too: include the task and role in the name.
 - _Lesson 2026-11-26:_ the T-0035 Verifier overwrote the T-0033 Verifier's `mut.sh` at the scratchpad root. The T-0033 Verifier then ran it, and its restore step wrote into the T-0035 worktree. The file ended up byte-identical to HEAD, and T-0035 was already merged, so nothing was lost.
+
+## Flaky tests (all crew)
+- A test that fails once in N runs is a defect, not bad luck. Root-cause it, never retry it until it passes (CLAUDE.md).
+- _Lesson 2026-11-27:_ T-0050 (`auth_pin_test`) and T-0052 (`session_fetch_test`) both deleted a temp directory while a session save was still running (`Directory not empty`). Single runs passed; the Opus Verifier's 100-run loop and the TL's merge gate caught them. Hence the DoD flake check.
 
 ## Resuming crew agents (TL)
 - A crew agent must **never run in the Tech Lead's worktree** (`/Users/emililiev/orca/workspaces/mini-client/tang`). When resuming an agent whose worktree was never created, tell it to create its own worktree first (`git worktree add <repo>/.claude/worktrees/<name> -b fleet/T-XXXX-… origin/main`) and `cd` there, **not** to `git switch` in its current directory.
