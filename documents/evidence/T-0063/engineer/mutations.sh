@@ -252,10 +252,8 @@ P="$AC/shell/app_appearance.dart"
 mutate B07 "Dark maps to light" "$P" "$T_SHELL $T_WIRE" \
   "    AppearanceThemeMode.dark => ThemeMode.dark," "    AppearanceThemeMode.dark => ThemeMode.light,"
 mutate B08 "reduce motion off turns the platform's setting off" "$P" "$T_SHELL" \
-  "  MediaQueryData applyMotion(MediaQueryData data) => reduceMotion
-      ? data.copyWith(disableAnimations: true)
-      : data;" "  MediaQueryData applyMotion(MediaQueryData data) =>
-      data.copyWith(disableAnimations: reduceMotion);"
+  "      reduceMotion ? data.copyWith(disableAnimations: true) : data;" \
+  "      data.copyWith(disableAnimations: reduceMotion);"
 mutate B09 "Compact maps to the standard density" "$P" "$T_SHELL" \
   "    AppearanceDensity.compact => VisualDensity.compact," "    AppearanceDensity.compact => null,"
 P="$AC/di/root_initializers.dart"
