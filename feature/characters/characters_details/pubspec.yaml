@@ -1,0 +1,66 @@
+# T-0067: the character profile (archetype SC, plan 01 F002), in the shape of
+# the SC exemplar comics_details.
+name: characters_details
+description: One character's profile in sections, with a favourite that asks the app to sign in.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  bloc: ^9.0.0
+  dio: ^5.11.0
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.0
+  flutter_localizations:
+    sdk: flutter
+  freezed_annotation: 3.1.0
+  get_it: ^8.0.0
+  injectable: 3.0.0
+  intl: any
+  json_annotation: 4.12.0
+  mc_analytics: any
+  mc_api_auth: any
+  mc_api_client: any
+  mc_api_errors: any
+  mc_bloc_kit: any
+  mc_di: any
+  mc_ds_buttons: any
+  mc_ds_cards: any
+  mc_ds_charts: any
+  mc_ds_feedback: any
+  mc_ds_layout: any
+  mc_ds_media: any
+  mc_ds_navigation: any
+  mc_ds_theme: any
+  mc_ds_tokens: any
+  mc_event_bus: any
+  mc_feature_flow: any
+  mc_l10n_core: any
+  mc_media: any
+  mc_monitoring: any
+  mc_prelude: any
+  mc_session: any
+  retrofit: 4.10.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mc_analysis: any
+  mc_fixtures_characters: any
+  mc_fixtures_comics: any
+  mc_fixtures_identity: any
+  mc_fixtures_media: any
+  mc_mocked_backend: any
+  mc_storage: any
+  mc_test_steps: any
+  mc_test_utils: any
+  mocktail: ^1.0.4
+  test: ^1.25.0
+
+flutter:
+  generate: true

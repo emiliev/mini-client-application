@@ -22,11 +22,18 @@ void main() {
     await pushLink(tester, 'miniclientuniverse://app/characters/${first.id}');
     await pumpUntil(
       tester,
-      find.byKey(const Key('character.details.placeholder')),
-      'the linked character details',
+      find.byKey(const ValueKey<String>('characters_details.name')),
+      'the linked character profile',
     );
 
-    expect(find.text('Character details ${first.id}'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey<String>('characters_details.name')),
+          )
+          .data,
+      first.name,
+    );
     await shot(binding, tester, '03_sandbox_link_after_flow');
   });
 }

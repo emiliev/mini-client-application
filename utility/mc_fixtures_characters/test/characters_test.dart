@@ -167,6 +167,99 @@ void main() {
       expect((missing['error']! as Map)['code'], 'character_not_found');
     });
 
+    test(
+      'T-0067-AC1: the detail serves aliases and six stats, exactly',
+      () async {
+        final spirit = await _get(dio, '/v1/characters/100001');
+        expect(spirit['aliases'], ['The Falconer', 'The Smith']);
+        expect(spirit['stats'], {
+          'combat': 28,
+          'durability': 29,
+          'energy': 79,
+          'intelligence': 58,
+          'speed': 89,
+          'strength': 94,
+        });
+        final spindle = await _get(dio, '/v1/characters/100000');
+        expect(
+          spindle['aliases'],
+          isEmpty,
+          reason: 'a character may have none',
+        );
+        final spiral = await _get(dio, '/v1/characters/100002');
+        expect(spiral['aliases'], ['The Sentinel']);
+      },
+    );
+
+    test('T-0067-AC1: the new fields moved nothing that was served before', () {
+      // The fields drawn before aliases and stats keep their seed-42 values.
+      final spindle = CharacterUniverse(42, defaultMockClock).find(100000)!;
+      expect(spindle.team, 'The Quiet Ones');
+      expect(spindle.powers, ['Dream walking', 'Echo vision', 'Iron skin']);
+      expect(spindle.firstAppearanceYear, 2011);
+      expect(spindle.comics, 214);
+      expect(spindle.series, 26);
+      expect(spindle.events, 5);
+    });
+
+    test('T-0067-AC1: every character has 0 to 2 distinct aliases other than '
+        'its own name and six stats from 1 to 100', () {
+      final universe = CharacterUniverse(42, defaultMockClock);
+      final counts = <int, int>{};
+      for (final c in universe.byName) {
+        counts.update(c.aliases.length, (n) => n + 1, ifAbsent: () => 1);
+        expect(c.aliases.toSet(), hasLength(c.aliases.length), reason: c.name);
+        for (final alias in c.aliases) {
+          expect(alias, startsWith('The '), reason: c.name);
+          expect(c.name, isNot(endsWith(alias.substring(4))), reason: c.name);
+        }
+        expect(c.stats.keys.toList(), statNames, reason: c.name);
+        for (final value in c.stats.values) {
+          expect(value, inInclusiveRange(1, 100), reason: c.name);
+        }
+      }
+      expect(counts, {0: 503, 1: 496, 2: 501});
+    });
+
+    test('T-0067-AC1: stats depend on the seed, aliases too', () {
+      final other = CharacterUniverse(7, defaultMockClock).find(100000)!;
+      expect(other.stats, {
+        'intelligence': 73,
+        'strength': 18,
+        'speed': 13,
+        'durability': 2,
+        'energy': 95,
+        'combat': 91,
+      });
+      expect(other.aliases, ['The Mender', 'The Drifter']);
+    });
+
+    test('T-0067-AC1: the synthetic cast serves stats and no aliases, as a '
+        'function of the index', () async {
+      final synthetic = MockBackend(
+        domains: [const SyntheticCharactersDomain(3)],
+      ).createDio();
+      final first = await _get(synthetic, '/v1/characters/100000');
+      expect(first['aliases'], isEmpty);
+      expect(first['stats'], {
+        'intelligence': 1,
+        'strength': 14,
+        'speed': 27,
+        'durability': 40,
+        'energy': 53,
+        'combat': 66,
+      });
+      final second = await _get(synthetic, '/v1/characters/100001');
+      expect(second['stats'], {
+        'intelligence': 8,
+        'strength': 21,
+        'speed': 34,
+        'durability': 47,
+        'energy': 60,
+        'combat': 73,
+      });
+    });
+
     test('T-0018-AC6: names are unique and the cast is 1,500', () {
       final universe = CharacterUniverse(42, defaultMockClock);
       expect(universe.byName, hasLength(characterCount));

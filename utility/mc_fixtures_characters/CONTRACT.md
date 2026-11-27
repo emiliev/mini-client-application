@@ -43,7 +43,14 @@ A bad query value gives `400` with `{"error": {"code": "invalid_parameter", "mes
 
 ### `GET /v1/characters/:id`
 
-`200` returns the summary fields plus `powers` (3 strings, sorted), `team`, `origin`, `firstAppearanceYear` and `appearances` (`comics`, `series`, `events`).
+`200` returns the summary fields plus `powers` (3 strings, sorted), `team`, `origin`, `firstAppearanceYear`, `appearances` (`comics`, `series`, `events`), `aliases` and `stats` (T-0067).
+
+| Field | Shape |
+|---|---|
+| `aliases` | 0 to 2 distinct strings of the form `The <word>`; none ends like the character's own name. The synthetic sets have none |
+| `stats` | an object with exactly the keys `combat`, `durability`, `energy`, `intelligence`, `speed` and `strength`, each an integer from 1 to 100. The synthetic sets compute them from the index: `1 + (index * 7 + k * 13) mod 100` for the k-th stat in the order `intelligence`, `strength`, `speed`, `durability`, `energy`, `combat` |
+
+`aliases` and `stats` depend on the seed and were added without moving any earlier field (they are drawn last). Seed 42: `100001` (`Spirit Warden`) has aliases `The Falconer` and `The Smith` and strength 94; `100000` has none.
 
 An unknown or non-numeric id gives `404` with `{"error": {"code": "character_not_found", "message": "...", "id": "<raw id>"}}`.
 

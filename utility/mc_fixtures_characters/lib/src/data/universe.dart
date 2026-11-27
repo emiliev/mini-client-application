@@ -13,6 +13,17 @@ const int characterArtCount = 24;
 /// How many characters the universe holds.
 const int characterCount = 1500;
 
+/// The power stats every character has, in the order the detail lists them
+/// (the wire sorts keys; the order here only fixes how they are drawn).
+const List<String> statNames = [
+  'intelligence',
+  'strength',
+  'speed',
+  'durability',
+  'energy',
+  'combat',
+];
+
 /// The first character id; ids are `idBase + generationIndex`.
 const int idBase = 100000;
 
@@ -31,6 +42,8 @@ final class CharacterRecord {
     required this.comics,
     required this.series,
     required this.events,
+    required this.aliases,
+    required this.stats,
   });
 
   final int id;
@@ -45,6 +58,12 @@ final class CharacterRecord {
   final int comics;
   final int series;
   final int events;
+
+  /// Other names, 0 to 2 of them, never the character's own name.
+  final List<String> aliases;
+
+  /// The six power stats by [statNames], each 1 to 100.
+  final Map<String, int> stats;
 
   /// The list shape: what a character card needs.
   Map<String, Object?> toSummaryJson() => {
@@ -63,6 +82,8 @@ final class CharacterRecord {
     'origin': origin,
     'firstAppearanceYear': firstAppearanceYear,
     'appearances': {'comics': comics, 'series': series, 'events': events},
+    'aliases': aliases,
+    'stats': stats,
   };
 }
 
@@ -113,6 +134,11 @@ final class CharacterUniverse {
           comics: 0,
           series: 0,
           events: 0,
+          aliases: const [],
+          stats: {
+            for (var k = 0; k < statNames.length; k++)
+              statNames[k]: 1 + (i * 7 + k * 13) % 100,
+          },
         ),
     ]);
     _byId = {for (final c in byName) c.id: c};
@@ -156,6 +182,24 @@ final class CharacterUniverse {
       comics: 1 + rng.nextInt(400),
       series: 1 + rng.nextInt(60),
       events: rng.nextInt(12),
+      // Drawn after every field above, so adding them moved nothing that
+      // was already served (T-0067).
+      aliases: _aliases(rng, name),
+      stats: {for (final stat in statNames) stat: 1 + rng.nextInt(100)},
     );
+  }
+
+  /// 0 to 2 distinct aliases, each `The <title word>`, never one the
+  /// character's own name already ends with.
+  static List<String> _aliases(SplitMix64 rng, String name) {
+    final count = rng.nextInt(3);
+    final chosen = <String>[];
+    while (chosen.length < count) {
+      final alias = 'The ${titleWords[rng.nextInt(titleWords.length)]}';
+      if (!name.endsWith(alias.substring(4)) && !chosen.contains(alias)) {
+        chosen.add(alias);
+      }
+    }
+    return chosen;
   }
 }

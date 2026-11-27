@@ -1,5 +1,5 @@
+import 'package:characters_details/characters_details.dart' as details;
 import 'package:characters_list/characters_list.dart';
-import 'package:universe_wiring/src/flows/character_details_placeholder_flow.dart';
 import 'package:universe_wiring/src/routes/route_targets.dart';
 
 /// Builds each route's flow from the feature barrels (R15: unannotated, so no
@@ -7,15 +7,21 @@ import 'package:universe_wiring/src/routes/route_targets.dart';
 class UniverseRouteTargetsImpl implements UniverseRouteTargets {
   const UniverseRouteTargetsImpl({
     required CharactersListNavigator charactersList,
-  }) : _charactersList = charactersList;
+    required details.CharacterDetailsNavigator characterDetails,
+  }) : _charactersList = charactersList,
+       _characterDetails = characterDetails;
 
   final CharactersListNavigator _charactersList;
+  final details.CharacterDetailsNavigator _characterDetails;
 
   @override
   CharactersListFlow characters() =>
       CharactersListFlow(navigator: _charactersList);
 
   @override
-  CharacterDetailsPlaceholderFlow characterDetails(int id) =>
-      CharacterDetailsPlaceholderFlow(id: id);
+  details.CharacterDetailsFlow characterDetails(int id) =>
+      details.CharacterDetailsFlow(
+        navigator: _characterDetails,
+        characterId: details.CharacterId(id),
+      );
 }

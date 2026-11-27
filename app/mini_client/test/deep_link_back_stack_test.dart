@@ -28,7 +28,7 @@ final _links = <String, Finder>{
     const ValueKey<String>('characters_list.grid'),
   ),
   AppLocations.character(100366): find.byKey(
-    const Key('character.details.placeholder'),
+    const ValueKey<String>('characters_details.name'),
   ),
   AppLocations.comic(501500): find.byKey(
     const ValueKey<String>('comics_details.title'),

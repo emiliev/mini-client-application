@@ -24,11 +24,18 @@ void main() {
     startApp(app.main);
     await pumpUntil(
       tester,
-      find.byKey(const Key('character.details.placeholder')),
-      'the linked character details',
+      find.byKey(const ValueKey<String>('characters_details.name')),
+      'the linked character profile',
     );
 
-    expect(find.text('Character details ${first.id}'), findsOneWidget);
+    expect(
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey<String>('characters_details.name')),
+          )
+          .data,
+      first.name,
+    );
     await shot(binding, tester, '02_sandbox_start_link');
   });
 }

@@ -23,6 +23,7 @@ dart_test(
     name = "workspace_gate_test",
     size = "small",
     data = [
+        "//feature/characters/characters_details:arbs",
         "//feature/characters/characters_list:arbs",
         "//feature/comics/comics_details:arbs",
         "//feature/discovery/discovery_search:arbs",
