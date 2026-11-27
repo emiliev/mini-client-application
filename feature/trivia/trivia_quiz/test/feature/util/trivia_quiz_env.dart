@@ -61,10 +61,21 @@ Future<void> ensureTriviaContainer() async {
   }
 }
 
+final Expando<int> _skew = Expando('trivia clock skew');
+
 /// The quiz's clock in a feature test: the widget-test binding's fake clock,
-/// which `tester.pump(d)` moves together with the fake timers (ADR-0014).
+/// which `tester.pump(d)` moves together with the fake timers (ADR-0014),
+/// plus the [clockAhead] skew.
 int triviaClock() =>
-    TestWidgetsFlutterBinding.instance.clock.now().millisecondsSinceEpoch;
+    TestWidgetsFlutterBinding.instance.clock.now().millisecondsSinceEpoch +
+    (_skew[McTestSession.current] ?? 0);
+
+/// Moves the quiz's clock [ms] ahead of the fake timers, for good: what a
+/// device does when the event loop is busy and a timer callback runs late
+/// (the clock is a `Stopwatch`, the countdown's end a `Timer`). A tap that
+/// lands in that gap is judged by its elapsed time.
+void clockAhead(int ms) =>
+    _skew[McTestSession.current] = (_skew[McTestSession.current] ?? 0) + ms;
 
 /// The seeds the next rounds get, in order; 42 once they run out (the
 /// contract's worked examples are seed 42).
@@ -357,14 +368,22 @@ Future<void> playQuestion(
     await tester.ensureVisible(find.byKey(playChoiceKey(choice)));
     await tester.pump();
   }
-  if (token.elapsedMs > 0) {
-    await tester.pump(Duration(milliseconds: token.elapsedMs));
-  }
   if (choice == null) {
-    await tester.pump(Duration(milliseconds: limit));
+    // No answer: the countdown's own timer ends the question at the limit.
+    await tester.pump(Duration(milliseconds: token.elapsedMs + limit));
+  } else if (token.elapsedMs < limit) {
+    if (token.elapsedMs > 0) {
+      await tester.pump(Duration(milliseconds: token.elapsedMs));
+    }
+    await tester.tap(find.byKey(playChoiceKey(choice)));
   } else {
-    // Past the limit the choice is disabled: the question timed out.
-    await tester.tap(find.byKey(playChoiceKey(choice)), warnIfMissed: false);
+    // A tap at or past the limit, before the countdown's timer has run (the
+    // timer is due at the limit): one millisecond before it, the clock runs
+    // ahead to the token's time, and the tap lands. The engine judges it by
+    // its elapsed time, a timeout, as the server does.
+    await tester.pump(Duration(milliseconds: limit - 1));
+    clockAhead(token.elapsedMs - (limit - 1));
+    await tester.tap(find.byKey(playChoiceKey(choice)));
   }
   await tester.pump();
   await tester.scrollUntilVisible(

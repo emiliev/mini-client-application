@@ -7,9 +7,10 @@ import '../util/trivia_quiz_env.dart';
 ///
 /// The last `POST /v1/me/trivia/results` carried one answer per question in
 /// round order, as the tokens say: the correct or a wrong choice with
-/// exactly the token's elapsed time; no choice and the limit for a token at
-/// or past the limit, or a no-answer (the app timed it out); `hint: true`
-/// only on the hinted one.
+/// exactly the token's elapsed time (at or past the limit too: the app sends
+/// what was tapped and when, and the server judges it a timeout); no choice
+/// and the limit for a no-answer (the app's countdown ended it); `hint:
+/// true` only on the hinted one.
 Future<void> theResultWasSavedWithTheAnswers(
   WidgetTester tester,
   String answers,
@@ -30,7 +31,7 @@ Future<void> theResultWasSavedWithTheAnswers(
     final limit = (q['timeLimitSeconds']! as int) * 1000;
     final a = sent[i];
     expect(a['questionId'], q['id'], reason: 'answer $i in round order');
-    if (t.kind == 'N' || t.elapsedMs >= limit) {
+    if (t.kind == 'N') {
       expect(a['choiceId'], isNull, reason: 'answer $i timed out');
       expect(a['elapsedMs'], limit, reason: 'answer $i at the limit');
     } else {

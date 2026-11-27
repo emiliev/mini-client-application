@@ -171,6 +171,8 @@ mutate P02 "a covering screen does not pause" "$P" "$T_SCOPE" \
   '_setPause(emit, _Pause.covered, paused: !shown);' '_setPause(emit, _Pause.covered, paused: !shown && shown);'
 mutate P03 "a resumed question gets its whole limit again" "$P" "$T_BDD" \
   'Duration(milliseconds: engine.remainingMs(_clock.elapsedMs)),' 'Duration(milliseconds: engine.question.limitMs),'
+mutate P13 "the countdown ends a millisecond late" "$P" "$T_BDD" \
+  'Duration(milliseconds: engine.remainingMs(_clock.elapsedMs)),' 'Duration(milliseconds: engine.remainingMs(_clock.elapsedMs) + 1),'
 mutate P04 "the hint flag is inverted" "$P" "$T_BDD" \
   '_hintOffered = _flags.variant(triviaHint) == triviaHintOn;' '_hintOffered = _flags.variant(triviaHint) != triviaHintOn;'
 mutate P05 "the hint flag is read on every frame" "$P" "$T_SCOPE" \
