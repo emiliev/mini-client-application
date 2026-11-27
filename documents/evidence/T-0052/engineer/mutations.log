@@ -12,15 +12,15 @@ baseline PASS
 === R2 the last-known-good is ignored
     KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:session_fetch_test 
 === R3 the last-known-good beats the remote value
-    KILLED by: //utility/mc_feature_flags:evaluation_test 
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:session_fetch_test 
 === R4 a key the server omits falls back to the old value
     KILLED by: //utility/mc_feature_flags:evaluation_test 
 === R5 the default is wrong: a null value counts as a value
     KILLED by: //utility/mc_feature_flags:evaluation_test 
 === W1 a wrong-typed remote value is reported every time
-    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test 
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
 === W2 a wrong-typed remote value is never reported
-    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test 
+    KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
 === W3 a wrong-typed override is never reported
     KILLED by: //utility/mc_feature_flags:evaluation_test //utility/mc_feature_flags:experiments_test 
 === W4 an int flag accepts a double
@@ -155,5 +155,45 @@ baseline PASS
     KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
 === P12 the empty scenario is dropped
     KILLED by: //utility/mc_fixtures_platform:fixture_sets_test //utility/mc_fixtures_platform:provider_contract_test 
+=== C1 a remote weight above the cap is accepted
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== C2 the cap itself is refused
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== C3 a declared weight above the cap is accepted
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== C4 the cap is 10^15
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== H1 the epoch stream is not listened to
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== H3 a sign-in announces no epoch
+    KILLED by: //utility/mc_feature_flags:session_fetch_test //utility/mc_session:session_test 
+=== H4 a sign-out announces no epoch
+    KILLED by: //utility/mc_session:session_test 
+=== D1 dispose leaves the watch streams open
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== D2 a fetch after dispose is sent
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== D3 a watch after dispose is a live stream
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== N1 a taken key makes set throw
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== N2 a blank key makes set throw
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== I1 a failed install-id save is not retried
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== I2 a saved install id is saved again and again
+    KILLED by: //utility/mc_feature_flags:registry_overrides_test 
+=== K1 flag and experiment reports share a key
+    KILLED by: //utility/mc_feature_flags:experiments_test //utility/mc_feature_flags:registry_overrides_test 
+=== K2 an empty variants list is not malformed
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== K3 a repeated variant name is accepted
+    KILLED by: //utility/mc_feature_flags:experiments_test 
+=== Y1 the cache stays on disk when the user changes
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== Y2 another cache file is deleted
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
+=== Y3 the cache is deleted on a same-user sign-in too
+    KILLED by: //utility/mc_feature_flags:session_fetch_test 
 
-TOTAL 78  KILLED 78  SURVIVED 0  BROKEN 0
+TOTAL 98  KILLED 98  SURVIVED 0  BROKEN 0
