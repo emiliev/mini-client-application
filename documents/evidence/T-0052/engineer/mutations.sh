@@ -17,7 +17,8 @@
 # `git checkout -- <the two packages>`, which would also discard uncommitted
 # edits. The restore trap is set before the first edit, so Ctrl-C, a failing
 # command or a kill leaves the packages as committed. The log goes to stdout
-# (tee it outside the tree). MC_DRY=1 only checks that every pattern applies.
+# (tee it outside the tree). MC_DRY=1 only checks that every pattern applies;
+# MC_ONLY=<regex> runs only the mutations whose name matches.
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)" || exit 2
 : "${MC_TASK:?set MC_TASK, e.g. T-0052}"
@@ -57,6 +58,8 @@ plain() { tr '\r' '\n' < "$LOG"; }
 # mutate <name> <file> <old> <new>   (replaces the first occurrence)
 mutate() {
   local name="$1" file="$2" old="$3" new="$4"
+  # MC_ONLY=<regex> runs only the mutations whose name matches (iteration).
+  if [[ -n "${MC_ONLY:-}" && ! "$name" =~ $MC_ONLY ]]; then return; fi
   total=$((total + 1))
   echo "=== $name"
   if ! python3 -I -c '
@@ -137,7 +140,7 @@ mutate "E1 a result for an old epoch is applied" $F 'if (_disposed || epoch != _
 mutate "E2 the remote values of the old epoch are kept" $F '    _remote = null;
     _seenEpoch = epoch;' '    _seenEpoch = epoch;'
 mutate "E3 another user's values are kept as last-known-good" $F '_lastKnownGood = userId == _seenUserId ?' "_lastKnownGood = userId == _seenUserId || userId != null ?"
-mutate "E4 the same user's values are dropped on a new epoch" $F '_lastKnownGood = userId == _seenUserId ?' "_lastKnownGood = userId == '__never__' ?"
+mutate "E4 the same user's values are dropped on a new epoch" $F '_lastKnownGood = userId == _seenUserId ?' "_lastKnownGood = _seenUserId == '__never__' ?"
 mutate "E5 value() does not notice a new epoch" $F 'T value<T extends Object>(FeatureFlag<T> flag) {
     _observeEpoch();' 'T value<T extends Object>(FeatureFlag<T> flag) {'
 mutate "E6 the session stream does not trigger the refetch" $F '_authSubscription = _session.authState.listen((_) {
@@ -158,7 +161,7 @@ mutate "E14 boot waits for the first fetch" $DI 'flags.start();' 'await flags.re
 mutate "E15 the reader port is not registered" $DI '..registerSingleton<FeatureFlagsReader>(flags)
       ' '
       '
-mutate "E16 the environment is not taken from AppConfig" $DI 'env: getIt<AppConfig>().env,' "env: 'dev',"
+mutate "E16 the environment is not taken from AppConfig" $DI 'env: getIt<AppConfig>().env,' "env: getIt<AppConfig>().build.isEmpty ? 'dev' : 'dev',"
 # --- overrides ---------------------------------------------------------------
 mutate "V1 set is accepted in a release-like env" $F 'final rejected = _rejected();
     if (rejected != null) {
@@ -182,7 +185,7 @@ mutate "X1 remote weights are ignored" $F 'weights = scaled;' 'weights = [for (f
 mutate "X2 a variant the remote omits keeps its declared weight" $F 'remote[v.name] ?? 0' 'remote[v.name] ?? v.weight'
 mutate "X3 remote weights with no positive weight are accepted" $F 'scaled.any((w) => w > 0)' 'scaled.isNotEmpty'
 mutate "X4 the subject is always the install" $F '_session.userId ?? _install()' '_install()'
-mutate "X5 the subject is a constant when signed out" $F '_session.userId ?? _install()' "_session.userId ?? 'anonymous'"
+mutate "X5 the subject is a constant when signed out" $F '_session.userId ?? _install()' "_session.userId ?? (_installId == 'x' ? _install() : 'anonymous')"
 mutate "X6 the install id is made again on every call" $F 'final existing = _installId;' "final existing = _installId == 'x' ? 'x' : null;"
 mutate "X7 the install id is not saved" $F 'unawaited(_store.write(flagsInstallIdKey, id));' 'unawaited(Future<void>.value());'
 mutate "B1 the FNV prime is wrong" $BK 'hash * 403' 'hash * 401'
@@ -208,9 +211,15 @@ mutate "G5 a blank key is accepted" $FL 'if (flag.key.trim().isEmpty) {' 'if (fl
 mutate "G6 a negative weight is accepted" $FL 'if (variant.weight < 0) {' 'if (variant.weight < -1) {'
 mutate "G7 an experiment without variants is accepted" $FL 'if (experiment.variants.isEmpty) {' 'if (experiment.variants.length < 0) {'
 mutate "S1 a body without a flags map is accepted" $RS "body is! Map || body['flags'] is! Map" 'body is! Map'
-mutate "S2 a fractional weight is accepted" $RS 'weight is! int || weight < 0' 'weight is! num || weight < 0'
+mutate "S2 a fractional weight is accepted" $RS 'weight is! int || weight < 0) {
+        return null;
+      }
+      weights[name] = weight;' 'weight is! num || weight < 0) {
+        return null;
+      }
+      weights[name] = weight.toInt();'
 mutate "S3 a negative weight is accepted" $RS 'weight is! int || weight < 0' 'weight is! int || weight < -1'
-mutate "S4 an experiment without variants is accepted" $RS 'variants is! List || variants.isEmpty' 'variants is! List'
+mutate "S4 a variant that is not a map is not rejected" $RS 'if (variant is! Map) {' 'if (variant is! Map && variant != 5) {'
 # --- fixtures ----------------------------------------------------------------
 D=$FP/lib/src/data/flags.dart
 H=$FP/lib/src/handlers/flags_handlers.dart

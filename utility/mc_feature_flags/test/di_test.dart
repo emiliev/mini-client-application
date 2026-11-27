@@ -48,6 +48,15 @@ Future<(GetIt, Directory, GateAdapter, Session)> _root({
   return (getIt, directory, gate, session);
 }
 
+/// Runs the initializer; a hang (it waited for the network) fails the test
+/// instead of timing it out.
+Future<void> _init(GetIt getIt) =>
+    Future.value(const FeatureFlagsDIInitializer().init(getIt)).timeout(
+      const Duration(seconds: 5),
+      onTimeout: () =>
+          throw TestFailure('the initializer waited for the network'),
+    );
+
 void main() {
   final dirs = <Directory>[];
   tearDown(() {
@@ -64,11 +73,7 @@ void main() {
     final (getIt, dir, gate, session) = await _root(holding: true);
     dirs.add(dir);
     // Completes although the response is held: boot does not wait for it.
-    await Future.value(const FeatureFlagsDIInitializer().init(getIt)).timeout(
-      const Duration(seconds: 5),
-      onTimeout: () =>
-          throw TestFailure('the initializer waited for the network'),
-    );
+    await _init(getIt);
 
     expect(getIt.isRegistered<FeatureFlags>(), isTrue);
     final flags = getIt<FeatureFlags>();
@@ -91,14 +96,14 @@ void main() {
       'release-like envs reject overrides', () async {
     final (getIt, dir, _, session) = await _root(env: 'release');
     dirs.add(dir);
-    await const FeatureFlagsDIInitializer().init(getIt);
+    await _init(getIt);
     expect(getIt<FeatureFlagOverrides>().isEnabled, isFalse);
     await getIt.reset();
     await session.dispose();
 
     final (dev, dir2, _, session2) = await _root();
     dirs.add(dir2);
-    await const FeatureFlagsDIInitializer().init(dev);
+    await _init(dev);
     expect(dev<FeatureFlagOverrides>().isEnabled, isTrue);
     await dev.reset();
     await session2.dispose();
@@ -108,7 +113,7 @@ void main() {
       'that arrives afterwards changes nothing', () async {
     final (getIt, dir, gate, session) = await _root(holding: true);
     dirs.add(dir);
-    await const FeatureFlagsDIInitializer().init(getIt);
+    await _init(getIt);
     final flags = getIt<FeatureFlags>();
     await gate.waitForHeld(1);
     await getIt.reset();
@@ -130,7 +135,7 @@ void main() {
     expect(store.existsSync(flagsCacheKey), isFalse);
     expect(store.existsSync(flagsOverridesKey), isFalse);
     expect(store.existsSync(flagsInstallIdKey), isFalse);
-    await const FeatureFlagsDIInitializer().init(getIt);
+    await _init(getIt);
     await getIt.reset();
     await session.dispose();
   });

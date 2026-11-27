@@ -441,6 +441,11 @@ void main() {
         for (final entries in [
           _remote('store_home_layout', {'control': 'heavy', 'rich': 1}),
           _remote('store_home_layout', {'control': -1, 'rich': 1}),
+          _remote('store_home_layout', {
+            'control': -1,
+            'compact': 0,
+            'rich': 5,
+          }),
           _remote('store_home_layout', {'control': 1.5, 'rich': 1}),
           _remote('store_home_layout', {'surprise': 1}),
           _remote('store_home_layout', {'control': 0, 'rich': 0}),

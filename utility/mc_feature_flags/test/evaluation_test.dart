@@ -299,9 +299,13 @@ void main() {
       expect(rig.flags.value(searchLayout), Layout.compact);
       expect(rig.reports, hasLength(4));
       // A JSON null is "no value": the default, and no report.
-      rig.stub.flags = {'catalogue.page_size': null};
+      rig.stub.flags = {
+        'catalogue.page_size': null,
+        'rig.not_on_the_server': null,
+      };
       await rig.flags.refresh();
       expect(rig.flags.value(pageSize), 10);
+      expect(rig.flags.value(unknownToServer), isFalse);
       expect(rig.reports, hasLength(4));
     });
 

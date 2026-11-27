@@ -72,7 +72,7 @@ final class RemoteSnapshot {
   Map<String, Object?> toJson() => {'userId': userId, 'body': body};
 
   static Map<String, int>? _weights(Object? variants) {
-    if (variants is! List || variants.isEmpty) {
+    if (variants is! List) {
       return null;
     }
     final weights = <String, int>{};
