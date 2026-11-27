@@ -1,0 +1,39 @@
+# T-0049 verifier: own LCOV union per package (own test targets only).
+import os, sys, glob, re
+tl, repo = sys.argv[1], sys.argv[2]
+pkgs = {'app/mini_client': 'mini_client', 'app/wiring/app_core': 'app_core',
+        'app/wiring/library_wiring': 'library_wiring',
+        'app/wiring/publishing_wiring': 'publishing_wiring',
+        'app/wiring/universe_wiring': 'universe_wiring',
+        'app/wiring/discovery_wiring': 'discovery_wiring'}
+gen = re.compile(r'\.(g|freezed|config|gr)\.dart$')
+for d, name in pkgs.items():
+    hits = {}
+    for f in glob.glob(f'{tl}/{d}/*/coverage.dat'):
+        sf = None
+        for line in open(f):
+            line = line.strip()
+            if line.startswith('SF:'):
+                sf = line[3:]
+            elif line.startswith('DA:') and sf and sf.startswith(f'package:{name}/'):
+                ln, h = line[3:].split(',')[:2]
+                key = (sf, int(ln))
+                hits[key] = max(hits.get(key, 0), int(h))
+    files = {}
+    for (sf, ln), h in hits.items():
+        if gen.search(sf):
+            continue
+        files.setdefault(sf, []).append((ln, h))
+    tot = sum(len(v) for v in files.values())
+    cov = sum(1 for v in files.values() for _, h in v if h > 0)
+    print(f'== {d}: {cov}/{tot} = {100 * cov / max(tot, 1):.1f} %')
+    for sf, v in sorted(files.items()):
+        miss = sorted(ln for ln, h in v if h == 0)
+        if miss or 'router/' in sf:
+            print(f'   {sf}: {len(v) - len(miss)}/{len(v)} miss {miss}')
+    libs = {f'package:{name}/' + os.path.relpath(p, f'{repo}/{d}/lib')
+            for p in glob.glob(f'{repo}/{d}/lib/**/*.dart', recursive=True)
+            if not gen.search(p)}
+    nol = sorted(libs - set(files))
+    if nol:
+        print('   no LCOV:', nol)
