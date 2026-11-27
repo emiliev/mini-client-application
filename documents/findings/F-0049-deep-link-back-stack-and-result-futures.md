@@ -10,11 +10,17 @@ P-087: `/characters`, `/comics/:id`, `/search` and `/me/lists/...` were top-leve
 4. **A cold-link editor now has a page below it.** The `FlowResultRoute` "first route goes home" branch stays as a safety net, but for linked editors `isFirst` is false now, so completing pops back to home.
 5. **Tests gotcha:** home's own button is labelled "New reading list" too, so a finder by that text finds the home button and the editor title. Use the editor's key (`reading_list_editor.details`).
 
+6. **Review round hardening.**
+   - The result reaches the call directly in `_deliver` (before the pop), not only through the push future, so it never depends on microtask order (a test pushes the route in a plain Navigator, where only the direct path exists).
+   - A route opened through `AppFlows` but built without `extra: state.extra` throws a `FlutterError` in debug builds (`FlowResultRoute._debugCheckCall`, run in `didChangeDependencies` because it reads the route's state). `AppFlows` leaves a token per location; the route takes it.
+   - `FlowExtraCodec` (set as `buildAppRouter`'s `extraCodec`) encodes a `FlowCall` as null and decodes it as no call, so go_router neither warns on every push nor tries to save a live future. Other extras pass through (the app uses none).
+   - `nestUnderHome` rejects a second route at exactly `/`.
+
 ## Rule for the bricks
 - Every wiring route list goes through `nestUnderHome` in `buildAppRouter`; no entity route is top level.
 - A route that ends with a result is built as `FlowResultRoute(extra: state.extra, builder: ...)`, and its caller uses an `AppFlows` entry, which pushes through `FlowCall`.
 
 ## Not done
-- `/characters/:id` goes Back to the characters list, then home (the details route nests under the list by T-0033 design), not straight to home.
+- `/characters/:id` goes Back to the characters list, then home. This is the TL's amended AC1 (plan 01 §4.2 nested paths).
 - Plan 01 §4.2's text still says wirings declare the nested tree. The shipped shape is "absolute in the wiring, re-rooted by `nestUnderHome`".
 - F-0048 should get one sentence: a result future always completes, with null when the route goes away (the TL owns existing findings).

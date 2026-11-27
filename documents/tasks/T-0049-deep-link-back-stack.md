@@ -61,8 +61,15 @@
 **Test integrity:** nothing deleted, skipped or weakened, no `// ignore:`. `flow_results_test.dart`'s two route builders now pass `extra: state.extra` (needed to test the new path). One redundant line (completing the call on delivery, equivalent to the push future's) was removed after a mutation survived.
 
 **Decisions for the TL**
-1. **`/characters/<id>` Back goes to the characters list, then home**, not straight to home (the details route nests under the list since T-0033). AC1's wording says "lands on home"; the test and e2e check list then home. Making it straight to home means un-nesting details from the list (an in-app tap on a card still pushes). Say if you want that.
+1. (Resolved by the TL: keep it, AC1 amended.) **`/characters/<id>` Back goes to the characters list, then home**, not straight to home (the details route nests under the list since T-0033). AC1's wording says "lands on home"; the test and e2e check list then home. Making it straight to home means un-nesting details from the list (an in-app tap on a card still pushes). Say if you want that.
 2. **Plan 01 §4.2 and F-0048** need a sentence each (TL-owned): the nesting is done by `nestUnderHome` in the app shell, not by the wirings' typed trees (F-0049 item 1); a result future always completes, with null when the route goes away.
 3. e2e files edited: five cold-link targets now also tap Back; new target `character_details_deeplink_test.dart`.
 
 **Finding:** [F-0049](../findings/F-0049-deep-link-back-stack-and-result-futures.md).
+
+**Review round (2026-11-27)**
+1. Exact stacks: `walkHome` taps Back once per link (twice for `/characters/<id>`: list, then home) and asserts home and no back button below it; the AC2 tests use the same walk. Mutation P1 (a link as a push via `onEnter`) fails 4 of the 5 AC2 tests (the characters-details one is unchanged by design, its stack is the same).
+2. A forgotten `extra: state.extra` throws in debug (`T-0049-AC3 a route built without extra ...`); mutation R6.
+3. `FlowExtraCodec` as `extraCodec` (unit test, a restoration-state test, and a `buildAppRouter` check); mutations R7 and R8.
+4. Direct completion restored (`T-0049-AC3 the result reaches the call directly ...`); mutation R5 now dies.
+5. `nestUnderHome` rejects `/` (test, mutation N8).
