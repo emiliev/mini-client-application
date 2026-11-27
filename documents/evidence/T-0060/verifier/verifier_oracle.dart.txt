@@ -1,0 +1,476 @@
+// Verifier T-0060 oracle, written from CONTRACT.md only (not from test/oracle.dart
+// or lib/src/data/scoring.dart).
+import 'dart:math';
+
+import 'package:dio/dio.dart';
+import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
+import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
+import 'package:mc_fixtures_editorial/mc_fixtures_editorial.dart';
+import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+
+int fails = 0;
+void check(bool ok, String what) {
+  if (!ok) {
+    fails++;
+    print('FAIL: $what');
+  }
+}
+
+MockBackend mk([int seed = 42]) => MockBackend(
+  seed: seed,
+  domains: [
+    const TriviaMockDomain(),
+    const ComicsMockDomain(),
+    const CharactersMockDomain(),
+    const IdentityMockDomain(),
+  ],
+);
+
+Dio dioOf(MockBackend b, {bool plain = false}) {
+  final d = b.createDio()..options.validateStatus = (_) => true;
+  if (plain) d.options.responseType = ResponseType.plain;
+  return d;
+}
+
+const limits = {'easy': 20000, 'medium': 15000, 'hard': 10000};
+final cats = ['all', 'characters', 'comics', 'creators'];
+final diffs = ['easy', 'medium', 'hard'];
+
+// ---- my oracle (CONTRACT.md "Scoring") ----
+({int score, int correct, List<int> pts}) oracle(
+  List<Map> questions,
+  Map<String, Map> byQ,
+  String diff,
+) {
+  final limit = limits[diff]!;
+  var streak = 0, score = 0, correct = 0;
+  final pts = <int>[];
+  for (final q in questions) {
+    final a = byQ[q['id']]!;
+    final choice = a['choiceId'];
+    final el = a['elapsedMs'] as int;
+    if (choice == null || el >= limit || choice != q['correctChoiceId']) {
+      streak = 0;
+      pts.add(0);
+      continue;
+    }
+    streak++;
+    final p = 100 + (50 * (limit - el)) ~/ limit + 25 * (streak - 1);
+    score += p;
+    correct++;
+    pts.add(p);
+  }
+  return (score: score, correct: correct, pts: pts);
+}
+
+Future<Map> getRound(Dio d, String cat, String diff, int seed) async =>
+    (await d.get(
+          '/v1/trivia/rounds',
+          queryParameters: {
+            'category': cat,
+            'difficulty': diff,
+            'seed': seed,
+          },
+        )).data
+        as Map;
+
+Map<String, String> bearer(String t) => {'Authorization': 'Bearer $t'};
+
+String wrongOf(Map q) =>
+    (q['choices'] as List)
+            .map((c) => (c as Map)['id'])
+            .firstWhere((x) => x != q['correctChoiceId'])
+        as String;
+
+Future<void> main() async {
+  final rnd = Random(2026);
+  final d = dioOf(mk());
+  final tok = mintAccessToken('u-100', 1);
+
+  // ---- 1. 30 random rounds (fresh backend per round so best-state is irrelevant)
+  for (var i = 0; i < 30; i++) {
+    final cat = cats[rnd.nextInt(4)], diff = diffs[i % 3];
+    final seed = rnd.nextInt(1 << 31);
+    final round = await getRound(d, cat, diff, seed);
+    final qs = (round['questions'] as List).cast<Map>();
+    final limit = limits[diff]!;
+    final answers = <Map>[];
+    final bias = rnd.nextDouble();
+    for (final q in qs) {
+      final r = rnd.nextDouble();
+      final Object? choice = r < 0.1
+          ? null
+          : r < bias
+          ? q['correctChoiceId']
+          : wrongOf(q);
+      final el = switch (rnd.nextInt(6)) {
+        0 => 0,
+        1 => limit - 1,
+        2 => limit,
+        3 => limit + 1 + rnd.nextInt(5000),
+        _ => rnd.nextInt(limit),
+      };
+      answers.add({'questionId': q['id'], 'choiceId': choice, 'elapsedMs': el});
+    }
+    final byQ = {for (final a in answers) a['questionId'] as String: a};
+    final exp = oracle(qs, byQ, diff);
+    final shuffled = [...answers]..shuffle(rnd);
+    final r2 = await d.post(
+      '/v1/me/trivia/results',
+      data: {'roundId': round['roundId'], 'answers': shuffled},
+      options: Options(headers: bearer(tok)),
+    );
+    check(r2.statusCode == 200, 'round $i status ${r2.statusCode} ${r2.data}');
+    final body = r2.data as Map;
+    check(body['score'] == exp.score, 'round $i score ${body['score']} vs ${exp.score}');
+    check(body['correct'] == exp.correct, 'round $i correct');
+    final bd = (body['breakdown'] as List).cast<Map>();
+    check(
+      bd.map((e) => e['points']).join(',') == exp.pts.join(','),
+      'round $i breakdown ${bd.map((e) => e['points'])} vs ${exp.pts}',
+    );
+    check(
+      bd.map((e) => e['questionId']).join() == qs.map((q) => q['id']).join(),
+      'round $i breakdown order',
+    );
+  }
+  print('1. 30 random rounds done, fails=$fails');
+
+  // ---- 2. worked examples with hand-computed numbers
+  Future<int> scoreOf(String diff, List<String> spec) async {
+    final round = await getRound(d, 'all', diff, 42);
+    final qs = (round['questions'] as List).cast<Map>();
+    final answers = <Map>[];
+    for (var i = 0; i < 10; i++) {
+      final s = spec[i];
+      final q = qs[i];
+      answers.add({
+        'questionId': q['id'],
+        'choiceId': s[0] == 'C'
+            ? q['correctChoiceId']
+            : s[0] == 'W'
+            ? wrongOf(q)
+            : null,
+        'elapsedMs': int.parse(s.substring(1)),
+      });
+    }
+    final r = await dioOf(mk()).post(
+      '/v1/me/trivia/results',
+      data: {'roundId': round['roundId'], 'answers': answers},
+      options: Options(headers: bearer(tok)),
+    );
+    return (r.data as Map)['score'] as int;
+  }
+
+  List<String> pad(List<String> a) => [...a, ...List.filled(10 - a.length, 'W0')];
+  check(await scoreOf('easy', pad(['C5000'])) == 137, 'E2');
+  check(await scoreOf('medium', pad(['C7000'])) == 126, 'E7');
+  check(await scoreOf('hard', pad(['C3333'])) == 133, 'E8');
+  check(
+    await scoreOf('easy', ['C0', 'C0', 'C0', 'W0', 'C0', 'C0', 'N0', 'C0', 'C0', 'C0']) == 1375,
+    'E12',
+  );
+  check(await scoreOf('hard', pad(['C1000', 'C2000', 'C3000'])) == 495, 'E14');
+  check(await scoreOf('easy', pad(['C0', 'C20000', 'C0', 'C0'])) == 475, 'E16');
+  print('2. worked examples done, fails=$fails');
+
+  // ---- 3. boundaries
+  for (final diff in diffs) {
+    final L = limits[diff]!;
+    check(await scoreOf(diff, pad(['C${L - 1}'])) == 100, '$diff L-1');
+    check(await scoreOf(diff, pad(['C$L'])) == 0, '$diff L');
+    check(await scoreOf(diff, pad(['C${L + 1}'])) == 0, '$diff L+1');
+    check(await scoreOf(diff, pad(['C0'])) == 150, '$diff 0');
+    check(await scoreOf(diff, pad(['C${L ~/ 2}'])) == 125, '$diff half');
+  }
+  print('3. boundaries done, fails=$fails');
+
+  // ---- 4. streak follows question order, not array order
+  {
+    final round = await getRound(d, 'all', 'easy', 7);
+    final qs = (round['questions'] as List).cast<Map>();
+    final answers = [
+      for (var i = 0; i < 10; i++)
+        {
+          'questionId': qs[i]['id'],
+          'choiceId': i == 4 ? wrongOf(qs[i]) : qs[i]['correctChoiceId'],
+          'elapsedMs': 0,
+        },
+    ];
+    const exp = 150 + 175 + 200 + 225 + 0 + 150 + 175 + 200 + 225 + 250;
+    for (final order in [
+      answers,
+      answers.reversed.toList(),
+      [...answers]..shuffle(rnd),
+    ]) {
+      final r = await dioOf(mk()).post(
+        '/v1/me/trivia/results',
+        data: {'roundId': round['roundId'], 'answers': order},
+        options: Options(headers: bearer(tok)),
+      );
+      check((r.data as Map)['score'] == exp, 'order independence ${(r.data as Map)['score']} vs $exp');
+    }
+  }
+  print('4. order done, fails=$fails');
+
+  // ---- 5. determinism
+  {
+    final p1 = dioOf(mk(), plain: true), p2 = dioOf(mk(), plain: true);
+    for (final c in cats) {
+      for (final df in diffs) {
+        final q = {'category': c, 'difficulty': df, 'seed': 42};
+        final x = (await p1.get('/v1/trivia/rounds', queryParameters: q)).data;
+        final y = (await p2.get('/v1/trivia/rounds', queryParameters: q)).data;
+        final z = (await p1.get('/v1/trivia/rounds', queryParameters: q)).data;
+        check(x == y && x == z, 'byte identical $c $df');
+        final o = (await p1.get('/v1/trivia/rounds', queryParameters: {...q, 'seed': 43})).data;
+        check(x != o, 'seed 42 vs 43 differ $c $df');
+      }
+    }
+    final pos = List.filled(4, 0);
+    var total = 0;
+    for (var s = 0; s < 1000; s++) {
+      final cat = cats[s % 4], df = diffs[s % 3];
+      final round = await getRound(d, cat, df, s * 7919 + 1);
+      final qs = (round['questions'] as List).cast<Map>();
+      check(qs.length == 10 && qs.map((q) => q['id']).toSet().length == 10, 'distinct q $s');
+      for (final q in qs) {
+        final ch = (q['choices'] as List).cast<Map>();
+        check(
+          ch.length == 4 &&
+              ch.map((c) => c['id']).toSet().length == 4 &&
+              ch.map((c) => c['text']).toSet().length == 4,
+          'choices distinct $s',
+        );
+        final idx = ch.indexWhere((c) => c['id'] == q['correctChoiceId']);
+        check(idx >= 0 && ch.where((c) => c['id'] == q['correctChoiceId']).length == 1, 'one correct');
+        pos[idx]++;
+        total++;
+      }
+    }
+    print('5. position share over 1000 rounds (10000 questions): ${pos.map((p) => (100 * p / total).toStringAsFixed(2)).toList()}');
+    for (final p in pos) {
+      check(p / total >= .2 && p / total <= .3, 'position share');
+    }
+  }
+  print('5. determinism done, fails=$fails');
+
+  // ---- 6a. validation and auth
+  {
+    final dd = dioOf(mk());
+    Future<String?> code(Future<Response> f) async =>
+        ((await f).data as Map)['error']?['code'] as String?;
+    Future<Response> rounds(Map<String, Object?> q) =>
+        dd.get('/v1/trivia/rounds', queryParameters: q);
+    check(await code(rounds({'category': 'x', 'difficulty': 'easy', 'seed': 1})) == 'unknown_category', 'unknown_category');
+    check(await code(rounds({'difficulty': 'easy', 'seed': 1})) == 'unknown_category', 'missing category');
+    check(await code(rounds({'category': 'all', 'difficulty': 'Easy', 'seed': 1})) == 'invalid_difficulty', 'invalid_difficulty');
+    for (final s in ['-1', '2147483648', '4.5', 'abc', '', '007', '+5', ' 5']) {
+      check(await code(rounds({'category': 'all', 'difficulty': 'easy', 'seed': s})) == 'invalid_seed', 'invalid_seed "$s"');
+    }
+    check(await code(rounds({'category': 'all', 'difficulty': 'easy'})) == 'invalid_seed', 'missing seed');
+    check((await rounds({'category': 'all', 'difficulty': 'easy', 'seed': '2147483647'})).statusCode == 200, 'max seed ok');
+    check((await rounds({'category': 'all', 'difficulty': 'easy', 'seed': '0'})).statusCode == 200, 'seed 0 ok');
+
+    final round = await getRound(dd, 'all', 'easy', 42);
+    final qs = (round['questions'] as List).cast<Map>();
+    List<Map> ans() => [
+      for (final q in qs) {'questionId': q['id'], 'choiceId': q['correctChoiceId'], 'elapsedMs': 1},
+    ];
+    Future<Response> post(Object? body, {String? t}) => dd.post(
+      '/v1/me/trivia/results',
+      data: body,
+      options: Options(headers: t == null ? {} : bearer(t)),
+    );
+    final rid = round['roundId'];
+    final good = {'roundId': rid, 'answers': ans()};
+    check((await post(good)).statusCode == 401, 'no bearer 401');
+    check((await post(good, t: expiredAccessToken('u-100'))).statusCode == 401, 'expired 401');
+    check((await post(good, t: mintRefreshToken('u-100', 1))).statusCode == 401, 'refresh-as-bearer 401');
+    check((await dd.get('/v1/me/trivia/best')).statusCode == 401, 'best no bearer');
+    check((await dd.get('/v1/me/trivia/best', options: Options(headers: bearer(expiredAccessToken('u-100'))))).statusCode == 401, 'best expired');
+    check((await dd.get('/v1/me/trivia/best', options: Options(headers: bearer(mintRefreshToken('u-100', 1))))).statusCode == 401, 'best refresh');
+    check((await post(good, t: tok)).statusCode == 200, 'good 200');
+    check(await code(post({'roundId': rid, 'answers': ans().sublist(1)}, t: tok)) == 'answer_count_mismatch', 'count');
+    check(await code(post({'roundId': 'r-nope-easy-1', 'answers': ans()}, t: tok)) == 'unknown_round', 'unknown_round');
+    check(await code(post({'roundId': 'r-all-easy-01', 'answers': ans()}, t: tok)) == 'unknown_round', 'unknown_round lead zero');
+    final uq = ans()..[3] = {...ans()[3], 'questionId': 'q-zzz'};
+    check(await code(post({'roundId': rid, 'answers': uq}, t: tok)) == 'unknown_question', 'unknown_question');
+    final dup = ans()..[3] = ans()[2];
+    check(await code(post({'roundId': rid, 'answers': dup}, t: tok)) == 'duplicate_answer', 'dup');
+    final neg = ans()..[3] = {...ans()[3], 'elapsedMs': -1};
+    check(await code(post({'roundId': rid, 'answers': neg}, t: tok)) == 'invalid_elapsed', 'neg');
+    final nullneg = ans()..[3] = {...ans()[3], 'choiceId': null, 'elapsedMs': -5};
+    check(await code(post({'roundId': rid, 'answers': nullneg}, t: tok)) == 'invalid_elapsed', 'null neg');
+    final noKey = [for (final a in ans()) {'questionId': a['questionId'], 'elapsedMs': 1}];
+    check(await code(post({'roundId': rid, 'answers': noKey}, t: tok)) == 'invalid_body', 'missing choiceId key');
+    check(await code(post({'roundId': rid}, t: tok)) == 'invalid_body', 'no answers');
+    check(await code(post('hello', t: tok)) == 'invalid_body', 'string body');
+    final badc = ans()..[3] = {...ans()[3], 'choiceId': 'c9'};
+    check(await code(post({'roundId': rid, 'answers': badc}, t: tok)) == 'unknown_choice', 'unknown_choice');
+    final fl = ans()..[3] = {...ans()[3], 'elapsedMs': 1.5};
+    check(await code(post({'roundId': rid, 'answers': fl}, t: tok)) == 'invalid_elapsed', 'float elapsed');
+    final strE = ans()..[3] = {...ans()[3], 'elapsedMs': '5'};
+    check(await code(post({'roundId': rid, 'answers': strE}, t: tok)) == 'invalid_elapsed', 'string elapsed');
+  }
+  print('6a. validation done, fails=$fails');
+
+  // ---- 6b. real users through identity routes, isNewBest, reset
+  {
+    final bk = mk();
+    final dd = dioOf(bk);
+    Future<String> signIn(String e, String p) async {
+      final r = await dd.post('/v1/auth/sign-in', data: {'email': e, 'password': p});
+      return (r.data as Map)['accessToken'] as String;
+    }
+
+    final t1 = await signIn('reader@mini-client.test', 'marvelous');
+    final t2 = await signIn('collector@mini-client.test', 'vault-7');
+    final round = await getRound(dd, 'comics', 'easy', 5);
+    final qs = (round['questions'] as List).cast<Map>();
+    List<Map> ans(int ms, {int correctN = 10}) => [
+      for (var i = 0; i < 10; i++)
+        {
+          'questionId': qs[i]['id'],
+          'choiceId': i < correctN ? qs[i]['correctChoiceId'] : null,
+          'elapsedMs': ms,
+        },
+    ];
+    Future<Map> post(String t, List<Map> a) async => (await dd.post(
+          '/v1/me/trivia/results',
+          data: {'roundId': round['roundId'], 'answers': a},
+          options: Options(headers: bearer(t)),
+        )).data as Map;
+    Future<List> best(String t) async => ((await dd.get(
+          '/v1/me/trivia/best',
+          options: Options(headers: bearer(t)),
+        )).data as Map)['best'] as List;
+    print('   initial best (identity only backend, no seeded trivia state for these tokens): u100=${await best(t1)} u101=${await best(t2)}');
+    var r = await post(t2, ans(1000));
+    final x = r['score'] as int;
+    check(r['isNewBest'] == true, 'first is new best');
+    r = await post(t2, ans(1000));
+    check(r['isNewBest'] == false && r['score'] == x, 'tie not new best');
+    r = await post(t2, ans(2000));
+    check(r['isNewBest'] == false && r['bestScore'] == x, 'lower not new best');
+    r = await post(t2, ans(500));
+    check(r['isNewBest'] == true && (r['score'] as int) > x, 'higher is new best');
+    final y = r['score'] as int;
+    check((await best(t1)).every((e) => e['category'] != 'comics'), 'u100 cannot see u101 comics');
+    r = await post(t1, ans(20000, correctN: 0));
+    check(r['score'] == 0 && r['isNewBest'] == false && r['bestScore'] == 0, 'zero first not new best: $r');
+    check((await best(t1)).any((e) => e['category'] == 'comics' && e['bestScore'] == 0), 'zero appears in best');
+    check((await best(t2)).any((e) => e['category'] == 'comics' && e['bestScore'] == y), 'u101 best kept');
+    bk.reset();
+    final t2b = await signIn('collector@mini-client.test', 'vault-7');
+    check((await best(t2b)).isEmpty, 'reset clears u101 best');
+    final t1b = await signIn('reader@mini-client.test', 'marvelous');
+    print('   after reset u100 best: ${await best(t1b)}');
+  }
+  print('6b. users/best done, fails=$fails');
+
+  // ---- 7. facts vs endpoints
+  {
+    final dd = dioOf(mk());
+    var checked = 0;
+    final seen = <String>{};
+    for (var s = 1; s < 60 && checked < 60; s++) {
+      for (final cat in cats.skip(1)) {
+        for (final df in diffs) {
+          final round = await getRound(dd, cat, df, s);
+          for (final q in (round['questions'] as List).cast<Map>()) {
+            final id = q['id'] as String;
+            if (!seen.add(id)) continue;
+            final prompt = q['prompt'] as String;
+            final correct = ((q['choices'] as List).cast<Map>()
+                    .firstWhere((c) => c['id'] == q['correctChoiceId']))['text']
+                as String;
+            if (id.startsWith('q-comic_price')) {
+              final c = await findComic(dd, RegExp(r'price of (.+)\?').firstMatch(prompt)!.group(1)!);
+              if (c == null) continue;
+              final cents = (c['price'] as Map)['amountCents'] as int;
+              check(correct == '\$${(cents / 100).toStringAsFixed(2)}', 'price $id $correct vs $cents');
+              checked++;
+            } else if (id.startsWith('q-comic_pages')) {
+              final c = await findComic(dd, RegExp(r'does (.+) have\?').firstMatch(prompt)!.group(1)!);
+              if (c == null) continue;
+              check(correct == '${c['pageCount']}', 'pages $id');
+              checked++;
+            } else if (id.startsWith('q-comic_year')) {
+              final c = await findComic(dd, RegExp(r'was (.+) released\?').firstMatch(prompt)!.group(1)!);
+              if (c == null) continue;
+              check(correct == (c['releaseDate'] as String).substring(0, 4), 'year $id');
+              checked++;
+            } else if (id.startsWith('q-creator_')) {
+              final role = id.contains('writer') ? 'writer' : id.contains('inker') ? 'inker' : 'penciller';
+              final c = await findComic(dd, RegExp(r'(?:wrote|penciled|inked) (.+)\?').firstMatch(prompt)!.group(1)!);
+              if (c == null) continue;
+              final names = [for (final cr in (c['creators'] as List).cast<Map>()) if (cr['role'] == role) cr['name']];
+              check(names.contains(correct), 'creator $id $role $names vs $correct');
+              checked++;
+            } else if (id.startsWith('q-character_team')) {
+              final ch = await findChar(dd, RegExp(r'does (.+) belong').firstMatch(prompt)!.group(1)!);
+              if (ch == null) continue;
+              check(ch['team'] == correct, 'team $id ${ch['team']} vs $correct');
+              checked++;
+            } else if (id.startsWith('q-character_debut_year')) {
+              final ch = await findChar(dd, RegExp(r'did (.+) first appear').firstMatch(prompt)!.group(1)!);
+              if (ch == null) continue;
+              check('${ch['firstAppearanceYear']}' == correct, 'debut year $id');
+              checked++;
+            }
+          }
+        }
+      }
+    }
+    print('7. facts checked via endpoints: $checked, fails=$fails');
+  }
+  print('TOTAL FAILS: $fails');
+}
+
+final _comicCache = <String, Map>{};
+Future<Map?> findComic(Dio d, String title) async {
+  if (_comicCache.isEmpty) {
+    for (var off = 0; off < 3000; off += 100) {
+      final r = await d.get('/v1/comics', queryParameters: {'limit': 100, 'offset': off});
+      final m = r.data as Map;
+      final items = (m['items'] ?? m['comics'] ?? m['results'] ?? m['data']) as List?;
+      if (items == null) {
+        print('comics list keys: ${m.keys}');
+        break;
+      }
+      if (items.isEmpty) break;
+      for (final it in items.cast<Map>()) {
+        _comicCache[it['title'] as String] = it;
+      }
+    }
+    print('   comics indexed: ${_comicCache.length}');
+  }
+  final s = _comicCache[title];
+  if (s == null) return null;
+  return (await d.get('/v1/comics/${s['id']}')).data as Map;
+}
+
+final _charCache = <String, Map>{};
+Future<Map?> findChar(Dio d, String name) async {
+  if (_charCache.isEmpty) {
+    for (var off = 0; off < 1600; off += 100) {
+      final r = await d.get('/v1/characters', queryParameters: {'limit': 100, 'offset': off});
+      final m = r.data as Map;
+      final items = (m['items'] ?? m['characters'] ?? m['results'] ?? m['data']) as List?;
+      if (items == null) {
+        print('char list keys: ${m.keys}');
+        break;
+      }
+      if (items.isEmpty) break;
+      for (final it in items.cast<Map>()) {
+        _charCache[it['name'] as String] = it;
+      }
+    }
+    print('   characters indexed: ${_charCache.length}');
+  }
+  final s = _charCache[name];
+  if (s == null) return null;
+  return (await d.get('/v1/characters/${s['id']}')).data as Map;
+}

@@ -1,0 +1,45 @@
+=== V1 time bonus rounds to nearest via double
+    KILLED by: scoring_test validation_test 
+=== V2 streak starts at 1
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== V3 timeout boundary exclusive
+    KILLED by: provider_contract_test scoring_test 
+=== V4 isNewBest uses >=
+    KILLED by: provider_contract_test validation_test 
+=== V5 choice shuffle skips first swap
+    KILLED by: provider_contract_test 
+=== V6 best read ignores user
+    KILLED by: provider_contract_test validation_test 
+=== V7 result write ignores user
+    KILLED by: provider_contract_test validation_test 
+=== V8 streak follows answers array order
+    KILLED by: scoring_test 
+=== V9 best overwritten by lower score
+    KILLED by: validation_test 
+=== V10 zero first result is a new best
+    KILLED by: provider_contract_test validation_test 
+=== V11 correct choice always at position 0 (no shuffle in round)
+    BROKEN
+=== V12 expired token accepted
+    BROKEN
+=== E-S1 elapsed equal to limit not timeout
+    KILLED by: provider_contract_test scoring_test 
+=== E-S9 bonus rounds up
+    KILLED by: provider_contract_test scoring_test validation_test 
+=== E-S13 first correct earns streak step
+    KILLED by: fixture_sets_test provider_contract_test scoring_test validation_test 
+=== E-S19 reverse order
+    KILLED by: provider_contract_test scoring_test 
+=== E-R14 choices not shuffled
+    KILLED by: determinism_test provider_contract_test 
+=== E-H44 no choiceId key read as timeout
+    KILLED by: validation_test 
+=== E-B35 cached choices changeable
+    KILLED by: determinism_test 
+=== E-S16 wrong keeps streak
+    KILLED by: provider_contract_test scoring_test 
+killed=18 survived=0 broken=2
+
+--- V11 and V12 re-run after rewrite (first versions did not build) ---
+V11 choice shuffle independent of the round seed: KILLED by determinism_test provider_contract_test
+V12 expired token accepted: KILLED by provider_contract_test validation_test
