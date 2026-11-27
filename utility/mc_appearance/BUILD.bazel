@@ -1,0 +1,73 @@
+# T-0063 (ADR-0013): the app-wide appearance. Pure Dart (R15), so blocs and
+# the app shell both read it; a hand-written DI initializer like
+# mc_feature_flags. No codegen.
+#
+# Dependencies:
+#   mc_storage      the device's copy (synchronous, FileStore.readSync/writeSync)
+#   mc_session      whose preferences these are, and the epoch every answer
+#                   is checked against
+#   mc_api_client   the shared Dio and apiCall
+#   mc_api_auth     authPinned: a write never leaves under another user (T-0050)
+#   mc_api_errors   the failure types
+#   mc_monitoring   the warning when a sync or a save fails
+load("@rules_dart//dart:defs.bzl", "dart_library", "dart_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+package(default_visibility = ["//visibility:public"])
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_api_auth",
+    "//utility/mc_api_client",
+    "//utility/mc_api_errors",
+    "//utility/mc_di",
+    "//utility/mc_monitoring",
+    "//utility/mc_prelude",
+    "//utility/mc_session",
+    "//utility/mc_storage",
+    "@pub_deps//:dio",
+    "@pub_deps//:get_it",
+]
+
+dart_library(
+    name = "mc_appearance",
+    package_name = "mc_appearance",
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_appearance",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_mocked_backend",
+    "@pub_deps//:test",
+]
+
+[dart_test(
+    name = t,
+    size = "small",
+    package_name = "mc_appearance",
+    language_version = _LANG,
+    srcs = ["test/rig.dart"],
+    main = "test/%s.dart" % t,
+    deps = _TEST_DEPS,
+) for t in [
+    "preferences_test",
+    "local_test",
+    "sync_test",
+    "races_test",
+    "di_test",
+]]
+
+# R15: lib imports no Flutter.
+dart_test(
+    name = "no_flutter_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    package_name = "mc_appearance",
+    language_version = _LANG,
+    main = "test/no_flutter_test.dart",
+    deps = ["@pub_deps//:test"],
+)

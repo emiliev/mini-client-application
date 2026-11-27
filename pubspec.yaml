@@ -37,6 +37,7 @@ workspace:
   - utility/mc_api_auth
   - utility/mc_api_client
   - utility/mc_api_errors
+  - utility/mc_appearance
   - utility/mc_bloc_kit
   - utility/mc_config
   - utility/mc_di
