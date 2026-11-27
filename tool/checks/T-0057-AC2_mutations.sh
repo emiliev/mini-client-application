@@ -91,6 +91,8 @@ PY
     say "$id CONTROL: BROKEN (build failed: not evidence)"; rc=1; ctl=1
   elif grep -q -a "FAILED in" <<< "$out"; then
     say "$id CONTROL: KILLED by $(grep -a -m1 -E '^  FAIL  ' <<< "$out" | sed 's/^ *//') (the gap is not what T-0057 pins)"; rc=1; ctl=1
+  elif grep -q -a "TIMEOUT in" <<< "$out"; then
+    say "$id CONTROL: TIMEOUT (not a survival)"; rc=1; ctl=1
   else
     say "$id CONTROL (suite without the T-0057-AC1 tests): SURVIVED, as expected"
   fi
