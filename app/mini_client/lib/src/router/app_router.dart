@@ -17,8 +17,11 @@ GoRouter buildAppRouter({required String initialLocation}) => GoRouter(
   initialLocation: initialLocation,
   // The link PendingLinks held wins over the platform's initial route.
   overridePlatformDefaultLocation: true,
-  routes: [
-    ...$appRoutes,
+  // A FlowCall (AppFlows' wait) is transient: not serialised, not warned on.
+  extraCodec: const FlowExtraCodec(),
+  // Every entity route nests under home (plan 01 §4.2, T-0049), so a link
+  // opens `[home, target]` and the first screen can go back.
+  routes: nestUnderHome($appRoutes, [
     ...discoveryRoutes,
     ...universeRoutes,
     ...publishingRoutes,
@@ -26,7 +29,7 @@ GoRouter buildAppRouter({required String initialLocation}) => GoRouter(
     ...commerceRoutes,
     ...libraryRoutes,
     ...accountRoutes,
-  ],
+  ]),
   // The auth guard (P1-16 AC4) joins here with mc_api_auth.
   redirect: (context, state) {
     McRouteProbe.recordRedirect(context, state.uri);

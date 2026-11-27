@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Opus tier** (app navigation; ADR-0011) |
 | Branch | `fleet/T-0049-deep-link-back-stack` |
@@ -43,3 +43,33 @@
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27: Engineer (Sonnet) implemented and handed off. Review-first applies.
+
+## Outcome
+**What changed**
+- `app_core`: new `nestUnderHome(appRoutes, entityRoutes)` (`route_nesting.dart`) re-roots each wiring's absolute `GoRoute` under home (leading `/` removed, children kept). `buildAppRouter` passes every wiring's routes through it. URLs, typed `location`s and `AppLocations` don't change; every wiring's drift test is green.
+- `FlowResultRoute` takes `extra: state.extra`. `AppFlows` pushes with a `FlowCall` as the `extra` and returns the call's future. The route completes the call with null in `dispose` when no result came (popped, replaced by a `go`, removed). The two library routes pass `extra: state.extra`.
+- Home's guard needed no change: it clears when the future completes.
+
+**AC to evidence**
+- AC1: `app/mini_client/test/deep_link_back_stack_test.dart` (`T-0049-AC1 a cold start from <link> ...`, five links, each taps Back to home); `app_core/test/route_nesting_test.dart`; e2e cold links with screenshots in `documents/evidence/T-0049/engineer/mini_client/` (`05`, `18`, `36`, `37`, `55` and their `*b`/`*c` Back-to-home shots).
+- AC2: same test file (`T-0049-AC2 a link to the running app (<link>) stacks [home, target]`, with the characters list open first). Documented in F-0049: a link is a `go`, so Back from the target is home, never the screen that was open.
+- AC3: `deep_link_back_stack_test` (`T-0049-AC3 a link to home replaces an open editor ...`); `app_core/test/flow_results_test.dart` group `T-0049-AC3` (replaced by `go`, `go` elsewhere, Back, result then leave, no caller); e2e `reading_list_deeplink_test` (37c).
+- AC4: `documents/evidence/T-0049/engineer/T-0049-AC4_gates.md` (146/146 tests, lint, `mc_arch_check`, fixtures check, `rules_fork.sh check`, format, l10n; coverage mini_client 95.4 %, app_core 96.4 %, wirings 100 %). Full mini_client e2e 10/10 (`mini_client/e2e-summary.md`).
+- Mutations: `documents/evidence/T-0049/engineer/mutations.sh`, 11/11 killed (`mutations.log`), including a route back at the top level (one per wiring) and the null completion.
+
+**Test integrity:** nothing deleted, skipped or weakened, no `// ignore:`. `flow_results_test.dart`'s two route builders now pass `extra: state.extra` (needed to test the new path). One redundant line (completing the call on delivery, equivalent to the push future's) was removed after a mutation survived.
+
+**Decisions for the TL**
+1. (Resolved by the TL: keep it, AC1 amended.) **`/characters/<id>` Back goes to the characters list, then home**, not straight to home (the details route nests under the list since T-0033). AC1's wording says "lands on home"; the test and e2e check list then home. Making it straight to home means un-nesting details from the list (an in-app tap on a card still pushes). Say if you want that.
+2. **Plan 01 §4.2 and F-0048** need a sentence each (TL-owned): the nesting is done by `nestUnderHome` in the app shell, not by the wirings' typed trees (F-0049 item 1); a result future always completes, with null when the route goes away.
+3. e2e files edited: five cold-link targets now also tap Back; new target `character_details_deeplink_test.dart`.
+
+**Finding:** [F-0049](../findings/F-0049-deep-link-back-stack-and-result-futures.md).
+
+**Review round (2026-11-27)**
+1. Exact stacks: `walkHome` taps Back once per link (twice for `/characters/<id>`: list, then home) and asserts home and no back button below it; the AC2 tests use the same walk. Mutation P1 (a link as a push via `onEnter`) fails 4 of the 5 AC2 tests (the characters-details one is unchanged by design, its stack is the same).
+2. A forgotten `extra: state.extra` throws in debug (`T-0049-AC3 a route built without extra ...`); mutation R6.
+3. `FlowExtraCodec` as `extraCodec` (unit test, a restoration-state test, and a `buildAppRouter` check); mutations R7 and R8.
+4. Direct completion restored (`T-0049-AC3 the result reaches the call directly ...`); mutation R5 now dies.
+5. `nestUnderHome` rejects `/` (test, mutation N8).

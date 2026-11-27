@@ -9,8 +9,8 @@ part 'search_routes.g.dart';
 List<RouteBase> get searchRoutes => $appRoutes;
 
 /// `/search`: the search, optionally starting with a query
-/// (`miniclient://app/search?q=spi`). It sits under no other route, so it is
-/// pushed from home and can be the root of a deep link.
+/// (`miniclient://app/search?q=spi`). The app shell nests it under home
+/// (T-0049), so a deep link opens `[home, search]`.
 @TypedGoRoute<SearchRoute>(path: '/search')
 class SearchRoute extends GoRouteData with $SearchRoute {
   const SearchRoute({this.q});

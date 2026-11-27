@@ -1,0 +1,49 @@
+// T-0049 Verifier probe (scratch): cold link __LINK__ via the file-drop start link.
+import 'dart:io';
+
+import 'package:app_core/app_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
+import 'package:mini_client/main.dart' as app;
+
+const _home = Key('home.placeholder');
+
+void main() {
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('VPROBE cold __LINK__', (tester) async {
+    File('${Directory.systemTemp.path}/$e2eStartLinkFile').writeAsStringSync(
+      'miniclient://app__LINK__',
+    );
+    startApp(app.main);
+    final target = find.byWidgetPredicate(
+      (w) =>
+          w.key == fixtureSignInSheetKey ||
+          w.key == const Key('not.found') ||
+          w.key == const ValueKey<String>('discovery_search.field') ||
+          (w is Text && w.data == 'Edit reading list'),
+    );
+    await pumpUntil(tester, target, 'the linked screen');
+    if (find.byKey(fixtureSignInSheetKey).evaluate().isNotEmpty) {
+      await tester.tap(find.byKey(fixtureSignInButtonKey));
+      await pumpUntil(tester, find.text('Edit reading list'), 'the editor');
+    }
+    await letArtLoad(tester, const Duration(seconds: 2));
+    expect(find.byKey(_home), findsNothing, reason: 'the link was the start');
+    final backs = find.byType(BackButton).evaluate().length;
+    // ignore: avoid_print
+    print(
+      'VPROBE cold __LINK__ backButtons=$backs '
+      'notFound=${find.byKey(const Key('not.found')).evaluate().length}',
+    );
+    await shot(binding, tester, '__NAME__');
+    if (backs > 0) {
+      await tester.tap(find.byType(BackButton).first);
+      await pumpUntil(tester, find.byKey(_home), 'home after one Back');
+      expect(find.byType(BackButton), findsNothing, reason: 'home is bottom');
+      await shot(binding, tester, '__NAME___b_home');
+    }
+  });
+}

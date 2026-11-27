@@ -15,8 +15,8 @@ List<RouteBase> get readingListsRoutes => $appRoutes;
 /// a [FlowResultRoute], whose `complete` is the flow's `onComplete`, so the
 /// route pops itself with the new list's id. Push it with
 /// `AppFlows.createReadingList` and await the id. A deep link
-/// (`miniclient://app/me/lists/new`) opens it with nobody to answer; then
-/// completing goes home.
+/// (`miniclient://app/me/lists/new`) opens it with nobody to answer; the app
+/// shell nests it under home (T-0049), so completing pops back to home.
 @TypedGoRoute<NewReadingListRoute>(path: '/me/lists/new')
 class NewReadingListRoute extends GoRouteData with $NewReadingListRoute {
   const NewReadingListRoute();
@@ -24,6 +24,7 @@ class NewReadingListRoute extends GoRouteData with $NewReadingListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       FlowResultRoute<String>(
+        extra: state.extra,
         builder: (complete) => diContainer<LibraryRouteTargets>()
             .newReadingList(onComplete: complete),
       );
@@ -41,6 +42,7 @@ class EditReadingListRoute extends GoRouteData with $EditReadingListRoute {
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       FlowResultRoute<String>(
+        extra: state.extra,
         builder: (complete) => diContainer<LibraryRouteTargets>()
             .editReadingList(id, onComplete: complete),
       );
