@@ -1,0 +1,58 @@
+# e2e_ios.sh: T-0055 engineer on mc-T-0055-engineer-49490 (2AAF4DB1-FBBE-4BB5-A34D-1D0E8CB733AF)
+# cwd: /tmp/mc-T-0055-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.krkcFq/screenshots/2-zz_broken_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_broken_test.dart -d 2AAF4DB1-FBBE-4BB5-A34D-1D0E8CB733AF
+
+Resolving dependencies in `/private/tmp/mc-T-0055-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0055-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            7.3s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.t68y8r/flutter_ios_build_temp_dirAoe5ic/temporary_xcresult_bundle
+
+    integration_test/zz_broken_test.dart:8:19: Error: A value of type 'String' can't be assigned to a variable of type 'int'.
+        final int x = 'not an int';
+                      ^
+    Target kernel_snapshot_program failed: Exception
+    Failed to package /private/tmp/mc-T-0055-engineer-e2e/app/mini_client.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Could not build the application for the simulator.
+Application failed to start on attempt: 1
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:56659/iBMI0u2HYuE=/
+VMServiceFlutterDriver: Isolate found with number: 4372122617069439
+VMServiceFlutterDriver: Isolate 4372122617069439 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0055 good target
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: 00:00 +1: (tearDownAll)
+All tests passed.
+flutter: 00:00 +2: All tests passed!
+
+# exit code: 0

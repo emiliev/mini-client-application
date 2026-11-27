@@ -1,0 +1,10 @@
+# e2e_ios.sh: T-0055 verifier on mc-T-0055-verifier-41763 (B5FD5EC8-156C-4E0B-9B11-9B50046F4706)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xkxZdd/screenshots/1-zz_good_test
+$ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/fake.sh ok integration_test/zz_good_test.dart #flutter drive
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient; removed build/ios/iphonesimulator
+# --- runner output ---
+ok
+
+# exit code: 0

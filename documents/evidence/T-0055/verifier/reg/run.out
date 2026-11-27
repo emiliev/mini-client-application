@@ -1,0 +1,37 @@
+==> Task T-0055, role verifier, project /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+==> Evidence dir: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/reg
+==> Creating simulator mc-T-0055-verifier-45899 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0055-verifier-45899
+SIMULATOR_UDID=96D06F47-55A4-454E-911F-63A269D9244E
+SIMULATOR_CREATED_AT=1795779084
+==> Booting 96D06F47-55A4-454E-911F-63A269D9244E
+==> Booted in 23 s
+==> Running target 1/3: integration_test/characters_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 96D06F47-55A4-454E-911F-63A269D9244E
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/reg/e2e-characters_journey_test.log
+==>   screenshot 01_home.png (downscaled from 1206x2622)
+==>   screenshot 02_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 03_preview.png (downscaled from 1206x2622)
+==>   screenshot 04_full_profile_placeholder.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_journey_test.dart (46 s)
+==> Running target 2/3: integration_test/comic_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d 96D06F47-55A4-454E-911F-63A269D9244E
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/reg/e2e-comic_deeplink_test.log
+==>   screenshot 18_deep_link_comic.png (downscaled from 1206x2622)
+==>   screenshot 18b_back_from_comic_is_home.png (downscaled from 1206x2622)
+==>   screenshot 19_link_to_running_app_comic.png (downscaled from 1206x2622)
+==>   screenshot 20_bad_comic_link_not_found.png (downscaled from 1206x2622)
+==> PASS integration_test/comic_deeplink_test.dart (34 s)
+==> Running target 3/3: integration_test/analytics_screens_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/analytics_screens_test.dart -d 96D06F47-55A4-454E-911F-63A269D9244E
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/reg/e2e-analytics_screens_test.log
+e2e_ios: warning: screenshot 01_home.png from integration_test/analytics_screens_test.dart clashes with an earlier one; saving it as analytics_screens_test-01_home.png
+==>   screenshot analytics_screens_test-01_home.png (downscaled from 1206x2622)
+e2e_ios: warning: screenshot 02_characters_list.png from integration_test/analytics_screens_test.dart clashes with an earlier one; saving it as analytics_screens_test-02_characters_list.png
+==>   screenshot analytics_screens_test-02_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 03_back_to_home.png (downscaled from 1206x2622)
+==> PASS integration_test/analytics_screens_test.dart (24 s)
+==> Summary: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/reg/e2e-summary.md
+==> RESULT: PASS (3 target(s))
+==> Deleted simulator mc-T-0055-verifier-45899 (96D06F47-55A4-454E-911F-63A269D9244E)
+SIMULATOR_DELETED_AT=1795779217

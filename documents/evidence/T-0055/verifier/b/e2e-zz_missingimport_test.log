@@ -1,0 +1,68 @@
+# e2e_ios.sh: T-0055 verifier on mc-T-0055-verifier-72933 (FB2E34A3-615E-4154-A6B7-4C2CF3797EB4)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ofhmTx/screenshots/2-zz_missingimport_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_missingimport_test.dart -d FB2E34A3-615E-4154-A6B7-4C2CF3797EB4
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            7.3s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.4jCLdK/flutter_ios_build_temp_dirUo8CvY/temporary_xcresult_bundle
+
+    Error: Couldn't resolve the package 'does_not_exist' in 'package:does_not_exist/nope.dart'.
+    integration_test/zz_missingimport_test.dart:3:8: Error: Not found: 'package:does_not_exist/nope.dart'
+    import 'package:does_not_exist/nope.dart';
+           ^
+    Unhandled exception:
+    FileSystemException(uri=org-dartlang-untranslatable-uri:package%3Adoes_not_exist%2Fnope.dart; message=StandardFileSystem only supports file:* and data:* URIs)
+    #0      StandardFileSystem.entityForUri (package:front_end/src/api_prototype/standard_file_system.dart:42)
+    #1      asFileUri (package:vm/kernel_front_end.dart:1059)
+    #2      writeDepfile (package:vm/kernel_front_end.dart:1220)
+    <asynchronous suspension>
+    #3      FrontendCompiler.compile (package:frontend_server/frontend_server.dart:932)
+    <asynchronous suspension>
+    #4      starter (package:frontend_server/starter.dart:108)
+    <asynchronous suspension>
+    #5      main (file:///Volumes/Work/s/w/ir/x/w/sdk/pkg/frontend_server/bin/frontend_server_starter.dart:13)
+    <asynchronous suspension>
+
+    Target kernel_snapshot_program failed: Exception
+    Failed to package /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Could not build the application for the simulator.
+Application failed to start on attempt: 1
+Application failed to start on attempt: 2
+Application failed to start on attempt: 3
+Application failed to start. Will not run test. Quitting.
+
+# exit code: 1
+# e2e_ios.sh: FAIL, build failed (marker: BUILD FAILED) although the runner exited with 1

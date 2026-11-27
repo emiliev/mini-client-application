@@ -1,0 +1,103 @@
+==> Task T-0055, role engineer, project /tmp/mc-T-0055-engineer-base/app/mini_client
+==> Evidence dir: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline
+==> Creating simulator mc-T-0055-engineer-357 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0055-engineer-357
+SIMULATOR_UDID=C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+SIMULATOR_CREATED_AT=1795774084
+==> Booting C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==> Booted in 23 s
+==> Running target 1/11: integration_test/analytics_screens_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/analytics_screens_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-analytics_screens_test.log
+==>   screenshot 01_home.png (downscaled from 1206x2622)
+==>   screenshot 02_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 03_back_to_home.png (downscaled from 1206x2622)
+==> PASS integration_test/analytics_screens_test.dart (53 s)
+==> Running target 2/11: integration_test/character_details_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/character_details_deeplink_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-character_details_deeplink_test.log
+==>   screenshot 55_deep_link_character_details.png (downscaled from 1206x2622)
+==>   screenshot 55b_back_from_details_is_list.png (downscaled from 1206x2622)
+==>   screenshot 55c_back_from_list_is_home.png (downscaled from 1206x2622)
+==> PASS integration_test/character_details_deeplink_test.dart (30 s)
+==> Running target 3/11: integration_test/characters_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_deeplink_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-characters_deeplink_test.log
+==>   screenshot 05_deep_link_characters.png (downscaled from 1206x2622)
+==>   screenshot 05b_back_from_characters_is_home.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_deeplink_test.dart (25 s)
+==> Running target 4/11: integration_test/characters_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-characters_journey_test.log
+e2e_ios: warning: screenshot 01_home.png from integration_test/characters_journey_test.dart clashes with an earlier one; saving it as characters_journey_test-01_home.png
+==>   screenshot characters_journey_test-01_home.png (downscaled from 1206x2622)
+e2e_ios: warning: screenshot 02_characters_list.png from integration_test/characters_journey_test.dart clashes with an earlier one; saving it as characters_journey_test-02_characters_list.png
+==>   screenshot characters_journey_test-02_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 03_preview.png (downscaled from 1206x2622)
+==>   screenshot 04_full_profile_placeholder.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_journey_test.dart (26 s)
+==> Running target 5/11: integration_test/characters_link_after_flow_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-characters_link_after_flow_test.log
+==>   screenshot 06_link_after_flow.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_link_after_flow_test.dart (23 s)
+==> Running target 6/11: integration_test/comic_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-comic_deeplink_test.log
+==>   screenshot 18_deep_link_comic.png (downscaled from 1206x2622)
+==>   screenshot 18b_back_from_comic_is_home.png (downscaled from 1206x2622)
+==>   screenshot 19_link_to_running_app_comic.png (downscaled from 1206x2622)
+==>   screenshot 20_bad_comic_link_not_found.png (downscaled from 1206x2622)
+==> PASS integration_test/comic_deeplink_test.dart (31 s)
+==> Running target 7/11: integration_test/comics_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comics_journey_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-comics_journey_test.log
+==>   screenshot 10_home.png (downscaled from 1206x2622)
+==>   screenshot 11_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 12_preview_related_comics.png (downscaled from 1206x2622)
+==>   screenshot 13_comic_page.png (downscaled from 1206x2622)
+==>   screenshot 14_sign_in_sheet.png (downscaled from 1206x2622)
+==>   screenshot 15_favourite_saved.png (downscaled from 1206x2622)
+==>   screenshot 16_comic_cast.png (downscaled from 1206x2622)
+==>   screenshot 17_cast_member_placeholder.png (downscaled from 1206x2622)
+==> PASS integration_test/comics_journey_test.dart (37 s)
+==> Running target 8/11: integration_test/reading_list_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_deeplink_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-reading_list_deeplink_test.log
+==>   screenshot 37_deep_link_new_list.png (downscaled from 1206x2622)
+==>   screenshot 37b_back_from_new_list_is_home.png (downscaled from 1206x2622)
+==>   screenshot 37c_editor_after_link_replaced_it.png (downscaled from 1206x2622)
+==>   screenshot 38_link_edit_list.png (downscaled from 1206x2622)
+==> PASS integration_test/reading_list_deeplink_test.dart (28 s)
+==> Running target 9/11: integration_test/reading_list_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_journey_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-reading_list_journey_test.log
+==>   screenshot 30_home_new_reading_list.png (downscaled from 1206x2622)
+==>   screenshot 31_sign_in_sheet.png (downscaled from 1206x2622)
+==>   screenshot 32_step1_blocked.png (downscaled from 1206x2622)
+==>   screenshot 33_step1_details.png (downscaled from 1206x2622)
+==>   screenshot 34_step2_comics.png (downscaled from 1206x2622)
+==>   screenshot 35_step3_review.png (downscaled from 1206x2622)
+==>   screenshot 36_home_list_created.png (downscaled from 1206x2622)
+==> PASS integration_test/reading_list_journey_test.dart (41 s)
+==> Running target 10/11: integration_test/search_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-search_deeplink_test.log
+==>   screenshot 36_deep_link_search.png (downscaled from 1206x2622)
+==>   screenshot 36b_back_from_search_is_home.png (downscaled from 1206x2622)
+==>   screenshot 37_link_to_running_app_search.png (downscaled from 1206x2622)
+==> PASS integration_test/search_deeplink_test.dart (38 s)
+==> Running target 11/11: integration_test/search_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_journey_test.dart -d C4192EDA-8C93-4DCA-AACB-CAC2CA870138
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-search_journey_test.log
+==>   screenshot 30_home_search_entry.png (downscaled from 1206x2622)
+==>   screenshot 31_search_opened.png (downscaled from 1206x2622)
+==>   screenshot 32_search_results_grouped.png (downscaled from 1206x2622)
+==>   screenshot 33_search_comics_chip.png (downscaled from 1206x2622)
+==>   screenshot 34_comic_from_search.png (downscaled from 1206x2622)
+==>   screenshot 35_recent_searches.png (downscaled from 1206x2622)
+==> PASS integration_test/search_journey_test.dart (39 s)
+==> Summary: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/rebaseline/e2e-summary.md
+==> RESULT: PASS (11 target(s))
+==> Deleted simulator mc-T-0055-engineer-357 (C4192EDA-8C93-4DCA-AACB-CAC2CA870138)
+SIMULATOR_DELETED_AT=1795774486

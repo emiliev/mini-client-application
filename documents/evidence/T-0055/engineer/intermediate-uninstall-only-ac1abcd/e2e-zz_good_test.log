@@ -1,0 +1,58 @@
+# e2e_ios.sh: T-0055 engineer on mc-T-0055-engineer-53610 (882BBD31-FB04-4780-98F5-8C4ECBD138AA)
+# cwd: /tmp/mc-T-0055-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.rSp2y2/screenshots/1-zz_good_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_good_test.dart -d 882BBD31-FB04-4780-98F5-8C4ECBD138AA
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient from 882BBD31-FB04-4780-98F5-8C4ECBD138AA before this target
+Resolving dependencies in `/private/tmp/mc-T-0055-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0055-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            6.2s
+Failed to check availability in Spotlight for action com.apple.mobilephone.call: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x600001121710 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.InCallService, IS=false}}}
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003da4000> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+Failed to index action parameter: <WFDynamicTagFieldParameter: 0x600003d601e0> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter)
+Failed to index action parameter: <WFDynamicTagFieldParameter: 0x600003d60960> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFDynamicTagFieldParameter)
+Failed to index action parameter: <WFHomeServicePickerParameter: 0x60000374f000> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeServicePickerParameter)
+Failed to index action parameter: <WFSystemShortcutPickerParameter: 0x600003764180> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter)
+is.workflow.actions.useractivity.open WFOpenUserActivityAction: Skipped because: [donation-based action]
+Failed to check availability in Spotlight for action is.workflow.actions.lightroom.import: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x6000011707b0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.adobe.lrmobile, IS=false}}}
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57164/mx5M4L0dvh0=/
+VMServiceFlutterDriver: Isolate found with number: 2931433665319827
+VMServiceFlutterDriver: Isolate 2931433665319827 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0055 good target
+Failed to index action parameter: <WFContentArrayParameter: 0x6000039c5790> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFContentArrayParameter)
+VMServiceFlutterDriver: Connected to Flutter application.
+Failed to index action parameter: <WFPosterPickerParameter: 0x600003752580> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter)
+Failed to index action parameter: <WFEvernoteTagsTagFieldParameter: 0x600003d0ed00> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter)
+flutter: 00:00 +1: (tearDownAll)
+All tests passed.
+flutter: 00:00 +2: All tests passed!
+Failed to check availability in Spotlight for action is.workflow.actions.workout.end: Error Domain=NSOSStatusErrorDomain Code=-10814 "(null)" UserInfo={_LSLine=156, _LSFunction=+[LSBundleRecord bundleRecordWithBundleIdentifier:allowPlaceholder:error:], _LSFile=LSBundleRecord.mm, NSUnderlyingError=0x6000011872d0 {Error Domain=NSOSStatusErrorDomain Code=-10814 "Unable to find this application extension record in the Launch Services database." UserInfo={_LSLine=652, _LSFunction=_LSPluginFindWithPlatformInfo, _LSFile=LSPluginBundle.mm, NSDebugDescription=Unable to find this application extension record in the Launch Services database., SK=com.apple.SessionTrackerApp, IS=false}}}
+Failed to index action parameter: <WFSpotlightSearchResultTypePickerParameter: 0x102d56770> due to ActionKit.(unknown context at $1c41e9db8).WFParameterStateToolKitConversionError.unknownParameterState(WFMultipleValueParameterState)
+Failed to index action parameter: <WFHomeAccessoryPickerParameter: 0x60000375a880> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFHomeAccessoryPickerParameter)
+Indexed: 1128
+Errored: 0
+Skipped: [control flow: 4, donation-based action: 2]
+   control flow: 4
+   donation-based action: 2
+Finished in 19.804813s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+
+# exit code: 0

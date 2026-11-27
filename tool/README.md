@@ -24,6 +24,8 @@ tool/e2e_ios.sh --task T-0010 --role verifier --project . \
 | `--runtime <id>` | `com.apple.CoreSimulator.SimRuntime.iOS-26-2` | Simulator runtime. |
 | `--evidence-dir <dir>` | `<repo>/documents/evidence/<task>/<role>` | Where the summary, logs and screenshots go. One dir per role, so Engineer and Verifier runs never overwrite each other. |
 | `--runner-cmd "<cmd>"` | `fvm flutter drive --driver={driver} --target={target} -d {udid}` | Command run once per target. `{target}`, `{driver}` and `{udid}` are replaced (shell-quoted); `$SCREENSHOT_DIR` is exported. |
+| `--bundle-id <id>` | Debug id of `ios/Runner.xcodeproj` | App bundle id to uninstall before each target (see "Build failures" below). |
+| `--keep-build` | off | Don't delete `build/ios/iphonesimulator` before each target (for runners that reuse a prebuilt app). |
 | `--keep-sim` | off | Don't delete the simulator; the script prints how to delete it. |
 
 What it does:
@@ -40,6 +42,10 @@ Machine-readable lines on stdout: `SIMULATOR_NAME=`, `SIMULATOR_UDID=`, `SIMULAT
 Exit codes: `0` all targets passed, `1` at least one target failed, `2` bad arguments or failed pre-flight (no simulator created), `3` simulator setup failed (or its deletion couldn't be confirmed), `4` evidence (log, screenshot or summary) couldn't be written, `130` / `143` interrupted by SIGINT / SIGTERM.
 
 Timings on this Mac (iPhone 17 Pro, iOS 26.2): pre-flight about 1 s, boot about 16 s, first `flutter drive` of a project about 30 to 45 s (cold Xcode build), later runs about 15 s, teardown about 1 s. The first run after a Flutter SDK change also downloads the SDK's iOS artifacts and migrates the project, which took about 65 s on its own.
+
+Build failures never pass ([T-0055](../documents/tasks/T-0055-e2e-false-pass.md), [F-0055](../documents/findings/F-0055-e2e-false-pass.md)). `flutter drive` exits 0 when the Xcode build fails but an older `build/ios/iphonesimulator/Runner.app` is left over from a previous target: it prints `Application failed to start on attempt: 1`, installs and runs that old app, and reports its tests as passed. Two independent defences:
+1. **No stale app.** Before each target the script runs `simctl uninstall` for the app's bundle id (the Debug id from `xcodebuild -showBuildSettings -scheme Runner`, else the Xcode project file; a `$(VAR)` value is refused; `--bundle-id` overrides) and deletes the project's `build/ios/iphonesimulator` (Xcode's intermediates stay, so builds are still incremental). The delete is the one that matters: uninstalling alone is not enough, because `flutter drive` re-installs the leftover bundle. The delete happens **only for the default `flutter drive` runner**: never with `--keep-build`, nor when the runner command has `--use-application-binary` or `--no-build`, nor for a custom runner without `flutter drive` in its command. The log's first lines record what was really done (`uninstalled <id>` only if `simctl` succeeded).
+2. **Build-failure markers.** A target whose runner output (everything after the `# --- runner output ---` line the script writes, so the echoed command is not scanned) contains one of these lines is FAIL, whatever the exit code, and the summary shows `FAIL (build failed: <marker>)`: `BUILD FAILED`, `Error (Xcode)`, `Failed to build iOS app`, `Could not build the application`, `Error: Compilation failed`, or a Dart compile error line (`<file>.dart:<line>:<col>: Error:`). `Application failed to start on attempt: N` is deliberately **not** a marker: a launch that timed out and then recovered prints it too. The list is `E2E_BUILD_FAIL_MARKERS` at the top of `e2e_ios.sh`; it is the only place to change it.
 
 Notes:
 - Parallel runs are safe as long as each uses its own project folder (own `build/`), which separate worktrees give you (F-0004 gotcha 8).
@@ -74,6 +80,18 @@ The suite creates a throwaway Flutter app in a temp dir (`fvm flutter create`, a
 | `test_T-0012-AC5_bad_runtime_or_device_fails_fast` | bad `--runtime` and bad `--device`: exit 2 in under 10 s, message names the value, no simulator | about 1 s |
 | `test_T-0012-AC6_cleanup_only_mc_simulators` | `sim_cleanup.sh` deletes booted and shut-down `mc-` simulators, keeps the control one; `--dry-run` deletes nothing | about 20 s |
 | `test_T-0012-AC7_small_screenshot_not_upscaled` | images of 600 and 1200 px are copied byte for byte, 1800 px is shrunk to 1200; also end to end through a stub `--runner-cmd` | about 20 s |
+
+T-0055 tests (build failures never pass):
+
+| Test | Covers | Time |
+|---|---|---|
+| `test_T-0055-AC1_good_pass_runtime_fail_build_fail` | through the real script with a fake runner: good PASS, runtime failure plain FAIL, build error with exit 0 `FAIL (build failed)`, a build error as the only target FAIL | about 50 s |
+| `test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner` | build dir deleted for the default runner; kept with `--keep-build`, `--no-build`, `--use-application-binary` and custom runners; the log note is true when the uninstall fails | about 1 s |
+| `test_T-0055-AC1_keep_build_flag_through_the_script` | `--keep-build` keeps the dir, the default deletes it, through the script | about 50 s |
+| `test_T-0055-AC1_bundle_id_resolution` | pbxproj fallback skips RunnerTests, a `$(VAR)` id is refused, `--bundle-id` wins | about 2 s |
+| `test_T-0055-AC2_command_text_with_marker_is_not_a_failure` | a runner command that only mentions `BUILD FAILED` is PASS (sentinel) | about 25 s |
+| `test_T-0055-AC2_every_marker_is_found_in_a_log` | every marker in `E2E_BUILD_FAIL_MARKERS` and a Dart compile error line is found in a log; a clean log, a bare `Error:` and a marker in the log header are not | about 1 s |
+| `test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail` | through the real script and a simulator, a fake runner that prints each marker and exits 0 gives `FAIL (build failed: ...)` and exit 1; a clean last target stays PASS | about 30 s |
 
 Regression tests for the code-review findings, each named after the AC it protects:
 

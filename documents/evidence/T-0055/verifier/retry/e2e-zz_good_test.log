@@ -1,0 +1,11 @@
+# e2e_ios.sh: T-0055 verifier on mc-T-0055-verifier-39039 (27E16CB9-0A6E-4C7D-87A4-69772CC22A2D)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BT7FLf/screenshots/1-zz_good_test
+$ /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/fake.sh retry integration_test/zz_good_test.dart
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient; kept build/ios/iphonesimulator (custom runner or --keep-build)
+# --- runner output ---
+Application failed to start on attempt: 1
+flutter: 00:01 +1: All tests passed!
+
+# exit code: 0

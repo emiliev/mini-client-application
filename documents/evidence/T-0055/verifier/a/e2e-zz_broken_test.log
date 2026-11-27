@@ -1,0 +1,54 @@
+# e2e_ios.sh: T-0055 verifier on mc-T-0055-verifier-65545 (CA77B7DC-9285-44F4-88F0-C75805197E32)
+# cwd: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7XrhAe/screenshots/2-zz_broken_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_broken_test.dart -d CA77B7DC-9285-44F4-88F0-C75805197E32
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                            4.2s
+Failed to build iOS app
+Error output from Xcode build:
+↳
+    ** BUILD FAILED **
+
+
+Xcode's output:
+↳
+    Writing result bundle at path:
+    	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.DBsThF/flutter_ios_build_temp_dirIZOhxO/temporary_xcresult_bundle
+
+    integration_test/zz_broken_test.dart:6:63: Error: A value of type 'String' can't be assigned to a variable of type 'int'.
+      testWidgets('zz_broken_test ran', (t) async { final int x = 'not an int'; expect(x, 1); });
+                                                                  ^
+    Target kernel_snapshot_program failed: Exception
+    Failed to package /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client.
+    Command PhaseScriptExecution failed with a nonzero exit code
+    note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+
+Could not build the application for the simulator.
+Application failed to start on attempt: 1
+Application failed to start on attempt: 2
+Application failed to start on attempt: 3
+Application failed to start. Will not run test. Quitting.
+
+# exit code: 1
+# e2e_ios.sh: FAIL, build failed (marker: BUILD FAILED) although the runner exited with 1

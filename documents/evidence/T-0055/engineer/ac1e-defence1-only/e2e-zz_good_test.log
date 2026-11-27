@@ -1,0 +1,44 @@
+# e2e_ios.sh: T-0055 engineer on mc-T-0055-engineer-71762 (61AECE18-4E3B-49EE-BB81-155ABA18F2FE)
+# cwd: /tmp/mc-T-0055-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.OQ8tZy/screenshots/1-zz_good_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_good_test.dart -d 61AECE18-4E3B-49EE-BB81-155ABA18F2FE
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient
+Resolving dependencies in `/private/tmp/mc-T-0055-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0055-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           11.5s
+Failed to index parameter type: <WFPosterPickerParameter: 0x600003755f80> in is.workflow.actions.wallpaper.set: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFPosterPickerParameter) for locale: en
+Failed to index parameter type: <WFTagFieldParameter: 0x600003b957a0> in is.workflow.actions.addnewreminder: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFTagFieldParameter) for locale: en
+Failed to index parameter type: <WFMailSenderPickerParameter: 0x10454f3b0> in is.workflow.actions.sendemail: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingIntentDescription for locale: en
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:59980/FhUU2apvdHk=/
+Failed to index parameter type: <WFEvernoteTagsTagFieldParameter: 0x600003d4b2a0> in is.workflow.actions.evernote.get: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFEvernoteTagsTagFieldParameter) for locale: en
+VMServiceFlutterDriver: Isolate found with number: 3417891281521187
+VMServiceFlutterDriver: Isolate 3417891281521187 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0055 good target
+VMServiceFlutterDriver: Connected to Flutter application.
+Skipping: <WFUnionParameter: 0x600003b716c0> in com.apple.MobileSMS.SendMessageReactionIntent because union values themselves are not treated as a type
+Failed to index parameter type: <WFSystemShortcutPickerParameter: 0x60000374a1c0> in com.apple.shortcuts.WFShortcutsSmallWidgetConfigurationIntent: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSystemShortcutPickerParameter) for locale: en
+Failed to index parameter type: <WFSSHKeyParameter: 0x600003762400> in is.workflow.actions.runsshscript: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.incompatibleParameterType(WFSSHKeyParameter) for locale: en
+flutter: 00:00 +1: (tearDownAll)
+flutter: 00:00 +2: All tests passed!
+All tests passed.
+
+# exit code: 0

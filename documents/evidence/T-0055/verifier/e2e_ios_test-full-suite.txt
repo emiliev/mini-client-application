@@ -1,0 +1,92 @@
+T-0012 e2e runner test suite
+  scripts run with: /bin/bash (3.2.57(1)-release)
+  device: iPhone 17 Pro, runtime: com.apple.CoreSimulator.SimRuntime.iOS-26-2
+  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.sysWei
+RUN  test_T-0012-AC1_pass_run_collects_evidence
+    creating fixture app in /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.sysWei/fixture_base
+    fixture ready in 2 s
+    exit code 0; simulator mc-T-0012-engineer-86949
+    01_list.png: 1200 px tall
+    02_detail.png: 1200 px tall
+PASS test_T-0012-AC1_pass_run_collects_evidence (84 s)
+RUN  test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom
+    unit: cp and sips failures both return non-zero with no note
+    run with an unwritable screenshot: exit 4
+PASS test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom (30 s)
+RUN  test_T-0012-AC1_multiple_targets_get_unique_names
+    3 targets: logs e2e-a_test{,-2,-2-2}.log; screenshots x, a_test-x, a_test-3-x, a_test-2-x
+PASS test_T-0012-AC1_multiple_targets_get_unique_names (23 s)
+RUN  test_T-0012-AC2_failing_target_reports_fail
+    exit code 1; simulator mc-T-0012-engineer-96042
+PASS test_T-0012-AC2_failing_target_reports_fail (95 s)
+RUN  test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint
+    pass run: exit 0, simulator mc-T-0012-engineer-98805
+    fail run: exit 1, simulator mc-T-0012-engineer-1120
+    sending SIGINT to pid 2822 while flutter drive runs on mc-T-0012-verifier-2822
+    interrupted run: exit 130
+PASS test_T-0012-AC3_no_simulator_left_after_pass_fail_sigint (136 s)
+RUN  test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans
+    SIGINT to the process group, then again 1 s later during teardown (mc-T-0012-engineer-3888)
+    exit 130
+PASS test_T-0012-AC3_teardown_survives_second_sigint_and_kills_orphans (34 s)
+RUN  test_T-0012-AC4_parallel_runs_isolated
+    engineer: exit 0, mc-T-0012-engineer-4970 (2721EE76-8930-47C9-A385-29AACC5C6840)
+    verifier: exit 0, mc-T-0012-verifier-4971 (5DB4F05A-FC9C-43A8-95C6-965E6372B45F)
+    simulators overlapped for 98 s
+PASS test_T-0012-AC4_parallel_runs_isolated (102 s)
+RUN  test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset
+    engineer exit 0, verifier exit 0
+    per-role dirs written; stale.png and e2e-old.log removed; notes.md kept
+PASS test_T-0012-AC4_default_evidence_dir_is_per_role_and_reset (37 s)
+RUN  test_T-0012-AC5_bad_runtime_or_device_fails_fast
+    bad --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9': exit 2 in 0 s: e2e_ios: error: unknown or unavailable --runtime 'com.apple.CoreSimulator.SimRuntime.iOS-99-9' (available iOS runtimes: com.apple.CoreSimulator.SimRuntime.iOS-18-2, com.apple.CoreSimulator.SimRuntime.iOS-26-0, com.apple.CoreSimulator.SimRuntime.iOS-26-2)
+    bad --device 'iPhone 99 Ultra': exit 2 in 0 s: e2e_ios: error: unknown --device 'iPhone 99 Ultra' (list them with: xcrun simctl list devicetypes)
+PASS test_T-0012-AC5_bad_runtime_or_device_fails_fast (1 s)
+RUN  test_T-0012-AC5_fvm_checked_only_when_runner_uses_it
+    default runner needs fvm; --runner-cmd true does not (reached the runtime check)
+PASS test_T-0012-AC5_fvm_checked_only_when_runner_uses_it (0 s)
+RUN  test_T-0012-AC6_cleanup_only_mc_simulators
+    private set: mc-T-0012-orphan-a-86587 (Booted), mc-T-0012-orphan-b-86587 (Shutdown), control zz-T-0012-control-86587
+    default set: 34 non-mc simulators untouched
+PASS test_T-0012-AC6_cleanup_only_mc_simulators (25 s)
+RUN  test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
+    fakebin-fail: exit 3
+    fakebin-badjson: exit 3
+PASS test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails (0 s)
+RUN  test_T-0012-AC7_small_screenshot_not_upscaled
+    600 px: unchanged 300x600
+    1200 px: unchanged 600x1200
+    1800 px: downscaled from 600x1800
+    stub run: exit 0 on mc-T-0012-engineer-11060
+PASS test_T-0012-AC7_small_screenshot_not_upscaled (25 s)
+RUN  test_T-0055-AC1_good_pass_runtime_fail_build_fail
+    ac1-mixed: exit 1 on mc-T-0012-engineer-11880
+    ac1-alone: exit 1 on mc-T-0012-engineer-12956
+PASS test_T-0055-AC1_good_pass_runtime_fail_build_fail (62 s)
+RUN  test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner
+    default: removed; --keep-build, --no-build, --use-application-binary, custom runner: kept
+PASS test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner (0 s)
+RUN  test_T-0055-AC1_keep_build_flag_through_the_script
+    --keep-build: exit 0 on mc-T-0012-engineer-13920
+    default: exit 0 on mc-T-0012-engineer-14620
+PASS test_T-0055-AC1_keep_build_flag_through_the_script (45 s)
+RUN  test_T-0055-AC1_bundle_id_resolution
+PASS test_T-0055-AC1_bundle_id_resolution (1 s)
+RUN  test_T-0055-AC2_every_marker_is_found_in_a_log
+    found: BUILD FAILED
+    found: Error (Xcode)
+    found: Failed to build iOS app
+    found: Could not build the application
+    found: Error: Compilation failed
+    found: Dart compile error line
+    controls: clean log, bare 'Error:', a launch retry and a marker in the header are not reported
+PASS test_T-0055-AC2_every_marker_is_found_in_a_log (0 s)
+RUN  test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail
+    ac2-markers: exit 1 on mc-T-0012-engineer-15428
+PASS test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail (24 s)
+RUN  test_T-0055-AC2_command_text_with_marker_is_not_a_failure
+    exit 0 on mc-T-0012-engineer-16632
+PASS test_T-0055-AC2_command_text_with_marker_is_not_a_failure (24 s)
+
+Summary: 20 passed, 0 failed, 20 total in 748 s
+RESULT: PASS

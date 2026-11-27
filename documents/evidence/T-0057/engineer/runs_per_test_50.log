@@ -1,0 +1,12 @@
+INFO: Invocation ID: f49aeff5-7658-4a18-a0c0-1bc317831ed7
+Computing main repo mapping: 
+
+INFO: Analyzed target //app/wiring/app_core:flow_results_hardening_test (0 packages loaded, 16 targets configured, 33 aspect applications).
+INFO: Found 1 test target...
+INFO: Elapsed time: 35.325s, Critical Path: 15.11s
+INFO: 59 processes: 31 action cache hit, 5 disk cache hit, 4 internal, 50 darwin-sandbox.
+INFO: Build completed successfully, 59 total actions
+//app/wiring/app_core:flow_results_hardening_test                        PASSED in 10.0s
+  Stats over 50 runs: max = 10.0s, min = 2.7s, avg = 5.3s, dev = 2.0s
+
+Executed 1 out of 1 test: 1 test passes.
