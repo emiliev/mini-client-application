@@ -82,8 +82,7 @@ class _BannerCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final p = context.mcPalette;
     final text = Theme.of(context).textTheme;
-    void open() =>
-        context.read<BannersBloc>().add(BannersEvent.open(banner));
+    void open() => context.read<BannersBloc>().add(BannersEvent.open(banner));
     return Semantics(
       key: ValueKey('store_home.banner.${banner.id}'),
       button: true,

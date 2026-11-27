@@ -73,7 +73,8 @@ final class DealsBloc
   DealsState loadingState() => const DealsState.loading();
 
   @override
-  DealsState readyState(List<Deal> data) => DealsState.ready(data, _clock.now());
+  DealsState readyState(List<Deal> data) =>
+      DealsState.ready(data, _clock.now());
 
   @override
   DealsState emptyState() => const DealsState.empty();

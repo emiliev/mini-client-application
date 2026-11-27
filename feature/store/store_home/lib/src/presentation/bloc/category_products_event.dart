@@ -14,8 +14,7 @@ sealed class CategoryProductsEvent {
   const factory CategoryProductsEvent.retry() = _Retry;
 
   /// Pull to refresh: reloads the first page and keeps the items meanwhile.
-  const factory CategoryProductsEvent.refresh(Completer<void> done) =
-      _Refresh;
+  const factory CategoryProductsEvent.refresh(Completer<void> done) = _Refresh;
 
   /// A product was tapped: its comic opens.
   const factory CategoryProductsEvent.open(Product product) = _Open;

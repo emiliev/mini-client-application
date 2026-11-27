@@ -45,8 +45,10 @@ class DealsSection extends StatelessWidget {
             height: height,
             itemWidth: _cardWidth,
           ),
-          empty: () =>
-              SectionEmpty(section: _section, message: l10n.storeHomeDealsEmpty),
+          empty: () => SectionEmpty(
+            section: _section,
+            message: l10n.storeHomeDealsEmpty,
+          ),
           failure: (error, _) => SectionError(
             section: _section,
             title: l10n.storeHomeDealsError,
@@ -89,7 +91,8 @@ class _DealCard extends StatelessWidget {
       button: true,
       container: true,
       label: deal.product.title,
-      value: '$discount, ${l10n.storeHomeDealPrices(original, price)}, '
+      value:
+          '$discount, ${l10n.storeHomeDealPrices(original, price)}, '
           '$endsIn',
       onTap: open,
       child: ExcludeSemantics(

@@ -86,8 +86,7 @@ class _StoreHomeContent extends StatelessWidget {
       if (featured)
         one((d) => context.read<FeaturedBloc>().add(FeaturedEvent.refresh(d))),
       one(
-        (d) =>
-            context.read<CartSummaryBloc>().add(CartSummaryEvent.refresh(d)),
+        (d) => context.read<CartSummaryBloc>().add(CartSummaryEvent.refresh(d)),
       ),
     ]);
   }

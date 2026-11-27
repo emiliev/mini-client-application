@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_prelude/mc_prelude.dart';
 import 'package:store_home/src/domain/model/store_analytics.dart';
 

@@ -103,7 +103,7 @@ Feature: The store front
 
   @T-0056-AC2
   Scenario: An empty store shows each section's empty state
-    Given the backend serves {'commerce.empty'}
+    Given the backend runs the scenario {'commerce.empty'}
     And I am signed in as {'reader@mini-client.test'}
     When I open the store
     Then the {'banners'} section shows {'No highlights right now.'}
@@ -125,13 +125,14 @@ Feature: The store front
       | 'id'      | '"501501"' |
 
   @T-0056-AC3
-  Scenario: A double tap on a deal opens its comic once; a tap after the guard opens it again
+  Scenario: A second tap on a deal within 500 ms is ignored; one after it opens the comic again
     When I open the store
     And I tap {'Amber Frontier #2'} in the {'deals'} section twice in quick succession
     Then the app was asked to open comic {501501} {1} times
-    When {500} milliseconds pass
-    And I tap {'Amber Frontier #2'} in the {'deals'} section
+    When I tap {'Amber Frontier #2'} in the {'deals'} section and again after {499} milliseconds
     Then the app was asked to open comic {501501} {2} times
+    When I tap {'Amber Frontier #2'} in the {'deals'} section and again after {500} milliseconds
+    Then the app was asked to open comic {501501} {4} times
 
   @T-0056-AC3
   Scenario: A featured comic opens its comic, once

@@ -20,7 +20,9 @@ class StoreHomeRepository {
   final StoreHomeApi _api;
 
   Future<Result<List<StoreBanner>, ApiFailure>> fetchBanners() => apiCall(
-    () async => [for (final b in (await _api.getBanners()).banners) b.toDomain()],
+    () async => [
+      for (final b in (await _api.getBanners()).banners) b.toDomain(),
+    ],
   );
 
   Future<Result<List<Deal>, ApiFailure>> fetchDeals() => apiCall(

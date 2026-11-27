@@ -86,17 +86,20 @@ class SectionSkeleton extends StatelessWidget {
         padding: McInsets.horizontal,
         child: width == null
             ? block(null)
-            : ClipRect(
-                child: OverflowBox(
-                  alignment: AlignmentDirectional.centerStart,
-                  maxWidth: double.infinity,
-                  child: Row(
-                    children: [
-                      for (var i = 0; i < 4; i++) ...[
-                        if (i > 0) const SizedBox(width: McSpacing.md),
-                        block(width),
+            : SizedBox(
+                height: height,
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: AlignmentDirectional.centerStart,
+                    maxWidth: double.infinity,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < 4; i++) ...[
+                          if (i > 0) const SizedBox(width: McSpacing.md),
+                          block(width),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),

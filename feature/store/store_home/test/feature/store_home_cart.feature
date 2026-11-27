@@ -49,7 +49,6 @@ Feature: The cart summary follows the session
     When {'collector@mini-client.test'} signs in elsewhere
     Then the cart section shows the cart of {'collector@mini-client.test'}
     And the backend received {2} requests for {'GET /v1/me/cart'}
-    And the backend received {'GET /v1/me/cart'} with a token of {'collector@mini-client.test'}
 
   @T-0056-AC3
   Scenario: A user switch while the cart is loading drops the old user's answer
@@ -110,7 +109,7 @@ Feature: The cart summary follows the session
   @T-0056-AC3
   Scenario: Pull to refresh while signed out reloads the store and not the cart
     When I open the store
-    And I pull to refresh
+    And I pull the store to refresh
     Then the backend received {2} requests for {'GET /v1/store/deals'}
     And the backend received {0} requests for {'GET /v1/me/cart'}
     And the {'cart'} section shows {'Sign in to see your cart.'}

@@ -9,6 +9,7 @@ import 'package:mc_feature_flow/testing.dart';
 import 'package:mc_fixtures_commerce/mc_fixtures_commerce.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
+import 'package:mc_l10n_core/mc_l10n_core.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mocktail/mocktail.dart';
@@ -30,8 +31,23 @@ final Expando<List<Completer<bool>>> _signIns = Expando('store_home sign-ins');
 MockStoreHomeNavigator storeNavigator() =>
     _navigators[McTestSession.current] ??= _newNavigator();
 
+/// Every hand-over the feature asked the app for, in order
+/// (`comic 501501`, `search amber`, `cart`): counted in all, unlike
+/// mocktail's verify, which forgets what it already verified.
+List<String> navigatorCalls() => _calls[McTestSession.current] ??= [];
+final Expando<List<String>> _calls = Expando('store_home navigator calls');
+
 MockStoreHomeNavigator _newNavigator() {
   final navigator = MockStoreHomeNavigator();
+  when(() => navigator.openComic(any())).thenAnswer(
+    (i) => navigatorCalls().add(
+      'comic ${(i.positionalArguments.single as ComicId).value}',
+    ),
+  );
+  when(() => navigator.openSearch(any())).thenAnswer(
+    (i) => navigatorCalls().add('search ${i.positionalArguments.single}'),
+  );
+  when(navigator.openCart).thenAnswer((_) => navigatorCalls().add('cart'));
   when(navigator.requestSignIn).thenAnswer((_) {
     final answer = Completer<bool>();
     pendingSignIns().add(answer);
@@ -144,16 +160,17 @@ Future<void> scrollStoreUntilVisible(WidgetTester tester, Finder finder) async {
 Future<List<String>> sectionTitlesInOrder(WidgetTester tester) async {
   await scrollStoreToTop(tester);
   final titles = <String>[];
-  final position = tester.state<ScrollableState>(storeBodyScrollable()).position;
+  final position = tester
+      .state<ScrollableState>(storeBodyScrollable())
+      .position;
   for (var step = 0; step < 50; step++) {
-    final shown =
-        [
-          for (final element in find.byType(McSectionHeader).evaluate())
-            (
-              title: (element.widget as McSectionHeader).title,
-              y: tester.getTopLeft(find.byWidget(element.widget)).dy,
-            ),
-        ]..sort((a, b) => a.y.compareTo(b.y));
+    final shown = [
+      for (final element in find.byType(McSectionHeader).evaluate())
+        (
+          title: (element.widget as McSectionHeader).title,
+          y: tester.getTopLeft(find.byWidget(element.widget)).dy,
+        ),
+    ]..sort((a, b) => a.y.compareTo(b.y));
     for (final header in shown) {
       if (!titles.contains(header.title)) {
         titles.add(header.title);
@@ -174,6 +191,7 @@ Future<List<String>> sectionTitlesInOrder(WidgetTester tester) async {
 /// Scrolls the store home to [section] (its header and the start of its
 /// content on screen).
 Future<void> scrollToSection(WidgetTester tester, String section) async {
+  await letSectionsLand(tester);
   await scrollStoreUntilVisible(tester, find.byKey(sectionKey(section)));
   await tester.ensureVisible(find.byKey(sectionKey(section)));
   await tester.pump();
@@ -206,7 +224,8 @@ Future<void> scrollCarouselTo(
 }
 
 /// Scrolls the home to [section] and taps [target] inside it, [times]
-/// times, [between] of fake time apart (zero: within one frame).
+/// times, [between] of fake time apart (zero: within one frame). An item of
+/// a carousel is scrolled into view sideways.
 Future<void> tapIn(
   WidgetTester tester,
   String section,
@@ -218,13 +237,30 @@ Future<void> tapIn(
     of: find.byKey(sectionKey(section)),
     matching: target,
   );
-  if (section == 'banners' || section == 'deals' || section == 'featured') {
-    await scrollCarouselTo(tester, section, scoped.first);
-  } else {
-    await scrollStoreUntilVisible(tester, scoped.first);
-    await tester.ensureVisible(scoped.first);
-    await tester.pump();
+  await scrollToSection(tester, section);
+  final carousel = find.byKey(sectionPartKey(section, 'content'));
+  final isCarousel =
+      carousel.evaluate().isNotEmpty &&
+      find
+          .descendant(of: carousel, matching: find.byType(Scrollable))
+          .evaluate()
+          .isNotEmpty;
+  if (isCarousel && scoped.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      scoped,
+      120,
+      scrollable: carouselScrollable(section),
+    );
   }
+  if (scoped.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      scoped,
+      200,
+      scrollable: storeBodyScrollable(),
+    );
+  }
+  await tester.ensureVisible(scoped.first);
+  await tester.pump();
   expect(scoped.hitTestable(), findsWidgets, reason: 'a tappable target');
   for (var i = 0; i < times; i++) {
     if (i > 0 && between > Duration.zero) {
@@ -286,7 +322,8 @@ String _group(int units, String separator) {
 }
 
 /// Text with its non-breaking and narrow spaces as plain ones.
-String plainSpaces(String text) => text.replaceAll(RegExp('[  ]'), ' ');
+String plainSpaces(String text) =>
+    text.replaceAll(RegExp('[\u00a0\u202f]'), ' ');
 
 /// Puts [quantity] of product [productId] in [email]'s cart, straight on the
 /// backend engine (a minted token, no request through the app's `Dio`), so
@@ -311,8 +348,14 @@ Future<void> putInCart(
   expect(response?.statusCode, 200, reason: 'the cart line was set');
 }
 
+/// The shared Retry label in the running test's locale (`mc_l10n_core`).
+String retryLabel(WidgetTester tester) =>
+    McL10nCoreL10n.of(tester.element(find.byType(Scaffold).first)).commonRetry;
+
 /// Called once per suite by the BDD aggregator (`mc_bdd_tests(setup = ...)`).
 void bddSetUpAll() {
+  // `any()` for the navigator's argument type (an int at run time).
+  registerFallbackValue(const ComicId(0));
   commerceFixtureSets.forEach(McFixtureSets.register);
   identityFixtureSets.forEach(McFixtureSets.register);
 }

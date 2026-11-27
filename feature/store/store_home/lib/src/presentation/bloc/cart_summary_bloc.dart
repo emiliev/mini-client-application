@@ -33,8 +33,7 @@ part 'cart_summary_state.dart';
 ///   (T-0050), so it never goes out with another user's bearer.
 @injectable
 final class CartSummaryBloc
-    extends
-        StoreSectionBloc<CartSummaryEvent, CartSummaryState, CartSummary> {
+    extends StoreSectionBloc<CartSummaryEvent, CartSummaryState, CartSummary> {
   CartSummaryBloc(
     this._repository,
     this._navigator,
@@ -141,8 +140,7 @@ final class CartSummaryBloc
   CartSummaryState loadingState() => const CartSummaryState.loading();
 
   @override
-  CartSummaryState readyState(CartSummary data) =>
-      CartSummaryState.ready(data);
+  CartSummaryState readyState(CartSummary data) => CartSummaryState.ready(data);
 
   @override
   CartSummaryState emptyState() => const CartSummaryState.empty();

@@ -71,7 +71,6 @@ class _ProductCard extends StatelessWidget {
       product.dealPrice ?? product.price,
       Localizations.localeOf(context).toString(),
     ),
-    onTap: () =>
-        context.read<FeaturedBloc>().add(FeaturedEvent.open(product)),
+    onTap: () => context.read<FeaturedBloc>().add(FeaturedEvent.open(product)),
   );
 }

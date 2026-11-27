@@ -48,7 +48,7 @@ Feature: Independent sections
     When I open the store
     And the app sends {'GET /v1/store/deals'}
     Then the {'deals'} section is loading
-    When I pull to refresh
+    When I pull the store to refresh
     Then the {'deals'} section is ready
     And the backend received {2} requests for {'GET /v1/store/deals'}
     Given the backend fails {'GET /v1/store/deals'} with {'server_error'}
@@ -63,7 +63,7 @@ Feature: Independent sections
     When I open the store
     And the app sends {'GET /v1/store/deals'}
     Given the backend fails {'GET /v1/store/deals'} with {'server_error'}
-    When I pull to refresh
+    When I pull the store to refresh
     Then the {'deals'} section shows its error with Retry
     When the backend recovers
     And the backend releases {'GET /v1/store/deals'}
@@ -78,7 +78,7 @@ Feature: Independent sections
     When I open the store
     Given the backend holds {'GET /v1/store/banners'}
     And the backend holds {'GET /v1/store/categories'}
-    When I pull to refresh
+    When I pull the store to refresh
     Then the backend received {2} requests for {'GET /v1/store/banners'}
     And the backend received {2} requests for {'GET /v1/store/deals'}
     And the backend received {2} requests for {'GET /v1/store/categories'}
@@ -103,7 +103,7 @@ Feature: Independent sections
     And the analytics event {'store_section_viewed'} was tracked with
       | 'key'     | 'json'      |
       | 'section' | '"deals"'   |
-    When I pull to refresh
+    When I pull the store to refresh
     Then the section {'deals'} was viewed {1} times
     When the backend recovers
     And I tap Retry in the {'featured'} section

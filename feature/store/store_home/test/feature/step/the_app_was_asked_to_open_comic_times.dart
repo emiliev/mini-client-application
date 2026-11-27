@@ -1,0 +1,16 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/store_home_env.dart';
+
+/// Usage: the app was asked to open comic {501501} {1} times
+///
+/// `openComic` was called exactly [count] times in all with that comic, and
+/// with no other comic.
+Future<void> theAppWasAskedToOpenComicTimes(
+  WidgetTester tester,
+  int id,
+  int count,
+) async {
+  final comics = navigatorCalls().where((c) => c.startsWith('comic '));
+  expect(comics, List.filled(count, 'comic $id'), reason: 'comics opened');
+}

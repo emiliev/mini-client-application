@@ -137,11 +137,16 @@ final class CategoryProductsBloc
     CategoryId id,
     String name,
   ) => switch (s) {
-    StoreHomeFlowState(category: OpenCategory(id: final open)) when open == id =>
-      s.copyWith(category: OpenCategory(id: id, name: name)),
+    StoreHomeFlowState(category: OpenCategory(id: final open))
+        when open == id =>
+      s.copyWith(
+        category: OpenCategory(id: id, name: name),
+      ),
     StoreHomeFlowState(rootCategory: OpenCategory(id: final root))
         when root == id =>
-      s.copyWith(rootCategory: OpenCategory(id: id, name: name)),
+      s.copyWith(
+        rootCategory: OpenCategory(id: id, name: name),
+      ),
     // The page left meanwhile: nothing to title.
     _ => s,
   };
