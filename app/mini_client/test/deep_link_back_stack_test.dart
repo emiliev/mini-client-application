@@ -13,6 +13,7 @@ import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mini_client/src/mini_client_app.dart';
 import 'package:mini_client/src/pages/placeholder_pages.dart';
+import 'package:mini_client/src/router/app_router.dart';
 
 const _config =
     '{"env":"e2e","backend":{"seed":42,"latencyMs":0,"scenario":"happy"},'
@@ -165,6 +166,13 @@ void main() {
       await walkHome(tester, entry.key);
     });
   }
+
+  test('T-0049-AC3 the app router treats a FlowCall extra as transient', () {
+    final router = buildAppRouter(initialLocation: AppLocations.home);
+    addTearDown(router.dispose);
+
+    expect(router.configuration.extraCodec, isA<FlowExtraCodec>());
+  });
 
   testWidgets('T-0049-AC3 a link to home replaces an open editor: its '
       'buttons work again', (tester) async {

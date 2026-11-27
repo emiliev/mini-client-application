@@ -105,6 +105,20 @@ mutate R3 "FlowCall completes twice (second value wins)" $RESULTS_SRC \
 mutate R4 "home never clears its guard" $HOME_PAGE \
   "s.replace('      _awaiting = false;', '      _awaiting = _awaiting;')" $T_APP
 
+# --- review round: exact stacks, the debug assert, the codec, direct completion
+mutate P1 "a link is a push, not a go (the stack keeps what was open)" $ROUTER \
+  "s.replace('  overridePlatformDefaultLocation: true,\n', '  overridePlatformDefaultLocation: true,\n  onEnter: (c, cur, next, r) { if (cur.uri.toString().isEmpty || _p.contains(next.uri.toString())) return const Allow(); _p.add(next.uri.toString()); return Block.then(() => r.push(next.uri.toString())); },\n').replace('GoRouter buildAppRouter', 'final _p = <String>{};\nGoRouter buildAppRouter')" $T_APP
+mutate R5 "no direct completion before the pop (result depends on microtask order)" $RESULTS_SRC \
+  "s.replace('    _call?.complete(pending.value);\n', '')" $T_RESULTS
+mutate R6 "a forgotten extra no longer trips the debug assert" $RESULTS_SRC \
+  "s.replace('    if (_call == null && expected > 0) {', '    if (_call == null && expected < 0) {')" $T_RESULTS
+mutate R7 "the codec keeps a FlowCall (warning, lost on restore)" $RESULTS_SRC \
+  "s.replace('input is FlowCall ? null : input', 'input')" $T_RESULTS
+mutate R8 "the app router has no extraCodec" $ROUTER \
+  "s.replace('  extraCodec: const FlowExtraCodec(),\n', '')" $T_APP
+mutate N8 "nestUnderHome accepts a second route at exactly /" $NESTING \
+  "s.replace(\" || route.path == '/') {\", ') {')" $T_NEST
+
 say "mutations: $n, killed: $killed"
 if [[ $n -eq $killed && $rc -eq 0 ]]; then say "ALL KILLED"; else say "SOME NOT KILLED"; fi
 exit $rc

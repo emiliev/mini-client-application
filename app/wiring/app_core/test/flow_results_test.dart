@@ -365,8 +365,9 @@ void main() {
 
       final result = AppFlows.createReadingList(router);
       await tester.pumpAndSettle();
-      final saved = router.routeInformationParser!
-          .restoreRouteInformation(router.routerDelegate.currentConfiguration)!;
+      final saved = router.routeInformationParser.restoreRouteInformation(
+        router.routerDelegate.currentConfiguration,
+      )!;
       final pushed =
           (saved.state! as Map<Object?, Object?>)['imperativeMatches']!
               as List<Object?>;
