@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `a6da9bde`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (**Opus**: novel generator design that every later template builds on; ADR-0011) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates. No Verifier, because this is not one of the exceptions. |
 | Branch | `fleet/T-0065-mcgen-core` |
@@ -195,3 +195,9 @@ cd tool/mcgen && fvm dart pub get --offline && fvm dart test
 
 On a CI runner with an empty pub cache, drop `--offline`: the lockfile still pins every version. The tests also need package configs at the repo root (for the analyze test) and in `tool/loc` (the loc test). When either is missing they run `fvm dart pub get --offline` there themselves, as the format gate does. So on CI, run `fvm dart pub get` at the root and in `tool/loc` first. Or run `tool/checks/T-0065-AC5_gates.sh`, which runs that command plus the format gate, `dart analyze`, and the lockfile check.
 
+
+## Merge (TL)
+- 2026-11-27: `/code-review` found 4 important issues (orphaned keep bodies deleted, a `**/` glob bug, results depending on the named targets, a crash on bad config) and 6 nits. Fix round `f52ec51c` fixed all 10; the keep manifest now stores the default-body hash (ADR-0016).
+- TL checks: changes outside `tool/mcgen` are only `tool/loc` (P-117 fix) and the gates script; no deleted or skipped tests.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 228/228 Bazel tests, lint clean, `mc_arch_check` OK, format gate passed, and `T-0065-AC5_gates.sh` passed (mcgen 96/96, `dart analyze` clean, lockfiles unchanged).
+- ADR-0016 accepted. P-117 is done. Follow-ups: P-120.

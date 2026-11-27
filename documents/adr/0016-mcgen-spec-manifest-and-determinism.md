@@ -1,6 +1,6 @@
 # ADR-0016: mcgen's contracts: the `mcgen/1` spec, the manifest, keep regions and seed derivation
 
-- **Status:** Proposed
+- **Status:** Accepted (TL, 2026-11-27, at the T-0065 merge `a6da9bde`)
 - **Date:** 2026-11-27
 - **Deciders:** Tech Lead
 - **Related:** T-0065, F-0065, plan 02 §2.1 to §2.6 and KD1/KD4/KD5, ADR-0009, tool/loc (P2-02), P-117
