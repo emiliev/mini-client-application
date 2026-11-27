@@ -1372,6 +1372,271 @@ void main() {
     });
   });
 
+  group('T-0059-AC1 review round', () {
+    late List<FlutterErrorDetails> reports;
+    setUp(() {
+      reports = [];
+      McChartValidation.releaseModeOverride = true;
+      McChartValidation.reporterOverride = reports.add;
+    });
+
+    testWidgets(
+      'T-0059-AC3 release: the highlight follows its bar past a skipped one',
+      (
+        tester,
+      ) async {
+        final data = [
+          const McBarDatum(label: 'A', value: 1),
+          const McBarDatum(label: 'B', value: double.nan),
+          const McBarDatum(label: 'C', value: 3),
+          const McBarDatum(label: 'D', value: 4),
+        ];
+        Widget chart(int? h) => McBarChart(
+          data: data,
+          semanticLabel: 's',
+          emptyMessage: _empty,
+          highlightIndex: h,
+        );
+        int? highlight() =>
+            (_painterOf(tester, McBarChart) as McBarPainter).highlightIndex;
+        await tester.pumpWidget(_app(chart(2)));
+        final p = _painterOf(tester, McBarChart) as McBarPainter;
+        expect(p.data.map((d) => d.label), ['A', 'C', 'D']);
+        expect(p.highlightIndex, 1);
+        final rec = _paintNow(tester, McBarChart);
+        final outline = rec
+            .named('drawRect')
+            .singleWhere((x) => x.arg<Paint>(1).style == PaintingStyle.stroke);
+        expect(outline.arg<Rect>(0), rec.fillRects()[1].inflate(1));
+        await tester.pumpWidget(_app(chart(1)));
+        expect(highlight(), isNull, reason: 'the highlighted bar was skipped');
+        await tester.pumpWidget(_app(chart(3)));
+        expect(highlight(), 2);
+        await tester.pumpWidget(_app(chart(9)));
+        expect(highlight(), isNull);
+        await tester.pumpWidget(_app(chart(-1)));
+        expect(highlight(), isNull);
+      },
+    );
+
+    testWidgets('T-0059-AC3 a changed highlight alone updates the chart', (
+      tester,
+    ) async {
+      McBarChart chart(int h) => McBarChart(
+        data: _bars,
+        semanticLabel: 's',
+        emptyMessage: _empty,
+        highlightIndex: h,
+      );
+      await tester.pumpWidget(_app(chart(0)));
+      await tester.pumpWidget(_app(chart(2)));
+      expect(
+        (_painterOf(tester, McBarChart) as McBarPainter).highlightIndex,
+        2,
+      );
+    });
+
+    testWidgets(
+      'T-0059-AC3 release: donut colours stay put past a skipped segment',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _app(
+            _donutChart(const [
+              McDonutSegment(label: 'A', value: 1),
+              McDonutSegment(label: 'B', value: double.nan),
+              McDonutSegment(label: 'C', value: 1),
+              McDonutSegment(label: 'D', value: 1),
+            ]),
+          ),
+        );
+        final p = _painterOf(tester, McDonutChart) as McDonutPainter;
+        expect(p.data.map((d) => d.label), ['A', 'C', 'D']);
+        expect(p.data.map((d) => d.role), [
+          McChartRole.series1,
+          McChartRole.series3,
+          McChartRole.neutral,
+        ]);
+      },
+    );
+
+    testWidgets(
+      'T-0059-AC3 a donut of more than four default roles throws in debug',
+      (
+        tester,
+      ) async {
+        McChartValidation.releaseModeOverride = false;
+        await tester.pumpWidget(
+          _app(
+            _donutChart([
+              for (var i = 0; i < 5; i++)
+                McDonutSegment(label: 'S$i', value: 1),
+            ]),
+          ),
+        );
+        expect(tester.takeException(), isA<ArgumentError>());
+        await tester.pumpWidget(
+          _app(
+            _donutChart([
+              for (var i = 0; i < 5; i++)
+                McDonutSegment(
+                  label: 'S$i',
+                  value: 1,
+                  role: McChartRole.values[i],
+                ),
+            ]),
+          ),
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets(
+      'T-0059-AC3 release: default segments never repeat a neighbour, ring included',
+      (
+        tester,
+      ) async {
+        for (final n in [5, 6, 9]) {
+          await tester.pumpWidget(
+            _app(
+              _donutChart([
+                for (var i = 0; i < n; i++)
+                  McDonutSegment(label: 'S$i', value: 1),
+              ]),
+            ),
+          );
+          expect(tester.takeException(), isNull);
+          final colors = _paintNow(
+            tester,
+            McDonutChart,
+          ).arcs().map((a) => a.$4.color.toARGB32()).toList();
+          expect(colors, hasLength(n));
+          for (var i = 0; i < n; i++) {
+            expect(colors[i], isNot(colors[(i + 1) % n]), reason: 'n=$n at $i');
+          }
+        }
+        expect(reports, isNotEmpty);
+      },
+    );
+
+    test(
+      'T-0059-AC3 role resolution: ring neighbours differ for any length',
+      () {
+        for (var n = 2; n <= 24; n++) {
+          final roles = McChartRole.resolveAll(List.filled(n, null));
+          for (var i = 0; i < n; i++) {
+            expect(roles[i], isNot(roles[(i + 1) % n]), reason: 'n=$n at $i');
+          }
+        }
+      },
+    );
+
+    test('T-0059-AC3 role resolution: up to four defaults are the cycle', () {
+      expect(McChartRole.resolveAll(const []), isEmpty);
+      expect(McChartRole.resolveAll(const [null]), [McChartRole.series1]);
+      for (var n = 1; n <= 4; n++) {
+        expect(McChartRole.resolveAll(List.filled(n, null)), [
+          for (var i = 0; i < n; i++) McChartRole.forIndex(i),
+        ]);
+      }
+    });
+
+    test(
+      'T-0059-AC3 role resolution: explicit roles are kept and respected',
+      () {
+        final roles = McChartRole.resolveAll(const [
+          null,
+          McChartRole.series1,
+          null,
+          null,
+          McChartRole.series2,
+          null,
+        ]);
+        expect(roles[1], McChartRole.series1);
+        expect(roles[4], McChartRole.series2);
+        for (var i = 0; i < roles.length; i++) {
+          expect(roles[i], isNot(roles[(i + 1) % roles.length]));
+        }
+        expect(
+          McChartRole.resolveAll(const [
+            McChartRole.negative,
+            McChartRole.negative,
+          ]),
+          [McChartRole.negative, McChartRole.negative],
+          reason: 'what the caller named is never changed',
+        );
+      },
+    );
+
+    testWidgets(
+      'T-0059-AC3 release: only the fourth series has data, so it is empty',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _app(
+            _lineChart(const [
+              McLineSeries(
+                label: 'a',
+                values: [double.nan, double.nan, double.nan],
+              ),
+              McLineSeries(label: 'b', values: []),
+              McLineSeries(label: 'c', values: []),
+              McLineSeries(label: 'd', values: [1, 2, 3]),
+            ]),
+          ),
+        );
+        expect(find.byType(McEmptyView), findsOneWidget);
+        expect(reports, isNotEmpty);
+      },
+    );
+
+    testWidgets(
+      'T-0059-AC3 release: a fourth series is dropped, the first three stay',
+      (
+        tester,
+      ) async {
+        await tester.pumpWidget(
+          _app(
+            _lineChart(const [
+              McLineSeries(label: 'a', values: [1, 2, 3]),
+              McLineSeries(label: 'b', values: [1, 2, 3]),
+              McLineSeries(label: 'c', values: [1, 2, 3]),
+              McLineSeries(label: 'd', values: [1, 2, 3]),
+            ]),
+          ),
+        );
+        expect(find.byType(McEmptyView), findsNothing);
+        expect(
+          (_painterOf(tester, McLineChart) as McLinePainter).series,
+          hasLength(3),
+        );
+      },
+    );
+
+    testWidgets(
+      'T-0059-AC4 release: a radar with 5 axes and 3 values reads the missing as 0',
+      (
+        tester,
+      ) async {
+        final handle = tester.ensureSemantics();
+        await tester.pumpWidget(
+          _app(
+            _radarChart(
+              const [
+                McRadarSeries(label: 'S', values: [1, 0.5, 0.25]),
+              ],
+              axes: const ['A', 'B', 'C', 'D', 'E'],
+            ),
+          ),
+        );
+        expect(_traversal(tester), contains('S: A 1, B 0.5, C 0.25, D 0, E 0'));
+        handle.dispose();
+      },
+    );
+  });
+
   group('T-0059-AC5 animation', () {
     testWidgets('T-0059-AC5 off by default: full size at once, no ticker', (
       tester,
@@ -1388,6 +1653,7 @@ void main() {
     ) async {
       await tester.pumpWidget(_app(_barChart(_bars)));
       final full = _paintNow(tester, McBarChart).fillRects();
+      await tester.pumpWidget(const SizedBox());
       await tester.pumpWidget(_app(_barChart(_bars, animate: true)));
       expect(_paintNow(tester, McBarChart).fillRects(), isEmpty);
       await tester.pump(const Duration(milliseconds: 175));
@@ -1498,15 +1764,85 @@ void main() {
       expect(_paintNow(tester, McBarChart).fillRects(), hasLength(3));
     });
 
-    testWidgets('T-0059-AC5 switching animate on later starts it', (
+    testWidgets('T-0059-AC5 switching animate on later does not replay', (
       tester,
     ) async {
       await tester.pumpWidget(_app(_barChart(_bars)));
       await tester.pumpWidget(_app(_barChart(_bars, animate: true)));
-      expect(_paintNow(tester, McBarChart).fillRects(), isEmpty);
-      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.binding.transientCallbackCount, 0);
       expect(_paintNow(tester, McBarChart).fillRects(), hasLength(3));
     });
+
+    testWidgets('T-0059-AC5 Reduce Motion turned off does not replay', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _app(_barChart(_bars, animate: true), disableAnimations: true),
+      );
+      final full = _paintNow(tester, McBarChart).fillRects();
+      await tester.pumpWidget(
+        _app(_barChart(_bars, animate: true), disableAnimations: false),
+      );
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(_paintNow(tester, McBarChart).fillRects(), full);
+      await tester.pumpWidget(
+        _app(_donutChart(_segments, animate: true), disableAnimations: true),
+      );
+      await tester.pumpWidget(
+        _app(_donutChart(_segments, animate: true), disableAnimations: false),
+      );
+      expect(tester.binding.transientCallbackCount, 0);
+      expect(_paintNow(tester, McDonutChart).arcs(), hasLength(3));
+      // new data still animates
+      await tester.pumpWidget(
+        _app(
+          _barChart(const [McBarDatum(label: 'z', value: 3)], animate: true),
+        ),
+      );
+      await tester.pumpWidget(
+        _app(
+          _barChart(const [McBarDatum(label: 'y', value: 3)], animate: true),
+        ),
+      );
+      expect(_paintNow(tester, McBarChart).fillRects(), isEmpty);
+    });
+
+    testWidgets(
+      'T-0059-AC5 every CurvedAnimation is disposed with its controller',
+      (
+        tester,
+      ) async {
+        var created = 0;
+        var disposed = 0;
+        void listen(ObjectEvent e) {
+          if (e.object.runtimeType.toString() != 'CurvedAnimation') {
+            return;
+          }
+          if (e is ObjectCreated) {
+            created++;
+          } else if (e is ObjectDisposed) {
+            disposed++;
+          }
+        }
+
+        FlutterMemoryAllocations.instance.addListener(listen);
+        addTearDown(
+          () => FlutterMemoryAllocations.instance.removeListener(listen),
+        );
+        await tester.pumpWidget(_app(_barChart(_bars, animate: true)));
+        await tester.pumpWidget(
+          _app(_barChart(_bars, animate: true), disableAnimations: true),
+        );
+        await tester.pumpWidget(
+          _app(_barChart(_bars, animate: true), disableAnimations: false),
+        );
+        await tester.pumpWidget(_app(_barChart(_bars)));
+        await tester.pumpWidget(_app(_donutChart(_segments, animate: true)));
+        await tester.pumpWidget(const SizedBox());
+        expect(created, greaterThanOrEqualTo(3));
+        expect(disposed, created);
+      },
+    );
 
     testWidgets('T-0059-AC5 leaving mid-animation disposes the controller', (
       tester,

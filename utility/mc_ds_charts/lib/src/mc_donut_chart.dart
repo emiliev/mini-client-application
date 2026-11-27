@@ -232,8 +232,25 @@ class _McDonutChartState extends State<McDonutChart>
   bool get animateChart => widget.animate;
 
   void _sanitize() {
+    final given = [for (final d in widget.data) d.role];
+    McChartValidation.check(
+      given.where((r) => r == null).length <= McChartRole.cycle.length,
+      'McDonutChart: more than ${McChartRole.cycle.length} segments without a '
+      'role; name the roles so neighbours stay distinguishable.',
+    );
+    // Resolve before dropping bad values, so a skipped segment never shifts
+    // the colour of the ones after it.
+    final roles = McChartRole.resolveAll(given);
+    final resolved = [
+      for (var i = 0; i < widget.data.length; i++)
+        McDonutSegment(
+          label: widget.data[i].label,
+          value: widget.data[i].value,
+          role: roles[i],
+        ),
+    ];
     _data = McChartValidation.sanitize(
-      widget.data,
+      resolved,
       (d) => d.isValid,
       chart: 'McDonutChart',
       what: 'segment values',

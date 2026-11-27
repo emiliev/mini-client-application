@@ -122,10 +122,13 @@ String mcFormatTick(double value, {double step = 1}) {
 /// otherwise up to two decimals without trailing zeros.
 String mcFormatValue(double value) {
   if (value == value.roundToDouble()) {
-    return value.toStringAsFixed(0);
+    return (value == 0 ? 0.0 : value).toStringAsFixed(0);
   }
-  final s = value.toStringAsFixed(2);
-  return s.replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+  final s = value
+      .toStringAsFixed(2)
+      .replaceFirst(RegExp(r'0+$'), '')
+      .replaceFirst(RegExp(r'\.$'), '');
+  return s == '-0' ? '0' : s;
 }
 
 /// The rectangles of a bar chart and the position of its zero line.

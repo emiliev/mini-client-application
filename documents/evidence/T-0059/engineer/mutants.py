@@ -86,7 +86,7 @@ M = [
     ('donut painter: ring thinner than designed', DON, 'static const double thicknessFraction = 0.28;', 'static const double thicknessFraction = 0.1;', True),
     # --- line painter -------------------------------------------------------
     ('line: gap drawn as a point', LIN, '      values[i].isFinite\n          ?', '      true\n          ?', False),
-    ('line: zero line always drawn', LIN, 'if (l.scale.min < 0 && l.scale.max > 0) {', 'if (true) {', False),
+    ('line: zero line always drawn', LIN, 'if (l.scale.min <= 0 && l.scale.max >= 0) {', 'if (true) {', False),
     ('line: every series in the first colour', LIN, '(series[i].role ?? McChartRole.forIndex(i))', '(series[i].role ?? McChartRole.series1)', False),
     ('line: semantics skip nothing', LIN, 'if (series[s].values[i].isFinite)', 'if (true)', False),
     # --- radar painter ------------------------------------------------------
@@ -116,9 +116,27 @@ M = [
     ('validation: release does not report', VAL, "    _report('$message Skipped.');", '', False),
     ('validation: bad items kept in release', VAL, 'return items.where(isValid).toList(growable: false);', 'return items;', False),
     ('validation: check never reports', VAL, '    _report(message);\n    return false;', '    return false;', False),
+    # --- review round -------------------------------------------------------
+    ('bar: highlight not mapped past a skipped bar', BAR, '? widget.data.take(h).where((d) => d.isFinite).length', '? h', False),
+    ('bar: skipped bar still highlighted', BAR, '(widget.data[h].isFinite\n', '(true\n', False),
+    ('bar: highlight change alone ignored', BAR, '        old.highlightIndex != widget.highlightIndex;', '        false;', False),
+    ('donut: roles resolved after dropping bad values', DON, 'role: roles[i],', 'role: widget.data[i].role,', False),
+    ('donut: more than four default roles allowed', DON, 'given.where((r) => r == null).length <= McChartRole.cycle.length,', 'true,', False),
+    ('role: ring wrap-around ignored', ROLE, 'if (i == n - 1 && n > 1) out[0],', 'if (false) out[0],', False),
+    ('role: next neighbour ignored', ROLE, 'if (i + 1 < n) out[i + 1],', 'if (false) out[i + 1],', False),
+    ('role: given roles overwritten', ROLE, '      if (out[i] != null) {\n        continue;\n      }', '      if (false) {\n        continue;\n      }', False),
+    ('line: zero line missing when the axis starts at 0', LIN, 'if (l.scale.min <= 0 && l.scale.max >= 0) {', 'if (l.scale.min < 0 && l.scale.max > 0) {', False),
+    ('line: data check over the untruncated series', LIN, '        _series.any(', '        w.series.any(', False),
+    ('format: negative zero for whole values', MATH, 'return (value == 0 ? 0.0 : value).toStringAsFixed(0);', 'return value.toStringAsFixed(0);', False),
+    ('format: negative zero for tiny values', MATH, "return s == '-0' ? '0' : s;", 'return s;', False),
+    ('radar: semantics stop at the shorter series', RAD, 'for (var i = 0; i < axes.length; i++) ', 'for (var i = 0; i < math.min(axes.length, series[s].values.length); i++) ', False),
+    ('radar: semantics read a missing value as the first', RAD, 'valueFormatter(i < series[s].values.length && series[s].values[i].isFinite', 'valueFormatter(series[s].values.isNotEmpty && series[s].values[0].isFinite', False),
+    ('animation: draw-in replays when animation is switched on', COM, '      _controller!.value = 1;', '      _controller!.forward(from: 0);', False),
+    ('animation: curved animation not disposed when switched off', COM, '      _curved?.dispose();\n      _controller?.dispose();\n      _controller = null;', '      _controller?.dispose();\n      _controller = null;', False),
+    ('animation: curved animation not disposed with the state', COM, '    _curved?.dispose();\n    _controller?.dispose();\n    super.dispose();', '    _controller?.dispose();\n    super.dispose();', False),
     # --- shared helpers -----------------------------------------------------
     ('animation: reduced motion ignored', COM, 'animateChart && !McA11y.reduceMotion(context)', 'animateChart', False),
-    ('animation: restarts on every update', COM, 'if (created || restart) {', 'if (true) {', False),
+    ('animation: restarts on every update', COM, 'if (restart) {', 'if (true) {', False),
     ('canvas: summary label dropped', COM, 'label: summary,', "label: '',", False),
     ('equality: NaN differs from NaN', COM, '!(a[i].isNaN && b[i].isNaN)', 'true', False),
 ]

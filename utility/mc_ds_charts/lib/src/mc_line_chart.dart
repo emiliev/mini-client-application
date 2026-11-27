@@ -163,7 +163,7 @@ class McLinePainter extends CustomPainter {
       );
       tp.paint(canvas, Offset(plot.left - 6 - tp.width, y - tp.height / 2));
     }
-    if (l.scale.min < 0 && l.scale.max > 0) {
+    if (l.scale.min <= 0 && l.scale.max >= 0) {
       final y = plot.bottom - l.scale.fraction(0) * plot.height;
       canvas.drawLine(
         Offset(plot.left, y),
@@ -315,14 +315,16 @@ class McLinePainter extends CustomPainter {
 
 /// A line chart of one to three series over shared x labels.
 ///
-/// - Every series has one value per x label (fewer is fine, more is ignored);
-///   the y axis is fitted to the data on 1-2-5 ticks and does not have to
-///   include zero.
+/// - Every series has one value per x label. Fewer is fine. More is an
+///   [ArgumentError] in debug, and the extra values are ignored in release.
+///   The y axis is fitted to the data on 1-2-5 ticks and does not have to
+///   include zero; a zero line is drawn whenever 0 is on the axis.
 /// - A NaN or infinite value is an [ArgumentError] in debug; in release it is
 ///   drawn as a gap in the line and reported once.
 /// - Series differ by colour role, marker shape (circle, square, triangle) and
-///   legend entry. More than three series, or none, is an [ArgumentError] in
-///   debug.
+///   legend entry. More than three series is an [ArgumentError] in debug, and
+///   the extra ones are ignored in release. No series at all is not an error:
+///   it shows the empty view.
 /// - Each series is one semantics node reading its x labels and values;
 ///   [semanticLabel] summarises the chart.
 /// - Empty data (no labels, no series or no finite value) shows a
@@ -378,7 +380,7 @@ class _McLineChartState extends State<McLineChart>
     _series = w.series.length > 3 ? w.series.sublist(0, 3) : w.series;
     _hasData =
         w.xLabels.isNotEmpty &&
-        w.series.any(
+        _series.any(
           (s) => s.values.take(w.xLabels.length).any((v) => v.isFinite),
         );
   }

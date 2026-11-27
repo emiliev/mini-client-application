@@ -865,6 +865,83 @@ void main() {
     });
   });
 
+  group('T-0059-AC2 zero lines', () {
+    List<(Offset, Offset, Paint)> zeroLines(RecordingCanvas c, double w) =>
+        c.lines().where((l) => l.$3.strokeWidth == w).toList();
+
+    test('T-0059-AC2 line: a zero line whenever 0 is on the axis', () {
+      for (final values in [
+        [0.0, 5.0, 10.0, 7.0],
+        [-10.0, -4.0, 0.0, -7.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [-3.0, 4.0, 1.0, 2.0],
+      ]) {
+        final p = line([McLineSeries(label: 'A', values: values)]);
+        final c = _paint(p);
+        final z = zeroLines(c, McLinePainter.zeroLineWidth);
+        expect(z, hasLength(1), reason: '$values');
+        final l = p.layout(_size);
+        final y = l.plot.bottom - l.scale.fraction(0) * l.plot.height;
+        expect(z.single.$1.dy, y);
+        expect(z.single.$2.dy, y);
+        expect(z.single.$1.dx, l.plot.left);
+        expect(z.single.$2.dx, l.plot.right);
+      }
+    });
+
+    test('T-0059-AC2 line: none when 0 is off the axis', () {
+      for (final values in [
+        [3.0, 5.0, 4.0, 8.0],
+        [-9.0, -5.0, -4.0, -8.0],
+      ]) {
+        final c = _paint(line([McLineSeries(label: 'A', values: values)]));
+        expect(zeroLines(c, McLinePainter.zeroLineWidth), isEmpty);
+      }
+    });
+
+    test('T-0059-AC2 bars: the zero line exists for all-positive and all-negative data', () {
+      for (final values in [
+        [1.0, 5.0],
+        [-1.0, -5.0],
+        [0.0, 0.0],
+      ]) {
+        final c = _paint(_bar(_bars(values)));
+        expect(zeroLines(c, McBarPainter.zeroLineWidth), hasLength(1));
+      }
+    });
+  });
+
+  group('T-0059-AC4 radar semantics', () {
+    test(
+      'T-0059-AC4 every axis is read, a missing value as 0 like the painter',
+      () {
+        final nodes = radar(
+          [
+            const McRadarSeries(label: 'S', values: [1, 0.5, 0.25]),
+            const McRadarSeries(
+              label: 'T',
+              values: [2, double.nan, -1, 0.5, 0.5, 9],
+            ),
+          ],
+          axes: const ['A', 'B', 'C', 'D', 'E'],
+        ).semanticsBuilder(_size);
+        expect(nodes[0].properties.label, 'S: A 1, B 0.5, C 0.25, D 0, E 0');
+        expect(nodes[1].properties.label, 'T: A 1, B 0, C 0, D 0.5, E 0.5');
+      },
+    );
+  });
+
+  group('T-0059-AC4 value text', () {
+    test('T-0059-AC4 no negative zero in value text', () {
+      expect(mcFormatValue(-0.0), '0');
+      expect(mcFormatValue(-0.001), '0');
+      expect(mcFormatValue(0.001), '0');
+      expect(mcFormatValue(-1.5), '-1.5');
+      expect(mcFormatValue(-2), '-2');
+      expect(mcFormatValue(0.005), '0.01');
+    });
+  });
+
   group('T-0059-AC2 timeline rail painter', () {
     McTimelineRailPainter rail({bool first = false, bool last = false}) =>
         McTimelineRailPainter(

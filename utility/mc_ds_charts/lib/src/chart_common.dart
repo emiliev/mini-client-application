@@ -54,7 +54,7 @@ TextPainter mcLabelPainter(
 mixin McChartAnimation<T extends StatefulWidget>
     on State<T>, TickerProviderStateMixin<T> {
   AnimationController? _controller;
-  Animation<double>? _curved;
+  CurvedAnimation? _curved;
   bool _first = true;
 
   bool get animateChart;
@@ -71,6 +71,7 @@ mixin McChartAnimation<T extends StatefulWidget>
   void syncChartAnimation({required bool restart}) {
     final on = animateChart && !McA11y.reduceMotion(context);
     if (!on) {
+      _curved?.dispose();
       _controller?.dispose();
       _controller = null;
       _curved = null;
@@ -82,13 +83,18 @@ mixin McChartAnimation<T extends StatefulWidget>
       parent: _controller!,
       curve: McMotion.standard,
     );
-    if (created || restart) {
+    if (restart) {
       _controller!.forward(from: 0);
+    } else if (created) {
+      // Animation switched on later (for example Reduce Motion turned off):
+      // show the finished chart, do not replay the draw-in.
+      _controller!.value = 1;
     }
   }
 
   @override
   void dispose() {
+    _curved?.dispose();
     _controller?.dispose();
     super.dispose();
   }

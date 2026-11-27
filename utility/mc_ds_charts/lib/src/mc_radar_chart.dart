@@ -219,7 +219,7 @@ class McRadarPainter extends CustomPainter {
           properties: SemanticsProperties(
             label:
                 '${series[s].label}: ${[
-                  for (var i = 0; i < math.min(axes.length, series[s].values.length); i++) '${axes[i]} ${valueFormatter(series[s].values[i].isFinite ? series[s].values[i].clamp(0.0, 1.0) : 0)}',
+                  for (var i = 0; i < axes.length; i++) '${axes[i]} ${valueFormatter(i < series[s].values.length && series[s].values[i].isFinite ? series[s].values[i].clamp(0.0, 1.0) : 0)}',
                 ].join(', ')}',
             textDirection: TextDirection.ltr,
             sortKey: OrdinalSortKey(s.toDouble()),

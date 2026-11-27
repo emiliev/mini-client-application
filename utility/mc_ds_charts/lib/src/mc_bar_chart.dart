@@ -391,6 +391,7 @@ class McBarChart extends StatefulWidget {
 class _McBarChartState extends State<McBarChart>
     with TickerProviderStateMixin<McBarChart>, McChartAnimation<McBarChart> {
   late List<McBarDatum> _data;
+  int? _highlight;
 
   @override
   bool get animateChart => widget.animate;
@@ -402,6 +403,14 @@ class _McBarChartState extends State<McBarChart>
       chart: 'McBarChart',
       what: 'values',
     );
+    // The highlight names a position in the caller's list: map it across the
+    // skipped values (null when the highlighted bar itself was skipped).
+    final h = widget.highlightIndex;
+    _highlight = (h == null || h < 0 || h >= widget.data.length)
+        ? null
+        : (widget.data[h].isFinite
+              ? widget.data.take(h).where((d) => d.isFinite).length
+              : null);
   }
 
   @override
@@ -413,7 +422,9 @@ class _McBarChartState extends State<McBarChart>
   @override
   void didUpdateWidget(McBarChart old) {
     super.didUpdateWidget(old);
-    final changed = !listEquals(old.data, widget.data);
+    final changed =
+        !listEquals(old.data, widget.data) ||
+        old.highlightIndex != widget.highlightIndex;
     if (changed) {
       _sanitize();
     }
@@ -448,7 +459,7 @@ class _McBarChartState extends State<McBarChart>
         textScaler: scaler,
         vertical: vertical,
         valueFormatter: widget.valueFormatter,
-        highlightIndex: widget.highlightIndex,
+        highlightIndex: _highlight,
         progress: progress,
       ),
     );
