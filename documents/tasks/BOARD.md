@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0050](T-0050-auth-first-send-pin.md) | `mc_api_auth` first-send epoch pin; favourite and reading-list writes pinned | merged `17d0caa` |
 | [T-0049](T-0049-deep-link-back-stack.md) | Cold deep links get a back stack; flow-result futures always complete | merged `d6ef20d` |
 | [T-0051](T-0051-fixtures-commerce.md) | `mc_fixtures_commerce`: store sections, cart in cents, promotions | merged `7b6a1f4` |
 
@@ -17,7 +18,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
-| [T-0050](T-0050-auth-first-send-pin.md) | `mc_api_auth` epoch pin on the first send; P-080, P-089, P-093 test gaps | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0039, T-0048 | `fleet/T-0050-auth-first-send-pin` |
 | [T-0052](T-0052-feature-flags.md) | `mc_feature_flags` (typed flags, experiments, overrides, remote fetch) + flags slice of `mc_fixtures_platform` | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0039 | `fleet/T-0052-feature-flags` |
 | [T-0053](T-0053-analytics.md) | `mc_analytics`: typed events, consent gate, app sessions, screen observer, BDD steps | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0053-analytics` |
 

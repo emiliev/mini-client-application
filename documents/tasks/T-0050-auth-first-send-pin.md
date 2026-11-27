@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-27 `17d0caa`; Verifier FAIL `f40bb86`, re-verify PASS `2887a0f`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Opus tier** (auth / security; ADR-0011) |
 | Branch | `fleet/T-0050-auth-first-send-pin` |
@@ -100,3 +100,6 @@ The Opus Verifier returned FAIL at `db556b5` on one flaky test of mine (D1); the
 | D4 | `auth_races_test` "a request retried after B signed in ..." slept 10 ms against a 50 ms retry delay (1 in 100 under load) | Root cause: the retry could run before the wall-clock switch. The switch now happens when the first send arrives at the adapter (`ArrivalAdapter`), before its 503 is answered, so it always precedes the retry. The assertions are unchanged | 200 runs, idle and under load: 0 failures |
 
 Gates [PASS](../evidence/T-0050/engineer/T-0050-AC4_gates.md); mutations: see [mutations.log](../evidence/T-0050/engineer/mutations.log) (40 of 40 behave as expected: 39 killed, V20-b equivalent and surviving). The Verifier's observations (same-user re-sign-in drops the first favourite tap silently; a pinned rejection is not logged by `MonitoringInterceptor`) are the TL's to file.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found a pre-existing gap: the favourite pinned the live epoch rather than the shown one, so A's stale tap could delete B's favourite. The TL had it fixed in this task, together with 5 nits (round `db556b5`). The Opus Verifier returned **FAIL** at `f40bb86` (about 256k tokens): D1 was a flaky teardown in `auth_pin_test` (a dropped session save; 3–10 % of runs), D2 and D3 were test gaps, and D4 was a wall-clock flake from T-0039. All four were fixed at `3cf8359`, with 200/200 runs passing idle and under load. A narrow Sonnet re-verify gave PASS at `2887a0f` (about 62k tokens). The TL merged `--no-ff`. On the merge result `check` passed, 155/155 tests passed, lint was clean, `mc_arch_check` was OK, provenance passed and the sim app built. P-080, P-083, P-089 and P-093 are done; follow-ups are P-099 to P-101.

@@ -10,7 +10,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0050 Verifier (Opus); T-0052, T-0053 engineers (Sonnet) |
+| **Active crew** | T-0052 engineer (review round), T-0053 engineer (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -28,16 +28,16 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0050 merged:** an authenticated write never goes out under another user's token, even if the user switches while it is being sent (P-083). The favourite button ignores a tap from a screen that hasn't reloaded after a switch.
 - **T-0049 merged:** a cold deep link to any entity screen now has home underneath it, so Back goes home (details go via the list). Home's New and Edit buttons keep working after a link replaces the editor. Follow-ups P-094 to P-098 (P-094 before the auth guard).
 - **T-0051 merged:** `mc_fixtures_commerce`, the store backend for the DB exemplar: sections, a per-user cart in integer cents, stacking promotions.
 - **T-0048 merged: `library_reading_list_editor`, the FW exemplar.** A 3-step wizard creates or edits a reading list; the result is returned to the caller (the flow-result pattern) and home shows "List created".
 - **T-0046 merged: `discovery_search`, the SR exemplar.** Debounced search across characters and comics, grouped results, type chips, recent-search history, and a Search entry on home with a `miniclient://app/search?q=` link.
 - Resumed 2026-11-27.
 - **Next, in order:**
-  1. T-0050 (P-083, the auth first-send pin): in verification.
-  2. DB prerequisites: `mc_feature_flags` (T-0052, in progress), `mc_analytics`, then the DB exemplar `store_home` (P1-21) on `mc_fixtures_commerce`.
-  3. P-094 to P-098 (`AppFlows` follow-ups) before the `/me/**` auth guard or the first picker.
-  4. ST (`settings_appearance`) and IX (`trivia_quiz`) exemplars, then the P1-24 bricks.
+  1. DB prerequisites: `mc_feature_flags` (T-0052, in progress), `mc_analytics`, then the DB exemplar `store_home` (P1-21) on `mc_fixtures_commerce`.
+  2. P-094 to P-098 (`AppFlows` follow-ups) before the `/me/**` auth guard or the first picker.
+  3. ST (`settings_appearance`) and IX (`trivia_quiz`) exemplars, then the P1-24 bricks.
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
