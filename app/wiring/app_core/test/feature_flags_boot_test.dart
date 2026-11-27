@@ -108,8 +108,17 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(flags.value(_layout), 'grid');
     // The fetch saved its cache (real file I/O): wait for it before the
-    // temp directory is deleted, in real time and without a sleep.
-    await tester.runAsync(() => diContainer<FeatureFlags>().settled());
+    // temp directory is deleted.
+    // The write's continuations run on the fake clock, so the wait alternates
+    // real time (for the I/O) and a pump, and ends as soon as nothing runs.
+    final saving = diContainer<FeatureFlags>();
+    for (var i = 0; i < 400 && saving.pendingWrites > 0; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 5)),
+      );
+      await tester.pump();
+    }
+    expect(saving.pendingWrites, 0, reason: 'the cache write finished');
   });
 
   testWidgets('T-0052-AC3 boot reaches home when the flags backend fails, '

@@ -513,6 +513,11 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     return write;
   }
 
+  /// How many storage writes or deletes this object started are still
+  /// running. For a widget test under fake async, where [settled] cannot
+  /// complete without pumping: it polls this between pumps.
+  int get pendingWrites => _writes.length;
+
   /// Completes when every storage write or delete this object started (the
   /// cache, its deletion, the install id) has finished, including any that
   /// start while it waits. For tests that delete the storage directory
