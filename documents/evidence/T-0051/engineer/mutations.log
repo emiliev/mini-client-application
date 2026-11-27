@@ -133,6 +133,16 @@ baseline PASS
     KILLED by: //utility/mc_fixtures_commerce:validation_test 
 === V28 carts do not persist (rebuilt per request)
     KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:money_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:validation_test 
+=== R1 an overlong product id throws (int.parse unguarded)
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== R2 leading zeros are accepted
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== R3 a blank code on DELETE removes every code
+    KILLED by: //utility/mc_fixtures_commerce:validation_test 
+=== R4 the category base is hard-coded
+    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+=== R5 an unknown section is not rejected
+    KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
 === V29 unknown_category answers 200
     KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test 
 === S1 the page limit allows 101
@@ -156,7 +166,8 @@ baseline PASS
 === S10 a deal product can be sold out
     KILLED by: //utility/mc_fixtures_commerce:cart_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
 === S11 five categories
-    KILLED by: //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test 
+pattern not found: categoryDefs.length].id
+    PATTERN NOT FOUND
 === S12 a product id is not its comic id
     KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test //utility/mc_fixtures_commerce:provider_contract_test //utility/mc_fixtures_commerce:store_test //utility/mc_fixtures_commerce:validation_test 
 === S13 a product title differs from its comic
@@ -190,4 +201,4 @@ baseline PASS
 === X8 the cart section misses a route
     KILLED by: //utility/mc_fixtures_commerce:fixture_sets_test 
 
-killed=95 survived=0 broken=0
+killed=99 survived=0 broken=1

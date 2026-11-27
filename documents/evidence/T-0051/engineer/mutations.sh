@@ -192,7 +192,7 @@ mutate "S7 no banner searches" $CA "'target': {'type': 'search', 'query': 'amber
 mutate "S8 the store sells four issues per series" $CA 'const int issuesSold = 3;' 'const int issuesSold = 4;'
 mutate "S9 the currency is dollars" $CA "const String currencyCode = 'EUR';" "const String currencyCode = 'USD';"
 mutate "S10 a deal product can be sold out" $CA 'const List<int> dealPositions = [7,' 'const List<int> dealPositions = [5,'
-mutate "S11 five categories" $CA 'categoryDefs.length].id' '5].id'
+mutate "S11 five categories" $CA '% categoryDefs.length]' '% 5]'
 mutate "S12 a product id is not its comic id" $CA 'id: comic.id,' 'id: comic.id + 1,'
 mutate "S13 a product title differs from its comic" $CA 'title: comic.title,' "title: '\${comic.title}!',"
 mutate "S14 prices ignore the seed" $CA "final random = SplitMix64(seed).fork('commerce')" "final random = SplitMix64(1).fork('commerce')"
