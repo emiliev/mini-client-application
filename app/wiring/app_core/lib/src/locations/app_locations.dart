@@ -49,4 +49,22 @@ abstract final class AppLocations {
   /// in commerce_wiring.
   static String storeCategory(String id) =>
       '/store/categories/${Uri.encodeComponent(id)}';
+
+  /// The trivia quiz's setup (T-0064). Equals `TriviaRoute().location` in
+  /// chronicle_wiring.
+  static const String trivia = '/trivia';
+
+  /// The trivia quiz opened at a round (T-0064): each given value is a query
+  /// parameter. Equals `TriviaPlayRoute(...).location` in chronicle_wiring.
+  static String triviaPlay({String? category, String? difficulty, int? seed}) {
+    final query = {
+      if (category != null) 'category': category,
+      if (difficulty != null) 'difficulty': difficulty,
+      if (seed != null) 'seed': '$seed',
+    };
+    return Uri(
+      path: '/trivia/play',
+      queryParameters: query.isEmpty ? null : query,
+    ).toString();
+  }
 }

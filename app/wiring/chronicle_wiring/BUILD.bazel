@@ -1,17 +1,136 @@
-# T-0021 (P1-16): the chronicle_wiring skeleton (plan 01 §3.4). No features yet.
-load("@rules_flutter//flutter:defs.bzl", "flutter_library")
+# T-0064: chronicle_wiring, the chronicle group's app layer (plan 01 §3.4),
+# shaped as the T-0056 wiring of the commerce group. It started as the T-0021
+# skeleton.
+#
+# Generators run as Bazel actions; nothing generated is committed:
+#   go_router_builder  src/routes/trivia_routes.dart (F-0007 workaround)
+#   injectable         src/di/di_initializer.dart + the navigator's shard
+#
+# R15: the route file imports only `route_targets.dart`; the generators read
+# `_stage` (the hand-written files they resolve imports through), never
+# `route_targets_impl.dart`.
+load("@rules_dart//dart:defs.bzl", "dart_codegen")
+load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_package")
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
 
 package(default_visibility = ["//app:__subpackages__"])
 
+_PKG = "chronicle_wiring"
+
+_LANG = "3.13"  # the pubspec floor (F-0011)
+
+_ROUTES = {
+    "trivia": "lib/src/routes/trivia_routes.dart",
+}
+
+_INIT = "lib/src/di/di_initializer.dart"
+
+_NAVIGATOR = "lib/src/navigators/trivia_quiz_navigator_impl.dart"
+
+_DEPS = [
+    "//app/wiring/app_core",
+    "//feature/trivia/trivia_quiz",
+    "//utility/mc_api_auth",
+    "//utility/mc_di",
+    "//utility/mc_session",
+    "@pub_deps//:flutter",
+    "@pub_deps//:get_it",
+    "@pub_deps//:go_router",
+    "@pub_deps//:injectable",
+]
+
+# Generator input only: the files the generators resolve imports through.
+flutter_library(
+    name = "_stage",
+    package_name = _PKG,
+    srcs = [
+        "lib/src/routes/route_targets.dart",
+        "lib/src/routes/trivia_routes.dart",
+    ],
+    language_version = _LANG,
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
+    deps = _DEPS,
+)
+
+# --- go_router_builder (F-0007 workaround: sky_engine turns summaries off) ---
+[dart_codegen(
+    name = "_%s_routes_go_router_part" % name,
+    package_name = _PKG,
+    src = src,
+    generator_bin = "@rules_dart//dart/ext/go_router:shim",
+    language_version = _LANG,
+    output_suffixes = [".go_router.g.part"],
+    deps = [
+        ":_stage",
+        "@flutter_sky_engine//:sky_engine",
+    ] + _DEPS,
+) for name, src in _ROUTES.items()]
+
+[dart_codegen(
+    name = "_%s_routes_g" % name,
+    package_name = _PKG,
+    src = src,
+    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
+    language_version = _LANG,
+    output_suffixes = [".g.dart"],
+    parts = [":_%s_routes_go_router_part" % name],
+) for name, src in _ROUTES.items()]
+
+# --- injectable (fork patch 0002) -------------------------------------------
+injectable_package(
+    name = "di_config",
+    srcs = [_NAVIGATOR],
+    init = _INIT,
+    init_deps = ["//utility/mc_di"],
+    language_version = _LANG,
+    package_name = _PKG,
+    shard_deps = [
+        ":_stage",
+        "@flutter_sky_engine//:sky_engine",
+    ] + _DEPS,
+)
+
+_CODEGEN = [
+    ":_trivia_routes_g",
+    ":di_config",
+]
+
 flutter_library(
     name = "chronicle_wiring",
-    package_name = "chronicle_wiring",
-    srcs = glob(["lib/**/*.dart"]),
-    language_version = "3.13",
-    deps = [
-        "//utility/mc_di",
-        "@pub_deps//:flutter",
-        "@pub_deps//:get_it",
-        "@pub_deps//:go_router",
-    ],
+    package_name = _PKG,
+    srcs = glob(
+        ["lib/**/*.dart"],
+        # `tool/ide_sync` writes the generated files beside their sources for
+        # the IDE; Bazel builds its own copies.
+        exclude = MC_GENERATED_DART,
+    ) + _CODEGEN,
+    language_version = _LANG,
+    deps = _DEPS,
 )
+
+_TEST_DEPS = _DEPS + [
+    ":chronicle_wiring",
+    "//utility/mc_ds_theme",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_test_utils",
+    "@pub_deps//:flutter_test",
+]
+
+[flutter_test(
+    name = t,
+    size = "small",
+    package_name = _PKG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    language_version = _LANG,
+    main = "test/%s.dart" % t,
+    deps = _TEST_DEPS,
+) for t in [
+    "routes_test",
+]]
