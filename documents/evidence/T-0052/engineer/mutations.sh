@@ -189,7 +189,7 @@ mutate "X3 remote weights with no positive weight are accepted" $F 'scaled.any((
 mutate "X4 the subject is always the install" $F '_session.userId ?? _install()' '_install()'
 mutate "X5 the subject is a constant when signed out" $F '_session.userId ?? _install()' "_session.userId ?? (_installId == 'x' ? _install() : 'anonymous')"
 mutate "X6 the install id is made again on every call" $F 'final existing = _installId;' "final existing = _installId == 'x' ? 'x' : null;"
-mutate "X7 the install id is not saved" $F 'write = _store.write(flagsInstallIdKey, id);' 'write = Future.value(success(null));'
+mutate "X7 the install id is not saved" $F 'write = _track(_store.write(flagsInstallIdKey, id));' 'write = Future.value(success(null));'
 mutate "B1 the FNV prime is wrong" $BK 'hash * 403' 'hash * 401'
 mutate "B2 the FNV offset is wrong" $BK 'var hash = 2166136261;' 'var hash = 2166136260;'
 mutate "B3 the hash adds instead of xor" $BK 'hash ^= byte;' 'hash += byte;'
