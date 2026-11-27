@@ -182,9 +182,10 @@ mutate N09 "home is the characters list" "$PAGES" "$T_NF" \
 mutate N10 "no Go home label" "$PAGES" "$T_NF" \
   "label: 'Go home'," "label: 'Home',"
 
-# --- P-098: a link must be a go (the AC4 test of /characters/<id>)
+# --- P-098: a link must be a go (the AC4 test of /characters/<id>). Only that
+# test runs: under a push, the other deep-link tests wait out their timeouts.
 MUST="T-0054-AC4 a link to the running app (/characters/100366)" mutate P1 \
-  "a link is a push, not a go (the stack keeps what was open)" "$ROUTER" "$T_APP" \
+  "a link is a push, not a go (the stack keeps what was open)" "$ROUTER" "$T_APP --test_filter=T-0054-AC4" \
   $'  overridePlatformDefaultLocation: true,\n' \
   $'  overridePlatformDefaultLocation: true,\n  onEnter: (c, cur, next, r) { if (cur.uri.toString().isEmpty || _p.contains(next.uri.toString())) return const Allow(); _p.add(next.uri.toString()); return Block.then(() => r.push(next.uri.toString())); },\n' \
   'GoRouter buildAppRouter' $'final _p = <String>{};\nGoRouter buildAppRouter'
