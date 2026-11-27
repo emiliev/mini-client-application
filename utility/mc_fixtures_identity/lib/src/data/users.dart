@@ -6,6 +6,7 @@ final class FixtureUser {
     required this.password,
     required this.displayName,
     this.seededFavourites = const [],
+    this.seededThemeMode = 'system',
   });
 
   final String id;
@@ -15,6 +16,9 @@ final class FixtureUser {
 
   /// `kind/id` favourites the default set starts with.
   final List<String> seededFavourites;
+
+  /// The `themeMode` this user's preferences start with (T-0061).
+  final String seededThemeMode;
 
   /// What the API shows; never the password.
   Map<String, Object?> toJson() => {
@@ -38,5 +42,6 @@ const List<FixtureUser> fixtureUsers = [
     email: 'collector@mini-client.test',
     password: 'vault-7',
     displayName: 'Cole Collector',
+    seededThemeMode: 'dark',
   ),
 ];

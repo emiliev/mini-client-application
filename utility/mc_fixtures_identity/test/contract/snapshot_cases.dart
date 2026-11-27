@@ -70,6 +70,26 @@ final Map<String, SnapshotCase> snapshotCases = {
     '/v1/me/favourites/pony/1',
     signedIn: true,
   ),
+  'preferences_get': _case('GET', '/v1/me/preferences', signedIn: true),
+  'preferences_unauthenticated': _case('GET', '/v1/me/preferences'),
+  'preferences_patch': _case(
+    'PATCH',
+    '/v1/me/preferences',
+    body: {'ifVersion': 0, 'themeMode': 'dark', 'reduceMotion': true},
+    signedIn: true,
+  ),
+  'preferences_patch_conflict': _case(
+    'PATCH',
+    '/v1/me/preferences',
+    body: {'ifVersion': 3, 'density': 'compact'},
+    signedIn: true,
+  ),
+  'preferences_patch_invalid_theme': _case(
+    'PATCH',
+    '/v1/me/preferences',
+    body: {'ifVersion': 0, 'themeMode': 'neon'},
+    signedIn: true,
+  ),
 };
 
 MockBackend snapshotBackend() =>
