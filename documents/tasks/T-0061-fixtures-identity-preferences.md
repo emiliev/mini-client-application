@@ -63,3 +63,17 @@ Provide the backend for the ST exemplar `settings_appearance`. A signed-in user'
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27: Engineer implemented the routes, the two scenarios, CONTRACT.md, 5 snapshots and `preferences_test.dart`. Mutations 70/70 killed, flake check 50 runs clean, gates PASS.
+
+## Outcome
+Status: ready for review. `GET`/`PATCH /v1/me/preferences` are served by the existing identity domain (`lib/src/handlers/preferences_handlers.dart`); `u-101` is seeded `dark`.
+
+| AC | Evidence |
+|---|---|
+| T-0061-AC1 | `preferences_test.dart` group "T-0061-AC1": pinned defaults as raw bytes, u-101 seed, seed in both sets, byte-identical sequences for seeds 42 and 7 |
+| T-0061-AC2 | group "T-0061-AC2": partial apply, version and updatedAt, 409 with current, reset, two real users, sign-out/sign-in, held two-client probe (`_HoldingAdapter`), concurrent PATCHes, retry on current, 300-step random run against an independent model |
+| T-0061-AC3 | group "T-0061-AC3": every code and parameter, 17 ordered pairs, 401 variants on both routes, nothing changes on rejection |
+| T-0061-AC4 | group "T-0061-AC4": preferences_error (only the two routes), preferences_conflict (once, not consumed by rejected requests, per backend), sets, CONTRACT.md and routes.json; 5 new snapshots in `provider_contract_test`; the existing identity tests are unedited |
+| T-0061-AC5 | [gates.md](../evidence/T-0061/engineer/gates.md) (closure, fixtures check with negative controls, `test //...` 191 pass, lint, arch, fork, format, l10n, coverage 99.0 %); [flake50.log](../evidence/T-0061/engineer/flake50.log); [mutations.log](../evidence/T-0061/engineer/mutations.log) (70 killed, 0 survived, 0 broken) |
+
+Decisions: `updatedAt` = clock + version seconds per user (not a global tick); seeds in all sets; the conflict scenario is a handler override that writes nothing and fires once per backend (flag in the store); check order is in CONTRACT.md. Finding: [F-0061](../findings/F-0061-identity-preferences.md).
