@@ -174,6 +174,26 @@ void main() {
       expect(account['density'], 'compact');
     });
 
+    test('T-0063-AC6 signed in, a change to the values already in use '
+        'announces nothing and sends nothing', () async {
+      final rig = await make(signedInAs: collector);
+      await rig.settle();
+      final seen = <AppearanceSnapshot>[];
+      final sub = rig.appearance.changes.listen(seen.add);
+      await rig.appearance.change(themeMode: AppearanceThemeMode.dark);
+      await rig.appearance.reset();
+      await rig.appearance.change(themeMode: AppearanceThemeMode.system);
+      await rig.appearance.change(themeMode: AppearanceThemeMode.system);
+      await rig.settle();
+      expect(rig.count('PATCH'), 1, reason: 'only the reset to System');
+      await sub.cancel();
+      expect(
+        [for (final s in seen) s.status],
+        [AppearanceSyncStatus.pending, AppearanceSyncStatus.synced],
+        reason: 'one change, one sync; the no-op ones announce nothing',
+      );
+    });
+
     test(
       'T-0063-AC2 retry does nothing unless offline or a save failed',
       () async {
@@ -292,7 +312,14 @@ void main() {
         themeMode: AppearanceThemeMode.light,
         density: AppearanceDensity.compact,
       );
+      expect((rig.saved! as Map)['pendingFor'], isNull, reason: 'the device');
+      final held = rig.gate.holdNext('GET');
       await rig.signIn(collector);
+      final read = await held;
+      // Adopted by the account that signs in, before its read is answered.
+      expect((rig.saved! as Map)['pendingFor'], collector);
+      expect((rig.saved! as Map)['pending'], ['themeMode', 'density']);
+      read.release();
       await rig.settle();
       expect(
         rig.shown,
