@@ -1,0 +1,302 @@
+#!/bin/bash
+# T-0048 mutation check: one or more mutations per AC behaviour, and one per
+# AC6 race (double submit, session change during submit, going back). Each
+# must make a named test target FAIL with a failing test (a mutation that
+# survives, or that only breaks the build, proves nothing). The unmutated tree
+# must pass first (positive control). Each mutation is restored with
+# `git checkout` of its file and the restore is verified; the script REFUSES
+# to run when a file it mutates has uncommitted edits.
+#
+#   MC_TASK=T-0048 MC_ROLE=engineer documents/evidence/T-0048/engineer/mutations.sh
+#   MC_ONLY="AC1-a AC6-c" ...   runs only the named mutations (after the baseline)
+#
+# Output base /tmp/mc-ob-$MC_TASK-$MC_ROLE; log /tmp/mc-$MC_TASK-$MC_ROLE-mutations.log
+# (also printed). Exit 0 only if every mutation was applied and killed.
+set -uo pipefail
+cd "$(git rev-parse --show-toplevel)"
+: "${MC_TASK:?set MC_TASK (e.g. T-0048)}"
+: "${MC_ROLE:?set MC_ROLE (engineer or verifier)}"
+OB="/tmp/mc-ob-$MC_TASK-$MC_ROLE"
+LOG="/tmp/mc-$MC_TASK-$MC_ROLE-mutations.log"
+: > "$LOG"
+say() { printf '%s\n' "$*" | tee -a "$LOG"; }
+bz() { tool/bazelw --output_base="$OB" "$@"; }
+
+FE=feature/library/library_reading_list_editor
+LW=app/wiring/library_wiring
+AC=app/wiring/app_core
+PW=app/wiring/publishing_wiring
+BDD=//$FE:bdd_test
+FLOW=//$FE:flow_scope_test
+ARCH=//$FE:architecture_test
+CONTRACT=//$FE:contract_test
+GOLDEN=//$FE:golden_test
+ROUTES=//$LW:routes_test
+RESULTS=//$AC:flow_results_test
+SHEET_T=//$AC:sign_in_sheet_test
+PW_ROUTES=//$PW:routes_test
+APP=//app/mini_client:reading_list_route_test
+FORMS_T="//utility/mc_forms:form_controller_test //utility/mc_forms:wizard_controller_test"
+ERRORS_T=//utility/mc_api_errors:api_failure_test
+LIB_T=//utility/mc_fixtures_library:validation_test
+
+BLOC=$FE/lib/src/presentation/bloc/reading_list_editor_bloc.dart
+PICKER=$FE/lib/src/presentation/bloc/comic_picker_bloc.dart
+FORM=$FE/lib/src/presentation/form/reading_list_form.dart
+DRAFT=$FE/lib/src/domain/model/reading_list.dart
+MAPPER=$FE/lib/src/domain/model/reading_list_mapper.dart
+REPO_=$FE/lib/src/domain/repository/reading_list_editor_repository.dart
+FLOWW=$FE/lib/src/flow/reading_list_editor_flow.dart
+DETAILS=$FE/lib/src/presentation/page/details_page.dart
+REVIEW=$FE/lib/src/presentation/page/review_page.dart
+ORDER_ROW=$FE/lib/src/presentation/widget/reading_order_row.dart
+COMIC_ROW=$FE/lib/src/presentation/widget/comic_row.dart
+STEPBAR=$FE/lib/src/presentation/widget/editor_step_bar.dart
+DE=$FE/lib/src/l10n/library_reading_list_editor_de.arb
+BARREL=$FE/lib/library_reading_list_editor.dart
+TARGETS_IMPL=$LW/lib/src/routes/route_targets_impl.dart
+NAV=$LW/lib/src/navigators/reading_list_editor_navigator_impl.dart
+RESULTS_SRC=$AC/lib/src/router/flow_results.dart
+LOCATIONS=$AC/lib/src/locations/app_locations.dart
+SHEET=$AC/lib/src/sign_in/fixture_sign_in_sheet.dart
+PW_NAV=$PW/lib/src/navigators/comics_details_navigator_impl.dart
+HOME_PAGE=app/mini_client/lib/src/pages/placeholder_pages.dart
+SCOPE=$FE/lib/src/di/flow_scope.dart
+FORM_CTRL=utility/mc_forms/lib/src/form_controller.dart
+WIZARD_CTRL=utility/mc_forms/lib/src/wizard_controller.dart
+API_FAILURE=utility/mc_api_errors/lib/src/api_failure.dart
+LIB_HANDLERS=utility/mc_fixtures_library/lib/src/handlers/library_handlers.dart
+
+VALIDATORS=utility/mc_forms/lib/src/validators.dart
+FILES=($VALIDATORS $BLOC $PICKER $FORM $DRAFT $MAPPER $REPO_ $FLOWW $DETAILS $REVIEW $ORDER_ROW $COMIC_ROW $STEPBAR $DE $BARREL
+  $TARGETS_IMPL $NAV $RESULTS_SRC $LOCATIONS $SHEET $PW_NAV $HOME_PAGE $SCOPE
+  $FORM_CTRL $WIZARD_CTRL $API_FAILURE $LIB_HANDLERS)
+for f in "${FILES[@]}"; do
+  if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
+    say "REFUSING TO RUN: $f has uncommitted edits (commit them first)"
+    exit 2
+  fi
+done
+restore_all() { git checkout -- "${FILES[@]}"; }
+trap restore_all EXIT
+
+# run <targets...>: the test output, one line per test, plus Bazel's summary.
+run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
+
+base="$(run $BDD $FLOW $ARCH $CONTRACT $GOLDEN $ROUTES $RESULTS $SHEET_T $PW_ROUTES $APP $FORMS_T $ERRORS_T $LIB_T)"
+if grep -q -E "FAILED|NO STATUS|^ERROR" <<< "$base"; then
+  say "BASELINE FAILS"; grep -E "FAILED|^ERROR" <<< "$base" | tee -a "$LOG"; exit 1
+fi
+say "baseline: PASS (14 targets)"
+
+rc=0
+n=0
+killed=0
+# mutate <id> <description> <file> <python expression on s> <targets...>
+mutate() {
+  local id="$1" what="$2" file="$3" expr="$4"; shift 4
+  if [[ -n "${MC_ONLY:-}" && " $MC_ONLY " != *" $id "* ]]; then return; fi
+  n=$((n + 1))
+  /usr/bin/python3 -I - "$file" "$expr" <<'EOF'
+import re, sys
+p, expr = sys.argv[1], sys.argv[2]
+s = open(p).read()
+t = eval(expr)
+if t == s:
+    print("MUTATION DID NOT CHANGE THE FILE"); sys.exit(3)
+open(p, "w").write(t)
+EOF
+  if [[ $? -ne 0 ]]; then say "$id $what: NOT APPLIED"; rc=1; git checkout -- "$file"; return; fi
+  [[ "$file" == *.dart ]] && fvm dart format "$file" > /dev/null
+  local out; out="$(run "$@")"
+  local first; first="$(grep -a -m1 -E '^  FAIL  |^[0-9:]+ \+[0-9]+ -[0-9]+: ' <<< "$out" | sed 's/^ *//')"
+  if [[ -n "$first" ]]; then
+    say "$id $what: KILLED ($first)"; killed=$((killed + 1))
+  elif grep -q -a -E "^ERROR|FAILED TO BUILD|Build did NOT complete" <<< "$out"; then
+    say "$id $what: COMPILE ERROR (not evidence)"; rc=1
+  else
+    say "$id $what: SURVIVED"; rc=1
+  fi
+  git checkout -- "$file"
+  git diff --quiet -- "$file" || { say "RESTORE FAILED: $file"; rc=1; }
+}
+
+# --- AC1: three steps create the list with exactly those values -------------
+mutate AC1-a "the name is sent untrimmed" $FORM \
+  "s.replace('name: _trimmedName(values.get<String>(ReadingListFields.name)),', \"name: values.get<String>(ReadingListFields.name) ?? '',\")" $BDD
+mutate AC1-b "the comics are sent in reverse order" $MAPPER \
+  "s.replace('List<int> get _ids => [for (final id in comicIds) id.value];', 'List<int> get _ids => [for (final id in comicIds.reversed) id.value];')" $BDD
+mutate AC1-c "a new list is public by default" $FORM \
+  "s.replace('initial: saved?.visibility ?? ReadingListVisibility.private,', 'initial: saved?.visibility ?? ReadingListVisibility.public,')" $BDD
+mutate AC1-d "a name may have 61 characters" $FORM \
+  "s.replace('static const int nameMaxLength = 60;', 'static const int nameMaxLength = 61;')" $BDD
+mutate AC1-e "a description may have 281 characters" $FORM \
+  "s.replace('static const int descriptionMaxLength = 280;', 'static const int descriptionMaxLength = 290;')" $BDD
+mutate AC1-f "a list may hold 101 comics" $FORM \
+  "s.replace('_atMost<PickedComic>(ReadingListRules.maxComics),', '_atMost<PickedComic>(ReadingListRules.maxComics + 1),')" $BDD
+mutate AC1-g "a pick does not make the comics error visible" $BLOC \
+  "s.replace('          wizard.touch(ReadingListFields.comics);\n', '')" $BDD
+mutate AC1-h "a saved list is not announced" $BLOC \
+  "s.replace('    if (_wrote) {', '    if (_wrote && _epoch == -1) {')" $BDD
+mutate AC3-f "a no-change save still announces a change" $BLOC \
+  "s.replace('    if (_wrote) {', '    if (_wrote || _epoch != -1) {')" $BDD
+mutate AC1-i "the reorder arrow moves the comic to the wrong place" $REVIEW \
+  "s.replace('ReadingListEditorEvent.comicMoved(i, i - 1)', 'ReadingListEditorEvent.comicMoved(i, 0)')" $BDD
+mutate AC1-j "a search result cannot be tapped by a screen reader" $COMIC_ROW \
+  "s.replace('      onTap: onTap,\n      excludeSemantics: true,', '      excludeSemantics: true,')" $FLOW
+# --- AC2: a failed save keeps everything; a refused field goes back -----------
+mutate AC2-a "a failed save shows no inline error" $REVIEW \
+  "s.replace('if (failure != null) ...[', 'if (failure != null && failure.message.isEmpty) ...[')" $BDD
+mutate AC2-b "Retry does nothing" $REVIEW \
+  "re.sub(r'onRetry: \(\) => context\.read<ReadingListEditorBloc>\(\)\.add\(\s*const ReadingListEditorEvent\.submit\(\),\s*\)', 'onRetry: () {}', s)" $BDD
+mutate AC2-c "a refused field is not rejected on the wizard" $BLOC \
+  "s.replace('        if (field != null) {', '        if (field != null && code == \'never\') {')" $BDD
+mutate AC2-d "the 400's parameter is not mapped to the name" $FORM \
+  "s.replace(\"    'name' => name,\", \"    'title' => name,\")" $BDD
+mutate AC2-e "kit: a rejection outlives a new value" $FORM_CTRL \
+  "s.replace('      _rejected.remove(name);', '      _rejected.length;')" $FORMS_T $BDD
+mutate AC2-f "kit: reject does not go to the field's step" $WIZARD_CTRL \
+  "s.replace('    if (step != _state.stepIndex) {\n      _goTo(step);', '    if (step == -2) {\n      _goTo(step);')" $FORMS_T $BDD
+mutate AC2-g "kit: a rejection is not an error of the field" $FORM_CTRL \
+  "s.replace('_specs[e.key]!.check(e.value.value, values) ?? _rejected[e.key],', '_specs[e.key]!.check(e.value.value, values),')" $FORMS_T $BDD
+mutate AC2-h "kit: ApiClientError drops the body's code" $API_FAILURE \
+  "s.replace('return ApiClientError(status, detail, body?.code, body?.parameter);', 'return ApiClientError(status, detail, null, body?.parameter);')" $ERRORS_T $BDD $CONTRACT
+mutate AC2-i "library: lengths count runes again" $LIB_HANDLERS \
+  "s.replace('raw.trim().characters.length', 'raw.trim().runes.length')" $LIB_T $BDD
+mutate AC2-j "library: duplicate names are allowed" $LIB_HANDLERS \
+  "s.replace('    if (list.id != except && list.name.trim().toLowerCase() == wanted) {', '    if (list.id != except && list.name == \'\' && wanted.isEmpty) {')" $LIB_T $BDD
+# --- AC3: edit mode -------------------------------------------------------
+mutate AC3-a "an unchanged list still sends the details" $DRAFT \
+  "s.replace('      name != saved.name ||', '      true ||')" $BDD
+mutate AC3-b "a new order is not seen as a change" $DRAFT \
+  "s.replace('      if (comicIds[i] != savedIds[i]) {', '      if (comicIds[i] != savedIds[i] && comicIds.length > 99) {')" $BDD
+mutate AC3-c "after the details saved, the baseline is not updated (Retry resends them)" $BLOC \
+  "s.replace('      saved = _saved = list;', '      saved = list;')" $BDD
+mutate AC3-d "another user's list shows as a failure, not as not found" $BLOC \
+  "s.replace('failure is ApiNotFound', 'failure is ApiClientError')" $BDD
+mutate AC3-e "edit mode does not pre-fill the steps" $BLOC \
+  "s.replace('          _open(list);', '          _open(null);')" $BDD
+mutate AC3-g "edit mode always needs a comic (an empty list cannot be renamed)" $FORM \
+  "s.replace('          _comicsRequired(saved),', '          _comicsRequired(null),')" $BDD
+# --- AC4: German and the pseudo-locale --------------------------------------
+mutate AC4-a "German Next left in English" $DE \
+  "s.replace('\"readingListEditorNext\": \"Weiter\"', '\"readingListEditorNext\": \"Next\"')" $BDD
+mutate AC4-b "the reading order title is not flexible (overflows at 2x)" $ORDER_ROW \
+  "s.replace('Expanded(child: Text(comic.title, style: text.bodyLarge)),', 'Text(comic.title, style: text.bodyLarge),')" $BDD
+# --- AC5: the app awaits the result ---------------------------------------
+mutate AC5-a "home does not show the returned list" $HOME_PAGE \
+  "s.replace('    setState(() => _lastList = (id: id!, created: created));', '    setState(() => _lastList = id!.isEmpty ? (id: id!, created: created) : null);')" $APP
+mutate AC5-b "the edit location is not encoded" $LOCATIONS \
+  "s.replace(\"'/me/lists/\${Uri.encodeComponent(id)}/edit'\", \"'/me/lists/\$id/edit'\")" $ROUTES $RESULTS
+mutate AC5-c "home opens a second editor on a double tap" $HOME_PAGE \
+  "s.replace('    if (_awaiting) {\n      return;\n    }\n', '')" $APP
+# --- AC6: blocked Next ---------------------------------------------------------
+mutate AC6-a "a tap on the disabled Next shows nothing" $BLOC \
+  "s.replace('      case _BlockedNext():\n        wizard?.touchCurrentStep();', '      case _BlockedNext():\n        if (_epoch == -1) {\n          wizard?.touchCurrentStep();\n        }')" $BDD
+mutate AC6-b "the step bar's blocked tap is not wired" $STEPBAR \
+  "s.replace('      onBlockedNext: () => bloc.add(const ReadingListEditorEvent.blockedNext()),', '      onBlockedNext: () {},')" $BDD
+# --- AC6: the result reaches the caller ----------------------------------------
+mutate AC6-c "the flow completes with no result" $FLOWW \
+  "s.replace('onComplete: (result) => onComplete(result as ReadingListId?),', 'onComplete: (result) => onComplete(null),')" $BDD
+mutate AC6-d "the route targets drop the result" $TARGETS_IMPL \
+  "s.replace('    onComplete: (id) => onComplete(id?.value),', '    onComplete: (id) => onComplete(null),')" $ROUTES $APP
+mutate AC6-e "the route pops without the result" $RESULTS_SRC \
+  "s.replace('      Navigator.of(context).pop<T>(pending.value);', '      Navigator.of(context).pop<T>();')" $RESULTS $ROUTES $APP
+mutate AC6-f "the route pops whatever is on top" $RESULTS_SRC \
+  "s.replace('    if (pending == null || route == null || !route.isCurrent) {', '    if (pending == null || route == null) {')" $RESULTS
+mutate AC6-t "a result under an overlay is dropped" $RESULTS_SRC \
+  "s.replace('    if (pending == null || route == null || !route.isCurrent) {\n      return;\n    }', '    if (pending == null || route == null || !route.isCurrent) {\n      _pending = null;\n      return;\n    }')" $RESULTS
+mutate AC6-g "a declined sign-in does not close the editor" $BLOC \
+  "s.replace('        // The user backed out: the editor closes with no result.\n        _flow.complete();', '        // The user backed out.')" $BDD
+# --- AC6 race: double submit -----------------------------------------------------
+mutate AC6-h "double submit: the save runs outside the wizard's one-completion guard" $BLOC \
+  "s.replace('    final outcome = await wizard.complete();', '    final outcome = await _save(wizard.state.form.values);')" $BDD
+# --- AC6 race: session change during submit ---------------------------------------
+mutate AC6-i "user switch during the save: the result is handed out anyway" $BLOC \
+  "s.replace('    if (_session.epoch != _epoch) {\n      // Whatever the save answered', '    if (_session.epoch != _epoch && _epoch == -1) {\n      // Whatever the save answered')" $BDD
+mutate AC6-j "user switch between two writes: the second is sent anyway" $BLOC \
+  "s.replace('    if (draft.itemsDifferFrom(saved)) {\n      if (!_canWrite(epoch)) {', '    if (draft.itemsDifferFrom(saved)) {\n      if (isClosed) {')" $BDD
+mutate AC6-k "sign-out before Finish does not end the editing" $BLOC \
+  "s.replace('    if (_wizard?.state.isCompleting ?? false) {', '    if (_wizard != null) {')" $BDD
+mutate AC6-l "session change during the load: the old session's list is shown" $BLOC \
+  "s.replace('      if (_session.epoch != epoch) {\n        // Read for a session that is gone', '      if (_session.epoch != epoch && epoch == -1) {\n        // Read for a session that is gone')" $BDD
+mutate AC6-m "a closed editor still writes" $BLOC \
+  "s.replace('  bool _canWrite(int? epoch) => !isClosed && _session.epoch == epoch;', '  bool _canWrite(int? epoch) => _session.epoch == epoch;')" $FLOW
+mutate AC6-u "leaving mid-load: neither the after-await guard nor the guard in _open (the late answer adds to a closed bloc)" $BLOC \
+  "s.replace('    _wizard = wizard;\n    if (!isClosed) {\n      add(_WizardChanged(wizard.state));\n    }', '    _wizard = wizard;\n    add(_WizardChanged(wizard.state));').replace('      if (isClosed) {\n        // The user left while the list was loading.', '      if (isClosed && _epoch == -1) {\n        // The user left while the list was loading.')" $FLOW
+mutate AC6-v "leaving mid-sign-in: the late answer opens the wizard on a closed bloc" $BLOC \
+  "s.replace('      if (isClosed) {\n        // The user left while the app was signing them in.', '      if (isClosed && _epoch == -1) {\n        // The user left while the app was signing them in.')" $FLOW
+mutate AC6-w "a half-saved edit is not announced" $BLOC \
+  "s.replace('    if (_wrote) {\n      // Whatever happens next', '    if (_wrote && outcome.getOrNull() != null) {\n      // Whatever happens next')" $BDD $FLOW
+# --- AC6 race: going back ---------------------------------------------------------
+mutate AC6-n "going back: a popped step page is not applied to the wizard" $BLOC \
+  "s.replace('    while (flow.step < wizard.state.stepIndex && wizard.back()) {}', '')" $BDD
+mutate AC6-o "going back: the review page can be popped while saving" $REVIEW \
+  "s.replace('          canPop: !saving,', '          canPop: true,')" $BDD
+mutate AC6-p "going back: a slow, older search answer replaces a newer one" $PICKER \
+  "s.replace('    if (search != _latest) {\n      return;\n    }', '')" $BDD
+# --- AC6: the shared sign-in sheet --------------------------------------------------
+mutate AC6-q "the library navigator gives no reason" $NAV \
+  "s.replace(\"reason: 'to save your reading lists',\", \"reason: '',\")" $ROUTES $APP
+mutate AC6-r "the publishing navigator no longer asks the shared sheet" $PW_NAV \
+  "re.sub(r'Future<bool> requestSignIn\(\) => requestFixtureSignIn\(.*?\);', 'Future<bool> requestSignIn() async => _session.isSignedIn || identical(_routerRef, _auth);', s, flags=re.S)" $PW_ROUTES
+mutate AC6-s "the shared sheet can be closed while signing in" $SHEET \
+  "s.replace('      canPop: !_busy,', '      canPop: true,')" $SHEET_T $PW_ROUTES
+# --- AC7: the barrel and the root imports ---------------------------------------------
+mutate AC7-a "barrel exports a page" $BARREL \
+  "s + \"export 'package:library_reading_list_editor/src/presentation/page/details_page.dart' show ReadingListDetailsPage;\n\"" $ARCH
+mutate AC7-b "SessionReader not forwarded (Session instead)" $SCOPE \
+  "s.replace('  RootImport<SessionReader>(),', '  RootImport<Session>(),')" $FLOW
+
+# --- Verifier's own mutations (V*) -----------------------------------------
+mutate V01 "create: the epoch pre-check before the POST is removed" $BLOC \
+  "s.replace('    if (editing == null) {\n      if (!_canWrite(epoch)) {\n        return failure(_stopped);\n      }\n', '    if (editing == null) {\n')" $BDD $FLOW
+mutate V02 "edit: the pre-check before the details PUT is removed" $BLOC \
+  "s.replace('    if (draft.detailsDifferFrom(saved)) {\n      if (!_canWrite(epoch)) {\n        return failure(_stopped);\n      }\n', '    if (draft.detailsDifferFrom(saved)) {\n')" $BDD $FLOW
+mutate V03 "a closed editor announces nothing (publish moved after the isClosed return)" $BLOC \
+  "s.replace('    if (_wrote) {\n      // Whatever happens next', '    if (_wrote && !isClosed) {\n      // Whatever happens next')" $BDD $FLOW
+mutate V04 "flow result: a deep-linked route pops instead of going home" $RESULTS_SRC \
+  "s.replace('    if (route.isFirst) {', '    if (route.isFirst && pending.value == 0) {')" $RESULTS $ROUTES
+mutate V05 "flow result: a second completion while pending overrides the first" $RESULTS_SRC \
+  "s.replace('    if (_done || _pending != null || !mounted) {', '    if (_done || !mounted) {')" $RESULTS
+mutate V06 "flow result: nothing delivers once the overlay closes" $RESULTS_SRC \
+  "s.replace('    if (_pending != null) {\n      // Navigation may not change', '    if (_pending != null && _done) {\n      // Navigation may not change')" $RESULTS
+mutate V07 "home: the awaiting flag is never cleared" $HOME_PAGE \
+  "s.replace('    } finally {\n      _awaiting = false;\n    }', '    } finally {}')" $APP
+mutate V08 "kit: WizardController.reject while completing is not ignored" $WIZARD_CTRL \
+  "s.replace('  void reject(String name, FieldError error) {\n    if (_disposed || _state.isCompleting || _state.isCompleted) {', '  void reject(String name, FieldError error) {\n    if (_disposed || _state.isCompleted) {')" $FORMS_T
+mutate V09 "kit: FormController.reject leaves a failed submit failed" $FORM_CTRL \
+  "s.replace('    _rejected[name] = error;\n    _emit(\n      _revalidate(\n        {\n          for (final e in _state.fields.entries)\n            e.key: e.key == name ? e.value.touch() : e.value,\n        },\n        failed: _state.submitStatus == SubmitStatus.failed\n            ? SubmitStatus.idle\n            : null,', '    _rejected[name] = error;\n    _emit(\n      _revalidate(\n        {\n          for (final e in _state.fields.entries)\n            e.key: e.key == name ? e.value.touch() : e.value,\n        },\n        failed: null,')" $FORMS_T
+mutate V10 "kit: reset keeps the server errors" $FORM_CTRL \
+  "s.replace('    _rejected.clear();\n', '')" $FORMS_T
+mutate V11 "kit: an error body sent as JSON text is ignored" $API_FAILURE \
+  "s.replace('        decoded = jsonDecode(data);', '        decoded = null;')" $ERRORS_T $CONTRACT
+mutate V12 "kit: the parameter is dropped" $API_FAILURE \
+  "s.replace('      parameter: parameter is String ? parameter : null,', '      parameter: null,')" $ERRORS_T $BDD $CONTRACT
+mutate V13 "library: a renamed list may not keep its own name" $LIB_HANDLERS \
+  "s.replace('    if (list.id != except && list.name.trim().toLowerCase() == wanted) {', '    if (list.name.trim().toLowerCase() == wanted) {')" $LIB_T $BDD
+mutate V14 "library: names compared case-sensitively" $LIB_HANDLERS \
+  "s.replace('final wanted = name.trim().toLowerCase();', 'final wanted = name.trim();').replace('list.name.trim().toLowerCase() == wanted', 'list.name.trim() == wanted')" $LIB_T $BDD
+mutate V15 "library: the description counts runes" $LIB_HANDLERS \
+  "s.replace('(raw is! String || raw.characters.length > descriptionMaxLength)', '(raw is! String || raw.runes.length > descriptionMaxLength)')" $LIB_T $BDD
+mutate V16 "kit: maxLength counts runes (60 flags fail the form)" $VALIDATORS \
+  "s.replace('(value) => value == null || value.characters.length <= max', '(value) => value == null || value.runes.length <= max')" $BDD
+mutate V17 "an ended session does not return to the first page" $BLOC \
+  "s.replace('    _flow.update((s) => s.copyWith(step: 0));\n    emit(const ReadingListEditorState.sessionEnded());', '    emit(const ReadingListEditorState.sessionEnded());')" $BDD
+mutate V18 "the details write is not counted as written" $BLOC \
+  "s.replace('      _wrote = true;\n      saved = _saved = list;', '      saved = _saved = list;')" $BDD $FLOW
+mutate V19 "the sign-in gate trusts the navigator's true without a session" $BLOC \
+  "s.replace('      if (!signedIn || !_session.isSignedIn) {', '      if (!signedIn) {')" $BDD $FLOW $ROUTES
+mutate V20 "the load guard against a double Retry is removed" $BLOC \
+  "s.replace('    if (_loading) {\n      return;\n    }\n    _loading = true;', '    _loading = true;')" $BDD
+mutate V21 "a refused description is mapped to no field" $FORM \
+  "s.replace(\"    'description' => description,\", \"    'desc' => description,\")" $BDD $CONTRACT
+mutate V22 "too_many_comics shows the generic error" $FORM \
+  "s.replace(\"FieldError serverError(String? code) => code == 'too_many_comics'\", \"FieldError serverError(String? code) => code == 'too_many_comics_x'\")" $BDD $CONTRACT
+mutate V23 "the session listener adds after close" $BLOC \
+  "s.replace('    _sessionChanges = _session.authState.listen((_) {\n      if (!isClosed) {\n        add(const _SessionChanged());\n      }\n    });', '    _sessionChanges = _session.authState.listen((_) {\n      add(const _SessionChanged());\n    });')" $BDD $FLOW
+mutate V24 "an ended session's late save result is handed out (ended state ignored in _submit)" $BLOC \
+  "s.replace('    if (isClosed) {\n      return;\n    }\n    if (_session.epoch != _epoch) {', '    if (isClosed) {\n      return;\n    }\n    if (_session.epoch != _epoch && _ended) {')" $BDD
+mutate V25 "description rule not applied in the form" $FORM \
+  "s.replace('          Validators.maxLength(ReadingListRules.descriptionMaxLength),', '')" $BDD
+say ""; say "$killed of $n mutations killed by a failing test"; exit $rc

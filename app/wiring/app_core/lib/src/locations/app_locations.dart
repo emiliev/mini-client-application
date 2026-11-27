@@ -28,4 +28,15 @@ abstract final class AppLocations {
     path: '/search',
     queryParameters: query == null ? null : {'q': query},
   ).toString();
+
+  /// The reading-list editor on a new list (T-0048). Equals
+  /// `NewReadingListRoute().location` in library_wiring. It ends with a
+  /// result: push it through `AppFlows.createReadingList`.
+  static const String newReadingList = '/me/lists/new';
+
+  /// The reading-list editor on list [id] (T-0048). Equals
+  /// `EditReadingListRoute(id: id).location` in library_wiring. It ends with
+  /// a result: push it through `AppFlows.editReadingList`.
+  static String editReadingList(String id) =>
+      '/me/lists/${Uri.encodeComponent(id)}/edit';
 }

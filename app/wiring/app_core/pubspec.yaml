@@ -1,5 +1,6 @@
 # T-0021 (P1-16): the shared app layer. McApp, boot, the root DI list,
-# PendingLinks and AppLocations.
+# PendingLinks and AppLocations; the flow-result helpers (AppFlows) and the
+# temporary fixture sign-in sheet that the wirings share (T-0048).
 name: app_core
 version: 0.1.0
 publish_to: none
@@ -21,6 +22,7 @@ dependencies:
   mc_bloc_kit: any
   mc_config: any
   mc_di: any
+  mc_ds_buttons: any
   mc_ds_feedback: any
   mc_ds_layout: any
   mc_ds_media: any
@@ -31,6 +33,7 @@ dependencies:
   mc_fixtures_comics: any
   mc_fixtures_discovery: any
   mc_fixtures_identity: any
+  mc_fixtures_library: any
   mc_fixtures_media: any
   mc_mocked_backend: any
   mc_monitoring: any
@@ -41,3 +44,4 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   mc_analysis: any
+  mc_test_utils: any

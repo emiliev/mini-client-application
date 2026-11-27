@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:characters/characters.dart';
 import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_fixtures_library/src/data/reading_list.dart';
@@ -106,7 +107,9 @@ Map<String, Object?> _detail(ReadingList list, ComicUniverse universe) => {
 };
 
 MockResponse? _checkName(Object? raw) {
-  final length = raw is String ? raw.trim().runes.length : -1;
+  // What a reader sees as one character (grapheme clusters), as the
+  // editor's form counts: a flag or an accented letter counts once.
+  final length = raw is String ? raw.trim().characters.length : -1;
   if (length < nameMinLength || length > nameMaxLength) {
     return _invalid(
       'invalid_name',
@@ -120,13 +123,34 @@ MockResponse? _checkName(Object? raw) {
 
 MockResponse? _checkDescription(Object? raw) {
   if (raw != null &&
-      (raw is! String || raw.runes.length > descriptionMaxLength)) {
+      (raw is! String || raw.characters.length > descriptionMaxLength)) {
     return _invalid(
       'invalid_description',
       'description must be a string of at most $descriptionMaxLength '
           'characters',
       {'parameter': 'description'},
     );
+  }
+  return null;
+}
+
+/// A user's list names are unique, compared case-insensitively after
+/// trimming; [except] is the list being renamed (it may keep its own name).
+MockResponse? _checkUnique(
+  LibraryState state,
+  String user,
+  String name, {
+  String? except,
+}) {
+  final wanted = name.trim().toLowerCase();
+  for (final list in state.listsByUser[user]!) {
+    if (list.id != except && list.name.trim().toLowerCase() == wanted) {
+      return _invalid(
+        'duplicate_name',
+        'you already have a list named "${list.name}"',
+        {'parameter': 'name', 'listId': list.id},
+      );
+    }
   }
   return null;
 }
@@ -255,6 +279,10 @@ MockHandler createList({required bool seed}) =>
         return error;
       }
       final state = _state(context, universe, seed: seed);
+      final taken = _checkUnique(state, user.id, body['name'] as String);
+      if (taken != null) {
+        return taken;
+      }
       final list = ReadingList(
         id: 'l-${state.nextNumber++}',
         name: (body['name'] as String).trim(),
@@ -285,7 +313,8 @@ MockHandler updateList({required bool seed}) =>
       final error =
           _checkName(body['name']) ??
           _checkDescription(body['description']) ??
-          _checkVisibility(body['visibility']);
+          _checkVisibility(body['visibility']) ??
+          _checkUnique(state, user.id, body['name'] as String, except: id);
       if (error != null) {
         return error;
       }

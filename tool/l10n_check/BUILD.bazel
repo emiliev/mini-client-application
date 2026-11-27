@@ -26,6 +26,7 @@ dart_test(
         "//feature/characters/characters_list:arbs",
         "//feature/comics/comics_details:arbs",
         "//feature/discovery/discovery_search:arbs",
+        "//feature/library/library_reading_list_editor:arbs",
         "//utility/mc_l10n_core:arbs",
     ],
     language_version = "3.13",

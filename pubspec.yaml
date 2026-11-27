@@ -21,6 +21,7 @@ workspace:
   - feature/characters/characters_list
   - feature/comics/comics_details
   - feature/discovery/discovery_search
+  - feature/library/library_reading_list_editor
   - spike/api_envelope
   - spike/bdd_sample
   - spike/di_sample

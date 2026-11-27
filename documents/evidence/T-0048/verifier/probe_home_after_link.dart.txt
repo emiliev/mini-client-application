@@ -1,0 +1,23 @@
+
+  // ---- Verifier probe (T-0048) ----
+  testWidgets('VPROBE after a link replaced the open editor, New reading '
+      'list opens an editor again', (tester) async {
+    await boot(tester);
+    await tap(tester, find.byKey(newReadingListKey));
+    await signInOnTheSheet(tester);
+    expect(find.text('Step 1 of 3'), findsOneWidget);
+
+    // A link to home arrives while the editor is open (a `go`).
+    await _pushLink(tester, 'miniclient://app/');
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('home.placeholder')), findsOneWidget);
+    expect(find.byKey(_details), findsNothing);
+
+    await tap(tester, find.byKey(newReadingListKey));
+    expect(
+      find.text('Step 1 of 3'),
+      findsOneWidget,
+      reason: 'a tap on New reading list opens the editor',
+    );
+  });
+}

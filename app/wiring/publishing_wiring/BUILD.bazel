@@ -34,11 +34,6 @@ _DEPS = [
     "//feature/comics/comics_details",
     "//utility/mc_api_auth",
     "//utility/mc_di",
-    "//utility/mc_ds_buttons",
-    "//utility/mc_ds_layout",
-    # TEMPORARY: the fixture sign-in sheet (P-044). Fixtures are allowed in
-    # app wiring, never in a feature or the DS.
-    "//utility/mc_fixtures_identity",
     "//utility/mc_session",
     "@pub_deps//:flutter",
     "@pub_deps//:get_it",
@@ -54,7 +49,6 @@ flutter_library(
         "lib/src/flows/creator_details_placeholder_flow.dart",
         "lib/src/routes/creators_routes.dart",
         "lib/src/routes/route_targets.dart",
-        "lib/src/sign_in/fixture_sign_in_sheet.dart",
     ],
     language_version = _LANG,
     tags = [
@@ -123,6 +117,7 @@ flutter_library(
 
 _TEST_DEPS = _DEPS + [
     ":publishing_wiring",
+    "//utility/mc_fixtures_identity",
     "//utility/mc_ds_theme",
     "//utility/mc_test_utils",
     "@pub_deps//:flutter_test",
