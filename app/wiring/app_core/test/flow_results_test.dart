@@ -45,12 +45,14 @@ Future<GoRouter> _app(WidgetTester tester, {String initial = '/'}) async {
       GoRoute(
         path: AppLocations.newReadingList,
         builder: (context, state) => FlowResultRoute<String>(
+          extra: state.extra,
           builder: (complete) => _FakeFlow(onComplete: complete),
         ),
       ),
       GoRoute(
         path: '/me/lists/:id/edit',
         builder: (context, state) => FlowResultRoute<String>(
+          extra: state.extra,
           builder: (complete) => _FakeFlow(
             onComplete: (_) => complete(state.pathParameters['id']),
           ),
@@ -193,6 +195,190 @@ void main() {
 
     expect(await result, 'l-5');
     expect(router.state.uri.toString(), '/me/lists/l-9/edit');
+  });
+
+  group('T-0049-AC3 a result future always completes, once, with null '
+      'when the route goes away without a result', () {
+    Future<(List<String?>, Future<void>)> open(
+      WidgetTester tester,
+      GoRouter router,
+    ) async {
+      final got = <String?>[];
+      final done = AppFlows.createReadingList(router).then(got.add);
+      await tester.pumpAndSettle();
+      expect(find.byKey(_finish), findsOneWidget);
+      return (got, done);
+    }
+
+    testWidgets('T-0049-AC3 replaced by a go', (tester) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, [null]);
+      expect(find.byKey(const Key('home')), findsOneWidget);
+    });
+
+    testWidgets('T-0049-AC3 replaced by a go to another route', (
+      tester,
+    ) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      router.go(AppLocations.editReadingList('l-3'));
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, [null]);
+    });
+
+    testWidgets('T-0049-AC3 popped by Back', (tester) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      router.pop();
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, [null]);
+    });
+
+    testWidgets('T-0049-AC3 a result then leaving gives the result once', (
+      tester,
+    ) async {
+      final router = await _app(tester);
+      final (got, done) = await open(tester, router);
+
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+      router.go(AppLocations.editReadingList('l-3'));
+      await tester.pumpAndSettle();
+      await done;
+
+      expect(got, ['l-5']);
+    });
+
+    testWidgets('T-0049-AC3 the result reaches the call directly, not through '
+        'the push future (dispose completes with null first)', (tester) async {
+      final call = FlowCall<String>();
+      await tester.pumpWidget(const MaterialApp(home: Text('home')));
+      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+      unawaited(
+        navigator.push<String>(
+          MaterialPageRoute<String>(
+            builder: (_) => FlowResultRoute<String>(
+              extra: call,
+              builder: (complete) => _FakeFlow(onComplete: complete),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+
+      expect(find.text('home'), findsOneWidget);
+      expect(await call.result, 'l-5');
+    });
+
+    testWidgets('T-0049-AC3 a route built without extra: state.extra trips an '
+        'assert in debug builds, naming the fix', (tester) async {
+      final router = GoRouter(
+        routes: [
+          GoRoute(path: '/', builder: (context, state) => const Text('home')),
+          GoRoute(
+            path: AppLocations.newReadingList,
+            builder: (context, state) => FlowResultRoute<String>(
+              builder: (complete) => _FakeFlow(onComplete: complete),
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      unawaited(AppFlows.createReadingList(router));
+      await tester.pumpAndSettle();
+
+      final error = tester.takeException();
+      expect(error, isA<FlutterError>());
+      expect(error.toString(), contains('extra: state.extra'));
+    });
+
+    testWidgets('T-0049-AC3 a link to the same location is not mistaken for '
+        'a forgotten extra', (tester) async {
+      final router = await _app(tester);
+      unawaited(AppFlows.createReadingList(router));
+      await tester.pumpAndSettle();
+
+      router.go(AppLocations.newReadingList);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('T-0049-AC3 a route nobody pushed (a link) ends without a '
+        'caller and without error', (tester) async {
+      final router = await _app(tester, initial: AppLocations.newReadingList);
+
+      router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byKey(const Key('home')), findsOneWidget);
+    });
+  });
+
+  group('T-0049-AC3 FlowExtraCodec: a FlowCall is transient', () {
+    test('T-0049-AC3 it encodes as null and decodes as no call', () {
+      const codec = FlowExtraCodec();
+      expect(codec.encode(FlowCall<String>()), isNull);
+      expect(codec.decode(null), isNull);
+      expect(codec.encode('x'), 'x', reason: 'other extras pass through');
+      expect(codec.decode('x'), 'x');
+    });
+
+    testWidgets('T-0049-AC3 with the codec, a push carrying a FlowCall is '
+        'saved as a custom null extra (no JSON warning path) and still '
+        'completes', (tester) async {
+      final router = GoRouter(
+        extraCodec: const FlowExtraCodec(),
+        routes: [
+          GoRoute(path: '/', builder: (context, state) => const Text('home')),
+          GoRoute(
+            path: AppLocations.newReadingList,
+            builder: (context, state) => FlowResultRoute<String>(
+              extra: state.extra,
+              builder: (complete) => _FakeFlow(onComplete: complete),
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+      await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+      await tester.pumpAndSettle();
+
+      final result = AppFlows.createReadingList(router);
+      await tester.pumpAndSettle();
+      final saved = router.routeInformationParser.restoreRouteInformation(
+        router.routerDelegate.currentConfiguration,
+      )!;
+      final pushed =
+          (saved.state! as Map<Object?, Object?>)['imperativeMatches']!
+              as List<Object?>;
+      final extra = (pushed.last! as Map<Object?, Object?>)['state']! as Map;
+      expect(extra['codec'], 'custom');
+      expect(extra['encoded'], isNull);
+
+      await tester.tap(find.byKey(_finish));
+      await tester.pumpAndSettle();
+      expect(await result, 'l-5');
+    });
   });
 
   test('T-0048-AC5 the reading-list locations', () {

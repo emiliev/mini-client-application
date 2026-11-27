@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mc_e2e_utils/mc_e2e_utils.dart';
 import 'package:mini_client/main.dart' as app;
+import 'package:mini_client/src/pages/placeholder_pages.dart';
 
 /// T-0048-AC5's deep link: `miniclient://app/me/lists/new` opens the
 /// reading-list editor through the file-drop start link (F-0020: `simctl
@@ -43,7 +44,35 @@ void main() {
     }
     await pumpUntil(tester, find.text('Step 1 of 3'), 'the linked editor');
     expect(find.text('New reading list'), findsOneWidget);
+    expect(
+      find.byType(BackButton),
+      findsWidgets,
+      reason: 'T-0049-AC1: the cold link has a back button',
+    );
     await shot(binding, tester, '37_deep_link_new_list');
+    await tester.tap(find.byType(BackButton).first);
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('home.placeholder')),
+      'T-0049-AC1: home, after Back from the cold link',
+    );
+    await shot(binding, tester, '37b_back_from_new_list_is_home');
+    // AC3: home's New reading list button opens the editor again.
+    await tester.tap(find.byKey(newReadingListKey));
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'the editor from home');
+    await pushLink(tester, 'miniclient://app/');
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('home.placeholder')),
+      'home, replacing the open editor',
+    );
+    await tester.tap(find.byKey(newReadingListKey));
+    await pumpUntil(
+      tester,
+      find.text('Step 1 of 3'),
+      'T-0049-AC3: the editor again, after a link replaced it',
+    );
+    await shot(binding, tester, '37c_editor_after_link_replaced_it');
 
     await pushLink(tester, 'miniclient://app/me/lists/l-1/edit');
     await pumpUntil(

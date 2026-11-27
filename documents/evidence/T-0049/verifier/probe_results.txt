@@ -1,0 +1,46 @@
+VPROBE codec state contains FlowCall: false
+VPROBE codec records=4 warnings(with codec)=0
+VPROBE codec warnings(control, no codec)=2
+  PASS  VPROBE codec: no "complex data type" warning with the codec; the control without the codec warns
+The following JsonUnsupportedObjectError was thrown running a test:
+  VPROBE-EXPECT? codec passes a non-JSON extra through to the engine report
+VPROBE opaque extra encoded as: _Opaque
+  FAIL  VPROBE-EXPECT? codec passes a non-JSON extra through to the engine report
+        The test description was: VPROBE-EXPECT? codec passes a non-JSON extra through to the engine report
+  PASS  VPROBE control: no codec, a non-JSON extra is dropped with a warning, no error
+VPROBE pending-under-dialog then go -> null
+  PASS  VPROBE a result pending under a dialog, then a go: what does the caller get
+  PASS  VPROBE result and a go in the same synchronous span
+  PASS  VPROBE system Back (handlePopRoute) completes with null
+  PASS  VPROBE edit with an encoded id: no false assert, the id
+  PASS  VPROBE two AppFlows on the same location, then go: both null, no error
+VPROBE nested forgotten extra -> FlutterError
+  PASS  VPROBE forgotten extra inside nestUnderHome also asserts
+VPROBE redirect then go -> exception=FlowResultRoute at /me/lists/new was opened through AppFlows but built without its FlowCall, so the caller would wait forever.
+VPROBE redirect then go -> caller completed=false
+  PASS  VPROBE a redirected AppFlows push (future /me guard), then the guard sends on with a go
+  PASS  VPROBE nestUnderHome keeps parentNavigatorKey, onExit, redirect, caseSensitive; refuses relative and a second "/"
+VPROBE stack edit: [/, me/lists/:id/edit]
+  PASS  VPROBE cold /me/lists/l-1/edit: back once to home
+VPROBE query+fragment field="spi" uri=/search?q=spi#top
+  PASS  VPROBE cold /search?q=spi#top: search with spi, back home
+VPROBE comics/abc stack=[null] back=0 canPop=false
+  PASS  VPROBE cold /comics/abc: what is under not-found
+VPROBE nope stack=[null] back=0 canPop=false
+  PASS  VPROBE cold /nope (unknown path)
+VPROBE creators stack=[/, creators/:id]
+  PASS  VPROBE cold /creators/1 nests too
+VPROBE preview before link stack=[/, characters]
+VPROBE preview after link stack=[/, comics/:id]
+  PASS  VPROBE link from the characters preview (inner flow page)
+VPROBE step2 after link stack=[/, search]
+  PASS  VPROBE link from reading-list step 2; then New works
+VPROBE sheet after link stack=[/, comics/:id]
+  PASS  VPROBE link while the sign-in sheet is open; then New works
+  PASS  VPROBE D2: after a link replaced the open editor, New opens an editor again
+  PASS  VPROBE Edit works again after a link replaced the editor; and a result still reaches home
+VPROBE push stack=[/, characters, comics/:id]
+  PASS  VPROBE an in-app push still stacks on what is open
+INFO: Build completed, 1 test FAILED, 13 total actions
+//app/mini_client:verifier_probe_test                                    PASSED in 4.1s
+//app/wiring/app_core:verifier_flow_probe_test                           FAILED in 1.1s

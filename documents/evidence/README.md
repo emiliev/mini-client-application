@@ -48,3 +48,4 @@ The task's Outcome section links its evidence folder. Screenshots are the one sa
 | [T-0048](T-0048/verification-report.md) | PASS (Opus, single pass) | FW exemplar: wizard races, flow result under overlays, user-switch probes (found the P-083 gap), e2e journey and deep link |
 | [T-0046](T-0046/verification-report.md) | PASS (Opus, then a narrow Sonnet merge re-check) | SR exemplar: debounce boundaries, stale-answer races, history on a failed save, merge with T-0048 |
 | [T-0051](T-0051/verification-report.md) | PASS (Sonnet, single pass) | Commerce fixtures: own cart oracle (stacking, half-up, largest remainder), section failures, two-user carts, overlong ids |
+| [T-0049](T-0049/verification-report.md) | PASS (Opus, single pass) | Deep-link back stacks on device (cold and running, from inner flow pages and sheets), result futures on every exit, codec log capture; 5 Minor defects → P-094 to P-098 |

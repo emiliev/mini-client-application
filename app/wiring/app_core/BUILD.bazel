@@ -63,6 +63,7 @@ flutter_library(
     "formatters_root_test",
     "app_layer_test",
     "feature_flags_boot_test",
+    "route_nesting_test",
 ]]
 
 # T-0048: the flow-result helpers.

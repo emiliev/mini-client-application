@@ -1,0 +1,337 @@
+// T-0049 Verifier probes (scratch, not committed).
+// ignore_for_file: implementation_imports, avoid_print, always_put_control_body_on_new_line
+import 'dart:async';
+
+import 'package:app_core/app_core.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:go_router/src/logging.dart' as grlog;
+
+const _finish = Key('finish');
+
+class _FakeFlow extends StatelessWidget {
+  const _FakeFlow({required this.onComplete, this.extraAction});
+
+  final ValueChanged<String?> onComplete;
+  final VoidCallback? extraAction;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    children: [
+      TextButton(
+        key: _finish,
+        onPressed: () {
+          onComplete('l-5');
+          extraAction?.call();
+        },
+        child: const Text('finish'),
+      ),
+      TextButton(
+        key: const Key('dialog'),
+        onPressed: () => unawaited(
+          showDialog<void>(
+            context: context,
+            builder: (_) => AlertDialog(
+              content: TextButton(
+                key: const Key('finish.under'),
+                onPressed: () => onComplete('l-7'),
+                child: const Text('finish under dialog'),
+              ),
+            ),
+          ),
+        ),
+        child: const Text('dialog'),
+      ),
+    ],
+  );
+}
+
+GoRoute _resultRoute(
+  String path, {
+  bool passExtra = true,
+  VoidCallback? also,
+}) => GoRoute(
+  path: path,
+  builder: (context, state) => FlowResultRoute<String>(
+    extra: passExtra ? state.extra : null,
+    builder: (complete) => _FakeFlow(
+      onComplete: (v) =>
+          complete(v == null ? null : state.pathParameters['id'] ?? v),
+      extraAction: also,
+    ),
+  ),
+);
+
+Future<GoRouter> _pump(WidgetTester tester, GoRouter router) async {
+  addTearDown(router.dispose);
+  await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+  await tester.pumpAndSettle();
+  return router;
+}
+
+List<RouteBase> _routes({VoidCallback? also}) => [
+  GoRoute(
+    path: '/',
+    builder: (context, state) => const Text('home', key: Key('home')),
+  ),
+  _resultRoute(AppLocations.newReadingList, also: also),
+  _resultRoute('/me/lists/:id/edit'),
+  GoRoute(path: '/x', builder: (context, state) => const Text('x')),
+];
+
+bool _containsFlowCall(Object? o) {
+  if (o is FlowCall) return true;
+  if (o is Map)
+    return o.values.any(_containsFlowCall) || o.keys.any(_containsFlowCall);
+  if (o is List) return o.any(_containsFlowCall);
+  return false;
+}
+
+class _Opaque {}
+
+void main() {
+  testWidgets('VPROBE codec: no "complex data type" warning with the codec; '
+      'the control without the codec warns', (tester) async {
+    final records = <String>[];
+    grlog.testDeveloperLog = (r) => records.add(r.message);
+    addTearDown(() => grlog.testDeveloperLog = null);
+
+    final withCodec = await _pump(
+      tester,
+      GoRouter(
+        debugLogDiagnostics: true,
+        extraCodec: const FlowExtraCodec(),
+        routes: _routes(),
+      ),
+    );
+    final r1 = AppFlows.createReadingList(withCodec);
+    await tester.pumpAndSettle();
+    final saved = withCodec.routeInformationParser.restoreRouteInformation(
+      withCodec.routerDelegate.currentConfiguration,
+    )!;
+    print(
+      'VPROBE codec state contains FlowCall: ${_containsFlowCall(saved.state)}',
+    );
+    expect(_containsFlowCall(saved.state), isFalse);
+    await tester.tap(find.byKey(_finish));
+    await tester.pumpAndSettle();
+    expect(await r1, 'l-5');
+    final warnWith = records
+        .where((m) => m.contains('complex data type'))
+        .length;
+    print(
+      'VPROBE codec records=${records.length} warnings(with codec)=$warnWith',
+    );
+    expect(records, isNotEmpty, reason: 'capture works');
+    expect(warnWith, 0);
+
+    records.clear();
+    await tester.pumpWidget(const SizedBox());
+    final noCodec = await _pump(
+      tester,
+      GoRouter(debugLogDiagnostics: true, routes: _routes()),
+    );
+    final r2 = AppFlows.createReadingList(noCodec);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_finish));
+    await tester.pumpAndSettle();
+    expect(await r2, 'l-5');
+    final warnWithout = records
+        .where((m) => m.contains('complex data type'))
+        .length;
+    print('VPROBE codec warnings(control, no codec)=$warnWithout');
+    expect(warnWithout, greaterThan(0));
+  });
+
+  testWidgets('VPROBE-EXPECT? codec passes a non-JSON extra through to the '
+      'engine report', (tester) async {
+    final router = await _pump(
+      tester,
+      GoRouter(extraCodec: const FlowExtraCodec(), routes: _routes()),
+    );
+    unawaited(router.push<void>('/x', extra: _Opaque()));
+    await tester.pumpAndSettle();
+    final saved = router.routeInformationParser.restoreRouteInformation(
+      router.routerDelegate.currentConfiguration,
+    )!;
+    final pushed =
+        (saved.state! as Map<Object?, Object?>)['imperativeMatches']!
+            as List<Object?>;
+    final extra = (pushed.last! as Map<Object?, Object?>)['state']! as Map;
+    print('VPROBE opaque extra encoded as: ${extra['encoded'].runtimeType}');
+  });
+
+  testWidgets('VPROBE control: no codec, a non-JSON extra is dropped with '
+      'a warning, no error', (tester) async {
+    final router = await _pump(tester, GoRouter(routes: _routes()));
+    unawaited(router.push<void>('/x', extra: _Opaque()));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('VPROBE a result pending under a dialog, then a go: what does '
+      'the caller get', (tester) async {
+    final router = await _pump(tester, GoRouter(routes: _routes()));
+    final r = AppFlows.createReadingList(router);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('dialog')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('finish.under')));
+    await tester.pumpAndSettle();
+    router.go('/');
+    await tester.pumpAndSettle();
+    print('VPROBE pending-under-dialog then go -> ${await r}');
+  });
+
+  testWidgets('VPROBE result and a go in the same synchronous span', (
+    tester,
+  ) async {
+    late GoRouter router;
+    router = await _pump(
+      tester,
+      GoRouter(routes: _routes(also: () => router.go('/x'))),
+    );
+    final r = AppFlows.createReadingList(router);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(_finish));
+    await tester.pumpAndSettle();
+    expect(await r, 'l-5');
+    expect(find.text('x'), findsOneWidget);
+  });
+
+  testWidgets('VPROBE system Back (handlePopRoute) completes with null', (
+    tester,
+  ) async {
+    final router = await _pump(tester, GoRouter(routes: _routes()));
+    final got = <String?>[];
+    final r = AppFlows.createReadingList(router).then(got.add);
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    await r;
+    expect(got, [null]);
+    expect(find.byKey(const Key('home')), findsOneWidget);
+  });
+
+  testWidgets('VPROBE edit with an encoded id: no false assert, the id', (
+    tester,
+  ) async {
+    final router = await _pump(tester, GoRouter(routes: _routes()));
+    final r = AppFlows.editReadingList(router, 'a b/é');
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.tap(find.byKey(_finish));
+    await tester.pumpAndSettle();
+    expect(await r, 'a b/é');
+  });
+
+  testWidgets('VPROBE two AppFlows on the same location, then go: both null, '
+      'no error', (tester) async {
+    final router = await _pump(tester, GoRouter(routes: _routes()));
+    final got = <String?>[];
+    final a = AppFlows.createReadingList(router).then(got.add);
+    await tester.pumpAndSettle();
+    final b = AppFlows.createReadingList(router).then(got.add);
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    router.go('/');
+    await tester.pumpAndSettle();
+    await Future.wait([a, b]);
+    expect(got, [null, null]);
+  });
+
+  testWidgets('VPROBE forgotten extra inside nestUnderHome also asserts', (
+    tester,
+  ) async {
+    final router = await _pump(
+      tester,
+      GoRouter(
+        routes: nestUnderHome(
+          [GoRoute(path: '/', builder: (c, s) => const Text('home'))],
+          [_resultRoute(AppLocations.newReadingList, passExtra: false)],
+        ),
+      ),
+    );
+    unawaited(AppFlows.createReadingList(router));
+    await tester.pumpAndSettle();
+    final e = tester.takeException();
+    print('VPROBE nested forgotten extra -> ${e.runtimeType}');
+    expect(e, isA<FlutterError>());
+  });
+
+  testWidgets('VPROBE a redirected AppFlows push (future /me guard), then '
+      'the guard sends on with a go', (tester) async {
+    var signedIn = false;
+    final router = await _pump(
+      tester,
+      GoRouter(
+        routes: [
+          ..._routes(),
+          GoRoute(path: '/signin', builder: (c, s) => const Text('signin')),
+        ],
+        redirect: (context, state) =>
+            !signedIn && state.uri.path.startsWith('/me/') ? '/signin' : null,
+      ),
+    );
+    var done = false;
+    final r = AppFlows.createReadingList(router).then((v) {
+      done = true;
+      return v;
+    });
+    await tester.pumpAndSettle();
+    expect(find.text('signin'), findsOneWidget);
+    signedIn = true;
+    router.go(AppLocations.newReadingList);
+    await tester.pumpAndSettle();
+    final e = tester.takeException();
+    print(
+      'VPROBE redirect then go -> exception=${e.toString().split("\n").first}',
+    );
+    router.go('/');
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(seconds: 1));
+    print('VPROBE redirect then go -> caller completed=$done');
+    unawaited(r);
+  });
+
+  test('VPROBE nestUnderHome keeps parentNavigatorKey, onExit, redirect, '
+      'caseSensitive; refuses relative and a second "/"', () {
+    final key = GlobalKey<NavigatorState>();
+    Future<bool> exit(BuildContext c, GoRouterState s) async => true;
+    String? redir(BuildContext c, GoRouterState s) => null;
+    final routes = nestUnderHome(
+      [GoRoute(path: '/', builder: (c, s) => const Text('home'))],
+      [
+        GoRoute(
+          path: '/a',
+          builder: (c, s) => const Text('a'),
+          parentNavigatorKey: key,
+          onExit: exit,
+          redirect: redir,
+          caseSensitive: false,
+        ),
+      ],
+    );
+    final a = (routes.single as GoRoute).routes.single as GoRoute;
+    expect(a.path, 'a');
+    expect(a.parentNavigatorKey, same(key));
+    expect(a.onExit, same(exit));
+    expect(a.redirect, same(redir));
+    expect(a.caseSensitive, isFalse);
+    expect(
+      () => nestUnderHome(
+        [GoRoute(path: '/', builder: (c, s) => const Text('home'))],
+        [GoRoute(path: 'rel', builder: (c, s) => const Text('r'))],
+      ),
+      throwsStateError,
+    );
+    expect(
+      () => nestUnderHome(
+        [GoRoute(path: '/', builder: (c, s) => const Text('home'))],
+        [GoRoute(path: '/', builder: (c, s) => const Text('r'))],
+      ),
+      throwsStateError,
+    );
+  });
+}

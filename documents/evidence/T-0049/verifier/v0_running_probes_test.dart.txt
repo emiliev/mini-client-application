@@ -1,0 +1,104 @@
+// T-0049 Verifier probe (scratch): links into the running app from inside a
+// sign-in sheet, the reading-list step 2 and the characters preview.
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+import 'package:app_core/app_core.dart';
+import 'package:mc_e2e_utils/mc_e2e_utils.dart';
+import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:mini_client/main.dart' as app;
+import 'package:mini_client/src/pages/placeholder_pages.dart';
+
+const _home = Key('home.placeholder');
+const _comicTitle = ValueKey<String>('comics_details.title');
+
+Future<void> _backToHomeExactly(WidgetTester tester, String what) async {
+  expect(find.byType(BackButton), findsWidgets, reason: '$what: a back');
+  await tester.tap(find.byType(BackButton).first);
+  await pumpUntil(tester, find.byKey(_home), '$what: home after one Back');
+  expect(find.byType(BackButton), findsNothing, reason: '$what: bottom');
+}
+
+void main() {
+  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  testWidgets('VPROBE links from a sheet, step 2 and the preview', (
+    tester,
+  ) async {
+    final first = CharacterUniverse(42, defaultMockClock).byName.first;
+    startApp(app.main);
+    await pumpUntil(tester, find.byKey(_home), 'home');
+
+    // 1. From inside the open sign-in sheet (signed out on a fresh sim).
+    await tester.ensureVisible(find.byKey(newReadingListKey));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(newReadingListKey));
+    await pumpUntil(
+      tester,
+      find.byWidgetPredicate(
+        (w) =>
+            w.key == fixtureSignInSheetKey ||
+            (w is Text && w.data == 'Step 1 of 3'),
+      ),
+      'the sheet or step 1',
+    );
+    final hadSheet = find.byKey(fixtureSignInSheetKey).evaluate().isNotEmpty;
+    // ignore: avoid_print
+    print('VPROBE sign-in sheet shown: $hadSheet');
+    await shot(binding, tester, 'v1_sign_in_sheet_before_link');
+    await pushLink(tester, 'miniclient://app/comics/501500');
+    await pumpUntil(tester, find.byKey(_comicTitle), 'comic over the sheet');
+    expect(find.byKey(fixtureSignInSheetKey), findsNothing);
+    await letArtLoad(tester, const Duration(seconds: 2));
+    await shot(binding, tester, 'v1b_link_from_sheet_comic');
+    await _backToHomeExactly(tester, 'from the sheet');
+
+    // 2. From the reading-list step 2; then New opens the editor again.
+    await tester.ensureVisible(find.byKey(newReadingListKey));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(newReadingListKey));
+    await pumpUntil(
+      tester,
+      find.byWidgetPredicate(
+        (w) =>
+            w.key == fixtureSignInSheetKey ||
+            (w is Text && w.data == 'Step 1 of 3'),
+      ),
+      'the sheet or step 1 (again)',
+    );
+    if (find.byKey(fixtureSignInSheetKey).evaluate().isNotEmpty) {
+      await tester.tap(find.byKey(fixtureSignInButtonKey));
+    }
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'step 1');
+    await tester.enterText(find.byType(TextField).first, 'Probe reads');
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.text('Next'));
+    await pumpUntil(tester, find.text('Step 2 of 3'), 'step 2');
+    await pushLink(tester, 'miniclient://app/search?q=spi');
+    await pumpUntil(
+      tester,
+      find.byKey(const ValueKey<String>('discovery_search.field')),
+      'search over step 2',
+    );
+    await _backToHomeExactly(tester, 'from step 2');
+    await tester.ensureVisible(find.byKey(newReadingListKey));
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(newReadingListKey));
+    await pumpUntil(tester, find.text('Step 1 of 3'), 'New works again');
+    await shot(binding, tester, 'v2_new_after_link_from_step2');
+    await tester.tap(find.byType(BackButton).first);
+    await pumpUntil(tester, find.byKey(_home), 'home after Back');
+
+    // 3. From the characters preview (inner flow page).
+    await tester.ensureVisible(find.text('Characters'));
+    await tester.tap(find.text('Characters'));
+    await pumpUntil(tester, find.text(first.name), 'the list');
+    await tester.tap(find.text(first.name));
+    await pumpUntil(tester, find.text('See full profile'), 'the preview');
+    await pushLink(tester, 'miniclient://app/comics/501500');
+    await pumpUntil(tester, find.byKey(_comicTitle), 'comic over preview');
+    await _backToHomeExactly(tester, 'from the preview');
+    await shot(binding, tester, 'v3_home_after_link_from_preview');
+  });
+}
