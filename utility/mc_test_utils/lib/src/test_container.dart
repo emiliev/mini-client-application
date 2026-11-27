@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
@@ -43,8 +44,8 @@ final class ExternalDouble<T extends Object> {
 /// The test root container (Tide's `TestContainer`, TD-02).
 ///
 /// It mirrors the production root list of `app_core`'s `rootInitializers`
-/// (config, monitoring, storage, event bus, session, mocked backend, API
-/// client, API auth, formatters), with
+/// (config, monitoring, storage, analytics, event bus, session, mocked
+/// backend, API client, API auth, formatters), with
 /// doubles only at the edges: `MockMonitoring`, the session's
 /// `McBackendHarness` transport, a temporary storage directory and a fixed
 /// config. The real `Dio` with its interceptors runs over the harness.
@@ -58,6 +59,8 @@ abstract final class McTestContainer {
     backend: BackendConfig(seed: 42, latency: Duration.zero, scenario: 'happy'),
     apiBaseUrl: 'https://mock.mini-client.invalid/',
     build: 'test',
+    // Tests assert on what analytics delivers, so consent starts granted.
+    analytics: AnalyticsConfig(defaultConsent: 'granted'),
   );
 
   /// The initializers, root list first, then [wirings] and [externals].
@@ -71,6 +74,12 @@ abstract final class McTestContainer {
       (getIt, _) => getIt.registerSingleton<Monitoring>(session.monitoring),
     ),
     StorageDIInitializer(session.storageDirectory),
+    // No lifecycle observer: a test pumps no app lifecycle, and nothing may
+    // outlive it on the binding.
+    AnalyticsDIInitializer(
+      sinks: [session.analytics],
+      observeLifecycle: false,
+    ),
     const EventBusDIInitializer(),
     const SessionDIInitializer(),
     McDIInitializer(

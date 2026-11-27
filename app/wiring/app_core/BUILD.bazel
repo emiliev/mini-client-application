@@ -7,6 +7,7 @@ package(default_visibility = ["//app:__subpackages__"])
 _LANG = "3.13"
 
 _DEPS = [
+    "//utility/mc_analytics",
     "//utility/mc_api_auth",
     "//utility/mc_api_client",
     "//utility/mc_bloc_kit",
@@ -64,6 +65,7 @@ flutter_library(
     "app_layer_test",
     "feature_flags_boot_test",
     "route_nesting_test",
+    "router_observers_test",
 ]]
 
 # T-0048: the flow-result helpers.

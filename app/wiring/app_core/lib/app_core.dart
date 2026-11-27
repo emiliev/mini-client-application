@@ -9,6 +9,7 @@ export 'package:app_core/src/locations/app_locations.dart';
 export 'package:app_core/src/media/app_media.dart';
 export 'package:app_core/src/router/flow_results.dart';
 export 'package:app_core/src/router/route_nesting.dart';
+export 'package:app_core/src/router/router_observers.dart';
 export 'package:app_core/src/router/router_ref.dart';
 export 'package:app_core/src/sandbox/stub_page.dart';
 export 'package:app_core/src/shell/error_hooks.dart';

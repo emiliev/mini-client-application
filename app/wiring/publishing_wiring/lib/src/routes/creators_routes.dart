@@ -9,7 +9,10 @@ part 'creators_routes.g.dart';
 List<RouteBase> get creatorsRoutes => $appRoutes;
 
 /// `/creators/:id`: one creator (a placeholder for now).
-@TypedGoRoute<CreatorDetailsRoute>(path: '/creators/:id')
+@TypedGoRoute<CreatorDetailsRoute>(
+  path: '/creators/:id',
+  name: 'creator_details',
+)
 class CreatorDetailsRoute extends GoRouteData with $CreatorDetailsRoute {
   const CreatorDetailsRoute({required this.id});
 
