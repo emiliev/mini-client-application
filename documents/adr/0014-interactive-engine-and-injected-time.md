@@ -3,7 +3,7 @@
 - **Status:** Proposed (T-0064 engineer; for the TL to accept at the merge)
 - **Date:** 2026-11-27
 - **Deciders:** Tech Lead
-- **Related:** T-0064, P1-23, plan 01 §3.3 and §6.1 (IX), R6, R15, R17, ADR-0007, ADR-0010, ADR-0012, F-0064, F-0060
+- **Related:** T-0064, P1-23, plan 01 §3.3 and §6.1 (IX), R6 (relaxed by ADR-0015), R15, R17, ADR-0007, ADR-0010, ADR-0012, F-0064, F-0060
 
 ## Context
 `trivia_quiz` (T-0064) is the first IX feature, and the P1-24 bricks copy it for about ten interactive features (`trivia_daily`, `timelines_explorer`, ...). Each has rules of its own (scoring, a game state) and a clock (a countdown, a timeline that plays). Two choices are costly to change once the bricks have copied them:
@@ -50,7 +50,7 @@
 
 ## Decision
 1. **An IX feature's rules are a pure-Dart engine in `lib/src/domain/engine/`** (`scoring.dart` for the arithmetic, `<feature>_engine.dart` for the state machine). It takes time as numbers (`elapsedMs`), never a clock or a timer, and it imports only its own model files and annotations. Integer arithmetic only where a server must agree.
-2. **The engine is tested through the flow** (R6): a Scenario Outline whose Examples are the backend contract's worked examples verbatim, a test that checks the two tables are the same rows, and per-row checks that the score shown before and after the save is the row's and that no mismatch was reported.
+2. **The engine is tested through the flow first**: a Scenario Outline whose Examples are the backend contract's worked examples verbatim, a test that checks the two tables are the same rows, and per-row checks that the score shown before and after the save is the row's and that no mismatch was reported. Since ADR-0015 (which relaxes R6) plain unit tests of the engine are allowed for what the flow reaches slowly or not at all (`test/unit/`, the engine lane only).
 3. **Time enters through the flow:** `TriviaQuizFlow(clock: int Function() /* monotonic ms */, nextSeed: int Function())`, provided into the flow's container as `TriviaTicker(clock)` and `RoundSeeds(nextSeed)`. The play bloc owns a `QuestionClock` over it (start, pause, resume) and two `Timer`s: a frame tick (100 ms) to redraw, and a one-shot at the question's remaining time that ends it exactly at the limit.
 4. **The countdown runs only while someone can play:** in `AppLifecycleState.resumed`, with the flow's route current (`FlowScope.outerIsCurrent`) and no quit dialog. Each is a pause reason; the clock resumes when none is left.
 5. **Enforcement:** the `_engine` lane in `BUILD.bazel` (analysed under `--config=lint` with pure-Dart deps only) and `:architecture_test` (the engine's import closure, floating point, negative controls).
@@ -58,10 +58,10 @@
 ## Consequences
 - **Positive:**
   - Bricks get one shape for rules (engine + outline) and one for time (flow-provided clock + feature timers).
-  - The 17 contract rows and the 5 hint rows prove local equals server on every run, and every rule mutant (bonus, streak, timeout boundary, hint) is killed by them (T-0064 mutations).
-  - Timer tests are exact and deterministic: 50 of 50 runs.
+  - The 17 contract rows and the 5 hint rows prove local equals server on every run, and the rule mutants (bonus, streak, timeout boundary, hint) are killed by them (T-0064: 85 of 85 in the full pass, the 15 targeted ones again at handoff).
+  - Timer tests are exact and deterministic: 50 of 50 runs of every target.
 - **Negative / trade-offs:**
-  - The engine has no fast test of its own; its mutants cost a BDD run each.
+  - A rule mutant costs a BDD run (about 10 s); the engine's unit tests cover only what the flow cannot reach.
   - Two time sources exist in a feature test: fake time (timers, the injected clock) and real time (`Stopwatch`, used nowhere in the feature). A brick must not read `DateTime.now()` in a bloc.
   - The countdown keeps scheduling frames while a question is open, so a step that settles (`mcSettle`, `pumpAndSettle`) waits for the question to time out: play steps pump explicit durations instead (F-0064 §5).
 - **Follow-ups:**

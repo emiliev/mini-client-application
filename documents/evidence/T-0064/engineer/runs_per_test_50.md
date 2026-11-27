@@ -26,3 +26,18 @@ Every target T-0064 adds or changes, the timer tests included (the BDD target ho
 //utility/mc_fixtures_editorial:validation_test                          PASSED in 1.2s
 Executed 15 out of 15 tests: 15 tests pass.
 ```
+
+## After ADR-0015 (no goldens, the engine unit tests), at `af88b09`
+
+The feature's targets changed (`golden_test` deleted, `painter_test` now runs in 4 themes, `engine_test` and the architecture check added), so its whole package ran again: `test --runs_per_test=50 --nocache_test_results //feature/trivia/trivia_quiz/...`. **7 targets x 50 runs = 350 runs, 0 failures, 0 flaky.** The other targets of the first table did not change.
+
+```
+//feature/trivia/trivia_quiz:architecture_test                           PASSED in 1.0s
+//feature/trivia/trivia_quiz:bdd_test                                    PASSED in 27.1s
+//feature/trivia/trivia_quiz:contract_test                               PASSED in 2.0s
+//feature/trivia/trivia_quiz:engine_test                                 PASSED in 0.8s
+//feature/trivia/trivia_quiz:flow_scope_test                             PASSED in 7.6s
+//feature/trivia/trivia_quiz:outline_matches_contract_test               PASSED in 0.4s
+//feature/trivia/trivia_quiz:painter_test                                PASSED in 7.1s
+Executed 7 out of 7 tests: 7 tests pass.
+```
