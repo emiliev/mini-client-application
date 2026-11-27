@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Review (engineer done; awaiting a fresh Verifier) |
+| Status | Done (merged 2026-11-27 `5c9053a`; Verifier PASS `e048c8c`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Opus tier** (app navigation; ADR-0011) |
 | Branch | `fleet/T-0054-flow-results-hardening` |
@@ -107,3 +107,9 @@ None in code. New scripts `tool/checks/T-0054-AC5_gates.sh` and `T-0054-AC5_muta
 **Reruns on the final tree.** Gates PASS (coverage mini_client 96.3 %, app_core 96.2 %). `--runs_per_test=50 --nocache_test_results` on 8 targets: 0 failures. Mutations: **39 of 39 killed**, none broken (some mutations from the first round were re-anchored or merged; a mutant that survived alone was redundant). e2e 13/13 PASS on my own simulator `mc-T-0054-engineer-91556` (deleted), with `xcrun simctl uninstall` before each target and a grep of every log for `BUILD FAILED`, `Error (Xcode)`, `Could not build the application` and `Compilation failed` (no hit). The e2e ran one commit before the last, which only reworded a variable (`push.then` to `pushed.then`, a lint fix: an unused variable). Gates, flake check and mutations ran on the final commit.
 
 **Decisions.** (a) The registry by page key that I first built to re-attach a rebuilt route was dead code (the old `State` disposes and ends the call first) and is removed. (b) `AppFlows.watchers` (a counter) was replaced by `debugOnChange`, because the counter could not tell a leaked listener from a removed one.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found 3 important bugs: a re-parse abandoned a live call, a same-frame replacement hung the caller, and errors outside the parser fell back to go_router's default error screen. It also found a pre-existing `push<String>` TypeError and 2 doc nits. The F-0049 nit was void, because the TL asked for that edit.
+- Review round `e68dd7b`: 39/39 mutations, 50-run flake check clean, e2e 13/13.
+- Single Opus Verifier pass: PASS `e048c8c`, about 257k tokens, interrupted once by the usage limit and resumed. It wrote 42 of its own probes, ran a 550-run flake check, and passed e2e 17/17 with build-failure checks done by hand. It found 2 Minor test gaps (async-guard supersede, first match) → P-110, before the guard.
+- The TL merged `--no-ff` and applied the plan 01 §4.4 picker-extras rule. On the merge result `check` passed, 178/178 tests passed, lint was clean, `mc_arch_check` reported OK, the sim app built, provenance passed, and a 20-run uncached check of `app_core` and `mini_client` was clean. P-094 to P-098 are done.
