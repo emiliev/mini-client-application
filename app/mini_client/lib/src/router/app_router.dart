@@ -48,6 +48,7 @@ GoRouter _buildRouter(
     ...commerceRoutes,
     ...libraryRoutes,
     ...accountRoutes,
+    notFoundRoute,
   ]),
   // The auth guard (P1-16 AC4) joins here with mc_api_auth.
   redirect: (context, state) {
@@ -59,6 +60,32 @@ GoRouter _buildRouter(
     }
     return null;
   },
-  errorBuilder: (context, state) =>
-      NotFoundPage(location: state.uri.toString()),
+  // Unknown paths and bad ids (a path or redirect error) land on the
+  // not-found route, nested under home like every other (T-0054).
+  onException: (context, state, router) =>
+      router.go(notFoundLocation(_asked(state.uri))),
 );
+
+/// The not-found screen's route: unknown paths and bad ids go here with
+/// `from` set to what was asked for, so it opens as `[home, not-found]`
+/// whether the app is cold or running (T-0054, P-097).
+final GoRoute notFoundRoute = GoRoute(
+  name: 'not_found',
+  path: _notFoundPath,
+  builder: (context, state) =>
+      NotFoundPage(location: state.uri.queryParameters['from'] ?? ''),
+);
+
+const _notFoundPath = '/not-found';
+
+/// What a link asked for, without its scheme and host: a link in the running
+/// app arrives as `miniclient://app/nope`, and the screen shows `/nope`.
+String _asked(Uri uri) => Uri(
+  path: uri.path,
+  query: uri.hasQuery ? uri.query : null,
+  fragment: uri.hasFragment ? uri.fragment : null,
+).toString();
+
+/// The location of the not-found screen for a failed [from].
+String notFoundLocation(String from) =>
+    Uri(path: _notFoundPath, queryParameters: {'from': from}).toString();

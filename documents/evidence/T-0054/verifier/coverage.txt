@@ -1,0 +1,8 @@
+== app/mini_client: 9 LCOV files, 131/136 = 96.3 %
+   lib files no LCOV mentions: ['app/mini_client/lib/main.dart']
+   app/mini_client/lib/src/pages/placeholder_pages.dart: 72/72, missed lines []
+   app/mini_client/lib/src/router/app_router.dart: 31/31, missed lines []
+== app/wiring/app_core: 10 LCOV files, 481/500 = 96.2 %
+   lib files no LCOV mentions: ['app/wiring/app_core/lib/app_core.dart']
+   app/wiring/app_core/lib/src/router/flow_results.dart: 117/121, missed lines [369, 373, 374, 375]
+   app/wiring/app_core/lib/src/router/route_nesting.dart: 26/27, missed lines [33]

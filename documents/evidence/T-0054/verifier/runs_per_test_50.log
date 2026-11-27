@@ -1,0 +1,12 @@
+//app/mini_client:analytics_screens_test                                 PASSED in 8.4s
+//app/mini_client:app_test                                               PASSED in 8.6s
+//app/mini_client:bdd_test                                               PASSED in 4.5s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 15.7s
+//app/mini_client:links_after_flow_test                                  PASSED in 5.3s
+//app/mini_client:not_found_test                                         PASSED in 12.7s
+//app/mini_client:reading_list_route_test                                PASSED in 16.1s
+//app/wiring/app_core:flow_results_hardening_test                        PASSED in 11.5s
+//app/wiring/app_core:flow_results_test                                  PASSED in 5.3s
+//app/wiring/app_core:router_observers_test                              PASSED in 3.2s
+//app/wiring/library_wiring:routes_test                                  PASSED in 3.7s
+Executed 11 out of 11 tests: 11 tests pass.

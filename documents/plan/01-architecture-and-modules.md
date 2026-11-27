@@ -480,6 +480,7 @@ Features never share types, so the wiring maps one feature's result type into th
 ### 4.4 Deep links
 - **iOS:** `FlutterDeepLinkingEnabled = YES` and the custom scheme `miniclient://app/<path>`, the only scheme anywhere in the plan. E2E drives it with `xcrun simctl openurl <udid> miniclient://app/characters/1011334` (never `booted`). A link that arrives during boot is held and replayed (§3.4, R29).
 - **Rule:** every entity route takes its ID as a path parameter, and its flow can start from the ID alone. `$extra` is only for non-linkable picker arguments.
+- **Picker extras (T-0054):** a picker's arguments travel as the route's `$extra` and must be JSON-safe: null, bool, a finite number, a String, or a List or a String-keyed Map of those. `FlowExtraCodec` keeps only those values when the route state is saved. Anything else is dropped to null with a debug warning. A picker therefore reads a null `$extra` as "no argument" (it is also null after **any** re-parse: `refresh`, a `refreshListenable` tick or a restore) and never relies on a live object surviving.
 - **Sub-screens:** flow constructor arguments seed the flow state (`/comics/:id/read?page=12` → `ComicsReaderFlow(comicId:, page:)`).
 
 ### 4.5 `mc_feature_flow` contract (hardened)

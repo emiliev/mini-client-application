@@ -149,22 +149,30 @@ void main() {
       await walkHome(tester, entry.key);
     });
 
-    testWidgets('T-0049-AC2 a link to the running app (${entry.key}) '
-        'stacks [home, target]; Back returns to home', (tester) async {
-      await boot(tester);
-      // Something else is open first: Back must not lead there.
-      await tester.tap(find.text('Characters'));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'T-0049-AC2 ${entry.key == AppLocations.character(100366) ? 'T-0054-AC4 ' : ''}a link to the running app (${entry.key}) '
+      'stacks [home, target]; Back returns to home',
+      (tester) async {
+        await boot(tester);
+        // Something else is open first: Back must not lead there. Not for the
+        // character's details: they sit under the characters list, so a list
+        // that was already open would give the same stack from a push as from
+        // a go (T-0054-AC4, P-098). From home, only a go builds the list below.
+        if (entry.key != AppLocations.character(100366)) {
+          await tester.tap(find.text('Characters'));
+          await tester.pumpAndSettle();
+        }
 
-      await _pushLink(tester, 'miniclient://app${entry.key}');
-      await tester.pumpAndSettle();
-      if (entry.key == AppLocations.newReadingList) {
-        await signInOnTheSheet(tester);
-      }
-      expect(entry.value, findsWidgets, reason: 'the linked screen');
+        await _pushLink(tester, 'miniclient://app${entry.key}');
+        await tester.pumpAndSettle();
+        if (entry.key == AppLocations.newReadingList) {
+          await signInOnTheSheet(tester);
+        }
+        expect(entry.value, findsWidgets, reason: 'the linked screen');
 
-      await walkHome(tester, entry.key);
-    });
+        await walkHome(tester, entry.key);
+      },
+    );
   }
 
   test('T-0049-AC3 the app router treats a FlowCall extra as transient', () {

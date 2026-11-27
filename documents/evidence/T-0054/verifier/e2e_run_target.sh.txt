@@ -1,0 +1,8 @@
+#!/bin/bash
+# T-0054 Verifier e2e runner wrapper: a clean install per target.
+# run_target.sh <udid> <target> <driver>   (cwd: the e2e project)
+udid="$1"; target="$2"; driver="$3"
+echo "== verifier wrapper: uninstall com.emiliev.miniClient from $udid, rm build/ios/iphonesimulator"
+xcrun simctl uninstall "$udid" com.emiliev.miniClient || true
+rm -rf build/ios/iphonesimulator
+exec fvm flutter drive --driver="$driver" --target="$target" -d "$udid"

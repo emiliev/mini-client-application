@@ -10,7 +10,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0054 engineer (review round), T-0055 engineer (Sonnet), T-0056 engineer (Opus) |
+| **Active crew** | T-0055 Verifier (Sonnet), T-0056 engineer (Opus), T-0057 engineer (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -28,6 +28,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0054 merged:** a result-returning screen always hands back exactly once: after router reloads, same-frame links and overlays. The not-found page has Back and Go home. P-110 (async-guard tests) must come before the sign-in guard.
 - **T-0052 merged:** `mc_feature_flags`. Typed flags and experiments are evaluated the same way every time, work offline from cache, take dev overrides, and never block boot. The mocked `/v1/flags` endpoint is in `mc_fixtures_platform`.
 - **T-0053 merged:** `mc_analytics`. Screens and events are tracked through one facade, and nothing is delivered without consent (P1-05 AC4). There is no network sink (P-004). Every app route now has a name.
 - **T-0050 merged:** an authenticated write never goes out under another user's token, even if the user switches while it is being sent (P-083). The favourite button ignores a tap from a screen that hasn't reloaded after a switch.
@@ -38,7 +39,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - Resumed 2026-11-27.
 - **Next, in order:**
   1. DB prerequisites done (`mc_feature_flags`, `mc_analytics`, commerce fixtures). Next: the DB exemplar (T-0056, in progress) `store_home` (P1-21) on `mc_fixtures_commerce`.
-  2. T-0054 (P-094 to P-098, the `AppFlows` follow-ups): in progress. It must land before the `/me/**` auth guard or the first picker.
+  2. T-0057 (P-110, pin the async-guard paths; in progress), then the `/me/**` auth guard.
   3. ST (`settings_appearance`) and IX (`trivia_quiz`) exemplars, then the P1-24 bricks.
 
 ## Next

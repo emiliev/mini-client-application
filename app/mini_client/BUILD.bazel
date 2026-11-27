@@ -61,6 +61,7 @@ flutter_library(
     language_version = _LANG,
     srcs = ["lib/src/pages/placeholder_pages.dart"],
     deps = [
+        "//app/wiring/app_core",
         "//utility/mc_ds_buttons",
         "//utility/mc_ds_layout",
         "@pub_deps//:flutter",
@@ -241,6 +242,25 @@ flutter_test(
         "//utility/mc_fixtures_media:asset_files",
     ],
     main = "test/store_route_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_monitoring",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0054: the not-found screen, over home, with a way home.
+flutter_test(
+    name = "not_found_test",
+    size = "medium",
+    package_name = _PKG,
+    language_version = _LANG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/not_found_test.dart",
     deps = _RUNTIME_DEPS + [
         ":mini_client_lib",
         "//utility/mc_monitoring",

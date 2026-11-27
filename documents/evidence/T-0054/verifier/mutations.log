@@ -1,0 +1,46 @@
+baseline: PASS
+V08 the push future is not chained into the call: KILLED (FAIL  T-0054-AC1 every call completes exactly once T-0054-AC1 a redirected page that pops with a value gives the caller that value (the push future is chained))
+M01 the stack watch never abandons a call: KILLED (FAIL  T-0054-AC1 every call completes exactly once T-0054-AC1 a guard redirect, then go(from): the caller gets null once and nothing asserts)
+M05 the stack watch is not listening: KILLED (FAIL  T-0054-AC1 every call completes exactly once T-0054-AC1 a guard redirect, then go(from): the caller gets null once and nothing asserts)
+R1 the page is matched by its completer, not its key (a re-parse abandons it): KILLED (FAIL  T-0054-AC1 review: re-parses, same-frame replacement, listeners T-0054-AC1 router.refresh() during a flow, then save: the result, once)
+R2 the route drops its call when a re-parse gives it a null extra: KILLED (FAIL  T-0054-AC1 review: re-parses, same-frame replacement, listeners T-0054-AC1 router.refresh() during a flow, then save: the result, once)
+R3 a push replaced in its own frame is never abandoned (no supersede check, no first look): KILLED (FAIL  T-0054-AC1 review: re-parses, same-frame replacement, listeners T-0054-AC1 a go in the same synchronous span as the push: null, once, and nothing is left listening)
+R5 the listener is never removed: KILLED (FAIL  T-0054-AC1 review: re-parses, same-frame replacement, listeners T-0054-AC1 router.refresh() during a flow, then save: the result, once)
+M11 an abandoned call ends with null even when it held a result: KILLED (FAIL  T-0054-AC3 a result held under an overlay is delivered T-0054-AC3 complete, then a go before the dialog closes: the result, once)
+M12 the route does not tell the call what it holds: KILLED (FAIL  T-0054-AC3 a result held under an overlay is delivered T-0054-AC3 complete, then a go before the dialog closes: the result, once)
+N01 no onException: unknown paths use go_router's own page: KILLED (FAIL  an unknown path shows the not-found page)
+P1 a link is a push, not a go (the stack keeps what was open): KILLED (FAIL  T-0049-AC2 T-0054-AC4 a link to the running app (/characters/100366) stacks [home, target]; Back returns to home)
+X01 the page key is not taken on delegate changes (only in the post-frame check): SURVIVED
+X02 a push not yet located always counts as superseded: SURVIVED
+X03 a push is never superseded: SURVIVED
+X06 the page is first matched as any imperative page: SURVIVED
+X11 a result is delivered even when an overlay covers the route: KILLED (FAIL  T-0048-AC6 a result that arrives under a dialog is kept, and the caller gets it once the dialog closed)
+X13 every pop value is dropped: KILLED (FAIL  T-0054-AC1 every call completes exactly once T-0054-AC1 a redirected page that pops with a value gives the caller that value (the push future is chained))
+X21 the listener is removed only when the stack watch abandons the call: BROKEN (build failed: not evidence)
+X22 a held result is lost when the stack watch ends the call: KILLED (FAIL  T-0054-AC3 a result held under an overlay is delivered T-0054-AC3 complete, then a go before the dialog closes: the result, once)
+X16 not-found is pushed over the stack, not a go: KILLED (FAIL  T-0054-AC4 a cold start at /nope shows not-found with a back button and Go home, over home)
+X18 an onEnter is added to the router (the pin must go red): KILLED (FAIL  T-0054-AC4 a cold start at /nope shows not-found with a back button and Go home, over home)
+X19 not-found Back always goes home (never pops): KILLED (FAIL  T-0054-AC4 a not-found that was pushed over a page pops instead of going home)
+X20 the not-found route is left out of the routes under home: KILLED (FAIL  T-0054-AC4 a cold start at /nope shows not-found with a back button and Go home, over home)
+mutations: 23, killed: 18
+SOME NOT KILLED
+baseline: PASS
+X21 the listener is removed lazily, on the next change after the call ended: KILLED (FAIL  T-0054-AC1 review: re-parses, same-frame replacement, listeners T-0054-AC1 router.refresh() then Back: null, once)
+mutations: 1, killed: 1
+ALL KILLED
+baseline: PASS
+X01 the page key is not taken on delegate changes (only in the post-frame check): SURVIVED
+X02 a push not yet located always counts as superseded: SURVIVED
+X03 a push is never superseded: KILLED (FAIL  VP AC1 VP16 same span push (async redirect); go: null once)
+X06 the page is first matched as any imperative page: SURVIVED
+mutations: 4, killed: 1
+SOME NOT KILLED
+baseline: PASS
+X02 a push not yet located always counts as superseded: KILLED (FAIL  VP AC1 VP07b slow async guard (spans frames): not abandoned while the push waits, then go(from) gives null once)
+X06 the page is first matched as any imperative page: KILLED (FAIL  VP AC1 VP23 two calls, the second redirected, then replace of the sign-in page, then Back: each call ends once)
+mutations: 2, killed: 2
+ALL KILLED
+baseline: PASS
+X18 an onEnter is added to the router (the pin must go red): KILLED (FAIL  T-0054-AC4 a cold start at /nope shows not-found with a back button and Go home, over home)
+mutations: 1, killed: 1
+ALL KILLED
