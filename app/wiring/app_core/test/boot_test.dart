@@ -92,8 +92,8 @@ void main() {
       expect(find.byType(BootPage), findsNothing);
       expect(diContainer.isRegistered<AppConfig>(), isTrue);
       // T-0052: the flags' first request (Dio starts it on a zero timer) ends
-      // with one more frame, so no timer is left pending.
-      await tester.pump();
+      // in a later frame, so no timer is left pending.
+      await tester.pump(const Duration(milliseconds: 10));
     },
   );
 
@@ -177,8 +177,8 @@ void main() {
       expect(runs, 2);
       expect(find.text('home'), findsOneWidget);
       expect(diContainer.isRegistered<AppConfig>(), isTrue);
-      // T-0052: as above, the flags' first request needs one more frame.
-      await tester.pump();
+      // T-0052: as above, the flags' first request needs a later frame.
+      await tester.pump(const Duration(milliseconds: 10));
     },
   );
 
