@@ -87,8 +87,22 @@ Handed off for verification. HEAD is on branch `fleet/T-0060-fixtures-editorial-
 | AC2 | `scoring_test` (`T-0060-AC2:` 40 tests): every worked example E1 to E17 is read from `CONTRACT.md` and run; limit-1, limit, limit+1 for each difficulty; independent oracle (`test/oracle.dart`) over 50 seeded random rounds; mutation run (S1 to S22 all killed) |
 | AC3 | `validation_test` (`T-0060-AC3:` 100 tests): every typed code, check order, 401 for no bearer, expired, refresh token and others, per-user and persistence until `reset()`, `isNewBest` only on a strictly higher score |
 | AC4 | `provider_contract_test` (`T-0060-AC4:` 23 snapshots, manifest and CONTRACT parity, all 336 questions checked against the characters, comics and series endpoints for backend seeds 42, 7 and 4, with negative controls; images resolve to bundled assets) and `fixture_sets_test` |
-| AC5 | `documents/evidence/T-0060/engineer/gates.md`: pure-Dart closure with negative control, registration, fixtures check, `test //...` (187 pass, also with `--lockfile_mode=error`), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, coverage 99.6 % (454/456). 50-run flake check: `flake50.log`, 0 failures |
+| AC5 | `documents/evidence/T-0060/engineer/gates.md`: pure-Dart closure with negative control, registration, fixtures check, `test //...` (187 pass, also with `--lockfile_mode=error`), lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, coverage 99.6 % (456/458). 50-run flake check: `flake50.log`, 0 failures |
 
 Mutations (`mutations.sh`, 123 mutants): run 1 killed 114, 4 survived, 5 did not build; the 4 survivors were fixed with tests (3) or retired as equivalent (H37), the 5 builds were fixed, and the 8 changed mutants were re-run and are all killed (`mutations_run1.log`, `mutations_run2_rerun_subset.log`). Net: 122 killed, 1 equivalent.
 
 Decisions and gotchas: [F-0060](../findings/F-0060-trivia-fixtures.md).
+
+## Review round
+`/code-review` found 6 nits, none important. All fixed (`origin/main` was still `ebba553`, already merged, so there was nothing to merge).
+
+| # | Fix | Test / evidence |
+|---|---|---|
+| 1 | An answer must have a `choiceId` key (value string or `null`); a missing key or `choiceID` is `invalid_body` | `T-0060-AC3` cases "no choiceId key" and "choiceID wrong case"; mutation H44 |
+| 2 | Gates script runs `test --lockfile_mode=error //...` | `gates.md` regenerated, all PASS |
+| 3 | Gates script removes only what it created (`MADE` list) and fails (`negative controls created`) when a throwaway path already exists | `gates.md` |
+| 4 | `unknown_category` message lists the active categories, or says "there are no categories" | `T-0060-AC3` message test, `T-0060-AC4` empty-set test; mutation H45 |
+| 5 | F-0060 coverage corrected to 99.6 % (456/458) | F-0060 |
+| 6 | Cached question `choices` and `facts` are unmodifiable | `T-0060-AC1` "cached questions cannot be changed"; mutations B35, B36 |
+
+Re-runs: gates PASS (coverage 99.6 %, 456/458; 187 tests pass with `--lockfile_mode=error`); 50-run flake check 0 failures (`flake50.log`); full mutation run 126 killed, 0 survived, 0 broken (`mutations_review_round_full.log`; new mutants H44, H45, B35, B36; H37 stays retired as equivalent).

@@ -1,6 +1,6 @@
-//utility/mc_fixtures_editorial:determinism_test                         PASSED in 4.4s
-//utility/mc_fixtures_editorial:fixture_sets_test                        PASSED in 4.0s
-//utility/mc_fixtures_editorial:provider_contract_test                   PASSED in 7.3s
-//utility/mc_fixtures_editorial:scoring_test                             PASSED in 2.7s
-//utility/mc_fixtures_editorial:validation_test                          PASSED in 3.2s
+//utility/mc_fixtures_editorial:determinism_test                         PASSED in 3.2s
+//utility/mc_fixtures_editorial:fixture_sets_test                        PASSED in 3.0s
+//utility/mc_fixtures_editorial:provider_contract_test                   PASSED in 4.2s
+//utility/mc_fixtures_editorial:scoring_test                             PASSED in 1.7s
+//utility/mc_fixtures_editorial:validation_test                          PASSED in 1.6s
 Executed 5 out of 5 tests: 5 tests pass.

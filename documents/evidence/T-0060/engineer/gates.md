@@ -30,8 +30,9 @@ throwaway package removed, tree clean: yes
 | pure-Dart closure | PASS |
 | workspace registration | PASS |
 | fixtures check | PASS |
+| negative controls created | PASS |
 | test editorial (uncached) | PASS |
-| test //... | PASS |
+| test //... (--lockfile_mode=error) | PASS |
 | build --config=lint //... | PASS |
 | mc_arch_check | PASS |
 | rules_fork.sh check | PASS |
@@ -40,7 +41,7 @@ throwaway package removed, tree clean: yes
 | coverage >= 90 % | PASS |
 
 - editorial tests, uncached: Executed 5 out of 5 tests: 5 tests pass.
-- test //...: Executed 15 out of 187 tests: 187 tests pass.
-- mc_fixtures_editorial coverage: TOTAL 454/456 99.6% (threshold 90 %)
+- test //...: Executed 26 out of 187 tests: 187 tests pass.
+- mc_fixtures_editorial coverage: TOTAL 456/458 99.6% (threshold 90 %)
 
 **PASS T-0060-AC5-gates**

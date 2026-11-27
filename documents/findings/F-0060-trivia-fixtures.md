@@ -29,7 +29,7 @@
 - **`MockResponse.error`'s `extra` is spread after `code`** (F-0051 §1): the extra fields here are `parameter`, `questionId`, `choiceId`, `expected`, never `code` or `message`.
 - **`int` in JSON.** `elapsedMs: 5.0` reaches the handler as a `double` (the mock transport decodes the JSON text again), so "an integer" is checked with `is int`, and `1.5`, `"100"`, `true` and `null` are all `invalid_elapsed`.
 - **`mutations.sh` needs a clean tree and a second output base** when it runs next to other Bazel work: it ran in a detached worktree (`git worktree add --detach`) with its own `--output_base`, so a flake check and the app wiring tests could use the main one. A full run of 123 mutants takes about 1 to 2 hours.
-- **Two guards cannot be reached** and are excluded from the mutation list: `_sample`'s "pool too small" and `_template`'s "yielded only n questions" (both `StateError`s that guard a generation bug). They are the only uncovered lines (99.6 % line coverage, 454 of 456 lines).
+- **Two guards cannot be reached** and are excluded from the mutation list: `_sample`'s "pool too small" and `_template`'s "yielded only n questions" (both `StateError`s that guard a generation bug). They are the only uncovered lines (99.6 % line coverage, 456 of 458 lines).
 
 ## Decisions
 - Added `invalid_body` (the body is malformed) and `unknown_choice` (a `choiceId` that is not one of the question's) to the list of typed codes in the task. A typo in a choice id would otherwise score as a wrong answer. Check order: body, round, count, question, duplicate, choice, elapsed.
