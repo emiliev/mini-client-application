@@ -6,7 +6,7 @@
 load("@rules_dart//dart:defs.bzl", "dart_codegen")
 load("@rules_flutter//flutter:defs.bzl", "flutter_application", "flutter_library", "flutter_test")
 load("@rules_flutter//flutter:ios.bzl", "IOS_MINIMUM_OS_VERSION", "flutter_ios_app")
-load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART", "mc_bdd_tests")
 
 package(default_visibility = ["//visibility:private"])
 
@@ -226,6 +226,46 @@ flutter_test(
         "//utility/mc_session",
         "//utility/mc_test_utils",
         "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0053: every screen of the real app is tracked once with its route name.
+flutter_test(
+    name = "analytics_screens_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/analytics_screens_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_analytics",
+        "//utility/mc_monitoring",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# T-0053-AC4: the app's screens through the shared analytics steps, over the
+# test container (the session's backend harness and analytics sink).
+mc_bdd_tests(
+    name = "bdd_test",
+    data = ["//utility/mc_fixtures_media:asset_files"],
+    features = glob(["test/feature/*.feature"]),
+    language_version = _LANG,
+    lib = ":mini_client_lib",
+    package_name = _PKG,
+    setup = "test/feature/util/app_env.dart",
+    steps = glob([
+        "test/feature/step/**/*.dart",
+        "test/feature/util/*.dart",
+    ]),
+    # The macro adds flutter, flutter_test and mc_test_utils itself.
+    deps = [d for d in _RUNTIME_DEPS if d != "@pub_deps//:flutter"] + [
+        "//utility/mc_fixtures_characters",
     ],
 )
 

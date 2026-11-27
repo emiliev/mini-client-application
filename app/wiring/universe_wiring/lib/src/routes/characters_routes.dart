@@ -12,7 +12,10 @@ List<RouteBase> get charactersRoutes => $appRoutes;
 /// to a character builds the back stack list -> details.
 @TypedGoRoute<CharactersRoute>(
   path: '/characters',
-  routes: [TypedGoRoute<CharacterDetailsRoute>(path: ':id')],
+  name: 'characters_list',
+  routes: [
+    TypedGoRoute<CharacterDetailsRoute>(path: ':id', name: 'character_details'),
+  ],
 )
 class CharactersRoute extends GoRouteData with $CharactersRoute {
   const CharactersRoute();

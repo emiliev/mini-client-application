@@ -1,0 +1,44 @@
+INFO: Invocation ID: 6cabbed6-5f56-4669-baf9-af4357269d0a
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 16 targets (0 packages loaded)
+Analyzing: 16 targets (0 packages loaded, 0 targets configured)
+Analyzing: 16 targets (0 packages loaded, 4 targets configured)
+
+INFO: Analyzed 16 targets (0 packages loaded, 5143 targets configured, 429 aspect applications).
+INFO: Found 2 targets and 14 test targets...
+INFO: Elapsed time: 68.527s, Critical Path: 4.79s
+INFO: 727 processes: 2214 action cache hit, 10 disk cache hit, 14 internal, 700 darwin-sandbox, 3 worker.
+INFO: Build completed successfully, 727 total actions
+//app/mini_client:analytics_screens_test                                 PASSED in 2.5s
+  Stats over 50 runs: max = 2.5s, min = 1.7s, avg = 1.9s, dev = 0.2s
+//app/mini_client:bdd_test                                               PASSED in 1.6s
+  Stats over 50 runs: max = 1.6s, min = 1.4s, avg = 1.5s, dev = 0.1s
+//app/wiring/app_core:formatters_root_test                               PASSED in 0.5s
+  Stats over 50 runs: max = 0.5s, min = 0.4s, avg = 0.4s, dev = 0.0s
+//app/wiring/app_core:router_observers_test                              PASSED in 0.9s
+  Stats over 50 runs: max = 0.9s, min = 0.8s, avg = 0.8s, dev = 0.0s
+//utility/mc_analytics:consent_gate_test                                 PASSED in 0.5s
+  Stats over 50 runs: max = 0.5s, min = 0.4s, avg = 0.4s, dev = 0.0s
+//utility/mc_analytics:di_test                                           PASSED in 0.4s
+  Stats over 50 runs: max = 0.4s, min = 0.4s, avg = 0.4s, dev = 0.0s
+//utility/mc_analytics:no_third_party_test                               PASSED in 0.6s
+  Stats over 50 runs: max = 0.6s, min = 0.4s, avg = 0.4s, dev = 0.1s
+//utility/mc_analytics:route_observer_test                               PASSED in 4.3s
+  Stats over 50 runs: max = 4.3s, min = 1.6s, avg = 2.1s, dev = 0.7s
+//utility/mc_analytics:sessions_sinks_test                               PASSED in 1.0s
+  Stats over 50 runs: max = 1.0s, min = 0.4s, avg = 0.6s, dev = 0.2s
+//utility/mc_analytics:validation_test                                   PASSED in 0.5s
+  Stats over 50 runs: max = 0.5s, min = 0.4s, avg = 0.4s, dev = 0.0s
+//utility/mc_config:app_config_test                                      PASSED in 0.3s
+  Stats over 50 runs: max = 0.3s, min = 0.2s, avg = 0.3s, dev = 0.0s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.3s
+  Stats over 50 runs: max = 0.3s, min = 0.2s, avg = 0.2s, dev = 0.0s
+//utility/mc_test_steps:analytics_steps_test                             PASSED in 0.7s
+  Stats over 50 runs: max = 0.7s, min = 0.6s, avg = 0.6s, dev = 0.0s
+//utility/mc_test_utils:isolation_test                                   PASSED in 0.6s
+  Stats over 50 runs: max = 0.6s, min = 0.5s, avg = 0.6s, dev = 0.0s
+
+Executed 14 out of 14 tests: 14 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

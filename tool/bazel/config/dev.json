@@ -2,5 +2,6 @@
   "env": "dev",
   "backend": { "seed": 42, "latencyMs": 250, "scenario": "happy" },
   "apiBaseUrl": "https://mock.mini-client.invalid/",
-  "build": "1"
+  "build": "1",
+  "analytics": { "defaultConsent": "granted" }
 }

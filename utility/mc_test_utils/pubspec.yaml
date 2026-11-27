@@ -16,6 +16,7 @@ dependencies:
   flutter_test:
     sdk: flutter
   get_it: ^8.0.0
+  mc_analytics: any
   mc_api_auth: any
   mc_api_client: any
   mc_config: any

@@ -1,0 +1,11 @@
+V01: KILLED by //app/mini_client:analytics_screens_test //utility/mc_analytics:consent_gate_test //utility/mc_analytics:sessions_sinks_test //utility/mc_analytics:validation_test  -- seq starts at 2
+V02: KILLED by //utility/mc_analytics:consent_gate_test  -- buffer cap 101
+V03: KILLED by //utility/mc_analytics:consent_gate_test  -- denied keeps buffer (denied then granted would flush)
+V04: KILLED by //utility/mc_analytics:consent_gate_test  -- reset drops queued granted entries too
+V05: KILLED by //utility/mc_analytics:consent_gate_test  -- damaged saved value falls back to the default
+V06: KILLED by //utility/mc_analytics:route_observer_test  -- observer duplicates
+V07: KILLED by //utility/mc_analytics:route_observer_test  -- dialogs tracked
+V08: KILLED by //utility/mc_analytics:validation_test  -- 25 params cap becomes 26
+V09: KILLED by //utility/mc_analytics:validation_test  -- string length counts UTF-16 units
+V10: KILLED by //utility/mc_analytics:sessions_sinks_test  -- throwing sink reported every time
+tree:        0 dirty files

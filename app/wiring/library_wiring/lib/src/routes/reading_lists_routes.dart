@@ -17,7 +17,10 @@ List<RouteBase> get readingListsRoutes => $appRoutes;
 /// `AppFlows.createReadingList` and await the id. A deep link
 /// (`miniclient://app/me/lists/new`) opens it with nobody to answer; the app
 /// shell nests it under home (T-0049), so completing pops back to home.
-@TypedGoRoute<NewReadingListRoute>(path: '/me/lists/new')
+@TypedGoRoute<NewReadingListRoute>(
+  path: '/me/lists/new',
+  name: 'reading_list_new',
+)
 class NewReadingListRoute extends GoRouteData with $NewReadingListRoute {
   const NewReadingListRoute();
 
@@ -33,7 +36,10 @@ class NewReadingListRoute extends GoRouteData with $NewReadingListRoute {
 /// `/me/lists/:id/edit`: the reading-list editor on list [id]. Ends with the
 /// list's id once saved (`AppFlows.editReadingList`), like
 /// [NewReadingListRoute].
-@TypedGoRoute<EditReadingListRoute>(path: '/me/lists/:id/edit')
+@TypedGoRoute<EditReadingListRoute>(
+  path: '/me/lists/:id/edit',
+  name: 'reading_list_edit',
+)
 class EditReadingListRoute extends GoRouteData with $EditReadingListRoute {
   const EditReadingListRoute({required this.id});
 

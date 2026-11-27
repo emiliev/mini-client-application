@@ -15,6 +15,10 @@ const _config =
     '"apiBaseUrl":"https://mock.mini-client.invalid/","build":"1"}';
 
 void main() {
+  // The root list observes the app lifecycle for analytics sessions (T-0053),
+  // which needs a binding, as the app has.
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   test('T-0041-AC4 the root list loads the German date symbols, after api '
       'auth and before the wirings', () async {
     final storage = Directory.systemTemp.createTempSync('formatters_root');

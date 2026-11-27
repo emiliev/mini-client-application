@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_test_utils/src/backend_harness.dart';
@@ -37,6 +38,11 @@ final class McTestSession {
   final McBackendHarness backend;
 
   final MockMonitoring monitoring;
+
+  /// What analytics delivered, in order (consent is granted in the test
+  /// container). The sink is the one `Analytics` was built over, so the BDD
+  /// steps `the analytics event ... was tracked` read it.
+  final InMemoryAnalyticsSink analytics = InMemoryAnalyticsSink();
 
   /// A temporary directory standing in for the app's storage directory.
   final Directory storageDirectory;

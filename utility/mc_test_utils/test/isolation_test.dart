@@ -140,7 +140,9 @@ void main() {
   ) async {
     await McTestContainer.initialize(McTestSession.current);
     final session = McTestSession.current;
-    expect(McTestContainer.initializers(session, wirings: const []).length, 9);
+    // Config, monitoring, storage, analytics (T-0053), event bus, session,
+    // mocked backend, API client, API auth and formatters.
+    expect(McTestContainer.initializers(session, wirings: const []).length, 10);
     expect(diContainer.isRegistered<Dio>(), isTrue);
   });
 }

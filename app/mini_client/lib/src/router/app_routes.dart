@@ -14,7 +14,14 @@ part 'app_routes.g.dart';
 
 @TypedGoRoute<HomeRoute>(
   path: '/',
-  routes: [TypedGoRoute<PlaceholderRoute>(path: 'placeholder/:id')],
+  // Route names are the screen names analytics tracks (T-0053).
+  name: 'home',
+  routes: [
+    TypedGoRoute<PlaceholderRoute>(
+      path: 'placeholder/:id',
+      name: 'placeholder_detail',
+    ),
+  ],
 )
 class HomeRoute extends GoRouteData with $HomeRoute {
   const HomeRoute();
