@@ -3,6 +3,7 @@ import 'package:mc_ds_media/mc_ds_media.dart';
 import 'package:mc_fixtures_characters/mc_fixtures_characters.dart';
 import 'package:mc_fixtures_comics/mc_fixtures_comics.dart';
 import 'package:mc_fixtures_discovery/mc_fixtures_discovery.dart';
+import 'package:mc_fixtures_editorial/mc_fixtures_editorial.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:mc_fixtures_library/mc_fixtures_library.dart';
 import 'package:mc_fixtures_media/mc_fixtures_media.dart';
@@ -19,6 +20,7 @@ const List<MockDomain> appMockDomains = [
   IdentityMockDomain(),
   LibraryMockDomain(),
   PlatformMockDomain(),
+  TriviaMockDomain(),
 ];
 
 /// The app root's media scope: `McImage` resolves `mock-asset://` art from the

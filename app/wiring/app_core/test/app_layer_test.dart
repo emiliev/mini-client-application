@@ -6,6 +6,7 @@ import 'package:app_core/app_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_media/mc_ds_media.dart';
+import 'package:mc_fixtures_editorial/mc_fixtures_editorial.dart';
 import 'package:mc_fixtures_library/mc_fixtures_library.dart';
 
 /// Records [route] and a redirect from inside [probe]'s scope.
@@ -105,5 +106,9 @@ void main() {
 
   test('T-0048-AC5 the app serves the library domain', () {
     expect(appMockDomains.whereType<LibraryMockDomain>(), hasLength(1));
+  });
+
+  test('T-0060-AC5 the app serves the trivia domain', () {
+    expect(appMockDomains.whereType<TriviaMockDomain>(), hasLength(1));
   });
 }
