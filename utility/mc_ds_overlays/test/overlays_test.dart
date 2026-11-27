@@ -112,21 +112,32 @@ SemanticsData _node(WidgetTester tester, String label) {
 Future<void> _confirm(
   WidgetTester tester, {
   bool destructive = false,
-  bool useRootNavigator = true,
+  bool? useRootNavigator,
   BuildContext? context,
   String title = 'Delete comic?',
   String message = 'It will be removed from your library.',
 }) async {
-  final answer = showMcConfirm(
-    context ?? _ctx(tester),
-    title: title,
-    message: message,
-    confirmLabel: 'Delete',
-    cancelLabel: 'Keep',
-    destructive: destructive,
-    useRootNavigator: useRootNavigator,
-    barrierLabel: 'Close dialog',
-  );
+  // The default of `useRootNavigator` is under test: pass it only when asked.
+  final answer = useRootNavigator == null
+      ? showMcConfirm(
+          context ?? _ctx(tester),
+          title: title,
+          message: message,
+          confirmLabel: 'Delete',
+          cancelLabel: 'Keep',
+          destructive: destructive,
+          barrierLabel: 'Close dialog',
+        )
+      : showMcConfirm(
+          context ?? _ctx(tester),
+          title: title,
+          message: message,
+          confirmLabel: 'Delete',
+          cancelLabel: 'Keep',
+          destructive: destructive,
+          useRootNavigator: useRootNavigator,
+          barrierLabel: 'Close dialog',
+        );
   await tester.pumpAndSettle();
   // The caller awaits the answer after acting on the dialog.
   _pending = answer;
@@ -147,18 +158,26 @@ const _options = [
 Future<Future<String?>> _openChoice(
   WidgetTester tester, {
   String? selected,
-  bool useRootNavigator = true,
+  bool? useRootNavigator,
   BuildContext? context,
   List<McChoiceOption<String>> options = _options,
 }) async {
-  final answer = showMcChoiceSheet<String>(
-    context ?? _ctx(tester),
-    title: 'Appearance',
-    dismissLabel: 'Close sheet',
-    options: options,
-    selected: selected,
-    useRootNavigator: useRootNavigator,
-  );
+  final answer = useRootNavigator == null
+      ? showMcChoiceSheet<String>(
+          context ?? _ctx(tester),
+          title: 'Appearance',
+          dismissLabel: 'Close sheet',
+          options: options,
+          selected: selected,
+        )
+      : showMcChoiceSheet<String>(
+          context ?? _ctx(tester),
+          title: 'Appearance',
+          dismissLabel: 'Close sheet',
+          options: options,
+          selected: selected,
+          useRootNavigator: useRootNavigator,
+        );
   await tester.pumpAndSettle();
   return answer;
 }
@@ -182,7 +201,6 @@ List<McMenuItem<String>> _menuItems({bool long = false}) => [
 Widget _menuApp(
   List<String> picked, {
   bool long = false,
-  bool useRootNavigator = true,
   McThemeVariant variant = McThemeVariant.light,
   double scale = 1,
 }) => _app(
@@ -192,7 +210,6 @@ Widget _menuApp(
       items: _menuItems(long: long),
       onSelected: picked.add,
       semanticLabel: 'More actions',
-      useRootNavigator: useRootNavigator,
     ),
   ),
   variant: variant,
@@ -609,9 +626,12 @@ void main() {
       );
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      await tester.pump(const Duration(seconds: 6));
-      expect(find.text('Removed'), findsOneWidget, reason: 'still up at 6 s');
-      await tester.pump(const Duration(milliseconds: 2200));
+      // Past the 4 s of a toast without an action, and past its exit
+      // animation, so it would be gone by now if the action did not count.
+      await tester.pump(const Duration(seconds: 4, milliseconds: 500));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.text('Removed'), findsOneWidget, reason: 'still up at 5 s');
+      await tester.pump(const Duration(seconds: 3));
       await tester.pumpAndSettle();
       expect(find.text('Removed'), findsNothing);
       expect(mcToastActionDuration, greaterThan(mcToastDuration));
@@ -1021,7 +1041,12 @@ void main() {
           expect(size.height >= mcMinTapTarget, isTrue, reason: '$label $size');
         }
         final handle = tester.getSize(
-          find.bySemanticsLabel('Close sheet').first,
+          find
+              .descendant(
+                of: find.byType(McSheet),
+                matching: find.byType(GestureDetector),
+              )
+              .first,
         );
         expect(handle.height >= mcMinTapTarget, isTrue, reason: '$handle');
         await _tapBarrier(tester);

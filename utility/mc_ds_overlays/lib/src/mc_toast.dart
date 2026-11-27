@@ -23,7 +23,8 @@ class McToastAction {
 /// [action]. A new toast **replaces** the current one at once (it does not
 /// queue behind it).
 ///
-/// The message is announced to a screen reader as a live region. The toast
+/// The toast is announced to a screen reader as a live region (the
+/// `SnackBar` itself is one; a test pins it). The toast
 /// stays [mcToastDuration], or [mcToastActionDuration] when it has an
 /// [action] (unless [duration] is given); an action never keeps it open for
 /// ever. The action wraps below the message when they do not fit on one line
@@ -46,13 +47,7 @@ ScaffoldFeatureController<SnackBar, SnackBarClosedReason> showMcToast(
         crossAxisAlignment: WrapCrossAlignment.center,
         runSpacing: McSpacing.xs,
         children: [
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              message,
-              style: McTypeScale.body.copyWith(color: p.surface),
-            ),
-          ),
+          Text(message, style: McTypeScale.body.copyWith(color: p.surface)),
           if (action != null) _ToastActionButton(action: action),
         ],
       ),

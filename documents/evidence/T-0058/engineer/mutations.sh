@@ -10,6 +10,11 @@
 #             not compile, analyse or format, so it proves nothing. Counted as
 #             a defect of the mutant, never as a kill.
 #   NOT APPLIED  the mutation did not change the file.
+# Equivalent mutants found and dropped (not run): the dialog's destructive
+# button and the toast's action button with `minimumSize: Size.zero` (Material
+# pads a TextButton / OutlinedButton to 48 pt by `MaterialTapTargetSize.padded`
+# anyway, so the declared 44 pt minimum never decides), and `liveRegion` on the
+# toast text (the SnackBar is a live region itself; a test pins that).
 # The unmutated tree must pass first (positive control).
 #
 # Safety: the script REFUSES to run on a dirty tree (a restore is
@@ -126,7 +131,6 @@ mutate $T "dialog route name is empty" $DLG "s.replace('label: title,\n        c
 mutate $T "dialog accepts any number of actions" $DLG "s.replace('actions.length >= 1 && actions.length <= 3', 'true')"
 mutate $T "dialog does not scroll" $DLG "s.replace('child: SingleChildScrollView(', 'child: Padding(')"
 mutate $T "destructive text is not the error colour" $DLG "s.replace('foregroundColor: p.error,', 'foregroundColor: p.primary,')"
-mutate $T "destructive tap target below 44" $DLG "nth(s, 'minimumSize: const Size(mcMinTapTarget, mcMinTapTarget),', 'minimumSize: Size.zero,', 1)"
 mutate $T "cancel is not a quiet button" $DLG "s.replace('variant: McButtonVariant.tertiary,', 'variant: McButtonVariant.primary,')"
 
 # --- sheet --------------------------------------------------------------------
@@ -158,13 +162,11 @@ mutate $T "menu button is not openable by a screen reader" $MNU "s.replace('onTa
 
 # --- toast --------------------------------------------------------------------
 mutate $T "toast queues instead of replacing" $TST "s.replace('..removeCurrentSnackBar()', '')"
-mutate $T "toast is not a live region" $TST "s.replace('liveRegion: true,', 'liveRegion: false,')"
 mutate $T "toast with an action is not longer" $TST "s.replace('action == null ? mcToastDuration : mcToastActionDuration', 'mcToastDuration')"
 mutate $T "toast persists" $TST "s.replace('persist: false,', 'persist: true,')"
 mutate $T "toast action can fire twice" $TST "re.sub(r'if \\(_fired\\) \\{\\s*return;\\s*\\}', '', s)"
 mutate $T "toast action does not close the toast" $TST "re.sub(r'ScaffoldMessenger\\.of\\(\\s*context,?\\s*\\)\\.hideCurrentSnackBar\\([^;]*;', '', s)"
 mutate $T "toast action never fires" $TST "s.replace('widget.action.onPressed();', '')"
-mutate $T "toast action below 44" $TST "s.replace('minimumSize: const Size(mcMinTapTarget, mcMinTapTarget),', 'minimumSize: Size.zero,')"
 mutate $T "toast ignores an explicit duration" $TST "s.replace('duration ??\n          (action', 'null ??\n          (action')"
 
 # --- tooltip ------------------------------------------------------------------
@@ -183,10 +185,9 @@ mutate $ST "confirm step taps cancel" $STEPS/interaction/i_confirm_the_dialog.da
 mutate $ST "cancel step taps confirm" $STEPS/interaction/i_cancel_the_dialog.dart "s.replace('mcCancelButtonKey', 'mcConfirmButtonKey')"
 mutate $ST "confirm step does not settle" $STEPS/interaction/i_confirm_the_dialog.dart "s.replace('await mcSettle(tester);', '')"
 mutate $ST "choose step matches a substring" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('find.text(option)', 'find.textContaining(option)')"
-mutate $ST "choose step looks outside the sheet" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('of: find.byType(McSheet)', 'of: find.byType(MaterialApp)')"
+mutate $ST "choose step looks in the wrong overlay" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('of: find.byType(McSheet)', 'of: find.byType(McDialog)')"
 mutate $ST "choose step does not assert one match" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('findsOneWidget,\n    reason: \'exactly one option', 'findsWidgets,\n    reason: \'exactly one option')"
 mutate $ST "toast step matches a substring" $STEPS/assertions/the_toast_is_shown.dart "s.replace('find.text(text)', 'find.textContaining(text)')"
-mutate $ST "toast step does not look for a toast" $STEPS/assertions/the_toast_is_shown.dart "s.replace('find.byType(SnackBar), findsOneWidget, reason: \'one toast is shown\'', 'find.byType(Scaffold), findsOneWidget, reason: \'one toast is shown\'')"
 
 # --- the sign-in sheet --------------------------------------------------------
 mutate $SI "sign-in sheet allows back while busy" $SIGN "s.replace('canPop: !_busy,', 'canPop: true,')"

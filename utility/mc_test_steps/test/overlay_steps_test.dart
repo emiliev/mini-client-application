@@ -102,6 +102,29 @@ void main() {
     await _red(iChooseInTheSheet(tester, 'Dark'));
   });
 
+  testWidgets('T-0058-AC4 I choose {option} in the sheet is exact', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_app());
+    unawaited(
+      showMcChoiceSheet<String>(
+        _ctx(tester),
+        title: 'Twice',
+        dismissLabel: 'Close',
+        options: const [
+          McChoiceOption(value: 'a', label: 'Same'),
+          McChoiceOption(value: 'b', label: 'Same'),
+        ],
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Negative control: two options read "Same", so the step cannot tell
+    // which one is meant and must not pick one.
+    await _red(iChooseInTheSheet(tester, 'Same'));
+    expect(find.byType(McSheet), findsOneWidget);
+  });
+
   testWidgets('T-0058-AC4 the toast {text} is shown', (tester) async {
     await tester.pumpWidget(_app());
 
