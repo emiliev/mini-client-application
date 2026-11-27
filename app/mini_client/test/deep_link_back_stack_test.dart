@@ -109,14 +109,28 @@ void main() {
     expect(diContainer<SessionReader>().isSignedIn, isTrue);
   }
 
-  /// Back from the first screen, once the page that leads home is reached.
-  Future<void> backToHome(WidgetTester tester) async {
-    for (var i = 0; i < 3 && find.byKey(_home).evaluate().isEmpty; i++) {
-      expect(find.byType(BackButton), findsWidgets, reason: 'a back button');
-      await tester.tap(find.byType(BackButton).first);
-      await tester.pumpAndSettle();
+  /// Taps Back exactly once on the screen that shows.
+  Future<void> backOnce(WidgetTester tester) async {
+    expect(find.byType(BackButton), findsWidgets, reason: 'a back button');
+    await tester.tap(find.byType(BackButton).first);
+    await tester.pumpAndSettle();
+  }
+
+  /// The exact walk home (plan 01 §4.2): one Back for every link, except
+  /// a character's details, which sit under the characters list.
+  Future<void> walkHome(WidgetTester tester, String link) async {
+    if (link == AppLocations.character(100366)) {
+      await backOnce(tester);
+      expect(
+        find.byKey(const ValueKey<String>('characters_list.grid')),
+        findsOneWidget,
+        reason: 'details sit under the characters list',
+      );
+      expect(find.byKey(_home), findsNothing);
     }
-    expect(find.byKey(_home), findsOneWidget);
+    await backOnce(tester);
+    expect(find.byKey(_home), findsOneWidget, reason: 'one Back from $link');
+    expect(find.byType(BackButton), findsNothing, reason: 'nothing below home');
   }
 
   for (final entry in _links.entries) {
@@ -131,7 +145,7 @@ void main() {
       expect(find.byKey(_home), findsNothing, reason: 'covered by the link');
       expect(find.byType(BackButton), findsWidgets, reason: 'a back button');
 
-      await backToHome(tester);
+      await walkHome(tester, entry.key);
     });
 
     testWidgets('T-0049-AC2 a link to the running app (${entry.key}) '
@@ -148,7 +162,7 @@ void main() {
       }
       expect(entry.value, findsWidgets, reason: 'the linked screen');
 
-      await backToHome(tester);
+      await walkHome(tester, entry.key);
     });
   }
 

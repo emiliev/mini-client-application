@@ -17,6 +17,8 @@ GoRouter buildAppRouter({required String initialLocation}) => GoRouter(
   initialLocation: initialLocation,
   // The link PendingLinks held wins over the platform's initial route.
   overridePlatformDefaultLocation: true,
+  // A FlowCall (AppFlows' wait) is transient: not serialised, not warned on.
+  extraCodec: const FlowExtraCodec(),
   // Every entity route nests under home (plan 01 §4.2, T-0049), so a link
   // opens `[home, target]` and the first screen can go back.
   routes: nestUnderHome($appRoutes, [

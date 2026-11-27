@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:app_core/src/locations/app_locations.dart';
 import 'package:flutter/widgets.dart';
@@ -79,6 +80,9 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
     }
     _pending = null;
     _done = true;
+    // Direct, so the result never depends on microtask order: dispose (which
+    // completes with null) may come in the same synchronous span as the pop.
+    _call?.complete(pending.value);
     if (route.isFirst) {
       GoRouter.of(context).go(AppLocations.home);
     } else {
@@ -86,9 +90,44 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
     }
   }
 
+  bool _checked = false;
+
+  /// Debug only: a route [AppFlows] opened must have been given its
+  /// [FlowCall]; without `extra: state.extra` its caller would wait forever.
+  /// (Here, not in `initState`: it reads the route's state, an inherited
+  /// widget.)
+  bool _debugCheckCall() {
+    if (_checked) {
+      return true;
+    }
+    _checked = true;
+    if (GoRouter.maybeOf(context) == null) {
+      return true;
+    }
+    final here = GoRouterState.of(context).uri.toString();
+    final expected = _expectedCalls[here] ?? 0;
+    if (expected > 0) {
+      // This route takes the token, with or without its call.
+      if (expected == 1) {
+        _expectedCalls.remove(here);
+      } else {
+        _expectedCalls[here] = expected - 1;
+      }
+    }
+    if (_call == null && expected > 0) {
+      throw FlutterError(
+        'FlowResultRoute at $here was opened through AppFlows but built '
+        'without its FlowCall, so the caller would wait forever.\n'
+        'Pass `extra: state.extra` to FlowResultRoute in the route.',
+      );
+    }
+    return true;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    assert(_debugCheckCall());
     if (_pending != null) {
       // Navigation may not change during a build: deliver after the frame.
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -119,6 +158,8 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
 /// Completes once: with the flow's result, or with null when the route went
 /// away without one. Later calls are ignored.
 final class FlowCall<T> {
+  FlowCall();
+
   final Completer<T?> _completer = Completer<T?>();
 
   /// Completes with the result of the route.
@@ -130,6 +171,31 @@ final class FlowCall<T> {
       _completer.complete(value);
     }
   }
+}
+
+/// Locations [AppFlows] opened and whose route has not yet shown its call
+/// (debug only; see `_debugCheckCall`).
+final Map<String, int> _expectedCalls = <String, int>{};
+
+/// go_router's `extraCodec` for the app: a [FlowCall] is **transient** (a
+/// live future can't be saved), so it encodes as null and decodes as no call,
+/// and go_router doesn't warn on every push that it can't serialise it. Any
+/// other extra passes through unchanged.
+final class FlowExtraCodec extends Codec<Object?, Object?> {
+  const FlowExtraCodec();
+
+  @override
+  Converter<Object?, Object?> get encoder => const _FlowExtraConverter();
+
+  @override
+  Converter<Object?, Object?> get decoder => const _FlowExtraConverter();
+}
+
+class _FlowExtraConverter extends Converter<Object?, Object?> {
+  const _FlowExtraConverter();
+
+  @override
+  Object? convert(Object? input) => input is FlowCall ? null : input;
 }
 
 /// The flows that end with a result, as typed entries: push the route and
@@ -152,6 +218,21 @@ abstract final class AppFlows {
   /// completes (see [FlowResultRoute]).
   static Future<String?> _open(GoRouter router, String location) {
     final call = FlowCall<String>();
+    assert(() {
+      final key = Uri.parse(location).toString();
+      _expectedCalls[key] = (_expectedCalls[key] ?? 0) + 1;
+      unawaited(
+        call.result.whenComplete(() {
+          final left = (_expectedCalls[key] ?? 1) - 1;
+          if (left <= 0) {
+            _expectedCalls.remove(key);
+          } else {
+            _expectedCalls[key] = left;
+          }
+        }),
+      );
+      return true;
+    }());
     unawaited(router.push<String>(location, extra: call).then(call.complete));
     return call.result;
   }

@@ -35,9 +35,9 @@ List<RouteBase> nestUnderHome(
 }
 
 GoRoute _relative(RouteBase route) {
-  if (route is! GoRoute || !route.path.startsWith('/')) {
+  if (route is! GoRoute || !route.path.startsWith('/') || route.path == '/') {
     throw StateError(
-      'Only absolute GoRoutes nest under home, got ${route.runtimeType} '
+      'Only absolute GoRoutes other than "/" nest under home, got ${route.runtimeType} '
       '${route is GoRoute ? route.path : ''}.',
     );
   }

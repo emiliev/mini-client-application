@@ -56,6 +56,13 @@ void main() {
     expect(find.byKey(const Key('/')), findsOneWidget);
   });
 
+  test('T-0049-AC1 a second route at exactly "/" is refused', () {
+    expect(
+      () => nestUnderHome([_route('/')], [_route('/')]),
+      throwsStateError,
+    );
+  });
+
   test('T-0049-AC1 a relative entity route, a missing home and two homes '
       'are refused', () {
     expect(
