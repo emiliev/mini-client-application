@@ -8,26 +8,26 @@
 | Project | `/tmp/mc-T-0049-engineer-e2e/app/mini_client` |
 | Device | iPhone 17 Pro (`com.apple.CoreSimulator.SimDeviceType.iPhone-17-Pro`) |
 | Runtime | iOS 26.2 (`com.apple.CoreSimulator.SimRuntime.iOS-26-2`) |
-| Simulator | `mc-T-0049-engineer-83733` |
-| Simulator UDID | `9F6E0842-037B-4018-8E17-5F69F20C14D7` |
+| Simulator | `mc-T-0049-engineer-68656` |
+| Simulator UDID | `BE869843-DDDE-4508-8395-3C3A5560D8EE` |
 | Runner | `fvm flutter drive --driver={driver} --target={target} -d {udid}` |
-| Started | 2026-11-27T06:19:55Z |
-| Finished | 2026-11-27T06:25:53Z |
+| Started | 2026-11-27T06:39:30Z |
+| Finished | 2026-11-27T06:45:37Z |
 
 ## Targets
 
 | Target | Result | Duration | Log |
 |---|---|---|---|
-| `integration_test/character_details_deeplink_test.dart` | PASS | 45 s | [e2e-character_details_deeplink_test.log](e2e-character_details_deeplink_test.log) |
-| `integration_test/characters_deeplink_test.dart` | PASS | 25 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
-| `integration_test/characters_journey_test.dart` | PASS | 26 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
-| `integration_test/characters_link_after_flow_test.dart` | PASS | 23 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
-| `integration_test/comic_deeplink_test.dart` | PASS | 32 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
-| `integration_test/comics_journey_test.dart` | PASS | 41 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
-| `integration_test/reading_list_deeplink_test.dart` | PASS | 35 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
-| `integration_test/reading_list_journey_test.dart` | PASS | 41 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
-| `integration_test/search_deeplink_test.dart` | PASS | 32 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
-| `integration_test/search_journey_test.dart` | PASS | 36 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
+| `integration_test/character_details_deeplink_test.dart` | PASS | 51 s | [e2e-character_details_deeplink_test.log](e2e-character_details_deeplink_test.log) |
+| `integration_test/characters_deeplink_test.dart` | PASS | 24 s | [e2e-characters_deeplink_test.log](e2e-characters_deeplink_test.log) |
+| `integration_test/characters_journey_test.dart` | PASS | 25 s | [e2e-characters_journey_test.log](e2e-characters_journey_test.log) |
+| `integration_test/characters_link_after_flow_test.dart` | PASS | 26 s | [e2e-characters_link_after_flow_test.log](e2e-characters_link_after_flow_test.log) |
+| `integration_test/comic_deeplink_test.dart` | PASS | 36 s | [e2e-comic_deeplink_test.log](e2e-comic_deeplink_test.log) |
+| `integration_test/comics_journey_test.dart` | PASS | 37 s | [e2e-comics_journey_test.log](e2e-comics_journey_test.log) |
+| `integration_test/reading_list_deeplink_test.dart` | PASS | 26 s | [e2e-reading_list_deeplink_test.log](e2e-reading_list_deeplink_test.log) |
+| `integration_test/reading_list_journey_test.dart` | PASS | 35 s | [e2e-reading_list_journey_test.log](e2e-reading_list_journey_test.log) |
+| `integration_test/search_deeplink_test.dart` | PASS | 30 s | [e2e-search_deeplink_test.log](e2e-search_deeplink_test.log) |
+| `integration_test/search_journey_test.dart` | PASS | 38 s | [e2e-search_journey_test.log](e2e-search_journey_test.log) |
 
 ## Screenshots
 

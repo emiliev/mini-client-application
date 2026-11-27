@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0049 engineer on mc-T-0049-engineer-83733 (9F6E0842-037B-4018-8E17-5F69F20C14D7)
+# e2e_ios.sh: T-0049 engineer on mc-T-0049-engineer-68656 (BE869843-DDDE-4508-8395-3C3A5560D8EE)
 # cwd: /tmp/mc-T-0049-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/9-search_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 9F6E0842-037B-4018-8E17-5F69F20C14D7
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.VuzYnC/screenshots/9-search_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d BE869843-DDDE-4508-8395-3C3A5560D8EE
 
 Resolving dependencies in `/private/tmp/mc-T-0049-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0049-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           10.7s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50101/J7c-ZK_Zrm8=/
-VMServiceFlutterDriver: Isolate found with number: 806633364975759
-VMServiceFlutterDriver: Isolate 806633364975759 is runnable.
+Xcode build done.                                           11.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55533/KoQjkcN_kGY=/
+VMServiceFlutterDriver: Isolate found with number: 5860727623297687
+VMServiceFlutterDriver: Isolate 5860727623297687 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0046-AC5 the deep link miniclient://app/search?q=spi opens the search with its results
@@ -43,9 +43,9 @@ flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
 flutter: 00:10 +1: (tearDownAll)
 flutter: 00:10 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/9-search_deeplink_test/36_deep_link_search.png (411725)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/9-search_deeplink_test/36b_back_from_search_is_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.xKB6Lo/screenshots/9-search_deeplink_test/37_link_to_running_app_search.png (413127)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.VuzYnC/screenshots/9-search_deeplink_test/36_deep_link_search.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.VuzYnC/screenshots/9-search_deeplink_test/36b_back_from_search_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.VuzYnC/screenshots/9-search_deeplink_test/37_link_to_running_app_search.png (413127)
 All tests passed.
 
 # exit code: 0
