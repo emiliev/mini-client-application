@@ -23,7 +23,7 @@
 - Navigation changes are Opus-tier for verification.
 
 ## Acceptance criteria
-- **T-0049-AC1:** Given a cold start from each link, then the first screen shows a back button and tapping it lands on home. The links are:
+- **T-0049-AC1:** Given a cold start from each link, then the first screen shows a back button, and Back walks the nested path to home: one tap for top-level entity screens; `/characters/<id>` → characters list → home. _(Amended by the TL 2026-11-27: details nest under the list, as plan 01 §4.2 intends.)_ The links are:
   - `/characters`
   - `/characters/<id>`
   - `/comics/501500`
