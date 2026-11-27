@@ -1,6 +1,6 @@
 # ADR-0012: Blocs track analytics through a pure-Dart port; a flow's pages are screens
 
-- **Status:** Proposed
+- **Status:** Accepted (TL, 2026-11-27, at the T-0056 merge `ee4317f`; the Opus Verifier recommended it with 2 edits, both applied)
 - **Date:** 2026-11-27
 - **Deciders:** Tech Lead (accepts at the T-0056 merge)
 - **Related:** T-0056, T-0053, P-103, F-0053, F-0056 §4, R15, R17, ADR-0007

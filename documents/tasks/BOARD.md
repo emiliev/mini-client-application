@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0056](T-0056-store-home-exemplar.md) | `store_home`, the DB exemplar (P1-21); ADR-0012 | merged `ee4317f` |
 | [T-0061](T-0061-fixtures-identity-preferences.md) | Identity preferences routes (GET/PATCH, `ifVersion`) for ST | merged `a16a332` |
 | [T-0060](T-0060-fixtures-editorial-trivia.md) | `mc_fixtures_editorial` trivia: seeded rounds, server-side scoring | merged `a6e5df7` |
 | [T-0058](T-0058-ds-overlays.md) | `mc_ds_overlays`; sign-in sheet on `McSheet` | merged `f0f1539` |
@@ -27,7 +28,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 
-| [T-0056](T-0056-store-home-exemplar.md) | `store_home`, the DB exemplar (P1-21): 5 independent sections, category paging, first flag and analytics use | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0051, T-0052, T-0053 | `fleet/T-0056-store-home` |
 | [T-0062](T-0062-tooling-hygiene.md) | Tooling hygiene: format gate, fresh-worktree gates, e2e bundle id and names, sheet handle pin (P-101, P-108, P-109, P-111, P-114) | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0055, T-0058 | `fleet/T-0062-tooling-hygiene` |
 
 ## Done

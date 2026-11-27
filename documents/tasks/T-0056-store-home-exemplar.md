@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (Verifier round handoff) |
+| Status | Done (merged 2026-11-27 `ee4317f`; Verifier FAIL `861f49c`, re-verify PASS `46e4361`) |
 | Owner | crew: Engineer (**Opus**: first DB exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0056-store-home` |
@@ -239,3 +239,15 @@ Results, at `728fd29` (the merge with `origin/main` at T-0058, plus this round):
 - **e2e:** on a fresh `mc-T-0056-engineer-*` (deleted afterwards), [4/4 PASS](../evidence/T-0056/engineer/e2e_verifier/e2e-summary.md): the 3 store targets and `search_journey_test`. No build-failure marker, each log names its own AC test, and the screenshots are at most 1200 px.
 
 **Test integrity:** no test was deleted, skipped or weakened, and there is no `// ignore:`. The new tests are additions. The two dead code terms (`ModalRoute.of(...).isCurrent` in the page and the `outerRoute` identity check in `FlowScope.updateShouldNotify`) were removed from production code, not from tests.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011).
+  - `/code-review` found 2 important bugs (a cart skeleton stuck after a same-user re-sign-in; the hidden store page loaded and tracked under a cold category link) and 5 nits. Review round `4218950`: 69/69, with ADR-0012 drafted.
+  - The **Opus Verifier returned FAIL** at `861f49c` (about 329k tokens):
+    - D1: the category paging-error tests were cited but never written, a process failure;
+    - D2: an event was added after `close()`;
+    - D3: nested `outerIsCurrent`;
+    - D4: test gaps.
+  - Verifier round `d6c2b90`: 76/76, 195/195. A narrow Sonnet re-verify passed at `46e4361` (about 103k tokens) after grepping every Outcome row.
+- The TL merged `--no-ff` and resolved one both-sides-added conflict in `app_core/test/app_layer_test.dart` by keeping both. On the merge result `check` passed, 201/201 tests passed, lint was clean, `mc_arch_check` reported OK, the sim app built, provenance and the no-direct-overlay check passed, and a 20-run uncached flake check was clean.
+- **ADR-0012 accepted.** P-103 and P-107 are done. Follow-ups: P-113 (prices), P-115, P-116. Protocol change: evidence rows must name tests that exist at handoff.
