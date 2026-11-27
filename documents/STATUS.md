@@ -5,13 +5,13 @@ _Last updated: 2026-11-27 by Tech Lead_
 | | |
 |---|---|
 | **Product** | An enterprise **Marvel app** in Tide's *Project Miniclient* "Lego" architecture: **169 modules** at S2, ≥ 500k LOC, BDD tests, iOS. It is the workload for **stress-testing and optimising `ai_rules_dart` / `ai_rules_flutter`** ([plan](plan/README.md), [Q-006](open-questions.md#q-006)) |
-| **Phase** | Phase C (exemplars): **5 of 7 archetypes done**: LD `characters_list`, SC `comics_details`, SR `discovery_search`, FW `library_reading_list_editor`, DB `store_home`. Remaining: ST `settings_appearance`, IX `trivia_quiz` (all their prerequisites are merged), then the P1-24 bricks |
+| **Phase** | Phase C (exemplars): **6 of 7 archetypes done**: LD `characters_list`, SC `comics_details`, SR `discovery_search`, FW `library_reading_list_editor`, DB `store_home`, IX `trivia_quiz`. Remaining: ST `settings_appearance` (T-0063, fix round), then Phase D (the `mcgen` generator) |
 | **Health** | Amber: PO decisions Q-010 to Q-014 open (defaults allow Phase A to proceed); usage limits cap crew at 3 concurrent agents |
 | **Code** | **The Marvel app boots on the iOS simulator** (`app/mini_client`), and the **first feature, `characters_list`**, is merged. About 30 packages (foundation, design system incl. paged lists/media/cards, mocked backend and fixtures, API client, feature flow, paging) and 75 test targets, all built and tested by Bazel 9.3.0 + Flutter 3.47.7. All codegen (freezed, json, go_router, gen-l10n, retrofit, injectable, BDD) runs as Bazel actions through 3 rules patches |
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0063 (Opus), T-0064 (Opus) |
+| **Active crew** | T-0063 (Opus, fix round) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -29,6 +29,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0064 merged: `trivia_quiz`, the IX exemplar.** Timed 10-question rounds with a pure-Dart scoring engine that agrees with the server's, a 50/50 hint, pause on background, and results charts. ADR-0014 accepted. It was the first merge under ADR-0015.
 - **T-0062 merged:** tooling hygiene. The e2e app installs as `com.emiliev.miniclient` (Q-004); there is one shared format gate (`tool/checks/lib/format_gate.sh`); `e2e_ios.sh` accepts any role and explains how to prepare a raw tree; the sign-in sheet handle is pinned.
 - **T-0056 merged: `store_home`, the DB exemplar.** A store front with banners, deals, categories, featured products and a cart summary. Each section loads, fails and retries on its own, and a category opens a paged list. It is the first feature behind a feature flag and with analytics. ADR-0012 accepted.
 - **T-0061 merged:** identity preferences (theme mode, density, reduce motion) are saved per user on the mocked server, with optimistic concurrency, ready for the ST exemplar.

@@ -1,6 +1,6 @@
 # ADR-0014: An interactive feature's engine is pure Dart in the feature, and time enters it through the flow
 
-- **Status:** Proposed (T-0064 engineer; for the TL to accept at the merge)
+- **Status:** Accepted (TL, 2026-11-27, at the T-0064 merge `09171cc`)
 - **Date:** 2026-11-27
 - **Deciders:** Tech Lead
 - **Related:** T-0064, P1-23, plan 01 §3.3 and §6.1 (IX), R6 (relaxed by ADR-0015), R15, R17, ADR-0007, ADR-0010, ADR-0012, F-0064, F-0060

@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (handed off) |
+| Status | Done (merged 2026-11-27 `09171cc`; review-first and merge gates per ADR-0015, no Verifier) |
 | Owner | crew: Engineer (**Opus**: first IX exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0064-trivia-quiz` |
@@ -178,3 +178,16 @@ No test was deleted, skipped or weakened, and there is no `// ignore:`. Existing
 - **50-run flake check** on the changed targets (`//feature/trivia/trivia_quiz/...`, `mini_client:trivia_route_test`): [400 of 400](../evidence/T-0064/engineer/runs_per_test_50.md) (8 targets x 50).
 - **e2e:** the play page changed, so `trivia_journey_test` ran once on a fresh simulator (deleted): [PASS](../evidence/T-0064/engineer/e2e_review/e2e-summary.md) on `mc-T-0064-engineer-9575` (deleted); its screenshot 63 shows the timed-out question with the right answer in green and no mark.
 - `origin/main` merged (`22c6fda`, journal only).
+
+## Merge (TL)
+- 2026-11-27: First task under ADR-0015 (no Verifier; merge on green gates).
+  - **Review:** `/code-review` found 1 important issue (the quit dialog added an event after close) and 4 nits. Fix round `dcc11c8` fixed all of them, plus the iOS back swipe on a linked round. The engineer's mutants ran once, before the PO dropped mutation testing.
+  - **TL checks:** no test file was deleted, no skip or `// ignore:` was added, and no assertion was removed. The sampled cited tests exist.
+  - **TL merged** `--no-ff`. On the merge result:
+    - `check` passed;
+    - 210/210 tests passed (14 s, mostly cached);
+    - lint was clean and `mc_arch_check` reported OK;
+    - the sim app built;
+    - the format gate and provenance passed;
+    - a 20-run uncached flake check over 14 quiz targets passed (97 s).
+  - **ADR-0014 accepted.** Follow-ups: P-118.

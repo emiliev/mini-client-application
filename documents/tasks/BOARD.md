@@ -5,6 +5,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0064](T-0064-trivia-quiz-exemplar.md) | `trivia_quiz`, the IX exemplar (P1-23); ADR-0014 | merged `09171cc` |
 | [T-0062](T-0062-tooling-hygiene.md) | Tooling hygiene: format gate, e2e bundle id and roles, sheet handle pin | merged `acfe0c5` |
 | [T-0056](T-0056-store-home-exemplar.md) | `store_home`, the DB exemplar (P1-21); ADR-0012 | merged `ee4317f` |
 | [T-0061](T-0061-fixtures-identity-preferences.md) | Identity preferences routes (GET/PATCH, `ifVersion`) for ST | merged `a16a332` |
@@ -30,7 +31,6 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 
 | [T-0063](T-0063-settings-appearance-exemplar.md) | `settings_appearance`, the ST exemplar (P1-22): app-wide theme, density, reduce motion; local + identity sync | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0061, T-0058 | `fleet/T-0063-settings-appearance` |
-| [T-0064](T-0064-trivia-quiz-exemplar.md) | `trivia_quiz`, the IX exemplar (P1-23): pure-Dart engine, timed rounds, painters, server-agreed scoring | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0060, T-0059, T-0058 | `fleet/T-0064-trivia-quiz` |
 
 ## Done
 | ID | Title | Result |
