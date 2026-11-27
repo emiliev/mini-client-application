@@ -189,4 +189,16 @@ The TL accepted the scope decisions above and asked for **ADR-0012** ([draft, Pr
 | 6 | Flow page names skipped the declared-name filter | Kept exempt, documented (go_router's path fallback does not exist for a flow page); `isValidName` still applies, and unnamed or invalid flow pages are recorded so the page before them is never reported | `flow_observer_test` (an invalid and an unnamed page, then a comic and Back); V11, V12 |
 | 7 | "Dein Warenkorb werden geladen" | de `Wird geladen: {section}` | BDD "In German a loading section is announced in a number-neutral phrase"; no golden changed (none is German) |
 
-Results after the round: see the handoff report (mutations, gates, the 50-run flake check, and the store e2e plus one existing journey on `mc-T-0056-engineer-*`).
+Two more changes came out of the round's own mutation run:
+- `BlocProvider(lazy: false)` became dead code once the page's start reads every bloc (its mutant survived), so it was removed.
+- The cart now subscribes to the session at its visit's start, not in its constructor, so a page built under another screen cannot react to a session event. This replaces a `_shownEpoch != null` guard that no test could reach.
+
+The check-only mode of `mutations.sh` now also refuses a dirty tree: its restore trap had silently reverted two uncommitted edits, which were then re-applied and committed.
+
+Results, on the merge with `origin/main` (T-0059):
+- **Mutations:** [69 of 69 killed](../evidence/T-0056/engineer/mutations.log), at `f0bbab8`, in two halves, each with its own baseline. That is 57 from the first round, 2 of them re-anchored, plus V01 to V12.
+- **Gates:** [PASS](../evidence/T-0056/engineer/T-0056-AC8_gates.md): 192/192 tests, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures, relative paths, byte identity 20/20, cutoff, not committed, gen-l10n parity.
+- **`test --lockfile_mode=error //...`:** 192/192.
+- **Coverage:** store_home 98.3 %, commerce_wiring 100 %, app_core 97.2 %, mc_analytics 100 %, mc_feature_flow 99.4 %, mc_monitoring 96.7 %, mc_formatters 100 %.
+- **[50-run flake check](../evidence/T-0056/engineer/runs_per_test_50.md):** 19 targets, 0 failures.
+- **e2e:** on a fresh `mc-T-0056-engineer-*` (deleted), [4/4 PASS](../evidence/T-0056/engineer/e2e_review/e2e-summary.md): the 3 store targets and `search_journey_test`, with no build-failure marker.

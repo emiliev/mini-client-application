@@ -1,0 +1,64 @@
+# e2e_ios.sh: T-0056 engineer on mc-T-0056-engineer-61978 (561C27E4-6CBD-4674-9D29-A48B0D951F0B)
+# cwd: /tmp/mc-T-0056-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.lqheqg/screenshots/2-store_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/store_deeplink_test.dart -d 561C27E4-6CBD-4674-9D29-A48B0D951F0B
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/private/tmp/mc-T-0056-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0056-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           10.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:56299/iJbKE1WF2kE=/
+VMServiceFlutterDriver: Isolate found with number: 7678982545338167
+VMServiceFlutterDriver: Isolate 7678982545338167 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0056-AC5 the cold link miniclient://app/store opens the store, and Back goes home
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 531e1402309ad061ed59299b3456036d, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: store_home, session_id: 531e1402309ad061ed59299b3456036d, seq: 2}
+flutter: [debug] BannersBloc: _Load _Loading -> _Loading
+flutter: [debug] DealsBloc: _Load _Loading -> _Loading
+flutter: [debug] CategoriesBloc: _Load _Loading -> _Loading
+flutter: [debug] FeaturedBloc: _Load _Loading -> _Loading
+flutter: [debug] CartSummaryBloc: _Load _Loading -> _SignedOut
+flutter: [debug] GET /v1/store/banners -> 200
+flutter: [debug] GET /v1/store/deals -> 200
+flutter: [debug] GET /v1/store/categories -> 200
+flutter: [debug] GET /v1/store/featured -> 200
+flutter: [debug] BannersBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: banners, session_id: 531e1402309ad061ed59299b3456036d, seq: 3}
+flutter: [debug] DealsBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: deals, session_id: 531e1402309ad061ed59299b3456036d, seq: 4}
+flutter: [debug] CategoriesBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: categories, session_id: 531e1402309ad061ed59299b3456036d, seq: 5}
+flutter: [debug] FeaturedBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: featured, session_id: 531e1402309ad061ed59299b3456036d, seq: 6}
+flutter: [event] mc_screen_view {screen_name: home, session_id: 531e1402309ad061ed59299b3456036d, seq: 7}
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: 00:05 +1: (tearDownAll)
+flutter: 00:05 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.lqheqg/screenshots/2-store_deeplink_test/47_deep_link_store.png (426450)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.lqheqg/screenshots/2-store_deeplink_test/47b_back_from_store_is_home.png (315801)
+All tests passed.
+
+# exit code: 0
