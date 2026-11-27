@@ -1,0 +1,6 @@
+//utility/mc_fixtures_identity:identity_test                             PASSED in 0.6s
+//utility/mc_fixtures_identity:no_flutter_test                           PASSED in 1.4s
+//utility/mc_fixtures_identity:preferences_test                          PASSED in 2.8s
+//utility/mc_fixtures_identity:provider_contract_test                    PASSED in 0.5s
+//utility/mc_mocked_backend:mocked_backend_test                          PASSED in 3.5s
+Executed 5 out of 5 tests: 5 tests pass.

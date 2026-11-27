@@ -1,0 +1,7 @@
+utility/mc_fixtures_identity/lib/src/data/users.dart: 5/5  uncovered=[]
+utility/mc_fixtures_identity/lib/src/domain.dart: 42/44  uncovered=['40', '111']
+utility/mc_fixtures_identity/lib/src/fixture_sets.dart: 3/3  uncovered=[]
+utility/mc_fixtures_identity/lib/src/handlers/identity_handlers.dart: 74/74  uncovered=[]
+utility/mc_fixtures_identity/lib/src/handlers/preferences_handlers.dart: 69/69  uncovered=[]
+utility/mc_fixtures_identity/lib/src/handlers/tokens.dart: 15/15  uncovered=[]
+TOTAL 208/210 99.0%

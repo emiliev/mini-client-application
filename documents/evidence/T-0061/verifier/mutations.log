@@ -1,0 +1,19 @@
+E-V7 older ifVersion accepted => KILLED by //utility/mc_fixtures_identity:preferences_test
+E-A4 density patch writes theme => KILLED by //utility/mc_fixtures_identity:preferences_test
+E-O5 stale beats malformed => KILLED by //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test
+E-U4 shared preferences object => KILLED by //utility/mc_fixtures_identity:preferences_test
+E-S7 conflict used up by rejected request => KILLED by //utility/mc_fixtures_identity:preferences_test
+E-R2 engine never calls onSelect => KILLED by //utility/mc_fixtures_identity:preferences_test //utility/mc_mocked_backend:mocked_backend_test
+E-R4 arming sets marker => KILLED by //utility/mc_fixtures_identity:preferences_test
+E-C19 double ifVersion accepted => KILLED by //utility/mc_fixtures_identity:preferences_test
+V1 onSelect only when scenario changes => KILLED by //utility/mc_fixtures_identity:preferences_test //utility/mc_mocked_backend:mocked_backend_test
+V2 onSelect also called for null (previous scenario) => KILLED by //utility/mc_mocked_backend:mocked_backend_test
+V3 onSelect gets a copy of the store => KILLED by //utility/mc_fixtures_identity:preferences_test
+V4 reduceMotion applied only when true => KILLED by //utility/mc_fixtures_identity:preferences_test
+V5 density skipped when comfortable => KILLED by //utility/mc_fixtures_identity:preferences_test
+V6 key by id length (u-100 and u-101 collide) => KILLED by //utility/mc_fixtures_identity:preferences_test
+V7 refresh token accepted as bearer => KILLED by //utility/mc_fixtures_identity:identity_test //utility/mc_fixtures_identity:preferences_test
+V8 expired bearer accepted => KILLED by //utility/mc_fixtures_identity:identity_test //utility/mc_fixtures_identity:preferences_test
+V9 sign-out wipes preferences => KILLED by //utility/mc_fixtures_identity:preferences_test
+V10 stale write applies then conflicts => KILLED by //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test
+killed 18 of 18
