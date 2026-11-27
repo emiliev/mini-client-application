@@ -1,12 +1,12 @@
 # T-0058 flake check: --runs_per_test=50 --nocache_test_results
 # targets: overlays_test, golden_test, overlay_steps_test, sign_in_sheet_test
-//app/wiring/app_core:sign_in_sheet_test                                 PASSED in 6.7s
-  Stats over 50 runs: max = 6.7s, min = 1.9s, avg = 2.9s, dev = 1.5s
+//app/wiring/app_core:sign_in_sheet_test                                 PASSED in 3.4s
+  Stats over 50 runs: max = 3.4s, min = 2.6s, avg = 3.0s, dev = 0.2s
 //utility/mc_ds_overlays:golden_test                                     PASSED in 13.9s
-  Stats over 50 runs: max = 13.9s, min = 5.3s, avg = 9.5s, dev = 2.8s
-//utility/mc_ds_overlays:overlays_test                                   PASSED in 13.0s
-  Stats over 50 runs: max = 13.0s, min = 7.0s, avg = 11.3s, dev = 1.0s
-//utility/mc_test_steps:overlay_steps_test                               PASSED in 3.0s
-  Stats over 50 runs: max = 3.0s, min = 1.0s, avg = 1.5s, dev = 0.5s
+  Stats over 50 runs: max = 13.9s, min = 7.8s, avg = 12.7s, dev = 0.8s
+//utility/mc_ds_overlays:overlays_test                                   PASSED in 15.0s
+  Stats over 50 runs: max = 15.0s, min = 6.6s, avg = 10.4s, dev = 2.9s
+//utility/mc_test_steps:overlay_steps_test                               PASSED in 2.6s
+  Stats over 50 runs: max = 2.6s, min = 1.7s, avg = 2.3s, dev = 0.2s
 Executed 4 out of 4 tests: 4 tests pass.
 # exit code: 0
