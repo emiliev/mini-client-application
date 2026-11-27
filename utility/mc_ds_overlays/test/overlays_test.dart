@@ -652,6 +652,24 @@ void main() {
       expect(mcToastActionDuration, greaterThan(mcToastDuration));
     });
 
+    // T-0062-AC4 (P-114b): the plain toast lasts exactly 4 s. The timer starts
+    // when the entry animation ends (inside the first 300 ms), so at 3.9 s after
+    // the show it is still up, and at 4.1 s plus the exit animation it is gone.
+    testWidgets('T-0062-AC4 a plain toast is still up at 3.9 s and gone after '
+        '4.1 s', (tester) async {
+      await tester.pumpWidget(_plain());
+      expect(mcToastDuration, const Duration(seconds: 4));
+      showMcToast(_ctx(tester), 'Saved');
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 3600)); // 3.9 s
+      expect(find.text('Saved'), findsOneWidget, reason: 'up at 3.9 s');
+      await tester.pump(const Duration(milliseconds: 200)); // 4.1 s
+      await tester.pump(const Duration(milliseconds: 500)); // exit animation
+      await tester.pumpAndSettle();
+      expect(find.text('Saved'), findsNothing, reason: 'gone after 4.1 s');
+    });
+
     testWidgets('T-0058-AC2 an explicit duration wins', (tester) async {
       await tester.pumpWidget(_plain());
       showMcToast(
@@ -1333,6 +1351,52 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(McSheet), findsNothing);
       expect(await answer, isNull);
+      handle.dispose();
+    });
+
+    // T-0062-AC4 (P-114a): the sheet is dismissible and draggable, so its
+    // handle is live, but the content refuses to pop (a busy sign-in). The
+    // handle must go through `maybePop`, which asks the PopScope; a plain
+    // `pop` would close the sheet over it.
+    testWidgets('T-0062-AC4 a handle tap on a sheet whose content has '
+        'PopScope(canPop: false) leaves it open', (tester) async {
+      final handle = tester.ensureSemantics();
+      await tester.pumpWidget(_plain());
+      final answer = showMcSheet<String>(
+        _ctx(tester),
+        dismissLabel: 'Close',
+        builder: (_) => const PopScope(
+          canPop: false,
+          child: McSheet(
+            title: 'Signing in',
+            dismissLabel: 'Close',
+            child: Text('Working'),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      var closed = false;
+      unawaited(answer.then((_) => closed = true));
+
+      // Control: the handle is live (a button with a tap action), so a
+      // refusal below comes from the PopScope and not from a missing handle.
+      final live = _labelled(tester, 'Close').where((n) {
+        final d = n.getSemanticsData();
+        return d.flagsCollection.isButton && d.hasAction(SemanticsAction.tap);
+      });
+      expect(live, isNotEmpty, reason: 'the handle is a live dismiss button');
+
+      await tapHandle(tester);
+      await tester.pumpAndSettle();
+      expect(find.byType(McSheet), findsOneWidget, reason: 'handle tap');
+
+      tester.binding.renderViews.first.owner!.semanticsOwner!.performAction(
+        live.first.id,
+        SemanticsAction.tap,
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(McSheet), findsOneWidget, reason: 'screen reader');
+      expect(closed, isFalse, reason: 'the sheet never answered');
       handle.dispose();
     });
 

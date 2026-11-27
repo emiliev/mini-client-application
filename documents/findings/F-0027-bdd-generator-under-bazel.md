@@ -30,7 +30,7 @@ Generating `.feature` → `_test.dart` under Bazel works in one pass, so the R28
 - `T-0029-AC2_missing_step.md`;
 - `T-0029-AC3_scaffold.md`;
 - `T-0029-AC4_no_analyzer.md`, with `T-0029-AC4_cquery_notool_deps.txt` and `T-0029-AC4_tool_closure_generator_targets.txt`;
-- `T-0029-AC5_stock_fallback.md`, with `T-0029-AC5_fallback_junit.xml` and `T-0029-AC5_stock_greeting_browse_test.dart`.
+- `T-0029-AC5_stock_fallback.md`, with `T-0029-AC5_fallback_junit.xml` and `T-0029-AC5_stock_greeting_browse_test.dart.txt`.
 
 ## Implications / actions
 - R28's BDD fallback is not triggered. `tool/build_runner_overlay` carries bdd_widget_test 3.0.5 only for the AC5 check.

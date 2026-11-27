@@ -16,8 +16,8 @@ tool/e2e_ios.sh --task T-0010 --role verifier --project . \
 | Option | Default | Meaning |
 |---|---|---|
 | `--task T-XXXX` | required | Task ID. Used in the simulator name and the default evidence dir. |
-| `--role engineer\|verifier` | required | Used in the simulator name. |
-| `--project <dir>` | required | Flutter project (must contain `pubspec.yaml`). The runner runs from here. |
+| `--role <name>` | required | Any `[a-z0-9-]+` (`engineer`, `verifier`, `reverify`, ...). Used in the simulator name `mc-<task>-<role>-<pid>` and in the default evidence dir. Anything else is refused in pre-flight (exit 2). |
+| `--project <dir>` | required | Flutter project (must contain `pubspec.yaml`). The runner runs from here. With the default `flutter drive` runner it must also have `ios/Runner.xcodeproj`: see "A raw tree" below. |
 | `--target <file>` (repeatable) | every `integration_test/*_test.dart` | Target files, relative to the project. |
 | `--driver <file>` | `test_driver/integration_test.dart` | Host-side driver. Checked only if the runner command uses `{driver}`. |
 | `--device <name or id>` | `iPhone 17 Pro` | Simulator device type. |
@@ -36,6 +36,13 @@ What it does:
 5. Copies each screenshot into the evidence dir. It is downscaled with `sips -Z 1200` **only if it is taller than 1200 px**; anything else is copied byte for byte. If a name is already taken in this run, the later file is saved as `<target-stem>-<name>.png`, then `<target-stem>-3-<name>.png` and so on until it is unique; log names work the same way (`e2e-<stem>-2.log`, …). If a screenshot can't be written, the run stops with exit 4 and the file is not listed in the summary.
 6. Writes `e2e-summary.md`: result, task, role, device, runtime, simulator name and UDID, runner, per-target result, duration and log, and the screenshots with their original size. It is rewritten after each target, so an interrupted run still leaves a summary (`INTERRUPTED (SIGINT)`).
 7. A `trap` on `EXIT`, `INT` and `TERM` stops the runner (it runs in its own process group, so children that were re-parented are killed too; SIGTERM, then SIGKILL after 5 s), keeps the interrupted target's log link and any screenshots it had already taken, then shuts down and deletes the simulator. During teardown, further SIGINT and SIGTERM are ignored, so a second Ctrl-C can't leave the simulator behind. `SIMULATOR_DELETED_AT=` is printed only once a fresh listing confirms the deletion.
+
+**A raw tree has no Xcode project.** The repo builds with Bazel, so `app/mini_client` has no `ios/Runner.xcodeproj` and no generated Dart. With the default `flutter drive` runner the script checks this in pre-flight (after the simulator checks, before any simulator exists) and fails once, with exit 2, naming the command to run (P-108, T-0062). It does not prepare the project itself, because that needs Bazel and a scratch copy:
+```sh
+tool/e2e/prepare_pub_project.sh --app app/mini_client --out /tmp/mc-<task>-<role>-proj   # prints E2E_PROJECT=<dir>
+tool/e2e_ios.sh --task T-XXXX --role reverify --project <that E2E_PROJECT dir>
+```
+`prepare_pub_project.sh` also sets `PRODUCT_BUNDLE_IDENTIFIER` to `com.emiliev.miniclient` (Q-004, the id Bazel builds) in every configuration, `com.emiliev.miniclient.RunnerTests` for the tests; `flutter create` alone would camel-case it (capital C, P-109). `tool/ide_sync --env dev` does the same for a checkout, and `e2e_ios.sh` reads the id from the project, so it follows. A custom `--runner-cmd` is not asked for an Xcode project.
 
 Machine-readable lines on stdout: `SIMULATOR_NAME=`, `SIMULATOR_UDID=`, `SIMULATOR_CREATED_AT=` and `SIMULATOR_DELETED_AT=` (epoch seconds).
 
@@ -104,7 +111,23 @@ Regression tests for the code-review findings, each named after the AC it protec
 | `test_T-0012-AC5_fvm_checked_only_when_runner_uses_it` | without `fvm` on PATH, the default runner fails pre-flight but `--runner-cmd true` doesn't | about 1 s |
 | `test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails` | a failing or garbage `xcrun simctl list` (fake `xcrun` on PATH) gives exit 3, not "nothing to delete" | about 1 s |
 
+T-0062 adds three tests (`test_T-0062-AC3_*`): any `[a-z0-9-]+` role names the simulator `mc-T-0062-<role>-<pid>` and it is deleted; a bad role is refused with exit 2 before any simulator exists; a raw tree fails with the `prepare_pub_project.sh` message while a prepared tree (and a custom runner) gets past it.
+
 The whole suite takes about 7 to 8 minutes.
+
+## `checks/lib/format_gate.sh`: the one `dart format` gate
+
+```sh
+tool/checks/lib/format_gate.sh          # check: exit 0 when nothing would change
+tool/checks/lib/format_gate.sh --fix    # rewrite the gated directories
+source tool/checks/lib/format_gate.sh && mc_format_gate   # from a gate script
+```
+
+New gate scripts call this instead of their own `dart format` line (the old per-task scripts are left as they were). It:
+- runs `fvm dart pub get --offline` at the repo root when `.dart_tool/package_config.json` is missing. The formatter resolves `package:mc_analysis/analysis_options.yaml` through it, so in a fresh worktree a bare `dart format` formats with the wrong style and reports about 140 false changes (P-101);
+- formats exactly `app/`, `feature/`, `utility/`, `spike/` and `tool/` (so `tool/loc` too) and nothing else. `third_party/` (vendored; `flow_builder` must stay byte-identical as patched, see `checks/T-0035-AC4_provenance.sh`) and `documents/` are never passed (P-111). Save evidence probes under `documents/` as `.dart.txt`.
+
+It is the only tool that may format; never run `dart format .` by hand. `tool/checks/T-0062-AC2_format_gate.sh` proves it in a fresh worktree, with a negative control in `tool/loc` and one in `third_party/flow_builder`.
 
 ## `rules_fork.sh`: patch queue for the rules forks
 

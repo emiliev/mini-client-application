@@ -188,6 +188,6 @@ done
 if [[ -n "$OUT" ]]; then
   ev="$(dirname "$OUT")"; mkdir -p "$ev"
   cp "$junit" "$ev/T-0029-AC5_fallback_junit.xml"
-  cp "$gen" "$ev/T-0029-AC5_stock_greeting_browse_test.dart"
+  cp "$gen" "$ev/T-0029-AC5_stock_greeting_browse_test.dart.txt"
 fi
 finish T-0029-AC5 $rc

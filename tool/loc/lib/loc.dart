@@ -67,8 +67,16 @@ class LocResult {
 }
 
 class _Module {
-  _Module(this.dir, this.name, this.testonly, this.deps, this.archetype,
-      this.manifest, this.l10nStem, this.l10nDir);
+  _Module(
+    this.dir,
+    this.name,
+    this.testonly,
+    this.deps,
+    this.archetype,
+    this.manifest,
+    this.l10nStem,
+    this.l10nDir,
+  );
   final String dir; // relative, posix
   final String name;
   final bool testonly;
@@ -191,8 +199,8 @@ List<Map<String, Object?>> _hist(Iterable<int> values, List<int> edges) {
         'bucket': i == edges.length - 1
             ? '${edges[i]}+'
             : edges[i + 1] - 1 == edges[i]
-                ? '${edges[i]}'
-                : '${edges[i]}-${edges[i + 1] - 1}',
+            ? '${edges[i]}'
+            : '${edges[i]}-${edges[i + 1] - 1}',
         'count': counts[i],
       },
   ];
@@ -212,8 +220,10 @@ String encodeJson(Map<String, Object?> m) =>
 
 String _gitCommit(String root) {
   try {
-    final r = Process.runSync('git', ['rev-parse', 'HEAD'],
-        workingDirectory: root);
+    final r = Process.runSync('git', [
+      'rev-parse',
+      'HEAD',
+    ], workingDirectory: root);
     if (r.exitCode == 0) return (r.stdout as String).trim();
   } on ProcessException {
     // fall through
@@ -231,16 +241,21 @@ List<String>? _gitFiles(String root, bool includeUntracked) {
       '--cached',
       if (includeUntracked) ...['--others', '--exclude-standard'],
     ];
-    final r = Process.runSync('git', args,
-        workingDirectory: root, stdoutEncoding: utf8);
+    final r = Process.runSync(
+      'git',
+      args,
+      workingDirectory: root,
+      stdoutEncoding: utf8,
+    );
     if (r.exitCode != 0) return null;
-    final out = (r.stdout as String)
-        .split('\u0000')
-        .where((x) => x.isNotEmpty)
-        .toSet()
-        .where((x) => File(p.join(root, x)).existsSync())
-        .toList()
-      ..sort();
+    final out =
+        (r.stdout as String)
+            .split('\u0000')
+            .where((x) => x.isNotEmpty)
+            .toSet()
+            .where((x) => File(p.join(root, x)).existsSync())
+            .toList()
+          ..sort();
     return out;
   } on ProcessException {
     return null;
@@ -248,7 +263,8 @@ List<String>? _gitFiles(String root, bool includeUntracked) {
 }
 
 String _read(String path) =>
-    File(path).readAsStringSync(encoding: const Utf8Codec(allowMalformed: true));
+    File(path)
+        .readAsStringSync(encoding: const Utf8Codec(allowMalformed: true));
 
 String _genKindOfHeader(String name) {
   if (name.contains('Retrofit')) return 'retrofit';
@@ -263,7 +279,11 @@ String _genKindOfHeader(String name) {
 /// header (`// ****`, `// <Name>Generator`, `// ****`). Lines before the first
 /// header go to the first section; a file with no header is all `json`.
 Map<String, int> _splitGenerated(
-    String kind, String path, String text, FileScan scan) {
+  String kind,
+  String path,
+  String text,
+  FileScan scan,
+) {
   if (!path.endsWith('.g.dart')) return {kind: scan.lines.length};
   final lines = text.split('\n');
   final stars = RegExp(r'^// \*{20,}\s*$');
@@ -289,8 +309,9 @@ Map<String, int> _splitGenerated(
 
 LocResult runLoc(LocOptions o) {
   final root = p.normalize(p.absolute(o.root));
-  final genRootAbs =
-      o.generatedRoot == null ? null : p.normalize(p.absolute(o.generatedRoot!));
+  final genRootAbs = o.generatedRoot == null
+      ? null
+      : p.normalize(p.absolute(o.generatedRoot!));
   final warnings = <String>[];
   final problems = <String>[]; // warnings that fail --strict
   void warn(String m, {bool fatal = false}) {
@@ -300,8 +321,10 @@ LocResult runLoc(LocOptions o) {
 
   var files = _gitFiles(root, o.includeUntracked);
   if (files == null) {
-    warn('$root is not in a git work tree: walked the filesystem, so '
-        'untracked files are counted');
+    warn(
+      '$root is not in a git work tree: walked the filesystem, so '
+      'untracked files are counted',
+    );
     files = _walk(root);
   }
   final fallback = _fallbackFiles(root);
@@ -340,8 +363,9 @@ LocResult runLoc(LocOptions o) {
       } on FormatException catch (e) {
         manifest.clear();
         warn(
-            'malformed $dir/.mcgen/manifest.json (treated as no manifest): ${e.message}',
-            fatal: true);
+          'malformed $dir/.mcgen/manifest.json (treated as no manifest): ${e.message}',
+          fatal: true,
+        );
       }
     }
     final spec = _loadYaml(p.join(root, dir, 'mcgen.yaml'));
@@ -358,15 +382,25 @@ LocResult runLoc(LocOptions o) {
       l10nDir = 'lib/l10n';
       if (l10n is YamlMap) {
         if (l10n['output-localization-file'] is String) {
-          stem = (l10n['output-localization-file'] as String)
-              .replaceAll('.dart', '');
+          stem = (l10n['output-localization-file'] as String).replaceAll(
+            '.dart',
+            '',
+          );
         }
         final od = l10n['output-dir'] ?? l10n['arb-dir'];
         if (od is String) l10nDir = p.posix.normalize(od);
       }
     }
-    modules[dir] =
-        _Module(dir, name, testonly, deps, archetype, manifest, stem, l10nDir);
+    modules[dir] = _Module(
+      dir,
+      name,
+      testonly,
+      deps,
+      archetype,
+      manifest,
+      stem,
+      l10nDir,
+    );
   }
 
   _Module? moduleOf(String f) {
@@ -380,10 +414,18 @@ LocResult runLoc(LocOptions o) {
 
   final unowned = <String, _Module>{};
   _Module unownedFor(String tier) => unowned.putIfAbsent(
+    tier,
+    () => _Module(
       tier,
-      () => _Module(tier, '(unowned:$tier)', false, const [], 'unknown', {},
-          'app_localizations', null)
-        ..synthetic = true);
+      '(unowned:$tier)',
+      false,
+      const [],
+      'unknown',
+      {},
+      'app_localizations',
+      null,
+    )..synthetic = true,
+  );
 
   final fileLoc = <int>[];
   final importsPer = <int>[];
@@ -410,7 +452,8 @@ LocResult runLoc(LocOptions o) {
     if (m != null && m.l10nDir != null) {
       final stem = m.l10nStem;
       final rel = p.posix.relative(f, from: m.dir);
-      final inDir = !checkDir ||
+      final inDir =
+          !checkDir ||
           p.posix.dirname(rel) == m.l10nDir ||
           p.posix.isWithin(m.l10nDir!, rel);
       if (inDir &&
@@ -452,8 +495,10 @@ LocResult runLoc(LocOptions o) {
           if (j is! Map) throw const FormatException('not a JSON object');
           arbKeys += j.keys.where((k) => !(k as String).startsWith('@')).length;
         } on FormatException catch (e) {
-          warn('malformed .arb (keys not counted): $f: ${e.message}',
-              fatal: true);
+          warn(
+            'malformed .arb (keys not counted): $f: ${e.message}',
+            fatal: true,
+          );
         }
       } else if (f.endsWith('.feature')) {
         scenarios += _read(p.join(root, f))
@@ -493,8 +538,10 @@ LocResult runLoc(LocOptions o) {
     var mod = m;
     if (mod == null) {
       mod = unownedFor(top);
-      warn('dart file outside any module (counted in ${mod.name}): $f',
-          fatal: true);
+      warn(
+        'dart file outside any module (counted in ${mod.name}): $f',
+        fatal: true,
+      );
     }
     final relInMod = p.posix.relative(f, from: mod.dir);
     final isTest =
@@ -522,8 +569,11 @@ LocResult runLoc(LocOptions o) {
       mod.testFiles++;
     } else {
       mod.libFiles++;
-      mod.layers.update(_layerOf(relInMod), (v) => v + hand + scaf,
-          ifAbsent: () => hand + scaf);
+      mod.layers.update(
+        _layerOf(relInMod),
+        (v) => v + hand + scaf,
+        ifAbsent: () => hand + scaf,
+      );
       mixAuthored += scan.mixins;
       withApplications += scan.withApplications;
       fileLoc.add(hand + scaf);
@@ -561,8 +611,7 @@ LocResult runLoc(LocOptions o) {
   final byTier = <String, Map<String, Object?>>{};
   final byArch = <String, Map<String, Object?>>{};
   void add(Map<String, Map<String, Object?>> into, String k, _Module m) {
-    final e =
-        into.putIfAbsent(k, () => {'modules': 0, 'source': 0, 'test': 0});
+    final e = into.putIfAbsent(k, () => {'modules': 0, 'source': 0, 'test': 0});
     if (!m.synthetic) e['modules'] = (e['modules'] as int) + 1;
     e['source'] = (e['source'] as int) + m.source.total;
     e['test'] = (e['test'] as int) + m.test.total;
@@ -657,14 +706,20 @@ String _markdown(Map<String, Object?> j) {
     ..writeln('| Bucket | hand | scaffold | total |')
     ..writeln('|---|---:|---:|---:|')
     ..writeln(
-        '| source (D8) | ${src['hand']} | ${src['scaffold']} | ${(src['hand'] as int) + (src['scaffold'] as int)} |')
+      '| source (D8) | ${src['hand']} | ${src['scaffold']} | ${(src['hand'] as int) + (src['scaffold'] as int)} |',
+    )
     ..writeln(
-        '| test | ${tst['hand']} | ${tst['scaffold']} | ${(tst['hand'] as int) + (tst['scaffold'] as int)} |')
+      '| test | ${tst['hand']} | ${tst['scaffold']} | ${(tst['hand'] as int) + (tst['scaffold'] as int)} |',
+    )
     ..writeln()
-    ..writeln('Tooling: ${t['tooling']} | Packages: ${t['packages']} | '
-        'Files: ${(t['files'] as Map)['lib']} lib, ${(t['files'] as Map)['test']} test, ${(t['files'] as Map)['other']} other')
+    ..writeln(
+      'Tooling: ${t['tooling']} | Packages: ${t['packages']} | '
+      'Files: ${(t['files'] as Map)['lib']} lib, ${(t['files'] as Map)['test']} test, ${(t['files'] as Map)['other']} other',
+    )
     ..writeln()
-    ..writeln('Generated: ${gen.entries.map((e) => '${e.key}=${e.value}').join(', ')}')
+    ..writeln(
+      'Generated: ${gen.entries.map((e) => '${e.key}=${e.value}').join(', ')}',
+    )
     ..writeln()
     ..writeln('## Per tier')
     ..writeln()
@@ -701,7 +756,9 @@ String _markdown(Map<String, Object?> j) {
     ..writeln('|---|---|---:|');
   for (final m in mods.take(20)) {
     final s = m['source'] as Map;
-    b.writeln('| ${m['name']} | ${m['path']} | ${(s['hand'] as int) + (s['scaffold'] as int)} |');
+    b.writeln(
+      '| ${m['name']} | ${m['path']} | ${(s['hand'] as int) + (s['scaffold'] as int)} |',
+    );
   }
   b
     ..writeln()
@@ -709,7 +766,9 @@ String _markdown(Map<String, Object?> j) {
   (j['histograms'] as Map).forEach((k, v) {
     b
       ..writeln()
-      ..writeln('`$k`: ${(v as List).map((e) => '${e['bucket']}:${e['count']}').join(' ')}');
+      ..writeln(
+        '`$k`: ${(v as List).map((e) => '${e['bucket']}:${e['count']}').join(' ')}',
+      );
   });
   final g = j['gates'] as Map;
   final w = j['warnings'] as List;
