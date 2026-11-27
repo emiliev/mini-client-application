@@ -35,7 +35,7 @@ sequenceDiagram
     E->>E: tool/verify.sh (L0–L3) + e2e (L4) for feature tasks
     E-->>TL: handoff report + evidence
     TL->>TL: /code-review on the diff (ADR-0011: review first)
-    TL->>E: accepted review findings (one fix round)
+    TL->>E: important review findings only (one fix round); nits go to pending-work.md
     E-->>TL: fixed branch
     opt ADR-0015 exception only (rules/codegen, vendored, auth/security, TL unsure)
         TL->>V: narrow verification brief
@@ -61,7 +61,7 @@ sequenceDiagram
 - [ ] **Merge gates green on the merge result** (ADR-0015): it compiles and every test passes. A Verifier report is needed only for an ADR-0015 exception.
 - [ ] `/code-review` has no unresolved important findings.
 - [ ] No tests deleted, skipped or weakened, and no lint suppressions, unless approved by the TL in the task log.
-- [ ] **Tests per ADR-0015:** features use BDD plus contract tests, with plain unit tests allowed for pure logic and **no goldens**. DS kits keep their goldens. About 15 targeted mutants on the risky logic, with no full sweeps.
+- [ ] **Tests per ADR-0015:** features use BDD plus contract tests, with plain unit tests allowed for pure logic and **no goldens**. DS kits keep their goldens. **No mutation testing.**
 - [ ] **Flake check:** every test target the task adds or changes that touches storage, timers, streams or races passes `test --runs_per_test=50 --nocache_test_results` with 0 failures, and the log is in the evidence. Tests never drop a future that writes to storage (`.ignore()`, `unawaited`): they await it before teardown deletes the directory (F-0050 §7).
 - [ ] The TL re-ran `tool/verify.sh` on the merge result before pushing; CI is green on `main` once T-0005 is done.
 - [ ] Task file Log and Outcome filled in, with evidence links. Decisions are ADRs, gotchas are findings, and leftover work goes to `pending-work.md`.

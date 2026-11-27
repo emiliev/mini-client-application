@@ -1,6 +1,6 @@
 # ADR-0015: Lean verification: no feature goldens, targeted mutations, correctness-only Verifiers
 
-- **Status:** Accepted (PO direction, 2026-11-27; item 4 tightened the same day: tests pass and it compiles = verified)
+- **Status:** Accepted (PO direction, 2026-11-27; tightened the same day: tests pass and it compiles = verified; no mutation testing)
 - **Date:** 2026-11-27
 - **Deciders:** Product Owner (direction), Tech Lead (rules)
 - **Supersedes in part:** ADR-0006 (verification strategy: goldens, Verifier scope), ADR-0011 (Verifier scope per tier), plan 01 R6 / D-30 (feature test kinds)
@@ -32,10 +32,11 @@ The PO also answered two follow-up questions:
    - Contract tests stay.
    - **Plain unit tests are now allowed for pure logic inside a feature**: engines, mappers, rules, formatters. This relaxes R6 / D-30.
    - Widget and bloc behaviour is still tested through BDD.
-3. **Mutations are capped at about 15 targeted mutants per task.**
-   - Engineers pick them where a silent test gap would hurt: races and the session epoch, money, scoring, auth and pins, validation boundaries, persistence.
-   - The mutation script rules stay: it refuses a dirty tree, sets the trap before the first edit, and counts BROKEN separately from KILLED.
-   - No full-package mutation sweeps.
+3. **No mutation testing** (PO, same day: "we don't need them for the sake of our final experiment").
+   - Engineers no longer write or run `mutations.sh`.
+   - Earlier mutation scripts and logs stay in `documents/evidence/` as history.
+   - Tests must still assert exact values and outcomes, which `/code-review` checks, and the flake check stays.
+   - (This first read "about 15 targeted mutants" and was tightened the same day.)
 4. **Verification = it compiles and the tests pass** (PO, same day: "if tests pass and code compiles we're good").
    - **There is no separate Verifier agent by default.** After `/code-review` and one fix round, the TL runs the merge gates on the merge result:
      - build, and the sim app build for app changes;
@@ -65,5 +66,6 @@ The PO also answered two follow-up questions:
 ## Consequences
 - **Faster.** Tasks finish sooner, with fewer hours spent on mutation runs, and Verifier passes should cost roughly half. Fewer golden re-baselines.
 - **Weaker visual safety net in features.** A pure styling regression, such as a colour or spacing that drifts without overflowing, can slip through. DS goldens still catch component-level changes, and e2e screenshots are viewed by Verifiers.
-- **Fewer mutants means less proof that tests bite outside the risky spots.** Review-first and the merge-time flake check mitigate this. With no Verifier, a test that compiles and passes but asserts the wrong thing can now reach `main`, unless `/code-review` catches it. The PO accepted that trade-off for speed.
-- **The bricks (P1-24) and `mcgen` (P2) templates follow this ADR.** Generated features carry no goldens and about 15 targeted mutants per batch. Plan 02 §7.3 is to be read with this ADR.
+- **With no mutants, nothing objectively proves that tests bite.** Review-first and the merge-time flake check mitigate this. With no Verifier, a test that compiles and passes but asserts the wrong thing can now reach `main`, unless `/code-review` catches it. The PO accepted that trade-off for speed.
+- **The bricks (P1-24) and `mcgen` (P2) templates follow this ADR.** Generated features carry no goldens and no mutation runs. Plan 02 §7.3 is to be read with this ADR.
+- **Review findings:** only *important* `/code-review` findings go back to the engineer and block the merge. Nits go straight to `pending-work.md` (TL rule, same day, to shorten fix rounds).
