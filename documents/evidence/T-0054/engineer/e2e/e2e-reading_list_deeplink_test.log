@@ -1,9 +1,9 @@
-# e2e_ios.sh: T-0054 engineer on mc-T-0054-engineer-61021 (92694708-2B98-409B-AE81-0C0736B2601D)
-# cwd: /tmp/mc-T-0054-engineer-e2e-c/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/10-reading_list_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_deeplink_test.dart -d 92694708-2B98-409B-AE81-0C0736B2601D
+# e2e_ios.sh: T-0054 engineer on mc-T-0054-engineer-91556 (8EB9E432-421E-4E0D-851A-D3200C547D30)
+# cwd: /tmp/mc-T-0054-engineer-e2e-e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/10-reading_list_deeplink_test
+$ xcrun simctl uninstall 8EB9E432-421E-4E0D-851A-D3200C547D30 com.emiliev.miniClient; fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_deeplink_test.dart -d 8EB9E432-421E-4E0D-851A-D3200C547D30
 
-Resolving dependencies in `/private/tmp/mc-T-0054-engineer-e2e-c`...
+Resolving dependencies in `/private/tmp/mc-T-0054-engineer-e2e-e`...
 Downloading packages...
   _fe_analyzer_shared 103.0.0 (111.0.0 available)
   analyzer 13.3.0 (14.7.0 available)
@@ -17,42 +17,42 @@ Downloading packages...
   test 1.31.1 (1.33.0 available)
   test_api 0.7.12 (0.7.15 available)
   test_core 0.6.18 (0.6.21 available)
-Got dependencies in `/private/tmp/mc-T-0054-engineer-e2e-c`!
+Got dependencies in `/private/tmp/mc-T-0054-engineer-e2e-e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           14.1s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52266/r-1fs_rGZls=/
-VMServiceFlutterDriver: Isolate found with number: 4902028498459851
-VMServiceFlutterDriver: Isolate 4902028498459851 is runnable.
+Xcode build done.                                           11.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51338/sJ2qv6qIl1I=/
+VMServiceFlutterDriver: Isolate found with number: 3644704488490443
+VMServiceFlutterDriver: Isolate 3644704488490443 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0048-AC5 the deep link miniclient://app/me/lists/new opens the editor
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 2}
+flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 2}
 flutter: [debug] ReadingListEditorBloc: _Start _Loading -> _SigningIn
 flutter: [debug] POST /v1/auth/sign-in -> 200
 flutter: [debug] ReadingListEditorBloc: _WizardChanged _SigningIn -> _Editing
-flutter: [event] mc_screen_view {screen_name: home, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 3}
-flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 4}
+flutter: [event] mc_screen_view {screen_name: home, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 3}
+flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 4}
 flutter: [debug] ReadingListEditorBloc: _WizardChanged _Loading -> _Editing
-flutter: [event] mc_screen_view {screen_name: home, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 5}
-flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 6}
+flutter: [event] mc_screen_view {screen_name: home, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 5}
+flutter: [event] mc_screen_view {screen_name: reading_list_new, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 6}
 flutter: [debug] ReadingListEditorBloc: _WizardChanged _Loading -> _Editing
 VMServiceFlutterDriver: request_data message is taking a long time to complete...
-flutter: [event] mc_screen_view {screen_name: reading_list_edit, session_id: a6002f22571c04ce8d46092d5ded2fdb, seq: 7}
+flutter: [event] mc_screen_view {screen_name: reading_list_edit, session_id: 655584e61c2ca1af78c3916a22cb581d, seq: 7}
 flutter: [debug] ReadingListEditorBloc: _Start _Loading -> _Loading
 flutter: [debug] GET /v1/me/lists/l-1 -> 200
 flutter: [debug] ReadingListEditorBloc: _WizardChanged _Loading -> _Editing
 flutter: 00:07 +1: (tearDownAll)
 flutter: 00:07 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/10-reading_list_deeplink_test/37_deep_link_new_list.png (246054)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/10-reading_list_deeplink_test/37b_back_from_new_list_is_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/10-reading_list_deeplink_test/37c_editor_after_link_replaced_it.png (246054)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/10-reading_list_deeplink_test/38_link_edit_list.png (260030)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/10-reading_list_deeplink_test/37_deep_link_new_list.png (246054)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/10-reading_list_deeplink_test/37b_back_from_new_list_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/10-reading_list_deeplink_test/37c_editor_after_link_replaced_it.png (246054)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/10-reading_list_deeplink_test/38_link_edit_list.png (260030)
 All tests passed.
 
 # exit code: 0

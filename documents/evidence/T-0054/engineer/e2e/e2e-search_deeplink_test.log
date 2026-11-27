@@ -1,9 +1,9 @@
-# e2e_ios.sh: T-0054 engineer on mc-T-0054-engineer-61021 (92694708-2B98-409B-AE81-0C0736B2601D)
-# cwd: /tmp/mc-T-0054-engineer-e2e-c/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/12-search_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 92694708-2B98-409B-AE81-0C0736B2601D
+# e2e_ios.sh: T-0054 engineer on mc-T-0054-engineer-91556 (8EB9E432-421E-4E0D-851A-D3200C547D30)
+# cwd: /tmp/mc-T-0054-engineer-e2e-e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/12-search_deeplink_test
+$ xcrun simctl uninstall 8EB9E432-421E-4E0D-851A-D3200C547D30 com.emiliev.miniClient; fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 8EB9E432-421E-4E0D-851A-D3200C547D30
 
-Resolving dependencies in `/private/tmp/mc-T-0054-engineer-e2e-c`...
+Resolving dependencies in `/private/tmp/mc-T-0054-engineer-e2e-e`...
 Downloading packages...
   _fe_analyzer_shared 103.0.0 (111.0.0 available)
   analyzer 13.3.0 (14.7.0 available)
@@ -17,28 +17,28 @@ Downloading packages...
   test 1.31.1 (1.33.0 available)
   test_api 0.7.12 (0.7.15 available)
   test_core 0.6.18 (0.6.21 available)
-Got dependencies in `/private/tmp/mc-T-0054-engineer-e2e-c`!
+Got dependencies in `/private/tmp/mc-T-0054-engineer-e2e-e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           11.8s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52310/CdFDkNfzga0=/
-VMServiceFlutterDriver: Isolate found with number: 6985389724830503
-VMServiceFlutterDriver: Isolate 6985389724830503 is runnable.
+Xcode build done.                                           11.0s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51418/epeRmeMphFQ=/
+VMServiceFlutterDriver: Isolate found with number: 1333341727256599
+VMServiceFlutterDriver: Isolate 1333341727256599 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0046-AC5 the deep link miniclient://app/search?q=spi opens the search with its results
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: 63c665d0cde21276feff8d3dfc0e2897, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: ad3deda0bf7079de9dec9150388d04d2, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: 63c665d0cde21276feff8d3dfc0e2897, seq: 2}
+flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: ad3deda0bf7079de9dec9150388d04d2, seq: 2}
 flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
 flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
-flutter: [event] mc_screen_view {screen_name: home, session_id: 63c665d0cde21276feff8d3dfc0e2897, seq: 3}
+flutter: [event] mc_screen_view {screen_name: home, session_id: ad3deda0bf7079de9dec9150388d04d2, seq: 3}
 VMServiceFlutterDriver: request_data message is taking a long time to complete...
-flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: 63c665d0cde21276feff8d3dfc0e2897, seq: 4}
+flutter: [event] mc_screen_view {screen_name: discovery_search, session_id: ad3deda0bf7079de9dec9150388d04d2, seq: 4}
 flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
 flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
@@ -47,9 +47,9 @@ flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
 flutter: 00:10 +1: (tearDownAll)
 flutter: 00:10 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/12-search_deeplink_test/36_deep_link_search.png (411725)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/12-search_deeplink_test/36b_back_from_search_is_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/12-search_deeplink_test/37_link_to_running_app_search.png (413127)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/12-search_deeplink_test/36_deep_link_search.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/12-search_deeplink_test/36b_back_from_search_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/12-search_deeplink_test/37_link_to_running_app_search.png (413127)
 All tests passed.
 
 # exit code: 0

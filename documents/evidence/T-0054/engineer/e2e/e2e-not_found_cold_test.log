@@ -1,9 +1,9 @@
-# e2e_ios.sh: T-0054 engineer on mc-T-0054-engineer-61021 (92694708-2B98-409B-AE81-0C0736B2601D)
-# cwd: /tmp/mc-T-0054-engineer-e2e-c/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/9-not_found_cold_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/not_found_cold_test.dart -d 92694708-2B98-409B-AE81-0C0736B2601D
+# e2e_ios.sh: T-0054 engineer on mc-T-0054-engineer-91556 (8EB9E432-421E-4E0D-851A-D3200C547D30)
+# cwd: /tmp/mc-T-0054-engineer-e2e-e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/9-not_found_cold_test
+$ xcrun simctl uninstall 8EB9E432-421E-4E0D-851A-D3200C547D30 com.emiliev.miniClient; fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/not_found_cold_test.dart -d 8EB9E432-421E-4E0D-851A-D3200C547D30
 
-Resolving dependencies in `/private/tmp/mc-T-0054-engineer-e2e-c`...
+Resolving dependencies in `/private/tmp/mc-T-0054-engineer-e2e-e`...
 Downloading packages...
   _fe_analyzer_shared 103.0.0 (111.0.0 available)
   analyzer 13.3.0 (14.7.0 available)
@@ -17,31 +17,31 @@ Downloading packages...
   test 1.31.1 (1.33.0 available)
   test_api 0.7.12 (0.7.15 available)
   test_core 0.6.18 (0.6.21 available)
-Got dependencies in `/private/tmp/mc-T-0054-engineer-e2e-c`!
+Got dependencies in `/private/tmp/mc-T-0054-engineer-e2e-e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           18.9s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:52190/GEc-adx0Lvk=/
-VMServiceFlutterDriver: Isolate found with number: 4215734551992651
-VMServiceFlutterDriver: Isolate 4215734551992651 is runnable.
+Xcode build done.                                           11.1s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:51308/4UW2GQ2aC44=/
+VMServiceFlutterDriver: Isolate found with number: 3496812096215935
+VMServiceFlutterDriver: Isolate 3496812096215935 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0054-AC4 a cold /nope has Back and Go home; a running link to /comics/abc stacks over home
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: 1beca65be2012ce0d8ba2d2ed808fbcb, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: 635c6ab493c441a2189d3e0b8e170a6c, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
-flutter: [event] mc_screen_view {screen_name: not_found, session_id: 1beca65be2012ce0d8ba2d2ed808fbcb, seq: 2}
-flutter: [event] mc_screen_view {screen_name: home, session_id: 1beca65be2012ce0d8ba2d2ed808fbcb, seq: 3}
-flutter: [event] mc_screen_view {screen_name: not_found, session_id: 1beca65be2012ce0d8ba2d2ed808fbcb, seq: 4}
-flutter: [event] mc_screen_view {screen_name: home, session_id: 1beca65be2012ce0d8ba2d2ed808fbcb, seq: 5}
+flutter: [event] mc_screen_view {screen_name: not_found, session_id: 635c6ab493c441a2189d3e0b8e170a6c, seq: 2}
+flutter: [event] mc_screen_view {screen_name: home, session_id: 635c6ab493c441a2189d3e0b8e170a6c, seq: 3}
+flutter: [event] mc_screen_view {screen_name: not_found, session_id: 635c6ab493c441a2189d3e0b8e170a6c, seq: 4}
+flutter: [event] mc_screen_view {screen_name: home, session_id: 635c6ab493c441a2189d3e0b8e170a6c, seq: 5}
 flutter: 00:04 +1: (tearDownAll)
 flutter: 00:04 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/9-not_found_cold_test/60_cold_nope_not_found.png (196660)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/9-not_found_cold_test/60b_cold_nope_back_is_home.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/9-not_found_cold_test/61_running_bad_comic_not_found.png (198705)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.nhXi5T/screenshots/9-not_found_cold_test/61b_running_go_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/9-not_found_cold_test/60_cold_nope_not_found.png (196660)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/9-not_found_cold_test/60b_cold_nope_back_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/9-not_found_cold_test/61_running_bad_comic_not_found.png (198705)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.8NAHUV/screenshots/9-not_found_cold_test/61b_running_go_home.png (310591)
 All tests passed.
 
 # exit code: 0
