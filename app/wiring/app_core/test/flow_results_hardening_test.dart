@@ -56,6 +56,17 @@ class _App {
   /// What the callers of [open] got, in order.
   final List<String?> got = [];
 
+  /// The same, tagged `c:` (create) or `e:` (edit), for tests with two calls.
+  final List<String> tagged = [];
+
+  void create() => unawaited(
+    AppFlows.createReadingList(router).then((v) => tagged.add('c:$v')),
+  );
+
+  void edit(String id) => unawaited(
+    AppFlows.editReadingList(router, id).then((v) => tagged.add('e:$v')),
+  );
+
   Future<void> open(WidgetTester tester) async {
     unawaited(AppFlows.createReadingList(router).then(got.add));
     await tester.pumpAndSettle();
@@ -66,6 +77,10 @@ Future<_App> _app(
   WidgetTester tester, {
   bool signedIn = true,
   String initial = '/',
+
+  /// When set, the guard of `/me/**` answers after this long (an async
+  /// redirect, as the planned sign-in guard will).
+  Duration? guardDelay,
 }) async {
   final state = ValueNotifier<bool>(signedIn);
   final tick = ValueNotifier<int>(0);
@@ -75,16 +90,24 @@ Future<_App> _app(
     initialLocation: initial,
     refreshListenable: Listenable.merge([state, tick]),
     redirect: (context, s) {
-      if (!state.value && s.uri.path.startsWith('/me/')) {
-        return '/signin?from=${Uri.encodeComponent(s.uri.toString())}';
+      String? target() {
+        if (!state.value && s.uri.path.startsWith('/me/')) {
+          return '/signin?from=${Uri.encodeComponent(s.uri.toString())}';
+        }
+        return null;
       }
-      return null;
+
+      if (guardDelay != null && s.uri.path.startsWith('/me/')) {
+        return Future<String?>.delayed(guardDelay, target);
+      }
+      return target();
     },
     routes: [
       GoRoute(
         path: '/',
         builder: (context, s) => const Text('home', key: _home),
       ),
+      GoRoute(path: '/other', builder: (context, s) => const Text('other')),
       GoRoute(
         path: '/signin',
         builder: (context, s) => Column(
@@ -459,6 +482,111 @@ void main() {
       await tester.pumpAndSettle();
       await expectNoListenerLeft(tester, app);
     });
+  });
+
+  group('T-0057-AC1 the async-guard paths (P-110)', () {
+    var changes = 0;
+    setUp(() {
+      changes = 0;
+      AppFlows.debugOnChange = () => changes++;
+      addTearDown(() => AppFlows.debugOnChange = null);
+    });
+
+    Future<void> expectNoListenerLeft(WidgetTester tester, _App app) async {
+      final before = changes;
+      app.router.go('/other');
+      await tester.pumpAndSettle();
+      app.router.go(AppLocations.home);
+      await tester.pumpAndSettle();
+      expect(changes, before, reason: 'a call still listens');
+    }
+
+    // VP07b (T-0054 Verifier). Kills X02 (a push not yet located always
+    // counts as superseded).
+    testWidgets('T-0057-AC1 a slow async guard (spans frames): the push is '
+        'not abandoned while it is still being redirected, then go(from) '
+        'gives null once', (tester) async {
+      final app = await _app(
+        tester,
+        signedIn: false,
+        guardDelay: const Duration(milliseconds: 400),
+      );
+      app.create();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(app.tagged, isEmpty, reason: 'a push still in its redirect lives');
+
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pumpAndSettle();
+      expect(find.byKey(_signIn), findsOneWidget);
+      expect(app.tagged, isEmpty);
+
+      await tester.tap(find.byKey(_signIn));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+      expect(app.tagged, ['c:null']);
+      await expectNoListenerLeft(tester, app);
+      expect(app.tagged, ['c:null']);
+    });
+
+    // VP16. Kills X03 (never superseded).
+    testWidgets('T-0057-AC1 an async guard and a go in the same span: the '
+        'push is superseded before it showed, null once', (tester) async {
+      final app = await _app(
+        tester,
+        signedIn: false,
+        guardDelay: const Duration(milliseconds: 50),
+      );
+      app.create();
+      app.router.go('/other');
+      await tester.pumpAndSettle();
+
+      expect(app.tagged, ['c:null']);
+      expect(find.byKey(_signIn), findsNothing);
+      await expectNoListenerLeft(tester, app);
+      expect(app.tagged, ['c:null']);
+    });
+
+    // VP23. Kills X06 (first match by any imperative page).
+    for (final how in ['replace', 'pushReplacement']) {
+      testWidgets('T-0057-AC1 two calls, the second redirected, then $how of '
+          'the sign-in page: each call ends once', (tester) async {
+        final app = await _app(tester);
+        app.create();
+        await tester.pumpAndSettle();
+        app.signedIn.value = false;
+        await tester.pumpAndSettle();
+        app.edit('l-4');
+        await tester.pumpAndSettle();
+        expect(find.byKey(_signIn), findsOneWidget);
+
+        if (how == 'replace') {
+          unawaited(app.router.replace<void>('/other'));
+        } else {
+          unawaited(app.router.pushReplacement<void>('/other'));
+        }
+        await tester.pumpAndSettle();
+        expect(find.text('other'), findsOneWidget);
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(app.tagged, contains('e:null'), reason: 'the redirected call');
+        expect(
+          app.tagged.where((g) => g.startsWith('c:')),
+          isEmpty,
+          reason: 'the editor below is still open',
+        );
+        expect(find.byKey(_finish), findsOneWidget);
+
+        await tester.tap(find.byKey(_finish));
+        await tester.pumpAndSettle();
+        expect(app.tagged, ['e:null', 'c:l-5']);
+        await expectNoListenerLeft(tester, app);
+        expect(app.tagged, ['e:null', 'c:l-5']);
+        expect(tester.takeException(), isNull);
+      });
+    }
   });
 
   group('T-0054-AC3 a result held under an overlay is delivered', () {

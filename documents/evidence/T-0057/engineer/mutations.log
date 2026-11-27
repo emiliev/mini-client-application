@@ -1,0 +1,9 @@
+baseline: PASS
+X02 CONTROL (suite without the T-0057-AC1 tests): SURVIVED, as expected
+X02 a push not yet located always counts as superseded: KILLED (FAIL  T-0057-AC1 the async-guard paths (P-110) T-0057-AC1 a slow async guard (spans frames): the push is not abandoned while it is still being redirected, then go(from) gives null once)
+X03 CONTROL (suite without the T-0057-AC1 tests): SURVIVED, as expected
+X03 a push is never superseded: KILLED (FAIL  T-0057-AC1 the async-guard paths (P-110) T-0057-AC1 an async guard and a go in the same span: the push is superseded before it showed, null once)
+X06 CONTROL (suite without the T-0057-AC1 tests): SURVIVED, as expected
+X06 the page is first matched as any imperative page: KILLED (FAIL  T-0057-AC1 the async-guard paths (P-110) T-0057-AC1 two calls, the second redirected, then replace of the sign-in page: each call ends once)
+mutations: 3, controls survived and mutants killed: 3
+ALL KILLED, ALL CONTROLS SURVIVED
