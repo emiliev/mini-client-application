@@ -25,6 +25,7 @@ cd "$(git rev-parse --show-toplevel)" || exit 2
 : "${MC_ROLE:?set MC_ROLE, e.g. engineer}"
 FF=utility/mc_feature_flags
 FP=utility/mc_fixtures_platform
+SS=utility/mc_session
 if [[ -n "$(git status --porcelain)" ]]; then
   echo "refusing to run: the working tree is not clean" >&2
   git status --short >&2
@@ -32,7 +33,7 @@ if [[ -n "$(git status --porcelain)" ]]; then
 fi
 OB="/tmp/mc-ob-$MC_TASK-$MC_ROLE"
 LOG="$(mktemp -t "mc-$MC_TASK-$MC_ROLE-mut.XXXXXX")"
-restore() { git checkout -- "$FF" "$FP" 2>/dev/null; }
+restore() { git checkout -- "$FF" "$FP" "$SS" 2>/dev/null; }
 # Set before any edit.
 trap 'restore; rm -f "$LOG"' EXIT
 trap 'echo "interrupted" >&2; exit 130' INT TERM
@@ -45,12 +46,13 @@ total=0
 tests_for() {
   case "$1" in
     "$FF"/*) echo "//$FF/..." ;;
+    "$SS"/*) echo "//$FF/... //$SS/..." ;;
     *) echo "//$FP/..." ;;
   esac
 }
 
 run_tests() {
-  tool/bazelw --output_base="$OB" test --keep_going --test_timeout=90 "$(tests_for "$1")" > "$LOG" 2>&1
+  tool/bazelw --output_base="$OB" test --keep_going --test_timeout=90 $(tests_for "$1") > "$LOG" 2>&1
 }
 
 plain() { tr '\r' '\n' < "$LOG"; }
@@ -101,7 +103,7 @@ open(p, "w").write(s.replace(old, new, 1))
 
 # Baseline: the unmutated tree must pass.
 if [[ -z "${MC_DRY:-}" ]]; then
-  run_tests "$FF/x" && run_tests "$FP/x" || { echo "BASELINE FAILS"; plain | tail -20; exit 1; }
+  run_tests "$FF/x" && run_tests "$FP/x" && run_tests "$SS/x" || { echo "BASELINE FAILS"; plain | tail -20; exit 1; }
   echo "baseline PASS"
 fi
 
@@ -242,6 +244,48 @@ mutate "P12 the empty scenario is dropped" $M "    'platform.empty': MockScenari
       'platform.empty',
       overrides: {'GET /v1/flags': handlers.emptyFlags},
     )," ''
+
+# --- review round -------------------------------------------------------------
+SE=$SS/lib/src/session.dart
+mutate "C1 a remote weight above the cap is accepted" $RS 'weight > maxVariantWeight ||' ''
+mutate "C2 the cap itself is refused" $RS 'weight > maxVariantWeight ||' 'weight >= maxVariantWeight ||'
+mutate "C3 a declared weight above the cap is accepted" $FL 'variant.weight < 0 || variant.weight > maxVariantWeight' 'variant.weight < 0'
+mutate "C4 the cap is 10^15" $BK 'const int maxVariantWeight = 1000000000;' 'const int maxVariantWeight = 1000000000000000;'
+mutate "H1 the epoch stream is not listened to" $F 'if (session is SessionEpochs) {' 'if (session is SessionEpochs && session.epochChanges.isBroadcast && _seenEpoch < 0) {'
+mutate "H2 the epoch listener does not observe" $F '_epochSubscription = session.epochChanges.listen((_) {
+        _observeEpoch();' '_epochSubscription = session.epochChanges.listen((_) {
+        _seenEpoch.hashCode;'
+mutate "H3 a sign-in announces no epoch" $SE '_epoch++;
+    _announceEpoch();
+    if (changed) {' '_epoch++;
+    if (changed) {'
+mutate "H4 a sign-out announces no epoch" $SE '_epoch++;
+      _announceEpoch();
+      _announce(AuthStatus.signedOut);' '_epoch++;
+      _announce(AuthStatus.signedOut);'
+mutate "D1 dispose leaves the watch streams open" $F 'unawaited(controller.close());' 'unawaited(Future<void>.value());'
+mutate "D2 a fetch after dispose is sent" $F 'if (_disposed) {
+      return Future<void>.value();
+    }
+    final epoch' 'if (_disposed && _watchers.length > 99) {
+      return Future<void>.value();
+    }
+    final epoch'
+mutate "D3 a watch after dispose is a live stream" $F 'if (_disposed) {
+      return Stream<T>.fromIterable([value(flag)]);' 'if (_disposed && _watchers.length > 99) {
+      return Stream<T>.fromIterable([value(flag)]);'
+mutate "N1 a taken key makes set throw" $F '} on DuplicateFlagKeyError catch (error) {' '} on StateError catch (error) {'
+mutate "N2 a blank key makes set throw" $F '} on ArgumentError catch (error) {' '} on RangeError catch (error) {'
+mutate "I1 a failed install-id save is not retried" $F '_saveInstallId(); // an earlier save failed: try again' '// no retry'
+mutate "I2 a saved install id is saved again and again" $F '(_) => _installIdSaved = true,' '(_) => _installIdSaving = false,'
+mutate "K1 flag and experiment reports share a key" $F "'remote:experiment:\$key',
+          'The remote weights of \$key are malformed'," "'remote:flag:\$key',
+          'The remote weights of \$key are malformed',"
+mutate "K2 an empty variants list is not malformed" $RS 'if (variants is! List || variants.isEmpty) {' 'if (variants is! List) {'
+mutate "K3 a repeated variant name is accepted" $RS 'weights.containsKey(name)' 'weights.length > 999'
+mutate "Y1 the cache stays on disk when the user changes" $F 'if (userId != _seenUserId) {' "if (userId == '__never__') {"
+mutate "Y2 another cache file is deleted" $F '_store.delete(flagsCacheKey)' "_store.delete('\${flagsCacheKey}_x')"
+mutate "Y3 the cache is deleted on a same-user sign-in too" $F 'if (userId != _seenUserId) {' 'if (userId != _seenUserId || epoch > 0) {'
 
 echo
 echo "TOTAL $total  KILLED $killed  SURVIVED $survived  BROKEN $broken"
