@@ -1,0 +1,119 @@
+{
+  "body": {
+    "bestScore": 903,
+    "breakdown": [
+      {
+        "outcome": "correct",
+        "points": 145,
+        "questionId": "q-series_end-06"
+      },
+      {
+        "outcome": "correct",
+        "points": 165,
+        "questionId": "q-series_end-21"
+      },
+      {
+        "outcome": "correct",
+        "points": 185,
+        "questionId": "q-comic_pages-03"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-series_end-14"
+      },
+      {
+        "outcome": "timeout",
+        "points": 0,
+        "questionId": "q-series_end-13"
+      },
+      {
+        "outcome": "correct",
+        "points": 100,
+        "questionId": "q-comic_pages-06"
+      },
+      {
+        "outcome": "timeout",
+        "points": 0,
+        "questionId": "q-comic_pages-13"
+      },
+      {
+        "outcome": "wrong",
+        "points": 0,
+        "questionId": "q-series_end-19"
+      },
+      {
+        "outcome": "correct",
+        "points": 133,
+        "questionId": "q-comic_pages-05"
+      },
+      {
+        "outcome": "correct",
+        "points": 175,
+        "questionId": "q-comic_pages-11"
+      }
+    ],
+    "category": "comics",
+    "correct": 6,
+    "isNewBest": true,
+    "roundId": "r-comics-hard-7",
+    "score": 903
+  },
+  "request": "POST /v1/me/trivia/results as u-100",
+  "requestBody": {
+    "answers": [
+      {
+        "choiceId": "c4",
+        "elapsedMs": 1000,
+        "questionId": "q-series_end-06"
+      },
+      {
+        "choiceId": "c3",
+        "elapsedMs": 2000,
+        "questionId": "q-series_end-21"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 3000,
+        "questionId": "q-comic_pages-03"
+      },
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-series_end-14"
+      },
+      {
+        "choiceId": null,
+        "elapsedMs": 0,
+        "questionId": "q-series_end-13"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 9999,
+        "questionId": "q-comic_pages-06"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 10000,
+        "questionId": "q-comic_pages-13"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 500,
+        "questionId": "q-series_end-19"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 3333,
+        "questionId": "q-comic_pages-05"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 0,
+        "questionId": "q-comic_pages-11"
+      }
+    ],
+    "roundId": "r-comics-hard-7"
+  },
+  "status": 200
+}

@@ -1,0 +1,67 @@
+{
+  "body": {
+    "error": {
+      "code": "unknown_question",
+      "message": "question q-nothing-01 is not in this round",
+      "parameter": "answers",
+      "questionId": "q-nothing-01"
+    }
+  },
+  "request": "POST /v1/me/trivia/results as u-100",
+  "requestBody": {
+    "answers": [
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-character_team-07"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-16"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-17"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 0,
+        "questionId": "q-nothing-01"
+      },
+      {
+        "choiceId": "c1",
+        "elapsedMs": 0,
+        "questionId": "q-comic_cast-19"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 0,
+        "questionId": "q-comic_cast-03"
+      },
+      {
+        "choiceId": "c3",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-03"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 0,
+        "questionId": "q-comic_cast-24"
+      },
+      {
+        "choiceId": "c4",
+        "elapsedMs": 0,
+        "questionId": "q-character_team-05"
+      },
+      {
+        "choiceId": "c2",
+        "elapsedMs": 0,
+        "questionId": "q-creator_writer-09"
+      }
+    ],
+    "roundId": "r-all-easy-42"
+  },
+  "status": 400
+}

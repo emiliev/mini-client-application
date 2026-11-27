@@ -1,0 +1,14 @@
+{
+  "domain": "trivia",
+  "routes": [
+    "GET /v1/trivia/categories",
+    "GET /v1/trivia/rounds",
+    "POST /v1/me/trivia/results",
+    "GET /v1/me/trivia/best"
+  ],
+  "scenarios": [
+    "trivia.empty",
+    "trivia.server_error",
+    "trivia.slow"
+  ]
+}

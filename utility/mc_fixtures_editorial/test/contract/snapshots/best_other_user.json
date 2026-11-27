@@ -1,0 +1,7 @@
+{
+  "body": {
+    "best": []
+  },
+  "request": "GET /v1/me/trivia/best as u-101",
+  "status": 200
+}

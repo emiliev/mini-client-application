@@ -1,0 +1,19 @@
+baseline PASS
+=== R14 the choices are not shuffled
+    KILLED by: determinism_test provider_contract_test 
+=== B14 one-comic characters are asked about
+    KILLED by: provider_contract_test 
+=== B28 the penciller question asks for the inker
+    KILLED by: provider_contract_test 
+=== H1 any category is accepted
+    KILLED by: fixture_sets_test provider_contract_test validation_test 
+=== H2 any difficulty is accepted
+    KILLED by: provider_contract_test validation_test 
+=== H6 no bearer falls back to the first user
+    KILLED by: fixture_sets_test provider_contract_test validation_test 
+=== H24 the stored best is the latest score
+    KILLED by: validation_test 
+=== H33 the empty state is the default state
+    KILLED by: fixture_sets_test 
+
+TOTAL 8  KILLED 8  SURVIVED 0  BROKEN 0

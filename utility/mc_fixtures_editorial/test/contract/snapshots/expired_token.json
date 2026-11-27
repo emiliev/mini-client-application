@@ -1,0 +1,14 @@
+{
+  "body": {
+    "error": {
+      "code": "unauthenticated",
+      "message": "A valid bearer token is required"
+    }
+  },
+  "request": "POST /v1/me/trivia/results as expired",
+  "requestBody": {
+    "answers": [],
+    "roundId": "r-all-easy-42"
+  },
+  "status": 401
+}

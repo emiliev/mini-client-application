@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_difficulty",
+      "message": "difficulty must be one of easy, medium, hard",
+      "parameter": "difficulty"
+    }
+  },
+  "request": "GET /v1/trivia/rounds?category=all&difficulty=extreme&seed=42 as none",
+  "status": 400
+}

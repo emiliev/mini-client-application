@@ -1,0 +1,282 @@
+{
+  "body": {
+    "category": "characters",
+    "difficulty": "medium",
+    "questions": [
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "Gravity bending"
+          },
+          {
+            "id": "c3",
+            "text": "Time stutter"
+          },
+          {
+            "id": "c4",
+            "text": "Sound shaping"
+          },
+          {
+            "id": "c1",
+            "text": "Memory reading"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "medium",
+        "id": "q-character_power-17",
+        "imageUrl": "mock-asset://characters/023",
+        "prompt": "Which of these is a power of Static Cartographer?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "2004"
+          },
+          {
+            "id": "c4",
+            "text": "2000"
+          },
+          {
+            "id": "c1",
+            "text": "1998"
+          },
+          {
+            "id": "c3",
+            "text": "1999"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "medium",
+        "id": "q-character_debut_year-04",
+        "imageUrl": "mock-asset://characters/001",
+        "prompt": "In which year did Umber Weaver first appear?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c3",
+            "text": "Light weaving"
+          },
+          {
+            "id": "c1",
+            "text": "Spark leap"
+          },
+          {
+            "id": "c2",
+            "text": "Tidal command"
+          },
+          {
+            "id": "c4",
+            "text": "Ember touch"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "medium",
+        "id": "q-character_power-07",
+        "imageUrl": "mock-asset://characters/002",
+        "prompt": "Which of these is a power of Prism Warden?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Tidal command"
+          },
+          {
+            "id": "c2",
+            "text": "Frost breath"
+          },
+          {
+            "id": "c3",
+            "text": "Dream walking"
+          },
+          {
+            "id": "c4",
+            "text": "Spark leap"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "medium",
+        "id": "q-character_power-21",
+        "imageUrl": "mock-asset://characters/018",
+        "prompt": "Which of these is a power of Cinder Drifter?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "Time stutter"
+          },
+          {
+            "id": "c1",
+            "text": "Iron skin"
+          },
+          {
+            "id": "c3",
+            "text": "Echo vision"
+          },
+          {
+            "id": "c4",
+            "text": "Light weaving"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "medium",
+        "id": "q-character_power-11",
+        "imageUrl": "mock-asset://characters/010",
+        "prompt": "Which of these is a power of Static Harbinger?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Sound shaping"
+          },
+          {
+            "id": "c3",
+            "text": "Echo vision"
+          },
+          {
+            "id": "c4",
+            "text": "Wind riding"
+          },
+          {
+            "id": "c2",
+            "text": "Shadow stepping"
+          }
+        ],
+        "correctChoiceId": "c3",
+        "difficulty": "medium",
+        "id": "q-character_power-06",
+        "imageUrl": "mock-asset://characters/023",
+        "prompt": "Which of these is a power of Marble Vanguard?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "1979"
+          },
+          {
+            "id": "c3",
+            "text": "1977"
+          },
+          {
+            "id": "c4",
+            "text": "1981"
+          },
+          {
+            "id": "c1",
+            "text": "1980"
+          }
+        ],
+        "correctChoiceId": "c4",
+        "difficulty": "medium",
+        "id": "q-character_debut_year-10",
+        "imageUrl": "mock-asset://characters/000",
+        "prompt": "In which year did Umber Watcher first appear?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "Echo vision"
+          },
+          {
+            "id": "c3",
+            "text": "Spark leap"
+          },
+          {
+            "id": "c4",
+            "text": "Wind riding"
+          },
+          {
+            "id": "c1",
+            "text": "Sound shaping"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "medium",
+        "id": "q-character_power-01",
+        "imageUrl": "mock-asset://characters/005",
+        "prompt": "Which of these is a power of Willow Keeper?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c2",
+            "text": "Mirror copy"
+          },
+          {
+            "id": "c1",
+            "text": "Gravity bending"
+          },
+          {
+            "id": "c4",
+            "text": "Shadow stepping"
+          },
+          {
+            "id": "c3",
+            "text": "Static discharge"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "medium",
+        "id": "q-character_power-23",
+        "imageUrl": "mock-asset://characters/010",
+        "prompt": "Which of these is a power of Zephyr Outrider?",
+        "timeLimitSeconds": 15
+      },
+      {
+        "category": "characters",
+        "choices": [
+          {
+            "id": "c1",
+            "text": "Stone sense"
+          },
+          {
+            "id": "c3",
+            "text": "Shadow stepping"
+          },
+          {
+            "id": "c4",
+            "text": "Spark leap"
+          },
+          {
+            "id": "c2",
+            "text": "Time stutter"
+          }
+        ],
+        "correctChoiceId": "c1",
+        "difficulty": "medium",
+        "id": "q-character_power-13",
+        "imageUrl": "mock-asset://characters/000",
+        "prompt": "Which of these is a power of Lumen Juggler?",
+        "timeLimitSeconds": 15
+      }
+    ],
+    "roundId": "r-characters-medium-1",
+    "seed": 1
+  },
+  "request": "GET /v1/trivia/rounds?category=characters&difficulty=medium&seed=1 as none",
+  "status": 200
+}

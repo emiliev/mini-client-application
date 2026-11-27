@@ -1,0 +1,32 @@
+{
+  "body": {
+    "categories": [
+      {
+        "id": "all",
+        "imageUrl": "mock-asset://characters/000",
+        "name": "All categories",
+        "questionCount": 336
+      },
+      {
+        "id": "characters",
+        "imageUrl": "mock-asset://characters/003",
+        "name": "Characters",
+        "questionCount": 120
+      },
+      {
+        "id": "comics",
+        "imageUrl": "mock-asset://characters/011",
+        "name": "Comics",
+        "questionCount": 144
+      },
+      {
+        "id": "creators",
+        "imageUrl": "mock-asset://characters/019",
+        "name": "Creators",
+        "questionCount": 72
+      }
+    ]
+  },
+  "request": "GET /v1/trivia/categories as none",
+  "status": 200
+}

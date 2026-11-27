@@ -1,0 +1,38 @@
+#!/bin/bash
+# Verifier T-0060 mutations (own set + re-run of engineer subset). Run from the worktree root.
+set -uo pipefail
+P=utility/mc_fixtures_editorial
+OB=/tmp/mc-ob-T-0060-verifier
+SC=$P/lib/src/data/scoring.dart
+RD=$P/lib/src/data/round.dart
+BK=$P/lib/src/data/bank.dart
+TH=$P/lib/src/handlers/trivia_handlers.dart
+LOG=/tmp/mc-v60/mut.log
+restore() { git checkout -- "$P"; }
+trap restore EXIT
+killed=0; survived=0; broken=0
+mutate() {
+  local name="$1" file="$2" old="$3" new="$4"
+  echo "=== $name"
+  if ! python3 -I -c '
+import sys
+p, old, new = sys.argv[1:4]
+s = open(p).read()
+n = s.count(old)
+if n != 1:
+    sys.exit("pattern occurs %d times: %s" % (n, old))
+open(p, "w").write(s.replace(old, new, 1))
+' "$file" "$old" "$new"; then echo "    PATTERN PROBLEM"; broken=$((broken+1)); restore; return; fi
+  fvm dart format "$file" >/dev/null 2>&1
+  tool/bazelw --output_base="$OB" test //$P/... > "$LOG" 2>&1
+  failed="$(tr '\r' '\n' < "$LOG" | grep -aE '^//.*FAILED in' | sed 's/ *FAILED in.*//' | sed "s|//$P:||" | tr '\n' ' ')"
+  if tr '\r' '\n' < "$LOG" | grep -aq 'Build did NOT complete'; then echo "    BROKEN"; broken=$((broken+1))
+  elif [[ -n "$failed" ]]; then echo "    KILLED by: $failed"; killed=$((killed+1))
+  else echo "    SURVIVED"; survived=$((survived+1)); fi
+  restore
+}
+mutate "V11 choice shuffle independent of the round seed" $RD '    final j = rng.nextInt(i + 1);
+    final held = list[i];' '    final j = (i * 7 + 1) % (i + 1);
+    final held = list[i];'
+mutate "V12 expired token accepted" $TH "userForAuthorization(request.headers['authorization'])" "userForAuthorization(request.headers['authorization']?.replaceAll('-expired', '-1'))"
+echo "killed=$killed survived=$survived broken=$broken"

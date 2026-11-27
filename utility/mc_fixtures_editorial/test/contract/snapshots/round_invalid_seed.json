@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_seed",
+      "message": "seed must be an integer from 0 to 2147483647",
+      "parameter": "seed"
+    }
+  },
+  "request": "GET /v1/trivia/rounds?category=all&difficulty=easy&seed=-1 as none",
+  "status": 400
+}

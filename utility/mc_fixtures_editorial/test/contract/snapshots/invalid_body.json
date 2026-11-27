@@ -1,0 +1,15 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_body",
+      "message": "Expected an object with a roundId string",
+      "parameter": "body"
+    }
+  },
+  "request": "POST /v1/me/trivia/results as u-100",
+  "requestBody": [
+    1,
+    2
+  ],
+  "status": 400
+}
