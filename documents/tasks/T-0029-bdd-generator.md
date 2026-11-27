@@ -41,7 +41,7 @@ One Engineer pass plus one fix round. Otherwise stop with a precise finding, and
 | AC2 | L1 | `tool/checks/T-0029-AC2_missing_step.sh` (manual fixtures `//spike/bdd_sample/test/negative:missing_step` and `:shadowed_step`; hashes every file under `spike/bdd_sample` + `git status --ignored` before and after); fork test `bdd_generator_test` ("missing steps fail naming each of them") | `T-0029-AC2_missing_step.md` |
 | AC3 | L1 | `tool/checks/T-0029-AC3_scaffold.sh` (`bazel run //tool/bdd:scaffold` on a temp copy) | `T-0029-AC3_scaffold.md` |
 | AC4 | L1 | `tool/checks/T-0029-AC4_no_analyzer.sh`; `//utility/mc_test_steps:data_table_test` (`T-0029-AC4 DataTable keeps the generated const shape`); the `greeting_table.feature` scenario `[T-0029-AC4]` | `T-0029-AC4_no_analyzer.md`, `T-0029-AC4_cquery_notool_deps.txt`, `T-0029-AC4_tool_closure_generator_targets.txt` |
-| AC5 | L2 | `tool/checks/T-0029-AC5_stock_fallback.sh` (stock bdd_widget_test 3.0.5 + build_runner in an overlay copy, then `flutter test`) | `T-0029-AC5_stock_fallback.md`, `T-0029-AC5_fallback_junit.xml`, `T-0029-AC5_stock_greeting_browse_test.dart` |
+| AC5 | L2 | `tool/checks/T-0029-AC5_stock_fallback.sh` (stock bdd_widget_test 3.0.5 + build_runner in an overlay copy, then `flutter test`) | `T-0029-AC5_stock_fallback.md`, `T-0029-AC5_fallback_junit.xml`, `T-0029-AC5_stock_greeting_browse_test.dart.txt` |
 | AC6 | L0/L1 | `tool/rules_fork.sh check`, `tool/bazelw test //...`, `tool/bazelw build --config=lint //...`, `tool/bazelw run //tool/mc_arch_check:bin`, `test @rules_dart//dart/ext/bdd:all`; upstream draft `documents/upstream/U-D-bdd/` | `T-0029-AC6_gates.md` |
 
 ## Log

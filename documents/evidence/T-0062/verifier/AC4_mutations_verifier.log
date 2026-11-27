@@ -1,0 +1,28 @@
+## baseline
+//utility/mc_ds_overlays:overlays_test                          (cached) PASSED in 4.6s
+## pop both
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "McSheet": []>
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_ds_overlays:overlays_test                                   FAILED in 3.8s
+## pop tap only
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "McSheet": []>
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_ds_overlays:overlays_test                                   FAILED in 3.2s
+## pop semantics only
+Expected: exactly one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "McSheet": []>
+INFO: Build completed, 1 test FAILED, 10 total actions
+//utility/mc_ds_overlays:overlays_test                                   FAILED in 3.2s
+## toast 3s
+Expected: Duration:<0:00:04.000000>
+  Actual: Duration:<0:00:03.000000>
+INFO: Build completed, 1 test FAILED, 14 total actions
+//utility/mc_ds_overlays:overlays_test                                   FAILED in 3.2s
+## toast 5s
+Expected: no matching candidates
+  Actual: _TextWidgetFinder:<Found 1 widget with text "Saved": [
+Expected: Duration:<0:00:04.000000>
+  Actual: Duration:<0:00:05.000000>
+done

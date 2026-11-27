@@ -1,0 +1,117 @@
+==> Task T-0062, role engineer, project /tmp/mc-T-0062-engineer-proj.bp2SKG/p/app/mini_client
+==> Evidence dir: /tmp/mc-T-0062-engineer-ev
+==> Creating simulator mc-T-0062-engineer-68804 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0062-engineer-68804
+SIMULATOR_UDID=74D5BF87-9C4F-43B5-A74A-256E50377FFC
+SIMULATOR_CREATED_AT=1795790552
+==> Booting 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==> Booted in 22 s
+==> Running target 1/13: integration_test/analytics_screens_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/analytics_screens_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-analytics_screens_test.log
+==>   screenshot 01_home.png (downscaled from 1206x2622)
+==>   screenshot 02_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 03_back_to_home.png (downscaled from 1206x2622)
+==> PASS integration_test/analytics_screens_test.dart (62 s)
+==> Running target 2/13: integration_test/character_details_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/character_details_deeplink_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-character_details_deeplink_test.log
+==>   screenshot 55_deep_link_character_details.png (downscaled from 1206x2622)
+==>   screenshot 55b_back_from_details_is_list.png (downscaled from 1206x2622)
+==>   screenshot 55c_back_from_list_is_home.png (downscaled from 1206x2622)
+==> PASS integration_test/character_details_deeplink_test.dart (28 s)
+==> Running target 3/13: integration_test/characters_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_deeplink_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-characters_deeplink_test.log
+==>   screenshot 05_deep_link_characters.png (downscaled from 1206x2622)
+==>   screenshot 05b_back_from_characters_is_home.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_deeplink_test.dart (26 s)
+==> Running target 4/13: integration_test/characters_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-characters_journey_test.log
+e2e_ios: warning: screenshot 01_home.png from integration_test/characters_journey_test.dart clashes with an earlier one; saving it as characters_journey_test-01_home.png
+==>   screenshot characters_journey_test-01_home.png (downscaled from 1206x2622)
+e2e_ios: warning: screenshot 02_characters_list.png from integration_test/characters_journey_test.dart clashes with an earlier one; saving it as characters_journey_test-02_characters_list.png
+==>   screenshot characters_journey_test-02_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 03_preview.png (downscaled from 1206x2622)
+==>   screenshot 04_full_profile_placeholder.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_journey_test.dart (26 s)
+==> Running target 5/13: integration_test/characters_link_after_flow_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_link_after_flow_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-characters_link_after_flow_test.log
+==>   screenshot 06_link_after_flow.png (downscaled from 1206x2622)
+==> PASS integration_test/characters_link_after_flow_test.dart (33 s)
+==> Running target 6/13: integration_test/comic_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-comic_deeplink_test.log
+==>   screenshot 18_deep_link_comic.png (downscaled from 1206x2622)
+==>   screenshot 18b_back_from_comic_is_home.png (downscaled from 1206x2622)
+==>   screenshot 19_link_to_running_app_comic.png (downscaled from 1206x2622)
+==>   screenshot 20_bad_comic_link_not_found.png (downscaled from 1206x2622)
+==> PASS integration_test/comic_deeplink_test.dart (42 s)
+==> Running target 7/13: integration_test/comics_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comics_journey_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-comics_journey_test.log
+==>   screenshot 10_home.png (downscaled from 1206x2622)
+==>   screenshot 11_characters_list.png (downscaled from 1206x2622)
+==>   screenshot 12_preview_related_comics.png (downscaled from 1206x2622)
+==>   screenshot 13_comic_page.png (downscaled from 1206x2622)
+==>   screenshot 14_sign_in_sheet.png (downscaled from 1206x2622)
+==>   screenshot 15_favourite_saved.png (downscaled from 1206x2622)
+==>   screenshot 16_comic_cast.png (downscaled from 1206x2622)
+==>   screenshot 17_cast_member_placeholder.png (downscaled from 1206x2622)
+==> PASS integration_test/comics_journey_test.dart (38 s)
+==> Running target 8/13: integration_test/not_found_cold_bad_comic_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/not_found_cold_bad_comic_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-not_found_cold_bad_comic_test.log
+==>   screenshot 62_cold_bad_comic_not_found.png (downscaled from 1206x2622)
+==>   screenshot 62b_cold_bad_comic_go_home.png (downscaled from 1206x2622)
+==> PASS integration_test/not_found_cold_bad_comic_test.dart (20 s)
+==> Running target 9/13: integration_test/not_found_cold_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/not_found_cold_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-not_found_cold_test.log
+==>   screenshot 60_cold_nope_not_found.png (downscaled from 1206x2622)
+==>   screenshot 60b_cold_nope_back_is_home.png (downscaled from 1206x2622)
+==>   screenshot 61_running_bad_comic_not_found.png (downscaled from 1206x2622)
+==>   screenshot 61b_running_go_home.png (downscaled from 1206x2622)
+==> PASS integration_test/not_found_cold_test.dart (22 s)
+==> Running target 10/13: integration_test/reading_list_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_deeplink_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-reading_list_deeplink_test.log
+==>   screenshot 37_deep_link_new_list.png (downscaled from 1206x2622)
+==>   screenshot 37b_back_from_new_list_is_home.png (downscaled from 1206x2622)
+==>   screenshot 37c_editor_after_link_replaced_it.png (downscaled from 1206x2622)
+==>   screenshot 38_link_edit_list.png (downscaled from 1206x2622)
+==> PASS integration_test/reading_list_deeplink_test.dart (42 s)
+==> Running target 11/13: integration_test/reading_list_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/reading_list_journey_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-reading_list_journey_test.log
+==>   screenshot 30_home_new_reading_list.png (downscaled from 1206x2622)
+==>   screenshot 31_sign_in_sheet.png (downscaled from 1206x2622)
+==>   screenshot 32_step1_blocked.png (downscaled from 1206x2622)
+==>   screenshot 33_step1_details.png (downscaled from 1206x2622)
+==>   screenshot 34_step2_comics.png (downscaled from 1206x2622)
+==>   screenshot 35_step3_review.png (downscaled from 1206x2622)
+==>   screenshot 36_home_list_created.png (downscaled from 1206x2622)
+==> PASS integration_test/reading_list_journey_test.dart (45 s)
+==> Running target 12/13: integration_test/search_deeplink_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-search_deeplink_test.log
+==>   screenshot 36_deep_link_search.png (downscaled from 1206x2622)
+==>   screenshot 36b_back_from_search_is_home.png (downscaled from 1206x2622)
+==>   screenshot 37_link_to_running_app_search.png (downscaled from 1206x2622)
+==> PASS integration_test/search_deeplink_test.dart (39 s)
+==> Running target 13/13: integration_test/search_journey_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_journey_test.dart -d 74D5BF87-9C4F-43B5-A74A-256E50377FFC
+==>   log: /tmp/mc-T-0062-engineer-ev/e2e-search_journey_test.log
+==>   screenshot 30_home_search_entry.png (downscaled from 1206x2622)
+==>   screenshot 31_search_opened.png (downscaled from 1206x2622)
+==>   screenshot 32_search_results_grouped.png (downscaled from 1206x2622)
+==>   screenshot 33_search_comics_chip.png (downscaled from 1206x2622)
+==>   screenshot 34_comic_from_search.png (downscaled from 1206x2622)
+==>   screenshot 35_recent_searches.png (downscaled from 1206x2622)
+==> PASS integration_test/search_journey_test.dart (41 s)
+==> Summary: /tmp/mc-T-0062-engineer-ev/e2e-summary.md
+==> RESULT: PASS (13 target(s))
+==> Keeping simulator mc-T-0062-engineer-68804 (74D5BF87-9C4F-43B5-A74A-256E50377FFC) because of --keep-sim
+==> Delete it later with: xcrun simctl shutdown 74D5BF87-9C4F-43B5-A74A-256E50377FFC; xcrun simctl delete 74D5BF87-9C4F-43B5-A74A-256E50377FFC

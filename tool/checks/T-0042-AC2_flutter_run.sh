@@ -101,7 +101,7 @@ cp "$WORK/run.log" "$SHOTS/AC2_flutter_run.log"
 # Negative control: no config asset, the app cannot boot to the home screen.
 ASSET="$REPO/app/mini_client/assets/app_config.json"
 ASSET_BAK="$WORK/app_config.json.bak"; mv "$ASSET" "$ASSET_BAK"
-xcrun simctl uninstall "$UDID" com.emiliev.miniClient >/dev/null 2>&1
+xcrun simctl uninstall "$UDID" com.emiliev.miniclient >/dev/null 2>&1
 if run_app "$WORK/neg.log" 300; then
   sleep 10
   xcrun simctl io "$UDID" screenshot "$WORK/neg.png" >/dev/null 2>&1

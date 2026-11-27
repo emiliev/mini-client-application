@@ -72,7 +72,7 @@
    - Our gates don't see this, because the consumer's lint aspect skips external repos. But the fork's own `.bazelrc` runs `test --output_groups=+dart_format` (lines 36–38), so U-D-bdd's claim "`bazel test //dart/ext/bdd:all` passes" holds only from the consumer side.
    - **Fix:** run `fvm dart format dart/ext/bdd` in the fork, re-export, and run `rules_fork.sh check`.
    - Plain `dart analyze bdd` with the fork's `analysis_options.yaml` also reports about 80 infos, mostly `specify_nonobvious_local_variable_types`. Some are resolution artifacts of a CLI run. Existing ext code isn't clean under plain `dart analyze` either (15 infos), so I don't count this as a defect. Re-check under the fork's own Bazel aspect before filing upstream.
-3. **D3 (minor): the Engineer's AC5 evidence is missing.** The task's verification plan (`documents/tasks/T-0029-bdd-generator.md:44`) and F-0027's Evidence section list `T-0029-AC5_stock_fallback.md`, `T-0029-AC5_fallback_junit.xml` and `T-0029-AC5_stock_greeting_browse_test.dart` under `engineer/`, but none were ever committed. The Verifier's copies are in `verifier/`.
+3. **D3 (minor): the Engineer's AC5 evidence is missing.** The task's verification plan (`documents/tasks/T-0029-bdd-generator.md:44`) and F-0027's Evidence section list `T-0029-AC5_stock_fallback.md`, `T-0029-AC5_fallback_junit.xml` and `T-0029-AC5_stock_greeting_browse_test.dart.txt` under `engineer/`, but none were ever committed. The Verifier's copies are in `verifier/`.
 4. **D4 (minor): the stacking statement in F-0027 fact 11 is stale.**
    - `documents/findings/F-0027-bdd-generator-under-bazel.md:22` and `U-D-bdd/README.md:47` say 0003 conflicts only with T-0028, in `pubspec.lock` (`dio`).
    - Against the current branch heads, `git am` on the pin gives:
@@ -100,7 +100,7 @@
 `documents/evidence/T-0029/verifier/`:
 - `T-0029-AC1_bdd_test.xml`: the Verifier's uncached `:bdd_test` run;
 - `T-0029-AC4_analyzer_family_configs.txt`: analyzer-family targets with their configuration, all `b1a3e4e` (exec);
-- `T-0029-AC5_fallback_junit.xml` and `T-0029-AC5_stock_greeting_browse_test.dart`: the Verifier's AC5 run.
+- `T-0029-AC5_fallback_junit.xml` and `T-0029-AC5_stock_greeting_browse_test.dart.txt`: the Verifier's AC5 run.
 
 ## Notes for the Tech Lead
 - The fix round needs D1 (a one-line import order fix, plus a build of a scaffolded stub in the AC3 check) and D2 (format 4 files, re-export, run `check`). D3 to D6 are documentation or small fixes that can ride along. After that, the same checks can be repeated quickly; the determinism, AC2 and AC4 results don't depend on these changes.
