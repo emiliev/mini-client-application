@@ -1,0 +1,12 @@
+//app/mini_client:analytics_screens_test PASSED in 4.3s	 Stats over 50 runs: max = 4.3s, min = 3.2s, avg = 3.7s, dev = 0.2s
+//app/mini_client:store_route_test PASSED in 4.1s	 Stats over 50 runs: max = 4.1s, min = 3.3s, avg = 3.7s, dev = 0.2s
+//app/wiring/commerce_wiring:routes_test PASSED in 1.8s	 Stats over 50 runs: max = 1.8s, min = 1.3s, avg = 1.5s, dev = 0.2s
+//feature/store/store_home:architecture_test PASSED in 0.4s	 Stats over 50 runs: max = 0.4s, min = 0.2s, avg = 0.3s, dev = 0.0s
+//feature/store/store_home:bdd_test PASSED in 27.5s	 Stats over 50 runs: max = 27.5s, min = 13.1s, avg = 21.0s, dev = 3.3s
+//feature/store/store_home:contract_test PASSED in 0.7s	 Stats over 50 runs: max = 0.7s, min = 0.4s, avg = 0.5s, dev = 0.1s
+//feature/store/store_home:flow_scope_test PASSED in 7.6s	 Stats over 50 runs: max = 7.6s, min = 2.3s, avg = 4.9s, dev = 1.4s
+//feature/store/store_home:golden_test PASSED in 6.2s	 Stats over 50 runs: max = 6.2s, min = 3.6s, avg = 4.9s, dev = 0.6s
+//utility/mc_analytics:di_test PASSED in 0.7s	 Stats over 50 runs: max = 0.7s, min = 0.4s, avg = 0.4s, dev = 0.1s
+//utility/mc_analytics:flow_observer_test PASSED in 1.8s	 Stats over 50 runs: max = 1.8s, min = 1.4s, avg = 1.6s, dev = 0.1s
+//utility/mc_analytics:route_observer_test PASSED in 2.8s	 Stats over 50 runs: max = 2.8s, min = 1.7s, avg = 2.3s, dev = 0.3s
+//utility/mc_feature_flow:feature_flow_test PASSED in 2.0s	 Stats over 50 runs: max = 2.0s, min = 1.4s, avg = 1.6s, dev = 0.2s
