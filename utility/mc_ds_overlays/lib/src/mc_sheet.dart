@@ -13,7 +13,7 @@ import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 /// **Keyboard.** The card is lifted by the keyboard's inset, so a text field
 /// in it stays visible and the body scrolls above the keyboard.
 ///
-/// **Semantics.** The card scopes its route, and its [title] is one node: the
+/// **Semantics.** The route scopes itself; the [title] is one node: the
 /// heading that also names the route. The drag handle is a 44 pt button named
 /// [dismissLabel] that closes the sheet through `Navigator.maybePop`, so a
 /// `PopScope` that refuses to pop (a sheet that is busy) is respected. In a
@@ -42,59 +42,55 @@ class McSheet extends StatelessWidget {
     final keyboard = MediaQuery.viewInsetsOf(context).bottom;
     return Padding(
       padding: EdgeInsets.only(bottom: keyboard),
-      child: Semantics(
-        scopesRoute: true,
-        explicitChildNodes: true,
-        child: Material(
-          color: p.surface,
-          elevation: McElevation.high,
-          shape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.vertical(
-              top: Radius.circular(McRadius.lg),
-            ),
+      child: Material(
+        color: p.surface,
+        elevation: McElevation.high,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(McRadius.lg),
           ),
-          clipBehavior: Clip.antiAlias,
-          child: SafeArea(
-            top: false,
-            bottom: keyboard == 0,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _DragHandle(dismissLabel: dismissLabel),
-                Flexible(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.fromLTRB(
-                      McSpacing.lg,
-                      0,
-                      McSpacing.lg,
-                      McSpacing.lg,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // One node: the heading, and the route's name.
-                        Semantics(
-                          header: true,
-                          namesRoute: true,
-                          child: Text(
-                            title,
-                            style: McTypeScale.headline.copyWith(
-                              color: p.onSurface,
-                            ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: SafeArea(
+          top: false,
+          bottom: keyboard == 0,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _DragHandle(dismissLabel: dismissLabel),
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    McSpacing.lg,
+                    0,
+                    McSpacing.lg,
+                    McSpacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // One node: the heading, and the route's name.
+                      Semantics(
+                        header: true,
+                        namesRoute: true,
+                        child: Text(
+                          title,
+                          style: McTypeScale.headline.copyWith(
+                            color: p.onSurface,
                           ),
                         ),
-                        const McGap.sm(),
-                        DefaultTextStyle.merge(
-                          style: McTypeScale.body.copyWith(color: p.onSurface),
-                          child: child,
-                        ),
-                      ],
-                    ),
+                      ),
+                      const McGap.sm(),
+                      DefaultTextStyle.merge(
+                        style: McTypeScale.body.copyWith(color: p.onSurface),
+                        child: child,
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

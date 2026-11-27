@@ -42,9 +42,9 @@ class McDialogAction {
 ///
 /// It brings no route: show it with [showMcDialog] (or [showMcConfirm]).
 /// The whole card scrolls when it is taller than the screen, so large text
-/// never overflows. **Semantics:** the card scopes its route and [title] is
-/// one node, the heading that also names the route, so a screen reader
-/// announces the title once when the dialog opens.
+/// never overflows. **Semantics:** the route scopes itself; [title] is one
+/// node, the heading that also names the route, so a screen reader announces
+/// the title once when the dialog opens.
 /// The actions are plain buttons of at least 44 pt.
 ///
 /// It uses no `LayoutBuilder` (F-0043), so it is safe in any intrinsic-size
@@ -73,36 +73,32 @@ class McDialog extends StatelessWidget {
       elevation: McElevation.high,
       shape: const RoundedRectangleBorder(borderRadius: McRadius.lgAll),
       insetPadding: const EdgeInsets.all(McSpacing.xl),
-      child: Semantics(
-        scopesRoute: true,
-        explicitChildNodes: true,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(McSpacing.xl),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // One node: the heading, and the route's name.
-              Semantics(
-                header: true,
-                namesRoute: true,
-                child: Text(
-                  title,
-                  style: McTypeScale.headline.copyWith(color: p.onSurface),
-                ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(McSpacing.xl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // One node: the heading, and the route's name.
+            Semantics(
+              header: true,
+              namesRoute: true,
+              child: Text(
+                title,
+                style: McTypeScale.headline.copyWith(color: p.onSurface),
               ),
-              const McGap.md(),
-              DefaultTextStyle.merge(
-                style: McTypeScale.body.copyWith(color: p.onSurface),
-                child: body,
-              ),
-              const McGap.xl(),
-              for (final (i, action) in actions.indexed) ...[
-                if (i > 0) const McGap.sm(),
-                _ActionButton(action),
-              ],
+            ),
+            const McGap.md(),
+            DefaultTextStyle.merge(
+              style: McTypeScale.body.copyWith(color: p.onSurface),
+              child: body,
+            ),
+            const McGap.xl(),
+            for (final (i, action) in actions.indexed) ...[
+              if (i > 0) const McGap.sm(),
+              _ActionButton(action),
             ],
-          ),
+          ],
         ),
       ),
     );

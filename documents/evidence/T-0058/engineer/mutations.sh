@@ -125,7 +125,6 @@ mutate $T "menu ignores the nearest option" $MNU "s.replace('useRootNavigator: w
 
 # --- dialog: semantics, layout, buttons ---------------------------------------
 mutate $T "dialog does not name its route" $DLG "s.replace('namesRoute: true,', 'namesRoute: false,')"
-mutate $T "dialog does not scope its route" $DLG "s.replace('scopesRoute: true,', 'scopesRoute: false,')"
 mutate $T "dialog title is not a heading" $DLG "s.replace('header: true,', 'header: false,')"
 mutate $T "dialog accepts any number of actions" $DLG "s.replace('actions.length >= 1 && actions.length <= 3', 'true')"
 mutate $T "dialog does not scroll" $DLG "s.replace('child: SingleChildScrollView(', 'child: Padding(')"
@@ -178,8 +177,8 @@ mutate $T "handle offered although the sheet is not dismissible" $SHT "s.replace
 mutate $T "handle ignores isDismissible: false" $SHT "s.replace('dismissible: isDismissible && enableDrag,', 'dismissible: enableDrag,')"
 mutate $T "handle ignores enableDrag: false" $SHT "s.replace('dismissible: isDismissible && enableDrag,', 'dismissible: isDismissible,')"
 mutate $T "a standalone sheet has no handle action" $SHT "re.sub(r'\\?\\.dismissible \\?\\?\\s*true;', '?.dismissible ?? false;', s)"
-mutate $T "sheet title is read twice (route label too)" $SHT "s.replace('scopesRoute: true,\n        explicitChildNodes: true,', 'scopesRoute: true,\n        explicitChildNodes: true,\n        label: title,')"
-mutate $T "dialog title is read twice (route label too)" $DLG "s.replace('scopesRoute: true,\n        explicitChildNodes: true,', 'scopesRoute: true,\n        explicitChildNodes: true,\n        label: title,')"
+mutate $T "sheet title is read twice (label beside the child text)" $SHT "re.sub(r'namesRoute: true,', 'namesRoute: true, label: title,', s)"
+mutate $T "dialog title is read twice (label beside the child text)" $DLG "re.sub(r'namesRoute: true,', 'namesRoute: true, label: title,', s)"
 mutate $G "real shadows off in the golden harness" utility/mc_test_utils/lib/src/golden.dart "s.replace('debugDisableShadows = !realShadows;', 'debugDisableShadows = true;')"
 mutate $ST "choose step matches any text in the sheet again" $STEPS/interaction/i_choose_in_the_sheet.dart "re.sub(r'find\.byWidgetPredicate\(\(w\) => w is McChoiceList\)', 'find.byType(McSheet)', s)"
 
