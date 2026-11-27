@@ -10,7 +10,8 @@
 #   2. globs over lib/** use MC_GENERATED_DART. Negative control: the same
 #      check run on a copy of the BUILD file without the exclusion fails.
 #   3. workspace registration in the root pubspec.yaml
-#   4. test //... (packages T-0053 touches uncached), `test --lockfile_mode=error`
+#   4. test //... (packages T-0053 touches uncached), `test --lockfile_mode=error`,
+#      the bundled config of each env (dev, e2e, perf) says what AC1 needs
 #   5. build --config=lint //..., mc_arch_check, rules_fork.sh check, dart format,
 #      l10n_check
 #   6. coverage of every touched package with hand-written lib/ code >=
@@ -105,6 +106,14 @@ uncached=(//utility/mc_analytics/... //utility/mc_config/... //utility/mc_test_s
 tests() { bzw test --nocache_test_results "${uncached[@]}" && bzw test //...; }
 gate "test //... (touched packages uncached)" tests
 gate "test --lockfile_mode=error //..." bzw test --lockfile_mode=error //...
+# The shipped configs: dev and e2e grant consent by default, perf does not.
+bundled_configs() {
+  local env
+  for env in dev e2e perf; do
+    bzw test --nocache_test_results --//tool/bazel/config:env="$env" //utility/mc_config:bundled_config_test || return 1
+  done
+}
+gate "bundled configs (dev, e2e, perf)" bundled_configs
 
 # 5. repo gates
 gate "build --config=lint //..." bzw build --config=lint //...
@@ -130,7 +139,7 @@ coverage() {
 }
 gate "coverage >= $MIN % (touched packages)" coverage
 total=$(grep -a -E '^(==|TOTAL|UNDER)' "$work/coverage.txt" 2>/dev/null | paste -sd" " - || echo 'not measured')
-tests_line=$(plain "$(logname "test //... (touched packages uncached)")" 2>/dev/null | grep -a 'Executed' | tail -1)
+tests_line=$(plain "$(logname "test //... (touched packages uncached)")" 2>/dev/null | grep -a 'Executed' | head -1)
 
 report "" "| Gate | Result |" "|---|---|" "${rows[@]}" "" \
   "- tests: ${tests_line:-?}" "- coverage: $total (threshold $MIN %)" \
