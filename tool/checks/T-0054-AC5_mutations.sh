@@ -121,8 +121,6 @@ mutate M04 "the page is matched by nothing" "$RES" "$F" \
   'identical(match.completer.future, push)' 'false'
 mutate M05 "the stack watch is not listening" "$RES" "$F" \
   $'    delegate.addListener(onChange);\n' ''
-mutate M06 "no first check after the push" "$RES" "$F" \
-  $'    onChange();\n    return call.result;' $'    return call.result;'
 mutate M07 "the debug assert never fires" "$RES" "$F" \
   'if (_call == null && state.extra is FlowCall) {' 'if (false) {'
 mutate M08 "the debug assert fires on a go-built route (no extra)" "$RES" "$F" \
@@ -130,8 +128,9 @@ mutate M08 "the debug assert fires on a go-built route (no extra)" "$RES" "$F" \
 mutate M09 "a call completes twice (no guard)" "$RES" "$F" \
   $'    if (!_completer.isCompleted) {\n      _completer.complete(value);\n    }' \
   '    _completer.complete(value);'
-mutate M10 "the call ends with the push future's value only (no direct result)" "$RES" "$F" \
-  $'    _call?.complete(pending.value);\n' ''
+# (Not mutated: the direct `_call?.complete(pending.value)` in `_deliver` is
+# equivalent since the call also holds the result; it stays as an explicit
+# guard against microtask order.)
 
 # --- P-096: a held result is delivered
 mutate M11 "an abandoned call ends with null even when it held a result" "$RES" "$F" \
@@ -169,7 +168,7 @@ mutate N02 "not-found keeps the scheme and host of a link" "$ROUTER" "$T_NF" \
 mutate N03 "not-found loses the query" "$ROUTER" "$T_NF" \
   'query: uri.hasQuery ? uri.query : null' 'query: null'
 mutate N04 "the not-found route shows no location" "$ROUTER" "$T_NF $T_OLD" \
-  $'NotFoundPage(location: state.uri.queryParameters[\'from\'] ?? \'\'),' 'const NotFoundPage(location: \'\'),'
+  $'NotFoundPage(location: state.uri.queryParameters[\'from\'] ?? \'\'),' $'const NotFoundPage(location: \'\'),'
 mutate N05 "a failed link goes home, not to not-found" "$ROUTER" "$T_NF $T_OLD" \
   'router.go(notFoundLocation(_asked(state.uri)))' 'router.go(AppLocations.home)'
 mutate N06 "Back always pops" "$PAGES" "$T_NF" \

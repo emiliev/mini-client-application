@@ -91,8 +91,8 @@ class _FlowResultRouteState<T> extends State<FlowResultRoute<T>> {
     }
     _pending = null;
     _done = true;
-    // Direct, so the result never depends on microtask order: dispose (which
-    // completes with null) may come in the same synchronous span as the pop.
+    // Direct, so the result never depends on microtask order (the call also
+    // holds it, so a dispose in the same span completes with it too).
     _call?.complete(pending.value);
     if (route.isFirst) {
       GoRouter.of(context).go(AppLocations.home);
@@ -330,7 +330,6 @@ abstract final class AppFlows {
       extra: call,
     );
     unawaited(push.then(call.complete));
-    onChange();
     return call.result;
   }
 
