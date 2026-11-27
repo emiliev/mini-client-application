@@ -35,6 +35,7 @@ _INIT = "lib/src/di/di_initializer.dart"
 
 # Pure-Dart deps of the hand-written, generator-read files.
 _PURE_DEPS = [
+    "//utility/mc_api_auth",
     "//utility/mc_api_client",
     "//utility/mc_api_errors",
     "//utility/mc_bloc_kit",

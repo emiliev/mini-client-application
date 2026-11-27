@@ -4,6 +4,7 @@ import 'package:comics_details/src/domain/model/comic_id.dart';
 import 'package:comics_details/src/domain/model/comic_mapper.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
 import 'package:mc_prelude/mc_prelude.dart';
@@ -32,15 +33,23 @@ class ComicsDetailsRepository {
         false,
   );
 
-  /// Writes the flag and returns what the backend now holds.
+  /// Writes the flag and returns what the backend now holds. The request is
+  /// pinned to the session [epoch] the caller checked: if the session changed
+  /// before it was sent, nothing is sent and the answer is
+  /// [ApiUnauthorized] (T-0050), so a write never goes out under another
+  /// user's bearer.
   Future<Result<bool, ApiFailure>> setFavourite(
     ComicId id, {
     required bool favourite,
+    required int epoch,
   }) => apiCall(
     () async =>
         (favourite
-                ? await _api.putFavourite(id.value)
-                : await _api.deleteFavourite(id.value))
+                ? await _api.putFavourite(id.value, extras: authPinned(epoch))
+                : await _api.deleteFavourite(
+                    id.value,
+                    extras: authPinned(epoch),
+                  ))
             .favourite,
   );
 
