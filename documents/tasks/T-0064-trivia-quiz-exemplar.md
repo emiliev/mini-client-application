@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification (handed off) |
 | Owner | crew: Engineer (**Opus**: first IX exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0064-trivia-quiz` |
@@ -94,3 +94,9 @@ This package is the shape the P1-24 bricks copy for every IX feature (`trivia_da
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27 (engineer): resumed after the usage-limit stop. The first worktree had been cleaned up with no commits on the branch (nothing lost) and no `mc-` simulator was left; a new worktree was made on `fleet/T-0064-trivia-quiz`.
+- 2026-11-27 (engineer): **contract first** (`mc_fixtures_editorial`, `c8879ad`): the hint is a scoring rule the server applies (rule 4, `hintPenalty` 50, at most one per round, `too_many_hints`), 5 hint worked examples in their own table (the 17 scoring rows unchanged), and `comicId` on one-comic questions for `openComic`. Snapshots regenerated (3 round snapshots gain `comicId`; 2 new), validation, scoring and provider tests.
+- 2026-11-27 (engineer): the feature (engine, 3 blocs, 3 pages, 2 painters, charts, l10n) and its BDD (`94beedd`); contract, scope, painter, golden and architecture tests (`c8d5d4a`); the wiring, home entry, app tests and 2 e2e targets (`2b8f058`). E2E 2/2 on `mc-T-0064-engineer-68050` (deleted).
+- 2026-11-27 (engineer): first mutation pass: S01 (the engine's `>=` limit boundary) **survived**: through the flow the countdown's own timer always ended the question first, so the engine's judge never saw an answer at the limit. Fixed in the test harness, not by weakening anything: a tap at or past the limit is played one millisecond before the timer with the quiz's clock moved ahead (a late timer callback), so the outline's `C20000`/`C20001` rows are sent and judged exactly as the contract writes them (F-0064 §5.3). Added P13 (the timer itself a millisecond late).
+- 2026-11-27 (engineer): a linked round without a seed drew it in the flow's `build` (once per rebuild); it is now drawn once by the play bloc, and a Retry plays the same round (`flow_scope_test`).
+- 2026-11-27 (engineer): merged `origin/main` (T-0062; no conflicts); the gates use T-0062's shared format gate.
