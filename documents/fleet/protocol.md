@@ -37,14 +37,12 @@ sequenceDiagram
     TL->>TL: /code-review on the diff (ADR-0011: review first)
     TL->>E: accepted review findings (one fix round)
     E-->>TL: fixed branch
-    TL->>V: verification brief (tier: Opus or Sonnet, set in the task file)
-    V->>V: re-run gates · audit tests vs ACs · mutations · e2e · screenshots
-    V-->>TL: verification report (PASS/FAIL per AC)
-    opt Verifier FAIL
-        TL->>E: fix round
-        TL->>V: narrow re-verification (Sonnet, failed items + gates)
+    opt ADR-0015 exception only (rules/codegen, vendored, auth/security, TL unsure)
+        TL->>V: narrow verification brief
+        V-->>TL: verification report
     end
-    TL->>TL: merge --no-ff → re-run tool/verify.sh on merge result → push origin/main
+    TL->>TL: check cited tests exist + test-file diff integrity
+    TL->>TL: merge --no-ff → merge gates (build, test //..., lint, arch, rules check, format, 20-run flake on new targets) → push origin/main
     TL->>D: BOARD, STATUS, journal, indexes, evidence links
     TL->>PO: summary (+ screenshots) + direction questions (if any)
 ```
@@ -60,7 +58,7 @@ sequenceDiagram
 - [ ] Every AC has a passing test whose name contains the AC ID, or a screenshot checkpoint for purely visual ACs.
 - [ ] `tool/verify.sh` is green on the branch (format, analyze, tests, coverage ≥ 80 % for domain, data and `mocked_backend`). Before `tool/verify.sh` exists, the equivalent `fvm` commands.
 - [ ] Feature tasks: the e2e journey passes on the iOS simulator.
-- [ ] **Verifier report: PASS on every AC** (`documents/evidence/T-XXXX/verification-report.md`), from a fresh agent that isn't the implementer.
+- [ ] **Merge gates green on the merge result** (ADR-0015): it compiles and every test passes. A Verifier report is needed only for an ADR-0015 exception.
 - [ ] `/code-review` has no unresolved important findings.
 - [ ] No tests deleted, skipped or weakened, and no lint suppressions, unless approved by the TL in the task log.
 - [ ] **Tests per ADR-0015:** features use BDD plus contract tests, with plain unit tests allowed for pure logic and **no goldens**. DS kits keep their goldens. About 15 targeted mutants on the risky logic, with no full sweeps.

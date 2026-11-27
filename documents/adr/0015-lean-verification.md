@@ -1,6 +1,6 @@
 # ADR-0015: Lean verification: no feature goldens, targeted mutations, correctness-only Verifiers
 
-- **Status:** Accepted (PO direction, 2026-11-27)
+- **Status:** Accepted (PO direction, 2026-11-27; item 4 tightened the same day: tests pass and it compiles = verified)
 - **Date:** 2026-11-27
 - **Deciders:** Product Owner (direction), Tech Lead (rules)
 - **Supersedes in part:** ADR-0006 (verification strategy: goldens, Verifier scope), ADR-0011 (Verifier scope per tier), plan 01 R6 / D-30 (feature test kinds)
@@ -36,23 +36,28 @@ The PO also answered two follow-up questions:
    - Engineers pick them where a silent test gap would hurt: races and the session epoch, money, scoring, auth and pins, validation boundaries, persistence.
    - The mutation script rules stay: it refuses a dirty tree, sets the trap before the first edit, and counts BROKEN separately from KILLED.
    - No full-package mutation sweeps.
-4. **Verifiers check correctness only.** For each AC the Verifier:
-   - finds the cited test, reads it, judges that it really asserts the AC, and runs it;
-   - re-runs the gates;
-   - runs the e2e for e2e ACs;
-   - probes only where an AC or a review finding points at real risk;
-   - re-runs **up to 5** of the engineer's mutants to confirm that the tests bite.
+4. **Verification = it compiles and the tests pass** (PO, same day: "if tests pass and code compiles we're good").
+   - **There is no separate Verifier agent by default.** After `/code-review` and one fix round, the TL runs the merge gates on the merge result:
+     - build, and the sim app build for app changes;
+     - `test --lockfile_mode=error //...`;
+     - lint;
+     - `mc_arch_check`;
+     - `rules_fork.sh check`;
+     - the format gate;
+     - provenance;
+     - a 20-run uncached flake check on the new or changed test targets.
 
-   Verifiers **no longer** do the following by default:
-   - write their own mutant sets;
-   - write their own coverage parsers (the gates report is enough);
-   - re-derive whole subsystems;
-   - audit the full diff.
-
-   The test-integrity check stays: deleted, skipped or weakened tests and suppressions, from a diff of the test files only. So does the rule that every cited test exists.
+     Green means merge.
+   - **The TL also checks that every test the handoff cites exists**, and runs a diff of the test files for deleted, skipped or weakened tests and `// ignore:`. Both are cheap, and they catch false evidence (T-0056).
+   - E2E ACs rest on the engineer's e2e logs and screenshots. The TL looks at the screenshots.
+   - **Exceptions, where the TL may still call one narrow Verifier and must say why in the task file:**
+     - rules or codegen patches to `ai_rules_*`;
+     - vendored code (flow_builder);
+     - auth or security changes;
+     - a task whose fix round leaves the TL unsure.
+   - The ADR-0011 Verifier tiers apply only to these exceptions.
 5. **Unchanged:**
-   - review-first (`/code-review` before the Verifier);
-   - a fresh Verifier, and nothing merges without a PASS;
+   - review-first (`/code-review` before merge);
    - the TL's merge gates;
    - the DoD flake check (50 runs on storage, timer, stream and race tests);
    - the model tiers of ADR-0011, except where this ADR narrows the Verifier's scope.
@@ -60,5 +65,5 @@ The PO also answered two follow-up questions:
 ## Consequences
 - **Faster.** Tasks finish sooner, with fewer hours spent on mutation runs, and Verifier passes should cost roughly half. Fewer golden re-baselines.
 - **Weaker visual safety net in features.** A pure styling regression, such as a colour or spacing that drifts without overflowing, can slip through. DS goldens still catch component-level changes, and e2e screenshots are viewed by Verifiers.
-- **Fewer mutants means less proof that tests bite outside the risky spots.** Review-first and the Verifier's 5 confirmation mutants mitigate this.
+- **Fewer mutants means less proof that tests bite outside the risky spots.** Review-first and the merge-time flake check mitigate this. With no Verifier, a test that compiles and passes but asserts the wrong thing can now reach `main`, unless `/code-review` catches it. The PO accepted that trade-off for speed.
 - **The bricks (P1-24) and `mcgen` (P2) templates follow this ADR.** Generated features carry no goldens and about 15 targeted mutants per batch. Plan 02 §7.3 is to be read with this ADR.
