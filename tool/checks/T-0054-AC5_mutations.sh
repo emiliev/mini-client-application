@@ -120,7 +120,7 @@ mutate M03 "the stack is checked at once, not after the frame" "$RES" "$F" \
 mutate M04 "the page is first matched by nothing" "$RES" "$F" \
   '? push != null && identical(match.completer.future, push)' '? false'
 mutate M05 "the stack watch is not listening" "$RES" "$F" \
-  $'    delegate.addListener(onChange);\n    _watchers++;' $'    _watchers++;'
+  $'    delegate.addListener(onChange);\n' ''
 mutate R1 "the page is matched by its completer, not its key (a re-parse abandons it)" "$RES" "$F" \
   ': match.pageKey.value == pageKey)' ': identical(match.completer.future, push))'
 mutate R2 "the route drops its call when a re-parse gives it a null extra" "$RES" "$F" \
