@@ -6,7 +6,7 @@
   "storeHomeCategories": "Kategorien",
   "storeHomeFeatured": "Empfohlen",
   "storeHomeCart": "Dein Warenkorb",
-  "storeHomeSectionLoading": "{section} werden geladen",
+  "storeHomeSectionLoading": "Wird geladen: {section}",
   "storeHomeBannersError": "Die Highlights konnten nicht geladen werden.",
   "storeHomeDealsError": "Die Angebote konnten nicht geladen werden.",
   "storeHomeCategoriesError": "Die Kategorien konnten nicht geladen werden.",

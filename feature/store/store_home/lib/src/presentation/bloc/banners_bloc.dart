@@ -37,8 +37,8 @@ final class BannersBloc
         tracker: tracker,
         section: StoreSection.banners,
       ) {
+    // Idle until the page is shown: the page adds `load` (a visit).
     on<BannersEvent>(_onEvent);
-    add(const BannersEvent.load());
   }
 
   final StoreHomeRepository _repository;

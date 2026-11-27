@@ -44,16 +44,25 @@ class AnalyticsRouteObserver extends NavigatorObserver {
 
   @override
   void didChangeTop(Route<dynamic> topRoute, Route<dynamic>? previousTopRoute) {
-    if (topRoute is! PageRoute<dynamic> || identical(topRoute, _last)) {
+    if (topRoute is! PageRoute<dynamic>) {
+      return;
+    }
+    // A flow inside the route says which of its pages is showing (its
+    // record: the page's name, '' for an unnamed page).
+    final flowPage = _flowScreens[topRoute];
+    if (identical(topRoute, _last)) {
+      // The same route again with only a popup in between: tracked again
+      // only if its flow moved to another page meanwhile (T-0056).
+      if (flowPage != null && flowPage != _reported[topRoute]) {
+        _reportFlowPage(topRoute, flowPage);
+      }
       return;
     }
     // Set before the name check: an unnamed page on top still counts as a
     // change, so the named page below is tracked again when it comes back.
     _last = topRoute;
-    // A flow inside the route says which of its pages is showing.
-    final flowPage = _flowScreens[topRoute];
     if (flowPage != null) {
-      _report(topRoute, flowPage);
+      _reportFlowPage(topRoute, flowPage);
       return;
     }
     final name = topRoute.settings.name;
@@ -65,6 +74,19 @@ class AnalyticsRouteObserver extends NavigatorObserver {
       return;
     }
     _report(topRoute, name);
+  }
+
+  /// A flow page's name is a screen name if it is valid. The declared-name
+  /// filter is for go_router, which names an unnamed page by its path; a
+  /// flow page has no path, and `McFlowPage.name` is the page's declaration,
+  /// so only [AnalyticsRules.isValidName] applies (F-0056 §4).
+  void _reportFlowPage(Route<dynamic> route, String name) {
+    if (!AnalyticsRules.isValidName(name)) {
+      // Recorded as shown, so the next change is a change.
+      _reported[route] = name;
+      return;
+    }
+    _report(route, name);
   }
 
   void _report(Route<dynamic> route, String name) {
@@ -107,10 +129,18 @@ final Expando<String> _reported = Expando('analytics reported screens');
 /// [tracker] is called with the flow navigator's context, which is inside the
 /// flow: `(context) => context.di<AnalyticsTracker>()` resolves the pure-Dart
 /// port (`Analytics` itself) through the flow's root imports.
+///
+/// [host] gives the route the flow is shown in, from the same context,
+/// **without depending on it**: `(context) => FlowScope.read(context)
+/// .outerRoute` (`mc_feature_flow`). `ModalRoute.of` would make the flow's
+/// navigator depend on the host route's status, so every change of it (a
+/// screen pushed over the host, a dialog) would rebuild the flow (T-0056).
+/// Null means the flow is not inside a route.
 class AnalyticsFlowObserver extends NavigatorObserver {
-  AnalyticsFlowObserver(this.tracker);
+  AnalyticsFlowObserver(this.tracker, {required this.host});
 
   final AnalyticsTracker? Function(BuildContext navigatorContext) tracker;
+  final ModalRoute<Object?>? Function(BuildContext navigatorContext) host;
   Route<dynamic>? _last;
 
   @override
@@ -119,24 +149,29 @@ class AnalyticsFlowObserver extends NavigatorObserver {
       return;
     }
     _last = topRoute;
-    final name = topRoute.settings.name;
     final context = navigator?.context;
-    if (name == null || !AnalyticsRules.isValidName(name) || context == null) {
+    if (context == null) {
       return;
     }
-    final host = ModalRoute.of(context);
-    if (host != null) {
-      _flowScreens[host] = name;
+    // Recorded whatever it is ('' for no name), so the route observer never
+    // reports an older page for this route.
+    final name = topRoute.settings.name ?? '';
+    final hostRoute = host(context);
+    if (hostRoute != null) {
+      _flowScreens[hostRoute] = name;
       // The first page of the flow: the route was tracked under this name.
-      if (previousTopRoute == null && _reported[host] == name) {
+      if (previousTopRoute == null && _reported[hostRoute] == name) {
         return;
       }
-      // Hidden under another screen: tracked when the route comes back.
-      if (!host.isCurrent) {
+      // Hidden under another screen or a popup: tracked when the route comes
+      // back (the route observer compares with what it last reported).
+      if (!hostRoute.isCurrent) {
         return;
       }
-      _reported[host] = name;
+      _reported[hostRoute] = name;
     }
-    tracker(context)?.trackScreen(name);
+    if (AnalyticsRules.isValidName(name)) {
+      tracker(context)?.trackScreen(name);
+    }
   }
 }

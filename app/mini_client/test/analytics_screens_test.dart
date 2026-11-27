@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:mini_client/src/mini_client_app.dart';
@@ -192,6 +193,50 @@ void main() {
       'comics_details',
       'store_category',
     ]);
+  });
+
+  testWidgets('T-0056-AC7 a cold link to a category: the store below it '
+      'loads and tracks nothing; after Back each section loads and is viewed '
+      'once, and a comic opened and closed over it changes nothing (one '
+      'visit, review round)', (tester) async {
+    await boot(
+      tester,
+      coldStartLink: 'miniclient://app${AppLocations.storeCategory('heroes')}',
+    );
+    expect(find.byKey(_categoryGrid), findsOneWidget);
+    const store = [
+      '/v1/store/banners',
+      '/v1/store/deals',
+      '/v1/store/categories',
+      '/v1/store/featured',
+    ];
+    List<int> requests() => [
+      for (final path in store)
+        diContainer<MockBackend>().recentTraffic
+            .where((t) => t.method == 'GET' && t.path == path)
+            .length,
+    ];
+    List<String> viewed() => [
+      for (final e in sink.events)
+        if (e.name == 'store_section_viewed') e.params['section']! as String,
+    ]..sort();
+    // The one categories request is the category page's own name lookup.
+    expect(requests(), [0, 0, 1, 0], reason: 'the store page is hidden');
+    expect(viewed(), isEmpty);
+
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_storeBody), findsOneWidget);
+    expect(requests(), [1, 1, 2, 1]);
+    expect(viewed(), ['banners', 'categories', 'deals', 'featured']);
+
+    await tapInStore(tester, 'Amber Frontier #2');
+    expect(find.byKey(_storeBody), findsNothing);
+    await tester.tap(find.byType(BackButton).last);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_storeBody), findsOneWidget);
+    expect(requests(), [1, 1, 2, 1], reason: 'the same visit');
+    expect(viewed(), hasLength(4));
   });
 
   testWidgets('T-0056-AC7 a cold link to a category tracks store_category '

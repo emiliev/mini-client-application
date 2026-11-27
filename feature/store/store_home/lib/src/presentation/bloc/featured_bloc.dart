@@ -35,8 +35,8 @@ final class FeaturedBloc
         tracker: tracker,
         section: StoreSection.featured,
       ) {
+    // Idle until the page is shown: the page adds `load` (a visit).
     on<FeaturedEvent>(_onEvent);
-    add(const FeaturedEvent.load());
   }
 
   final StoreHomeRepository _repository;

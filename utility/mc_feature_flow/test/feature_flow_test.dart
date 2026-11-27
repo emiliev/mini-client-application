@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_bloc_kit/mc_bloc_kit.dart';
@@ -167,6 +169,53 @@ void main() {
     expect(first.tops, ['list', 'detail', 'list']);
     expect(second.tops, isEmpty);
     expect(second.navigator, isNull);
+  });
+
+  testWidgets('T-0056-AC7 the scope publishes the flow\'s route and whether '
+      'it is current, and a page that depends on it sees each flip', (
+    tester,
+  ) async {
+    final seen = <bool>[];
+    ModalRoute<Object?>? outer;
+    late BuildContext hostContext;
+    await tester.pumpWidget(
+      _app(
+        Builder(
+          builder: (context) {
+            hostContext = context;
+            return FeatureFlow<_Selection>(
+              state: const _Selection(),
+              onGeneratePages: (_) => [
+                McFlowPage(
+                  name: 'only',
+                  child: Builder(
+                    builder: (context) {
+                      final scope = FlowScope.of(context);
+                      seen.add(scope.outerIsCurrent);
+                      outer = FlowScope.read(context).outerRoute;
+                      return const Text('page');
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(seen.last, isTrue);
+    expect(outer, same(ModalRoute.of(hostContext)));
+
+    unawaited(
+      Navigator.of(hostContext)
+          .push(MaterialPageRoute<void>(builder: (_) => const Text('cover'))),
+    );
+    await tester.pumpAndSettle();
+    expect(seen.last, isFalse, reason: 'covered');
+    Navigator.of(hostContext).pop();
+    await tester.pumpAndSettle();
+    expect(seen.last, isTrue, reason: 'shown again');
   });
 
   testWidgets('T-0022-AC3 complete(r) calls onComplete once with r', (

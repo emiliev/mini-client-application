@@ -151,7 +151,8 @@ void main() {
       expect(cart.total, const Money(4329, Currency.eur));
     });
 
-    test('T-0056-AC1 days left round up, and an ended deal has none', () {
+    test('T-0056-AC1 a deal runs until endsAt exactly; days left round down '
+        '(review round)', () {
       Deal endingAt(DateTime end) => Deal(
         product: const Product(
           id: ComicId(1),
@@ -165,18 +166,25 @@ void main() {
         endsAt: end,
       );
       final now = defaultMockClock;
-      expect(endingAt(now.add(const Duration(days: 1))).daysLeftAt(now), 1);
-      expect(endingAt(now.add(const Duration(hours: 25))).daysLeftAt(now), 2);
+      Deal inFuture(Duration d) => endingAt(now.add(d));
+      // Running: 8 days, 25 hours, exactly 1 day, 1 hour, 1 microsecond.
+      expect(inFuture(const Duration(days: 8)).daysLeftAt(now), 8);
+      expect(inFuture(const Duration(hours: 25)).daysLeftAt(now), 1);
+      expect(inFuture(const Duration(days: 1)).daysLeftAt(now), 1);
+      expect(inFuture(const Duration(hours: 23)).daysLeftAt(now), 0);
+      expect(inFuture(const Duration(hours: 1)).daysLeftAt(now), 0);
+      expect(inFuture(const Duration(hours: 1)).runsAt(now), isTrue);
+      expect(inFuture(const Duration(microseconds: 1)).runsAt(now), isTrue);
+      // Exactly at endsAt, and after it: ended.
+      expect(endingAt(now).runsAt(now), isFalse);
       expect(
-        endingAt(now.add(const Duration(microseconds: 1))).daysLeftAt(now),
-        1,
+        endingAt(now.subtract(const Duration(microseconds: 1))).runsAt(now),
+        isFalse,
       );
-      expect(endingAt(now).daysLeftAt(now), 0);
       expect(
-        endingAt(now.subtract(const Duration(days: 1))).daysLeftAt(now),
-        0,
+        endingAt(now.subtract(const Duration(days: 1))).runsAt(now),
+        isFalse,
       );
-      expect(endingAt(now.add(const Duration(days: 8))).daysLeftAt(now), 8);
     });
   });
 

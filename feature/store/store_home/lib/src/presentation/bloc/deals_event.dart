@@ -4,7 +4,7 @@ part of 'deals_bloc.dart';
 sealed class DealsEvent {
   const DealsEvent();
 
-  /// The first load (the bloc adds it itself).
+  /// The first load: the page adds it once it is shown (F-0056 §1).
   const factory DealsEvent.load() = _Load;
 
   /// Retry after a failure: loads this section again, and only this one.

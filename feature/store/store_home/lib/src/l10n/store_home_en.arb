@@ -76,7 +76,7 @@
   },
   "storeHomeDealEndsIn": "{days, plural, =0{Ends today} =1{Ends in 1 day} other{Ends in {days} days}}",
   "@storeHomeDealEndsIn": {
-    "description": "How long a deal still runs, in whole days (rounded up).",
+    "description": "How long a running deal still runs, in whole days left (rounded down; 0 is less than a day). Ended deals are not shown.",
     "placeholders": {
       "days": {
         "type": "int",

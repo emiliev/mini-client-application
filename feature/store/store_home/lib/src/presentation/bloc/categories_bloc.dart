@@ -39,8 +39,8 @@ final class CategoriesBloc
         tracker: tracker,
         section: StoreSection.categories,
       ) {
+    // Idle until the page is shown: the page adds `load` (a visit).
     on<CategoriesEvent>(_onEvent);
-    add(const CategoriesEvent.load());
   }
 
   final StoreHomeRepository _repository;

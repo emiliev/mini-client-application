@@ -4,6 +4,8 @@
 // generate the list, Phase D). The flow is immutable after creation: a new
 // initial category builds a new flow. The injected clock is what the deals
 // count down against.
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -138,8 +140,7 @@ void main() {
     );
   });
 
-  mcTestWidgets('T-0056-AC1 the deals count down against the injected clock, '
-      'not the device time', (tester) async {
+  Future<void> openAt(WidgetTester tester, Duration after) async {
     serveStore();
     await ensureStoreContainer();
     await initFlow(
@@ -147,30 +148,115 @@ void main() {
       () => storeTestHost(
         StoreHomeFlow(
           navigator: storeNavigator(),
-          // A day and an hour after the fixtures' clock: the first deal (1
-          // day) has ended, the second (2 days) ends in 23 hours.
-          clock: () => defaultMockClock.add(const Duration(hours: 25)),
+          clock: () => defaultMockClock.add(after),
         ),
       ),
     );
     await mcSettle(tester);
+  }
 
-    await scrollCarouselTo(tester, 'deals', find.byKey(dealKey(501501)));
-    expect(
-      find.descendant(
-        of: find.byKey(dealKey(501501)),
-        matching: find.text('Ends today'),
-      ),
-      findsOneWidget,
-    );
+  String endsIn(WidgetTester tester, int product) {
+    final texts = tester
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byKey(dealKey(product)),
+            matching: find.byType(Text),
+          ),
+        )
+        .map((t) => t.data ?? '');
+    return texts.firstWhere((t) => t.startsWith('Ends'));
+  }
+
+  mcTestWidgets('T-0056-AC1 the deals count down against the injected clock, '
+      'not the device time: 23 h and 1 h left end today, a deal at or after '
+      'its end is left out (review round)', (tester) async {
+    // The fixtures' deals end 1, 2, 3, ... 8 days after the fixed clock.
+    // 25 h later: the first has ended, the second has 23 h left.
+    await openAt(tester, const Duration(hours: 25));
+    await scrollToSection(tester, 'deals');
+    expect(find.byKey(dealKey(501501)), findsNothing, reason: 'ended');
     await scrollCarouselTo(tester, 'deals', find.byKey(dealKey(502240)));
-    expect(
-      find.descendant(
-        of: find.byKey(dealKey(502240)),
-        matching: find.text('Ends in 1 day'),
-      ),
-      findsOneWidget,
+    expect(endsIn(tester, 502240), 'Ends today');
+    await scrollCarouselTo(tester, 'deals', find.byKey(dealKey(500822)));
+    expect(endsIn(tester, 500822), 'Ends in 1 day');
+  });
+
+  mcTestWidgets('T-0056-AC1 exactly at a deal\'s end it is left out; an hour '
+      'before, it ends today', (tester) async {
+    await openAt(tester, const Duration(days: 2));
+    await scrollToSection(tester, 'deals');
+    expect(find.byKey(dealKey(501501)), findsNothing);
+    expect(find.byKey(dealKey(502240)), findsNothing, reason: 'ends now');
+    await scrollCarouselTo(tester, 'deals', find.byKey(dealKey(500822)));
+    expect(endsIn(tester, 500822), 'Ends in 1 day');
+  });
+
+  mcTestWidgets('T-0056-AC1 an hour before the first deal ends, it ends '
+      'today', (tester) async {
+    await openAt(tester, const Duration(hours: 23));
+    await scrollCarouselTo(tester, 'deals', find.byKey(dealKey(501501)));
+    expect(endsIn(tester, 501501), 'Ends today');
+  });
+
+  mcTestWidgets('T-0056-AC1 when every deal has ended, the section is empty', (
+    tester,
+  ) async {
+    await openAt(tester, const Duration(days: 8));
+    await scrollToSection(tester, 'deals');
+    expect(find.byKey(sectionPartKey('deals', 'empty')), findsOneWidget);
+    expect(find.text('No deals right now.'), findsOneWidget);
+  });
+
+  mcTestWidgets('T-0056-AC7 a store page built under another screen loads and '
+      'tracks nothing until it is shown; then each section loads and is viewed '
+      'once, and covering it again changes nothing (one visit, review round)', (
+    tester,
+  ) async {
+    serveStore();
+    await ensureStoreContainer();
+    final session = McTestSession.current;
+    await tester.pumpWidget(
+      McTestApp(session: session, home: storeTestHost(storeFlowUnderTest())),
     );
+    // A screen over the store before the store page is built.
+    final navigator = Navigator.of(tester.element(find.byType(StoreHomeFlow)));
+    Future<void> cover() => navigator.push(
+      MaterialPageRoute<void>(
+        builder: (_) => const Scaffold(body: Text('cover')),
+      ),
+    );
+    unawaited(cover());
+    await mcSettle(tester);
+
+    int requests(String path) => session.backend.requests
+        .where((r) => r.method == 'GET' && r.path == path)
+        .length;
+    const store = [
+      '/v1/store/banners',
+      '/v1/store/deals',
+      '/v1/store/categories',
+      '/v1/store/featured',
+    ];
+    List<String> viewed() => [
+      for (final e in session.analytics.events)
+        if (e.name == 'store_section_viewed') e.params['section']! as String,
+    ];
+    expect(find.text('cover'), findsOneWidget);
+    expect(find.byKey(storeHomeBodyKey, skipOffstage: false), findsOneWidget);
+    expect([for (final p in store) requests(p)], [0, 0, 0, 0]);
+    expect(viewed(), isEmpty);
+
+    navigator.pop();
+    await mcSettle(tester);
+    expect([for (final p in store) requests(p)], [1, 1, 1, 1]);
+    expect(viewed()..sort(), ['banners', 'categories', 'deals', 'featured']);
+
+    unawaited(cover());
+    await mcSettle(tester);
+    navigator.pop();
+    await mcSettle(tester);
+    expect([for (final p in store) requests(p)], [1, 1, 1, 1]);
+    expect(viewed(), hasLength(4), reason: 'one visit');
   });
 }
 

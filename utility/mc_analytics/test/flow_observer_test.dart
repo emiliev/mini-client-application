@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_analytics/mc_analytics.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_feature_flow/mc_feature_flow.dart';
 
 import 'support.dart';
 
@@ -51,6 +53,11 @@ class _Flow extends StatelessWidget {
   );
 }
 
+/// The host route of these hand-built flows. `ModalRoute.of` adds a
+/// dependency; the real flows pass `FlowScope.read(context).outerRoute`
+/// (see the build-count test below), which does not.
+ModalRoute<Object?>? _host(BuildContext context) => ModalRoute.of(context);
+
 void main() {
   late Rig rig;
   late ValueNotifier<bool> category;
@@ -62,7 +69,7 @@ void main() {
   tearDown(() => category.dispose());
 
   AnalyticsFlowObserver flowObserver() =>
-      AnalyticsFlowObserver((_) => rig.analytics);
+      AnalyticsFlowObserver((_) => rig.analytics, host: _host);
 
   Future<GoRouter> pumpApp(
     WidgetTester tester, {
@@ -210,7 +217,10 @@ void main() {
     Widget nested(String key, String? name, {bool silent = false}) => Navigator(
       key: ValueKey(key),
       observers: [
-        AnalyticsFlowObserver((_) => silent ? null : rig.analytics),
+        AnalyticsFlowObserver(
+          (_) => silent ? null : rig.analytics,
+          host: _host,
+        ),
       ],
       pages: [MaterialPage<void>(name: name, child: Text('page $key'))],
       onDidRemovePage: (_) {},
@@ -246,5 +256,186 @@ void main() {
       ['shown_page'],
       reason: 'the popup is ignored and the page is not tracked again',
     );
+  });
+
+  testWidgets('T-0056-AC7 a flow page changed under a popup is tracked when '
+      'the popup closes, once', (tester) async {
+    final router = await pumpApp(tester);
+    unawaited(router.push('/store'));
+    await tester.pumpAndSettle();
+    final context = tester.element(find.text('flow home'));
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => const AlertDialog(title: Text('popup')),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    category.value = true;
+    await tester.pumpAndSettle();
+    expect(await screens(tester), ['home', 'store_home'], reason: 'hidden');
+
+    Navigator.of(tester.element(find.text('popup'))).pop();
+    await tester.pumpAndSettle();
+    expect(await screens(tester), ['home', 'store_home', 'store_category']);
+
+    // Another popup with no page change in between tracks nothing.
+    unawaited(
+      showDialog<void>(
+        context: tester.element(find.text('flow category')),
+        builder: (_) => const AlertDialog(title: Text('again')),
+      ),
+    );
+    await tester.pumpAndSettle();
+    Navigator.of(tester.element(find.text('again'))).pop();
+    await tester.pumpAndSettle();
+    expect(await screens(tester), ['home', 'store_home', 'store_category']);
+  });
+
+  testWidgets('T-0056-AC7 an unnamed or invalid flow page is not a screen, '
+      'and coming back to its route does not report the page before it', (
+    tester,
+  ) async {
+    final observer = flowObserver();
+    final pages = ValueNotifier<String?>(null);
+    addTearDown(pages.dispose);
+    final router = GoRouter(
+      initialLocation: '/',
+      observers: [AnalyticsRouteObserver(rig.analytics)],
+      routes: [
+        GoRoute(
+          path: '/',
+          name: 'home',
+          builder: (_, _) => const Scaffold(body: Text('home')),
+        ),
+        GoRoute(
+          path: '/store',
+          name: 'store_home',
+          builder: (_, _) => ValueListenableBuilder<String?>(
+            valueListenable: pages,
+            builder: (context, second, _) => Navigator(
+              observers: [observer],
+              pages: [
+                const MaterialPage<void>(
+                  name: 'store_home',
+                  key: ValueKey('first'),
+                  child: Scaffold(body: Text('flow home')),
+                ),
+                if (second != null)
+                  MaterialPage<void>(
+                    name: second.isEmpty ? null : second,
+                    key: const ValueKey('second'),
+                    child: const Scaffold(body: Text('flow second')),
+                  ),
+              ],
+              onDidRemovePage: (_) => pages.value = null,
+            ),
+          ),
+        ),
+        GoRoute(
+          path: '/comic',
+          name: 'comics_details',
+          builder: (_, _) => const Scaffold(body: Text('comic')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(MaterialApp.router(routerConfig: router));
+    await tester.pumpAndSettle();
+    unawaited(router.push('/store'));
+    await tester.pumpAndSettle();
+
+    for (final second in ['Not Valid', '']) {
+      pages.value = second;
+      await tester.pumpAndSettle();
+      unawaited(router.push('/comic'));
+      await tester.pumpAndSettle();
+      router.pop();
+      await tester.pumpAndSettle();
+      pages.value = null;
+      await tester.pumpAndSettle();
+    }
+
+    expect(await screens(tester), [
+      'home',
+      'store_home',
+      'comics_details',
+      'store_home',
+      'comics_details',
+      'store_home',
+    ]);
+  });
+
+  testWidgets('T-0056-AC7 the flow observer looks its host up without a '
+      'dependency: the flow navigator does not depend on the host route, and '
+      'covering the host rebuilds no flow page', (
+    tester,
+  ) async {
+    var builds = 0;
+    final router = GoRouter(
+      initialLocation: '/',
+      observers: [AnalyticsRouteObserver(rig.analytics)],
+      routes: [
+        GoRoute(
+          path: '/',
+          name: 'store_home',
+          builder: (_, _) => FeatureFlow<int>(
+            state: 0,
+            observers: [
+              AnalyticsFlowObserver(
+                (_) => rig.analytics,
+                host: (context) => FlowScope.read(context).outerRoute,
+              ),
+            ],
+            onGeneratePages: (_) => [
+              McFlowPage(
+                name: 'store_home',
+                child: Builder(
+                  builder: (context) {
+                    builds++;
+                    return const Scaffold(body: Text('flow home'));
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        GoRoute(
+          path: '/comic',
+          name: 'comics_details',
+          builder: (_, _) => const Scaffold(body: Text('comic')),
+        ),
+      ],
+    );
+    addTearDown(router.dispose);
+    await tester.pumpWidget(
+      MaterialApp.router(theme: McTheme.light, routerConfig: router),
+    );
+    await tester.pumpAndSettle();
+    final before = builds;
+    expect(before, greaterThan(0));
+    // The flow's own navigator registered no dependency on the host route's
+    // status (`ModalRoute.of` would add `_ModalScopeStatus`, so a status
+    // change would rebuild the navigator).
+    final flowNavigator = find
+        .descendant(
+          of: find.byType(FeatureFlow<int>),
+          matching: find.byType(Navigator),
+        )
+        .first;
+    expect('${tester.element(flowNavigator)}', isNot(contains('ModalScope')));
+
+    unawaited(router.push('/comic'));
+    await tester.pumpAndSettle();
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(builds, before, reason: 'no flow page rebuilt');
+    expect(await screens(tester), [
+      'store_home',
+      'comics_details',
+      'store_home',
+    ]);
   });
 }

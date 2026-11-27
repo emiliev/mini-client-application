@@ -31,6 +31,20 @@ Feature: The store in German and in the pseudo-locale
     And the {'cart'} section shows {'Melde dich an, um deinen Warenkorb zu sehen.'}
 
   @T-0056-AC4 @l10n
+  Scenario: In German a loading section is announced in a number-neutral phrase (review round)
+    Given the device locale is {'de'}
+    And I am signed in as {'reader@mini-client.test'}
+    And the backend holds {'GET /v1/store/deals'}
+    And the backend holds {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    Then the {'deals'} section is announced as {'Wird geladen: Angebote'}
+    And the {'cart'} section is announced as {'Wird geladen: Dein Warenkorb'}
+    When the backend releases {'GET /v1/store/deals'}
+    And the backend releases {'GET /v1/me/cart'}
+    Then the {'deals'} section is ready
+
+  @T-0056-AC4 @l10n
   Scenario: In German the category page is German
     Given the device locale is {'de'}
     When I open the store at category {'nope'}

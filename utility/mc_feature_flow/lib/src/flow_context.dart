@@ -15,6 +15,8 @@ class FlowScope extends InheritedWidget {
     this.controller,
     this.outerNavigator,
     this.outerCanPop = false,
+    this.outerRoute,
+    this.outerIsCurrent = true,
     this.flowNavigatorObserver,
     super.key,
   });
@@ -34,6 +36,19 @@ class FlowScope extends InheritedWidget {
   /// when the routes below the flow change (a router `go`, a deep-link stack
   /// rebuild, `pushAndRemoveUntil`).
   final bool outerCanPop;
+
+  /// The route the flow itself is shown in (in [outerNavigator]); null when
+  /// the flow is not inside a route. Read it with [read] to look the route up
+  /// without depending on its status (`ModalRoute.of` would make the caller
+  /// rebuild whenever the route's status changes), as `mc_analytics`'
+  /// `AnalyticsFlowObserver` does (T-0056).
+  final ModalRoute<Object?>? outerRoute;
+
+  /// Whether the flow's own route is the current route of [outerNavigator]
+  /// (nothing, not even a dialog, covers it); true outside a route. A widget
+  /// that depends on the scope ([of]) rebuilds when it flips, so a page can
+  /// start its work only once it is really shown (T-0056).
+  final bool outerIsCurrent;
 
   /// An observer attached to the flow's own navigator, so the scope knows
   /// which `Navigator` is the flow's ([isFlowNavigator]).
@@ -78,7 +93,10 @@ class FlowScope extends InheritedWidget {
 
   @override
   bool updateShouldNotify(FlowScope oldWidget) =>
-      container != oldWidget.container || outerCanPop != oldWidget.outerCanPop;
+      container != oldWidget.container ||
+      outerCanPop != oldWidget.outerCanPop ||
+      outerIsCurrent != oldWidget.outerIsCurrent ||
+      !identical(outerRoute, oldWidget.outerRoute);
 }
 
 extension McFlowContext on BuildContext {

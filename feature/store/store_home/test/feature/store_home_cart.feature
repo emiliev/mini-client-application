@@ -125,3 +125,17 @@ Feature: The cart summary follows the session
     And the backend received {1} requests for {'GET /v1/me/cart'}
     And the backend received {'GET /v1/me/cart'} with a token of {'collector@mini-client.test'}
     And no error was reported
+
+  @T-0056-AC3
+  Scenario: A same-user re-sign-in while the cart is loading ends on that user's cart (review round)
+    Given I am signed in as {'reader@mini-client.test'}
+    And the backend holds the next {'GET /v1/me/cart'}
+    When I open the store
+    And the app sends {'GET /v1/me/cart'}
+    Then the {'cart'} section is loading
+    When {'reader@mini-client.test'} signs in elsewhere
+    And the backend releases {'GET /v1/me/cart'}
+    Then the cart section shows the cart of {'reader@mini-client.test'}
+    And the backend received {2} requests for {'GET /v1/me/cart'}
+    And the section {'cart'} was viewed {1} times
+

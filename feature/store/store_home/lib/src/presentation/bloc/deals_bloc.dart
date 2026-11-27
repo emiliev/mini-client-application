@@ -18,12 +18,15 @@ part 'deals_bloc.freezed.dart';
 part 'deals_event.dart';
 part 'deals_state.dart';
 
+/// The deals that run at `asOf`, the time they arrived.
+typedef RunningDeals = ({List<Deal> deals, DateTime asOf});
+
 /// The deals section: loads `GET v1/store/deals` on its own, with the time
 /// its countdowns are read against (the injected [StoreClock]), and hands a
 /// tapped deal's comic over to the app.
 @injectable
 final class DealsBloc
-    extends StoreSectionBloc<DealsEvent, DealsState, List<Deal>> {
+    extends StoreSectionBloc<DealsEvent, DealsState, RunningDeals> {
   DealsBloc(
     this._repository,
     this._navigator,
@@ -36,8 +39,8 @@ final class DealsBloc
         tracker: tracker,
         section: StoreSection.deals,
       ) {
+    // Idle until the page is shown: the page adds `load` (a visit).
     on<DealsEvent>(_onEvent);
-    add(const DealsEvent.load());
   }
 
   final StoreHomeRepository _repository;
@@ -63,18 +66,33 @@ final class DealsBloc
     }
   }
 
+  /// The deals that still run when they arrive, with that time: one that has
+  /// ended (the backend's list is a moment's, the clock moves on) is left
+  /// out, so an all-ended list is the empty state.
   @override
-  Future<Result<List<Deal>, ApiFailure>> fetch() => _repository.fetchDeals();
+  Future<Result<RunningDeals, ApiFailure>> fetch() async {
+    final result = await _repository.fetchDeals();
+    final now = _clock.now();
+    return result.map(
+      (deals) => (
+        deals: [
+          for (final deal in deals)
+            if (deal.runsAt(now)) deal,
+        ],
+        asOf: now,
+      ),
+    );
+  }
 
   @override
-  bool isEmptyData(List<Deal> data) => data.isEmpty;
+  bool isEmptyData(RunningDeals data) => data.deals.isEmpty;
 
   @override
   DealsState loadingState() => const DealsState.loading();
 
   @override
-  DealsState readyState(List<Deal> data) =>
-      DealsState.ready(data, _clock.now());
+  DealsState readyState(RunningDeals data) =>
+      DealsState.ready(data.deals, data.asOf);
 
   @override
   DealsState emptyState() => const DealsState.empty();

@@ -42,16 +42,12 @@ abstract class Deal with _$Deal {
 
   const Deal._();
 
-  /// Whole days left at [now], rounded up (a deal that ends in 25 hours has
-  /// 2 days left); 0 once it has ended.
-  int daysLeftAt(DateTime now) {
-    final left = endsAt.difference(now);
-    if (left <= Duration.zero) {
-      return 0;
-    }
-    const day = Duration.microsecondsPerDay;
-    return (left.inMicroseconds + day - 1) ~/ day;
-  }
+  /// Whether the deal still runs at [now]: it ends at [endsAt] exactly.
+  bool runsAt(DateTime now) => endsAt.isAfter(now);
+
+  /// Whole days left at [now], rounded down: 25 hours left is 1 day, 1 hour
+  /// left is 0 ("ends today"). Only for a deal that [runsAt] [now].
+  int daysLeftAt(DateTime now) => endsAt.difference(now).inDays;
 }
 
 /// A store banner and where it leads.

@@ -325,6 +325,8 @@ class _FlowScopeHost extends StatelessWidget {
       controller: controller,
       outerNavigator: Navigator.maybeOf(context),
       outerCanPop: route != null && !route.isFirst,
+      outerRoute: route,
+      outerIsCurrent: route?.isCurrent ?? true,
       flowNavigatorObserver: flowNavigatorObserver,
       child: child,
     );

@@ -57,7 +57,11 @@ class StoreHomeFlow extends StatelessWidget {
     localizationsDelegates: const [StoreHomeL10n.delegate],
     // The flow's pages are screens (P-103): resolved inside the flow.
     observers: [
-      AnalyticsFlowObserver((context) => context.di<AnalyticsTracker>()),
+      AnalyticsFlowObserver(
+        (context) => context.di<AnalyticsTracker>(),
+        // Without a dependency on the host route (F-0056 §4).
+        host: (context) => FlowScope.read(context).outerRoute,
+      ),
     ],
     state: StoreHomeFlowState(
       rootCategory: switch (initialCategory) {

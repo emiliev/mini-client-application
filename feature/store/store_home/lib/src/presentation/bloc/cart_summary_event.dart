@@ -4,7 +4,7 @@ part of 'cart_summary_bloc.dart';
 sealed class CartSummaryEvent {
   const CartSummaryEvent();
 
-  /// The first load (the bloc adds it itself).
+  /// The first load: the page adds it once it is shown (F-0056 §1).
   const factory CartSummaryEvent.load() = _Load;
 
   /// Retry after a failure: loads this section again, and only this one.

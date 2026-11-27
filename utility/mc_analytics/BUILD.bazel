@@ -47,8 +47,21 @@ _TEST_DEPS = _DEPS + [
     "sessions_sinks_test",
     "di_test",
     "route_observer_test",
-    "flow_observer_test",
 ]]
+
+# T-0056: the flow observer, with a real FeatureFlow (test-only dependency).
+flutter_test(
+    name = "flow_observer_test",
+    size = "small",
+    srcs = ["test/support.dart"],
+    language_version = _LANG,
+    main = "test/flow_observer_test.dart",
+    package_name = _PKG,
+    deps = _TEST_DEPS + [
+        "//utility/mc_ds_theme",
+        "//utility/mc_feature_flow",
+    ],
+)
 
 # T-0053-AC3 and P-004: lib imports no network client and no third-party SDK.
 flutter_test(

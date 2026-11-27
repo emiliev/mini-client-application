@@ -26,12 +26,18 @@ const storeHomeBodyKey = ValueKey<String>('store_home.body');
 /// The store home: provides one bloc per section and nothing else (Tide).
 ///
 /// - **Sections are independent.** Each section has its own bloc, request
-///   and states. The blocs are created at once (`lazy: false`), so every
-///   section loads in parallel when the page opens, also those below the
-///   fold, which a lazy list has not built yet (F-0040 fact 6).
+///   and states. The blocs are created with the page (`lazy: false`), so
+///   every section loads in parallel when the visit starts, also those below
+///   the fold, which a lazy list has not built yet (F-0040 fact 6).
 /// - **The flag decides which sections exist**, read once when the page
 ///   opens: with `store.home_featured` off, the featured section and its bloc
 ///   are never created, so its endpoint is never called.
+/// - **A visit starts when the page is shown** (F-0056 §1): the blocs exist
+///   but stay idle while the page is built under another screen (the store
+///   below a cold `/store/categories/:id` link). The first time the page is
+///   the flow's top page and the flow's route is the app's current route,
+///   every section loads, once; the visit lasts as long as the page, so a
+///   comic opened and closed over the store loads and tracks nothing again.
 class StoreHomePage extends StatefulWidget {
   const StoreHomePage({super.key});
 
@@ -63,10 +69,44 @@ class _StoreHomePageState extends State<StoreHomePage> {
   }
 }
 
-class _StoreHomeContent extends StatelessWidget {
+class _StoreHomeContent extends StatefulWidget {
   const _StoreHomeContent({required this.featured});
 
   final bool featured;
+
+  @override
+  State<_StoreHomeContent> createState() => _StoreHomeContentState();
+}
+
+class _StoreHomeContentState extends State<_StoreHomeContent> {
+  bool _started = false;
+
+  bool get featured => widget.featured;
+
+  /// Depends on the flow page's route and on the flow's own route
+  /// (`FlowScope.outerIsCurrent`), so it runs again when either changes.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final shown =
+        (ModalRoute.of(context)?.isCurrent ?? true) &&
+        (FlowScope.maybeOf(context)?.outerIsCurrent ?? true);
+    if (shown && !_started) {
+      _started = true;
+      _startAll(context);
+    }
+  }
+
+  /// The visit starts: every section loads at once, each on its own.
+  void _startAll(BuildContext context) {
+    context.read<BannersBloc>().add(const BannersEvent.load());
+    context.read<DealsBloc>().add(const DealsEvent.load());
+    context.read<CategoriesBloc>().add(const CategoriesEvent.load());
+    if (featured) {
+      context.read<FeaturedBloc>().add(const FeaturedEvent.load());
+    }
+    context.read<CartSummaryBloc>().add(const CartSummaryEvent.load());
+  }
 
   /// Pull to refresh: every section reloads at once, each on its own; the
   /// control closes when all of them have their answers.

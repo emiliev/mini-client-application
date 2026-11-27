@@ -26,7 +26,9 @@ part 'cart_summary_state.dart';
 ///   whatever the answer, the session decides what shows next.
 /// - **The session decides.** It follows `SessionReader.authState`: a
 ///   sign-in, a sign-out or a user switch anywhere reloads the section for
-///   the session now current, once per session epoch.
+///   the session now current, once per session epoch. An answer that arrives
+///   for an older epoch (a same-user re-sign-in sends no `authState` event)
+///   also reloads it.
 /// - **Every await is a session boundary** (F-0040 fact 21): a cart read
 ///   started for one session and answered under another is dropped before
 ///   any state is written, and the request itself is pinned to its epoch
@@ -50,7 +52,7 @@ final class CartSummaryBloc
     _sessionChanges = _session.authState.listen(
       (_) => add(const _SessionChanged()),
     );
-    add(const CartSummaryEvent.load());
+    // Idle until the page is shown: the page adds `load` (a visit).
   }
 
   final StoreHomeRepository _repository;
@@ -80,7 +82,8 @@ final class CartSummaryBloc
           done.complete();
         }
       case _SessionChanged():
-        if (_session.epoch != _shownEpoch) {
+        // Not before the page started the section (`_shownEpoch` is null).
+        if (_shownEpoch != null && _session.epoch != _shownEpoch) {
           await _show(emit);
         }
       case _SignIn():
@@ -125,9 +128,14 @@ final class CartSummaryBloc
   Future<Result<CartSummary, ApiFailure>?> fetch() async {
     final epoch = _session.epoch;
     final result = await _repository.fetchCart(epoch: epoch);
-    // An answer for a session that is gone is dropped; that session's
-    // change reloads the section (or already has).
-    return _session.epoch == epoch ? result : null;
+    if (_session.epoch == epoch) {
+      return result;
+    }
+    // An answer for a session that is gone is dropped, and the section
+    // reloads for the session now current. A sign-in as the same user starts
+    // a new epoch without an `authState` event, so nothing else would.
+    add(const _SessionChanged());
+    return null;
   }
 
   @override
