@@ -301,6 +301,7 @@ Feature: Favourite a comic
     And I tap {'Add to favourites'}
     And the app finishes writing to storage
     Then the backend received {0} requests for {'PUT /v1/me/favourites/comic/501500'}
+    And the session belongs to {'collector@mini-client.test'}
     And the backend received {0} requests for {'DELETE /v1/me/favourites/comic/501500'}
     And I see {'Add to favourites'}
     And the app announced {0} change to {'favourites'}
@@ -321,6 +322,7 @@ Feature: Favourite a comic
     And comic {501500} is a favourite of {'collector@mini-client.test'}
     And comic {501500} is a favourite of {'reader@mini-client.test'}
     And the app announced {0} change to {'favourites'}
+    And the session belongs to {'collector@mini-client.test'}
 
   @T-0041-AC6
   Scenario: Two pages of the same comic agree after one of them writes

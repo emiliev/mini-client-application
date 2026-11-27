@@ -200,6 +200,7 @@ Feature: The editor stays consistent while requests are in flight
     And I tap {'Create list'}
     And the app finishes writing to storage
     Then the backend received {0} requests for {'POST /v1/me/lists'}
+    And the session belongs to {'collector@mini-client.test'}
     And I see {'You are no longer signed in as before'}
     And the editor has not ended
     And {'collector@mini-client.test'} has {1} reading lists
@@ -219,6 +220,7 @@ Feature: The editor stays consistent while requests are in flight
     And I tap {'Save changes'}
     And the app finishes writing to storage
     Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}
+    And the session belongs to {'collector@mini-client.test'}
     And the backend received {'PUT /v1/me/lists/l-1'} with a token of {'reader@mini-client.test'}
     And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}
     And I see {'You are no longer signed in as before'}
@@ -239,6 +241,7 @@ Feature: The editor stays consistent while requests are in flight
     And I tap {'Save changes'}
     And the app finishes writing to storage
     Then the backend received {0} requests for {'PUT /v1/me/lists/l-1'}
+    And the session belongs to {'collector@mini-client.test'}
     And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}
     And I see {'You are no longer signed in as before'}
     And the app announced {0} change to {'readingLists'}

@@ -414,6 +414,22 @@ void main() {
       },
     );
 
+    test('T-0050-AC3 (P-093) reject for a field on another step does not move '
+        'the wizard while completing', () async {
+      final gate = Completer<Result<String, ApiFailure>>();
+      final h = _Harness(onComplete: (_) => gate.future)..fillAll();
+      final running = h.controller.complete();
+      expect(h.s.isCompleting, isTrue);
+      final before = h.states.length;
+
+      h.controller.reject('books', taken);
+
+      expect(h.s.stepIndex, 0, reason: 'the books are on step 1');
+      expect(h.states.length, before, reason: 'nothing was emitted');
+      gate.complete(success('ok'));
+      await running;
+    });
+
     test('T-0048-AC2 reject is ignored while completing, once completed and '
         'after dispose', () async {
       final gate = Completer<Result<String, ApiFailure>>();
