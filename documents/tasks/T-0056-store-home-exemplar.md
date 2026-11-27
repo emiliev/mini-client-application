@@ -174,5 +174,19 @@ No test was deleted, skipped or weakened, and there is no `// ignore:`. Two exis
 - `app/sandbox/commerce_sandbox` (P1-21 lists it; out of this task's scope), as P-091 did for the library sandbox.
 - `openCheckout`, `openPromo` and the cart screen, with checkout (F078).
 - `mcgen wire` for `flow_scope.dart`.
-- `AnalyticsFlowObserver` misses an inner page change made while a dialog covers the route (no screen does that today).
 - Other features' in-flow pages (the characters preview, the wizard steps) could adopt `AnalyticsFlowObserver`; their page names are not screen names yet.
+
+## Review round (TL `/code-review`, 2 important, 5 nits)
+The TL accepted the scope decisions above and asked for **ADR-0012** ([draft, Proposed](../adr/0012-analytics-tracker-port.md)): the `AnalyticsTracker` port, the flow observer, the rule "a flow's first page has the same name as its route", and the visit definition. `origin/main` was merged first (`ecc7d54`, docs only).
+
+| # | Finding | Fix | Pinned by |
+|---|---|---|---|
+| 1 (important) | The cart stayed on its skeleton after a same-user re-sign-in: no `authState` event, and `fetch()` dropped the answer | A dropped answer adds the session event itself, so the section reloads for the epoch now current (one mechanism rather than also `epochChanges`, so the mutant stays killable; F-0056 §2) | BDD "A same-user re-sign-in while the cart is loading ends on that user's cart"; mutant V01 |
+| 2 (important) | A cold `/store/categories/:id` built the store page under the category, whose eager blocs loaded and tracked all sections | The blocs are idle until the page adds `load`, the first time the page is shown (its flow page is on top and `FlowScope.outerIsCurrent`, new in `mc_feature_flow`). The visit is the page's life; a comic over it is the same visit (F-0056 §1, ADR-0012) | `flow_scope_test` (built under a cover: 0 requests, 0 views; uncovered: 1 each; covered again: no change); `mini_client:analytics_screens_test` (cold category link: 0 store requests and 0 views; Back: 1 each; comic and Back: no change); `mc_feature_flow:feature_flow_test`; mutants V02, V03, V04, V08 |
+| 3 | A flow page changed under a popup was never tracked | The route observer, seeing the same route on top again, reports the flow's page when it differs from what it last reported | `flow_observer_test` (popup over the host, page change, close: tracked once; a second popup: nothing); V05 |
+| 4 | `ModalRoute.of` made the flow navigator depend on the host route | `AnalyticsFlowObserver(..., host:)`; the flow passes `FlowScope.read(c).outerRoute` (new field, no dependency) | `flow_observer_test`: the flow navigator has no `_ModalScopeStatus` dependency (fails with `ModalRoute.of`), and covering the host rebuilds no flow page; V06, V07 |
+| 5 | An ended deal said "Ends today" | Ended deals are left out (a deal runs until `endsAt` exactly), an all-ended list is the empty state; days left round down (25 h "Ends in 1 day", 23 h and 1 h "Ends today") | `contract_test` boundaries (8 d, 25 h, 1 d, 23 h, 1 h, 1 µs, at `endsAt`, after); `flow_scope_test` (25 h, exactly 2 d, 23 h, all ended); V09, V10, D06 |
+| 6 | Flow page names skipped the declared-name filter | Kept exempt, documented (go_router's path fallback does not exist for a flow page); `isValidName` still applies, and unnamed or invalid flow pages are recorded so the page before them is never reported | `flow_observer_test` (an invalid and an unnamed page, then a comic and Back); V11, V12 |
+| 7 | "Dein Warenkorb werden geladen" | de `Wird geladen: {section}` | BDD "In German a loading section is announced in a number-neutral phrase"; no golden changed (none is German) |
+
+Results after the round: see the handoff report (mutations, gates, the 50-run flake check, and the store e2e plus one existing journey on `mc-T-0056-engineer-*`).

@@ -129,8 +129,11 @@ the consent is, so a bug shows in a debug build before anyone has consented.
   flow's navigator (`FeatureFlow(observers: [...])`, T-0056, P-103): name the
   flow's pages with their screen names and its first page as its route; the
   first page is then not tracked twice, a page pushed or popped inside the flow
-  is tracked, and coming back to the route tracks the page the flow shows.
-  Rules and examples: F-0056 §4.
+  is tracked, a page changed under another screen or a popup is tracked when
+  the route comes back, and coming back to the route tracks the page the flow
+  shows. Pass `host: (c) => FlowScope.read(c).outerRoute`: the host route is
+  looked up without a dependency (`ModalRoute.of` would rebuild the flow's
+  navigator on every status change). Rules and examples: F-0056 §4, ADR-0012.
 
 ## DI
 

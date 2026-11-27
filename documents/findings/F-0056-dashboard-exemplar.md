@@ -3,7 +3,7 @@
 - **Date:** 2026-11-27
 - **Author:** crew: Engineer (T-0056)
 - **Type:** Design record / Lesson / Kit gap
-- **Related:** T-0056, P1-21, plan 01 §3.3, §6.1, R15, R17, R30; F-0031, F-0040, F-0046, F-0048, F-0051, F-0052, F-0053; P-103, P-107
+- **Related:** T-0056, ADR-0012 (proposed), P1-21, plan 01 §3.3, §6.1, R15, R17, R30; F-0031, F-0040, F-0046, F-0048, F-0051, F-0052, F-0053; P-103, P-107
 
 ## Summary
 `store_home` is the fifth exemplar (DB): the store front in five independent sections (banners, deals, categories, featured, cart) and a paged category page inside the flow. It is the first feature to read a feature flag and to track analytics, so it sets both patterns. **No codegen shim failed on a real-world case**: the 20 freezed, json, retrofit and injectable outputs equal build_runner's (`T-0056-AC8_matches_build_runner.md`). The DB bricks copy sections 1 to 6; section 7 lists the traps.
@@ -15,12 +15,14 @@ Each section has its own bloc, its own sealed events (Tide's private cases) and 
 - **The newest answer wins.** Every load bumps a generation; an answer is written only if no load started after it (F-0046 fact 7). Both race orders are scenarios: a refresh's success beats an older load that fails later, and a refresh's failure beats an older load that succeeds later (`the backend holds the next {route}`, section 7).
 - **Retry is per section**, and only from `failure`: a second tap finds the section loading, so a double tap sends one request.
 - **Pull to refresh reloads every section at once.** The page adds `refresh(done)` to each bloc and waits for all; a refresh keeps the shown state until its answer lands.
-- **Every bloc is created when the page opens** (`BlocProvider(lazy: false)`). A lazy provider below the fold is never read until the user scrolls (the list is lazy, F-0040 fact 6), so its section would not load in parallel. Pinned by "Every section sends its request when the store opens, before any scrolling".
+- **Every section starts when the visit starts.** A lazy provider below the fold is never read until the user scrolls (the list is lazy, F-0040 fact 6), so the page's start reads every bloc itself and adds its `load` (the first handoff used `BlocProvider(lazy: false)`; with the explicit start that became dead code, and its mutant survived, so it was removed). Pinned by "Every section sends its request when the store opens, before any scrolling".
+- **A visit starts when the page is shown (review round).** The blocs are idle until the page adds `load`, which it does the first time it is *shown*: it is its flow's top page (`ModalRoute.of(context).isCurrent`) and its flow's route is the app's current route (`FlowScope.outerIsCurrent`, new). go_router builds the store page under a cold `/store/categories/:id` link, and the first handoff loaded and tracked all five sections there. **A visit** is the page's life, from that first showing to its disposal: a comic opened and closed over the store is the same visit, so nothing loads or is viewed again. Pinned by `flow_scope_test` (a page built under a cover loads nothing; once uncovered, one request and one view per section; covered again, no change) and `mini_client:analytics_screens_test` (the cold category link, then Back, then a comic and Back).
 - **The open guard** (500 ms, the other exemplars' value) is in the base; a different item goes through at once, a second category tap while the first page slides in keeps the first.
 
 ## 2. The session-dependent section (the cart)
 - Signed out, the summary is hidden and the section offers to sign in; a tap awaits `requestSignIn()`. **The session, not the answer, decides** what shows next: a sign-in elsewhere while the store waits is just as good.
-- The section listens to `SessionReader.authState` and reloads once per epoch (`_shownEpoch`).
+- The section listens to `SessionReader.authState` and reloads once per epoch (`_shownEpoch`; not before the visit started).
+- **A dropped answer reloads (review round).** A sign-in as the same user starts a new epoch with no `authState` event (F-0052 decision 3), so the first handoff dropped the answer and stayed on its skeleton. Now `fetch()`, on finding the epoch moved, adds the session event itself, and the section reloads for the epoch now current. Pinned by "A same-user re-sign-in while the cart is loading ends on that user's cart". (`SessionEpochs.epochChanges` would also have worked; the drop-reload covers every missed event, needs no cast to `SessionEpochs`, and one mechanism keeps both mutants killable.)
 - **Check after every await, before every write** (F-0040 fact 21): `fetch()` reads the epoch, sends the request pinned to it (`authPinned`, T-0050), and answers null when the epoch moved, so the base writes nothing. A user switch right before the read leaves (`signs in just before the app sends`) ends on the new user's cart with no error reported.
 - The first handoff also invalidated in-flight loads on sign-out and checked `state is _Ready` before opening the cart; both were dead guards behind the epoch check and the UI (no test could kill them) and were removed (F-0051: a dead guard is worse than none).
 
@@ -39,12 +41,16 @@ Each section has its own bloc, its own sealed events (Tide's private cases) and 
   - a page pushed or popped inside the flow is tracked while the flow's route is current; one changed while another screen covers it is tracked when the route comes back;
   - coming back to the route (Back from a comic) tracks **the page the flow shows**, not the route's name: the route observer reads the flow observer's per-route record.
   So store → category → back is `store_home, store_category, store_home` in the app, and category → comic → back is `…, comics_details, store_category`. In a feature test (no route observer) the first page is tracked too. `mc_analytics:flow_observer_test` and `mini_client:analytics_screens_test` pin both.
+- **Review round.**
+  - **The host is looked up without a dependency:** `AnalyticsFlowObserver(tracker, host: (c) => FlowScope.read(c).outerRoute)`. `ModalRoute.of` from the flow navigator's context made that navigator depend on the host route's status. The test checks that the flow navigator lists no `_ModalScopeStatus` dependency (it fails with `ModalRoute.of`), and that covering the host rebuilds no flow page.
+  - **A page changed under a popup** (a dialog over the host) is tracked when the popup closes: the route observer, seeing the same route on top again, reports the flow's page if it differs from what it last reported for that route.
+  - **Unnamed and invalid flow page names** are recorded (as `''` or the name) but not tracked, so coming back to the route never reports the page *before* them. Flow page names pass `AnalyticsRules.isValidName` and are exempt from the router's declared-name filter: that filter exists because go_router names an unnamed page by its path, and a flow page has no path (`McFlowPage.name` is its declaration).
 
 ## 5. Money
 - **Integer cents end to end.** DTO fields are `int ...Cents`; the domain holds `Money(minorUnits, Currency)`; `Currency.parse('EUR')` (new in `mc_formatters`) refuses an unknown or lower-case code with a `FormatException` (so a bad body is `ApiMalformed`). The feature formats with `formatMoney(money, locale)`: `€12.99` in en, `12,99 €` (no-break space) in de; `mc_formatters` tests every cent below €100 digit for digit.
 - `architecture_test` fails on any `double`, `num`, `toDouble`, `round`, `floor`, `ceil` or `truncate` in the generator-read files (domain, blocs, flags), with controls.
 - Test oracles never use the app's formatter: the env's `euros(cents)` and `eurosDe(cents)` build the expected text from the cents, and the cart's expected count and total come from the backend engine, read with a minted token.
-- **"Ends in N days" against an injected clock.** The flow takes `clock`, provides it as `StoreClock` (flow-provided, not a root import), and the deals bloc stamps its `ready` state with `now`; `Deal.daysLeftAt(now)` rounds up and is 0 once ended. The wiring passes the mocked backend's fixed clock (`commerceClock`), so the app's deals end 1 to 8 days after `2026-01-01`.
+- **"Ends in N days" against an injected clock.** The flow takes `clock`, provides it as `StoreClock` (flow-provided, not a root import), and the deals bloc reads it when the deals arrive. **Ended deals are left out (review round):** a deal runs until `endsAt` exactly (`Deal.runsAt`), so one at or after its end is not shown, and a list of only ended deals is the empty state. `daysLeftAt` counts whole days, rounded down: 25 h is "Ends in 1 day", 23 h and 1 h are "Ends today". Boundaries are pinned in `contract_test` and `flow_scope_test`. The wiring passes the mocked backend's fixed clock (`commerceClock`), so the app's deals end 1 to 8 days after `2026-01-01`.
 
 ## 6. Navigation shape
 - Four navigator methods: `openComic`, `openSearch`, `openCart` (a placeholder route `/store/cart` for now) and `requestSignIn`. Deferred: `openCheckout()` and `openPromo(code)`.
@@ -76,4 +82,3 @@ Each section has its own bloc, its own sealed events (Tide's private cases) and 
 - `app/sandbox/commerce_sandbox` (P1-21 lists it; out of this task's scope), as P-091 did for the library sandbox.
 - `openCheckout`, `openPromo` and the cart screen with the checkout feature (F078).
 - `mcgen wire` for `flow_scope.dart` (as every exemplar).
-- `AnalyticsFlowObserver` misses an inner page change made while a dialog covers the flow's route (the route observer skips the same route coming back); no screen does that today.

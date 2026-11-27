@@ -187,8 +187,8 @@ mutate P04 "a product tap opens nothing" "$P" "$T_BDD" \
 # --- the page, the flow, the data -----------------------------------------
 mutate G01 "the featured flag is ignored" "$F/presentation/page/store_home_page.dart" "$T_BDD" \
   $'    storeHomeFeatured,\n  );' $'    storeHomeFeatured,\n  ) || true;'
-mutate G02 "the cart bloc is created lazily (below the fold)" "$F/presentation/page/store_home_page.dart" "$T_BDD" \
-  'BlocProvider(lazy: false, create: (c) => c.di<CartSummaryBloc>()),' 'BlocProvider(create: (c) => c.di<CartSummaryBloc>()),'
+mutate G02 "the visit's start skips the cart (it loads only when scrolled to)" "$F/presentation/page/store_home_page.dart" "$T_BDD" \
+  $'    context.read<CartSummaryBloc>().add(const CartSummaryEvent.load());\n' ''
 mutate G03 "pull to refresh skips the deals" "$F/presentation/page/store_home_page.dart" "$T_BDD" \
   $'      one((d) => context.read<DealsBloc>().add(DealsEvent.refresh(d))),\n' ''
 mutate G04 "the flow ignores the injected clock" "$F/flow/store_home_flow.dart" "$T_BDD //feature/store/store_home:flow_scope_test" \
