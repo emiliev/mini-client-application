@@ -112,6 +112,7 @@ Future<void> _settleRealIo(WidgetTester tester) async {
       return;
     }
   }
+  fail('the sign-in sheet did not close');
 }
 
 void main() {
@@ -290,29 +291,35 @@ void main() {
     );
   });
 
-  mcTestWidgets('T-0067-AC3 the route targets build each flow with the wiring '
-      'navigator', (tester) async {
-    final session = McTestSession.current;
-    final ref = RouterRef();
-    await McTestContainer.initialize(
-      session,
-      wirings: [RouterDIInitializer(ref), const UniverseWiringDIInitializer()],
-    );
-    final router = ref.attach(GoRouter(routes: universeRoutes));
-    addTearDown(router.dispose);
+  mcTestWidgets(
+    'T-0041-AC8 T-0067-AC3 the route targets build each flow with the wiring '
+    'navigator',
+    (tester) async {
+      final session = McTestSession.current;
+      final ref = RouterRef();
+      await McTestContainer.initialize(
+        session,
+        wirings: [
+          RouterDIInitializer(ref),
+          const UniverseWiringDIInitializer(),
+        ],
+      );
+      final router = ref.attach(GoRouter(routes: universeRoutes));
+      addTearDown(router.dispose);
 
-    final targets = diContainer<UniverseRouteTargets>();
-    expect(
-      targets.characters().navigator,
-      same(diContainer<CharactersListNavigator>()),
-    );
-    final profile = targets.characterDetails(7);
-    expect(profile.characterId, const details.CharacterId(7));
-    expect(
-      profile.navigator,
-      same(diContainer<details.CharacterDetailsNavigator>()),
-    );
-  });
+      final targets = diContainer<UniverseRouteTargets>();
+      expect(
+        targets.characters().navigator,
+        same(diContainer<CharactersListNavigator>()),
+      );
+      final profile = targets.characterDetails(7);
+      expect(profile.characterId, const details.CharacterId(7));
+      expect(
+        profile.navigator,
+        same(diContainer<details.CharacterDetailsNavigator>()),
+      );
+    },
+  );
 
   test('T-0033-AC2 every AppLocations entry equals its typed route', () {
     final drift = <String, ({String location, String route})>{

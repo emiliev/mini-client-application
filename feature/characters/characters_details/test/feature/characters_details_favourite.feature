@@ -353,3 +353,32 @@ Feature: Favourite a character
     And the backend received {1} requests for {'PUT /v1/me/favourites/character/100002'}
     And the backend received {3} requests for {'GET /v1/me/favourites/character/100002'}
     And the app announced {1} change to {'favourites'}
+
+  @T-0067-AC3
+  Scenario: An announcement that arrives during a write is applied when the write settles
+    Given I am signed in as {'reader@mini-client.test'}
+    When I open character {100002}
+    Given the backend holds {'PUT /v1/me/favourites/character/100002'}
+    When I tap {'Add to favourites'}
+    And the app sends {'PUT /v1/me/favourites/character/100002'}
+    And another page announces a change to {'favourites'}
+    Then the backend received {1} requests for {'GET /v1/me/favourites/character/100002'}
+    When the backend releases {'PUT /v1/me/favourites/character/100002'}
+    And the app finishes writing to storage
+    Then I see {'Remove from favourites'}
+    And the backend received {2} requests for {'GET /v1/me/favourites/character/100002'}
+    And the app announced {2} change to {'favourites'}
+    And character {100002} is a favourite of {'reader@mini-client.test'}
+
+  @T-0067-AC3
+  Scenario: A refresh caused by an announcement keeps the toggle as it was, enabled
+    Given I am signed in as {'reader@mini-client.test'}
+    When I open character {100000}
+    Then the favourite toggle shows {'Remove from favourites'} enabled and on
+    Given the backend holds {'GET /v1/me/favourites/character/100000'}
+    When another page announces a change to {'favourites'}
+    Then the backend received {2} requests for {'GET /v1/me/favourites/character/100000'}
+    And the favourite toggle shows {'Remove from favourites'} enabled and on
+    And I don't see {'Add to favourites'}
+    When the backend releases {'GET /v1/me/favourites/character/100000'}
+    Then the favourite toggle shows {'Remove from favourites'} enabled and on
