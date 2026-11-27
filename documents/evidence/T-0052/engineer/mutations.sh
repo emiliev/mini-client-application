@@ -136,12 +136,8 @@ mutate "E1 a result for an old epoch is applied" $F 'if (_disposed || epoch != _
         return;'
 mutate "E2 the remote values of the old epoch are kept" $F '    _remote = null;
     _seenEpoch = epoch;' '    _seenEpoch = epoch;'
-mutate "E3 another user's values are kept as last-known-good" $F 'userId == _seenUserId
-        ?' "userId == _seenUserId || userId != null
-        ?"
-mutate "E4 the same user's values are dropped on a new epoch" $F 'userId == _seenUserId
-        ?' "userId == '__never__'
-        ?"
+mutate "E3 another user's values are kept as last-known-good" $F '_lastKnownGood = userId == _seenUserId ?' "_lastKnownGood = userId == _seenUserId || userId != null ?"
+mutate "E4 the same user's values are dropped on a new epoch" $F '_lastKnownGood = userId == _seenUserId ?' "_lastKnownGood = userId == '__never__' ?"
 mutate "E5 value() does not notice a new epoch" $F 'T value<T extends Object>(FeatureFlag<T> flag) {
     _observeEpoch();' 'T value<T extends Object>(FeatureFlag<T> flag) {'
 mutate "E6 the session stream does not trigger the refetch" $F '_authSubscription = _session.authState.listen((_) {
