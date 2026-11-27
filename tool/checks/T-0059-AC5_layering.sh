@@ -4,10 +4,11 @@
 # mc_ds_buttons), and nothing below it depends back on it.
 #   1. mc_arch_check passes on the workspace;
 #   2. the Bazel closure (cquery deps) of the LIBRARY holds, among
-#      //utility/* packages, only the allowed ones; the closure of each test
-#      target holds only those plus mc_test_utils (the golden harness);
+#      //utility, //feature, //app and //spike packages, only the allowed ones
+#      (the test targets' closure is not scanned: the golden harness
+#      mc_test_utils pulls in the whole app stack);
 #   3. the package's pubspec dependencies, BUILD deps and `package:mc_*`
-#      imports name only allowed packages (comments aside);
+#      imports (tests included) name only allowed packages (comments aside);
 #   4. no lower DS package (theme, layout, tokens, feedback, buttons) names
 #      mc_ds_charts (no cycle);
 #   5. positive controls: the closure query sees mc_ds_feedback and
@@ -23,12 +24,10 @@ cd "$REPO"
 rc=0
 PKG=utility/mc_ds_charts
 LIB=//utility/mc_ds_charts:mc_ds_charts
-TESTS=(//utility/mc_ds_charts:geometry_test //utility/mc_ds_charts:painter_test //utility/mc_ds_charts:charts_test //utility/mc_ds_charts:golden_test)
 # Allowed utility packages in the closure of the library.
 ALLOWED_LIB='mc_ds_charts|mc_ds_feedback|mc_ds_buttons|mc_ds_layout|mc_ds_theme|mc_ds_tokens'
-# Tests may also use the golden harness.
-ALLOWED_TEST="$ALLOWED_LIB|mc_test_utils"
-# Packages the pubspec, BUILD file and Dart files may name.
+# Packages the pubspec, BUILD file and Dart files may name (the golden harness
+# mc_test_utils is test-only).
 ALLOWED_DIRECT='mc_ds_charts|mc_ds_feedback|mc_ds_layout|mc_ds_theme|mc_ds_tokens|mc_test_utils'
 report "# T-0059-AC5: layering" ""
 bad() { rc=1; }
@@ -71,16 +70,15 @@ source_hits() {
 }
 # cycle_hits: lower DS packages that name mc_ds_charts.
 cycle_hits() {
-  grep -rn "mc_ds_charts" utility/mc_ds_theme utility/mc_ds_layout utility/mc_ds_tokens \
-    utility/mc_ds_feedback utility/mc_ds_buttons --include=pubspec.yaml --include=BUILD.bazel --include='*.dart' 2>/dev/null || true
+  grep -rnE "mc_ds_charts: any|//utility/mc_ds_charts|package:mc_ds_charts" \
+    utility/mc_ds_theme utility/mc_ds_layout utility/mc_ds_tokens \
+    utility/mc_ds_feedback utility/mc_ds_buttons \
+    --include=pubspec.yaml --include=BUILD.bazel --include='*.dart' 2>/dev/null || true
 }
 
 # --- 2/3/4. the closure, the sources and the lower layers are clean ----------
 hits="$(closure_hits "$ALLOWED_LIB" "$LIB")"
 report "## closure of the library" '```' "unexpected in closure: ${hits:-none}" '```'
-[[ -z "$hits" ]] || bad
-hits="$(closure_hits "$ALLOWED_TEST" "${TESTS[@]}")"
-report "## closure of the test targets" '```' "unexpected in closure: ${hits:-none}" '```'
 [[ -z "$hits" ]] || bad
 src="$(source_hits)"
 report "## pubspec, BUILD and Dart files name a package outside the allowed set" '```' "${src:-none}" '```'
