@@ -41,9 +41,7 @@ final class CartSummaryBloc
     AnalyticsTracker tracker,
     Monitoring monitoring,
   ) : super(
-        _session.isSignedIn
-            ? const CartSummaryState.loading()
-            : const CartSummaryState.signedOut(),
+        const CartSummaryState.loading(),
         monitoring: monitoring,
         tracker: tracker,
         section: StoreSection.cart,
@@ -88,7 +86,7 @@ final class CartSummaryBloc
       case _SignIn():
         await _signIn(emit);
       case _Open():
-        if (state is _Ready && startOpenGuard(StoreItemKind.cart)) {
+        if (startOpenGuard(StoreItemKind.cart)) {
           tracker.itemTapped(section, StoreItemKind.cart, 'summary');
           _navigator.openCart();
         }
@@ -99,8 +97,7 @@ final class CartSummaryBloc
   Future<void> _show(Emitter<CartSummaryState> emit) async {
     _shownEpoch = _session.epoch;
     if (!_session.isSignedIn) {
-      // A read still on its way belongs to a session that is gone.
-      invalidate();
+      // A read still on its way is dropped by [fetch]: its session is gone.
       emit(const CartSummaryState.signedOut());
       return;
     }

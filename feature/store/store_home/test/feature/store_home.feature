@@ -135,6 +135,18 @@ Feature: The store front
     Then the app was asked to open comic {501501} {4} times
 
   @T-0056-AC3
+  Scenario: Two different deals tapped in one frame open both comics
+    When I open the store
+    And I tap {'Amber Frontier #2'} and {'Brass Reckoning #1'} in the {'deals'} section in quick succession
+    Then the app was asked to open comic {501501} {1} times, then comic {502240}
+
+  @T-0056-AC3
+  Scenario: A second category tapped while the first opens keeps the first
+    When I open the store
+    And I tap {'Heroes'} and {'Villains'} in the {'categories'} section in quick succession
+    Then the category page of {'heroes'} is open, titled {'Heroes'}
+
+  @T-0056-AC3
   Scenario: A featured comic opens its comic, once
     When I open the store
     And I tap {'Amber Crossing #1'} in the {'featured'} section

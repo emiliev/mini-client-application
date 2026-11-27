@@ -29,6 +29,15 @@ Feature: Independent sections
       | 'store.cart_error'       | 'cart'       |
 
   @T-0056-AC6
+  Scenario: Every section sends its request when the store opens, before any scrolling
+    When I open the store
+    Then the backend received {1} requests for {'GET /v1/store/banners'}
+    And the backend received {1} requests for {'GET /v1/store/deals'}
+    And the backend received {1} requests for {'GET /v1/store/categories'}
+    And the backend received {1} requests for {'GET /v1/store/featured'}
+    And the backend received {1} requests for {'GET /v1/me/cart'}
+
+  @T-0056-AC6
   Scenario: A slow section never blocks the others from rendering
     Given the backend holds {'GET /v1/store/deals'}
     When I open the store

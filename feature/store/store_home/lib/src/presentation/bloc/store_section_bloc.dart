@@ -104,9 +104,6 @@ abstract base class StoreSectionBloc<E, S, T> extends McBloc<E, S> {
     }
   }
 
-  /// Makes every load in flight stale: its answer will not be shown.
-  void invalidate() => _generation++;
-
   /// False while a hand-over of the same [target] still guards (the second
   /// tap of a double tap); else starts the guard for it. Another target goes
   /// through at once.

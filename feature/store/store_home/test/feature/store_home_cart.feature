@@ -113,3 +113,15 @@ Feature: The cart summary follows the session
     Then the backend received {2} requests for {'GET /v1/store/deals'}
     And the backend received {0} requests for {'GET /v1/me/cart'}
     And the {'cart'} section shows {'Sign in to see your cart.'}
+
+  @T-0056-AC3
+  Scenario: A user switch right before the cart read is sent shows the new user's cart and nothing fails
+    Given I am signed in as {'reader@mini-client.test'}
+    And {'collector@mini-client.test'} signs in just before the app sends {'GET /v1/me/cart'}
+    When I open the store
+    And the app finishes writing to storage
+    Then the cart section shows the cart of {'collector@mini-client.test'}
+    And the session belongs to {'collector@mini-client.test'}
+    And the backend received {1} requests for {'GET /v1/me/cart'}
+    And the backend received {'GET /v1/me/cart'} with a token of {'collector@mini-client.test'}
+    And no error was reported
