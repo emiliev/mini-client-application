@@ -9,7 +9,7 @@ INFO: Build completed successfully, 1 total action
    33 files from //feature/store/store_home:_stage
 == 3. Resolve (hosted versions must equal the committed overlay lock)
 == 4. build_runner
-  Built with build_runner/aot in 20s; wrote 13 outputs.
+  Built with build_runner/aot in 15s; wrote 13 outputs.
    dart analyze: no unresolved imports
 == 5. Compare with bazel-bin (declared outputs only)
 EQUAL   feature/store/store_home/lib/src/domain/api/store_home_api.g.dart  sha256 ef942a77d8c02777
@@ -31,7 +31,7 @@ INFO: Build completed successfully, 1 total action
 ADDED bloc characters clock flutter flutter_bloc freezed_annotation intl material_color_utilities nested provider retrofit sky_engine vector_math
    analyzer "14.1.0", lean_builder "1.2.2"
 == 4. build_runner
-  Built with build_runner/aot in 15s; wrote 9 outputs.
+  Built with build_runner/aot in 13s; wrote 9 outputs.
 == 5. Compare with bazel-bin
 EQUAL   feature/store/store_home/lib/src/di/di_initializer.config.dart  sha256 92c89703d9ad74d0
 EQUAL   feature/store/store_home/lib/src/domain/api/store_home_api.injectable.json (shard)  sha256 21667e246ae74b7e

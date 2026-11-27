@@ -1,0 +1,84 @@
+# e2e_ios.sh: T-0056 engineer on mc-T-0056-engineer-28158 (580F8574-9A30-4FA9-9854-03F9338AD721)
+# cwd: /tmp/mc-T-0056-engineer-e2e/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/store_journey_test.dart -d 580F8574-9A30-4FA9-9854-03F9338AD721
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient
+# --- runner output ---
+Resolving dependencies in `/private/tmp/mc-T-0056-engineer-e2e`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/private/tmp/mc-T-0056-engineer-e2e`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           25.1s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55679/fnYt08TstCY=/
+VMServiceFlutterDriver: Isolate found with number: 8681565506600667
+VMServiceFlutterDriver: Isolate 8681565506600667 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0056-AC5 home to the store, a deal and its comic, back, a category and its second page
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: store_home, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 3}
+flutter: [debug] BannersBloc: _Load _Loading -> _Loading
+flutter: [debug] DealsBloc: _Load _Loading -> _Loading
+flutter: [debug] CategoriesBloc: _Load _Loading -> _Loading
+flutter: [debug] FeaturedBloc: _Load _Loading -> _Loading
+flutter: [debug] CartSummaryBloc: _Load _Loading -> _SignedOut
+flutter: [debug] GET /v1/store/banners -> 200
+flutter: [debug] GET /v1/store/deals -> 200
+flutter: [debug] GET /v1/store/categories -> 200
+flutter: [debug] GET /v1/store/featured -> 200
+flutter: [debug] BannersBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: banners, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 4}
+flutter: [debug] DealsBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: deals, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 5}
+flutter: [debug] CategoriesBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: categories, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 6}
+flutter: [debug] FeaturedBloc: _Load _Loading -> _Ready
+flutter: [event] store_section_viewed {section: featured, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 7}
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [event] store_item_tapped {section: deals, kind: comic, id: 501501, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 8}
+flutter: [event] mc_screen_view {screen_name: comics_details, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 9}
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501501 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: store_home, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 10}
+flutter: [event] store_item_tapped {section: categories, kind: category, id: heroes, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 11}
+flutter: [event] mc_screen_view {screen_name: store_category, session_id: 1620bebd8d61bf011e4c5030c6c0e836, seq: 12}
+flutter: [debug] CategoryProductsBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/store/categories/heroes/products -> 200
+flutter: [debug] CategoryProductsBloc: _PageChanged _Loading -> _Success
+flutter: [debug] CategoryProductsBloc: _PageChanged _Success -> _Success
+flutter: [debug] GET /v1/store/categories/heroes/products -> 200
+flutter: [debug] CategoryProductsBloc: _PageChanged _Success -> _Success
+flutter: 00:21 +1: (tearDownAll)
+flutter: 00:21 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/40_home_store_entry.png (315801)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/41_store_sections.png (426450)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/42_store_lower_sections.png (394278)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/43_comic_from_deal.png (373204)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/44_back_to_store.png (424936)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/45_category_heroes.png (397444)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.BkNLak/screenshots/1-store_journey_test/46_category_page_two.png (407910)
+All tests passed.
+
+# exit code: 0

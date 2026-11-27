@@ -16,7 +16,7 @@
 | T-0056-AC8_gen_l10n_parity | PASS |
 | coverage >= 90 % (touched packages) | PASS |
 
-- tests: Executed 31 out of 192 tests: 192 tests pass.
-- coverage: == feature/store/store_home TOTAL 885/900 98.3% == app/wiring/commerce_wiring TOTAL 54/54 100.0% == app/wiring/app_core TOTAL 488/502 97.2% == utility/mc_analytics TOTAL 326/326 100.0% == utility/mc_feature_flow TOTAL 172/173 99.4% == utility/mc_monitoring TOTAL 29/30 96.7% == utility/mc_formatters TOTAL 33/33 100.0% (threshold 90 %)
+- tests: Executed 33 out of 195 tests: 195 tests pass.
+- coverage: == feature/store/store_home TOTAL 892/900 99.1% == app/wiring/commerce_wiring TOTAL 54/54 100.0% == app/wiring/app_core TOTAL 486/500 97.2% == utility/mc_analytics TOTAL 326/326 100.0% == utility/mc_feature_flow TOTAL 172/173 99.4% == utility/mc_monitoring TOTAL 29/30 96.7% == utility/mc_formatters TOTAL 33/33 100.0% (threshold 90 %)
 
 **PASS T-0056-AC8-gates**

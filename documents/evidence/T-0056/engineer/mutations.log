@@ -1,5 +1,5 @@
-# Review round, at f0bbab8, in two halves (MC_ONLY), each with its own baseline
-## half 1
+# Verifier round, at 728fd29, in three parts (MC_ONLY), each with its own baseline
+## part 1
 baseline: PASS
 M01 a stale answer is applied (no generation check): KILLED (//feature/store/store_home:bdd_test)
 M02 a refresh shows the skeleton instead of keeping the content: KILLED (//feature/store/store_home:bdd_test)
@@ -26,6 +26,11 @@ C04 a session change elsewhere is ignored: KILLED (//feature/store/store_home:bd
 C05 pull to refresh asks for the cart while signed out: KILLED (//feature/store/store_home:bdd_test)
 C06 signed out still asks for the cart: KILLED (//feature/store/store_home:bdd_test)
 C07 an empty cart shows as ready: KILLED (//feature/store/store_home:bdd_test)
+
+mutations: 25, killed: 25
+RESULT: PASS
+## part 2
+baseline: PASS
 P01 an unknown category is a failure, not not-found: KILLED (//feature/store/store_home:bdd_test)
 P02 the looked-up name never titles the page: KILLED (//feature/store/store_home:bdd_test)
 P03 the end of the list loads no next page: KILLED (//feature/store/store_home:bdd_test)
@@ -34,13 +39,6 @@ G01 the featured flag is ignored: KILLED (//feature/store/store_home:bdd_test)
 G02 the visit's start skips the cart (it loads only when scrolled to): KILLED (//feature/store/store_home:bdd_test)
 G03 pull to refresh skips the deals: KILLED (//feature/store/store_home:bdd_test)
 G04 the flow ignores the injected clock: KILLED (//feature/store/store_home:bdd_test)
-V01 a dropped cart answer does not reload (item 1): KILLED (//feature/store/store_home:bdd_test)
-V02 the store page starts while hidden (item 2): KILLED (//app/mini_client:analytics_screens_test)
-
-mutations: 35, killed: 35
-RESULT: PASS
-## half 2
-baseline: PASS
 D01 the cart read is not pinned to its session: KILLED (//feature/store/store_home:bdd_test)
 D02 every page is requested at offset 0: KILLED (//feature/store/store_home:bdd_test)
 D03 the deal price is the original price: KILLED (//feature/store/store_home:bdd_test)
@@ -57,6 +55,11 @@ F1 money always has 2 decimals: KILLED (//utility/mc_formatters:formatters_test)
 F2 money ignores the locale: KILLED (//utility/mc_formatters:formatters_test)
 F3 the minor-unit divisor is 100 per digit: KILLED (//utility/mc_formatters:formatters_test)
 F4 Currency.parse accepts lower case: KILLED (//utility/mc_formatters:formatters_test)
+
+mutations: 24, killed: 24
+RESULT: PASS
+## part 3
+baseline: PASS
 K1 a flow's first page is tracked again: KILLED (//app/mini_client:analytics_screens_test)
 K2 a flow page is tracked while hidden under another screen: KILLED (//app/mini_client:analytics_screens_test)
 K3 the route observer ignores what the flow shows: KILLED (//app/mini_client:analytics_screens_test)
@@ -65,6 +68,8 @@ K5 the tracker port's screens go nowhere: KILLED (//app/mini_client:analytics_sc
 K6 FeatureFlow drops its observers: KILLED (//utility/mc_feature_flow:feature_flow_test)
 U1 holdNext holds every request: KILLED (//feature/store/store_home:bdd_test)
 U2 the flag stub never reads the snapshot: KILLED (//utility/mc_test_steps:flag_steps_test)
+V01 a dropped cart answer does not reload (item 1): KILLED (//feature/store/store_home:bdd_test)
+V02 the store page starts while hidden (item 2): KILLED (//app/mini_client:analytics_screens_test)
 V03 the store page starts again on every showing (item 2): KILLED (//app/mini_client:analytics_screens_test)
 V04 the cart never follows the session once its visit starts (item 2): KILLED (//feature/store/store_home:bdd_test)
 V05 a flow page changed under a popup is never tracked (item 3): KILLED (//utility/mc_analytics:flow_observer_test)
@@ -75,6 +80,13 @@ V09 an ended deal is shown (item 5): KILLED (//feature/store/store_home:flow_sco
 V10 a deal still runs exactly at its end (item 5): KILLED (//feature/store/store_home:contract_test)
 V11 an invalid flow page name is tracked (item 6): KILLED (//utility/mc_analytics:flow_observer_test)
 V12 an invalid flow page is not recorded, so the page before it is reported (item 6): KILLED (//utility/mc_analytics:flow_observer_test)
+W01 the cart adds an event after it was closed (D2): KILLED (//feature/store/store_home:bdd_test)
+W02 a nested flow ignores the flow around it (D3): KILLED (//utility/mc_feature_flow:feature_flow_test)
+W03 the cart Retry ignores its state (D4, the Verifier's X02): KILLED (//feature/store/store_home:bdd_test)
+W04 the featured Retry ignores its state (D4, X03): KILLED (//feature/store/store_home:bdd_test)
+W05 the category Retry loads more instead (D1, X12): KILLED (//feature/store/store_home:bdd_test)
+W06 a refresh with the flag off reads the featured bloc (D4, X10): KILLED (//feature/store/store_home:bdd_test)
+W07 the flag is read on every build, not once per visit (D4, X09): KILLED (//feature/store/store_home:flow_scope_test)
 
-mutations: 34, killed: 34
+mutations: 27, killed: 27
 RESULT: PASS

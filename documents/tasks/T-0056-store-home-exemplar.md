@@ -230,4 +230,12 @@ Also from the probes: VP01 (each section held in turn blocks none of the other f
 
 **Mutants:** W01 to W07 are new. V01 was re-anchored on the guarded add, V02 on the simpler start condition, and V08 on the new `updateShouldNotify`. That makes 76 in all.
 
-**Results:** _filled in after the runs below._
+Results, at `728fd29` (the merge with `origin/main` at T-0058, plus this round):
+- **Mutations:** [76 of 76 killed](../evidence/T-0056/engineer/mutations.log), none broken and none timed out. They ran in three parts (25, 24, 27), each with its own green baseline. That is the 69 from the review round (V01, V02 and V08 re-anchored) plus W01 to W07.
+- **Gates:** [PASS](../evidence/T-0056/engineer/T-0056-AC8_gates.md): tests, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures, relative paths, byte identity, cutoff, not committed, gen-l10n parity.
+- **`test --lockfile_mode=error //...`:** [195/195](../evidence/T-0056/engineer/T-0056-AC8_lockfile_test.txt).
+- **Coverage:** store_home 892/900 = 99.1 % (98.3 % before; the category paging lines that D1 found are now covered), commerce_wiring 100 %, app_core 97.2 %, mc_analytics 100 %, mc_feature_flow 99.4 %, mc_monitoring 96.7 %, mc_formatters 100 %.
+- **[50-run flake check](../evidence/T-0056/engineer/runs_per_test_50.md):** 19 targets, 0 failures.
+- **e2e:** on a fresh `mc-T-0056-engineer-*` (deleted afterwards), [4/4 PASS](../evidence/T-0056/engineer/e2e_verifier/e2e-summary.md): the 3 store targets and `search_journey_test`. No build-failure marker, each log names its own AC test, and the screenshots are at most 1200 px.
+
+**Test integrity:** no test was deleted, skipped or weakened, and there is no `// ignore:`. The new tests are additions. The two dead code terms (`ModalRoute.of(...).isCurrent` in the page and the `outerRoute` identity check in `FlowScope.updateShouldNotify`) were removed from production code, not from tests.
