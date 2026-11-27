@@ -8,6 +8,9 @@
 #   source tool/checks/lib/format_gate.sh   # defines mc_format_gate [--fix]
 #
 # What it does:
+#   0. MC_DART (T-0068, CI): a command line for the Dart to use instead of `fvm dart`, e.g.
+#      MC_DART=dart on a runner whose PATH has Flutter 3.47.7 (.fvmrc). With it set, step 1 runs
+#      `$MC_DART pub get` online (a clean machine has no pub cache). Default stays `fvm dart`.
 #   1. `fvm dart pub get --offline` at the repo root when
 #      .dart_tool/package_config.json is missing. The formatter resolves
 #      `package:mc_analysis/analysis_options.yaml` through it; without it a
@@ -22,6 +25,7 @@
 # `dart format .` by hand.
 
 MC_FORMAT_DIRS=(app feature utility spike tool)
+read -r -a MC_DART_CMD <<< "${MC_DART:-fvm dart}"
 MC_FORMAT_GATE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mc_format_gate() {
@@ -29,9 +33,11 @@ mc_format_gate() {
   [ "${1:-}" != "--fix" ] || fix=1
   root="$(git -C "$MC_FORMAT_GATE_DIR" rev-parse --show-toplevel)" || return 2
   if [ ! -f "$root/.dart_tool/package_config.json" ]; then
-    echo "format gate: no .dart_tool/package_config.json; running 'fvm dart pub get --offline'" >&2
-    (cd "$root" && fvm dart pub get --offline >/dev/null) || {
-      echo "format gate: 'fvm dart pub get --offline' failed" >&2
+    local pub=(pub get --offline)
+    [ -z "${MC_DART:-}" ] || pub=(pub get)
+    echo "format gate: no .dart_tool/package_config.json; running '${MC_DART_CMD[*]} ${pub[*]}'" >&2
+    (cd "$root" && "${MC_DART_CMD[@]}" "${pub[@]}" >/dev/null) || {
+      echo "format gate: '${MC_DART_CMD[*]} ${pub[*]}' failed" >&2
       return 2
     }
   fi
@@ -39,9 +45,9 @@ mc_format_gate() {
     [ -d "$root/$d" ] && dirs+=("$d")
   done
   if [ "$fix" = 1 ]; then
-    (cd "$root" && fvm dart format "${dirs[@]}")
+    (cd "$root" && "${MC_DART_CMD[@]}" format "${dirs[@]}")
   else
-    (cd "$root" && fvm dart format --output=none --set-exit-if-changed "${dirs[@]}")
+    (cd "$root" && "${MC_DART_CMD[@]}" format --output=none --set-exit-if-changed "${dirs[@]}")
   fi
 }
 
