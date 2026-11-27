@@ -6,8 +6,8 @@
 #   2. build --config=lint //...
 #   3. run //tool/mc_arch_check:bin
 #   4. tool/rules_fork.sh check
-#   5. dart format --set-exit-if-changed (every Dart dir but tool/loc, P-066,
-#      and third_party/: vendored code keeps upstream's formatting)
+#   5. dart format through the shared gate (tool/checks/lib/format_gate.sh,
+#      T-0062: app, feature, utility, spike and tool; never third_party/)
 #   6. run //tool/l10n_check:bin over the repo
 #   7. the fixtures check (T-0031-AC6: no production feature or utility target
 #      depends on mc_fixtures_*; trivia_quiz is found by its glob) and the relative-path scan (T-0034-AC4)
@@ -47,8 +47,7 @@ gate "test //... (touched packages uncached)" tests
 gate "build --config=lint //..." bzw build --config=lint //...
 gate "mc_arch_check" bzw run //tool/mc_arch_check:bin
 gate "rules_fork.sh check" "$REPO/tool/rules_fork.sh" check
-gate "dart format" fvm dart format --output=none --set-exit-if-changed \
-  app feature spike utility tool/l10n_check tool/mc_arch_check
+gate "dart format (format_gate.sh)" "$REPO/tool/checks/lib/format_gate.sh"
 gate "l10n_check" bzw run //tool/l10n_check:bin -- "$REPO"
 # The closure checks take the output base on their own variable.
 ob=""
