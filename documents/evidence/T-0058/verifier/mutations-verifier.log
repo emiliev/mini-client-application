@@ -1,0 +1,28 @@
+baseline //utility/mc_ds_overlays:overlays_test: PASS
+baseline //utility/mc_test_steps:overlay_steps_test: PASS
+baseline //app/wiring/app_core:sign_in_sheet_test: PASS
+confirm answers false: KILLED (FAIL  T-0058-AC2 showMcConfirm T-0058-AC2 confirm answers true)
+cancel answers true: KILLED (FAIL  T-0058-AC2 showMcConfirm T-0058-AC2 cancel answers false)
+sheet ignores the nearest option: KILLED (FAIL  T-0058-AC2 root and nearest navigator T-0058-AC2 a sheet: root by default, nearest on request)
+sheet is not dismissible: KILLED (FAIL  T-0058-AC2 showMcChoiceSheet T-0058-AC2 a barrier tap answers null)
+sheet ignores the bottom inset: KILLED (FAIL  T-0058-AC1 the sheet body hosts anything T-0058-AC1 McSheet keeps the bottom safe-area inset)
+toast queues instead of replacing: KILLED (FAIL  T-0058-AC2 toasts T-0058-AC2 a second toast replaces the first)
+toast action can fire twice: KILLED (FAIL  T-0058-AC2 toasts T-0058-AC2 the toast action fires once)
+sheet ignores the keyboard: KILLED (FAIL  T-0058-AC1 keyboard T-0058-AC1 the field and the actions stay above a 300 pt keyboard and take)
+handle offered although the sheet is not dismissible: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with isDismissible: false the handle t)
+handle ignores isDismissible: false: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with isDismissible: false the handle t)
+confirm step taps cancel: KILLED (FAIL  T-0058-AC4 I confirm the dialog)
+menu does not report the pick: KILLED (FAIL  T-0058-AC2 McMenuButton T-0058-AC2 reports the picked value)
+sign-in sheet allows a drag while busy: KILLED (FAIL  T-0048-AC6 requestFixtureSignIn: while signing in, the barrier, Back, Not now and a drag do no)
+--- verifier's own mutations ---
+V1 showMcDialog default barrierDismissible false: KILLED (FAIL  T-0058-AC2 showMcConfirm T-0058-AC2 a barrier tap answers false, not null)
+V2 keyboard inset halved: KILLED (FAIL  T-0058-AC1 keyboard T-0058-AC1 the field and the actions stay above a 300 pt keyboard and take)
+V3 safe-area bottom kept under keyboard: SURVIVED
+V4 handle dismissible = isDismissible || enableDrag: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with isDismissible: false the handle t)
+V5 route isDismissible always true: KILLED (FAIL  T-0058-AC2 a sheet that may not be dismissed T-0058-AC2 with isDismissible: false the handle t)
+V6 plain toast 4s -> 2s: SURVIVED
+V7 handle pops instead of maybePop: SURVIVED
+V8 selected choice row ignores taps: KILLED (FAIL  T-0058-AC2 showMcChoiceSheet T-0058-AC2 tapping the current option answers it again)
+V9 menu inverts root navigator: KILLED (FAIL  T-0058-AC2 root and nearest navigator T-0058-AC2 a menu: root by default, nearest on request)
+V10 toast hide instead of remove: KILLED (FAIL  T-0058-AC2 toasts T-0058-AC2 a second toast replaces the first)
+killed=20 survived=3 broken=0 notapplied=0
