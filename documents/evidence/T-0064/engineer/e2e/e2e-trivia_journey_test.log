@@ -1,0 +1,279 @@
+# e2e_ios.sh: T-0064 engineer on mc-T-0064-engineer-68050 (2038DCA3-39FD-44BA-885E-D5DB384B4D98)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/T-0064-engineer/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/trivia_journey_test.dart -d 2038DCA3-39FD-44BA-885E-D5DB384B4D98
+
+# e2e_ios.sh: uninstalled com.emiliev.miniClient
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/T-0064-engineer`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/T-0064-engineer`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           24.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62437/adOirlzb0Dw=/
+VMServiceFlutterDriver: Isolate found with number: 7316640195322215
+VMServiceFlutterDriver: Isolate 7316640195322215 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0064-AC5 home to the quiz, a full round with a timeout, and the results with their charts
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: trivia_setup, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 3}
+flutter: [debug] TriviaSetupBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/trivia/categories -> 200
+flutter: [debug] TriviaSetupBloc: _Load _Loading -> _Ready
+flutter: [debug] TriviaSetupBloc: _SelectCategory _Ready -> _Ready
+flutter: [debug] TriviaSetupBloc: _SelectDifficulty _Ready -> _Ready
+flutter: [event] mc_screen_view {screen_name: trivia_play, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 4}
+flutter: [debug] TriviaPlayBloc: _Start _Loading -> _Loading
+flutter: [debug] GET /v1/trivia/rounds -> 200
+flutter: [debug] TriviaPlayBloc: _Start _Loading -> _Playing
+flutter: [event] trivia_round_started {category: characters, difficulty: hard, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 5}
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: true, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 6}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: true, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 7}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 8}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _TimeUp _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: timeout, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 9}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 10}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 11}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: true, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 12}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 13}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 14}
+flutter: [debug] TriviaPlayBloc: _Next _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Tick _Playing -> _Playing
+flutter: [debug] TriviaPlayBloc: _Answer _Playing -> _Playing
+flutter: [event] trivia_answer {correct: false, elapsed_bucket: q1, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 15}
+flutter: [event] trivia_round_finished {score: 457, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 16}
+flutter: [event] mc_screen_view {screen_name: trivia_results, session_id: f83b3812815e1ed45adc94a3cf057cfd, seq: 17}
+flutter: [debug] TriviaResultsBloc: _Start _Saving -> _SignedOut
+flutter: 00:33 +1: (tearDownAll)
+flutter: 00:33 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/60_home_trivia_entry.png (320218)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/61_setup_characters_hard.png (307230)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/62_question_1.png (273903)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/64_question_2_revealed.png (300059)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/63_question_4_timed_out.png (327027)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/65_results.png (341120)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Wplfe3/screenshots/1-trivia_journey_test/66_results_charts.png (454425)
+All tests passed.
+
+# exit code: 0

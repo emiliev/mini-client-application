@@ -65,6 +65,35 @@ Feature: Playing a trivia round
     And the backend received {2} requests for {'GET /v1/me/trivia/best'}
 
   @T-0064-AC1
+  Scenario: A best-score answer for a session that is gone is read again for the current one
+    Given I am signed in as {'reader@mini-client.test'}
+    And the backend holds the next {'GET /v1/me/trivia/best'}
+    When I open the trivia
+    And the app sends {'GET /v1/me/trivia/best'}
+    And {'reader@mini-client.test'} signs in elsewhere
+    And the backend releases {'GET /v1/me/trivia/best'}
+    Then the category {'all'} shows the best {870}
+    And the backend received {2} requests for {'GET /v1/me/trivia/best'}
+
+  @T-0064-AC1
+  Scenario: A user switch right before the best scores are sent sends nothing under the old user
+    Given I am signed in as {'reader@mini-client.test'}
+    And {'collector@mini-client.test'} signs in just before the app sends {'GET /v1/me/trivia/best'}
+    When I open the trivia
+    And the app finishes writing to storage
+    Then no category shows a best score
+    And the backend received {'GET /v1/me/trivia/best'} with the bearer of {'collector@mini-client.test'}
+    And the backend received {1} requests for {'GET /v1/me/trivia/best'}
+
+  @T-0064-AC1
+  Scenario: A double tap on Start opens one round
+    Given the next round seeds are {'42, 7'}
+    When I open the trivia
+    And I tap {'Start'} twice in quick succession
+    Then the round shows the first question of the {'all'} {'easy'} round of seed {42}
+    And the backend received {1} requests for {'GET /v1/trivia/rounds'}
+
+  @T-0064-AC1
   Scenario: A failed read of the best scores keeps the categories usable
     Given I am signed in as {'reader@mini-client.test'}
     And the backend fails {'GET /v1/me/trivia/best'} with {'server_error'}
@@ -110,6 +139,7 @@ Feature: Playing a trivia round
     And I tap {'Retry'} twice in quick succession
     Then the results show the score {325} and {2} correct
     And I see {'Best: 870'}
+    And I don't see {'New best!'}
     And the backend received {2} requests for {'POST /v1/me/trivia/results'}
     And the best of {'reader@mini-client.test'} for {'all'} is {870}
 
@@ -165,6 +195,15 @@ Feature: Playing a trivia round
     When signing in is cancelled
     Then I see {'Sign in to save your score and see your best.'}
     And the backend received {0} requests for {'POST /v1/me/trivia/results'}
+
+  @T-0064-AC3
+  Scenario: Signed out, a sign-in elsewhere and then backing out of the sheet saves nothing
+    When I open the round {'all'} {'easy'} of seed {42}
+    And I play the answers {'C0 W0x9'}
+    And I tap {'Save your score'}
+    And {'collector@mini-client.test'} signs in elsewhere
+    And signing in is cancelled
+    Then the backend received {0} requests for {'POST /v1/me/trivia/results'}
 
   @T-0064-AC3
   Scenario: Signed out, a sign-in answer of yes with nobody signed in saves nothing

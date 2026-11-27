@@ -82,4 +82,5 @@ Feature: Scoring a round, exactly as the server does
     When I open the round {'all'} {'easy'} of seed {42}
     And I play the answers {'C0x10'}
     Then the results show the score {999} and {10} correct
+    And the points per question are {'999 0 0 0 0 0 0 0 0 0'}
     And {1} errors were reported
