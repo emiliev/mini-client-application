@@ -46,6 +46,7 @@ flutter_library(
     main = "test/%s.dart" % t,
     deps = _RUNTIME_DEPS + [
         ":universe_sandbox_lib",
+        "//feature/characters/characters_details",
         "//feature/characters/characters_list",
         "@pub_deps//:flutter_test",
     ],

@@ -19,6 +19,7 @@ const _config =
 const _comicTitle = ValueKey<String>('comics_details.title');
 const _comicBody = ValueKey<String>('comics_details.body');
 const _cast = ValueKey<String>('comics_details.cast');
+const _characterName = ValueKey<String>('characters_details.name');
 
 /// What iOS sends for a link once the app runs.
 Future<void> _pushLink(WidgetTester tester, String location) =>
@@ -114,8 +115,8 @@ void main() {
     );
   });
 
-  testWidgets('T-0041-AC3 in the app, a cast member opens the characters '
-      'placeholder', (tester) async {
+  testWidgets('T-0041-AC3 in the app, a cast member opens the character '
+      'profile', (tester) async {
     await boot(tester);
     await _pushLink(tester, 'miniclient://app/comics/501500');
     await tester.pumpAndSettle();
@@ -136,10 +137,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const Key('character.details.placeholder')),
-      findsOneWidget,
+      tester.widget<Text>(find.byKey(_characterName)).data,
+      'Amber Vanguard',
     );
-    expect(find.text('Character details 100366'), findsOneWidget);
+    expect(find.byKey(_comicTitle), findsNothing);
   });
 
   for (final link in [

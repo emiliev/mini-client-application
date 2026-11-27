@@ -350,6 +350,7 @@ flutter_test(
     main = "test/analytics_screens_test.dart",
     deps = _RUNTIME_DEPS + [
         ":mini_client_lib",
+        "//utility/mc_ds_forms",
         "//utility/mc_analytics",
         "//utility/mc_mocked_backend",
         "//utility/mc_monitoring",

@@ -23,7 +23,7 @@ Future<void> _pushLink(WidgetTester tester, String location) =>
       (_) {},
     );
 
-const _details = Key('character.details.placeholder');
+const _details = Key('fake.character.details');
 const _list = Key('fake.characters');
 
 void main() {
@@ -62,7 +62,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(_details), findsOneWidget);
-    expect(find.text('Character details 7'), findsOneWidget);
+    expect(find.text('fake character 7'), findsOneWidget);
   });
 
   testWidgets('T-0033-AC3 a cold-start link of the main app scheme is not the '
@@ -88,7 +88,7 @@ void main() {
     hold.complete();
     await tester.pumpAndSettle();
 
-    expect(find.text('Character details 5'), findsOneWidget);
+    expect(find.text('fake character 5'), findsOneWidget);
   });
 
   testWidgets('T-0033-AC3 a foreign link that arrives after boot is ignored '
@@ -113,6 +113,6 @@ void main() {
     await _pushLink(tester, 'miniclientuniverse://app/characters/8');
     await tester.pumpAndSettle();
 
-    expect(find.text('Character details 8'), findsOneWidget);
+    expect(find.text('fake character 8'), findsOneWidget);
   });
 }

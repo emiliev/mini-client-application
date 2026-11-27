@@ -9,6 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_forms/mc_ds_forms.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 import 'package:mc_monitoring/mc_monitoring.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
@@ -271,6 +272,74 @@ void main() {
     );
 
     expect(sink.screens, ['character_details']);
+  });
+
+  testWidgets('T-0067-AC1 a cold link to a character: Back walks the list '
+      'and home, each tracked once', (tester) async {
+    await boot(
+      tester,
+      coldStartLink: 'miniclient://app${AppLocations.character(100366)}',
+    );
+    expect(sink.screens, ['character_details']);
+
+    await tester.tap(find.byType(BackButton).first);
+    await tester.pumpAndSettle();
+    expect(
+      find.byKey(const ValueKey<String>('characters_list.grid')),
+      findsOneWidget,
+    );
+    await tester.tap(find.byType(BackButton).first);
+    await tester.pumpAndSettle();
+    expect(find.byKey(_home), findsOneWidget);
+
+    expect(sink.screens, ['character_details', 'characters_list', 'home']);
+  });
+
+  testWidgets('T-0067-AC3 in the app, a favourite saved from a profile '
+      'tracks character_favourited with its id', (tester) async {
+    await boot(
+      tester,
+      coldStartLink: 'miniclient://app${AppLocations.character(100366)}',
+    );
+    expect(
+      [
+        for (final e in sink.events)
+          if (e.name == 'character_favourited') e,
+      ],
+      isEmpty,
+    );
+
+    await tester.tap(find.text('Add to favourites'));
+    await tester.pumpAndSettle();
+    const form = ValueKey<String>('auth_signin.form');
+    expect(find.byKey(form), findsOneWidget);
+    await tester.tap(
+      find.byKey(
+        const ValueKey<String>('auth_signin.demo.reader@mini-client.test'),
+      ),
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(McFormScaffold.submitKey));
+    for (var i = 0; i < 20; i++) {
+      await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 20)),
+      );
+      // Not `pumpAndSettle`: the form's spinner runs until the answer.
+      await tester.pump(const Duration(milliseconds: 100));
+      if (find.text('Remove from favourites').evaluate().isNotEmpty) {
+        break;
+      }
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('Remove from favourites'), findsOneWidget);
+    final tracked = [
+      for (final e in sink.events)
+        if (e.name == 'character_favourited') e.params,
+    ];
+    expect(tracked, [
+      {'id': 100366},
+    ]);
   });
 
   testWidgets('T-0053-AC4 every route of the app is named for analytics, '

@@ -19,6 +19,7 @@ workspace:
   - app/wiring/publishing_wiring
   - app/wiring/universe_wiring
   - feature/auth/auth_signin
+  - feature/characters/characters_details
   - feature/characters/characters_list
   - feature/comics/comics_details
   - feature/discovery/discovery_search

@@ -85,6 +85,40 @@ void main() {
     );
   });
 
+  test('T-0067-AC4 the gate checks the characters_details ARB set', () {
+    const dir = 'feature/characters/characters_details/lib/src/l10n';
+    for (final locale in ['en', 'de', 'en_XA']) {
+      expect(
+        File('$dir/characters_details_$locale.arb').existsSync(),
+        isTrue,
+        reason: 'characters_details_$locale.arb is not in the gate runfiles',
+      );
+    }
+    // The same files with one pseudo-locale key removed: the check must name
+    // it, so the gate really reads this package's set.
+    final copy = Directory.systemTemp.createTempSync('l10n_gate_');
+    addTearDown(() => copy.deleteSync(recursive: true));
+    final target = Directory('${copy.path}/$dir')..createSync(recursive: true);
+    for (final arb in Directory(dir).listSync().whereType<File>()) {
+      arb.copySync('${target.path}/${arb.uri.pathSegments.last}');
+    }
+    final xa = File('${target.path}/characters_details_en_XA.arb');
+    final json = jsonDecode(xa.readAsStringSync()) as Map<String, dynamic>
+      ..remove('characterDetailsStatsLabel');
+    xa.writeAsStringSync(jsonEncode(json));
+
+    expect(
+      checkL10n(copy.path).map((v) => '$v'),
+      contains(
+        allOf(
+          contains('characters_details'),
+          contains('en_XA'),
+          contains('characterDetailsStatsLabel'),
+        ),
+      ),
+    );
+  });
+
   test('T-0046-AC8 the gate checks the discovery_search ARB set', () {
     const dir = 'feature/discovery/discovery_search/lib/src/l10n';
     for (final locale in ['en', 'de', 'en_XA']) {

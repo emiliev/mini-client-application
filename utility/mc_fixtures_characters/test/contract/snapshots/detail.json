@@ -1,5 +1,6 @@
 {
   "body": {
+    "aliases": [],
     "appearances": {
       "comics": 214,
       "events": 5,
@@ -16,6 +17,14 @@
       "Echo vision",
       "Iron skin"
     ],
+    "stats": {
+      "combat": 49,
+      "durability": 77,
+      "energy": 48,
+      "intelligence": 48,
+      "speed": 74,
+      "strength": 65
+    },
     "team": "The Quiet Ones",
     "thumbnail": {
       "path": "mock-asset://characters/015",

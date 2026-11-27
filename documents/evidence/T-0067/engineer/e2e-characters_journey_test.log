@@ -1,0 +1,72 @@
+# e2e_ios.sh: T-0067 engineer on mc-T-0067-engineer-14100 (837B2563-4E4B-4AB9-80CC-7D9782D70915)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-abbd917b8ce0b9c00/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_journey_test.dart -d 837B2563-4E4B-4AB9-80CC-7D9782D70915
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-abbd917b8ce0b9c00`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-abbd917b8ce0b9c00`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           16.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62334/RQA99hjiCco=/
+VMServiceFlutterDriver: Isolate found with number: 6045644454164815
+VMServiceFlutterDriver: Isolate 6045644454164815 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0067-AC5 home to the characters list, a preview, the full profile, a comic, Back, Back
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 33116f9388762a889d182e9a9adc0285, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: home, session_id: 33116f9388762a889d182e9a9adc0285, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 33116f9388762a889d182e9a9adc0285, seq: 3}
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] RelatedComicsBloc: _Load _Loading -> _Success
+flutter: [event] mc_screen_view {screen_name: character_details, session_id: 33116f9388762a889d182e9a9adc0285, seq: 4}
+flutter: [debug] CharacterDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/characters/100486 -> 200
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] CharacterDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] CharacterFavouriteBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: comics_details, session_id: 33116f9388762a889d182e9a9adc0285, seq: 5}
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/comics/501267 -> 200
+flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: character_details, session_id: 33116f9388762a889d182e9a9adc0285, seq: 6}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 33116f9388762a889d182e9a9adc0285, seq: 7}
+flutter: 00:19 +1: (tearDownAll)
+flutter: 00:20 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/01_home.png (326911)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/02_characters_list.png (405341)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/03_preview.png (324738)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/04_profile_top.png (395146)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/05_profile_comics.png (393568)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/06_comic_page.png (374920)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/07_back_to_profile.png (393568)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.Zgttgj/screenshots/1-characters_journey_test/08_back_to_preview.png (324738)
+All tests passed.
+
+# exit code: 0

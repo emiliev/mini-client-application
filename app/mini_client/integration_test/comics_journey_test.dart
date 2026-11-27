@@ -99,13 +99,18 @@ void main() {
     await tester.tap(find.text(castName));
     await pumpUntil(
       tester,
-      find.byKey(const Key('character.details.placeholder')),
-      'the character details placeholder',
+      find.byKey(const ValueKey<String>('characters_details.name')),
+      'the character profile',
     );
     expect(
-      find.text('Character details ${comic.characterIds.first}'),
-      findsOneWidget,
+      tester
+          .widget<Text>(
+            find.byKey(const ValueKey<String>('characters_details.name')),
+          )
+          .data,
+      castName,
     );
-    await shot(binding, tester, '17_cast_member_placeholder');
+    await letArtLoad(tester);
+    await shot(binding, tester, '17_cast_member_profile');
   });
 }
