@@ -703,6 +703,44 @@ void main() {
       expect(await _pending, isFalse);
     });
 
+    testWidgets('T-0058-AC2 showMcDialog: root by default, nearest on '
+        'request', (tester) async {
+      mcSetSurface(tester, 400, 800);
+      await tester.pumpWidget(_nestedApp());
+      final nested = _ctx(tester, _nestedHomeKey);
+      McDialog dialog(BuildContext c) => McDialog(
+        title: 'T',
+        body: const Text('B'),
+        actions: [
+          McDialogAction(label: 'OK', onPressed: () => Navigator.of(c).pop()),
+        ],
+      );
+
+      var answer = showMcDialog<void>(nested, builder: dialog);
+      await tester.pumpAndSettle();
+      expect(
+        _navigatorOf(tester, find.byType(McDialog)),
+        same(_root(tester)),
+      );
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await answer;
+
+      answer = showMcDialog<void>(
+        nested,
+        useRootNavigator: false,
+        builder: dialog,
+      );
+      await tester.pumpAndSettle();
+      expect(
+        _navigatorOf(tester, find.byType(McDialog)),
+        same(_nestedKey.currentState),
+      );
+      await tester.tap(find.text('OK'));
+      await tester.pumpAndSettle();
+      await answer;
+    });
+
     testWidgets('T-0058-AC2 a sheet: root by default, nearest on request', (
       tester,
     ) async {
@@ -774,7 +812,21 @@ void main() {
       tester,
     ) async {
       mcSetSurface(tester, 400, 800);
-      for (final root in [true, false]) {
+      // null: the default, which must be the root navigator.
+      for (final option in <bool?>[null, true, false]) {
+        final root = option ?? true;
+        final menu = option == null
+            ? McMenuButton<String>(
+                items: _menuItems(),
+                onSelected: (_) {},
+                semanticLabel: 'More actions',
+              )
+            : McMenuButton<String>(
+                items: _menuItems(),
+                onSelected: (_) {},
+                semanticLabel: 'More actions',
+                useRootNavigator: option,
+              );
         await tester.pumpWidget(
           _app(
             Column(
@@ -786,12 +838,7 @@ void main() {
                     onGenerateRoute: (_) => MaterialPageRoute<void>(
                       builder: (_) => Align(
                         alignment: Alignment.topRight,
-                        child: McMenuButton<String>(
-                          items: _menuItems(),
-                          onSelected: (_) {},
-                          semanticLabel: 'More actions',
-                          useRootNavigator: root,
-                        ),
+                        child: menu,
                       ),
                     ),
                   ),
