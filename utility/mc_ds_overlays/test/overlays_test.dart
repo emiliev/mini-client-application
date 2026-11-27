@@ -1006,6 +1006,13 @@ void main() {
         }
         await _tapBarrier(tester);
 
+        // The destructive confirm is a different button: check it too.
+        await _confirm(tester, destructive: true);
+        final destructive = tester.getSize(find.byKey(mcConfirmButtonKey));
+        expect(destructive.height >= mcMinTapTarget, isTrue);
+        expect(destructive.width >= mcMinTapTarget, isTrue);
+        await _tapBarrier(tester);
+
         await _openChoice(tester, selected: 'dark');
         for (final label in ['Light', 'Dark', 'Follow the system']) {
           final size = tester.getSize(

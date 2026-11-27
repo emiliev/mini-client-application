@@ -90,8 +90,10 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Negative control: an option the sheet does not have.
+    // Negative controls: an option the sheet does not have, and a prefix of
+    // one that it does.
     await _red(iChooseInTheSheet(tester, 'Sepia'));
+    await _red(iChooseInTheSheet(tester, 'Dar'));
     expect(answers, isEmpty);
 
     await iChooseInTheSheet(tester, 'Dark');
