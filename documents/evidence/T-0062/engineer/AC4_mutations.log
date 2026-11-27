@@ -1,0 +1,7 @@
+baseline: both filters PASS (unmutated)
+M1 handle tap: pop: CONTROL (without the new tests) SURVIVED; SUITE (new tests) KILLED
+M2 semantics tap: pop: CONTROL (without the new tests) SURVIVED; SUITE (new tests) KILLED
+M3 both: pop: CONTROL (without the new tests) SURVIVED; SUITE (new tests) KILLED
+M4 toast 3 s: CONTROL (without the new tests) SURVIVED; SUITE (new tests) KILLED
+M5 toast 5 s: CONTROL (without the new tests) KILLED; SUITE (new tests) KILLED
+RESULT: PASS (every control survived, every mutant killed)
