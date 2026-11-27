@@ -11,7 +11,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0065 (Opus), T-0066 (Sonnet), T-0067 (Sonnet) |
+| **Active crew** | T-0065 (Opus), T-0066, T-0067, T-0068 (Sonnet; urgent CI) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
