@@ -249,7 +249,8 @@ void main() {
     expect(fast.elapsed, lessThan(triviaSlowDelay));
   });
 
-  test('T-0060-AC4 the slow scenario covers all four routes', () {
+  test('T-0060-AC4 the slow scenario covers all four routes, 2 s each', () {
+    expect(triviaSlowDelay, const Duration(seconds: 2));
     final rules = const TriviaMockDomain().scenarios['trivia.slow']!.rules;
     expect([
       for (final r in rules) '${r.method} ${r.path}',

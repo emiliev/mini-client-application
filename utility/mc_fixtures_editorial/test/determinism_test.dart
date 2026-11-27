@@ -77,9 +77,9 @@ void main() {
           seed: seed,
         );
         final questions = questionsOf(round);
-        expect(questions, hasLength(roundSize));
+        expect(questions, hasLength(10));
         final ids = [for (final q in questions) q['id']! as String];
-        expect(ids.toSet(), hasLength(roundSize), reason: 'seed $seed');
+        expect(ids.toSet(), hasLength(10), reason: 'seed $seed');
         for (final q in questions) {
           expect(q['difficulty'], difficulty);
           if (category != 'all') {
@@ -87,7 +87,7 @@ void main() {
           }
           expect(
             q['timeLimitSeconds'],
-            timeLimitSecondsByDifficulty[difficulty],
+            const {'easy': 20, 'medium': 15, 'hard': 10}[difficulty],
           );
         }
       }
@@ -192,7 +192,7 @@ void main() {
         for (final q in bank) {
           templates[q.template] = (templates[q.template] ?? 0) + 1;
         }
-        expect(templates.values.toSet(), {questionsPerTemplate});
+        expect(templates.values.toSet(), {24});
         for (final category in categoryIds) {
           for (final difficulty in difficulties) {
             expect(
@@ -201,7 +201,7 @@ void main() {
                     (q) => q.category == category && q.difficulty == difficulty,
                   )
                   .length,
-              greaterThanOrEqualTo(roundSize),
+              greaterThanOrEqualTo(10),
               reason: '$category $difficulty',
             );
           }

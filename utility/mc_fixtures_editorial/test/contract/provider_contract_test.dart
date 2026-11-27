@@ -408,14 +408,18 @@ void main() {
       for (final d in difficulties) {
         expect(
           doc,
-          contains('| `$d` | ${timeLimitSecondsByDifficulty[d]} |'),
+          contains(
+            '| `$d` | ${const {'easy': 20, 'medium': 15, 'hard': 10}[d]} |',
+          ),
           reason: d,
         );
       }
     });
   });
 
-  for (final seed in [42, 7]) {
+  // Seed 4 holds a first-comic question whose character has two comics on
+  // the same earliest date (the tie goes to the lower id).
+  for (final seed in [42, 7, 4]) {
     group('T-0060-AC4 the facts agree with the endpoints (backend seed '
         '$seed)', () {
       late _Truth truth;

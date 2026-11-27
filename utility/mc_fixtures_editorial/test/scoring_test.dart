@@ -51,7 +51,7 @@ List<_Example> _examples() {
 }
 
 int _limitSeconds(String difficulty) =>
-    timeLimitSecondsByDifficulty[difficulty]!;
+    const {'easy': 20, 'medium': 15, 'hard': 10}[difficulty]!;
 
 void main() {
   group('T-0060-AC2 scoring: the worked examples of CONTRACT.md', () {
@@ -68,7 +68,7 @@ void main() {
         final dio = jsonDio(triviaBackend());
         final round = await fetchRound(dio, difficulty: e.difficulty);
         final spec = parseAnswers(e.answers);
-        expect(spec, hasLength(roundSize));
+        expect(spec, hasLength(10));
         final result = await play(dio, round, spec);
         expect(result['score'], e.score);
         expect(result['correct'], e.correct);
@@ -78,7 +78,7 @@ void main() {
         expect(expected.score, e.score);
         expect(expected.correct, e.correct);
         final breakdown = (result['breakdown']! as List).cast<Json>();
-        expect(breakdown, hasLength(roundSize));
+        expect(breakdown, hasLength(10));
         expect(
           breakdown.fold<int>(0, (sum, b) => sum + (b['points']! as int)),
           e.score,
@@ -231,7 +231,7 @@ void main() {
         );
         final spec = <Answer>[];
         var run = 0;
-        for (var i = 0; i < roundSize; i++) {
+        for (var i = 0; i < 10; i++) {
           final kind = switch (random.nextInt(10)) {
             < 6 => 'C',
             < 9 => 'W',
