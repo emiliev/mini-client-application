@@ -26,6 +26,7 @@ dependencies:
   mc_ds_buttons: any
   mc_ds_feedback: any
   mc_ds_layout: any
+  mc_ds_overlays: any
   mc_ds_media: any
   mc_ds_theme: any
   mc_event_bus: any

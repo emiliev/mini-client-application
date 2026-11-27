@@ -17,6 +17,7 @@ _DEPS = [
     "//utility/mc_ds_feedback",
     "//utility/mc_ds_layout",
     "//utility/mc_ds_media",
+    "//utility/mc_ds_overlays",
     "//utility/mc_ds_theme",
     "//utility/mc_event_bus",
     "//utility/mc_feature_flags",
