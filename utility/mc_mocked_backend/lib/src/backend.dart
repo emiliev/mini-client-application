@@ -19,6 +19,7 @@ final class MockScenario {
     this.name, {
     this.rules = const [],
     this.overrides = const {},
+    this.onSelect,
   });
 
   final String name;
@@ -26,6 +27,11 @@ final class MockScenario {
 
   /// Replacement handlers keyed by `"METHOD /path/pattern"`.
   final Map<String, MockHandler> overrides;
+
+  /// Called with the backend's store each time this scenario is selected with
+  /// `useScenario`, before the next request. A scenario with a once-only
+  /// effect clears its own marker here, so selecting it again arms it again.
+  final void Function(Map<String, Object?> store)? onSelect;
 }
 
 /// A domain package (`mc_fixtures_<domain>`) registers its routes here. The
@@ -156,6 +162,7 @@ final class MockBackend {
       );
     }
     _scenario = name == null ? null : _scenarios[name];
+    _scenario?.onSelect?.call(_store);
     _resetRules();
   }
 

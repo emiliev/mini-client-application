@@ -1,0 +1,17 @@
+{
+  "body": {
+    "error": {
+      "code": "version_conflict",
+      "current": {
+        "density": "comfortable",
+        "reduceMotion": false,
+        "themeMode": "system",
+        "updatedAt": "2026-01-01T00:00:00.000Z",
+        "version": 0
+      },
+      "message": "The preferences are at version 0, not 3"
+    }
+  },
+  "request": "PATCH /v1/me/preferences",
+  "status": 409
+}

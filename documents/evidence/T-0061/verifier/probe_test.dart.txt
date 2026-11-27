@@ -1,0 +1,188 @@
+// T-0061 Verifier probe (independent of the engineer's tests). Run as
+// utility/mc_fixtures_identity/test/zz_probe_test.dart, then removed.
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
+import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
+import 'package:mc_mocked_backend/mc_mocked_backend.dart';
+import 'package:test/test.dart';
+
+typedef J = Map<String, dynamic>;
+Dio d(MockBackend b) => b.createDio()..options.validateStatus = (_) => true;
+Future<Map<String, String>> login(Dio dio, String e, String p) async {
+  final r = await dio.post<J>('/v1/auth/sign-in', data: {'email': e, 'password': p});
+  return {
+    'Authorization': 'Bearer ${r.data!['accessToken']}',
+    '_r': r.data!['refreshToken'] as String,
+  };
+}
+
+Options o(Map<String, String>? h) =>
+    Options(headers: h == null ? null : {'Authorization': h['Authorization']});
+const path = '/v1/me/preferences';
+Future<Response<J>> get(Dio x, Map<String, String>? h) => x.get<J>(path, options: o(h));
+Future<Response<J>> pat(Dio x, Object? b, Map<String, String>? h) =>
+    x.patch<J>(path, data: b, options: o(h));
+
+void main() {
+  test('AC1 defaults, seed, byte identical', () async {
+    Future<List<String>> run() async {
+      final b = MockBackend(seed: 42, domains: [const IdentityMockDomain()]);
+      final x = b.createDio()
+        ..options.validateStatus = ((_) => true)
+        ..options.responseType = ResponseType.plain;
+      final out = <String>[];
+      for (final c in [
+        ['reader@mini-client.test', 'marvelous'],
+        ['collector@mini-client.test', 'vault-7'],
+      ]) {
+        final r = await x.post<String>('/v1/auth/sign-in', data: {'email': c[0], 'password': c[1]});
+        out.add(r.data!);
+        final t = jsonDecode(r.data!)['accessToken'];
+        final g = await x.get<String>(path, options: Options(headers: {'Authorization': 'Bearer $t'}));
+        out.add(g.data!);
+        final p = await x.patch<String>(path,
+            data: {'ifVersion': 0, 'density': 'compact'},
+            options: Options(headers: {'Authorization': 'Bearer $t'}));
+        out.add(p.data!);
+      }
+      return out;
+    }
+
+    final a = await run(), c = await run();
+    expect(a, c);
+    print(a.join('\n'));
+    expect(jsonDecode(a[1]), {
+      'themeMode': 'system', 'density': 'comfortable', 'reduceMotion': false,
+      'updatedAt': '2026-01-01T00:00:00.000Z', 'version': 0,
+    });
+    expect(jsonDecode(a[4])['themeMode'], 'dark');
+  });
+
+  test('AC2 semantics', () async {
+    final b = MockBackend(seed: 42, domains: [const IdentityMockDomain()]);
+    final x = d(b);
+    final r = await login(x, 'reader@mini-client.test', 'marvelous');
+    final c = await login(x, 'collector@mini-client.test', 'vault-7');
+    var p = await pat(x, {'ifVersion': 0, 'reduceMotion': true}, r);
+    expect(p.statusCode, 200);
+    expect(p.data, {
+      'themeMode': 'system', 'density': 'comfortable', 'reduceMotion': true,
+      'updatedAt': '2026-01-01T00:00:01.000Z', 'version': 1,
+    });
+    p = await pat(x, {'ifVersion': 1, 'density': 'compact'}, r);
+    expect(p.data, {
+      'themeMode': 'system', 'density': 'compact', 'reduceMotion': true,
+      'updatedAt': '2026-01-01T00:00:02.000Z', 'version': 2,
+    });
+    final s = await pat(x, {'ifVersion': 1, 'themeMode': 'light'}, r);
+    expect(s.statusCode, 409);
+    expect(s.data!['error']['code'], 'version_conflict');
+    expect(s.data!['error']['current'], p.data);
+    expect((await get(x, r)).data, p.data);
+    final gc = await get(x, c);
+    expect(gc.data, {
+      'themeMode': 'dark', 'density': 'comfortable', 'reduceMotion': false,
+      'updatedAt': '2026-01-01T00:00:00.000Z', 'version': 0,
+    });
+    final pc = await pat(x, {'ifVersion': 0, 'themeMode': 'light'}, c);
+    expect(pc.data!['updatedAt'], '2026-01-01T00:00:01.000Z');
+    expect(pc.data!['density'], 'comfortable');
+    expect((await get(x, r)).data, p.data);
+    final rs = await Future.wait([
+      pat(x, {'ifVersion': 2, 'themeMode': 'dark'}, r),
+      pat(x, {'ifVersion': 2, 'themeMode': 'light'}, r),
+    ]);
+    expect(rs.map((e) => e.statusCode).toList()..sort(), [200, 409]);
+    final win = rs.firstWhere((e) => e.statusCode == 200);
+    final fin = (await get(x, r)).data!;
+    expect(fin, win.data);
+    expect(fin['version'], 3);
+    await x.post('/v1/auth/sign-out', data: {'refreshToken': r['_r']});
+    final r2 = await login(x, 'reader@mini-client.test', 'marvelous');
+    expect((await get(x, r2)).data, fin);
+    b.reset();
+    final r3 = await login(x, 'reader@mini-client.test', 'marvelous');
+    final c3 = await login(x, 'collector@mini-client.test', 'vault-7');
+    expect((await get(x, r3)).data!['version'], 0);
+    expect((await get(x, r3)).data!['themeMode'], 'system');
+    expect((await get(x, c3)).data!['themeMode'], 'dark');
+    expect((await get(x, c3)).data!['version'], 0);
+  });
+
+  test('AC3 codes, order, auth', () async {
+    final b = MockBackend(seed: 42, domains: [const IdentityMockDomain()]);
+    final x = d(b);
+    final r = await login(x, 'reader@mini-client.test', 'marvelous');
+    Future<void> exp(Object? body, int st, String code, [String? param]) async {
+      final p = await pat(x, body, r);
+      expect([p.statusCode, p.data!['error']['code'], p.data!['error']['parameter']],
+          [st, code, param], reason: '$body');
+    }
+
+    await exp({'ifVersion': 0, 'themeMode': 'x'}, 400, 'invalid_theme_mode', 'themeMode');
+    await exp({'ifVersion': 0, 'density': 'x'}, 400, 'invalid_density', 'density');
+    await exp({'ifVersion': 0, 'reduceMotion': 'true'}, 400, 'invalid_reduce_motion', 'reduceMotion');
+    await exp({'ifVersion': 0, 'foo': 1}, 400, 'unknown_key', 'foo');
+    await exp({'ifVersion': 0}, 400, 'empty_patch');
+    await exp({'themeMode': 'dark'}, 400, 'invalid_body', 'ifVersion');
+    await exp({'ifVersion': '0', 'themeMode': 'dark'}, 400, 'invalid_body', 'ifVersion');
+    await exp([1], 400, 'invalid_body', 'ifVersion');
+    await exp({'ifVersion': 'z', 'foo': 1}, 400, 'invalid_body', 'ifVersion');
+    await exp({'ifVersion': 0, 'foo': 1, 'themeMode': 'x'}, 400, 'unknown_key', 'foo');
+    await exp({'ifVersion': 0, 'themeMode': 'x', 'density': 'x', 'reduceMotion': 1}, 400, 'invalid_theme_mode', 'themeMode');
+    await exp({'ifVersion': 0, 'density': 'x', 'reduceMotion': 1}, 400, 'invalid_density', 'density');
+    await exp({'ifVersion': 5, 'themeMode': 'x'}, 400, 'invalid_theme_mode', 'themeMode');
+    await exp({'ifVersion': 5}, 400, 'empty_patch');
+    for (final h in <Map<String, String>?>[
+      null,
+      {'Authorization': 'Bearer mc-access-u-100-expired'},
+      {'Authorization': 'Bearer ${r['_r']}'},
+    ]) {
+      expect((await get(x, h)).statusCode, 401);
+      final p = await pat(x, 'garbage', h);
+      expect(p.statusCode, 401);
+      expect(p.data!['error']['code'], 'unauthenticated');
+    }
+    expect((await get(x, r)).data!['version'], 0);
+    expect((await get(x, r)).data!['themeMode'], 'system');
+  });
+
+  test('AC4 scenarios', () async {
+    final b = MockBackend(seed: 42, domains: [const IdentityMockDomain()]);
+    final x = d(b);
+    final r = await login(x, 'reader@mini-client.test', 'marvelous');
+    b.useScenario('identity.preferences_error');
+    expect((await get(x, r)).statusCode, 500);
+    expect((await pat(x, {'ifVersion': 0, 'density': 'compact'}, r)).statusCode, 500);
+    expect((await get(x, r)).data!['error']['code'], 'injected_failure');
+    expect((await x.get<J>('/v1/me', options: o(r))).statusCode, 200);
+    expect((await x.get<J>('/v1/me/favourites/character/100000', options: o(r))).statusCode, 200);
+    b.useScenario(null);
+    expect((await get(x, r)).data!['version'], 0);
+    Future<Response<J>> w(int v) => pat(x, {'ifVersion': v, 'density': v.isEven ? 'compact' : 'comfortable'}, r);
+    b.useScenario('identity.preferences_conflict');
+    final a = await w(0);
+    expect(a.statusCode, 409);
+    expect(a.data!['error']['message'], contains('Injected'));
+    expect((await get(x, r)).data!['version'], 0);
+    expect((await w(0)).statusCode, 200);
+    final real = await w(0);
+    expect(real.data!['error']['message'], 'The preferences are at version 1, not 0');
+    b.useScenario(null);
+    b.useScenario('identity.preferences_conflict');
+    expect((await w(1)).statusCode, 409);
+    expect((await w(1)).statusCode, 200);
+    b.useScenario('identity.preferences_conflict');
+    expect((await w(2)).statusCode, 409);
+    expect((await w(2)).statusCode, 200);
+    b.reset();
+    final r2 = await login(x, 'reader@mini-client.test', 'marvelous');
+    b.useScenario('identity.preferences_conflict');
+    expect((await pat(x, {'ifVersion': 0, 'density': 'compact'}, r2)).statusCode, 409);
+    b.reset();
+    b.useScenario('identity.preferences_conflict');
+    final r3 = await login(x, 'reader@mini-client.test', 'marvelous');
+    expect((await pat(x, {'ifVersion': 0, 'density': 'compact'}, r3)).statusCode, 409);
+  });
+}

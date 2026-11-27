@@ -1,0 +1,11 @@
+{
+  "body": {
+    "error": {
+      "code": "invalid_theme_mode",
+      "message": "themeMode must be one of system, light, dark",
+      "parameter": "themeMode"
+    }
+  },
+  "request": "PATCH /v1/me/preferences",
+  "status": 400
+}

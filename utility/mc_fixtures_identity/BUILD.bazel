@@ -28,6 +28,19 @@ dart_test(
 )
 
 dart_test(
+    name = "preferences_test",
+    size = "small",
+    package_name = "mc_fixtures_identity",
+    language_version = "3.13",
+    data = [
+        "CONTRACT.md",
+        "fixtures/routes.json",
+    ],
+    main = "test/preferences_test.dart",
+    deps = _TEST_DEPS,
+)
+
+dart_test(
     name = "provider_contract_test",
     size = "small",
     package_name = "mc_fixtures_identity",

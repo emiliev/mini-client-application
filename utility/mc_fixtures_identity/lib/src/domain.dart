@@ -1,9 +1,11 @@
 import 'package:mc_fixtures_identity/src/handlers/identity_handlers.dart';
+import 'package:mc_fixtures_identity/src/handlers/preferences_handlers.dart';
 import 'package:mc_mocked_backend/mc_mocked_backend.dart';
 
-/// The identity domain: sign-in, refresh, sign-out, the current user and
-/// favourites writes. Documented in `CONTRACT.md`; the same routes are in
-/// `fixtures/routes.json`, and a test keeps the three in step.
+/// The identity domain: sign-in, refresh, sign-out, the current user,
+/// favourites writes and the user's preferences. Documented in
+/// `CONTRACT.md`; the same routes are in `fixtures/routes.json`, and a test
+/// keeps the three in step.
 final class IdentityMockDomain implements MockDomain {
   /// [seedFavourites] false starts every user with no favourites (the
   /// `identity.empty` set). [withScenarios] false leaves the scenarios out, so
@@ -25,6 +27,14 @@ final class IdentityMockDomain implements MockDomain {
     'GET /v1/me/favourites/:kind/:id',
     'PUT /v1/me/favourites/:kind/:id',
     'DELETE /v1/me/favourites/:kind/:id',
+    'GET /v1/me/preferences',
+    'PATCH /v1/me/preferences',
+  ];
+
+  /// The routes the `identity.preferences_error` scenario fails.
+  static const List<String> preferencesRoutes = [
+    'GET /v1/me/preferences',
+    'PATCH /v1/me/preferences',
   ];
 
   @override
@@ -48,7 +58,9 @@ final class IdentityMockDomain implements MockDomain {
       ..delete(
         '/v1/me/favourites/:kind/:id',
         favourite('DELETE', seed: seedFavourites),
-      );
+      )
+      ..get('/v1/me/preferences', getPreferences)
+      ..add('PATCH', '/v1/me/preferences', patchPreferences());
   }
 
   @override
@@ -68,6 +80,24 @@ final class IdentityMockDomain implements MockDomain {
                   const FailureKind.http(500),
                 ),
             ],
+          ),
+          'identity.preferences_error': MockScenario(
+            'identity.preferences_error',
+            rules: [
+              for (final route in preferencesRoutes)
+                FailureRule(
+                  route.split(' ').first,
+                  route.split(' ').last,
+                  const FailureKind.http(500),
+                ),
+            ],
+          ),
+          'identity.preferences_conflict': MockScenario(
+            'identity.preferences_conflict',
+            onSelect: armPreferencesConflict,
+            overrides: {
+              'PATCH /v1/me/preferences': patchPreferences(conflictOnce: true),
+            },
           ),
         }
       : const {};

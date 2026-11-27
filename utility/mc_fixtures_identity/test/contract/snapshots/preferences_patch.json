@@ -1,0 +1,11 @@
+{
+  "body": {
+    "density": "comfortable",
+    "reduceMotion": true,
+    "themeMode": "dark",
+    "updatedAt": "2026-01-01T00:00:01.000Z",
+    "version": 1
+  },
+  "request": "PATCH /v1/me/preferences",
+  "status": 200
+}

@@ -1,0 +1,155 @@
+baseline PASS
+=== D1 the default theme is light
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== D2 u-101 is seeded light
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== D3 u-101 is not seeded
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== D4 u-100 is seeded dark too
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== D5 the default density is compact
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== D6 reduceMotion defaults to true
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== D7 version starts at 1
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V1 a write adds 2 to the version
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V2 a write leaves the version
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V3 updatedAt adds 2 s per write
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V4 updatedAt adds a minute per write
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V5 updatedAt has no zone
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V6 a newer ifVersion is accepted
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V7 an older ifVersion is accepted
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== V8 the version is never checked
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V9 the 409 has no current object
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V10 the conflict answers 400
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V11 the conflict code is renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V12 a conflict bumps the version
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== V13 the 409 message differs
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== A1 themeMode is not applied
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== A2 density is not applied
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== A3 reduceMotion is not applied
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== A4 a density patch also writes the theme
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== A5 the response shows the old version
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== A6 the JSON never shows reduceMotion true
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== A7 the density key is renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C1 any string is a theme
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C2 'auto' is a theme
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C3 'system' is not a theme
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C4 'dark' is not a theme
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C5 'tight' is a density
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C6 'compact' is not a density
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C7 reduceMotion only rejects null
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C8 invalid_theme_mode renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C9 invalid_density renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C10 invalid_reduce_motion renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C11 unknown_key renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C12 empty_patch renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C13 invalid_body renamed
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C14 validation answers 422
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C15 the theme error names no parameter
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C16 the unknown key is not named
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C17 the body error names the wrong parameter
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C18 version is an accepted key
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C19 a double ifVersion is accepted
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== C20 an empty patch needs every key
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== C21 an empty patch is accepted
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== O1 the version is checked before unknown keys
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== O2 an empty patch is checked before unknown keys
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== O3 density is checked before the theme
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== O4 reduceMotion is checked before density
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== O5 a stale version beats a malformed body
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== O6 the body is checked before the bearer
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== U1 GET without a bearer reads the reader
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== U2 PATCH without a bearer writes the reader
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== U3 unauthenticated answers 403
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== U4 every user shares one preferences object
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== U5 users share by the first three characters of the id
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== U6 preferences outlive reset
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== S1 PATCH is registered as PUT
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== S2 the manifest drops the PATCH route
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_fixtures_identity:provider_contract_test 
+=== S3 preferences_error also fails the other routes
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S4 preferences_error fails only GET
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S5 preferences_error answers 503
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S6 the conflict fires every time
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S7 the conflict is used up by a rejected request
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S8 the conflict writes before it answers
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S9 the conflict scenario overrides the wrong route
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== S10 the conflict is never marked fired
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R1 the conflict scenario is not wired to the hook
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R2 the engine never calls onSelect
+    KILLED by: //utility/mc_fixtures_identity:preferences_test //utility/mc_mocked_backend:mocked_backend_test 
+=== R3 arming clears the wrong key
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R4 arming sets the marker instead of clearing it
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R5 the injected 409 reads like a real mismatch
+    KILLED by: //utility/mc_fixtures_identity:preferences_test 
+=== R6 the engine runs onSelect before the scenario is chosen
+    KILLED by: //utility/mc_mocked_backend:mocked_backend_test 
+
+killed=76 survived=0 broken=0

@@ -7,10 +7,14 @@
     "GET /v1/me",
     "GET /v1/me/favourites/:kind/:id",
     "PUT /v1/me/favourites/:kind/:id",
-    "DELETE /v1/me/favourites/:kind/:id"
+    "DELETE /v1/me/favourites/:kind/:id",
+    "GET /v1/me/preferences",
+    "PATCH /v1/me/preferences"
   ],
   "scenarios": [
     "identity.expired_token",
+    "identity.preferences_conflict",
+    "identity.preferences_error",
     "identity.server_error"
   ],
   "sets": [

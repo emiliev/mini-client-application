@@ -1,8 +1,8 @@
 # Identity contract (`mc_fixtures_identity`)
 
-Our own domain-first contract (F-0003): a mock identity provider with sign-in, token refresh, sign-out, the current user and per-user favourites. It claims no compatibility with any real identity service. Users and tokens are invented.
+Our own domain-first contract (F-0003): a mock identity provider with sign-in, token refresh, sign-out, the current user, per-user favourites and per-user preferences. It claims no compatibility with any real identity service. Users and tokens are invented.
 
-The base URL is never contacted: `MockBackend` answers at the Dio transport. Responses are JSON with sorted keys, so equal data is byte-identical. State (issued-token counter, used refresh tokens, favourites) lives in the backend's store, so writes persist across requests until `reset()`.
+The base URL is never contacted: `MockBackend` answers at the Dio transport. Responses are JSON with sorted keys, so equal data is byte-identical. State (issued-token counter, used refresh tokens, favourites, preferences) lives in the backend's store, so writes persist across requests until `reset()`.
 
 ## Users
 
@@ -10,6 +10,8 @@ The base URL is never contacted: `MockBackend` answers at the Dio transport. Res
 |---|---|---|---|---|
 | `u-100` | `reader@mini-client.test` | `marvelous` | Rhea Reader | `character/100000`, `character/100001` |
 | `u-101` | `collector@mini-client.test` | `vault-7` | Cole Collector | none |
+
+Preferences at start (all sets): `u-100` has the defaults (`themeMode: system`); `u-101` has `themeMode: dark`. Both start at `version: 0`.
 
 The email match is case-insensitive and ignores surrounding blanks.
 
@@ -39,6 +41,8 @@ Refresh tokens **rotate**: a refresh token works once. A second refresh with the
 | `GET /v1/me/favourites/:kind/:id` | Whether this item is a favourite |
 | `PUT /v1/me/favourites/:kind/:id` | Mark it as a favourite |
 | `DELETE /v1/me/favourites/:kind/:id` | Remove it |
+| `GET /v1/me/preferences` | The user's appearance preferences |
+| `PATCH /v1/me/preferences` | Change some of them, guarded by `ifVersion` |
 
 The machine-readable list is `fixtures/routes.json`; a test keeps it, the domain and this file in step.
 
@@ -80,6 +84,39 @@ Needs `Authorization: Bearer <access token>`. Response `200`: `{id, email, displ
 
 Favourites are per user and kept until `reset()`, which also restores the seeded ones.
 
+### `/v1/me/preferences`
+
+Appearance preferences of the signed-in user, for the settings feature. Both methods need the bearer (`401` `unauthenticated` otherwise). The object (`GET` response, `PATCH` success, and `error.current` of a `409`):
+
+```json
+{"themeMode": "system", "density": "comfortable", "reduceMotion": false, "updatedAt": "2026-01-01T00:00:00.000Z", "version": 0}
+```
+
+| Key | Values |
+|---|---|
+| `themeMode` | `system` (default), `light`, `dark` |
+| `density` | `comfortable` (default), `compact` |
+| `reduceMotion` | `false` (default), `true` |
+
+A user who never saved has the defaults, except that `u-101` starts with `themeMode: dark`. `version` is `0` until the first write and goes up by 1 on every successful `PATCH`, even when the values do not change. `updatedAt` is the fixed clock plus one second per write of that user (`version` seconds), so `version: 0` shows the clock itself. This differs from `mc_fixtures_library` (T-0047), whose `updatedAt` advances with one backend-wide write counter: here it depends on the user's `version` alone, so a test can compute it, and another user's writes never move it (Tech Lead decision, T-0061 review round). Preferences are kept per user until `reset()`, which restores the defaults and the `u-101` seed; they survive sign-out and a new sign-in. One user never sees another's.
+
+`PATCH` takes `{"ifVersion": int, ...keys}`: only the keys present change, and the full updated object is returned. `ifVersion` must equal the current `version` (optimistic concurrency): of two writes with the same `ifVersion`, the first to arrive wins and the other gets `409`.
+
+The checks run in this order and the first failure answers. A rejected request changes nothing.
+
+| Order | Check | Status and `error.code` | `error.parameter` |
+|---|---|---|---|
+| 1 | no valid bearer | `401` `unauthenticated` | |
+| 2 | body is not an object, or `ifVersion` is missing or not an int | `400` `invalid_body` | `ifVersion` |
+| 3 | a key other than `ifVersion`, `themeMode`, `density`, `reduceMotion` | `400` `unknown_key` | the key |
+| 4 | none of the three preference keys | `400` `empty_patch` | |
+| 5 | `themeMode` not `system`, `light` or `dark` | `400` `invalid_theme_mode` | `themeMode` |
+| 6 | `density` not `comfortable` or `compact` | `400` `invalid_density` | `density` |
+| 7 | `reduceMotion` not a bool | `400` `invalid_reduce_motion` | `reduceMotion` |
+| 8 | `ifVersion` is not the current `version` | `409` `version_conflict` | |
+
+The `409` body is `{"error": {"code": "version_conflict", "message": ..., "current": <the object>}}`, so a client can re-apply its change on `current.version` or show the current values.
+
 ### Errors from the engine
 
 | Status | `error.code` | When |
@@ -94,6 +131,8 @@ Favourites are per user and kept until `reset()`, which also restores the seeded
 |---|---|
 | `identity.expired_token` | `POST /v1/auth/sign-in` hands out `mc-access-<userId>-expired` with a good refresh token, so the first authenticated request gets `401` and one refresh fixes it |
 | `identity.server_error` | Every route of the table above fails with `500` |
+| `identity.preferences_error` | Only `GET` and `PATCH /v1/me/preferences` fail, with `500` and the engine's `injected_failure` body; every other route works |
+| `identity.preferences_conflict` | The next `PATCH /v1/me/preferences` that passes checks 1 to 7 answers `409` `version_conflict` with the current object and writes nothing; later ones are served normally. Its message is `Injected version conflict (scenario identity.preferences_conflict)`, unlike a real mismatch (`The preferences are at version N, not M`). Each selection of the scenario (`useScenario`) arms it once, with or without `reset()`; selecting it twice in a row is still one arming |
 
 ## Fixture sets
 
@@ -101,8 +140,8 @@ Named sets for feature tests (plan 05 §3.4), exported as `identityFixtureSets`.
 
 | Set | Contents |
 |---|---|
-| `identity.default` | The seven routes, the users above, seeded favourites, and the two scenarios |
-| `identity.empty` | The same routes with no seeded favourites (`favouriteCount` 0 for both users); no scenarios |
+| `identity.default` | The nine routes, the users above, seeded favourites and preferences, and the four scenarios |
+| `identity.empty` | The same routes with no seeded favourites (`favouriteCount` 0 for both users) and the same preferences; no scenarios |
 | `identity.server_error` | The same routes, each answering `500` `server_error`; no scenarios |
 
 ## Snapshots
