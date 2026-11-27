@@ -21,6 +21,7 @@ An ADR captures **one** significant decision: the context, the options weighed, 
 | [0010](0010-testing-tiers-and-coverage.md) | Tide testing tiers, BDD traceability, 90 % coverage | Accepted | 2026-11-23 |
 | [0011](0011-model-tiers-and-review-first.md) | Crew model tiers, and code review before verification | Accepted | 2026-11-26 |
 | [0012](0012-analytics-tracker-port.md) | Blocs track analytics through a pure-Dart port in `mc_monitoring`; a flow's pages are screens | Accepted | 2026-11-27 |
+| [0015](0015-lean-verification.md) | Lean verification: no feature goldens, ~15 targeted mutants, correctness-only Verifiers (PO) | Accepted | 2026-11-27 |
 
 ## Expected upcoming ADRs
 | Topic | Comes from |
