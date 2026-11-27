@@ -217,6 +217,16 @@ void main() {
       ..submit(' ');
     expect(clears, 1);
     expect(searches, ['hulk']);
+
+    // The blank submit forgot "hulk": typing it again searches again,
+    // and a second blank submit clears nothing more.
+    sut.update('hulk');
+    clock.advance(const Duration(milliseconds: 300));
+    expect(searches, ['hulk', 'hulk']);
+    sut
+      ..submit(' ')
+      ..submit(' ');
+    expect(clears, 2);
   });
 
   test('T-0046-AC6: submit after dispose does nothing', () {

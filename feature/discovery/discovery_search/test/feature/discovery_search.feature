@@ -76,6 +76,7 @@ Feature: Search characters and comics
     And I type {'spi'}
     Then I see {'The search failed'}
     And I see {<message>}
+    And {1} errors were reported
     When the backend recovers
     And I tap {'Retry'}
     Then the characters section shows the first {5} characters for {'spi'} with their art
@@ -185,12 +186,17 @@ Feature: Search characters and comics
     Then the app was asked to open character {'Spindle Alchemist'}
 
   @T-0046-AC3
-  Scenario: A result can be opened again once the first open has settled
+  Scenario: A second tap 499 ms after the first is still the same tap
     When I open the search
     And I type {'spi'}
-    And I tap the result {'Spindle Alchemist'}
-    And {500} milliseconds pass
-    And I tap the result {'Spindle Alchemist'}
+    And I tap the result {'Spindle Alchemist'} and again after {499} milliseconds
+    Then the app was asked to open character {'Spindle Alchemist'}
+
+  @T-0046-AC3
+  Scenario: A tap 501 ms after the first opens the result again
+    When I open the search
+    And I type {'spi'}
+    And I tap the result {'Spindle Alchemist'} and again after {501} milliseconds
     Then the app was asked to open character {'Spindle Alchemist'} {2} times
 
   @T-0046-AC4 @l10n

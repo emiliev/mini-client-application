@@ -8,8 +8,8 @@ part 'discovery_search_flow_state.freezed.dart';
 abstract class DiscoverySearchFlowState with _$DiscoverySearchFlowState {
   const factory DiscoverySearchFlowState({
     /// The query the flow opened with (`/search?q=spi`): the field starts
-    /// with it and it is searched once typing would have paused. Null opens
-    /// on the recent searches.
+    /// with it and it is searched at once. Null (the flow treats a blank
+    /// query as none) opens on the recent searches.
     String? initialQuery,
   }) = _DiscoverySearchFlowState;
 }

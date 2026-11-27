@@ -18,12 +18,19 @@ import 'package:mc_test_utils/mc_test_utils.dart';
 ///    sizes, modification times) has not changed for 25 rounds in a row, so
 ///    a chain of queued writes (each a read, a write and a rename) also
 ///    finishes. It fails after 1000 rounds of change.
-Future<void> mcFinishStorageIo(WidgetTester tester) async {
+///
+/// [afterEachPump] runs after every pump, so a caller can check what the
+/// screen shows while the I/O lands (a state that must never show).
+Future<void> mcFinishStorageIo(
+  WidgetTester tester, {
+  void Function()? afterEachPump,
+}) async {
   for (var round = 0; round < 10; round++) {
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 20)),
     );
     await tester.pump();
+    afterEachPump?.call();
   }
   final directory = McTestSession.current.storageDirectory;
   var last = _snapshot(directory);
@@ -36,6 +43,7 @@ Future<void> mcFinishStorageIo(WidgetTester tester) async {
       () => Future<void>.delayed(const Duration(milliseconds: 2)),
     );
     await tester.pump();
+    afterEachPump?.call();
     final now = _snapshot(directory);
     unchanged = now == last ? unchanged + 1 : 0;
     last = now;

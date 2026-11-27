@@ -57,8 +57,9 @@ HOME_ROUTES=app/mini_client/lib/src/router/app_routes.dart
 FLOW_W=$DS/lib/src/flow/discovery_search_flow.dart
 DQ=utility/mc_paging/lib/src/query/debounced_query.dart
 DQ_TEST=//utility/mc_paging:debounced_query_test
+STATE=$DS/lib/src/presentation/bloc/discovery_search_state.dart
 
-FILES=($BLOC $MAP $DTO $MODEL $REPO_ $MODULE $SCOPE $PAGE $RESULTS $TILE $HISTORY $FAIL_MSG $DE $BARREL $NAV $ROUTE $LOC $DOMAINS $HOME_ROUTES $FLOW_W $DQ)
+FILES=($BLOC $MAP $DTO $MODEL $REPO_ $MODULE $SCOPE $PAGE $RESULTS $TILE $HISTORY $FAIL_MSG $DE $BARREL $NAV $ROUTE $LOC $DOMAINS $HOME_ROUTES $FLOW_W $DQ $STATE)
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
     say "REFUSING TO RUN: $f has uncommitted edits (commit them first)"
@@ -214,7 +215,7 @@ mutate R3-b "submit leaves a pending search running" $DQ \
 mutate R3-c "submit searches the last query again" $DQ \
   "s.replace('    if (query == _searched) {\n      return;\n    }\n    _searched = query;\n    onSearch(query);', '    _searched = query;\n    onSearch(query);')" $DQ_TEST
 mutate R5-a "the backend's too-short answer is a failure (repository)" $REPO_ \
-  "s.replace('if (_isQueryTooShort(e.response)) {', 'if (_isQueryTooShort(e.response) && query.isEmpty) {')" $BDD $CONTRACT
+  "s.replace('error is ApiClientError && error.code == queryTooShortCode', 'error is ApiClientError && error.code == queryTooShortCode && query.isEmpty')" $BDD $CONTRACT
 mutate R5-b "the backend's too-short answer is a failure (bloc)" $BLOC \
   "s.replace('          // The backend counts the query as too short (after folding).\n          _showHistory(emit);', '          // The backend counts the query as too short (after folding).\n          emit(\n            DiscoverySearchState.failure(\n              query: query,\n              error: const ApiFailure.clientError(400),\n            ),\n          );')" $BDD
 mutate R7-a "a failed Clear is taken as done" $BLOC \
@@ -231,6 +232,19 @@ mutate R10 "a blank linked query is kept (no keyboard)" $FLOW_W \
   "s.replace('return query == null || query.trim().isEmpty ? null : query;', 'return query;')" $BDD
 mutate R12 "groups in another order are accepted" $MAP \
   "s.replace('    if (!inOrder) {', '    if (!inOrder && types.isEmpty) {')" $CONTRACT
+# --- Verifier Lows (L1 to L5) -----------------------------------------------
+mutate L1-a "the open guard ends at 498 ms (a tap at 499 ms opens again)" $BLOC \
+  "s.replace('const Duration openGuard = Duration(milliseconds: 500);', 'const Duration openGuard = Duration(milliseconds: 498);')" $BDD
+mutate L1-b "the open guard lasts 502 ms (a tap at 501 ms is ignored)" $BLOC \
+  "s.replace('const Duration openGuard = Duration(milliseconds: 500);', 'const Duration openGuard = Duration(milliseconds: 502);')" $BDD
+mutate L2 "a failed Clear restores its list over a newer change (no version check)" $BLOC \
+  "s.replace('if (failed && version == _historyVersion) {', 'if (failed) {')" $BDD
+mutate L3 "a blank submit keeps the last searched query" $DQ \
+  "s[:s.rindex('        _searched = null;\n        onClear();')] + '        onClear();' + s[s.rindex('        _searched = null;\n        onClear();') + len('        _searched = null;\n        onClear();'):]" $DQ_TEST
+mutate L4 "a failed search is not reported (no McFailureState)" $STATE \
+  "s.replace('  @Implements<McFailureState>()\n', '')" $BDD
+mutate L5 "the keyboard's Search key does nothing" $PAGE \
+  "s.replace('              onSubmitted: (text) => context.read<DiscoverySearchBloc>().add(\n                DiscoverySearchEvent.submitted(text),\n              ),\n', '')" $BDD
 # --- AC7: the barrel, the root imports, the wire shape ----------------------
 mutate AC7-a "barrel exports a page" $BARREL \
   "s + \"export 'package:discovery_search/src/presentation/page/discovery_search_page.dart' show DiscoverySearchPage;\n\"" $ARCH

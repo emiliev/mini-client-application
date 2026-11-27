@@ -139,11 +139,13 @@ Future<void> expectSectionAction(
 bool searchFieldFocused(WidgetTester tester) =>
     tester.widget<EditableText>(searchField()).focusNode.hasFocus;
 
-/// Taps the result row titled [title] ([times] taps within one frame).
+/// Taps the result row titled [title] [times] times, [between] of fake time
+/// apart (zero: within one frame), then settles.
 Future<void> tapResult(
   WidgetTester tester,
   String title, {
   int times = 1,
+  Duration between = Duration.zero,
 }) async {
   final row = find.descendant(
     of: find.byKey(searchResultsKey),
@@ -153,6 +155,9 @@ Future<void> tapResult(
   await mcSettle(tester);
   expect(row.hitTestable(), findsOneWidget, reason: 'one "$title" row');
   for (var i = 0; i < times; i++) {
+    if (i > 0 && between > Duration.zero) {
+      await tester.pump(between);
+    }
     await tester.tap(row.hitTestable());
   }
   await mcSettle(tester);

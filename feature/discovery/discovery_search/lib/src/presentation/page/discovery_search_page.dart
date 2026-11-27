@@ -97,6 +97,11 @@ class _DiscoverySearchPageContentState
               label: l10n.discoverySearchFieldLabel,
               clearLabel: l10n.discoverySearchClearQuery,
               onChanged: _changed,
+              // The keyboard's Search key: search now, not after the
+              // debounce.
+              onSubmitted: (text) => context.read<DiscoverySearchBloc>().add(
+                DiscoverySearchEvent.submitted(text),
+              ),
               // Opened to type: the keyboard comes up. Opened with a query
               // (a link): the results are what the user came for.
               autofocus: widget.initialQuery == null,

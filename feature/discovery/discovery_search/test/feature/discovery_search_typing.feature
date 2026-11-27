@@ -21,6 +21,16 @@ Feature: Search as you type
     And the comics section shows the first {5} comics for {'spi'} with their art
 
   @T-0046-AC6
+  Scenario: The keyboard's Search key searches at once
+    When I open the search
+    And I type {'spi'} one character at a time
+    And I press Search on the keyboard
+    Then the backend received {1} requests for {'GET /v1/search?q=spi'}
+    When {300} milliseconds pass
+    Then the backend received {1} requests for {'GET /v1/search'}
+    And the characters section shows the first {5} characters for {'spi'} with their art
+
+  @T-0046-AC6
   Scenario: A pause inside the word sends a request for each pause
     When I open the search
     And I type {'sp'} one character at a time
@@ -187,6 +197,21 @@ Feature: Search as you type
     When I open the search again
     Then the recent searches are {'spi, amber'}
     And I don't see {'Your recent searches could not be cleared. Please try again.'}
+
+  @T-0046-AC6
+  Scenario: A Clear that fails after a newer change does not bring the old list back
+    When I open the search
+    And I type {'amber'}
+    And the app finishes writing to storage
+    And I open the search again
+    Given the app can no longer write to storage
+    # The Clear fails on its way to storage; meanwhile a search (whose save
+    # fails too) and an empty field make a newer change of the list.
+    When I tap {'Clear'}
+    And I type {'spi'}
+    And I tap the icon button {'Clear search'}
+    Then the app finishes writing to storage, never showing {'Your recent searches could not be cleared. Please try again.'}
+    And the recent searches are {'amber'}
 
   @T-0046-AC4 @l10n
   Scenario: A Clear that fails explains itself in German

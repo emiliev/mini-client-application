@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:discovery_search/src/domain/api/discovery_search_api.dart';
 import 'package:discovery_search/src/domain/model/search_mapper.dart';
 import 'package:discovery_search/src/domain/model/search_results.dart';
@@ -27,30 +26,21 @@ class DiscoverySearchRepository {
   /// The first [searchPageSize] matches of each type for [query], characters
   /// first.
   ///
-  /// **Null** when the backend finds the query too short to search
-  /// (`400 query_too_short`). The backend counts characters after folding
-  /// accents away, so a query the client counts as long enough can still be
-  /// too short ("e" plus a combining accent, two bare accents); the client
-  /// does not copy the backend's fold table, it takes the backend's word.
-  Future<Result<SearchResults?, ApiFailure>> search(String query) =>
-      apiCall(() async {
-        try {
-          return (await _api.search(query, limit: searchPageSize)).toDomain();
-        } on DioException catch (e) {
-          if (_isQueryTooShort(e.response)) {
-            return null;
-          }
-          rethrow;
-        }
-      });
-
-  static bool _isQueryTooShort(Response<Object?>? response) {
-    if (response?.statusCode != 400) {
-      return false;
-    }
-    final body = response!.data;
-    return body is Map &&
-        body['error'] is Map &&
-        (body['error'] as Map)['code'] == queryTooShortCode;
+  /// **Null** when the backend finds the query too short to search (a `400`
+  /// whose error code is [queryTooShortCode]). The backend counts characters
+  /// after folding accents away, so a query the client counts as long
+  /// enough can still be too short ("e" plus a combining accent, two bare
+  /// accents); the client does not copy the backend's fold table, it takes
+  /// the backend's word.
+  Future<Result<SearchResults?, ApiFailure>> search(String query) async {
+    final result = await apiCall(
+      () async => (await _api.search(query, limit: searchPageSize)).toDomain(),
+    );
+    return result.fold(
+      success,
+      (error) => error is ApiClientError && error.code == queryTooShortCode
+          ? success(null)
+          : failure(error),
+    );
   }
 }

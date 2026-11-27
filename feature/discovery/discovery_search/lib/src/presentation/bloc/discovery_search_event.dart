@@ -10,7 +10,8 @@ sealed class DiscoverySearchEvent {
   /// The field's text changed (every edit, the clear button included).
   const factory DiscoverySearchEvent.queryChanged(String text) = _QueryChanged;
 
-  /// A query to search at once, not typed: a tapped recent search.
+  /// A query to search at once: a tapped recent search, or the keyboard's
+  /// Search key.
   const factory DiscoverySearchEvent.submitted(String text) = _Submitted;
 
   /// A type chip was chosen (or a group's "Show 20").

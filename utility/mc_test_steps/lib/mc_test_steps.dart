@@ -6,6 +6,7 @@
 /// name is in `:step_index`; a local step with the same name is a build error.
 library;
 
+export 'package:mc_test_steps/src/assertions/errors_were_reported.dart';
 export 'package:mc_test_steps/src/assertions/i_dont_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see.dart';
 export 'package:mc_test_steps/src/assertions/i_see_the_texts.dart';
@@ -32,9 +33,11 @@ export 'package:mc_test_steps/src/environment/i_am_signed_in_as.dart';
 export 'package:mc_test_steps/src/environment/milliseconds_pass.dart';
 export 'package:mc_test_steps/src/environment/the_app_can_no_longer_write_to_storage.dart';
 export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storage.dart';
+export 'package:mc_test_steps/src/environment/the_app_finishes_writing_to_storage_never_showing.dart';
 export 'package:mc_test_steps/src/environment/the_device_locale_is.dart';
 export 'package:mc_test_steps/src/environment/the_pseudolocale_is_active.dart';
 export 'package:mc_test_steps/src/environment/the_text_scale_is.dart';
+export 'package:mc_test_steps/src/interaction/i_press_search_on_the_keyboard.dart';
 export 'package:mc_test_steps/src/interaction/i_pull_to_refresh.dart';
 export 'package:mc_test_steps/src/interaction/i_swipe_back.dart';
 export 'package:mc_test_steps/src/interaction/i_tap.dart';
