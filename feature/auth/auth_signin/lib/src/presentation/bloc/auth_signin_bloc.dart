@@ -24,8 +24,11 @@ part 'auth_signin_state.dart';
 /// - **Typed failures:** the form's failed submit is read as a
 ///   [SignInFailure] (`InvalidCredentials`, or `SignInUnavailable` with the
 ///   cause). An edit clears it; submitting again is the retry.
-/// - **No leaving mid-request:** "Not now" is ignored while a request runs, so
-///   a sign-in that is on its way is never answered as "cancelled".
+/// - **No leaving mid-request:** "Not now" is ignored while a request runs,
+///   and the page has no back button then, so a sign-in that is on its way is
+///   never answered as "cancelled". A system back or a link can still close
+///   the flow: a sign-in that lands after that is undone (the session ends),
+///   so "no result" never means "someone is signed in".
 /// - **The result:** a sign-in completes the flow with
 ///   `SignInResult.signedIn`, "Not now" with `SignInResult.cancelled`
 ///   (`onComplete` fires once, `FeatureFlowController`).
@@ -105,9 +108,16 @@ final class AuthSignInBloc extends McBloc<AuthSignInEvent, AuthSignInState> {
         password: values.get<String>(SignInFields.password) ?? '',
       ),
     );
-    if (result == null || isClosed) {
-      // Invalid (the form shows why), a request is already running (a double
-      // tap), or the user left while the request was on its way.
+    if (result == null) {
+      // Invalid (the form shows why), or a request is already running (a
+      // double tap).
+      return;
+    }
+    if (isClosed) {
+      // The user left (Back, a link) while the request was on its way. The
+      // caller was told "no sign-in", so one that landed is undone: leaving
+      // cancels.
+      await result.fold((_) => _repository.signOut(), (_) async {});
       return;
     }
     result.fold((_) {

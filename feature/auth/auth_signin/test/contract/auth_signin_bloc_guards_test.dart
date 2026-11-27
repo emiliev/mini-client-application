@@ -196,17 +196,20 @@ void main() {
   );
 
   test('T-0066-AC1 a bloc closed while the request is on its way completes '
-      'nothing and throws nothing', () async {
+      'nothing, throws nothing, and undoes the sign-in that lands', () async {
     h = _Harness.start(latency: const Duration(milliseconds: 30))..fill();
     await h.settle();
 
     h.bloc.add(const AuthSignInEvent.submit());
     await h.until(() => h.bloc.state.form.isSubmitting);
     await h.bloc.close();
-    await h.until(() => h.session.isSignedIn);
+    await h.until(
+      () => h.backend.recentTraffic.any((t) => t.path == '/v1/auth/sign-out'),
+    );
     await h.settle();
 
     expect(h.results, isEmpty, reason: 'the flow was gone');
+    expect(h.session.isSignedIn, isFalse, reason: 'leaving cancels');
   });
 
   test('T-0066-AC1 a demo account fills both fields, and is ignored while a '

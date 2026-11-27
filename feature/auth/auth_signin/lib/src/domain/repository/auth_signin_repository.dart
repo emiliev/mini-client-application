@@ -18,4 +18,12 @@ class AuthSignInRepository {
     required String email,
     required String password,
   }) => _auth.signIn(email: email.trim(), password: password);
+
+  /// Ends the session the last [signIn] started, for a sign-in whose screen
+  /// was left before the answer came (the bloc's "leaving cancels"). A
+  /// failure to tell the server is not reported: the session is cleared
+  /// either way.
+  Future<void> signOut() async {
+    await _auth.signOut();
+  }
 }

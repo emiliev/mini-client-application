@@ -1,3 +1,5 @@
+import 'package:app_core/src/sign_in/sign_in_request.dart';
+
 /// Typed locations for navigation across wiring groups (plan 01 §4.2). A
 /// wiring never imports another wiring, so it reaches another group's routes
 /// through these. Each app tests `AppLocations.x(...) == XRoute(...).location`.
@@ -71,4 +73,22 @@ abstract final class AppLocations {
   /// The appearance settings (T-0063). Equals
   /// `SettingsAppearanceRoute().location` in account_wiring.
   static const String settingsAppearance = '/settings/appearance';
+
+  /// The sign-in screen (T-0066), which ends with a result (push it through
+  /// `AppFlows.signIn`). Equals `SignInRoute(...).location` in
+  /// account_wiring.
+  ///
+  /// [from] is where the guard was sending the user: after signing in, the
+  /// screen goes there, if it is a location of this app (`safeSignInTarget`).
+  /// [reason] says what signing in is for. Both are query parameters.
+  static String signIn({String? from, SignInPurpose? reason}) {
+    final query = {
+      if (from != null) 'from': from,
+      if (reason != null) 'reason': reason.name,
+    };
+    return Uri(
+      path: '/auth/sign-in',
+      queryParameters: query.isEmpty ? null : query,
+    ).toString();
+  }
 }

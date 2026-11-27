@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:app_core/src/locations/app_locations.dart';
+import 'package:app_core/src/sign_in/sign_in_request.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
@@ -296,13 +297,41 @@ abstract final class AppFlows {
   /// with the new list's id, or null when the user left without saving
   /// (Back, a declined sign-in).
   static Future<String?> createReadingList(GoRouter router) =>
-      _open(router, AppLocations.newReadingList);
+      _open<String>(router, AppLocations.newReadingList);
 
   /// Opens the reading-list editor on list [id]. Completes with [id] once
   /// saved (also when nothing changed), or null when the user left without
   /// saving.
   static Future<String?> editReadingList(GoRouter router, String id) =>
-      _open(router, AppLocations.editReadingList(id));
+      _open<String>(router, AppLocations.editReadingList(id));
+
+  /// Opens the sign-in screen (`/auth/sign-in`, account_wiring) on top of
+  /// the current page. Completes with true when the user signed in, false
+  /// when they chose "Not now" or left by Back, once.
+  ///
+  /// **The sign-in route's result is a `bool`, on purpose.** When the guard
+  /// redirects a push of another result route (`createReadingList` while
+  /// signed out), the sign-in page is what shows, and when it pops with a
+  /// value that value reaches the *original* caller through the push's
+  /// future. A `String` result such as "cancelled" would arrive as a list
+  /// id. `_open` accepts a pop value only of its own result type, so a
+  /// `bool` is null to every `String` caller.
+  ///
+  /// With a [from] the screen **goes to `from`** (`go`) after signing in
+  /// instead of returning, which replaces the page this call opened, so the
+  /// call ends with false although someone signed in: the caller reads the
+  /// session. [from] is for the guard's redirect, which builds the location
+  /// itself; features use `requestAppSignIn`, which has none.
+  static Future<bool> signIn(
+    GoRouter router, {
+    String? from,
+    SignInPurpose? reason,
+  }) async =>
+      await _open<bool>(
+        router,
+        AppLocations.signIn(from: from, reason: reason),
+      ) ??
+      false;
 
   /// Called on every change a watch of a call hears (for tests: after every
   /// call has ended, no change reaches a watch any more, so no listener is
@@ -334,8 +363,8 @@ abstract final class AppFlows {
   /// a null `extra`, but with the same page key, so the page is still found
   /// and never abandoned while it is there; the route keeps its call (see
   /// [FlowResultRoute]).
-  static Future<String?> _open(GoRouter router, String location) {
-    final call = FlowCall<String>();
+  static Future<T?> _open<T extends Object>(GoRouter router, String location) {
+    final call = FlowCall<T>();
     final delegate = router.routerDelegate;
     final provider = router.routeInformationProvider;
     // Null while the router applies the push inside `push` itself.
@@ -406,7 +435,7 @@ abstract final class AppFlows {
       extra: call,
     );
     unawaited(
-      pushed.then((value) => call.complete(value is String ? value : null)),
+      pushed.then((value) => call.complete(value is T ? value : null)),
     );
     // A first look after the frame: a `go` in the same synchronous span as
     // the push leaves nothing for the router to notify about.

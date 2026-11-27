@@ -1,3 +1,5 @@
+import 'package:auth_signin/auth_signin.dart';
+import 'package:flutter/foundation.dart';
 import 'package:settings_appearance/settings_appearance.dart';
 
 /// What the account group's typed routes build (R15): each member returns a
@@ -10,4 +12,13 @@ import 'package:settings_appearance/settings_appearance.dart';
 abstract interface class AccountRouteTargets {
   /// The appearance settings: `/settings/appearance`.
   SettingsAppearanceFlow settingsAppearance();
+
+  /// The sign-in form: `/auth/sign-in`. [reason] is the `reason` code of the
+  /// link (an unknown or absent one says nothing). [onComplete] gets the
+  /// app-level result, true when someone signed in: features never share
+  /// types (plan 01 §4.3).
+  AuthSignInFlow signIn({
+    required ValueChanged<bool> onComplete,
+    String? reason,
+  });
 }

@@ -20,18 +20,24 @@ _PKG = "account_wiring"
 _LANG = "3.13"  # the pubspec floor (F-0011)
 
 _ROUTES = {
+    "auth": "lib/src/routes/auth_routes.dart",
     "settings": "lib/src/routes/settings_routes.dart",
 }
 
 _INIT = "lib/src/di/di_initializer.dart"
 
-_NAVIGATOR = "lib/src/navigators/settings_appearance_navigator_impl.dart"
+_NAVIGATORS = [
+    "lib/src/navigators/auth_signin_navigator_impl.dart",
+    "lib/src/navigators/settings_appearance_navigator_impl.dart",
+]
 
 _DEPS = [
     "//app/wiring/app_core",
+    "//feature/auth/auth_signin",
     "//feature/settings/settings_appearance",
     "//utility/mc_api_auth",
     "//utility/mc_di",
+    "//utility/mc_fixtures_identity",
     "//utility/mc_session",
     "@pub_deps//:flutter",
     "@pub_deps//:get_it",
@@ -44,6 +50,7 @@ flutter_library(
     name = "_stage",
     package_name = _PKG,
     srcs = [
+        "lib/src/routes/auth_routes.dart",
         "lib/src/routes/route_targets.dart",
         "lib/src/routes/settings_routes.dart",
     ],
@@ -82,7 +89,7 @@ flutter_library(
 # --- injectable (fork patch 0002) -------------------------------------------
 injectable_package(
     name = "di_config",
-    srcs = [_NAVIGATOR],
+    srcs = _NAVIGATORS,
     init = _INIT,
     init_deps = ["//utility/mc_di"],
     language_version = _LANG,
@@ -94,6 +101,7 @@ injectable_package(
 )
 
 _CODEGEN = [
+    ":_auth_routes_g",
     ":_settings_routes_g",
     ":di_config",
 ]
@@ -114,7 +122,6 @@ flutter_library(
 _TEST_DEPS = _DEPS + [
     ":account_wiring",
     "//utility/mc_ds_theme",
-    "//utility/mc_fixtures_identity",
     "//utility/mc_test_utils",
     "@pub_deps//:flutter_test",
 ]

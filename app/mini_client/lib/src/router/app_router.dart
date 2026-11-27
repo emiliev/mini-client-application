@@ -6,6 +6,8 @@ import 'package:discovery_wiring/discovery_wiring.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:library_wiring/library_wiring.dart';
+import 'package:mc_di/mc_di.dart';
+import 'package:mc_session/mc_session.dart';
 import 'package:mini_client/src/pages/placeholder_pages.dart';
 import 'package:mini_client/src/router/app_routes.dart';
 import 'package:publishing_wiring/publishing_wiring.dart';
@@ -14,21 +16,31 @@ import 'package:universe_wiring/universe_wiring.dart';
 /// The app's router. `McApp` calls this once, when boot is ready, with the
 /// held deep link (R29). The shell (`StatefulShellRoute`, 5 tabs) arrives
 /// with the first features.
-GoRouter buildAppRouter({required String initialLocation}) {
+///
+/// The sign-in guard (plan 01 §4.2, T-0066) reads [session], which is the
+/// root's `SessionReader` unless a test passes its own.
+GoRouter buildAppRouter({
+  required String initialLocation,
+  SessionReader? session,
+}) {
   // The observer needs the router's declared names, and the router needs the
   // observer: it asks for the names when the first screen shows.
   late final GoRouter router;
+  final guard = SignInGuard(session ?? diContainer<SessionReader>());
   router = _buildRouter(
     initialLocation,
+    guard,
     appRouterObservers(
       screenNames: () => goRouteNames(router.configuration.routes),
     ),
   );
+  guard.bind(router);
   return router;
 }
 
 GoRouter _buildRouter(
   String initialLocation,
+  SignInGuard guard,
   List<NavigatorObserver> observers,
 ) => GoRouter(
   initialLocation: initialLocation,
@@ -50,7 +62,9 @@ GoRouter _buildRouter(
     ...accountRoutes,
     notFoundRoute,
   ]),
-  // The auth guard (P1-16 AC4) joins here with mc_api_auth.
+  // The sign-in guard (P1-16 AC4) re-evaluates on every sign-in and
+  // sign-out, so signing out on a protected screen redirects.
+  refreshListenable: guard.refresh,
   redirect: (context, state) {
     McRouteProbe.recordRedirect(context, state.uri);
     // Only miniclient://app/… links are the app's (as PendingLinks.normalise).
@@ -58,7 +72,9 @@ GoRouter _buildRouter(
     if (LinkScheme.app.isForeign(uri)) {
       return AppLocations.home;
     }
-    return null;
+    // Signed out on `/me/**`, `/library/**` or `/store/checkout`:
+    // `/auth/sign-in?from=<where they were going>`.
+    return guard.redirect(uri);
   },
   // Unknown paths and bad ids (a path or redirect error) land on the
   // not-found route, nested under home like every other (T-0054).
