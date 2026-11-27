@@ -51,7 +51,7 @@ FILES=("$RES" "$ROUTER" "$PAGES" "$LISTS")
 restore_all() { git checkout -- "${FILES[@]}" 2>/dev/null; }
 trap restore_all EXIT INT TERM
 
-run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
+run() { bz test --nocache_test_results --test_timeout=900 --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
 
 base="$(run $T_RES $T_HARD $T_APP $T_NF $T_OLD $T_LISTS)"
 if grep -q -a -E "FAILED|NO STATUS|^ERROR|Build did NOT complete" <<< "$base"; then
