@@ -94,6 +94,8 @@ Build the core of the generator that will produce the remaining ~95 features fro
   - **P-117 root-caused** (two causes, not one) and fixed for tool/loc and tool/mcgen (F-0065 §4).
   - Mid-task correction: I first rendered with `htmlEscapeValues: false`. Reading mason's `render.dart` showed that mason keeps mustache's default escaping, so mcgen now does too, and templates use `{{{x}}}`.
 
+- 2026-11-27 (Engineer, review round, ADR-0015's one fix round): merged `origin/main` (T-0068 docs), then fixed the 4 important `/code-review` findings and every nit. See "Review round" below.
+
 ## Outcome
 **Handed off** for `/code-review` and the TL merge gates (ADR-0015, no Verifier). Finding: [F-0065](../findings/F-0065-mcgen-core.md). ADR draft: [ADR-0016](../adr/0016-mcgen-spec-manifest-and-determinism.md) (Proposed). Evidence: [`documents/evidence/T-0065/`](../evidence/T-0065/).
 
@@ -123,7 +125,7 @@ Build the core of the generator that will produce the remaining ~95 features fro
 - **`tool/checks/T-0065-AC5_gates.sh`:** mcgen's gates, which Bazel does not run (F-0065 §1).
 
 ### AC → evidence
-Tests are in `tool/mcgen/test/` and run with `cd tool/mcgen && fvm dart test`: 80 tests, all passing. 10 consecutive runs gave 80/80 each ([`mcgen-test-10-runs.log`](../evidence/T-0065/mcgen-test-10-runs.log)).
+Tests are in `tool/mcgen/test/` and run with `cd tool/mcgen && fvm dart pub get --offline && fvm dart test`: 96 tests after the review round, all passing. Ten consecutive runs passed each time ([`mcgen-test-10-runs.log`](../evidence/T-0065/mcgen-test-10-runs.log)).
 
 | AC | Tests and evidence |
 |---|---|
@@ -139,7 +141,7 @@ Tests are in `tool/mcgen/test/` and run with `cd tool/mcgen && fvm dart test`: 8
 | `tool/bazelw --output_base=/tmp/mc-ob-T-0065-engineer test --lockfile_mode=error //...` | 223 tests pass, exit 0. All were cached: no Bazel input changed, since mcgen is not a Bazel package |
 | Shared format gate, `tool/checks/lib/format_gate.sh` | 0 changed, with nested `.dart_tool` in tool/loc and tool/mcgen (P-117) |
 | `cd tool/mcgen && fvm dart analyze --fatal-infos` | No issues |
-| `cd tool/mcgen && fvm dart test` | 80/80, ten runs in a row |
+| `cd tool/mcgen && fvm dart test` | 96/96 after the review round, ten runs in a row |
 | `pubspec.lock`, `MODULE.bazel.lock` | unchanged against `origin/main` |
 
 ### Test integrity
@@ -164,3 +166,32 @@ F-0065 §5 has the details:
 - **A shared table of the first-party kits' exported symbols**, so archetypes don't each register `McBloc`, `FeatureFlow`, etc. (F-0065 §5.4).
 - **`test //...` does not run mcgen's tests.** The TL runs `tool/checks/T-0065-AC5_gates.sh` with the merge gates, until a tool hub in `MODULE.bazel` is acceptable (F-0065 §1).
 - **The writer leaves empty directories behind** when a spec stops generating every file in one. This is cosmetic.
+
+## Review round
+`/code-review` found 4 important findings and 6 nits. All are fixed; the tests are in `tool/mcgen/test/review_round_test.dart`.
+
+| # | Finding | Fix | Tests |
+|---|---|---|---|
+| 1 | A managed file that is no longer generated was deleted even when its keep regions held hand-written bodies | The manifest's `keep` is now `{id: sha256 of the default body}` (ADR-0016 updated). The delete path scans the file: a region whose body is non-blank and differs from its default makes it `orphan-keep`, refused without `--force`, which deletes it and logs `(forced over orphan-keep)`. Orphan regions in files that are still generated use the same rule, so an untouched default is no longer a false orphan | "T-0065-AC2 with a filled keep region, gen refuses and names it; --force deletes and logs it"; "T-0065-AC2 with only its default keep bodies, it is deleted"; "T-0065-AC2 an untouched dropped region is not an orphan; a filled one is"; "T-0065-AC2 the manifest records each region's default-body hash" |
+| 2 | `**/` needed at least one directory | `**/` compiles to `(?:.*/)?` | "T-0065-AC2 **/ matches zero or more directories"; "T-0065-AC2 a mixed module owns lib/**/*.dart files at the top of lib/ too" |
+| 3 | lint, gen and check results depended on which modules were named | The session loads every spec under the root for the `LintContext` and `PackageCatalog`, and generates or reports only the targets. A broken spec that isn't named is left out of the context (it is reported when named) | "T-0065-AC4 gen of one module sees a dependency that exists only as a spec"; "T-0065-AC4 lint catches a module collision when only one of the two specs is named"; "T-0065-AC4 a broken spec that is not named does not stop another module" |
+| 4 | A bad `mcgen.yaml` or schema crashed with a stack trace | The session is built inside the `try`. `McgenException`, `FormatException` (`YamlException` included), `FileSystemException` and `StateError` print a diagnostic and exit 1. `runMcgen` gains a `toolDir` override for these tests | "a mcgen.yaml without global_seed"; "a mcgen.yaml that is not YAML"; "a schema that is not JSON, and one with an unsupported keyword"; "a missing config file" |
+
+**Nits, all fixed:**
+- An owned file that already exists, but was missing from the manifest, is now listed with the generated hash, so loc counts it as scaffold while it matches.
+- `check` and `gen` agree on a deleted managed file: both treat it as `stale-manifest` ("deleted: gen would create it again"), and gen recreates it. Test: "T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated".
+- The manifest's `keep` and `ownership` are validated on read. Test: "T-0065-AC2 a malformed keep list or ownership is a malformed manifest".
+- The absolute-path guard covers only the root and the tool directory; HOME and the temp directory are dropped. `determinism_test` still checks the output for all four.
+- utility_hello's lint rejects an enum default that isn't one of the enum's values. Test: "T-0065-AC4 an enum default must be one of its values".
+- `listTree`'s doc now says what it does: it skips `.dart_tool/` and `build/`, and lists `.mcgen/`.
+
+**Golden change:** `test/golden/utility_hello/.mcgen/manifest.json`'s `keep` went from `["greeting.render"]` to `{"greeting.render": "<default-body hash>"}`. Nothing else changed.
+
+**The command that runs the tests**, for CI (T-0068) and the merge gates:
+
+```sh
+cd tool/mcgen && fvm dart pub get --offline && fvm dart test
+```
+
+On a CI runner with an empty pub cache, drop `--offline`: the lockfile still pins every version. The tests also need package configs at the repo root (for the analyze test) and in `tool/loc` (the loc test). When either is missing they run `fvm dart pub get --offline` there themselves, as the format gate does. So on CI, run `fvm dart pub get` at the root and in `tool/loc` first. Or run `tool/checks/T-0065-AC5_gates.sh`, which runs that command plus the format gate, `dart analyze`, and the lockfile check.
+

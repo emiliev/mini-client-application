@@ -12,7 +12,7 @@ class ManifestEntry {
   const ManifestEntry({
     required this.hash,
     required this.ownership,
-    this.keep = const [],
+    this.keep = const {},
   });
 
   /// sha256 of the content without keep-region bodies (see keep.dart).
@@ -21,12 +21,15 @@ class ManifestEntry {
   /// `managed` or `owned`. For `owned`, [hash] is the first-write hash.
   final String ownership;
 
-  /// The keep-region ids the file was written with, sorted.
-  final List<String> keep;
+  /// Keep-region id -> sha256 of the region's *default* body (keep.dart
+  /// `bodyHash`): what mcgen would emit there. A body that differs is
+  /// hand-written.
+  final Map<String, String> keep;
 
   Map<String, Object?> toJson() => {
     'hash': hash,
-    if (keep.isNotEmpty) 'keep': keep,
+    if (keep.isNotEmpty)
+      'keep': {for (final id in (keep.keys.toList()..sort())) id: keep[id]},
     'ownership': ownership,
   };
 
@@ -35,10 +38,13 @@ class ManifestEntry {
       other is ManifestEntry &&
       other.hash == hash &&
       other.ownership == ownership &&
-      other.keep.join(',') == keep.join(',');
+      _keepKey(other.keep) == _keepKey(keep);
 
   @override
-  int get hashCode => Object.hash(hash, ownership, keep.join(','));
+  int get hashCode => Object.hash(hash, ownership, _keepKey(keep));
+
+  static String _keepKey(Map<String, String> k) =>
+      (k.keys.toList()..sort()).map((id) => '$id=${k[id]}').join(',');
 }
 
 class Manifest {
@@ -91,11 +97,22 @@ class Manifest {
                 'files["${e.key}"] needs string hash and ownership',
               );
             }
-            final keep = v['keep'];
+            final keep = v['keep'] ?? const <String, Object?>{};
+            if (keep is! Map<String, Object?> ||
+                keep.values.any((h) => h is! String)) {
+              throw FormatException(
+                'files["${e.key}"].keep must map region ids to hashes',
+              );
+            }
+            if (v['ownership'] != 'managed' && v['ownership'] != 'owned') {
+              throw FormatException(
+                'files["${e.key}"].ownership must be managed or owned',
+              );
+            }
             return ManifestEntry(
               hash: v['hash']! as String,
               ownership: v['ownership']! as String,
-              keep: keep is List ? keep.cast<String>() : const [],
+              keep: keep.cast<String, String>(),
             );
           }(),
       },

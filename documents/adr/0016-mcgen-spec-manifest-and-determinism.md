@@ -42,7 +42,7 @@ About 95 feature specs and their generated packages will be committed with these
    - `archetype`, `generator` (`mcgen <version>`), `module`, `ownership`;
    - `seed` (`0x` plus 16 hex digits);
    - `spec_hash`: sha256 of the canonical JSON of the spec, so comments and key order don't count;
-   - `files`: `{<module-relative path>: {hash, ownership: managed|owned, keep?: [ids]}}`.
+   - `files`: `{<module-relative path>: {hash, ownership: managed|owned, keep?: {<region id>: <sha256 of the region's default body>}}}`. The default-body hash tells a body mcgen wrote from one a human filled in: a dropped file or region whose body differs from its default is never deleted without `--force` (`orphan-keep`).
 
    It is written with keys sorted by code unit, a two-space indent, LF and a final newline. `hash` is **tool/loc's rule**: sha256 of the content without the lines strictly between keep markers, joined with LF. For an `owned` file, `hash` is the first-write hash.
 3. **Keep regions and headers:**

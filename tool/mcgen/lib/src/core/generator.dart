@@ -47,8 +47,8 @@ class GeneratedFile {
   /// `managed` or `owned`.
   final String ownership;
 
-  /// Keep-region ids, sorted.
-  final List<String> keep;
+  /// Keep-region id -> hash of its default body (as rendered here).
+  final Map<String, String> keep;
 
   String get hash => contentHash(path, content);
 }
@@ -64,15 +64,23 @@ class GeneratedModule {
   final UseGraph graph;
 }
 
-/// `*` matches inside one path segment, `**` across segments.
+/// `*` matches inside one path segment, `**` across segments, and `**/`
+/// zero or more whole directories.
 RegExp globToRegExp(String glob) {
   final b = StringBuffer('^');
   for (var i = 0; i < glob.length; i++) {
     final c = glob[i];
     if (c == '*') {
       if (i + 1 < glob.length && glob[i + 1] == '*') {
-        b.write('.*');
-        i++;
+        if (i + 2 < glob.length && glob[i + 2] == '/') {
+          // `**/` is zero or more directories: `lib/**/*.dart` matches
+          // `lib/x.dart` too.
+          b.write('(?:.*/)?');
+          i += 2;
+        } else {
+          b.write('.*');
+          i++;
+        }
       } else {
         b.write('[^/]*');
       }
@@ -185,7 +193,7 @@ class Generator {
         }
       }
       final prefix = keepPrefixFor(path);
-      final keep = <String>[];
+      final keep = <String, String>{};
       if (prefix != null) {
         final scan = KeepScan.of(content, prefix);
         if (!scan.ok) {
@@ -193,7 +201,9 @@ class Generator {
             '$path: generated keep markers are damaged: ${scan.damage.join('; ')}',
           );
         }
-        keep.addAll(scan.ids..sort());
+        for (final r in scan.regions) {
+          keep[r.id] = bodyHash(r.body);
+        }
         emittedKeep.addAll(scan.ids);
       }
       files[path] = GeneratedFile(

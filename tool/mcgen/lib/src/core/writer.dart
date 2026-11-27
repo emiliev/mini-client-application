@@ -154,7 +154,14 @@ WritePlan planWrite(
         continue;
       }
       if (current != null) {
+        // Listed with the generated hash: loc counts it as scaffold while it
+        // still matches, as hand once it differs.
         notes.add('owned ${f.path} already exists; left as it is');
+        entries[f.path] = ManifestEntry(
+          hash: f.hash,
+          ownership: 'owned',
+          keep: f.keep,
+        );
         continue;
       }
       changes.add(FileChange(f.path, ChangeKind.create, content: f.content));
@@ -193,7 +200,12 @@ WritePlan planWrite(
       if (!scan.ok) {
         reasons.add((DriftKind.keepDamage, scan.damage.join('; ')));
       } else {
-        final splice = spliceKeepRegions(f.content, current, prefix);
+        final splice = spliceKeepRegions(
+          f.content,
+          current,
+          prefix,
+          defaults: oldEntry?.keep ?? const {},
+        );
         content = splice.content;
         if (splice.orphans.isNotEmpty) {
           reasons.add((
@@ -237,23 +249,42 @@ WritePlan planWrite(
       continue;
     }
     if (current == null) continue;
-    if (contentHash(e.key, current) != e.value.hash && !force) {
-      drift.add(
-        Drift(
-          at(e.key),
-          DriftKind.handEdit,
-          'edited outside keep regions, and no longer generated',
-        ),
-      );
+    final reasons = <(DriftKind, String)>[];
+    if (contentHash(e.key, current) != e.value.hash) {
+      reasons.add((
+        DriftKind.handEdit,
+        'edited outside keep regions, and no longer generated',
+      ));
+    }
+    final prefix = keepPrefixFor(e.key);
+    if (prefix != null) {
+      final scan = KeepScan.of(current, prefix);
+      final filled = [
+        for (final r in scan.regions)
+          if (isFilled(r, e.value.keep)) r.id,
+      ];
+      if (!scan.ok) {
+        reasons.add((DriftKind.keepDamage, scan.damage.join('; ')));
+      } else if (filled.isNotEmpty) {
+        reasons.add((
+          DriftKind.orphanKeep,
+          'no longer generated, but keep region(s) ${filled.join(', ')} hold code',
+        ));
+      }
+    }
+    if (reasons.isNotEmpty && !force) {
+      for (final (k, d) in reasons) {
+        drift.add(Drift(at(e.key), k, d));
+      }
       continue;
     }
     changes.add(
       FileChange(
         e.key,
         ChangeKind.delete,
-        forced: contentHash(e.key, current) != e.value.hash
-            ? DriftKind.handEdit.label
-            : null,
+        forced: reasons.isEmpty
+            ? null
+            : reasons.map((r) => r.$1.label).join(', '),
       ),
     );
   }

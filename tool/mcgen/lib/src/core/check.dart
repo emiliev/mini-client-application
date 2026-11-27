@@ -64,7 +64,9 @@ List<Drift> checkModule(
     if (e.value.ownership != 'managed') continue;
     final f = File(p.join(moduleDirAbs, e.key));
     if (!f.existsSync()) {
-      add(e.key, DriftKind.handEdit, 'deleted');
+      // gen recreates it (nothing hand-written is lost), so it is stale,
+      // not drift that would stop gen.
+      add(e.key, DriftKind.staleManifest, 'deleted: gen would create it again');
       continue;
     }
     final content = f.readAsStringSync();
@@ -74,7 +76,7 @@ List<Drift> checkModule(
       // Broken markers explain a missing region already; report them alone.
       final damage = scan.ok
           ? [
-              for (final id in e.value.keep)
+              for (final id in e.value.keep.keys)
                 if (!scan.ids.contains(id)) 'keep region "$id" was removed',
             ]
           : [for (final d in scan.damage) '$d'];

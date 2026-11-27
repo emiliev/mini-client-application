@@ -56,6 +56,7 @@ class UtilityHelloArchetype extends Archetype {
       );
     }
     final local = {for (final e in spec.entities) e.name};
+    final byName = {for (final e in spec.entities) e.name: e};
     for (final e in spec.entities) {
       if (e.kind == EntityKind.union) {
         err(e, 'union', '${e.path}.union', 'utility_hello has no unions');
@@ -70,6 +71,18 @@ class UtilityHelloArchetype extends Archetype {
               'unknown type "$t": use dart:core types or entities of this spec',
             );
           }
+        }
+        final en = byName[f.type.name];
+        if (f.hasDefault &&
+            en != null &&
+            en.kind == EntityKind.enumeration &&
+            !en.values.contains(f.defaultValue)) {
+          err(
+            f,
+            'default',
+            '${f.path}.default',
+            'default "${f.defaultValue}" is not a value of ${en.name} (${en.values.join(', ')})',
+          );
         }
       }
     }

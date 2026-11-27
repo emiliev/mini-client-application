@@ -21,6 +21,7 @@ import 'package:mcgen/src/core/spec/schema_validator.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
 import 'package:mcgen/src/core/writer.dart';
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
 
 const _notYet = {
   'wire': 'P2-08',
@@ -54,6 +55,7 @@ int runMcgen(
   String? cwd,
   String? dartExecutable,
   Map<String, Archetype>? archetypes,
+  String? toolDir,
 }) {
   final o = out ?? stdout;
   final e = err ?? stderr;
@@ -112,15 +114,16 @@ int runMcgen(
     e.writeln('mcgen: no root: pass --root, or run inside a git checkout');
     return 64;
   }
-  final session = _Session(
-    root,
-    ToolLayout.current(
-      bricksDir: command == 'gen' ? opts.option('bricks') : null,
-    ),
-    archetypes ?? registry.archetypes,
-    dartExecutable,
-  );
   try {
+    final bricks = command == 'gen' ? opts.option('bricks') : null;
+    final session = _Session(
+      root,
+      toolDir == null
+          ? ToolLayout.current(bricksDir: bricks)
+          : ToolLayout(toolDir, bricksDir: bricks),
+      archetypes ?? registry.archetypes,
+      dartExecutable,
+    );
     final specs = session.resolve(
       opts.rest,
       all: opts.flag('all'),
@@ -150,6 +153,16 @@ int runMcgen(
   } on _UsageError catch (x) {
     e.writeln('mcgen: ${x.message}');
     return 64;
+  } on FormatException catch (x) {
+    // A malformed mcgen.yaml, schema or brick.yaml (YamlException is one).
+    e.writeln('mcgen: ${x is YamlException ? x.toString() : x.message}');
+    return 1;
+  } on FileSystemException catch (x) {
+    e.writeln('mcgen: ${x.message}: ${x.path}');
+    return 1;
+  } on StateError catch (x) {
+    e.writeln('mcgen: ${x.message}');
+    return 1;
   }
 }
 
@@ -180,12 +193,8 @@ class _Session {
   final RepoIndex index;
   late final Generator generator;
 
-  List<String> get forbidden => [
-    root,
-    tool.dir,
-    Directory.systemTemp.resolveSymbolicLinksSync(),
-    ?Platform.environment['HOME'],
-  ];
+  /// Absolute paths output must never contain: the trees mcgen reads.
+  List<String> get forbidden => [root, tool.dir];
 
   /// Root-relative spec paths for [targets].
   List<String> resolve(
@@ -237,18 +246,43 @@ class _Session {
     schema: schema,
   );
 
-  /// Loads every spec; diagnostics of the ones that fail go to [bad].
+  final _loaded = <String, ModuleSpec>{};
+  final _failed = <String, List<Diagnostic>>{};
+
+  ModuleSpec? _tryLoad(String rel) {
+    if (_loaded.containsKey(rel)) return _loaded[rel];
+    if (_failed.containsKey(rel)) return null;
+    try {
+      return _loaded[rel] = load(rel);
+    } on McgenException catch (x) {
+      _failed[rel] = x.diagnostics;
+      return null;
+    }
+  }
+
+  /// Loads the targeted specs; diagnostics of the ones that fail go to [bad].
   List<ModuleSpec> loadAll(List<String> rels, List<Diagnostic> bad) {
-    final specs = <ModuleSpec>[];
+    final specs = [for (final rel in rels) ?_tryLoad(rel)];
     for (final rel in rels) {
-      try {
-        specs.add(load(rel));
-      } on McgenException catch (x) {
-        bad.addAll(x.diagnostics);
-      }
+      bad.addAll(_failed[rel] ?? const []);
     }
     return specs;
   }
+
+  /// Every spec under the root (and the targets): the context lint and the
+  /// package catalog see, whichever modules are named. A broken spec that
+  /// is not a target is left out of it; it is reported when targeted.
+  List<ModuleSpec> get context {
+    for (final rel in index.specFiles) {
+      _tryLoad(rel);
+    }
+    return _loaded.values.toList();
+  }
+
+  List<ModuleSpec> others(ModuleSpec s) => [
+    for (final x in context)
+      if (!identical(x, s)) x,
+  ];
 
   int lint(List<String> rels, StringSink out, StringSink err) {
     final diags = <Diagnostic>[];
@@ -257,7 +291,7 @@ class _Session {
       index: index,
       config: config,
       archetypes: archetypes,
-      specs: specs,
+      specs: context,
     );
     for (final s in specs) {
       diags.addAll(lintSpec(s, ctx));
@@ -283,7 +317,7 @@ class _Session {
           generator.generate(
             s,
             index: index,
-            specs: specs.where((x) => !identical(x, s)).toList(),
+            specs: others(s),
             forbidden: forbidden,
           ),
         );
@@ -389,7 +423,7 @@ class _Session {
           g = generator.generate(
             s,
             index: index,
-            specs: specs.where((x) => !identical(x, s)).toList(),
+            specs: others(s),
             forbidden: forbidden,
           );
         } on McgenException catch (x) {

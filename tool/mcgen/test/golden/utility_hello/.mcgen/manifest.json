@@ -7,9 +7,9 @@
     },
     "lib/src/greeting.dart": {
       "hash": "4741146bf05891ba9425a107a208988b4d7ecf66e2c110efc6ccf37c217ee68e",
-      "keep": [
-        "greeting.render"
-      ],
+      "keep": {
+        "greeting.render": "31a9bbcd3eb14751d06a87b3ce105dd44f1bebd4acef855babfe19e525381748"
+      },
       "ownership": "managed"
     },
     "lib/src/mood.dart": {

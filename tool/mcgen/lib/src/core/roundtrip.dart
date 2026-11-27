@@ -44,8 +44,9 @@ class TreeDiff {
   ].join('\n');
 }
 
-/// Lists [dir]'s files (module-relative, sorted), skipping dot-directories
-/// and anything matching [ignore].
+/// Lists [dir]'s files (module-relative, sorted), skipping `.dart_tool/`
+/// and `build/` directories and anything matching [ignore]. Other dot
+/// entries (`.mcgen/`) are listed.
 List<String> listTree(String dir, {List<String> ignore = const []}) {
   final globs = [for (final g in ignore) globToRegExp(g)];
   final out = <String>[];

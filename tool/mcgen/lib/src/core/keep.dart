@@ -161,13 +161,32 @@ class Splice {
   final List<String> kept;
 
   /// Region ids in the old file that the new output no longer has, and whose
-  /// body was not empty: carrying on would lose hand-written code.
+  /// body holds hand-written code: carrying on would lose it.
   final List<String> orphans;
 }
 
+/// sha256 of a region body (its lines joined with LF). The manifest keeps it
+/// for each region's *default* body, so mcgen can tell a body it wrote from
+/// one a human filled in.
+String bodyHash(List<String> body) =>
+    sha256.convert(utf8.encode(body.join('\n'))).toString();
+
+/// Whether [r] holds hand-written code: a non-blank body that is not the
+/// default mcgen emitted ([defaults]: id -> [bodyHash] of the default).
+bool isFilled(KeepRegion r, Map<String, String> defaults) =>
+    r.body.any((l) => l.trim().isNotEmpty) &&
+    defaults[r.id] != bodyHash(r.body);
+
 /// Replaces each region body in [fresh] by the same region's body in
-/// [existing]. Both must scan clean (see [KeepScan.ok]).
-Splice spliceKeepRegions(String fresh, String existing, String prefix) {
+/// [existing]. Both must scan clean (see [KeepScan.ok]). [defaults] are the
+/// default-body hashes from the manifest, so an untouched region that the
+/// output dropped is not an orphan.
+Splice spliceKeepRegions(
+  String fresh,
+  String existing,
+  String prefix, {
+  Map<String, String> defaults = const {},
+}) {
   final newScan = KeepScan.of(fresh, prefix);
   final oldScan = KeepScan.of(existing, prefix);
   if (!newScan.ok) {
@@ -199,8 +218,7 @@ Splice spliceKeepRegions(String fresh, String existing, String prefix) {
   final newIds = newScan.ids.toSet();
   final orphans = [
     for (final r in oldScan.regions)
-      if (!newIds.contains(r.id) && r.body.any((l) => l.trim().isNotEmpty))
-        r.id,
+      if (!newIds.contains(r.id) && isFilled(r, defaults)) r.id,
   ];
   return Splice(out.join('\n'), kept, orphans);
 }
