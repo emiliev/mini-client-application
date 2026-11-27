@@ -22,6 +22,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0054](T-0054-flow-results-hardening.md) | `AppFlows` hardening: per-call tokens, safe extras, results under overlays, not-found way home (P-094 to P-098) | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0049 | `fleet/T-0054-flow-results-hardening` |
 | [T-0055](T-0055-e2e-false-pass.md) | `tool/e2e_ios.sh` false PASS when a target's app fails to build; re-baseline the e2e suite | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0055-e2e-false-pass` |
+| [T-0056](T-0056-store-home-exemplar.md) | `store_home`, the DB exemplar (P1-21): 5 independent sections, category paging, first flag and analytics use | **In Progress** | Engineer (Opus) / Verifier (Opus) | T-0051, T-0052, T-0053 | `fleet/T-0056-store-home` |
 
 ## Done
 | ID | Title | Result |
