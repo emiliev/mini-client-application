@@ -281,6 +281,7 @@ flutter_library(
 _TEST_DEPS = [
     "//utility/mc_analytics",
     "//utility/mc_api_auth",
+    "//utility/mc_ds_buttons",
     "//utility/mc_di",
     "//utility/mc_ds_charts",
     "//utility/mc_ds_media",

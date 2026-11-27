@@ -28,6 +28,10 @@ const playScoreKey = ValueKey<String>('trivia_play.score');
 const playPausedKey = ValueKey<String>('trivia_play.paused');
 ValueKey<String> playChoiceKey(String id) => ValueKey('trivia_play.choice.$id');
 
+/// The mark on a judged choice: right (a check) or wrong (a cross).
+const playChoiceCheckKey = ValueKey<String>('trivia_play.choice.check');
+const playChoiceCrossKey = ValueKey<String>('trivia_play.choice.cross');
+
 /// The play page: provides its bloc and nothing else (Tide).
 class TriviaPlayPage extends StatelessWidget {
   const TriviaPlayPage({super.key});
@@ -58,6 +62,18 @@ class _PlayContentState extends State<_PlayContent>
   bool _started = false;
   bool? _shown;
 
+  /// Asks to quit on any pop of the flow's own route while the round is on
+  /// screen: the iOS back swipe and a system back would otherwise pop the
+  /// whole flow, past this page's `PopScope` (which guards only the page's
+  /// route inside the flow's navigator). Registered with the outer route, it
+  /// also turns that route's back swipe off (review round).
+  late final _QuitOnPop _outerPop = _QuitOnPop(
+    () => context.read<TriviaPlayBloc>().add(
+      const TriviaPlayEvent.quitAsked(),
+    ),
+  );
+  ModalRoute<Object?>? _outerRoute;
+
   @override
   void initState() {
     super.initState();
@@ -82,6 +98,12 @@ class _PlayContentState extends State<_PlayContent>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    final outer = FlowScope.maybeOf(context)?.outerRoute;
+    if (outer != _outerRoute) {
+      _outerRoute?.unregisterPopEntry(_outerPop);
+      _outerRoute = outer;
+      outer?.registerPopEntry(_outerPop);
+    }
     final shown = FlowScope.maybeOf(context)?.outerIsCurrent ?? true;
     final bloc = context.read<TriviaPlayBloc>();
     if (shown != _shown) {
@@ -96,6 +118,8 @@ class _PlayContentState extends State<_PlayContent>
 
   @override
   void dispose() {
+    _outerRoute?.unregisterPopEntry(_outerPop);
+    _outerPop.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
@@ -111,7 +135,11 @@ class _PlayContentState extends State<_PlayContent>
       cancelLabel: l10n.triviaQuitCancel,
       destructive: true,
     );
-    bloc.add(TriviaPlayEvent.quitAnswered(confirmed: confirmed));
+    // The dialog can close because the page went away (a link replaced the
+    // route): the bloc is closed then, and takes no events (review round).
+    if (!bloc.isClosed) {
+      bloc.add(TriviaPlayEvent.quitAnswered(confirmed: confirmed));
+    }
   }
 
   @override
@@ -236,7 +264,10 @@ class _QuestionView extends StatelessWidget {
             key: playHintKey,
             label: l10n.triviaHint,
             variant: McButtonVariant.tertiary,
-            onPressed: () => bloc.add(const TriviaPlayEvent.useHint()),
+            // Disabled while paused; the bloc refuses it then too.
+            onPressed: view.paused
+                ? null
+                : () => bloc.add(const TriviaPlayEvent.useHint()),
           ),
         ],
         if (answer != null) ...[
@@ -254,19 +285,28 @@ class _QuestionView extends StatelessWidget {
     );
   }
 
+  /// How a choice is drawn once the question is revealed. Only a judged
+  /// choice is marked as chosen: after a timeout (a late tap included: it
+  /// is judged a timeout, as the server judges it) the correct choice is
+  /// revealed and nothing is marked as the player's (review round).
   _ChoiceLook _lookOf(String id) {
     final answer = view.answer;
     if (answer == null) {
       return _ChoiceLook.open;
     }
+    final chosen =
+        answer.outcome != AnswerOutcome.timeout && id == answer.choiceId;
     if (id == view.question.correctChoiceId) {
-      return _ChoiceLook.correct;
+      return chosen ? _ChoiceLook.correct : _ChoiceLook.revealed;
     }
-    return id == answer.choiceId ? _ChoiceLook.chosenWrong : _ChoiceLook.idle;
+    return chosen ? _ChoiceLook.chosenWrong : _ChoiceLook.idle;
   }
 }
 
-enum _ChoiceLook { open, correct, chosenWrong, idle }
+/// `open` while asking; then `correct` (chosen and right, with a check),
+/// `chosenWrong` (chosen and wrong, with a cross), `revealed` (the right
+/// answer, not chosen: green, no icon) and `idle`.
+enum _ChoiceLook { open, correct, chosenWrong, revealed, idle }
 
 class _ChoiceButton extends StatelessWidget {
   const _ChoiceButton({
@@ -286,6 +326,7 @@ class _ChoiceButton extends StatelessWidget {
     final (border, icon) = switch (look) {
       _ChoiceLook.open || _ChoiceLook.idle => (p.outline, null),
       _ChoiceLook.correct => (p.success, Icons.check_circle),
+      _ChoiceLook.revealed => (p.success, null),
       _ChoiceLook.chosenWrong => (p.error, Icons.cancel),
     };
     return OutlinedButton(
@@ -304,7 +345,14 @@ class _ChoiceButton extends StatelessWidget {
       child: Row(
         children: [
           Expanded(child: Text(text)),
-          if (icon != null) Icon(icon, color: border),
+          if (icon != null)
+            Icon(
+              icon,
+              color: border,
+              key: icon == Icons.check_circle
+                  ? playChoiceCheckKey
+                  : playChoiceCrossKey,
+            ),
         ],
       ),
     );
@@ -351,4 +399,23 @@ class _Feedback extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A pop of the outer route that never pops: it asks to quit instead.
+class _QuitOnPop extends PopEntry<Object?> {
+  _QuitOnPop(this._onQuit);
+
+  final VoidCallback _onQuit;
+
+  @override
+  final ValueNotifier<bool> canPopNotifier = ValueNotifier<bool>(false);
+
+  @override
+  void onPopInvokedWithResult(bool didPop, Object? result) {
+    if (!didPop) {
+      _onQuit();
+    }
+  }
+
+  void dispose() => canPopNotifier.dispose();
 }

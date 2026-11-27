@@ -27,10 +27,12 @@ const _comicTitle = ValueKey<String>('comics_details.title');
 
 void main() {
   late Directory storage;
+  late InMemorySink monitoringSink;
 
   setUp(() async {
     await resetDIContainer();
     storage = Directory.systemTemp.createTempSync('trivia_route_test');
+    monitoringSink = InMemorySink();
   });
 
   tearDown(() async {
@@ -56,7 +58,7 @@ void main() {
           initializers: (routerRef) => rootInitializers(
             config: () async => _config,
             storageDirectory: storage,
-            monitoringSinks: [InMemorySink()],
+            monitoringSinks: [monitoringSink],
             mockDomains: appMockDomains,
             routerRef: routerRef,
             wirings: wiringInitializers,
@@ -193,5 +195,69 @@ void main() {
     expect(find.byKey(_setupBody), findsOneWidget);
     await back(tester);
     expect(find.byKey(_home), findsOneWidget);
+  });
+
+  /// The cold link to a round, loaded and on its first question.
+  Future<void> openLinkedRound(WidgetTester tester) async {
+    await boot(
+      tester,
+      coldStartLink:
+          'miniclient://app/trivia/play?category=all&difficulty=easy&seed=42',
+    );
+    await land(tester);
+    expect(find.byKey(_prompt), findsOneWidget);
+  }
+
+  List<MonitoringEntry> errors() => [
+    for (final e in monitoringSink.entries)
+      if (e is ErrorEntry) e,
+  ];
+
+  testWidgets('T-0064-AC3 a link that replaces the round while the quit '
+      'dialog is open fails nothing (review round)', (tester) async {
+    await openLinkedRound(tester);
+    await tester.tap(find.byKey(_quit));
+    await tester.pumpAndSettle();
+    expect(find.text('Quit this round?'), findsOneWidget);
+
+    router(tester).go(AppLocations.home);
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(_home), findsOneWidget);
+    expect(find.text('Quit this round?'), findsNothing);
+    expect(tester.takeException(), isNull);
+    expect(errors(), isEmpty, reason: 'nothing reported to monitoring');
+  });
+
+  testWidgets('T-0064-AC3 a system back on a linked round asks to quit and '
+      'leaves nothing behind it (review round)', (tester) async {
+    await openLinkedRound(tester);
+    final location = router(tester).state.uri.toString();
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Quit this round?'), findsOneWidget);
+    expect(router(tester).state.uri.toString(), location);
+    await tester.tap(find.byKey(mcCancelButtonKey));
+    await tester.pumpAndSettle();
+    expect(find.byKey(_prompt), findsOneWidget, reason: 'the round goes on');
+    expect(router(tester).state.uri.toString(), location);
+  });
+
+  testWidgets('T-0064-AC3 the iOS back swipe does not pop a round in play '
+      '(review round)', (tester) async {
+    await openLinkedRound(tester);
+    final location = router(tester).state.uri.toString();
+
+    // A drag from the left edge, as the Cupertino back gesture expects.
+    final gesture = await tester.startGesture(const Offset(2, 400));
+    await gesture.moveBy(const Offset(300, 0));
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(_prompt), findsOneWidget);
+    expect(router(tester).state.uri.toString(), location);
+    expect(find.byKey(_setupBody), findsNothing);
   });
 }

@@ -83,6 +83,10 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
   /// same round).
   int? _seed;
   bool _started = false;
+
+  /// The round was left (quit). A round that loads after that is dropped:
+  /// no engine, no `trivia_round_started`, no timers (review round).
+  bool _left = false;
   bool _hintOffered = false;
   bool _confirmingQuit = false;
   final Set<_Pause> _pauses = {};
@@ -140,7 +144,9 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
       difficulty: request.difficulty,
       seed: _seed ??= request.seed ?? _seeds.next(),
     );
-    if (isClosed) {
+    // The player may have left while it loaded (the page is still on its
+    // way out, so the bloc is not closed yet).
+    if (isClosed || _left) {
       return;
     }
     result.fold((round) {
@@ -248,7 +254,12 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
 
   void _useHint(Emitter<TriviaPlayState> emit) {
     final engine = _engine;
-    if (engine == null || !_hintOffered || !engine.canUseHint) {
+    // Paused (background, covered, the quit dialog), nobody can see the
+    // question: the hint waits, and stays available (review round).
+    if (engine == null ||
+        !_hintOffered ||
+        !engine.canUseHint ||
+        _pauses.isNotEmpty) {
       return;
     }
     engine.useHint();
@@ -307,6 +318,7 @@ final class TriviaPlayBloc extends McBloc<TriviaPlayEvent, TriviaPlayState> {
   /// Leaves the round: back to the setup page, or out of the flow when it
   /// was opened at the round.
   void _leave() {
+    _left = true;
     _frame?.cancel();
     _due?.cancel();
     if (_flow.state.linked) {

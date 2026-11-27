@@ -61,9 +61,13 @@ final class TriviaSetupBloc extends McBloc<TriviaSetupEvent, TriviaSetupState> {
   ) async {
     switch (event) {
       case _Load():
-        _sessionChanges ??= _session.authState.listen(
-          (_) => add(const _SessionChanged()),
-        );
+        // Guarded: a session event can still arrive between `close()` and
+        // the cancel taking effect (review round).
+        _sessionChanges ??= _session.authState.listen((_) {
+          if (!isClosed) {
+            add(const _SessionChanged());
+          }
+        });
         await _loadCategories(emit);
       case _Retry():
         if (state is _Failure) {

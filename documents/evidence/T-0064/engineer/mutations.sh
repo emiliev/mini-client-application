@@ -286,7 +286,7 @@ mutate G09 "the meter's pills have no gaps" "$F/presentation/painter/streak_mete
 mutate G10 "the donut shows wrong answers as correct" "$F/presentation/widget/score_breakdown.dart" "$T_PAINT" \
   'value: correct.toDouble(),' 'value: wrong.toDouble(),'
 mutate G11 "leaving a linked round does not pop it" "$F/flow/trivia_quiz_flow.dart" "$T_BDD" \
-  'onComplete: (_) => unawaited(Navigator.maybeOf(context)?.maybePop()),' 'onComplete: (_) => unawaited(Future<void>.value()),'
+  '    navigator.pop();' '    navigator.canPop();'
 mutate G12 "a linked round has a setup page" "$F/flow/trivia_quiz_flow.dart" "$T_BDD" \
   'TriviaQuizFlowState(linked: linked != null, round: linked),' 'TriviaQuizFlowState(linked: linked == null, round: linked),'
 mutate G13 "the results screen is misnamed" "$AN" "$T_BDD" \

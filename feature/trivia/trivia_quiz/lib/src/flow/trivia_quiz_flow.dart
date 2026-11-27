@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
@@ -87,8 +85,10 @@ class TriviaQuizFlow extends StatelessWidget {
           host: (context) => FlowScope.read(context).outerRoute,
         ),
       ],
-      // A linked round that is left leaves the flow (to the route below).
-      onComplete: (_) => unawaited(Navigator.maybeOf(context)?.maybePop()),
+      // A linked round that is left leaves the flow (to the route below). A
+      // pop, not `maybePop`: the play page guards the route against pops it
+      // did not ask for (the back swipe), and this one it did ask for.
+      onComplete: (_) => _leave(context),
       state: TriviaQuizFlowState(linked: linked != null, round: linked),
       onGeneratePages: (state) => [
         if (!state.linked)
@@ -106,5 +106,12 @@ class TriviaQuizFlow extends StatelessWidget {
           ),
       ],
     );
+  }
+}
+
+void _leave(BuildContext context) {
+  final navigator = Navigator.maybeOf(context);
+  if (navigator != null && navigator.canPop()) {
+    navigator.pop();
   }
 }

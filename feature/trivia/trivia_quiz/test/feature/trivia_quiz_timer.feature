@@ -61,6 +61,22 @@ Feature: The countdown, under fake time
       | 'paused'   |
 
   @T-0064-AC6
+  Scenario: A tap on the correct choice at the limit is a timeout, and no choice is marked as the player's
+    When I open the round {'all'} {'easy'} of seed {42}
+    And I answer {'C'} after {20000} milliseconds
+    Then the question timed out
+    And the choices carry the marks {''}
+
+  @T-0064-AC6
+  Scenario: A judged answer marks the player's choice
+    When I open the round {'all'} {'easy'} of seed {42}
+    And I answer {'W'} after {1000} milliseconds
+    Then the choices carry the marks {'cross'}
+    When I go to the next question
+    And I answer {'C'} after {1000} milliseconds
+    Then the choices carry the marks {'check'}
+
+  @T-0064-AC6
   Scenario: Time in the background does not count towards an answer
     When I open the round {'all'} {'easy'} of seed {42}
     And {4000} milliseconds pass

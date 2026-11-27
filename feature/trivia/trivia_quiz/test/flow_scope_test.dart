@@ -11,6 +11,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_di/mc_di.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_navigation/mc_ds_navigation.dart';
 import 'package:mc_feature_flags/mc_feature_flags.dart';
 import 'package:mc_feature_flow/mc_feature_flow.dart';
@@ -217,6 +218,37 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1));
     await tester.pump();
     expect(find.byKey(playNextKey), findsOneWidget, reason: 'timed out');
+  });
+
+  mcTestWidgets('T-0064-AC6 under another screen the hint is disabled; '
+      'shown again it is offered and works', (tester) async {
+    serveTrivia();
+    McTestSession.current.flags.forceVariant('trivia_hint', 'hint');
+    await openRound(tester);
+    final navigator = Navigator.of(
+      tester.element(find.byKey(playPromptKey)),
+      rootNavigator: true,
+    );
+    unawaited(
+      navigator.push(
+        PageRouteBuilder<void>(
+          transitionDuration: Duration.zero,
+          reverseTransitionDuration: Duration.zero,
+          pageBuilder: (_, _, _) => const Scaffold(body: Text('cover')),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+    final hint = find.byKey(playHintKey, skipOffstage: false);
+    expect(tester.widget<McButton>(hint).onPressed, isNull, reason: 'paused');
+    navigator.pop();
+    await tester.pump();
+    await tester.pump();
+    expect(tester.widget<McButton>(hint).onPressed, isNotNull);
+    await tester.tap(hint);
+    await tester.pump();
+    expect(visibleChoices(), 2);
   });
 
   mcTestWidgets('T-0064-AC6 the hint experiment is read once per round: a '

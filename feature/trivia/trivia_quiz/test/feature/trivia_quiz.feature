@@ -172,6 +172,18 @@ Feature: Playing a trivia round
     Then the screen under the quiz is shown
 
   @T-0064-AC3
+  Scenario: Quitting a round started from the setup while it loads drops the round when it arrives
+    Given the backend holds {'GET /v1/trivia/rounds'}
+    When I open the trivia
+    And I start the round
+    And {1000} milliseconds pass
+    And I ask to quit the round
+    And the backend releases {'GET /v1/trivia/rounds'}
+    Then the setup shows the categories {'All categories, Characters, Comics, Creators'}
+    And no analytics event was tracked
+    And no error was reported
+
+  @T-0064-AC3
   Scenario: Signed out, Save your score asks to sign in and saves for that user
     When I open the round {'all'} {'easy'} of seed {42}
     And I play the answers {'C0 W0x9'}
@@ -282,6 +294,17 @@ Feature: Playing a trivia round
     When I go to the next question
     Then the hint is not offered
     And the question shows four choices
+
+  @T-0064-AC6
+  Scenario: A hint asked for as the app leaves the foreground does nothing, and is still there on return
+    Given the experiment {'trivia_hint'} is in variant {'hint'}
+    When I open the round {'all'} {'easy'} of seed {42}
+    And I tap the hint as the app becomes inactive
+    Then the question shows four choices
+    When the app lifecycle becomes {'resumed'}
+    Then the hint is offered
+    When I use the hint
+    Then the question shows only the correct choice and one wrong choice
 
   @T-0064-AC6
   Scenario: Without the hint experiment there is no hint
