@@ -1,0 +1,282 @@
+# T-0066 (F045): `auth_signin`, the sign-in form (archetype FW, one page),
+# shaped as library_reading_list_editor (T-0048). Phase D's buildgen emits this
+# file; until then it is written by hand.
+# No per-package analysis_options.yaml: the root file applies (F-0021).
+#
+# Every generator runs as a Bazel action; nothing generated is committed:
+#   freezed      flow state
+#   injectable   shards + di_initializer.config.dart (fork patch 0002)
+#   gen-l10n     lib/src/l10n/auth_signin_l10n*.dart
+#   BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
+#
+# Staging (plan 03 §3.4, §4.7). Generators read only Flutter-free libraries
+# (R15): `_stage` holds the hand-written pure files.
+load("@rules_dart//dart:defs.bzl", "dart_codegen", "dart_library", "dart_test")
+load("@rules_dart//dart/ext/injectable:defs.bzl", "injectable_package")
+load("@rules_flutter//flutter:defs.bzl", "flutter_gen_l10n", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART", "mc_bdd_tests")
+
+package(default_visibility = ["//visibility:private"])
+
+_PKG = "auth_signin"
+
+_LANG = "3.13"  # the pubspec floor; codegen equals build_runner only with it (F-0011)
+
+_INIT = "lib/src/di/di_initializer.dart"
+
+# Pure-Dart deps of the hand-written, generator-read files.
+_PURE_DEPS = [
+    "//utility/mc_api_auth",
+    "//utility/mc_api_errors",
+    "//utility/mc_bloc_kit",
+    "//utility/mc_di",
+    "//utility/mc_forms",
+    "//utility/mc_monitoring",
+    "//utility/mc_prelude",
+    "//utility/mc_session",
+    "@pub_deps//:bloc",
+    "@pub_deps//:freezed_annotation",
+    "@pub_deps//:get_it",
+    "@pub_deps//:injectable",
+]
+
+# The Flutter-free hand-written files: domain, navigator, flow state, bloc,
+# the form and the root-import list. Pages, widgets, the flow widget and l10n
+# are Flutter.
+_PURE_SRCS = glob(
+    [
+        "lib/src/di/flow_scope.dart",
+        "lib/src/domain/**/*.dart",
+        "lib/src/flow/auth_signin_flow_state.dart",
+        "lib/src/navigator/**/*.dart",
+        "lib/src/presentation/bloc/**/*.dart",
+        "lib/src/presentation/form/**/*.dart",
+    ],
+    exclude = MC_GENERATED_DART,
+)
+
+# Generator input only (V3-18): never a dep of the package library or a test.
+dart_library(
+    name = "_stage",
+    package_name = _PKG,
+    srcs = _PURE_SRCS,
+    language_version = _LANG,
+    tags = [
+        "no-dart-analyze",
+        "no-dart-format",
+    ],
+    deps = _PURE_DEPS,
+)
+
+# --- freezed ----------------------------------------------------------------
+_FREEZED = {
+    "flow_state": "lib/src/flow/auth_signin_flow_state.dart",
+}
+
+[dart_codegen(
+    name = "_%s_freezed" % name,
+    package_name = _PKG,
+    src = src,
+    generator_bin = "@rules_dart//dart/ext/freezed:shim",
+    language_version = _LANG,
+    output_suffixes = [".freezed.dart"],
+    deps = [":_stage"],
+) for name, src in _FREEZED.items()]
+
+# --- injectable (fork patch 0002) -------------------------------------------
+injectable_package(
+    name = "di_config",
+    srcs = [
+        "lib/src/domain/repository/auth_signin_repository.dart",
+        "lib/src/presentation/bloc/auth_signin_bloc.dart",
+    ],
+    init = _INIT,
+    init_deps = ["//utility/mc_di"],
+    language_version = _LANG,
+    package_name = _PKG,
+    shard_deps = [":_stage"],
+)
+
+# --- gen-l10n ---------------------------------------------------------------
+# Outputs land beside the ARBs; the rule ignores l10n.yaml, so these attributes
+# mirror it (IDE / pub path: `flutter: generate: true`, F-0023).
+flutter_gen_l10n(
+    name = "_l10n",
+    arbs = glob(["lib/src/l10n/*.arb"]),
+    nullable_getter = False,
+    output_class = "AuthSignInL10n",
+    output_localization_file = "auth_signin_l10n.dart",
+    template_arb_file = "auth_signin_en.arb",
+)
+
+filegroup(
+    name = "arbs",
+    srcs = glob(["lib/src/l10n/*.arb"]),
+    visibility = ["//tool/l10n_check:__pkg__"],
+)
+
+_CODEGEN = [
+    ":_flow_state_freezed",
+    ":di_config",
+    ":_l10n",
+]
+
+# --- the package library ----------------------------------------------------
+_FLUTTER_DEPS = [
+    "//utility/mc_ds_buttons",
+    "//utility/mc_ds_forms",
+    "//utility/mc_ds_layout",
+    "//utility/mc_ds_navigation",
+    "//utility/mc_ds_theme",
+    "//utility/mc_feature_flow",
+    "//utility/mc_l10n_core",
+    "@pub_deps//:flutter",
+    "@pub_deps//:flutter_bloc",
+    "@pub_deps//:flutter_localizations",
+    "@pub_deps//:intl",
+]
+
+flutter_library(
+    name = "auth_signin",
+    srcs = glob(
+        ["lib/**/*.dart"],
+        # `tool/ide_sync` and `fvm flutter pub get` write the generated files
+        # beside their sources for the IDE; Bazel builds its own copies.
+        exclude = MC_GENERATED_DART,
+    ) + _CODEGEN,
+    language_version = _LANG,
+    package_name = _PKG,
+    visibility = ["//visibility:public"],
+    deps = _PURE_DEPS + _FLUTTER_DEPS,
+)
+
+# --- tests (ADR-0015: BDD + contract + l10n; unit tests for pure logic; no
+# goldens) ------------------------------------------------------------------
+_TEST_DEPS = [
+    "//utility/mc_api_auth",
+    "//utility/mc_di",
+    "//utility/mc_ds_forms",
+    "//utility/mc_ds_navigation",
+    "//utility/mc_feature_flow",
+    "//utility/mc_fixtures_identity",
+    "//utility/mc_mocked_backend",
+    "//utility/mc_session",
+    "@pub_deps//:dio",
+    "@pub_deps//:mocktail",
+]
+
+mc_bdd_tests(
+    name = "bdd_test",
+    features = glob(["test/feature/*.feature"]),
+    language_version = _LANG,
+    lib = ":auth_signin",
+    package_name = _PKG,
+    setup = "test/feature/util/auth_signin_env.dart",
+    steps = glob([
+        "test/feature/step/**/*.dart",
+        "test/feature/util/*.dart",
+    ]),
+    deps = _TEST_DEPS,
+)
+
+# The repository's error mapping against the fixture's sign-in answers (one
+# of the src/ importers, R7).
+flutter_test(
+    name = "contract_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/auth_signin_contract_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":auth_signin",
+        "//utility/mc_api_auth",
+        "//utility/mc_api_errors",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_prelude",
+        "//utility/mc_session",
+        "//utility/mc_storage",
+        "@pub_deps//:dio",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# The pure logic: reasons, the form's rules, the failure mapping (ADR-0015
+# allows plain unit tests here).
+flutter_test(
+    name = "unit_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/unit/auth_signin_unit_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":auth_signin",
+        "//utility/mc_api_errors",
+        "//utility/mc_forms",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# The bloc's own guards over the real backend: one request per submit, and
+# no way out while a request runs.
+flutter_test(
+    name = "bloc_guards_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/contract/auth_signin_bloc_guards_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":auth_signin",
+        "//utility/mc_api_auth",
+        "//utility/mc_api_errors",
+        "//utility/mc_bloc_kit",
+        "//utility/mc_fixtures_identity",
+        "//utility/mc_forms",
+        "//utility/mc_mocked_backend",
+        "//utility/mc_monitoring",
+        "//utility/mc_session",
+        "//utility/mc_storage",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R17: the hand-written root imports resolve every registration of the flow.
+flutter_test(
+    name = "flow_scope_test",
+    size = "small",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = ["//utility/mc_ds_theme:fonts"],
+    language_version = _LANG,
+    main = "test/flow_scope_test.dart",
+    package_name = _PKG,
+    deps = _TEST_DEPS + [
+        ":auth_signin",
+        "//utility/mc_monitoring",
+        "//utility/mc_storage",
+        "//utility/mc_test_steps",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
+# R4 and R15 conformance. The list of generator-read files is written from the
+# same glob as :_stage, so the check cannot drift from the staging library.
+genrule(
+    name = "_pure_srcs_list",
+    outs = ["test/architecture/pure_srcs.txt"],
+    cmd = "cat > $@ <<'EOF'\n" + "\n".join(_PURE_SRCS) + "\nEOF",
+)
+
+dart_test(
+    name = "architecture_test",
+    size = "small",
+    data = [
+        "lib/auth_signin.dart",
+        ":_pure_srcs_list",
+    ] + _PURE_SRCS,
+    language_version = _LANG,
+    main = "test/architecture/architecture_test.dart",
+    package_name = _PKG,
+    deps = ["@pub_deps//:test"],
+)
