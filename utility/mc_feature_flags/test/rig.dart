@@ -103,6 +103,13 @@ final class TrackingStore extends FileStore {
     pending.add(done);
     return done;
   }
+
+  @override
+  Future<Result<void, StorageFailure>> delete(String key) {
+    final done = super.delete(key);
+    pending.add(done);
+    return done;
+  }
 }
 
 /// One request that [GateAdapter] is holding.

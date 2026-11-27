@@ -1,3 +1,5 @@
+import 'package:mc_feature_flags/src/bucketing.dart' show maxVariantWeight;
+
 /// How a flag's value moves to and from JSON. [decode] returns null for a
 /// value of the wrong type (the evaluation then falls to the next source), so
 /// a flag's `T` is never nullable.
@@ -265,11 +267,12 @@ final class FeatureFlagRegistry {
     }
     final names = <String>{};
     for (final variant in experiment.variants) {
-      if (variant.weight < 0) {
+      if (variant.weight < 0 || variant.weight > maxVariantWeight) {
         throw ArgumentError.value(
           variant.weight,
           'weight',
-          'The weight of ${experiment.key}:${variant.name} is negative',
+          'The weight of ${experiment.key}:${variant.name} is not between 0 '
+              'and $maxVariantWeight',
         );
       }
       if (!names.add(variant.name)) {

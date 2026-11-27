@@ -1,3 +1,5 @@
+import 'package:mc_feature_flags/src/bucketing.dart' show maxVariantWeight;
+
 /// What one successful `GET /v1/flags` said, for one user.
 ///
 /// Flag values stay raw: a value's type is checked when the flag that reads it
@@ -72,7 +74,7 @@ final class RemoteSnapshot {
   Map<String, Object?> toJson() => {'userId': userId, 'body': body};
 
   static Map<String, int>? _weights(Object? variants) {
-    if (variants is! List) {
+    if (variants is! List || variants.isEmpty) {
       return null;
     }
     final weights = <String, int>{};
@@ -82,7 +84,11 @@ final class RemoteSnapshot {
       }
       final name = variant['name'];
       final weight = variant['weight'];
-      if (name is! String || weight is! int || weight < 0) {
+      if (name is! String ||
+          weight is! int ||
+          weight < 0 ||
+          weight > maxVariantWeight ||
+          weights.containsKey(name)) {
         return null;
       }
       weights[name] = weight;

@@ -62,10 +62,14 @@ const String flagsInstallIdKey = 'feature_flags.install_id';
 /// `Dio` adds it). A fetch remembers the epoch it started in; a result that
 /// arrives after the epoch changed is dropped, before anything is applied or
 /// written. The epoch is checked on every call as well as on `authState`, so a
-/// change is never missed while waiting for the stream. A sign-in as the
-/// **same** user starts a new epoch but sends no `authState` event, so its
-/// refetch starts at the next read (`value`, `variant`, `refresh`); the old
-/// values stay in use meanwhile as last-known-good.
+/// change is never missed while waiting for a stream. A sign-in as the
+/// **same** user starts a new epoch but sends no `authState` event, so the
+/// flags also listen to `SessionEpochs.epochChanges` (when the session has
+/// it, as `Session` does); the old values stay in use meanwhile as
+/// last-known-good.
+///
+/// When the user changes (a sign-out, or another user), the saved body of the
+/// previous user is deleted, so a user's targeted answer does not stay on disk.
 ///
 /// [refresh] joins a fetch of the current epoch that is already running, so
 /// it may answer with a request that started before the call.
@@ -129,10 +133,14 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     sync: true,
   );
   final Set<String> _reported = {};
+  final Set<StreamController<Object>> _watchers = {};
+  bool _installIdSaved = false;
+  bool _installIdSaving = false;
   final Map<String, Object> _overrideFlags = {};
   final Map<String, String> _forcedVariants = {};
 
   StreamSubscription<AuthStatus>? _authSubscription;
+  StreamSubscription<int>? _epochSubscription;
   int _seenEpoch;
   String? _seenUserId;
   RemoteSnapshot? _remote;
@@ -162,6 +170,7 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
       final id = read.getOrNull();
       if (id is String && id.isNotEmpty) {
         _installId = id;
+        _installIdSaved = true;
       }
     }
   }
@@ -203,6 +212,15 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
       _observeEpoch();
       _notify();
     });
+    // A sign-in as the same user starts a new epoch but is no `authState`
+    // event; `SessionEpochs` announces it, so a `watch` reacts at once.
+    final Object session = _session;
+    if (session is SessionEpochs) {
+      _epochSubscription = session.epochChanges.listen((_) {
+        _observeEpoch();
+        _notify();
+      });
+    }
   }
 
   /// Starts the fetch for the current session without waiting for it.
@@ -220,7 +238,13 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
   Future<void> dispose() {
     _disposed = true;
     unawaited(_authSubscription?.cancel());
+    unawaited(_epochSubscription?.cancel());
     unawaited(_changes.close());
+    // Every `watch` stream ends, so its listener gets `done`.
+    for (final controller in List.of(_watchers)) {
+      unawaited(controller.close());
+    }
+    _watchers.clear();
     return Future<void>.value();
   }
 
@@ -239,7 +263,7 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
           return decoded;
         }
         _reportOnce(
-          'override:${flag.key}',
+          'override:flag:${flag.key}',
           'The saved override of ${flag.key} is not a valid $T',
         );
       }
@@ -254,7 +278,7 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
           return decoded;
         }
         _reportOnce(
-          'remote:${flag.key}',
+          'remote:flag:${flag.key}',
           'The remote value of ${flag.key} is not a valid $T: '
               '$raw',
         );
@@ -266,6 +290,9 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
 
   @override
   Stream<T> watch<T extends Object>(FeatureFlag<T> flag) {
+    if (_disposed) {
+      return Stream<T>.fromIterable([value(flag)]);
+    }
     late final StreamController<T> controller;
     StreamSubscription<void>? subscription;
     controller = StreamController<T>(
@@ -280,8 +307,12 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
         });
         controller.add(last);
       },
-      onCancel: () => subscription?.cancel(),
+      onCancel: () {
+        _watchers.remove(controller);
+        return subscription?.cancel();
+      },
     );
+    _watchers.add(controller);
     return controller.stream;
   }
 
@@ -299,7 +330,7 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
           return forced;
         }
         _reportOnce(
-          'override:$key',
+          'override:experiment:$key',
           'The forced variant "$forced" of $key is not declared',
         );
       }
@@ -309,17 +340,22 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     final snapshot = _remote ?? _lastKnownGood;
     if (snapshot != null && snapshot.experiments.containsKey(key)) {
       final remote = snapshot.experiments[key];
-      final scaled = remote == null
-          ? null
-          : [for (final v in variants) remote[v.name] ?? 0];
-      if (scaled != null && scaled.any((w) => w > 0)) {
-        weights = scaled;
-      } else {
+      if (remote == null) {
         _reportOnce(
-          'remote:$key',
-          'The remote weights of $key are malformed or give no declared '
-              'variant a positive weight',
+          'remote:experiment:$key',
+          'The remote weights of $key are malformed',
         );
+      } else {
+        final scaled = [for (final v in variants) remote[v.name] ?? 0];
+        if (scaled.any((w) => w > 0)) {
+          weights = scaled;
+        } else {
+          _reportOnce(
+            'remote:experiment:$key',
+            'The remote weights of $key give no declared variant a positive '
+                'weight',
+          );
+        }
       }
     }
     return pickVariant(variants, weights, bucketOf(key, _subject()));
@@ -331,12 +367,45 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
   String _install() {
     final existing = _installId;
     if (existing != null) {
+      if (!_installIdSaved) {
+        _saveInstallId(); // an earlier save failed: try again
+      }
       return existing;
     }
     final id = _newInstallId();
     _installId = id;
-    unawaited(_store.write(flagsInstallIdKey, id));
+    _saveInstallId();
     return id;
+  }
+
+  /// Saves the install id; on a failure it warns once and a later read tries
+  /// again (the id is already in use in memory).
+  void _saveInstallId() {
+    final id = _installId;
+    if (id == null || _installIdSaving || _installIdSaved) {
+      return;
+    }
+    _installIdSaving = true;
+    Future<Result<void, StorageFailure>> write;
+    try {
+      write = _store.write(flagsInstallIdKey, id);
+    } on Object catch (error) {
+      _installIdSaving = false;
+      _reportOnce('install-id', 'could not save the install id: $error');
+      return;
+    }
+    unawaited(
+      write.then((result) {
+        _installIdSaving = false;
+        result.fold(
+          (_) => _installIdSaved = true,
+          (failure) => _reportOnce(
+            'install-id',
+            'could not save the install id: $failure',
+          ),
+        );
+      }),
+    );
   }
 
   // --- the session epoch and the fetch -------------------------------------
@@ -351,6 +420,20 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     }
     final userId = _session.userId;
     _lastKnownGood = userId == _seenUserId ? (_remote ?? _lastKnownGood) : null;
+    if (userId != _seenUserId) {
+      // The saved body is the previous user's targeted answer: do not leave it
+      // on disk. (The next successful fetch writes the new user's.)
+      unawaited(
+        _store
+            .delete(flagsCacheKey)
+            .then(
+              (result) => result.fold(
+                (_) {},
+                (failure) => _warn('could not clear the cache: $failure'),
+              ),
+            ),
+      );
+    }
     _remote = null;
     _seenEpoch = epoch;
     _seenUserId = userId;
@@ -364,6 +447,9 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
   }
 
   Future<void> _fetch() {
+    if (_disposed) {
+      return Future<void>.value();
+    }
     final epoch = _session.epoch;
     final running = _inFlight;
     if (running != null && running.epoch == epoch) {
@@ -444,6 +530,9 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
           ),
         );
 
+  FlagOverrideFailure _invalid(String message) =>
+      FlagOverrideFailure(FlagOverrideFailureReason.invalidFlag, message);
+
   @override
   Future<Result<void, FlagOverrideFailure>> set<T extends Object>(
     FeatureFlag<T> flag,
@@ -453,7 +542,13 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     if (rejected != null) {
       return rejected;
     }
-    registry.bindFlag(flag);
+    try {
+      registry.bindFlag(flag);
+    } on DuplicateFlagKeyError catch (error) {
+      return failure(_invalid('$error'));
+    } on ArgumentError catch (error) {
+      return failure(_invalid('${error.message}'));
+    }
     _overrideFlags[flag.key] = flag.codec.encode(value);
     _notify();
     return _saveOverrides();
@@ -489,7 +584,13 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
         ),
       );
     }
-    registry.bindExperiment(experiment);
+    try {
+      registry.bindExperiment(experiment);
+    } on DuplicateFlagKeyError catch (error) {
+      return failure(_invalid('$error'));
+    } on ArgumentError catch (error) {
+      return failure(_invalid('${error.message}'));
+    }
     _forcedVariants[experiment.key] = variant;
     _notify();
     return _saveOverrides();

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mc_event_bus/mc_event_bus.dart';
 import 'package:mc_prelude/mc_prelude.dart';
 import 'package:mc_session/src/auth_tokens.dart';
@@ -46,6 +48,18 @@ abstract interface class SessionReader {
   /// Each change of [status], in order. A broadcast stream: it has no replay,
   /// so read [status] for the current value.
   Stream<AuthStatus> get authState;
+}
+
+/// Every new session epoch, as it starts. [SessionReader.authState] and
+/// `SessionChanged` only announce a change of *user*; a sign-in as the same
+/// user starts a new epoch (new tokens) without either, so work that follows
+/// the epoch (`mc_feature_flags`) listens here. A separate interface, so
+/// existing `SessionReader` implementations are unaffected; `Session`
+/// implements both. A broadcast stream with no replay.
+abstract interface class SessionEpochs {
+  /// The new [SessionReader.epoch], once per sign-in and per sign-out of a
+  /// signed-in session.
+  Stream<int> get epochChanges;
 }
 
 /// The write side: only the sign-in flow and the auth interceptor use it.

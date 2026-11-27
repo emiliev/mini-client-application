@@ -16,6 +16,12 @@ int fnv1a32(List<int> bytes) {
   return hash;
 }
 
+/// The largest weight a variant may have, declared or remote. The scaled
+/// cumulative weight is `cumulative * 10000`, so with this cap and fewer than
+/// 900 variants it stays under 2^53 (JavaScript's exact integers) and far
+/// under 2^63. A remote weight above it is malformed.
+const int maxVariantWeight = 1000000000;
+
 /// The number of buckets a subject falls into, per experiment.
 const int bucketCount = 10000;
 

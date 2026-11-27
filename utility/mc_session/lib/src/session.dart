@@ -17,7 +17,7 @@ import 'package:mc_storage/mc_storage.dart';
 ///
 /// The store is plain JSON in the app's support directory. That is enough for
 /// a mock identity; a real one must move the tokens to the Keychain.
-final class Session implements SessionReader, SessionWriter {
+final class Session implements SessionReader, SessionWriter, SessionEpochs {
   /// The store key the session lives under unless another is given.
   static const String defaultKey = 'session';
 
@@ -57,6 +57,7 @@ final class Session implements SessionReader, SessionWriter {
   final String _key;
   final StreamController<AuthStatus> _changes =
       StreamController<AuthStatus>.broadcast();
+  final StreamController<int> _epochs = StreamController<int>.broadcast();
 
   _Active? _current;
   int _epoch = 0;
@@ -87,6 +88,9 @@ final class Session implements SessionReader, SessionWriter {
   Stream<AuthStatus> get authState => _changes.stream;
 
   @override
+  Stream<int> get epochChanges => _epochs.stream;
+
+  @override
   Future<Result<void, StorageFailure>> signIn({
     required String userId,
     required AuthTokens tokens,
@@ -95,6 +99,7 @@ final class Session implements SessionReader, SessionWriter {
     final changed = _current?.userId != userId;
     _current = active;
     _epoch++;
+    _announceEpoch();
     if (changed) {
       _announce(AuthStatus.signedIn);
     }
@@ -124,13 +129,23 @@ final class Session implements SessionReader, SessionWriter {
     _current = null;
     if (wasSignedIn) {
       _epoch++;
+      _announceEpoch();
       _announce(AuthStatus.signedOut);
     }
     return _enqueue(() => _store.delete(_key));
   }
 
   /// Closes [authState]. The saved value stays.
-  Future<void> dispose() => _changes.close();
+  Future<void> dispose() async {
+    unawaited(_epochs.close());
+    await _changes.close();
+  }
+
+  void _announceEpoch() {
+    if (!_epochs.isClosed) {
+      _epochs.add(_epoch);
+    }
+  }
 
   void _announce(AuthStatus status) {
     if (!_changes.isClosed) {

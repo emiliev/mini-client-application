@@ -348,6 +348,96 @@ void main() {
     });
   });
 
+  group('T-0052-AC3 review round', () {
+    test('T-0052-AC3 a watch-only consumer sees the new epoch of a same-user '
+        're-sign-in, with no value() read', () async {
+      final rig = await Rig.create(start: false);
+      rigs.add(rig);
+      rig.stub.flags = {'catalogue.page_size': 20};
+      await rig.signIn('u-100');
+      await rig.flags.refresh();
+      final events = <int>[];
+      final sub = rig.flags.watch(pageSize).listen(events.add);
+      await rig.settle();
+      expect(events, [20]);
+      rig.stub.flags = {'catalogue.page_size': 30};
+      await rig.signIn('u-100', 2); // no authState event, nobody reads
+      await rig.settle();
+      expect(events, [20, 30]);
+      await sub.cancel();
+    });
+
+    test('T-0052-AC3 dispose ends every watch stream with done, and a watch '
+        'after dispose emits its value and ends', () async {
+      final rig = await make(start: false);
+      final done = <Future<void>>[];
+      for (var i = 0; i < 3; i++) {
+        final completer = Completer<void>();
+        done.add(completer.future);
+        rig.flags.watch(pageSize).listen((_) {}, onDone: completer.complete);
+      }
+      await rig.settle();
+      await rig.flags.dispose();
+      await Future.wait(done).timeout(const Duration(seconds: 5));
+      expect(await rig.flags.watch(pageSize).toList(), [10]);
+    });
+
+    test('T-0052-AC3 after dispose refresh() returns at once and sends no '
+        'request, whatever the session does', () async {
+      final rig = await make(start: false);
+      await rig.flags.refresh();
+      final before = _flagCalls(rig);
+      expect(before, 1);
+      await rig.flags.dispose();
+      await rig.flags.refresh();
+      await rig.signIn('u-100');
+      await rig.flags.refresh();
+      rig.flags.value(pageSize);
+      rig.flags.start();
+      await rig.settle();
+      expect(_flagCalls(rig), before);
+    });
+
+    test('T-0052-AC3 the cache of a user is deleted when the user changes '
+        'or signs out, so it does not stay on disk', () async {
+      final rig = await make(start: false);
+      await rig.signIn('u-100');
+      await rig.flags.refresh();
+      expect(await storedCacheUser(rig), 'u-100');
+      // Same-user sign-in keeps it.
+      await rig.signIn('u-100', 2);
+      await rig.settle();
+      expect(rig.store.existsSync(flagsCacheKey), isTrue);
+      // The backend fails from now on, so nothing rewrites the cache.
+      rig.backend.addFailure(
+        const FailureRule('GET', '/v1/flags', FailureKind.http(500)),
+      );
+      await rig.signOut();
+      await rig.flags.refresh();
+      await rig.settle();
+      expect(rig.store.existsSync(flagsCacheKey), isFalse);
+      // Another user: the previous user's body is not left either.
+      final other = await make(start: false);
+      await other.signIn('u-100');
+      await other.flags.refresh();
+      other.backend.addFailure(
+        const FailureRule('GET', '/v1/flags', FailureKind.http(500)),
+      );
+      await other.signIn('u-101');
+      await other.flags.refresh();
+      await other.settle();
+      expect(other.store.existsSync(flagsCacheKey), isFalse);
+      // And a restart as anonymous with the backend failing sees defaults.
+      final restarted = await rig.relaunch(
+        domain: const FailingPlatformDomain(),
+        start: false,
+      );
+      rigs.add(restarted);
+      await restarted.flags.refresh();
+      expect(restarted.flags.value(searchLayout), Layout.compact);
+    });
+  });
+
   group('T-0052-AC3 watch', () {
     test('T-0052-AC3 watch emits the current value, then only distinct '
         'changes', () async {

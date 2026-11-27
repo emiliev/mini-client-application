@@ -41,6 +41,29 @@ final class _ThrowingStore extends FileStore {
       throw StateError('disk on fire');
 }
 
+/// A store whose first [failures] writes fail (a failed result).
+final class _FlakyStore extends FileStore {
+  _FlakyStore(super.directory, {required this.failures});
+
+  int failures;
+  int attempts = 0;
+  final List<Future<Object?>> pending = [];
+
+  @override
+  Future<Result<void, StorageFailure>> write(String key, Object? value) {
+    attempts++;
+    final Future<Result<void, StorageFailure>> done;
+    if (failures > 0) {
+      failures--;
+      done = Future.value(failure(StorageFailure(key, 'disk full')));
+    } else {
+      done = super.write(key, value);
+    }
+    pending.add(done);
+    return done;
+  }
+}
+
 void main() {
   final rigs = <Rig>[];
   Future<Rig> make({String env = 'dev', Directory? dir}) async {
@@ -54,6 +77,115 @@ void main() {
       await rig.dispose();
     }
     rigs.clear();
+  });
+
+  group('T-0052-AC1 review round', () {
+    test('T-0052-AC1 set and forceVariant return a failure for a taken or '
+        'blank key instead of throwing', () async {
+      final rig = await make();
+      rig.flags.value(promoBanner); // registers store.promo_banner
+      rig.flags.variant(storeHomeLayout);
+      FlagOverrideFailureReason? reason(Result<void, FlagOverrideFailure> r) =>
+          r.fold((_) => null, (f) => f.reason);
+      expect(
+        reason(await rig.flags.set(_twin, true)),
+        FlagOverrideFailureReason.invalidFlag,
+      );
+      expect(
+        reason(await rig.flags.set(_blank, true)),
+        FlagOverrideFailureReason.invalidFlag,
+      );
+      expect(
+        reason(
+          await rig.flags.forceVariant(
+            const Experiment(
+              key: 'store_home_layout',
+              variants: [ExperimentVariant('control', 1)],
+            ),
+            'control',
+          ),
+        ),
+        FlagOverrideFailureReason.invalidFlag,
+      );
+      expect(
+        reason(
+          await rig.flags.forceVariant(
+            const Experiment(key: ' ', variants: [ExperimentVariant('a', 1)]),
+            'a',
+          ),
+        ),
+        FlagOverrideFailureReason.invalidFlag,
+      );
+      // Nothing was saved or applied.
+      expect(rig.store.existsSync(flagsOverridesKey), isFalse);
+      expect(rig.flags.value(promoBanner), isTrue);
+    });
+
+    test('T-0052-AC2 a flag and an experiment that share a key are both '
+        'reported', () async {
+      final rig = await make();
+      const sharedFlag = FeatureFlag<int>(
+        key: 'shared',
+        defaultValue: 1,
+        description: 'x',
+        codec: IntFlagCodec(),
+      );
+      const sharedExperiment = Experiment(
+        key: 'shared',
+        variants: [ExperimentVariant('a', 1), ExperimentVariant('b', 1)],
+      );
+      rig.stub
+        ..flags = {'shared': 'wrong type'}
+        ..experiments = [
+          {'key': 'shared', 'variants': <Object?>[]},
+        ];
+      await rig.flags.refresh();
+      rig.flags.value(sharedFlag);
+      rig.flags.variant(sharedExperiment);
+      await rig.settle();
+      final shared = rig.reports.where((m) => m.contains('shared')).toList();
+      expect(shared, hasLength(2));
+      expect(shared.any((m) => m.contains('remote value')), isTrue);
+      expect(shared.any((m) => m.contains('remote weights')), isTrue);
+    });
+
+    test('T-0052-AC2 a failed install-id save warns once and is retried on a '
+        'later read', () async {
+      final rig = await make();
+      final store = _FlakyStore(rig.dir, failures: 2);
+      final flags = await FeatureFlags.open(
+        dio: rig.dio,
+        session: rig.session,
+        store: store,
+        env: 'dev',
+        monitoring: rig.monitoring,
+        newInstallId: () => 'install-x',
+      );
+      flags.variant(storeHomeLayout);
+      await Future.wait(store.pending);
+      await rig.settle();
+      flags.variant(storeHomeLayout); // retry 1: fails again
+      await Future.wait(store.pending);
+      await rig.settle();
+      flags.variant(storeHomeLayout); // retry 2: saved
+      await Future.wait(store.pending);
+      await rig.settle();
+      await Future.wait(store.pending);
+      flags.variant(storeHomeLayout); // already saved: no more writes
+      await rig.settle();
+      await Future.wait(store.pending);
+      expect(store.attempts, 3);
+      expect(
+        rig.reports.where((m) => m.contains('install id')),
+        hasLength(1),
+        reason: 'warned once',
+      );
+      expect(
+        (await rig.store.read(flagsInstallIdKey)).getOrNull(),
+        'install-x',
+      );
+      await flags.dispose();
+    });
   });
 
   group('T-0052-AC1 the registry', () {

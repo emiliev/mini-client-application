@@ -37,17 +37,17 @@ Codecs: `BoolFlagCodec`, `IntFlagCodec`, `StringFlagCodec`, `EnumFlagCodec`. Key
 3. The **last-known-good** remote value from storage, for the same user, while no fetch has succeeded yet in this epoch.
 4. The flag's `defaultValue`.
 
-A value of the wrong type, or a source with no value, falls to the next source. The wrong type is reported once to `Monitoring`. Unknown remote keys are ignored.
+A value of the wrong type, or a source with no value, falls to the next source. When the user changes (a sign-out, or another user) the saved body of the previous user is deleted, so a user's targeted flags do not stay on disk. The wrong type is reported once to `Monitoring`. Unknown remote keys are ignored.
 
 ## Experiments
 
-The bucket of a subject is `FNV-1a-32(utf8("<experimentKey>:<subjectId>")) % 10000`. The variants' cumulative weights are scaled to 10000 and the first whose bound is above the bucket wins; a weight of 0 never wins. The subject is the signed-in user id, else a random install id kept in storage. Remote config supplies weights per variant name; a local override can force a variant.
+The bucket of a subject is `FNV-1a-32(utf8("<experimentKey>:<subjectId>")) % 10000`. The variants' cumulative weights are scaled to 10000 and the first whose bound is above the bucket wins; a weight of 0 never wins. The subject is the signed-in user id, else a random install id kept in storage. Weights are integers from 0 to `maxVariantWeight` (1,000,000,000: above it the scaled sum could overflow, so a larger remote weight is malformed and reported). Remote config supplies weights per variant name; an entry with no variants, a repeated name, or a bad weight is malformed and the declared weights apply; a local override can force a variant.
 
 ## Why these dependencies
 
 Plan 01 lists `mc_prelude`, `mc_di`, `mc_config`, `mc_storage`, `mc_api_client` and `mc_api_errors`. This package adds two:
 
-- `mc_session`: the session epoch and user. A fetch is for one epoch, a result for an older epoch is dropped, and the signed-in user is the experiment subject.
+- `mc_session`: the session epoch and user (and `SessionEpochs.epochChanges`, so a same-user sign-in is seen at once). A fetch is for one epoch, a result for an older epoch is dropped, and the signed-in user is the experiment subject.
 - `mc_monitoring`: the one report of a wrong-typed remote value (and failed fetches).
 
 ## Boot

@@ -343,6 +343,12 @@ void main() {
       expect(anonymous.flags.value(pageSize), 10, reason: 'cache is for u-101');
       // Control: the same cache is used by the user it belongs to.
       await anonymous.signIn('u-101');
+      await anonymous.settle(); // the user change cleared the old cache
+      await _writeCache(
+        anonymous,
+        userId: 'u-101',
+        flags: {'catalogue.page_size': 77},
+      );
       final owner = await relaunch(
         anonymous,
         domain: const FailingPlatformDomain(),

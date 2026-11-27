@@ -515,6 +515,116 @@ void main() {
       },
     );
 
+    test('T-0052-AC2 a remote weight above the cap is malformed: it falls back '
+        'and is reported, where an uncapped sum would overflow', () async {
+      expect(maxVariantWeight, 1000000000);
+      final rig = await make();
+      rig.stub.experiments = _remote('store_home_layout', {
+        'control': 0,
+        'compact': 0,
+        'rich': 1000000000000000,
+      });
+      await rig.signIn('u-102'); // rich by the declared weights
+      await rig.flags.refresh();
+      expect(rig.flags.variant(storeHomeLayout), 'rich', reason: 'declared');
+      expect(
+        rig.reports.where((m) => m.contains('store_home_layout')),
+        [contains('malformed')],
+      );
+      // u-100 is control by the declared weights: at the cap the remote
+      // weights apply (rich), one above they do not.
+      rig.stub.experiments = _remote('store_home_layout', {
+        'control': 0,
+        'compact': 0,
+        'rich': maxVariantWeight,
+      });
+      await rig.signIn('u-100');
+      await rig.flags.refresh();
+      expect(rig.flags.variant(storeHomeLayout), 'rich', reason: 'at the cap');
+      rig.stub.experiments = _remote('store_home_layout', {
+        'control': 0,
+        'compact': 0,
+        'rich': maxVariantWeight + 1,
+      });
+      await rig.signIn('user-é'); // compact by the declared weights
+      await rig.flags.refresh();
+      expect(
+        rig.flags.variant(storeHomeLayout),
+        'compact',
+        reason: 'one above the cap: declared',
+      );
+    });
+
+    test('T-0052-AC2 the arithmetic at the cap is exact and picks the right '
+        'variant for every bucket edge', () {
+      final three = _experiment('store_home_layout').variants;
+      const w = [maxVariantWeight, maxVariantWeight, maxVariantWeight];
+      expect(pickVariant(three, w, 0), 'control');
+      expect(pickVariant(three, w, 3332), 'control');
+      expect(pickVariant(three, w, 3333), 'compact');
+      expect(pickVariant(three, w, 6665), 'compact');
+      expect(pickVariant(three, w, 6666), 'rich');
+      expect(pickVariant(three, w, 9999), 'rich');
+    });
+
+    test('T-0052-AC2 a declared weight above the cap is refused', () {
+      expect(
+        () => FeatureFlagRegistry().registerExperiment(
+          const Experiment(
+            key: 'huge',
+            variants: [ExperimentVariant('a', 1000000001)],
+          ),
+        ),
+        throwsArgumentError,
+      );
+    });
+
+    test('T-0052-AC2 an empty variants list and duplicate variant names are '
+        'malformed: reported as such, the declared weights apply', () async {
+      final rig = await make();
+      await rig.signIn('u-102');
+      for (final entries in <List<Object?>>[
+        [
+          {'key': 'store_home_layout', 'variants': <Object?>[]},
+        ],
+        _remote('store_home_layout', {'control': 1}) +
+            [
+              {
+                'key': 'store_home_layout',
+                'variants': [
+                  {'name': 'control', 'weight': 1},
+                  {'name': 'control', 'weight': 1},
+                ],
+              },
+            ],
+        [
+          {
+            'key': 'store_home_layout',
+            'variants': [
+              {'name': 'rich', 'weight': 0},
+              {'name': 'control', 'weight': 1},
+              {'name': 'rich', 'weight': 1},
+            ],
+          },
+        ],
+      ]) {
+        final fresh = await make();
+        fresh.stub.experiments = entries;
+        await fresh.signIn('u-102');
+        await fresh.flags.refresh();
+        expect(
+          fresh.flags.variant(storeHomeLayout),
+          'rich',
+          reason: '$entries',
+        );
+        expect(
+          fresh.reports.where((m) => m.contains('malformed')),
+          hasLength(1),
+        );
+      }
+      expect(rig.reports, isEmpty);
+    });
+
     test('T-0052-AC2 the last-known-good weights are used after a restart '
         'with the backend failing', () async {
       final first = await make();

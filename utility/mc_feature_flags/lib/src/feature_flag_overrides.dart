@@ -9,6 +9,10 @@ enum FlagOverrideFailureReason {
   /// The variant is not one the experiment declares.
   unknownVariant,
 
+  /// The flag or experiment is not valid: its key is blank, or another flag
+  /// already uses the key.
+  invalidFlag,
+
   /// The change is applied in memory but could not be saved.
   storage,
 }
