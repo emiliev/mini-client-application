@@ -248,7 +248,7 @@ mutate D02 "no question links its comic" "$MAP" "$T_BDD" \
 mutate D03 "the hint is not sent" "$MAP" "$T_BDD" \
   'hint: a.hint ? true : null,' 'hint: a.hint && a.points < 0 ? true : null,'
 mutate D04 "the best is read one point high" "$MAP" "$T_BDD" \
-  'Map<String, int> toDomain() => {for (final b in best) b.category: b.bestScore};' 'Map<String, int> toDomain() => {for (final b in best) b.category: b.bestScore + 1};'
+  '    for (final b in best) b.category: b.bestScore,' '    for (final b in best) b.category: b.bestScore + 1,'
 mutate D05 "the server's points are read one high" "$MAP" "$T_BDD $T_CONTRACT" \
   'points: [for (final b in breakdown) b.points],' 'points: [for (final b in breakdown) b.points + 1],'
 
