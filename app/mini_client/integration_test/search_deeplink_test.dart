@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mc_e2e_utils/mc_e2e_utils.dart';
@@ -56,7 +56,29 @@ void main() {
       reason: 'the link, not home, was the start location',
     );
     await letArtLoad(tester);
+    expect(
+      find.byType(BackButton),
+      findsWidgets,
+      reason: 'T-0049-AC1: the cold link has a back button',
+    );
     await shot(binding, tester, '36_deep_link_search');
+    await tester.tap(find.byType(BackButton).first);
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('home.placeholder')),
+      'T-0049-AC1: home, after Back from the cold link',
+    );
+    await shot(binding, tester, '36b_back_from_search_is_home');
+    // A link to the running app stacks [home, search] again.
+    await pushLink(tester, 'miniclient://app/search?q=spi');
+    await pumpUntil(
+      tester,
+      find.descendant(
+        of: find.byKey(_results),
+        matching: find.text(first('spi')),
+      ),
+      'the search again, after Back',
+    );
 
     await pushLink(tester, 'miniclient://app/search?q=amber');
     await pumpUntil(

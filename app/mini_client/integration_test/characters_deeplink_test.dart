@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:app_core/app_core.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:mc_e2e_utils/mc_e2e_utils.dart';
@@ -16,8 +16,8 @@ import 'package:mini_client/main.dart' as app;
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('T-0033-AC4 the deep link miniclient://app/characters opens the '
-      'list', (tester) async {
+  testWidgets('T-0033-AC4 T-0049-AC1 the deep link miniclient://app/characters '
+      'opens the list, with a back button that leads home', (tester) async {
     final first = CharacterUniverse(42, defaultMockClock).byName.first;
     File('${Directory.systemTemp.path}/$e2eStartLinkFile').writeAsStringSync(
       'miniclient://app/characters',
@@ -33,6 +33,18 @@ void main() {
       reason: 'the link, not home, was the start location',
     );
     await letArtLoad(tester);
+    expect(
+      find.byType(BackButton),
+      findsWidgets,
+      reason: 'T-0049-AC1: the cold link has a back button',
+    );
     await shot(binding, tester, '05_deep_link_characters');
+    await tester.tap(find.byType(BackButton).first);
+    await pumpUntil(
+      tester,
+      find.byKey(const Key('home.placeholder')),
+      'T-0049-AC1: home, after Back from the cold link',
+    );
+    await shot(binding, tester, '05b_back_from_characters_is_home');
   });
 }
