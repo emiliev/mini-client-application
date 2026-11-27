@@ -41,6 +41,7 @@ restore_all() { git checkout -- "${FILES[@]}"; }
 trap restore_all EXIT INT TERM
 
 run() { bz test --nocache_test_results --test_output=errors "$@" 2>&1 | tr '\r' '\n'; }
+runm() { run --output_groups=-dart_analyze,-dart_format "$@"; }
 
 if [[ -z "${MC_DRY:-}" ]]; then
   base="$(run //utility/mc_analytics/... //utility/mc_config/... //utility/mc_test_steps:analytics_steps_test //app/mini_client:analytics_screens_test //app/mini_client:bdd_test)"
@@ -61,11 +62,8 @@ for id in $(specs list); do
   if [[ -n "${MC_DRY:-}" ]]; then
     say "$id: applies -- $what"; restore_all; continue
   fi
-  # The build checks formatting of lib/ (F-0051): a mutant must be formatted,
-  # or it is "broken" instead of killed. JSON files are not Dart.
-  case "$(specs file "$id")" in *.dart) fvm dart format "$(specs file "$id")" > /dev/null ;; esac
   # shellcheck disable=SC2046
-  out="$(run $(specs targets "$id"))"
+  out="$(runm $(specs targets "$id"))"
   if grep -q "Build did NOT complete" <<< "$out"; then
     say "$id: BROKEN (build did not complete) -- $what"; broken=$((broken + 1))
   elif grep -q "TIMEOUT in" <<< "$out"; then

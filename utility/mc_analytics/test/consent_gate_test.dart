@@ -212,6 +212,19 @@ void main() {
       expect(rig.sink.records, isEmpty);
     });
 
+    test('T-0053-AC1 granted then denied in one turn delivers nothing of the '
+        'buffer', () async {
+      final rig = Rig(consent: AnalyticsConsent.unknown);
+      trackOneOfEach(rig.analytics);
+
+      unawaited(rig.analytics.setConsent(AnalyticsConsent.granted));
+      unawaited(rig.analytics.setConsent(AnalyticsConsent.denied));
+      await settle();
+
+      expect(rig.sink.records, isEmpty);
+      expect(rig.analytics.bufferedCount, 0);
+    });
+
     test(
       'T-0053-AC1 entries delivered before the switch stay delivered',
       () async {
@@ -443,6 +456,23 @@ void main() {
         AnalyticsConsent.granted,
       );
     });
+
+    test(
+      'T-0053-AC1 two choices in one turn: the last one is the one saved',
+      () async {
+        final store = ConsentStore(FileStore(dir));
+        final rig = Rig(consent: AnalyticsConsent.unknown, persist: store.save);
+
+        final first = rig.analytics.setConsent(AnalyticsConsent.granted);
+        final second = rig.analytics.setConsent(AnalyticsConsent.denied);
+        await Future.wait([first, second]);
+
+        expect(
+          await ConsentStore(FileStore(dir)).restore(AnalyticsConsent.granted),
+          AnalyticsConsent.denied,
+        );
+      },
+    );
 
     test('T-0053-AC1 nothing saved gives the fallback', () async {
       final store = ConsentStore(FileStore(dir));
