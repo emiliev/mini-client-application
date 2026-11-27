@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0052 engineer on mc-T-0052-engineer-91385 (79AFEC30-E612-4DE5-A3E9-748DE0028523)
+# e2e_ios.sh: T-0052 engineer on mc-T-0052-engineer-56774 (9D3CD058-D128-4959-8F01-6CEC054ECAAD)
 # cwd: /tmp/mc-T-0052-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_journey_test.dart -d 79AFEC30-E612-4DE5-A3E9-748DE0028523
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_journey_test.dart -d 9D3CD058-D128-4959-8F01-6CEC054ECAAD
 
 Resolving dependencies in `/private/tmp/mc-T-0052-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0052-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           16.0s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:63042/UO2jF6bqA9c=/
-VMServiceFlutterDriver: Isolate found with number: 4075902768648403
-VMServiceFlutterDriver: Isolate 4075902768648403 is runnable.
+Xcode build done.                                           14.0s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:53716/76zxyTZfKgQ=/
+VMServiceFlutterDriver: Isolate found with number: 3081301268785439
+VMServiceFlutterDriver: Isolate 3081301268785439 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0046-AC5 home to the search, "spi", the results, a comic and its page; back, and the recent search
@@ -44,13 +44,13 @@ flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
 flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
 flutter: [debug] DiscoverySearchBloc: _Cleared _Results -> _Idle
 flutter: 00:16 +1: (tearDownAll)
-flutter: 00:17 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test/30_home_search_entry.png (310591)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test/31_search_opened.png (209750)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test/32_search_results_grouped.png (411725)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test/33_search_comics_chip.png (405902)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test/34_comic_from_search.png (371207)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/9-search_journey_test/35_recent_searches.png (212120)
+flutter: 00:16 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test/30_home_search_entry.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test/31_search_opened.png (209021)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test/32_search_results_grouped.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test/33_search_comics_chip.png (405902)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test/34_comic_from_search.png (371207)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/10-search_journey_test/35_recent_searches.png (212120)
 All tests passed.
 
 # exit code: 0

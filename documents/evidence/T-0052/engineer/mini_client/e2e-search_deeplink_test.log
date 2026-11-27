@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0052 engineer on mc-T-0052-engineer-91385 (79AFEC30-E612-4DE5-A3E9-748DE0028523)
+# e2e_ios.sh: T-0052 engineer on mc-T-0052-engineer-56774 (9D3CD058-D128-4959-8F01-6CEC054ECAAD)
 # cwd: /tmp/mc-T-0052-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/8-search_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 79AFEC30-E612-4DE5-A3E9-748DE0028523
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/9-search_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/search_deeplink_test.dart -d 9D3CD058-D128-4959-8F01-6CEC054ECAAD
 
 Resolving dependencies in `/private/tmp/mc-T-0052-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0052-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                            9.8s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62600/4KNrKqBvX-s=/
-VMServiceFlutterDriver: Isolate found with number: 629923889459747
-VMServiceFlutterDriver: Isolate 629923889459747 is runnable.
+Xcode build done.                                           12.8s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:53627/C6R9jP1SeeA=/
+VMServiceFlutterDriver: Isolate found with number: 3558136960397995
+VMServiceFlutterDriver: Isolate 3558136960397995 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0046-AC5 the deep link miniclient://app/search?q=spi opens the search with its results
@@ -39,10 +39,14 @@ VMServiceFlutterDriver: request_data message is taking a long time to complete..
 flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
 flutter: [debug] GET /v1/search -> 200
 flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
-flutter: 00:08 +1: (tearDownAll)
-flutter: 00:09 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/8-search_deeplink_test/36_deep_link_search.png (410707)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/8-search_deeplink_test/37_link_to_running_app_search.png (412229)
+flutter: [debug] DiscoverySearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/search -> 200
+flutter: [debug] DiscoverySearchBloc: _Search _Searching -> _Results
+flutter: 00:10 +1: (tearDownAll)
+flutter: 00:10 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/9-search_deeplink_test/36_deep_link_search.png (411725)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/9-search_deeplink_test/36b_back_from_search_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/9-search_deeplink_test/37_link_to_running_app_search.png (413127)
 All tests passed.
 
 # exit code: 0

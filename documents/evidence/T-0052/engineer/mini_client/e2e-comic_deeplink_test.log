@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0052 engineer on mc-T-0052-engineer-91385 (79AFEC30-E612-4DE5-A3E9-748DE0028523)
+# e2e_ios.sh: T-0052 engineer on mc-T-0052-engineer-56774 (9D3CD058-D128-4959-8F01-6CEC054ECAAD)
 # cwd: /tmp/mc-T-0052-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/4-comic_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d 79AFEC30-E612-4DE5-A3E9-748DE0028523
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/5-comic_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/comic_deeplink_test.dart -d 9D3CD058-D128-4959-8F01-6CEC054ECAAD
 
 Resolving dependencies in `/private/tmp/mc-T-0052-engineer-e2e`...
 Downloading packages...
@@ -21,10 +21,10 @@ Got dependencies in `/private/tmp/mc-T-0052-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           11.7s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:62026/qcdxpBVCUM0=/
-VMServiceFlutterDriver: Isolate found with number: 7836412270548123
-VMServiceFlutterDriver: Isolate 7836412270548123 is runnable.
+Xcode build done.                                           10.4s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:53434/aR3HGGmouqs=/
+VMServiceFlutterDriver: Isolate found with number: 2600228033010011
+VMServiceFlutterDriver: Isolate 2600228033010011 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0041-AC5 the deep link miniclient://app/comics/501500 opens the comic page
@@ -36,16 +36,17 @@ flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
 flutter: [debug] GET /v1/comics/501500 -> 200
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
 flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Loading
 flutter: [debug] GET /v1/comics/500000 -> 200
 flutter: [debug] ComicDetailsBloc: _Load _Loading -> _Success
-VMServiceFlutterDriver: request_data message is taking a long time to complete...
 flutter: [debug] ComicFavouriteBloc: _Load _Loading -> _Ready
-flutter: 00:09 +1: (tearDownAll)
-flutter: 00:09 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/4-comic_deeplink_test/18_deep_link_comic.png (373888)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/4-comic_deeplink_test/19_link_to_running_app_comic.png (370090)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.d5vdE9/screenshots/4-comic_deeplink_test/20_bad_comic_link_not_found.png (195352)
+flutter: 00:10 +1: (tearDownAll)
+flutter: 00:10 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/5-comic_deeplink_test/18_deep_link_comic.png (374865)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/5-comic_deeplink_test/18b_back_from_comic_is_home.png (310591)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/5-comic_deeplink_test/19_link_to_running_app_comic.png (371207)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.4QZ06J/screenshots/5-comic_deeplink_test/20_bad_comic_link_not_found.png (195352)
 All tests passed.
 
 # exit code: 0
