@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-27 `7b6a1f4`; Verifier PASS `6b1ee59`) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verifier | crew: Verifier, **Sonnet tier** (fixtures; ADR-0011) |
 | Branch | `fleet/T-0051-fixtures-commerce` |
@@ -89,3 +89,6 @@ Follow-ups: none. Questions for the PO: none.
 5. `SectionFailingCommerceDomain` throws an `ArgumentError` listing the valid sections (its constructor is no longer `const`). Test `T-0051-AC2 an unknown section...`; mutation R5.
 6. `DELETE .../promo?code=` with a blank value is `400 invalid_parameter` (documented). Test `T-0051-AC4 DELETE promo with a blank code...`; mutation R3.
 Gates re-run after merging `origin/main` (already up to date): all PASS, `test //...` 150/150, coverage 98.7 %.
+
+## Merge (TL)
+- 2026-11-27: Review-first (ADR-0011). `/code-review` found one important bug: an overlong product id caused a 500. It also found nits on zero-padded ids, `mutations.sh` build detection, `seriesIdBase`, the unknown section and the blank promo code. Review round `eac479e` (100/100 mutations). A single Sonnet Verifier pass gave PASS `6b1ee59` (about 109k tokens; own oracle from `CONTRACT.md`, 8 carts, two real users, 10/10 own mutations, no defects). The TL merged `--no-ff`; on the merge result `check` passed, 150/150 tests, lint was clean, `mc_arch_check` reported OK and no feature or app target reaches the package.
