@@ -20,3 +20,23 @@ INFO: Build completed successfully, 775 total actions
 //utility/mc_test_utils:isolation_test                                   PASSED in 0.9s
 Executed 15 out of 15 tests: 15 tests pass.
 ```
+
+Per-target run logs (each `run_N_of_50`), counted from `bazel-testlogs` after the run:
+
+| target | run logs | failed |
+|---|---|---|
+| //utility/mc_appearance:preferences_test | 50 | 0 |
+| //utility/mc_appearance:local_test | 50 | 0 |
+| //utility/mc_appearance:sync_test | 50 | 0 |
+| //utility/mc_appearance:races_test | 50 | 0 |
+| //utility/mc_appearance:di_test | 50 | 0 |
+| //utility/mc_storage:file_store_test | 50 | 0 |
+| //utility/mc_ds_theme:theme_test | 50 | 0 |
+| //utility/mc_test_utils:isolation_test | 50 | 0 |
+| //feature/settings/settings_appearance:bdd_test | 50 | 0 |
+| //feature/settings/settings_appearance:flow_scope_test | 50 | 0 |
+| //feature/settings/settings_appearance:contract_test | 50 | 0 |
+| //app/wiring/account_wiring:routes_test | 50 | 0 |
+| //app/wiring/app_core:appearance_shell_test | 50 | 0 |
+| //app/mini_client:settings_route_test | 50 | 0 |
+| //app/mini_client:analytics_screens_test | 50 | 0 |
