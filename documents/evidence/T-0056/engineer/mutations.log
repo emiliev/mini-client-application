@@ -1,3 +1,5 @@
+# Review round, at f0bbab8, in two halves (MC_ONLY), each with its own baseline
+## half 1
 baseline: PASS
 M01 a stale answer is applied (no generation check): KILLED (//feature/store/store_home:bdd_test)
 M02 a refresh shows the skeleton instead of keeping the content: KILLED (//feature/store/store_home:bdd_test)
@@ -12,7 +14,7 @@ M10 a comic banner opens nothing: KILLED (//feature/store/store_home:bdd_test)
 M11 a category banner's page is named before the lookup: KILLED (//feature/store/store_home:bdd_test)
 M12 a search banner is tracked as a comic: KILLED (//feature/store/store_home:bdd_test)
 M13 deals Retry ignores the state (double tap loads twice): KILLED (//feature/store/store_home:bdd_test)
-M14 deals count down against the device time: KILLED (//feature/store/store_home:bdd_test)
+M14 deals count down a day off the injected clock: KILLED (//feature/store/store_home:bdd_test)
 M15 a deal tap is tracked with the wrong id: KILLED (//feature/store/store_home:bdd_test)
 M16 a category opens without its name: KILLED (//feature/store/store_home:bdd_test)
 M17 a second category tap replaces the first: KILLED (//feature/store/store_home:bdd_test)
@@ -29,15 +31,22 @@ P02 the looked-up name never titles the page: KILLED (//feature/store/store_home
 P03 the end of the list loads no next page: KILLED (//feature/store/store_home:bdd_test)
 P04 a product tap opens nothing: KILLED (//feature/store/store_home:bdd_test)
 G01 the featured flag is ignored: KILLED (//feature/store/store_home:bdd_test)
-G02 the cart bloc is created lazily (below the fold): KILLED (//feature/store/store_home:bdd_test)
+G02 the visit's start skips the cart (it loads only when scrolled to): KILLED (//feature/store/store_home:bdd_test)
 G03 pull to refresh skips the deals: KILLED (//feature/store/store_home:bdd_test)
 G04 the flow ignores the injected clock: KILLED (//feature/store/store_home:bdd_test)
+V01 a dropped cart answer does not reload (item 1): KILLED (//feature/store/store_home:bdd_test)
+V02 the store page starts while hidden (item 2): KILLED (//app/mini_client:analytics_screens_test)
+
+mutations: 35, killed: 35
+RESULT: PASS
+## half 2
+baseline: PASS
 D01 the cart read is not pinned to its session: KILLED (//feature/store/store_home:bdd_test)
 D02 every page is requested at offset 0: KILLED (//feature/store/store_home:bdd_test)
 D03 the deal price is the original price: KILLED (//feature/store/store_home:bdd_test)
 D04 a product never has a deal price: KILLED (//feature/store/store_home:bdd_test)
 D05 a search banner leads to a comic: KILLED (//feature/store/store_home:bdd_test)
-D06 days left round down: KILLED (//feature/store/store_home:contract_test)
+D06 days left round up: KILLED (//feature/store/store_home:contract_test)
 W1 openSearch drops the query: KILLED (//app/wiring/commerce_wiring:routes_test)
 W2 openCart pushes the store: KILLED (//app/wiring/commerce_wiring:routes_test)
 W3 the sign-in sheet loses the cart's reason: KILLED (//app/wiring/commerce_wiring:routes_test)
@@ -56,6 +65,16 @@ K5 the tracker port's screens go nowhere: KILLED (//app/mini_client:analytics_sc
 K6 FeatureFlow drops its observers: KILLED (//utility/mc_feature_flow:feature_flow_test)
 U1 holdNext holds every request: KILLED (//feature/store/store_home:bdd_test)
 U2 the flag stub never reads the snapshot: KILLED (//utility/mc_test_steps:flag_steps_test)
+V03 the store page starts again on every showing (item 2): KILLED (//app/mini_client:analytics_screens_test)
+V04 the cart never follows the session once its visit starts (item 2): KILLED (//feature/store/store_home:bdd_test)
+V05 a flow page changed under a popup is never tracked (item 3): KILLED (//utility/mc_analytics:flow_observer_test)
+V06 the flow observer depends on the host route (item 4): KILLED (//utility/mc_analytics:flow_observer_test)
+V07 FeatureFlow does not publish its route (item 4): KILLED (//app/mini_client:analytics_screens_test)
+V08 FlowScope does not notify a status flip (item 2, 4): KILLED (//feature/store/store_home:flow_scope_test)
+V09 an ended deal is shown (item 5): KILLED (//feature/store/store_home:flow_scope_test)
+V10 a deal still runs exactly at its end (item 5): KILLED (//feature/store/store_home:contract_test)
+V11 an invalid flow page name is tracked (item 6): KILLED (//utility/mc_analytics:flow_observer_test)
+V12 an invalid flow page is not recorded, so the page before it is reported (item 6): KILLED (//utility/mc_analytics:flow_observer_test)
 
-mutations: 57, killed: 57
+mutations: 34, killed: 34
 RESULT: PASS
