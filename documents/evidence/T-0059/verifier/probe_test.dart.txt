@@ -1,0 +1,167 @@
+import 'dart:math' as math;
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_charts/mc_ds_charts.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+import 'support/recording_canvas.dart';
+
+final _themes = {for (final v in McThemeVariant.values) v: McTheme.of(v).copyWith(platform: TargetPlatform.iOS)};
+Widget app(Widget c, {McThemeVariant v = McThemeVariant.light, bool noAnim = false}) => MaterialApp(
+  theme: _themes[v],
+  builder: (ctx, a) => MediaQuery(data: MediaQuery.of(ctx).copyWith(disableAnimations: noAnim), child: a!),
+  home: Scaffold(body: Align(alignment: Alignment.topCenter, child: SizedBox(width: 375, child: c))));
+
+CustomPainter painterOf(WidgetTester t, Type c) => t.widget<CustomPaint>(find.descendant(of: find.byType(c), matching: find.byType(CustomPaint))).painter!;
+double lum(Color c) {
+  double f(double x) => x <= 0.03928 ? x / 12.92 : math.pow((x + 0.055) / 1.055, 2.4).toDouble();
+  return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b);
+}
+double cr(Color a, Color b) { final x = lum(a), y = lum(b); return (math.max(x,y)+0.05)/(math.min(x,y)+0.05); }
+
+void main() {
+  tearDown(McChartValidation.reset);
+  test('probe ticks', () {
+    for (final r in [(0.0,0.0),(-7.0,3.0),(0.001,0.004),(1e9,3e9)]) {
+      final s = mcNiceTicks(r.$1, r.$2);
+      print('TICKS ${r.$1}..${r.$2} -> min=${s.min} max=${s.max} step=${s.step} n=${((s.max-s.min)/s.step).round()+1}');
+      expect(s.min <= r.$1 && s.max >= r.$2, true);
+      expect(s.step > 0, true);
+    }
+  });
+  test('probe donut sweeps', () {
+    for (final vals in <List<double>>[[1000.0,2,1,0.5],[1.0,1,1],[0.0,0],[5.0],[1e-9,1,1e9], List.filled(90,1.0), List.generate(40,(i)=>i==0?1000.0:1.0)]) {
+      final s = mcDonutSweeps(vals);
+      final sum = s.fold(0.0,(a,b)=>a+b);
+      final pos = vals.where((v)=>v>0).length;
+      print('SWEEP n=${vals.length} sumDeg=${sum*180/math.pi} minPositive=${s.where((x)=>x>0).fold(99.0,math.min)*180/math.pi}');
+      if (pos>0) { expect(sum, closeTo(2*math.pi, 1e-9)); } else { expect(sum, 0); }
+      if (pos>0 && pos*mcDonutMinSweep<2*math.pi) { for (final x in s.where((x)=>x>0)) { expect(x >= mcDonutMinSweep-1e-12, true); } }
+    }
+    final arcs = mcDonutArcs(mcDonutSweeps([3.0,2,1]));
+    expect(arcs.last.start+arcs.last.sweep, closeTo(-math.pi/2+2*math.pi, 1e-9));
+  });
+  test('probe radar', () {
+    for (final n in [3,5,8]) {
+      for (var i=0;i<n;i++) {
+        final v = mcRadarVertex(center: const Offset(100,100), radius: 50, index: i, count: n, value: 1);
+        final ang = -math.pi/2 + i*2*math.pi/n;
+        expect((v - Offset(100+50*math.cos(ang),100+50*math.sin(ang))).distance < 1e-9, true);
+        if (i==0) { expect(v.dx, closeTo(100,1e-9)); expect(v.dy, closeTo(50,1e-9)); }
+        if (i<3 || n==3) print('RADAR n=$n i=$i -> $v');
+      }
+      final z = mcRadarVertex(center: const Offset(100,100), radius: 50, index: 1, count: n, value: 0);
+      expect(z, const Offset(100,100));
+      final c = mcRadarVertex(center: const Offset(100,100), radius: 50, index: 1, count: n, value: 7);
+      expect((c-const Offset(100,100)).distance, closeTo(50,1e-9));
+    }
+  });
+  test('probe bar extents', () {
+    const plot = Rect.fromLTWH(0,0,300,100);
+    for (final vals in [[5.0,-3.0,0.0],[-2.0,-8.0],[0.0,0.0],[4.0,10.0]]) {
+      final lo = vals.reduce(math.min), hi = vals.reduce(math.max);
+      final sc = mcNiceTicks(lo, hi, includeZero: true);
+      final g = mcLayoutBars(plot: plot, values: vals, scale: sc, vertical: true);
+      print('BARS $vals zeroY=${g.zero} rects=${g.bars}');
+      for (var i=0;i<vals.length;i++) {
+        final r = g.bars[i];
+        if (vals[i] > 0) { expect(r.bottom, closeTo(g.zero,1e-9)); expect(r.top < g.zero, true); }
+        if (vals[i] < 0) { expect(r.top, closeTo(g.zero,1e-9)); expect(r.bottom > g.zero, true); }
+        if (vals[i] == 0) { expect(r.height, closeTo(0,1e-9)); }
+        expect(r.top >= plot.top-1e-9 && r.bottom <= plot.bottom+1e-9, true);
+      }
+      final h = mcLayoutBars(plot: plot, values: vals, scale: sc, vertical: false);
+      for (var i=0;i<vals.length;i++) { if (vals[i]<0) { expect(h.bars[i].right, closeTo(h.zero,1e-9)); } if (vals[i]>0) { expect(h.bars[i].left, closeTo(h.zero,1e-9)); } }
+    }
+  });
+  testWidgets('probe zero line line chart', (t) async {
+    for (final vals in [[0.0,5.0,10.0],[-10.0,-5.0,0.0],[0.0,0.0,0.0],[2.0,4.0,6.0]]) {
+      await t.pumpWidget(app(McLineChart(xLabels: const ['a','b','c'], series: [McLineSeries(label:'s', values: vals)], semanticLabel:'x', emptyMessage:'e')));
+      final c = RecordingCanvas();
+      final size = t.getSize(find.descendant(of: find.byType(McLineChart), matching: find.byType(CustomPaint)));
+      painterOf(t, McLineChart).paint(c, size);
+      final ls = c.lines();
+      final thick = ls.where((l)=>l.$3.strokeWidth>1.2 && l.$1.dy==l.$2.dy).toList();
+      print('ZERO line $vals: horizontal heavier lines=${thick.length} widths=${ls.map((l)=>l.$3.strokeWidth).toSet()}');
+    }
+  });
+  testWidgets('probe AC3 release', (t) async {
+    McChartValidation.releaseModeOverride = true;
+    final reports = <FlutterErrorDetails>[];
+    McChartValidation.reporterOverride = reports.add;
+    await t.pumpWidget(app(McBarChart(data: const [McBarDatum(label:'A',value:1),McBarDatum(label:'B',value:double.nan),McBarDatum(label:'C',value:3),McBarDatum(label:'D',value:2)], highlightIndex: 2, semanticLabel:'s', emptyMessage:'e')));
+    final bp = painterOf(t, McBarChart) as McBarPainter;
+    print('HIGHLIGHT data=${bp.data.map((d)=>d.label).toList()} idx=${bp.highlightIndex} reports=${reports.length}');
+    expect(bp.data[bp.highlightIndex!].label, 'C');
+    final c = RecordingCanvas();
+    bp.paint(c, t.getSize(find.descendant(of: find.byType(McBarChart), matching: find.byType(CustomPaint))));
+    final strokes = c.named('drawRect').where((x)=>x.arg<Paint>(1).style==PaintingStyle.stroke && x.arg<Paint>(1).strokeWidth==McBarPainter.highlightWidth).toList();
+    print('HIGHLIGHT outlines=${strokes.length}');
+    expect(strokes.length,1);
+    final bars = c.filledRects();
+    print('bars=${bars.length}');
+    expect(strokes.first.arg<Rect>(0).center.dx, closeTo(bars[1].$1.center.dx, 2.5));
+
+    List<Color> arcColors(RecordingCanvas cv) => [for (final a in cv.arcs()) if (a.$4.style==PaintingStyle.stroke) a.$4.color];
+    Future<List<Color>> donut(List<McDonutSegment> d) async {
+      await t.pumpWidget(app(McDonutChart(data: d, semanticLabel:'s', emptyMessage:'e', centerLabel:'1')));
+      final cv = RecordingCanvas();
+      painterOf(t, McDonutChart).paint(cv, const Size(200,200));
+      return arcColors(cv);
+    }
+    final full = await donut(const [McDonutSegment(label:'a',value:1,role:McChartRole.series1),McDonutSegment(label:'b',value:2),McDonutSegment(label:'c',value:3),McDonutSegment(label:'d',value:4)]);
+    final dropped = await donut(const [McDonutSegment(label:'a',value:1,role:McChartRole.series1),McDonutSegment(label:'b',value:double.nan),McDonutSegment(label:'c',value:3),McDonutSegment(label:'d',value:4)]);
+    print('DONUT full=$full\nDONUT dropped=$dropped');
+    expect(dropped.length, 3);
+    expect(dropped[1], full[2]); expect(dropped[2], full[3]);
+    for (final n in [5,6,9]) {
+      final cols = await donut([for (var i=0;i<n;i++) McDonutSegment(label:'s$i', value: 1.0+i)]);
+      print('DONUT n=$n arcs=${cols.length}');
+      expect(cols.length, n);
+      for (var i=0;i<n;i++) { expect(cols[i] != cols[(i+1)%n], true, reason:'n=$n i=$i'); }
+      final roles = McChartRole.resolveAll(List.filled(n,null));
+      for (var i=0;i<n;i++) { expect(roles[i] != roles[(i+1)%n], true); }
+    }
+    await t.pumpWidget(app(McLineChart(xLabels: const ['a','b'], series: const [McLineSeries(label:'1',values:[]),McLineSeries(label:'2',values:[]),McLineSeries(label:'3',values:[]),McLineSeries(label:'4',values:[1,2])], semanticLabel:'s', emptyMessage:'EMPTYMSG')));
+    expect(find.text('EMPTYMSG'), findsOneWidget);
+    McChartValidation.reset();
+    final errs = <Object>[];
+    final old = FlutterError.onError;
+    FlutterError.onError = (d) => errs.add(d.exception);
+    await t.pumpWidget(app(McBarChart(data: const [McBarDatum(label:'A',value:double.nan)], semanticLabel:'s', emptyMessage:'e')));
+    FlutterError.onError = old;
+    print('DEBUG errors: ${errs.map((e)=>e.runtimeType).toList()}');
+    expect(errs.any((e)=>e is ArgumentError), true);
+    t.takeException();
+  });
+  testWidgets('probe AC4 semantics', (t) async {
+    final h = t.ensureSemantics();
+    await t.pumpWidget(app(McBarChart(data: const [McBarDatum(label:'Mon',value:-0.0),McBarDatum(label:'Tue',value:-0.001),McBarDatum(label:'Wed',value:2)], semanticLabel:'SUMMARY', emptyMessage:'e')));
+    var labels = t.semantics.simulatedAccessibilityTraversal().map((n)=>n.label).where((l)=>l.isNotEmpty).toList();
+    print('SEM bar $labels');
+    expect(labels.first.contains('SUMMARY'), true);
+    McChartValidation.releaseModeOverride = true;
+    McChartValidation.reporterOverride = (_) {};
+    await t.pumpWidget(app(McRadarChart(axes: const ['a','b','c','d','e'], series: const [McRadarSeries(label:'S', values:[0.5,0.2,0.9])], semanticLabel:'RAD', emptyMessage:'e')));
+    labels = t.semantics.simulatedAccessibilityTraversal().map((n)=>n.label).where((l)=>l.isNotEmpty).toList();
+    print('SEM radar $labels');
+    h.dispose();
+  });
+  test('probe contrast', () {
+    for (final v in McThemeVariant.values) {
+      final p = McPalette.of(v);
+      final roles = {for (final r in McChartRole.values) r.name: r.resolve(p)};
+      final out = roles.map((k,c)=>MapEntry(k, cr(c,p.surface).toStringAsFixed(2)));
+      print('CONTRAST ${v.name} surface=${p.surface} $out');
+      for (final c in roles.values) { expect(cr(c,p.surface) >= 3.0, true); }
+    }
+  });
+  testWidgets('probe animation reduce motion', (t) async {
+    await t.pumpWidget(app(McBarChart(data: const [McBarDatum(label:'A',value:1)], animate:true, semanticLabel:'s', emptyMessage:'e'), noAnim:true));
+    await t.pumpAndSettle();
+    await t.pumpWidget(app(McBarChart(data: const [McBarDatum(label:'A',value:1)], animate:true, semanticLabel:'s', emptyMessage:'e'), noAnim:false));
+    await t.pump();
+    print('ANIM transient after reduce-motion off: ${t.binding.transientCallbackCount}');
+    expect(t.binding.transientCallbackCount, 0);
+  });
+}
