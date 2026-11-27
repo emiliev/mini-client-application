@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_test_utils/mc_test_utils.dart';
 
 import '../util/comics_details_env.dart';
 
@@ -12,7 +13,15 @@ Future<void> iTapTheCastMemberAndThenAfterMilliseconds(
   String second,
   int milliseconds,
 ) async {
-  await tapComicTarget(tester, castCard(first));
+  // Both cards on screen first: scrolling and settling would spend the time
+  // this step measures.
+  await scrollComicUntilVisible(tester, castCard(first));
+  await scrollComicUntilVisible(tester, castCard(second));
+  await scrollComicUntilVisible(tester, castCard(first));
+  expect(castCard(first).hitTestable(), findsOneWidget);
+  expect(castCard(second).hitTestable(), findsOneWidget);
+  await tester.tap(castCard(first).hitTestable());
   await tester.pump(Duration(milliseconds: milliseconds));
-  await tapComicTarget(tester, castCard(second));
+  await tester.tap(castCard(second).hitTestable());
+  await mcSettle(tester);
 }
