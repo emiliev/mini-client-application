@@ -39,6 +39,8 @@ The character profile is a hand-built SC feature in the shape of `comics_details
     - "See full profile" is pushed over the preview, so Back from the profile shows the **preview** (a page of the characters_list flow), not the grid; Back from there reaches the list.
     - The cold link `miniclient://app/characters/<id>` still builds `[home, list, profile]` (T-0049): the test taps Back twice.
 
+13. **Review round: three bugs in the copied favourite bloc, fixed in both features.** A `DataChanged` during a tap was dropped; overlapping reads in one epoch could finish in any order; every background re-read emitted `loading` (a flicker and a disabled toggle). Fix: a stale flag, a read counter (a tap bumps it too, so an older read cannot undo a write), and `loading` only for a first read or a new session. A tap during a background read is therefore allowed (the toggle is no longer `loading`). The bricks copy the fixed version.
+
 ## Implications / actions
 - The SC brick copies sections "Copied" and keeps 2, 5 and 6 as the variation points for a feature with a second request and a chart.
 - `identity.default`'s seeded favourites make two characters special in every feature that favourites a character; a brick uses an id outside that list.

@@ -98,15 +98,17 @@ class _CharacterSections extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: McSpacing.xl),
       children: [
         CharacterHeader(character: character),
-        McSectionHeader(title: l10n.characterDetailsBio),
-        Padding(
-          padding: McInsets.horizontal,
-          child: Text(
-            character.bio,
-            key: characterBioKey,
-            style: Theme.of(context).textTheme.bodyLarge,
+        if (character.bio.isNotEmpty) ...[
+          McSectionHeader(title: l10n.characterDetailsBio),
+          Padding(
+            padding: McInsets.horizontal,
+            child: Text(
+              character.bio,
+              key: characterBioKey,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
           ),
-        ),
+        ],
         McSectionHeader(title: l10n.characterDetailsStats),
         CharacterStats(character: character),
         McSectionHeader(title: l10n.characterDetailsComics),

@@ -24,6 +24,7 @@ An ADR captures **one** significant decision: the context, the options weighed, 
 | [0013](0013-app-wide-appearance.md) | The app-wide appearance lives in `mc_appearance`, local first, synced with the account | Accepted | 2026-11-27 |
 | [0014](0014-interactive-engine-and-injected-time.md) | An interactive feature's engine is pure Dart in the feature, and time enters it through the flow | Accepted | 2026-11-27 |
 | [0015](0015-lean-verification.md) | Lean verification: no feature goldens, ~15 targeted mutants, correctness-only Verifiers (PO) | Accepted | 2026-11-27 |
+| [0016](0016-mcgen-spec-manifest-and-determinism.md) | mcgen's contracts: the `mcgen/1` spec, the manifest, keep regions and seed derivation | Accepted | 2026-11-27 |
 
 ## Expected upcoming ADRs
 | Topic | Comes from |

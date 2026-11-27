@@ -5,10 +5,10 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0067](T-0067-characters-details.md) | `characters_details` (F002): the profile behind "See full profile" | merged `21b57873` |
+| [T-0065](T-0065-mcgen-core.md) | `tool/mcgen` core (P2-01); ADR-0016 | merged `a6da9bde` |
 | [T-0068](T-0068-ci-github-actions.md) | **URGENT** CI: GitHub Actions (macOS + Bazel cache) runs the merge gates on main, fleet/**, PRs | **In Progress** | Engineer (Sonnet) / TL pushes + CI run | T-0062 | `fleet/T-0068-ci` |
-| [T-0065](T-0065-mcgen-core.md) | `tool/mcgen` core: spec model, seeded RNG, writer, manifest, keep regions, `gen --check` (P2-01) | **In Progress** | Engineer (Opus) / ADR-0015 | Phase C | `fleet/T-0065-mcgen-core` |
 | [T-0066](T-0066-auth-sign-in.md) | `auth_sign_in` feature and the `/me/**` guard; replaces the fixture sheet (F045, P-044) | **In Progress** | Engineer (Sonnet) / narrow Verifier (auth) | T-0050, T-0057 | `fleet/T-0066-auth-sign-in` |
-| [T-0067](T-0067-characters-details.md) | `characters_details`: the character profile behind "See full profile" (F002) | **In Progress** | Engineer (Sonnet) / ADR-0015 | T-0041 | `fleet/T-0067-characters-details` |
 | [T-0063](T-0063-settings-appearance-exemplar.md) | `settings_appearance`, the ST exemplar (P1-22); `mc_appearance`; ADR-0013 | merged `9b85870` |
 | [T-0064](T-0064-trivia-quiz-exemplar.md) | `trivia_quiz`, the IX exemplar (P1-23); ADR-0014 | merged `09171cc` |
 | [T-0062](T-0062-tooling-hygiene.md) | Tooling hygiene: format gate, e2e bundle id and roles, sheet handle pin | merged `acfe0c5` |

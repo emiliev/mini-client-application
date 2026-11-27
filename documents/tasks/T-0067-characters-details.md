@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (handed off for `/code-review` and the TL's merge gates; ADR-0015, no Verifier) |
+| Status | Done (merged 2026-11-27 `21b57873`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates. No Verifier. |
 | Branch | `fleet/T-0067-characters-details` |
@@ -63,6 +63,11 @@ Today "See full profile" in the characters preview, and the link `miniclient://a
 - 2026-11-27: Wiring in `universe_wiring`: the real `CharacterDetailsFlow`, `CharacterDetailsNavigatorImpl` (`openComic` through `AppLocations.comic`, `requestSignIn` through `requestFixtureSignIn`, the hook every wiring uses today), the placeholder flow deleted, tests rewritten over `McTestContainer`.
 - 2026-11-27: Other tests that named the placeholder now name the real profile: `mini_client` tests and journeys, the universe sandbox tests and journeys. No test was deleted, skipped or weakened; the placeholder assertions were replaced by assertions on the real name, comics and Back.
 - 2026-11-27: E2E on `mc-T-0067-engineer-*` (deleted each time): the first two runs found two bugs of the new journey test (a missing import; waiting for a header that a scrolled list does not build, then a wrong Back target: the preview, not the grid). Fixed in the test; the app was right. Final run 3/3 PASS.
+- 2026-11-27: Review round (`/code-review`, 3 important findings in the favourite bloc, fixed in **both** `character_favourite_bloc` and `comic_favourite_bloc`):
+  1. An announcement that arrives while a tap is in flight sets `_stale`; the tap's ending reads the flag again.
+  2. Every read takes a number from `_loadSeq`; only the newest writes its answer, and a tap also bumps it, so a read that predates a write cannot undo it.
+  3. A background refresh (same session, a value already shown) keeps that value and emits no `loading`; `loading` is for the first read and a new session.
+  Tests (each fails on the old bloc; checked for `characters_details`): `bloc_guards_test` "two reads that finish out of order ...", "a tap during a background read is not overwritten ...", "a background refresh never emits loading"; BDD "An announcement that arrives during a write is applied when the write settles" and "A refresh caused by an announcement keeps the toggle as it was, enabled", in both features (`T-0067-AC3`, `T-0041-AC6`, `T-0050-AC2`). Nits: both old test IDs are back in the renamed tests (`T-0033-AC4 T-0067-AC5 ...`, `T-0041-AC8 T-0067-AC3 ...`); empty origin and bio rows are left out (new `characters_details_synthetic.feature`); `_settleRealIo` now fails when the sheet never closes.
 - 2026-11-27: Gates run on the branch, see AC6. Finding: [F-0067](../findings/F-0067-characters-details.md).
 
 ## Outcome
@@ -91,7 +96,7 @@ Every test below was grepped at the handoff commit.
 | AC6 | See the gates below; [`runs_per_test_50.md`](../evidence/T-0067/engineer/runs_per_test_50.md); `characters_details:architecture_test` ("T-0067-AC6": the barrel, no Flutter in generator-read files). |
 
 ### Gates (run on the branch at the handoff commit)
-- `test --lockfile_mode=error //...`: 228 of 228 pass.
+- `test --lockfile_mode=error //...`: 228 of 228 pass (also after the review round).
 - `build --config=lint //...`: clean.
 - `mc_arch_check`: OK. `rules_fork.sh check`: OK. `l10n_check`: OK. `tool/checks/lib/format_gate.sh`: 0 changed.
 - `T-0042-AC4_safety.sh` after `tool/ide_sync`: [report](../evidence/T-0067/engineer/T-0042-AC4_safety.md).
@@ -104,7 +109,14 @@ Every test below was grepped at the handoff commit.
 - Tests that named the placeholder: `mini_client` (`comic_route_test`, `search_route_test`, `deep_link_back_stack_test`, `analytics_screens_test` gains 2 tests, 3 integration journeys), the universe sandbox (`fake_targets`, links test, 2 integration tests). All of them assert the real profile now.
 
 ### Not done / follow-ups
+- After a failed read, a tap still assumes "not a favourite" and writes without re-reading the flag (both favourite blocs). Left for a later round: it needs a new state transition and a scenario.
 - The preview in `characters_list` does not show the aliases the detail now has.
 - `appearances` (comics, series, events) is served and parsed but not shown: its counts are random and would contradict the comics row.
 - One rule for singular or plural class names in the SC brick (F-0067 section 1).
 - T-0066 replaces the sign-in sheet: `CharacterDetailsNavigatorImpl.requestSignIn` calls `requestFixtureSignIn`, exactly as the other five wirings do, so its merge switches them together.
+
+## Merge (TL)
+- 2026-11-27: `/code-review` found 3 important favourite-bloc issues (a missed announcement while busy, out-of-order reads, refresh flicker), all shared with `comics_details`, plus the AC-ID traceability nit. Fix round `721eab3e` fixed them in **both** blocs and restored both old IDs in the renamed tests.
+- TL checks: no deleted or skipped tests; the 13 "removed" assertions are re-indented, with equal counts added per file.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 228/228 tests, lint clean, `mc_arch_check` OK, sim app built, format gate and provenance passed, and a 20-run uncached flake check over 12 targets was clean.
+- Follow-up: P-121.

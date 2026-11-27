@@ -1,0 +1,19 @@
+# tool/mcgen is a standalone package (not a pub workspace member), so it
+# cannot include package:mc_analysis. This file must not include anything a
+# nested .dart_tool/package_config.json cannot resolve (P-117): the format gate
+# reads its `formatter` section from here, so the gate formats tool/mcgen the
+# same with or without a `pub get` in this directory.
+analyzer:
+  exclude:
+    # Mustache templates, not Dart (mason's brick format).
+    - "bricks/**/__brick__/**"
+    # The reference archetype's expected output: package:mc_hello does not
+    # resolve here; test/analyze_test.dart analyses it with mc_analysis.
+    - "test/golden/**"
+  language:
+    strict-casts: true
+    strict-raw-types: true
+    strict-inference: true
+
+formatter:
+  trailing_commas: preserve

@@ -1,0 +1,30 @@
+{
+  "archetype": "utility_hello",
+  "files": {
+    "lib/mc_hello.dart": {
+      "hash": "6729878b62287da056ba119c821c9decfeaa765ffee250842c61433e9b80e1e2",
+      "ownership": "managed"
+    },
+    "lib/src/greeting.dart": {
+      "hash": "4741146bf05891ba9425a107a208988b4d7ecf66e2c110efc6ccf37c217ee68e",
+      "keep": {
+        "greeting.render": "31a9bbcd3eb14751d06a87b3ce105dd44f1bebd4acef855babfe19e525381748"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/mood.dart": {
+      "hash": "2c1699e4ee198f87cfe453a6ec73cf6e1897b70eb1d450945018270c80a8038b",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "af529d05f680fbfafc51a728cf207dfa5046e9c5245cc464112749ad4b6c7b3d",
+      "ownership": "managed"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "mc_hello",
+  "ownership": "managed",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x562a6946d495a023",
+  "spec_hash": "8211ab98a9dbfbebf36d944f5a1181627d79e91e3f0a30a4f87d8bf4aba3a138"
+}

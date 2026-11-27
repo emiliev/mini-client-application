@@ -1,0 +1,13 @@
+# Scaffolded by mcgen from mcgen.yaml; edit the spec or a keep region.
+
+name: mc_hello
+description: Greetings, generated to test mcgen's core.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  meta: ^1.15.0

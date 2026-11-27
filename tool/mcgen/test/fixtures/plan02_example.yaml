@@ -1,0 +1,50 @@
+schema: mcgen/1
+module: characters_list          # D2 naming
+tier: feature
+archetype: list_detail
+size_class: M                    # S | M | L | XL (§3.1)
+ownership: mixed                 # managed | mixed | ejected
+seed_salt: 0                     # bump to re-roll unconstrained choices only
+deps: [mc_prelude, mc_di, mc_api_client, mc_monitoring, mc_feature_flow, mc_bloc_kit, mc_ds_cards, mc_formatters]   # never mc_design_system (spec lint)
+entities:
+  - name: Character
+    fields:
+      - {name: id, type: CharacterId}                  # extension type
+      - {name: name, type: String}
+      - {name: aliases, type: List<String>, default: []}
+      - {name: thumbnail, type: Thumbnail}            # nested model
+      - {name: alignment, type: Alignment, unknown: neutral}
+      - {name: firstAppearance, type: DateTime?}
+  - {name: Alignment, enum: [hero, villain, neutral]}
+  - {name: Affiliation, union: [team(TeamRef), solo(), unknown()], union_key: kind}
+endpoints:
+  - {id: list, method: GET, path: v1/characters, query: [offset, limit, nameStartsWith], returns: Page<Character>}
+  - {id: detail, method: GET, path: 'v1/characters/{id}', returns: Character}
+rules:
+  - id: badge
+    kind: classifier
+    input: Character
+    cases: [{when: "comicsCount >= 1000", then: legend}, {when: "comicsCount >= 100", then: veteran}]
+    default: rookie
+    examples: [{comicsCount: 1200, expect: legend}, {comicsCount: 5, expect: rookie}]
+blocs:
+  - name: CharactersList
+    states: [initial, loading, loaded, loadingMore, empty, error]
+    events: [load, loadMore, refresh, search(query), open(Character)]
+    transformers: {search: debounce_300ms}
+flow: {state: [{name: previewId, type: CharacterId?}], pages: [CharactersListPage, CharacterPreviewPage]}
+screens:
+  - {name: CharactersListPage, layout: sliver_grid, depth: 9, widgets: 7}
+  - {name: CharacterPreviewPage, layout: scroll_sections, depth: 11, widgets: 9}
+navigator: {name: CharactersListNavigator, outbound: [openCharacter(CharacterId), openComic(ComicId), requestSignIn() -> bool]}
+l10n: {locales: [en, de, fr, es, ja], keys: 64, placeholders: 9, plurals: 4, selects: 1}   # en template; others pseudo (01)
+mixins: [{name: TileMotion, on: State}]
+bdd:                             # 05 §3 vocabulary; data setup before the flow opens (TD-05)
+  - feature: browse_characters
+    background: "Given the backend serves {'characters.paged_45'}"
+    scenarios:
+      - {id: MC-characters_list-01, title: "The first page is listed in name order", steps: ["When I open the characters list", "Then I see {'Hero 01'}"]}
+      - {id: MC-characters_list-02, title: "A failed first page offers a retry", steps: ["Given the backend fails {'GET /v1/characters'} once with {'server_error'}", "When I open the characters list", "Then I see the error state"]}
+    outlines:                    # rule examples run through the flow (R6), one row per example
+      - {id: MC-characters_list-03, rule: badge, title: "A character's badge follows its comic count"}
+keep: [rules.badge.body]         # hand-owned region(s)

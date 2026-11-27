@@ -1,0 +1,33 @@
+# mcgen's global settings (plan 02 section 2.5, ADR-0016).
+#
+# Changing global_seed re-rolls every unconstrained choice in every module;
+# bump a module's seed_salt instead to re-roll one module.
+global_seed: 20261127
+
+dart:
+  # The FVM-pinned SDK (.fvmrc: Flutter 3.47.7, Dart 3.13.5). mcgen formats
+  # with that SDK's `dart format` and refuses any other formatter version,
+  # so its output agrees with tool/checks/lib/format_gate.sh.
+  language_version: "3.13"
+  sdk_constraint: ^3.13.0
+  formatter_version: 3.1.13
+  page_width: 80
+
+# Constraints for third-party packages generated code may use. First-party
+# packages (app/, feature/, utility/) are always `any`.
+third_party:
+  bloc: ^9.0.0
+  dio: ^5.11.0
+  flutter_bloc: ^9.1.0
+  freezed_annotation: 3.1.0
+  get_it: ^8.0.0
+  injectable: 3.0.0
+  intl: any
+  json_annotation: 4.12.0
+  meta: ^1.15.0
+  mocktail: ^1.0.4
+  retrofit: 4.10.0
+  test: ^1.25.0
+
+# Packages that come with the Flutter SDK.
+sdk_packages: [flutter, flutter_localizations, flutter_test]
