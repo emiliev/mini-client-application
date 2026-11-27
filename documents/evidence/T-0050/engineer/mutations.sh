@@ -48,6 +48,8 @@ PIN=$AUTH/lib/src/auth_pin.dart
 SESSION_DI=$SESS/lib/src/session_di_initializer.dart
 CD_REPO=$CD/lib/src/domain/repository/comics_details_repository.dart
 CD_BLOC=$CD/lib/src/presentation/bloc/comic_details_bloc.dart
+CD_FAV=$CD/lib/src/presentation/bloc/comic_favourite_bloc.dart
+CD_GUARDS=//$CD:bloc_guards_test
 FE_REPO=$FE/lib/src/domain/repository/reading_list_editor_repository.dart
 FE_BLOC=$FE/lib/src/presentation/bloc/reading_list_editor_bloc.dart
 FE_FORM=$FE/lib/src/presentation/form/reading_list_form.dart
@@ -57,7 +59,7 @@ FORM_CTRL=utility/mc_forms/lib/src/form_controller.dart
 WIZARD_CTRL=utility/mc_forms/lib/src/wizard_controller.dart
 HOOK=utility/mc_test_steps/lib/src/environment/signs_in_just_before_the_app_sends.dart
 
-FILES=($INT $PIN $SESSION_DI $CD_REPO $CD_BLOC $FE_REPO $FE_BLOC $FE_FORM $FE_XA $FE_DE
+FILES=($INT $PIN $SESSION_DI $CD_REPO $CD_BLOC $CD_FAV $FE_REPO $FE_BLOC $FE_FORM $FE_XA $FE_DE
   $FORM_CTRL $WIZARD_CTRL $HOOK)
 for f in "${FILES[@]}"; do
   if ! git diff --quiet -- "$f" || ! git diff --cached --quiet -- "$f"; then
@@ -71,7 +73,7 @@ trap restore_all EXIT
 # run <targets...>: the test output, one line per test, plus Bazel's summary.
 run() { bz test --nocache_test_results --test_output=all "$@" 2>&1 | tr '\r' '\n'; }
 
-ALL="$AUTH_ALL $SESS_T $CD_BDD $FE_BDD $FE_CONTRACT $FE_GUARDS $FORMS_T //$CD:contract_test //$CD:flow_scope_test //$FE:flow_scope_test"
+ALL="$AUTH_ALL $SESS_T $CD_BDD $CD_GUARDS $FE_BDD $FE_CONTRACT $FE_GUARDS $FORMS_T //$CD:contract_test //$CD:flow_scope_test //$FE:flow_scope_test"
 base="$(run $ALL)"
 if grep -q -E "FAILED|NO STATUS|^ERROR" <<< "$base"; then
   say "BASELINE FAILS"; grep -E "FAILED|^ERROR" <<< "$base" | tee -a "$LOG"; exit 1
@@ -154,15 +156,22 @@ mutate H1 "the switch step never switches (the race would pass vacuously)" $HOOK
   "s.replace('var fired = false;', 'var fired = true;')" $CD_BDD $FE_BDD
 # --- AC3: P-089 -------------------------------------------------------------------------
 mutate P89-a "a double tap on a character opens it twice" $CD_BLOC \
-  "s.replace('case _OpenCharacter(:final id):\n        if (_startOpenGuard()) {', 'case _OpenCharacter(:final id):\n        if (_startOpenGuard() | true) {')" $CD_BDD
+  "s.replace('case _OpenCharacter(:final id):\n        if (_startOpenGuard((\'character\', id.value))) {', 'case _OpenCharacter(:final id):\n        if (_startOpenGuard((\'character\', id.value)) | true) {')" $CD_BDD
 mutate P89-b "a double tap on a creator opens it twice" $CD_BLOC \
-  "s.replace('case _OpenCreator(:final id):\n        if (_startOpenGuard()) {', 'case _OpenCreator(:final id):\n        if (_startOpenGuard() | true) {')" $CD_BDD
+  "s.replace('case _OpenCreator(:final id):\n        if (_startOpenGuard((\'creator\', id.value))) {', 'case _OpenCreator(:final id):\n        if (_startOpenGuard((\'creator\', id.value)) | true) {')" $CD_BDD
 mutate P89-c "the guard is 400 ms: a tap at 499 ms opens again" $CD_BLOC \
   "s.replace('Duration(milliseconds: 500)', 'Duration(milliseconds: 400)')" $CD_BDD
 mutate P89-d "the guard is 600 ms: a tap at 501 ms is swallowed" $CD_BLOC \
   "s.replace('Duration(milliseconds: 500)', 'Duration(milliseconds: 600)')" $CD_BDD
+mutate P89-f "the guard is not per target: a different character within 450 ms is dropped" $CD_BLOC \
+  "s.replace('_openTarget == target', 'true')" $CD_BDD
 mutate P89-e "the guard timer is never started" $CD_BLOC \
   "s.replace('    _openGuard = Timer(openGuard, () {});\n', '')" $CD_BDD
+# --- review round: the favourite bloc's stale-state guard ---------------------------
+mutate R1-a "the favourite tap is not dropped when the session moved on (still pinned to the shown epoch)" $CD_FAV \
+  "s.replace('if (epoch == null || epoch != _session.epoch) {', 'if (epoch == null) {')" $CD_GUARDS
+mutate R1-b "the favourite tap is not dropped and the write pins the current epoch" $CD_FAV \
+  "s.replace('if (epoch == null || epoch != _session.epoch) {', 'if (epoch == null) {').replace('      epoch: epoch,', '      epoch: _session.epoch,')" $CD_GUARDS
 # --- AC3: P-093 ----------------------------------------------------------------------------
 mutate P93-V01 "the create does not check the session before writing" $FE_BLOC \
   "s.replace('    if (editing == null) {\n      if (!_canWrite(epoch)) {\n        return failure(_stopped);\n      }\n', '    if (editing == null) {\n')" $FE_GUARDS

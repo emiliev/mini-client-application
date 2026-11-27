@@ -1,7 +1,7 @@
 # negative control: the step points at a route no request matches
 ## variant A: wrong route, 'session belongs' kept
   FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is sent sends nothing for the wrong user [T-0050-AC2]
-## variant B: wrong route, 'session belongs' removed (the teardown check)
+## variant B: wrong route, no tap, 'session belongs' removed (only the teardown check can fail)
   FAIL  comics_details_favourite Favourite a comic A user switch right before the favourite is sent sends nothing for the wrong user [T-0050-AC2]
-VARIANT B DID NOT GO RED FOR THE RIGHT REASON
-NEGATIVE CONTROL FAILED
+        TestFailure: collector@mini-client.test never signed in: no request matched "PUT /v1/me/favourites/comic/999999" while the hook was installed, so the race was not exercised
+NEGATIVE CONTROL OK: both variants went red

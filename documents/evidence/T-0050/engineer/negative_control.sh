@@ -23,7 +23,7 @@ s = open(p).read()
 t = s.replace("signs in just before the app sends {'"'"'PUT /v1/me/favourites/comic/501500'"'"'}",
               "signs in just before the app sends {'"'"'PUT /v1/me/favourites/comic/999999'"'"'}", 1)
 if drop:
-    # No tap either: nothing but the step's own teardown check can fail.
+    # No tap either: nothing but the teardown check of the step can fail.
     lines = [l for l in t.split("\n") if "the session belongs to" not in l]
     i = next(k for k, l in enumerate(lines) if "999999" in l)
     assert "I tap" in lines[i + 1]
