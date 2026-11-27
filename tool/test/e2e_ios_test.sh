@@ -1109,6 +1109,91 @@ test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails() {
   assert_not_contains "$out" "No simulators named" "output (missing set)"
 }
 
+# ---------------------------------------- T-0062: role names, raw trees ---
+
+# t0062_sim_names: names in the default set that start with mc-T-0062-.
+t0062_sim_names() { devices_tsv | awk -F '\t' 'index($3, "mc-T-0062-") == 1 { print $3 }' | sort; }
+
+test_T-0062-AC3_any_role_name_is_accepted_and_its_simulator_deleted() {
+  ensure_stub_project
+  local out="$OUT/t0062-ac3-role.out" rc=0 name before after
+  before=$(t0062_sim_names)
+  run_e2e "$out" --task T-0062 --role reverify --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$EV/t0062-role" \
+    --runner-cmd "echo ran" || rc=$?
+  name=$(out_value "$out" SIMULATOR_NAME)
+  note "role reverify: exit $rc on '$name'"
+  assert_eq 0 "$rc" "exit code for --role reverify"
+  [[ $name =~ ^mc-T-0062-reverify-[0-9]+$ ]] || fail "simulator name '$name' is not mc-T-0062-reverify-<pid>"
+  sim_exists "$name" && fail "simulator $name was not deleted"
+  after=$(t0062_sim_names)
+  assert_eq "$before" "$after" "mc-T-0062-* simulators before vs after"
+  assert_contains "$EV/t0062-role/e2e-summary.md" "| Role | reverify |"
+}
+
+test_T-0062-AC3_a_role_outside_a_z_0_9_dash_is_refused_before_any_simulator() {
+  ensure_stub_project
+  local role out rc before after
+  before=$(t0062_sim_names)
+  for role in Re_Verify "re verify" "../x" ""; do
+    out="$OUT/t0062-ac3-badrole.out"
+    rc=0
+    run_e2e "$out" --task T-0062 --role "$role" --project "$STUB" --runner-cmd true || rc=$?
+    note "role '$role': exit $rc"
+    assert_eq 2 "$rc" "exit code for --role '$role'"
+    assert_contains "$out" "--role"
+    assert_not_contains "$out" "SIMULATOR_NAME=" "output for --role '$role'"
+  done
+  after=$(t0062_sim_names)
+  assert_eq "$before" "$after" "mc-T-0062-* simulators before vs after"
+}
+
+# A raw tree (no ios/Runner.xcodeproj) with the default `flutter drive` runner
+# fails once, early, naming the command to run. A prepared tree gets past the
+# check (a fake fvm stands in for flutter, so no build happens). A custom
+# runner is not asked for an Xcode project.
+test_T-0062-AC3_raw_tree_fails_with_the_prepare_command_and_a_prepared_tree_runs() {
+  local d="$WORK/t0062-raw" fb="$WORK/t0062-fakebin" out rc=0 name before after
+  mkdir -p "$d/raw/integration_test" "$d/raw/test_driver" "$fb"
+  printf 'name: raw_project\n' >"$d/raw/pubspec.yaml"
+  printf '// stub target\n' >"$d/raw/integration_test/stub_test.dart"
+  printf '// stub driver\n' >"$d/raw/test_driver/integration_test.dart"
+  printf '#!/bin/sh\necho "fake fvm $*"\nexit 0\n' >"$fb/fvm"
+  chmod +x "$fb/fvm"
+  before=$(t0062_sim_names)
+
+  out="$OUT/t0062-ac3-raw.out"
+  PATH="$fb:$PATH" "$BASH_BIN" "$E2E" --task T-0062 --role reverify --project "$d/raw" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$EV/t0062-raw" >"$out" 2>&1 || rc=$?
+  note "raw tree: exit $rc: $(grep 'error:' "$out" | head -n 1 | cut -c1-160)"
+  assert_eq 2 "$rc" "exit code for a raw tree"
+  assert_contains "$out" "has no ios/Runner.xcodeproj"
+  assert_contains "$out" "tool/e2e/prepare_pub_project.sh --app"
+  assert_not_contains "$out" "SIMULATOR_NAME=" "output for a raw tree"
+  [ ! -e "$EV/t0062-raw/e2e-summary.md" ] || fail "a failed pre-flight must not write a summary"
+
+  # A custom runner needs no Xcode project, so the raw tree is fine for it.
+  out="$OUT/t0062-ac3-raw-custom.out"
+  rc=0
+  run_e2e "$out" --task T-0062 --role reverify --project "$d/raw" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$EV/t0062-raw-custom" --runner-cmd "echo ran" || rc=$?
+  assert_eq 0 "$rc" "exit code for a custom runner on a raw tree"
+
+  # The prepared tree: the check passes and a simulator is created and deleted.
+  mkdir -p "$d/raw/ios/Runner.xcodeproj"
+  out="$OUT/t0062-ac3-prepared.out"
+  rc=0
+  PATH="$fb:$PATH" "$BASH_BIN" "$E2E" --task T-0062 --role reverify --project "$d/raw" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$EV/t0062-prepared" >"$out" 2>&1 || rc=$?
+  name=$(out_value "$out" SIMULATOR_NAME)
+  note "prepared tree: exit $rc on '$name'"
+  assert_not_contains "$out" "has no ios/Runner.xcodeproj" "output for a prepared tree"
+  [[ $name =~ ^mc-T-0062-reverify-[0-9]+$ ]] || fail "no simulator was created for the prepared tree ('$name')"
+  sim_exists "$name" && fail "simulator $name was not deleted"
+  after=$(t0062_sim_names)
+  assert_eq "$before" "$after" "mc-T-0062-* simulators before vs after"
+}
+
 ALL_TESTS="
 test_T-0012-AC1_pass_run_collects_evidence
 test_T-0012-AC1_unwritable_screenshot_is_an_error_not_a_phantom
@@ -1130,6 +1215,9 @@ test_T-0055-AC1_bundle_id_resolution
 test_T-0055-AC2_every_marker_is_found_in_a_log
 test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail
 test_T-0055-AC2_command_text_with_marker_is_not_a_failure
+test_T-0062-AC3_any_role_name_is_accepted_and_its_simulator_deleted
+test_T-0062-AC3_a_role_outside_a_z_0_9_dash_is_refused_before_any_simulator
+test_T-0062-AC3_raw_tree_fails_with_the_prepare_command_and_a_prepared_tree_runs
 "
 
 # ----------------------------------------------------------- suite runner ---
@@ -1151,7 +1239,7 @@ suite_cleanup() {
     done
   done <"$BG_PIDS_FILE"
   # 2) sweep any simulator a run of this suite announced and that still exists.
-  grep -h '^SIMULATOR_NAME=mc-T-0012-' "$OUT"/*.out 2>/dev/null | cut -d= -f2- | sort -u >"$WORK/announced"
+  grep -h -E '^SIMULATOR_NAME=mc-T-00(12|62)-' "$OUT"/*.out 2>/dev/null | cut -d= -f2- | sort -u >"$WORK/announced"
   while read -r name; do
     [ -n "$name" ] || continue
     for u in $(devices_tsv | awk -F '\t' -v n="$name" '$3 == n { print $1 }'); do

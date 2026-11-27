@@ -30,7 +30,7 @@ After the script, `git status` showed the tree clean (the BUILD file used for th
 ## Acceptance criteria
 | AC | Scenario (short) | Mapped test(s) / probe | Test really asserts the AC? | Result |
 |---|---|---|---|---|
-| T-0043-AC1 | seed 42, same sequence on two backends | `search_test` T-0043-AC1 (3 tests); my `verifier/probe.dart` with 8 requests on two backends: byte-identical | yes (raw body text compared) | PASS |
+| T-0043-AC1 | seed 42, same sequence on two backends | `search_test` T-0043-AC1 (3 tests); my `verifier/probe.dart.txt` with 8 requests on two backends: byte-identical | yes (raw body text compared) | PASS |
 | T-0043-AC2 | ranking for `spi` and others | `ranking_test` (25 tests) and `search_test` (independent oracle for 6 queries); my probe: `spi` gives 152 characters then 400 comics, `iro`, `chr`; every result has the query as prefix, word-prefix or substring | yes: each tier pair is pinned against a contradicting title order; mutations M1, M2, M3 died | PASS |
 | T-0043-AC2 (P1-10 AC5) | curated name hits both domains | `spindle` / `spi` returns `Spindle Alchemist` (character) and `Spindle Chronicles #1` (comic), characters first | yes | PASS |
 | T-0043-AC3 | snapshots, resolvable ids, thumbnails | `provider_contract_test` (13 tests, 14 snapshots; every id resolves on its own detail endpoint for seeds 42 and 7; every thumbnail resolves to an asset file); M4 (edited snapshot) died | yes | PASS |

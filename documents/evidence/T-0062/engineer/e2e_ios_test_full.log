@@ -1,0 +1,7 @@
+T-0012 e2e runner test suite
+  scripts run with: /bin/bash (3.2.57(1)-release)
+  device: iPhone 17 Pro, runtime: com.apple.CoreSimulator.SimRuntime.iOS-26-2
+  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.mg6wTF
+RUN  test_T-0012-AC1_pass_run_collects_evidence
+    creating fixture app in /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.mg6wTF/fixture_base
+    fixture ready in 4 s

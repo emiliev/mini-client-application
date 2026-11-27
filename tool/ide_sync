@@ -321,6 +321,9 @@ ensure_ios_project() {
     (cd "$tmp/$name" && fvm flutter create --platforms=ios --project-name "$name" --org com.emiliev --no-pub . >/dev/null 2>"$SCRATCH/create.err") ||
       { cat "$SCRATCH/create.err" >&2; return 1; }
     fi
+    # T-0062 (P-109): `flutter create` camel-cases the id (com.emiliev.miniClient); Q-004 and Bazel use com.emiliev.miniclient.
+    [ ! -f "$tmp/$name/ios/Runner.xcodeproj/project.pbxproj" ] ||
+      sed -i '' 's/com\.emiliev\.miniClient/com.emiliev.miniclient/g' "$tmp/$name/ios/Runner.xcodeproj/project.pbxproj"
     # Every file `flutter create` adds that the checkout lacks (the Xcode
     # project, the Flutter xcconfigs, Runner-Bridging-Header.h, the launch
     # image), never one that exists. Each must be git-ignored, and all are

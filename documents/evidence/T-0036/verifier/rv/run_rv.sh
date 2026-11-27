@@ -18,8 +18,8 @@ restore() {
 trap restore EXIT
 cat "$S/ff_build_append.txt" >> "$FF/BUILD.bazel"
 cat "$S/cl_build_append.txt" >> "$CL/BUILD.bazel"
-cp "$S/rv_probe_test.dart" "$FF/test/verifier_probe_test.dart"
-cp "$S/characters_probe_test.dart" "$CL/test/verifier_probe_test.dart"
+cp "$S/rv_probe_test.dart.txt" "$FF/test/verifier_probe_test.dart"
+cp "$S/characters_probe_test.dart.txt" "$CL/test/verifier_probe_test.dart"
 /usr/bin/python3 -I - "$FB" "$MODE" <<'PY' || exit 2
 import sys
 p, mode = sys.argv[1:3]
