@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification (engineer handoff) |
 | Owner | crew: Engineer (**Opus**: first DB exemplar, which the bricks copy; ADR-0011) |
 | Verifier | crew: Verifier, **Opus tier** (exemplar) |
 | Branch | `fleet/T-0056-store-home` |
@@ -105,3 +105,73 @@ As with T-0032, T-0041, T-0046 and T-0048, this package is the shape the P1-24 b
 
 ## Log
 - 2026-11-27: Created and dispatched (TL).
+- 2026-11-27: Engineer (Opus). Kit support first (the `AnalyticsTracker` port, flow screen tracking, stub flags, `holdNext`, `Currency.parse`), then the feature, the wiring, the app entry and the links. A usage-limit pause mid-task; resumed from the WIP commit, with the tree and the simulators checked clean.
+- 2026-11-27: BDD 59 scenarios green; 11 goldens; e2e 3/3 on `mc-T-0056-engineer-*` (deleted); mutations 57/57 killed; `origin/main` (T-0054) merged, with 2 "both sides added" conflicts in `app/mini_client` resolved by keeping both; gates PASS on the merge result; 50-run flake check. Handed off.
+
+## Outcome
+**Handed off** for review and verification on `fleet/T-0056-store-home`. Finding: [F-0056](../findings/F-0056-dashboard-exemplar.md) (the rules the DB bricks copy). Evidence: [`documents/evidence/T-0056/engineer/`](../evidence/T-0056/engineer/).
+
+### What was built
+- **`feature/store/store_home`** (DB), in plan 01 §3.3's layout and the earlier exemplars' shapes:
+  - **Barrel:** `StoreHomeFlow`, `StoreHomeNavigator`, `ComicId`, `CategoryId` (R4).
+  - **Navigator (4 of the archetype's 6):** `openComic`, `openSearch`, `openCart` (a placeholder route), `requestSignIn`. Deferred: `openCheckout()` (with F078) and `openPromo(code)`.
+  - **Flow:** `StoreHomeFlow(navigator:, clock:, initialCategory:)`, keyed by the category. Its pages are `store_home` and `store_category` (their screen names). Opened at a category, the category page is the only page, so Back walks category → store → home.
+  - **Data:** one retrofit `StoreHomeApi` (relative paths): `GET v1/store/banners`, `deals`, `categories`, `categories/{id}/products`, `featured`, and `v1/me/cart` (the summary, pinned to its session epoch). Ten DTOs, all `@Freezed(fromJson: true, toJson: true)` (R30), integer cents only. A stateless repository.
+  - **Blocs (6):** one per section (banners, deals, categories, featured, cart) on a pure-Dart base, `StoreSectionBloc` (load, refresh, the newest answer wins by generation, `store_section_viewed` once per visit, the open guard), plus the category page's `PagingController` bloc. Each has its own sealed events and freezed state.
+  - **Pages:** the store home (`McAppBar` + `McFlowBackButton`, `McSectionHeader` per section, carousels for banners, deals and featured, an adaptive grid for categories; each section has its own skeleton, error card with Retry, and empty line; iOS pull to refresh) and the category page (`McPagedGrid` of `McMediaCard`, the paging error and Retry in the footer, not-found).
+  - **Flag:** `storeHomeFeatured` (`store.home_featured`, default on), read once by the page; when it is off, the featured section and its bloc are never built.
+  - **Analytics:** `store_section_viewed` (`section`), `store_item_tapped` (`section`, `kind`, `id`), and the screens `store_home` and `store_category` from inside the flow.
+  - **l10n:** en, de and `en_XA` (35 keys).
+  - **Tests (R6):** 4 `.feature` files (59 scenarios with the outlines' examples), `contract_test` (13), `flow_scope_test` (6), `golden_test` (11 goldens), `architecture_test` (4, including no floating-point money).
+- **`app/wiring/commerce_wiring`** (was a skeleton): `store_routes.dart` (`StoreRoute` `/store` `store_home`, with children `StoreCategoryRoute` `categories/:id` `store_category` and `StoreCartRoute` `cart` `store_cart`), `CommerceRouteTargets` + impl, `CartPlaceholderFlow`, `StoreHomeNavigatorImpl` (`@LazySingleton`; comics and search via `AppLocations`, the cart by its typed route, sign-in by the shared fixture sheet with "to see your cart"), `CommerceWiringDIInitializer` (the backend's clock via `commerceClock`), `routes_test` (13).
+- **`app/wiring/app_core`:** `AppLocations.store` and `AppLocations.storeCategory(id)` (encoded); `CommerceMockDomain` in `appMockDomains`; two `app_layer_test` cases.
+- **`app/mini_client`:** a Store entry on home; `store_route_test` (6: the entry, a deal → comic → Back, a search banner, both cold links and their back stacks, a category inside the flow); `analytics_screens_test` gains the store routes and 3 screen-order tests; e2e `store_journey_test`, `store_deeplink_test`, `store_category_deeplink_test`.
+
+### AC → evidence
+| AC | Tests and evidence |
+|---|---|
+| AC1 | `:bdd_test` "Signed in, the five sections show the store in order" (the section order; every banner; every deal with both prices, struck through and not, and "ends in"; every category with its count; every featured comic with its price; the cart's count and total as the backend engine holds them; one request per section; the cart's bearer); signed out (no cart request); the flag off, on (control) and of the wrong type. `:contract_test` the mapper keeps integer cents, days left; `:flow_scope_test` the injected clock; `:architecture_test` no floating point; `mc_formatters:formatters_test` en `€12.99`, every cent below €100, `Currency.parse`; golden of the lower sections |
+| AC2 | `:bdd_test` "When every store route fails, each section shows its own error and each Retry recovers only its own section" (request counts per section); a double Retry loads once; the empty store (`commerce.empty`); the category's next page failing, then Retry (footer); the first page failing. Goldens: failed, empty |
+| AC3 | `:bdd_test`: a deal, a featured comic and a comic banner each call `openComic` exactly once; the 499/500 ms guard; two deals in one frame open both; a search banner calls `openSearch('amber')`; a category banner opens the category, named by lookup; a category opens in the flow and page 2 loads at the end (`offset=20&limit=20`); Back keeps the sections; View cart. `store_home_cart.feature` (11): signed out awaits `requestSignIn()`; declined; a double tap; a user switch reloads; a stale load is dropped (held); a sign-out while loading; a switch right before the read is sent (pinned, no error reported); a sign-in elsewhere during the store's own sign-in; failure and Retry; refresh while signed out. `commerce_wiring:routes_test` pushes the right location for every method, the sheet's reason, the drift table; `mini_client:store_route_test` |
+| AC4 | `:bdd_test`: German sections, deal prices (`10,83 €`, `Endet in 1 Tag`), cart (`Summe 24,24 €`), errors and the category page; `en_XA` at 1x and 2x over the whole store, the category page to its end, and every section failed: `nothing overflows`. `mc_formatters` de `12,99 €`. Goldens: the store home in all 4 themes, the category page light and dark, the pseudo-locale at 2x. `l10n_check:workspace_gate_test` |
+| AC5 | e2e on a fresh `mc-T-0056-engineer-*` (iOS 26.2, deleted), [summary](../evidence/T-0056/engineer/e2e/e2e-summary.md): `store_journey_test` 40–46 (home → Store → sections → a deal → the comic page → Back → Heroes in the flow → page 2), `store_deeplink_test` 47 (`miniclient://app/store` cold, Back home), `store_category_deeplink_test` 48 (`…/store/categories/heroes` cold, Back → store → home). No build-failure marker in any target log. Also `mini_client:store_route_test` and `commerce_wiring:routes_test` |
+| AC6 | `store_home_sections.feature`: the outline over `store.banners_error` … `store.cart_error` (5); every request leaves at once; a held section never blocks the other four; a refresh racing an in-flight load ends on the newest answer in both orders (`the backend holds the next`); pull to refresh reloads all in parallel and keeps what is shown. Golden: loading |
+| AC7 | Flag step: `the flag {key} is {value}` in 3 scenarios, plus `mc_test_steps:flag_steps_test` (negative controls) and `mc_test_utils:flags_container_test`. Analytics: `the section {s} was viewed {n} times` (once per visit, 0 when failed, 1 after Retry, not again after a refresh or Back from the category); the T-0053 `was tracked with` table and an outline over every kind of tap; `the screens tracked are {'store_home, store_category, store_home'}`; in the app, home → store → category → back → back, and category → comic → back (`mini_client:analytics_screens_test`); `mc_analytics:flow_observer_test` (6) and `di_test` (the port) |
+| AC8 | [`T-0056-AC8_gates.md`](../evidence/T-0056/engineer/T-0056-AC8_gates.md) **PASS** on the merge with `origin/main`: tests 188/188, lint, `mc_arch_check`, `rules_fork.sh check`, format, `l10n_check`, fixtures check, relative paths; [byte identity, 20 of 20 EQUAL](../evidence/T-0056/engineer/T-0056-AC8_matches_build_runner.md), [cutoff](../evidence/T-0056/engineer/T-0056-AC8_cutoff.md), [not committed](../evidence/T-0056/engineer/T-0056-AC8_generated_not_committed.md), [gen-l10n parity](../evidence/T-0056/engineer/T-0056-AC8_gen_l10n_parity.md); [`test --lockfile_mode=error //...`](../evidence/T-0056/engineer/T-0056-AC8_lockfile_test.txt) 188/188; [50-run flake check](../evidence/T-0056/engineer/runs_per_test_50.md); `T-0042-AC4_safety.sh` after `tool/ide_sync` ([report](../evidence/T-0056/engineer/T-0042-AC4_safety.md)); `:architecture_test` (the barrel, R15) |
+
+### Coverage (AC8)
+store_home 867/882 = 98.3 %, commerce_wiring 54/54 = 100 %, app_core 484/502 = 96.4 %, mc_analytics 319/319 = 100 %, mc_feature_flow 168/169 = 99.4 %, mc_monitoring 29/30 = 96.7 % (it was 73.3 %, a pre-existing gap that two tests close), mc_formatters 33/33 = 100 %.
+
+### Mutations
+[mutations.sh](../evidence/T-0056/engineer/mutations.sh) (`MC_TASK=T-0056 MC_ROLE=engineer`; it refuses a dirty tree, sets its restore trap before any edit, counts `Build did NOT complete` as BROKEN and only `FAILED in` as a kill): **57 of 57 killed**, none broken and none timed out ([log](../evidence/T-0056/engineer/mutations.log)). They cover the section mechanics (9), the section blocs (9), the cart's session rules (7), the category page (4), the page and flow (4), the data and money mapping (6), the wiring (6), the money formatter (4), the kit (6: flow screens, the port, `FeatureFlow.observers`) and the test kit (2). Two cart guards that no mutant could kill (an invalidate on sign-out behind the epoch check, and a ready-state check before opening the cart) were removed rather than kept as dead code.
+
+### Edits outside `feature/store/store_home` and `commerce_wiring` (TL, please confirm)
+- `utility/mc_monitoring`: `AnalyticsTracker`, the pure-Dart port (blocs cannot import the Flutter package `mc_analytics`, R15), and two tests that close the package's coverage gap.
+- `utility/mc_analytics`: `Analytics implements AnalyticsTracker`, registered by `AnalyticsDIInitializer`; `AnalyticsFlowObserver`, and the route observer reading a flow's page (P-103); README; tests `flow_observer_test` and `di_test` (+2).
+- `utility/mc_feature_flow`: `FeatureFlow(observers:)` (read once) and a test (P-103).
+- `utility/mc_test_utils`: `McTestFlags`, registered by `McTestContainer` as `FeatureFlagsReader` (P-107); `McBackendHarness.holdNext`; tests. `isolation_test`'s initializer count goes from 10 to 11 (the new entry; not a weakening).
+- `utility/mc_test_steps`: `the flag {key} is {value}`, `the backend holds the next {route}`, `the backend runs the scenario {name}`; `flag_steps_test`.
+- `utility/mc_formatters`: `Currency.parse`; en and de money tests.
+- `app/wiring/app_core`: the two locations, the commerce domain, `app_layer_test` (+2).
+- `app/mini_client`: the Store button and its callback; `store_route_test`; `analytics_screens_test` (the route-name set plus 3 tests); 3 e2e targets; BUILD.
+- `tool/l10n_check` (gate data and a test), `tool/checks/T-0056-AC8_*.sh`, and the root `pubspec.yaml` (the workspace member; `pubspec.lock` and `MODULE.bazel.lock` are unchanged).
+
+### Decisions made inside the scope
+1. **Blocs track analytics through a port in `mc_monitoring`**, rather than a feature-local adapter or a split of `mc_analytics`: one general mechanism that every brick reuses, and neither kit gains a dependency.
+2. **In-flow screens:** a generic `FeatureFlow(observers:)` plus `AnalyticsFlowObserver` in `mc_analytics`, so `mc_feature_flow` stays free of analytics. A flow's first page shares its route's name.
+3. **The page reads the flag once per visit**, not a bloc: a section that is off has no bloc at all.
+4. **One base class holds the section mechanics**, and each section keeps its own events and freezed state (the archetype's "one freezed state per section").
+5. **A category is a flow page.** `/store/categories/:id` opens the flow with the category as its only page. When the opener did not know the category's name, the page looks it up.
+6. **Signed out, the cart summary is hidden but the section stays**, offering to sign in (the only way to reach `requestSignIn()`). The session, not the sheet's answer, decides what shows next.
+7. **The deals' clock is a flow argument** (`clock:`), provided as `StoreClock`; the wiring passes the mocked backend's clock.
+8. **Six blocs, not five:** the category page needs its own paging bloc.
+
+### Test integrity
+No test was deleted, skipped or weakened, and there is no `// ignore:`. Two existing tests changed: `mc_test_utils:isolation_test` (the initializer count, 10 → 11) and `mini_client:analytics_screens_test` (three new route names, merged with T-0054's `not_found`). Goldens: 11 new, all looked at; no existing golden changed.
+
+### Follow-ups (for `pending-work.md`)
+- `app/sandbox/commerce_sandbox` (P1-21 lists it; out of this task's scope), as P-091 did for the library sandbox.
+- `openCheckout`, `openPromo` and the cart screen, with checkout (F078).
+- `mcgen wire` for `flow_scope.dart`.
+- `AnalyticsFlowObserver` misses an inner page change made while a dialog covers the route (no screen does that today).
+- Other features' in-flow pages (the characters preview, the wizard steps) could adopt `AnalyticsFlowObserver`; their page names are not screen names yet.
