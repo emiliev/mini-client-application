@@ -8,7 +8,7 @@
 #   - SURVIVED : every target passed. Makes the script fail.
 # The unmutated tree must pass first (baseline). The script REFUSES to run on a
 # dirty tree (anything uncommitted, tracked or not), sets its restore trap
-# BEFORE the first edit, and verifies at the end that the tree is clean again.
+# BEFORE the first edit, and verifies at the end that every file it touches is restored.
 #
 #   MC_TASK=T-0053 MC_ROLE=engineer documents/evidence/T-0053/engineer/mutations.sh
 #   MC_ONLY="G01 V03" ...   only the named mutations (after the baseline)
@@ -76,10 +76,11 @@ for id in $(specs list); do
     say "$id: BROKEN (no test result) -- $what"; broken=$((broken + 1))
   fi
   restore_all
-  if [[ -n "$(git status --porcelain)" ]]; then say "RESTORE FAILED after $id"; git status --porcelain | tee -a "$LOG"; exit 1; fi
+  # Only the files a mutation can touch: the notes of the run are not.
+  if [[ -n "$(git status --porcelain -- "${FILES[@]}")" ]]; then say "RESTORE FAILED after $id"; git status --porcelain -- "${FILES[@]}" | tee -a "$LOG"; exit 1; fi
 done
 
-if [[ -z "$(git status --porcelain)" ]]; then clean="clean"; else clean="DIRTY"; fi
+if [[ -z "$(git status --porcelain -- "${FILES[@]}")" ]]; then clean="clean"; else clean="DIRTY"; fi
 say "---"
 say "mutations: $n, killed: $killed, survived: $survived, broken: $broken, not applied: $notapplied; tree: $clean"
 [[ "$survived" == 0 && "$broken" == 0 && "$notapplied" == 0 && "$clean" == "clean" ]]
