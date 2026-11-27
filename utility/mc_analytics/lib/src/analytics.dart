@@ -130,6 +130,10 @@ class Analytics implements AnalyticsTracker {
   void trackEvent(String name, [Map<String, Object> params = const {}]) =>
       track(AnalyticsEvent(name, params: params));
 
+  /// [screen] for the port.
+  @override
+  void trackScreen(String name) => screen(name);
+
   /// Tracks that screen [name] (snake_case) is showing, as the kit's
   /// `mc_screen_view` with the param `screen_name`.
   void screen(String name, {Map<String, Object> params = const {}}) {

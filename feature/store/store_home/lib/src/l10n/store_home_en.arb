@@ -1,0 +1,189 @@
+{
+  "@@locale": "en",
+  "storeHomeTitle": "Store",
+  "@storeHomeTitle": {
+    "description": "The store home's app bar title."
+  },
+  "storeHomeBanners": "Highlights",
+  "@storeHomeBanners": {
+    "description": "Header of the banners section."
+  },
+  "storeHomeDeals": "Deals",
+  "@storeHomeDeals": {
+    "description": "Header of the deals section."
+  },
+  "storeHomeCategories": "Categories",
+  "@storeHomeCategories": {
+    "description": "Header of the categories section."
+  },
+  "storeHomeFeatured": "Featured",
+  "@storeHomeFeatured": {
+    "description": "Header of the featured products section."
+  },
+  "storeHomeCart": "Your cart",
+  "@storeHomeCart": {
+    "description": "Header of the cart summary section."
+  },
+  "storeHomeSectionLoading": "Loading {section}",
+  "@storeHomeSectionLoading": {
+    "description": "Screen-reader label of a section's skeleton while it loads.",
+    "placeholders": {
+      "section": {
+        "type": "String",
+        "example": "Deals"
+      }
+    }
+  },
+  "storeHomeBannersError": "The highlights could not be loaded.",
+  "@storeHomeBannersError": {
+    "description": "The banners section's error card title."
+  },
+  "storeHomeDealsError": "The deals could not be loaded.",
+  "@storeHomeDealsError": {
+    "description": "The deals section's error card title."
+  },
+  "storeHomeCategoriesError": "The categories could not be loaded.",
+  "@storeHomeCategoriesError": {
+    "description": "The categories section's error card title."
+  },
+  "storeHomeFeaturedError": "The featured comics could not be loaded.",
+  "@storeHomeFeaturedError": {
+    "description": "The featured section's error card title."
+  },
+  "storeHomeCartError": "Your cart could not be loaded.",
+  "@storeHomeCartError": {
+    "description": "The cart section's error card title."
+  },
+  "storeHomeBannersEmpty": "No highlights right now.",
+  "@storeHomeBannersEmpty": {
+    "description": "The banners section when the store has none."
+  },
+  "storeHomeDealsEmpty": "No deals right now.",
+  "@storeHomeDealsEmpty": {
+    "description": "The deals section when there are none."
+  },
+  "storeHomeCategoriesEmpty": "No categories yet.",
+  "@storeHomeCategoriesEmpty": {
+    "description": "The categories section when there are none."
+  },
+  "storeHomeFeaturedEmpty": "Nothing is featured right now.",
+  "@storeHomeFeaturedEmpty": {
+    "description": "The featured section when there is nothing."
+  },
+  "storeHomeCartEmpty": "Your cart is empty.",
+  "@storeHomeCartEmpty": {
+    "description": "The cart section of a signed-in user with no items."
+  },
+  "storeHomeDealEndsIn": "{days, plural, =0{Ends today} =1{Ends in 1 day} other{Ends in {days} days}}",
+  "@storeHomeDealEndsIn": {
+    "description": "How long a deal still runs, in whole days (rounded up).",
+    "placeholders": {
+      "days": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "storeHomeDealDiscount": "−{percent}%",
+  "@storeHomeDealDiscount": {
+    "description": "A deal's discount badge (a minus sign, then the percentage).",
+    "placeholders": {
+      "percent": {
+        "type": "int",
+        "example": "25"
+      }
+    }
+  },
+  "storeHomeDealPrices": "Was {original}, now {price}",
+  "@storeHomeDealPrices": {
+    "description": "Screen-reader text of a deal's two prices (the struck-through one first).",
+    "placeholders": {
+      "original": {
+        "type": "String",
+        "example": "€14.43"
+      },
+      "price": {
+        "type": "String",
+        "example": "€12.99"
+      }
+    }
+  },
+  "storeHomeCategoryCount": "{count, plural, =0{No comics} =1{1 comic} other{{count} comics}}",
+  "@storeHomeCategoryCount": {
+    "description": "How many comics a category has.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "60"
+      }
+    }
+  },
+  "storeHomeCartItems": "{count, plural, =1{1 item} other{{count} items}}",
+  "@storeHomeCartItems": {
+    "description": "How many items are in the cart.",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "example": "3"
+      }
+    }
+  },
+  "storeHomeCartTotal": "Total {total}",
+  "@storeHomeCartTotal": {
+    "description": "The cart's total, formatted money.",
+    "placeholders": {
+      "total": {
+        "type": "String",
+        "example": "€45.99"
+      }
+    }
+  },
+  "storeHomeCartOpen": "View cart",
+  "@storeHomeCartOpen": {
+    "description": "Opens the cart."
+  },
+  "storeHomeCartSignedOut": "Sign in to see your cart.",
+  "@storeHomeCartSignedOut": {
+    "description": "The cart section while nobody is signed in."
+  },
+  "storeHomeCartSignIn": "Sign in",
+  "@storeHomeCartSignIn": {
+    "description": "Asks the app to sign someone in, to show their cart."
+  },
+  "storeHomeCartSigningIn": "Waiting for you to sign in.",
+  "@storeHomeCartSigningIn": {
+    "description": "The cart section while the app signs someone in."
+  },
+  "storeCategoryTitle": "Category",
+  "@storeCategoryTitle": {
+    "description": "The category page's title while its name is not known."
+  },
+  "storeCategoryLoading": "Loading products",
+  "@storeCategoryLoading": {
+    "description": "Screen-reader label while a category's products load."
+  },
+  "storeCategoryEmptyTitle": "Nothing here yet",
+  "@storeCategoryEmptyTitle": {
+    "description": "Title of an empty category."
+  },
+  "storeCategoryEmptyMessage": "This category has no comics for sale right now.",
+  "@storeCategoryEmptyMessage": {
+    "description": "Message of an empty category."
+  },
+  "storeCategoryErrorTitle": "The products could not be loaded",
+  "@storeCategoryErrorTitle": {
+    "description": "Title of the category page when its first page failed."
+  },
+  "storeCategoryLoadMoreFailed": "More products could not be loaded.",
+  "@storeCategoryLoadMoreFailed": {
+    "description": "The footer when a later page of products failed."
+  },
+  "storeCategoryNotFoundTitle": "This category is not in the store",
+  "@storeCategoryNotFoundTitle": {
+    "description": "Title for a category id the store does not know."
+  },
+  "storeCategoryNotFoundMessage": "It may have been renamed or removed.",
+  "@storeCategoryNotFoundMessage": {
+    "description": "Message for a category id the store does not know."
+  }
+}

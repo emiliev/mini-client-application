@@ -103,10 +103,15 @@ void main() {
       final tracker = getIt<AnalyticsTracker>();
       expect(tracker, same(getIt<Analytics>()));
       tracker.trackEvent('store_section_viewed', {'section': 'deals'});
-      tracker.trackEvent('no_params');
+      tracker
+        ..trackEvent('no_params')
+        ..trackScreen('store_category');
       await settle();
 
-      final events = sink.events.where((e) => e.name != sessionStartEventName);
+      expect(sink.screens, ['store_category']);
+      final events = sink.events.where(
+        (e) => e.name != sessionStartEventName && e.name != screenViewEventName,
+      );
       expect(events.map((e) => e.name), ['store_section_viewed', 'no_params']);
       expect(events.first.params, {'section': 'deals'});
       expect(events.last.params, isEmpty);

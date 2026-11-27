@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:mc_analytics/src/analytics.dart';
 import 'package:mc_analytics/src/event.dart';
+import 'package:mc_monitoring/mc_monitoring.dart';
 
 /// Calls `Analytics.screen` with the name of each page route that becomes the
 /// top route, whether by push, pop, replace or a `go` that rebuilds the stack.
@@ -103,12 +104,13 @@ final Expando<String> _reported = Expando('analytics reported screens');
 ///   between is not tracked twice, and a name that is not a valid screen name
 ///   is not tracked. If [analytics] gives null, nothing is tracked.
 ///
-/// [analytics] is called with the flow navigator's context (inside the flow,
-/// so `context.di<Analytics>()` resolves through the flow's root imports).
+/// [tracker] is called with the flow navigator's context, which is inside the
+/// flow: `(context) => context.di<AnalyticsTracker>()` resolves the pure-Dart
+/// port (`Analytics` itself) through the flow's root imports.
 class AnalyticsFlowObserver extends NavigatorObserver {
-  AnalyticsFlowObserver(this.analytics);
+  AnalyticsFlowObserver(this.tracker);
 
-  final Analytics? Function(BuildContext navigatorContext) analytics;
+  final AnalyticsTracker? Function(BuildContext navigatorContext) tracker;
   Route<dynamic>? _last;
 
   @override
@@ -135,6 +137,6 @@ class AnalyticsFlowObserver extends NavigatorObserver {
       }
       _reported[host] = name;
     }
-    analytics(context)?.screen(name);
+    tracker(context)?.trackScreen(name);
   }
 }

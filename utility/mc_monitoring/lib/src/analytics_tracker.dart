@@ -13,4 +13,10 @@ abstract interface class AnalyticsTracker {
   /// Tracks the event [name] (snake_case) with [params], whose values are
   /// `String`, `int`, `double` or `bool` (`mc_analytics`' `AnalyticsRules`).
   void trackEvent(String name, [Map<String, Object> params = const {}]);
+
+  /// Tracks that the screen [name] (snake_case) is showing. Routes are
+  /// tracked by the app's router observer; a flow's own pages by
+  /// `mc_analytics`' `AnalyticsFlowObserver`, which resolves this port inside
+  /// the flow.
+  void trackScreen(String name);
 }

@@ -1,0 +1,91 @@
+import 'package:mc_api_client/mc_api_client.dart';
+import 'package:mc_formatters/mc_formatters.dart';
+import 'package:mc_media/mc_media.dart';
+import 'package:mc_paging/mc_paging.dart';
+import 'package:store_home/src/domain/model/category_id.dart';
+import 'package:store_home/src/domain/model/comic_id.dart';
+import 'package:store_home/src/domain/model/store.dart';
+import 'package:store_home/src/domain/model/store_dto.dart';
+
+/// Wire to domain. A value the contract does not allow (an unknown variant,
+/// currency or banner target, an instant that does not parse) throws a
+/// [FormatException], which the repository's `apiCall` turns into
+/// `ApiMalformed`. Cents stay integers: `Money(cents, currency)`.
+extension ImageDtoMapper on ImageDto {
+  ApiImage toDomain() =>
+      ApiImage(path: path, variant: ImageVariant.fromWire(variant));
+}
+
+extension ProductDtoMapper on ProductDto {
+  Product toDomain() {
+    final money = Currency.parse(currency);
+    return Product(
+      id: ComicId(id),
+      title: title,
+      cover: cover.toDomain(),
+      price: Money(priceCents, money),
+      dealPrice: switch (dealPriceCents) {
+        final cents? => Money(cents, money),
+        null => null,
+      },
+    );
+  }
+}
+
+extension BannerDtoMapper on BannerDto {
+  StoreBanner toDomain() => StoreBanner(
+    id: id,
+    title: title,
+    subtitle: subtitle,
+    image: image.toDomain(),
+    target: target.toDomain(),
+  );
+}
+
+extension BannerTargetDtoMapper on BannerTargetDto {
+  BannerTarget toDomain() => switch ((type, comicId, categoryId, query)) {
+    ('comic', final id?, _, _) => BannerTarget.comic(ComicId(id)),
+    ('category', _, final id?, _) => BannerTarget.category(CategoryId(id)),
+    ('search', _, _, final q?) => BannerTarget.search(q),
+    _ => throw FormatException('Not a banner target', '$this'),
+  };
+}
+
+extension DealDtoMapper on DealDto {
+  Deal toDomain() {
+    final money = Currency.parse(currency);
+    return Deal(
+      product: product.toDomain(),
+      originalPrice: Money(originalPriceCents, money),
+      dealPrice: Money(dealPriceCents, money),
+      discountPercent: discountPercent,
+      endsAt: DateTime.parse(endsAt).toUtc(),
+    );
+  }
+}
+
+extension CategoryDtoMapper on CategoryDto {
+  StoreCategory toDomain() => StoreCategory(
+    id: CategoryId(id),
+    name: name,
+    count: count,
+    image: image.toDomain(),
+  );
+}
+
+extension CartSummaryDtoMapper on CartSummaryDto {
+  CartSummary toDomain() => CartSummary(
+    itemCount: itemCount,
+    total: Money(totalCents, Currency.parse(currency)),
+  );
+}
+
+/// The envelope as the paging kit's [Page].
+extension ProductPageMapper on ApiPage<ProductDto> {
+  Page<Product> toDomain() => Page(
+    offset: offset,
+    limit: limit,
+    total: total,
+    results: [for (final dto in results) dto.toDomain()],
+  );
+}

@@ -1,0 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
+import 'package:mc_ds_layout/mc_ds_layout.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+import 'package:mc_formatters/mc_formatters.dart';
+import 'package:store_home/src/domain/model/store.dart';
+import 'package:store_home/src/domain/model/store_analytics.dart';
+import 'package:store_home/src/presentation/bloc/cart_summary_bloc.dart';
+import 'package:store_home/src/presentation/widget/store_section.dart';
+
+/// The cart summary: the signed-in user's item count and total, which opens
+/// the cart. Signed out the summary is hidden and the section offers to sign
+/// in instead.
+class CartSection extends StatelessWidget {
+  const CartSection({super.key});
+
+  static const _section = StoreSection.cart;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.storeL10n;
+    final bloc = context.read<CartSummaryBloc>();
+    return StoreSectionFrame(
+      section: _section,
+      title: l10n.storeHomeCart,
+      child: BlocBuilder<CartSummaryBloc, CartSummaryState>(
+        builder: (context, state) => state.when(
+          loading: () => SectionSkeleton(
+            section: _section,
+            label: l10n.storeHomeSectionLoading(l10n.storeHomeCart),
+            height: 96,
+          ),
+          empty: () =>
+              SectionEmpty(section: _section, message: l10n.storeHomeCartEmpty),
+          failure: (error, _) => SectionError(
+            section: _section,
+            title: l10n.storeHomeCartError,
+            error: error,
+            onRetry: () => bloc.add(const CartSummaryEvent.retry()),
+          ),
+          ready: (cart) => _Summary(
+            cart: cart,
+            onOpen: () => bloc.add(const CartSummaryEvent.open()),
+          ),
+          signedOut: () => _Card(
+            part: 'signed_out',
+            children: [
+              Text(
+                l10n.storeHomeCartSignedOut,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const McGap.sm(),
+              McButton(
+                label: l10n.storeHomeCartSignIn,
+                onPressed: () => bloc.add(const CartSummaryEvent.signIn()),
+              ),
+            ],
+          ),
+          signingIn: () => _Card(
+            part: 'signing_in',
+            children: [
+              Text(
+                l10n.storeHomeCartSigningIn,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Summary extends StatelessWidget {
+  const _Summary({required this.cart, required this.onOpen});
+
+  final CartSummary cart;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.storeL10n;
+    final text = Theme.of(context).textTheme;
+    final total = formatMoney(
+      cart.total,
+      Localizations.localeOf(context).toString(),
+    );
+    return _Card(
+      part: 'content',
+      children: [
+        Text(l10n.storeHomeCartItems(cart.itemCount), style: text.labelLarge),
+        const McGap.xs(),
+        Text(
+          l10n.storeHomeCartTotal(total),
+          key: sectionPartKey(StoreSection.cart, 'total'),
+          style: text.bodyMedium,
+        ),
+        const McGap.sm(),
+        McButton(
+          label: l10n.storeHomeCartOpen,
+          variant: McButtonVariant.secondary,
+          onPressed: onOpen,
+        ),
+      ],
+    );
+  }
+}
+
+class _Card extends StatelessWidget {
+  const _Card({required this.part, required this.children});
+
+  final String part;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.mcPalette;
+    return Padding(
+      key: sectionPartKey(StoreSection.cart, part),
+      padding: McInsets.horizontal,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: p.surface,
+          borderRadius: McRadius.mdAll,
+          border: Border.all(color: p.outline),
+        ),
+        child: Padding(
+          padding: McInsets.card,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: children,
+          ),
+        ),
+      ),
+    );
+  }
+}

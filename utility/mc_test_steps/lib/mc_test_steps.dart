@@ -33,6 +33,7 @@ export 'package:mc_test_steps/src/backend/the_backend_received_with_the_bearer_o
 export 'package:mc_test_steps/src/backend/the_backend_received_with_the_body.dart';
 export 'package:mc_test_steps/src/backend/the_backend_recovers.dart';
 export 'package:mc_test_steps/src/backend/the_backend_releases.dart';
+export 'package:mc_test_steps/src/backend/the_backend_runs_the_scenario.dart';
 export 'package:mc_test_steps/src/backend/the_backend_serves.dart';
 export 'package:mc_test_steps/src/backend_failure_names.dart';
 export 'package:mc_test_steps/src/data_table.dart';

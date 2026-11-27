@@ -1,0 +1,144 @@
+import 'dart:math' as math;
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mc_ds_media/mc_ds_media.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+import 'package:mc_media/mc_media.dart';
+import 'package:store_home/src/domain/model/store.dart';
+import 'package:store_home/src/domain/model/store_analytics.dart';
+import 'package:store_home/src/presentation/bloc/banners_bloc.dart';
+import 'package:store_home/src/presentation/widget/store_section.dart';
+
+/// The banners: a horizontal carousel of wide cards. A tap dispatches an
+/// event; only the bloc decides where it leads.
+class BannersSection extends StatelessWidget {
+  const BannersSection({super.key});
+
+  static const _section = StoreSection.banners;
+  static const _imageAspectRatio = 16 / 9;
+
+  /// A card's width: most of the screen, at most 320.
+  static double _cardWidth(BuildContext context) =>
+      math.min(320, MediaQuery.sizeOf(context).width - 3 * McSpacing.lg);
+
+  static double _cardHeight(BuildContext context, double width) =>
+      (width / _imageAspectRatio +
+              2 * McSpacing.sm +
+              scaledLines(context, SectionType.title, 1) +
+              McSpacing.xxs +
+              scaledLines(context, SectionType.detail, 1))
+          .ceilToDouble() +
+      1;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.storeL10n;
+    final width = _cardWidth(context);
+    final height = _cardHeight(context, width);
+    return StoreSectionFrame(
+      section: _section,
+      title: l10n.storeHomeBanners,
+      child: BlocBuilder<BannersBloc, BannersState>(
+        builder: (context, state) => state.when(
+          loading: () => SectionSkeleton(
+            section: _section,
+            label: l10n.storeHomeSectionLoading(l10n.storeHomeBanners),
+            height: height,
+            itemWidth: width,
+          ),
+          empty: () => SectionEmpty(
+            section: _section,
+            message: l10n.storeHomeBannersEmpty,
+          ),
+          failure: (error, _) => SectionError(
+            section: _section,
+            title: l10n.storeHomeBannersError,
+            error: error,
+            onRetry: () => context.read<BannersBloc>().add(
+              const BannersEvent.retry(),
+            ),
+          ),
+          ready: (banners) => SectionCarousel(
+            section: _section,
+            height: height,
+            itemWidth: width,
+            count: banners.length,
+            itemBuilder: (context, i) => _BannerCard(banner: banners[i]),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BannerCard extends StatelessWidget {
+  const _BannerCard({required this.banner});
+
+  final StoreBanner banner;
+
+  @override
+  Widget build(BuildContext context) {
+    final p = context.mcPalette;
+    final text = Theme.of(context).textTheme;
+    void open() =>
+        context.read<BannersBloc>().add(BannersEvent.open(banner));
+    return Semantics(
+      key: ValueKey('store_home.banner.${banner.id}'),
+      button: true,
+      container: true,
+      label: banner.title,
+      value: banner.subtitle,
+      onTap: open,
+      child: ExcludeSemantics(
+        child: Material(
+          color: p.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: McRadius.mdAll,
+            side: BorderSide(color: p.outline),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: open,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                AspectRatio(
+                  aspectRatio: BannersSection._imageAspectRatio,
+                  child: McImage(
+                    image: banner.image,
+                    variant: ImageVariant.landscape,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(McSpacing.sm),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        banner.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.labelLarge,
+                      ),
+                      const SizedBox(height: McSpacing.xxs),
+                      Text(
+                        banner.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
