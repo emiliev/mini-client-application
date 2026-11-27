@@ -246,6 +246,35 @@ void main() {
       }
     });
 
+    test('T-0059-AC2 a thinned-out label at the edge stays on the canvas', () {
+      for (final scale in [2.0, 3.0]) {
+        final painter = _bar(
+          [
+            for (var i = 0; i < 13; i++)
+              McBarDatum(
+                label: 'Durchschnittsgeschwindigkeit $i',
+                value: i + 1.0,
+              ),
+          ],
+          scaler: TextScaler.linear(scale),
+        );
+        const size = Size(320, 240);
+        final c = _paint(painter, size);
+        final row = painter.layout(size).plot.bottom + 6;
+        for (final x in c.named('drawParagraph')) {
+          final at = x.arg<Offset>(1);
+          if (at.dy == row) {
+            expect(at.dx, greaterThanOrEqualTo(0), reason: 'scale $scale');
+            expect(
+              at.dx + x.arg<Paragraph>(0).longestLine,
+              lessThanOrEqualTo(size.width),
+              reason: 'scale $scale',
+            );
+          }
+        }
+      }
+    });
+
     test('T-0059-AC2 few bars keep every label', () {
       final painter = _bar(_bars([1, 2, 3, 4]));
       final c = _paint(painter);

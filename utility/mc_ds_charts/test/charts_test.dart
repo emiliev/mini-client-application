@@ -454,6 +454,42 @@ void main() {
       });
     });
 
+    test('T-0059-AC3 debug sanitize throws and reports nothing', () {
+      final reports = <FlutterErrorDetails>[];
+      McChartValidation.reporterOverride = reports.add;
+      McChartValidation.releaseModeOverride = false;
+      expect(
+        () => McChartValidation.sanitize<double>(
+          [1, double.nan, double.infinity],
+          (v) => v.isFinite,
+          chart: 'McX',
+          what: 'values',
+        ),
+        throwsA(
+          isA<ArgumentError>().having(
+            (e) => e.message,
+            'message',
+            allOf(contains('McX'), contains('2 values')),
+          ),
+        ),
+      );
+      expect(reports, isEmpty);
+    });
+
+    test('T-0059-AC3 release sanitize drops the bad and reports once', () {
+      final reports = <FlutterErrorDetails>[];
+      McChartValidation.reporterOverride = reports.add;
+      McChartValidation.releaseModeOverride = true;
+      final out = McChartValidation.sanitize<double>(
+        [1, double.nan, 3, double.infinity],
+        (v) => v.isFinite,
+        chart: 'McX',
+        what: 'values',
+      );
+      expect(out, [1, 3]);
+      expect(reports, hasLength(1));
+    });
+
     test('T-0059-AC3 the mode follows kReleaseMode unless injected', () {
       expect(McChartValidation.isRelease, kReleaseMode);
       McChartValidation.releaseModeOverride = true;
@@ -1375,6 +1411,13 @@ void main() {
       await tester.pump(const Duration(milliseconds: 175));
       final mid = _paintNow(tester, McDonutChart).arcs().where(
         (a) => a.$4.color.toARGB32() != p.surfaceVariant.toARGB32(),
+      );
+      expect(
+        _paintNow(tester, McDonutChart).arcs().where(
+          (a) => a.$4.color.toARGB32() == p.surfaceVariant.toARGB32(),
+        ),
+        hasLength(1),
+        reason: 'the empty track stays under the arcs while they draw in',
       );
       final midTotal = mid.fold<double>(
         0,

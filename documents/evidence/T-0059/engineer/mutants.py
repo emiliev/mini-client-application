@@ -90,7 +90,7 @@ M = [
     ('line: every series in the first colour', LIN, '(series[i].role ?? McChartRole.forIndex(i))', '(series[i].role ?? McChartRole.series1)', False),
     ('line: semantics skip nothing', LIN, 'if (series[s].values[i].isFinite)', 'if (true)', False),
     # --- radar painter ------------------------------------------------------
-    ('radar: non-finite value not zeroed', RAD, 'values[i].isFinite ? values[i] : 0', 'values[i]', False),
+    ('radar: non-finite value not zeroed', RAD, '(i < values.length && values[i].isFinite ? values[i] : 0)', '(i < values.length ? values[i] : 0)', False),
     ('radar: opaque fill', RAD, 'color.withValues(alpha: 0.2)', 'color.withValues(alpha: 1.0)', True),
     ('radar: series colour index', RAD, '(series[i].role ?? McChartRole.forIndex(i))', '(series[i].role ?? McChartRole.series1)', False),
     # --- timeline -----------------------------------------------------------

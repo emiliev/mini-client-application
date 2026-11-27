@@ -57,6 +57,9 @@ void main() {
         (0.2, 0.9),
         (-1.0, 1.0),
         (1234.0, 98765.0),
+        (12.0, 90.0),
+        (65.0, 90.0),
+        (0.65, 0.9),
       ]) {
         final s = mcNiceTicks(lo, hi);
         expect(s.min, lessThanOrEqualTo(lo));
@@ -519,6 +522,29 @@ void main() {
       expect(mid.series2, Color.lerp(a.series2, b.series2, 0.5));
       expect(mid.series3, Color.lerp(a.series3, b.series3, 0.5));
       expect(a == McPalette.light, isTrue);
+      McPalette withSeries({Color? s1, Color? s2, Color? s3}) => McPalette(
+        brightness: a.brightness,
+        primary: a.primary,
+        onPrimary: a.onPrimary,
+        background: a.background,
+        surface: a.surface,
+        surfaceVariant: a.surfaceVariant,
+        onSurface: a.onSurface,
+        onSurfaceMuted: a.onSurfaceMuted,
+        outline: a.outline,
+        error: a.error,
+        onError: a.onError,
+        success: a.success,
+        series1: s1 ?? a.series1,
+        series2: s2 ?? a.series2,
+        series3: s3 ?? a.series3,
+      );
+      expect(withSeries(), a);
+      expect(withSeries().hashCode, a.hashCode);
+      const other = Color(0xFF123456);
+      expect(withSeries(s1: other) == a, isFalse);
+      expect(withSeries(s2: other) == a, isFalse);
+      expect(withSeries(s3: other) == a, isFalse);
       expect(
         McPalette.of(McThemeVariant.light) == McPalette.of(McThemeVariant.dark),
         isFalse,
