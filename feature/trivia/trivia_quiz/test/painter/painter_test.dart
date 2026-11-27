@@ -1,13 +1,15 @@
 // The three painters of the quiz on a recording canvas (F-0059 fact 1),
-// reached through the flow (no src/ import, R7): the countdown ring, the
-// streak meter, and the results breakdown (the DS donut and bars). Each is
-// taken from the widget tree and painted into a canvas that records calls.
+// reached through the flow (no src/ import, R7): the countdown ring and the
+// streak meter in each of the 4 themes, and the results breakdown (the DS
+// donut and bars). Each is taken from the widget tree and painted into a
+// canvas that records calls. Features have no goldens (PO 2026-11-27).
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mc_ds_charts/mc_ds_charts.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 
 import '../feature/util/trivia_quiz_env.dart';
@@ -67,81 +69,98 @@ Future<void> _openRound(WidgetTester tester) async {
 void main() {
   setUpAll(bddSetUpAll);
 
-  mcTestWidgets('T-0064-AC4 the countdown ring: a full turn at the start, '
-      'the share left after 5 s, urgent at a quarter, no arc at the end', (
-    tester,
-  ) async {
-    McTestSession.current.backend.useFixtureSet('trivia.default');
-    await _openRound(tester);
-    final palette = tester.element(find.byKey(countdownRingKey)).mcPalette;
+  for (final variant in McThemeVariant.values) {
+    mcTestWidgets('T-0064-AC4 the countdown ring in ${variant.name}: a full '
+        'turn at the start, the share left after 5 s, urgent at a quarter, no '
+        'arc at the end', (tester) async {
+      McTestSession.current.themeVariant = variant;
+      McTestSession.current.backend.useFixtureSet('trivia.default');
+      await _openRound(tester);
+      final palette = tester.element(find.byKey(countdownRingKey)).mcPalette;
 
-    var canvas = _paint(tester, find.byKey(countdownRingKey));
-    expect(canvas.named('drawCircle'), hasLength(1), reason: 'the track');
-    expect(
-      _argb(canvas.named('drawCircle').single.args[2]),
-      palette.surfaceVariant.toARGB32(),
-    );
-    var arc = canvas.named('drawArc').single;
-    expect(arc.args[1], -math.pi / 2, reason: 'from 12 o’clock');
-    expect(arc.args[2] as double, closeTo(2 * math.pi, 1e-9));
-    expect(_argb(arc.args[4]), palette.primary.toARGB32());
+      var canvas = _paint(tester, find.byKey(countdownRingKey));
+      expect(canvas.named('drawCircle'), hasLength(1), reason: 'the track');
+      expect(
+        _argb(canvas.named('drawCircle').single.args[2]),
+        palette.surfaceVariant.toARGB32(),
+      );
+      var arc = canvas.named('drawArc').single;
+      expect(arc.args[1], -math.pi / 2, reason: 'from 12 o’clock');
+      expect(arc.args[2] as double, closeTo(2 * math.pi, 1e-9));
+      expect(_argb(arc.args[4]), palette.primary.toARGB32());
 
-    await tester.pump(const Duration(milliseconds: 5000));
-    canvas = _paint(tester, find.byKey(countdownRingKey));
-    arc = canvas.named('drawArc').single;
-    expect(arc.args[2] as double, closeTo(2 * math.pi * 0.75, 1e-9));
-    expect(_argb(arc.args[4]), palette.primary.toARGB32());
+      await tester.pump(const Duration(milliseconds: 5000));
+      canvas = _paint(tester, find.byKey(countdownRingKey));
+      arc = canvas.named('drawArc').single;
+      expect(arc.args[2] as double, closeTo(2 * math.pi * 0.75, 1e-9));
+      expect(_argb(arc.args[4]), palette.primary.toARGB32());
 
-    await tester.pump(const Duration(milliseconds: 10000));
-    canvas = _paint(tester, find.byKey(countdownRingKey));
-    arc = canvas.named('drawArc').single;
-    expect(arc.args[2] as double, closeTo(2 * math.pi * 0.25, 1e-9));
-    expect(_argb(arc.args[4]), palette.error.toARGB32(), reason: 'urgent');
+      await tester.pump(const Duration(milliseconds: 10000));
+      canvas = _paint(tester, find.byKey(countdownRingKey));
+      arc = canvas.named('drawArc').single;
+      expect(arc.args[2] as double, closeTo(2 * math.pi * 0.25, 1e-9));
+      expect(_argb(arc.args[4]), palette.error.toARGB32(), reason: 'urgent');
 
-    await tester.pump(const Duration(milliseconds: 5000));
-    canvas = _paint(tester, find.byKey(countdownRingKey));
-    expect(canvas.named('drawArc'), isEmpty, reason: 'no time left');
-    expect(canvas.named('drawCircle'), hasLength(1));
-  });
+      await tester.pump(const Duration(milliseconds: 5000));
+      canvas = _paint(tester, find.byKey(countdownRingKey));
+      expect(canvas.named('drawArc'), isEmpty, reason: 'no time left');
+      expect(canvas.named('drawCircle'), hasLength(1));
+    });
 
-  mcTestWidgets('T-0064-AC4 the streak meter lights one pill per correct '
-      'answer in a row, and none after a miss', (tester) async {
-    McTestSession.current.backend.useFixtureSet('trivia.default');
-    await _openRound(tester);
-    final round = await currentRound(tester);
-    final palette = tester.element(find.byKey(streakMeterKey)).mcPalette;
-    List<int> pills() => [
-      for (final c in _paint(tester, find.byKey(streakMeterKey)).named(
-        'drawRRect',
-      ))
-        _argb(c.args[1]),
-    ];
-    final lit = palette.series2.toARGB32();
-    final unlit = palette.surfaceVariant.toARGB32();
+    mcTestWidgets('T-0064-AC4 the streak meter in ${variant.name} lights one '
+        'pill per correct answer in a row, and none after a miss', (
+      tester,
+    ) async {
+      McTestSession.current.themeVariant = variant;
+      McTestSession.current.backend.useFixtureSet('trivia.default');
+      await _openRound(tester);
+      final round = await currentRound(tester);
+      final palette = tester.element(find.byKey(streakMeterKey)).mcPalette;
+      List<int> pills() => [
+        for (final c in _paint(tester, find.byKey(streakMeterKey)).named(
+          'drawRRect',
+        ))
+          _argb(c.args[1]),
+      ];
+      final lit = palette.series2.toARGB32();
+      final unlit = palette.surfaceVariant.toARGB32();
 
-    expect(pills(), List.filled(10, unlit));
-    for (final token in parseAnswerTokens('C0x3')) {
-      await playQuestion(tester, round, token);
+      expect(pills(), List.filled(10, unlit));
+      for (final token in parseAnswerTokens('C0x3')) {
+        await playQuestion(tester, round, token);
+        await tapNext(tester);
+      }
+      expect(pills(), [...List.filled(3, lit), ...List.filled(7, unlit)]);
+      final rects = [
+        for (final c in _paint(tester, find.byKey(streakMeterKey)).named(
+          'drawRRect',
+        ))
+          (c.args[0]! as RRect).outerRect,
+      ];
+      for (var i = 1; i < rects.length; i++) {
+        expect(rects[i].left, greaterThan(rects[i - 1].right), reason: 'gaps');
+      }
+      expect(
+        rects.last.right,
+        closeTo(tester.getSize(find.byKey(streakMeterKey)).width, 0.01),
+      );
+
+      await playQuestion(tester, round, (kind: 'W', elapsedMs: 0, hint: false));
       await tapNext(tester);
-    }
-    expect(pills(), [...List.filled(3, lit), ...List.filled(7, unlit)]);
-    final rects = [
-      for (final c in _paint(tester, find.byKey(streakMeterKey)).named(
-        'drawRRect',
-      ))
-        (c.args[0]! as RRect).outerRect,
-    ];
-    for (var i = 1; i < rects.length; i++) {
-      expect(rects[i].left, greaterThan(rects[i - 1].right), reason: 'gaps');
-    }
-    expect(
-      rects.last.right,
-      closeTo(tester.getSize(find.byKey(streakMeterKey)).width, 0.01),
-    );
+      expect(pills(), List.filled(10, unlit));
+    });
+  }
 
-    await playQuestion(tester, round, (kind: 'W', elapsedMs: 0, hint: false));
-    await tapNext(tester);
-    expect(pills(), List.filled(10, unlit));
+  mcTestWidgets('T-0064-AC4 the four themes draw the ring and the meter in '
+      'their own colours', (tester) async {
+    final seen = <McThemeVariant, (int, int)>{};
+    for (final variant in McThemeVariant.values) {
+      final palette = McTheme.of(variant)
+          .extension<McThemeExtension>()!
+          .palette;
+      seen[variant] = (palette.primary.toARGB32(), palette.series2.toARGB32());
+    }
+    expect(seen.values.toSet(), hasLength(McThemeVariant.values.length));
   });
 
   mcTestWidgets('T-0064-AC4 the results breakdown: one donut arc per '
