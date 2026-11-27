@@ -133,14 +133,14 @@ mutate $T "destructive text is not the error colour" $DLG "s.replace('foreground
 mutate $T "cancel is not a quiet button" $DLG "s.replace('variant: McButtonVariant.tertiary,', 'variant: McButtonVariant.primary,')"
 
 # --- sheet --------------------------------------------------------------------
-mutate $T "sheet handle shorter than 44" $SHT "s.replace('height: mcMinTapTarget,\n          child: Center(', 'height: 20,\n          child: Center(')"
+mutate $T "sheet handle shorter than 44" $SHT "nth(s, 'height: mcMinTapTarget,', 'height: 20,', 1)"
 mutate $T "sheet handle has no dismiss label" $SHT "s.replace('label: dismissLabel,\n      button: true,', 'label: \"\",\n      button: true,')"
 mutate $T "sheet does not name its route" $SHT "s.replace('namesRoute: true,', 'namesRoute: false,')"
 mutate $T "sheet barrier label dropped" $SHT "s.replace('barrierLabel: dismissLabel,', 'barrierLabel: null,')"
 mutate $T "sheet is not dismissible" $SHT "s.replace('isDismissible: isDismissible,', 'isDismissible: false,')"
 mutate $T "sheet cannot be dragged" $SHT "s.replace('enableDrag: enableDrag,', 'enableDrag: false,')"
 mutate $T "sheet does not scroll" $SHT "s.replace('child: SingleChildScrollView(', 'child: Padding(')"
-mutate $T "sheet ignores the bottom inset" $SHT "re.sub(r'child: SafeArea\\(\\s*top: false,\\s*child:', 'child: Padding(padding: EdgeInsets.zero, child:', s)"
+mutate $T "sheet ignores the bottom inset" $SHT "s.replace('bottom: keyboard == 0,', 'bottom: false,')"
 
 # --- choice sheet: what it returns --------------------------------------------
 mutate $T "choice answers null instead of the value" $SHT "s.replace('Navigator.of(sheetContext).pop(value)', 'Navigator.of(sheetContext).pop()')"
@@ -195,7 +195,7 @@ mutate $ST "confirm step taps cancel" $STEPS/interaction/i_confirm_the_dialog.da
 mutate $ST "cancel step taps confirm" $STEPS/interaction/i_cancel_the_dialog.dart "s.replace('mcCancelButtonKey', 'mcConfirmButtonKey')"
 mutate $ST "confirm step does not settle" $STEPS/interaction/i_confirm_the_dialog.dart "s.replace('await mcSettle(tester);', '')"
 mutate $ST "choose step matches a substring" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('find.text(option)', 'find.textContaining(option)')"
-mutate $ST "choose step looks in the wrong overlay" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('of: find.byType(McSheet)', 'of: find.byType(McDialog)')"
+mutate $ST "choose step looks in the wrong overlay" $STEPS/interaction/i_choose_in_the_sheet.dart "re.sub(r'find\\.byWidgetPredicate\\(\\(w\\) => w is McChoiceList\\)', 'find.byType(McDialog)', s)"
 mutate $ST "choose step does not assert one match" $STEPS/interaction/i_choose_in_the_sheet.dart "s.replace('findsOneWidget,\n    reason: \'exactly one option', 'findsWidgets,\n    reason: \'exactly one option')"
 mutate $ST "toast step matches a substring" $STEPS/assertions/the_toast_is_shown.dart "s.replace('find.text(text)', 'find.textContaining(text)')"
 

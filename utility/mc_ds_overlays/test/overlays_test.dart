@@ -117,11 +117,11 @@ void _expectTitleOnce(WidgetTester tester, String title) {
   final flags = nodes.single.getSemanticsData().flagsCollection;
   expect(flags.isHeader, isTrue, reason: 'the title is a heading');
   expect(flags.namesRoute, isTrue, reason: 'and it names the route');
-  expect(
-    _nodes(tester).any((n) => n.getSemanticsData().flagsCollection.scopesRoute),
-    isTrue,
-    reason: 'a node scopes the route',
-  );
+  var scoped = false;
+  for (SemanticsNode? n = nodes.single.parent; n != null; n = n.parent) {
+    scoped = scoped || n.getSemanticsData().flagsCollection.scopesRoute;
+  }
+  expect(scoped, isTrue, reason: 'the title sits inside a node that scopes it');
 }
 
 Future<void> _confirm(
