@@ -1,0 +1,24 @@
+name: mc_analytics
+description: Analytics facade with a consent gate, app-lifecycle sessions, in-memory and monitoring sinks, and a screen-tracking route observer (T-0053, U06). No third-party SDK.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+  flutter: ^3.47.7
+
+dependencies:
+  flutter:
+    sdk: flutter
+  get_it: ^8.0.0
+  mc_config: any
+  mc_di: any
+  mc_monitoring: any
+  mc_storage: any
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  go_router: 17.5.0
+  mc_analysis: any

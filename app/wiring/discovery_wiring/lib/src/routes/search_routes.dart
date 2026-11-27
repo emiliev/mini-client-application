@@ -11,7 +11,7 @@ List<RouteBase> get searchRoutes => $appRoutes;
 /// `/search`: the search, optionally starting with a query
 /// (`miniclient://app/search?q=spi`). The app shell nests it under home
 /// (T-0049), so a deep link opens `[home, search]`.
-@TypedGoRoute<SearchRoute>(path: '/search')
+@TypedGoRoute<SearchRoute>(path: '/search', name: 'discovery_search')
 class SearchRoute extends GoRouteData with $SearchRoute {
   const SearchRoute({this.q});
 

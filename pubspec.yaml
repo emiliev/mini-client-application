@@ -32,6 +32,7 @@ workspace:
   - tool/l10n_check
   - tool/mc_arch_check
   - utility/mc_analysis
+  - utility/mc_analytics
   - utility/mc_api_auth
   - utility/mc_api_client
   - utility/mc_api_errors

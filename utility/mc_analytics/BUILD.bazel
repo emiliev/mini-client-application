@@ -1,0 +1,61 @@
+# T-0053 (U06): the analytics facade. A Flutter package (UF): the route observer
+# and the lifecycle observer need Flutter, the rest is plain Dart. Hand-written
+# DI initializer like mc_session; no generator runs here.
+load("@rules_flutter//flutter:defs.bzl", "flutter_library", "flutter_test")
+load("//tool/bazel:defs.bzl", "MC_GENERATED_DART")
+
+package(default_visibility = ["//visibility:public"])
+
+_PKG = "mc_analytics"
+
+_LANG = "3.13"
+
+_DEPS = [
+    "//utility/mc_config",
+    "//utility/mc_di",
+    "//utility/mc_monitoring",
+    "//utility/mc_storage",
+    "@pub_deps//:flutter",
+    "@pub_deps//:get_it",
+]
+
+flutter_library(
+    name = "mc_analytics",
+    srcs = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    package_name = _PKG,
+    deps = _DEPS,
+)
+
+_TEST_DEPS = _DEPS + [
+    ":mc_analytics",
+    "@pub_deps//:flutter_test",
+    "@pub_deps//:go_router",
+]
+
+[flutter_test(
+    name = t,
+    size = "small",
+    srcs = ["test/support.dart"],
+    language_version = _LANG,
+    main = "test/%s.dart" % t,
+    package_name = _PKG,
+    deps = _TEST_DEPS,
+) for t in [
+    "consent_gate_test",
+    "validation_test",
+    "sessions_sinks_test",
+    "di_test",
+    "route_observer_test",
+]]
+
+# T-0053-AC3 and P-004: lib imports no network client and no third-party SDK.
+flutter_test(
+    name = "no_third_party_test",
+    size = "small",
+    data = glob(["lib/**/*.dart"], exclude = MC_GENERATED_DART),
+    language_version = _LANG,
+    main = "test/no_third_party_test.dart",
+    package_name = _PKG,
+    deps = ["@pub_deps//:flutter_test"],
+)
