@@ -1,0 +1,50 @@
+==> Task T-0055, role verifier, project /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client
+==> Evidence dir: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/d
+==> Creating simulator mc-T-0055-verifier-77423 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0055-verifier-77423
+SIMULATOR_UDID=D1EAED9F-E635-4E84-88AD-815046D93059
+SIMULATOR_CREATED_AT=1795777513
+==> Booting D1EAED9F-E635-4E84-88AD-815046D93059
+==> Booted in 31 s
+==> Running target 1/2: integration_test/zz_good_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_good_test.dart -d D1EAED9F-E635-4E84-88AD-815046D93059
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/d/e2e-zz_good_test.log
+==> PASS integration_test/zz_good_test.dart (33 s)
+==> Running target 2/2: integration_test/analytics_screens_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/analytics_screens_test.dart -d D1EAED9F-E635-4E84-88AD-815046D93059
+==>   log: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/d/e2e-analytics_screens_test.log
+==> FAIL integration_test/analytics_screens_test.dart (19 s): build failed, marker 'BUILD FAILED'. Last lines of e2e-analytics_screens_test.log:
+    Running Xcode build...                                          
+    Xcode build done.                                           11.4s
+    Failed to build iOS app
+    Error output from Xcode build:
+    ↳
+        ** BUILD FAILED **
+    
+    
+    Xcode's output:
+    ↳
+        Writing result bundle at path:
+        	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.K8kHcj/flutter_ios_build_temp_dirYe4cPL/temporary_xcresult_bundle
+    
+        lib/main.dart:21:19: Error: A value of type 'String' can't be assigned to a variable of type 'int'.
+        final int zzBad = 'x';
+                          ^
+        Target kernel_snapshot_program failed: Exception
+        Failed to package /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/proj/app/mini_client.
+        Command PhaseScriptExecution failed with a nonzero exit code
+        note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+        note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    
+    Could not build the application for the simulator.
+    Application failed to start on attempt: 1
+    Application failed to start on attempt: 2
+    Application failed to start on attempt: 3
+    Application failed to start. Will not run test. Quitting.
+    
+    # exit code: 1
+    # e2e_ios.sh: FAIL, build failed (marker: BUILD FAILED) although the runner exited with 1
+==> Summary: /private/tmp/claude-501/-Users-emililiev-orca-workspaces-mini-client-tang/d152dd30-eec6-4962-a3ba-bd2883014b3a/scratchpad/v55/ev/d/e2e-summary.md
+==> RESULT: FAIL (1 of 2 target(s) failed)
+==> Deleted simulator mc-T-0055-verifier-77423 (D1EAED9F-E635-4E84-88AD-815046D93059)
+SIMULATOR_DELETED_AT=1795777602

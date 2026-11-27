@@ -1,0 +1,37 @@
+T-0012 e2e runner test suite
+  scripts run with: /bin/bash (3.2.57(1)-release)
+  device: iPhone 17 Pro, runtime: com.apple.CoreSimulator.SimRuntime.iOS-26-2
+  temp dir: /private/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/e2e_ios_test.fLPMEW
+RUN  test_T-0055-AC1_good_pass_runtime_fail_build_fail
+    ac1-mixed: exit 1 on mc-T-0012-engineer-18538
+    ASSERTION FAILED: T-0055-AC1a: build failure after a pass is not FAIL (build failed): | `integration_test/stub_test.dart` | PASS | 0 s | [e2e-stub_test-2.log](e2e-stub_test-2.log) |
+FAIL test_T-0055-AC1_good_pass_runtime_fail_build_fail (42 s)
+RUN  test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner
+    default: removed; --keep-build, --no-build, --use-application-binary, custom runner: kept
+PASS test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner (0 s)
+RUN  test_T-0055-AC1_keep_build_flag_through_the_script
+    --keep-build: exit 0 on mc-T-0012-engineer-20093
+    default: exit 0 on mc-T-0012-engineer-21055
+PASS test_T-0055-AC1_keep_build_flag_through_the_script (57 s)
+RUN  test_T-0055-AC1_bundle_id_resolution
+PASS test_T-0055-AC1_bundle_id_resolution (1 s)
+RUN  test_T-0055-AC2_every_marker_is_found_in_a_log
+    found: BUILD FAILED
+    found: Error (Xcode)
+    found: Failed to build iOS app
+    found: Could not build the application
+    found: Error: Compilation failed
+    found: Dart compile error line
+    controls: clean log, bare 'Error:', a launch retry and a marker in the header are not reported
+PASS test_T-0055-AC2_every_marker_is_found_in_a_log (0 s)
+RUN  test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail
+    ac2-markers: exit 0 on mc-T-0012-engineer-22264
+    ASSERTION FAILED: exit code with failing targets: expected '1', got '0'
+FAIL test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail (24 s)
+RUN  test_T-0055-AC2_command_text_with_marker_is_not_a_failure
+    exit 0 on mc-T-0012-engineer-23210
+PASS test_T-0055-AC2_command_text_with_marker_is_not_a_failure (23 s)
+
+Summary: 5 passed, 2 failed, 7 total in 147 s
+Failed: test_T-0055-AC1_good_pass_runtime_fail_build_fail test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail
+RESULT: FAIL

@@ -1,0 +1,5 @@
+    ASSERTION FAILED: marker 'BUILD FAILED' was not found in a log
+FAIL test_T-0055-AC2_every_marker_is_found_in_a_log (0 s)
+    ASSERTION FAILED: exit code with failing targets: expected '1', got '0'
+FAIL test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail (25 s)
+RESULT: FAIL

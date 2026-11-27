@@ -1,0 +1,50 @@
+==> Task T-0055, role engineer, project /tmp/mc-T-0055-engineer-e2e/app/mini_client
+==> Evidence dir: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence1-only
+==> Creating simulator mc-T-0055-engineer-71762 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0055-engineer-71762
+SIMULATOR_UDID=61AECE18-4E3B-49EE-BB81-155ABA18F2FE
+SIMULATOR_CREATED_AT=1795773242
+==> Booting 61AECE18-4E3B-49EE-BB81-155ABA18F2FE
+==> Booted in 29 s
+==> Running target 1/2: integration_test/zz_good_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_good_test.dart -d 61AECE18-4E3B-49EE-BB81-155ABA18F2FE
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence1-only/e2e-zz_good_test.log
+==> PASS integration_test/zz_good_test.dart (32 s)
+==> Running target 2/2: integration_test/zz_broken_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_broken_test.dart -d 61AECE18-4E3B-49EE-BB81-155ABA18F2FE
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence1-only/e2e-zz_broken_test.log
+==> FAIL integration_test/zz_broken_test.dart (15 s, exit 1). Last lines of e2e-zz_broken_test.log:
+    Try `flutter pub outdated` for more information.
+    Running Xcode build...                                          
+    Xcode build done.                                            5.5s
+    Failed to build iOS app
+    Error output from Xcode build:
+    ↳
+        ** BUILD FAILED **
+    
+    
+    Xcode's output:
+    ↳
+        Writing result bundle at path:
+        	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.91Jh3W/flutter_ios_build_temp_diroVXK1O/temporary_xcresult_bundle
+    
+        integration_test/zz_broken_test.dart:8:19: Error: A value of type 'String' can't be assigned to a variable of type 'int'.
+            final int x = 'not an int';
+                          ^
+        Target kernel_snapshot_program failed: Exception
+        Failed to package /private/tmp/mc-T-0055-engineer-e2e/app/mini_client.
+        Command PhaseScriptExecution failed with a nonzero exit code
+        note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+        note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    
+    Could not build the application for the simulator.
+    Application failed to start on attempt: 1
+    Application failed to start on attempt: 2
+    Application failed to start on attempt: 3
+    Application failed to start. Will not run test. Quitting.
+    
+    # exit code: 1
+==> Summary: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence1-only/e2e-summary.md
+==> RESULT: FAIL (1 of 2 target(s) failed)
+==> Deleted simulator mc-T-0055-engineer-71762 (61AECE18-4E3B-49EE-BB81-155ABA18F2FE)
+SIMULATOR_DELETED_AT=1795773325

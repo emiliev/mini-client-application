@@ -1,0 +1,16 @@
+## mutation: attempt marker restored
+    ASSERTION FAILED: a launch retry alone was reported as a build failure
+FAIL test_T-0055-AC2_every_marker_is_found_in_a_log (0 s)
+RESULT: FAIL
+## mutation: header scanned too
+    ASSERTION FAILED: a marker before the sentinel was reported
+FAIL test_T-0055-AC2_every_marker_is_found_in_a_log (0 s)
+RESULT: FAIL
+## mutation: always delete build dir
+    ASSERTION FAILED: --keep-build: expected 'kept', got 'removed'
+FAIL test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner (0 s)
+RESULT: FAIL
+## mutation: log claims uninstall even when it failed
+    ASSERTION FAILED: failed uninstall must not be logged as done: # e2e_ios.sh: uninstalled com.x.app; removed build/ios/iphonesimulator
+FAIL test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner (0 s)
+RESULT: FAIL

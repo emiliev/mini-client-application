@@ -1,0 +1,50 @@
+==> Task T-0055, role engineer, project /tmp/mc-T-0055-engineer-e2e/app/mini_client
+==> Evidence dir: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence2-only
+==> Creating simulator mc-T-0055-engineer-75256 (iPhone 17 Pro, iOS 26.2)
+SIMULATOR_NAME=mc-T-0055-engineer-75256
+SIMULATOR_UDID=86BFBB27-61AA-4D5B-9505-A3696190714D
+SIMULATOR_CREATED_AT=1795773326
+==> Booting 86BFBB27-61AA-4D5B-9505-A3696190714D
+==> Booted in 25 s
+==> Running target 1/2: integration_test/zz_good_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_good_test.dart -d 86BFBB27-61AA-4D5B-9505-A3696190714D
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence2-only/e2e-zz_good_test.log
+==> PASS integration_test/zz_good_test.dart (31 s)
+==> Running target 2/2: integration_test/zz_broken_test.dart
+==>   $ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/zz_broken_test.dart -d 86BFBB27-61AA-4D5B-9505-A3696190714D
+==>   log: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence2-only/e2e-zz_broken_test.log
+==> FAIL integration_test/zz_broken_test.dart (17 s): build failed, marker 'BUILD FAILED'. Last lines of e2e-zz_broken_test.log:
+    
+    Xcode's output:
+    ↳
+        Writing result bundle at path:
+        	/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/flutter_tools.UJFAFj/flutter_ios_build_temp_dir8KI3rH/temporary_xcresult_bundle
+    
+        integration_test/zz_broken_test.dart:8:19: Error: A value of type 'String' can't be assigned to a variable of type 'int'.
+            final int x = 'not an int';
+                          ^
+        Target kernel_snapshot_program failed: Exception
+        Failed to package /private/tmp/mc-T-0055-engineer-e2e/app/mini_client.
+        Command PhaseScriptExecution failed with a nonzero exit code
+        note: Run script build phase 'Run Script' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+        note: Run script build phase 'Thin Binary' will be run during every build because the option to run the script phase "Based on dependency analysis" is unchecked. (in target 'Runner' from project 'Runner')
+    
+    Could not build the application for the simulator.
+    Application failed to start on attempt: 1
+    VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:60712/0XYLmYKfjRU=/
+    VMServiceFlutterDriver: Isolate found with number: 6378966540601595
+    VMServiceFlutterDriver: Isolate 6378966540601595 is runnable.
+    VMServiceFlutterDriver: Isolate is paused at start.
+    VMServiceFlutterDriver: Attempting to resume isolate
+    flutter: 00:00 +0: T-0055 good target
+    VMServiceFlutterDriver: Connected to Flutter application.
+    flutter: 00:00 +1: (tearDownAll)
+    flutter: 00:00 +2: All tests passed!
+    All tests passed.
+    
+    # exit code: 0
+    # e2e_ios.sh: FAIL, build failed (marker: BUILD FAILED) although the runner exited with 0
+==> Summary: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a404bc9522e669e19/documents/evidence/T-0055/engineer/ac1e-defence2-only/e2e-summary.md
+==> RESULT: FAIL (1 of 2 target(s) failed)
+==> Deleted simulator mc-T-0055-engineer-75256 (86BFBB27-61AA-4D5B-9505-A3696190714D)
+SIMULATOR_DELETED_AT=1795773402

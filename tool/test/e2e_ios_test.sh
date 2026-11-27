@@ -628,6 +628,245 @@ test_T-0012-AC7_small_screenshot_not_upscaled() {
     fail "summary does not record small_600.png as unchanged"
 }
 
+# ------------------------------------------------ T-0055: build failures ---
+
+# Helpers (defined once, t55_ prefix). A "scenario" is one line "<rc>|<text>":
+# the fake runner prints <text> (printf escapes allowed) and exits <rc>. Target
+# N of a run plays scenario N.
+
+# t55_scan <log>: build_failure_marker of the script under test, sourced.
+t55_scan() { "$BASH_BIN" -c 'source "$1"; build_failure_marker "$2"' _ "$E2E" "$1"; }
+
+# t55_write_log <file> <body line>: a log shaped like the script's own, with
+# the sentinel line between the header and the runner output.
+t55_write_log() {
+  printf '# h1\n$ cmd\n\n# note\n# --- runner output ---\n%s\nexit\n' "$2" >"$1"
+}
+
+# t55_markers: one marker per line.
+t55_markers() { "$BASH_BIN" -c 'source "$1"; printf "%s\n" "${E2E_BUILD_FAIL_MARKERS[@]}"' _ "$E2E"; }
+
+# t55_fake_run <name> <project> <scenario-file> [extra e2e args...]
+# Runs the real script on a real simulator with the fake runner and one target
+# per scenario. Sets T55_RC, T55_OUT, T55_SUM.
+t55_fake_run() {
+  local name=$1 project=$2 scen=$3 d="$WORK/t55-$1" n=0 total targs=()
+  shift 3
+  mkdir -p "$d"
+  cp "$scen" "$d/scen"
+  printf '#!/bin/bash\nn=$(cat "$1" 2>/dev/null || echo 0); n=$((n + 1)); echo "$n" >"$1"\nIFS="|" read -r rc text < <(sed -n "${n}p" "$2")\nprintf "$text\\n"\nexit "$rc"\n' >"$d/fake_runner.sh"
+  chmod +x "$d/fake_runner.sh"
+  echo 0 >"$d/cnt"
+  total=$(wc -l <"$d/scen" | tr -d ' ')
+  while [ "$n" -lt "$total" ]; do
+    targs+=(--target integration_test/stub_test.dart)
+    n=$((n + 1))
+  done
+  T55_OUT="$OUT/t55-$name-run.out"
+  T55_SUM="$EV/t55-$name/e2e-summary.md"
+  T55_RC=0
+  run_e2e "$T55_OUT" --task "$TASK" --role engineer --project "$project" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$EV/t55-$name" \
+    "${targs[@]}" "$@" --runner-cmd "'$d/fake_runner.sh' '$d/cnt' '$d/scen'" || T55_RC=$?
+  note "$name: exit $T55_RC on $(out_value "$T55_OUT" SIMULATOR_NAME)"
+}
+
+# t55_row <n>: the n-th target row of the last run's summary.
+t55_row() { grep '^| `integration_test' "$T55_SUM" | sed -n "${1}p"; }
+
+# T-0055-AC1 (b, c, d) through the real script with a fake runner standing in
+# for flutter drive: a good target is PASS, a runtime failure is FAIL (plain),
+# a compile error that exits 0 is FAIL "build failed", and a compile error as
+# the only target is FAIL.
+test_T-0055-AC1_good_pass_runtime_fail_build_fail() {
+  ensure_stub_project
+  local scen="$WORK/t55-ac1.scen"
+  printf '%s\n' \
+    '0|flutter: 00:01 +1: All tests passed!' \
+    "0|Failed to build iOS app\\n    ** BUILD FAILED **\\nApplication failed to start on attempt: 1\\nflutter: 00:01 +1: All tests passed!" \
+    '1|flutter: 00:01 +0 -1: Some tests failed.' \
+    '0|flutter: 00:01 +1: All tests passed!' >"$scen"
+  t55_fake_run ac1-mixed "$STUB" "$scen"
+  assert_eq 1 "$T55_RC" "exit code with failing targets"
+  t55_row 1 | grep -q '| PASS |' || fail "T-0055-AC1d: good target is not PASS: $(t55_row 1)"
+  t55_row 2 | grep -q '| FAIL (build failed: ' || fail "T-0055-AC1a: build failure after a pass is not FAIL (build failed): $(t55_row 2)"
+  t55_row 3 | grep -q '| FAIL |' || fail "T-0055-AC1c: runtime failure is not a plain FAIL: $(t55_row 3)"
+  t55_row 4 | grep -q '| PASS |' || fail "T-0055-AC1d: good target after failures is not PASS: $(t55_row 4)"
+  printf '%s\n' "0|    integration_test/x_test.dart:8:19: Error: A value of type 'String' can't be assigned" >"$scen"
+  t55_fake_run ac1-alone "$STUB" "$scen"
+  assert_eq 1 "$T55_RC" "T-0055-AC1b exit code of a broken target alone"
+  t55_row 1 | grep -q '| FAIL (build failed: Dart compile error)' || fail "T-0055-AC1b: $(t55_row 1)"
+}
+
+# T-0055-AC2, unit level: every marker in E2E_BUILD_FAIL_MARKERS, and a Dart
+# compile error line, makes build_failure_marker report a failure when it
+# appears after the sentinel of a log; a clean log, a bare "Error:", and a
+# marker only before the sentinel (the command echoed in the header) do not.
+test_T-0055-AC2_every_marker_is_found_in_a_log() {
+  local d="$WORK/t55ac2u" markers m n=0
+  mkdir -p "$d"
+  markers=$(t55_markers)
+  [ -n "$markers" ] || fail "no markers listed in E2E_BUILD_FAIL_MARKERS"
+  while IFS= read -r m; do
+    n=$((n + 1))
+    t55_write_log "$d/marker-$n.log" "some prefix $m some suffix"
+    t55_scan "$d/marker-$n.log" >/dev/null || fail "marker '$m' was not found in a log"
+    note "found: $m"
+  done <<EOF
+$markers
+EOF
+  [ "$n" -ge 5 ] || fail "expected at least the 5 markers named in T-0055, got $n"
+  t55_write_log "$d/dart.log" "    integration_test/x_test.dart:8:19: Error: A value of type 'String' can't be assigned"
+  t55_scan "$d/dart.log" >/dev/null || fail "a Dart compile error line was not found"
+  note "found: Dart compile error line"
+  # Controls: these must NOT be reported.
+  t55_write_log "$d/clean.log" "flutter: 00:00 +1: All tests passed!"
+  t55_scan "$d/clean.log" >/dev/null && fail "a clean log was reported as a build failure"
+  t55_write_log "$d/error-word.log" "Error: something at runtime, not a compile error in a .dart file"
+  t55_scan "$d/error-word.log" >/dev/null && fail "'Error:' without a file:line:col was reported"
+  t55_write_log "$d/retry.log" "Application failed to start on attempt: 1"
+  t55_scan "$d/retry.log" >/dev/null && fail "a launch retry alone was reported as a build failure"
+  printf '# h1\n$ echo BUILD FAILED\n\n# note\n# --- runner output ---\nok\n' >"$d/header.log"
+  t55_scan "$d/header.log" >/dev/null && fail "a marker before the sentinel was reported"
+  note "controls: clean log, bare 'Error:', a launch retry and a marker in the header are not reported"
+}
+
+# T-0055-AC2, through the real script (a real simulator, a fake runner): a
+# runner that prints a marker and exits 0 is FAIL with "build failed" in the
+# summary, for every marker and a Dart error line; a launch retry that
+# recovered (attempt-1 line, no build error, exit 0) is PASS; the same retry
+# line next to "Could not build the application" is FAIL.
+test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail() {
+  ensure_stub_project
+  local scen="$WORK/t55-ac2.scen" m n=0 total
+  : >"$scen"
+  while IFS= read -r m; do
+    printf '0|%s\n' "$m" >>"$scen"
+  done <<EOF
+$(t55_markers)
+EOF
+  printf '%s\n' \
+    "0|integration_test/x_test.dart:8:19: Error: bad type" \
+    "0|Application failed to start on attempt: 1\\nflutter: 00:01 +1: All tests passed!" \
+    "0|Application failed to start on attempt: 1\\nCould not build the application for the simulator." \
+    "0|All tests passed!" >>"$scen"
+  total=$(wc -l <"$scen" | tr -d ' ')
+  t55_fake_run ac2-markers "$STUB" "$scen"
+  assert_eq 1 "$T55_RC" "exit code with failing targets"
+  n=0
+  while [ "$n" -lt $((total - 3)) ]; do
+    n=$((n + 1))
+    t55_row "$n" | grep -q '| FAIL (build failed: ' || fail "scenario $n is not FAIL (build failed): $(t55_row "$n")"
+  done
+  t55_row $((total - 2)) | grep -q '| PASS |' || fail "recovered launch retry is not PASS: $(t55_row $((total - 2)))"
+  t55_row $((total - 1)) | grep -q '| FAIL (build failed: Could not build the application)' || fail "retry plus build error is not FAIL: $(t55_row $((total - 1)))"
+  t55_row "$total" | grep -q '| PASS |' || fail "clean target is not PASS: $(t55_row "$total")"
+  assert_contains "$T55_SUM" "FAIL (build failed: BUILD FAILED)"
+  assert_contains "$T55_SUM" "FAIL (build failed: Dart compile error)"
+  assert_contains "$T55_OUT" "RESULT: FAIL"
+}
+
+# T-0055-AC2 (header): a runner command that merely mentions BUILD FAILED.
+test_T-0055-AC2_command_text_with_marker_is_not_a_failure() {
+  ensure_stub_project
+  local ev="$EV/t55-cmdtext" out="$OUT/t55-cmdtext-run.out" rc=0
+  run_e2e "$out" --task "$TASK" --role engineer --project "$STUB" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    --runner-cmd "echo 'about BUILD FAILED' >/dev/null" || rc=$?
+  note "exit $rc on $(out_value "$out" SIMULATOR_NAME)"
+  assert_eq 0 "$rc" "exit code of a runner whose command text mentions BUILD FAILED"
+  assert_contains "$ev/e2e-summary.md" "| PASS |"
+  grep -q 'BUILD FAILED' "$ev/e2e-stub_test.log" || fail "the log header should still show the command text"
+}
+
+# T-0055 review: remove_stale_app deletes build/ios/iphonesimulator only for
+# the default `flutter drive` kind of runner, never with --keep-build,
+# --use-application-binary or --no-build, and the log note tells the truth
+# about the uninstall. Unit level: the script is sourced, xcrun is a stub.
+test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner() {
+  local d="$WORK/t55keep" res log
+  mkdir -p "$d"
+  case_run() { # <runner-cmd> <keep-build 0|1> <xcrun-rc>: prints "kept" or "removed", note in $d/log
+    rm -rf "$d/proj"
+    mkdir -p "$d/proj/build/ios/iphonesimulator/Runner.app"
+    : >"$d/log"
+    "$BASH_BIN" -c '
+      source "$1"
+      xcrun() { return "$XRC"; }
+      PROJECT_DIR=$2; RUNNER_CMD_TEMPLATE=$3; KEEP_BUILD=$4; SIM_UDID=U; BUNDLE_ID_RESOLVED=com.x.app
+      E2E_LOG_SENTINEL="# --- runner output ---"
+      XRC=$5
+      remove_stale_app "$6"
+    ' _ "$E2E" "$d/proj" "$1" "$2" "$3" "$d/log" 2>/dev/null
+    if [ -e "$d/proj/build/ios/iphonesimulator" ]; then echo kept; else echo removed; fi
+  }
+  res=$(case_run 'fvm flutter drive --driver={driver} --target={target} -d {udid}' 0 0)
+  assert_eq removed "$res" "default flutter drive runner"
+  grep -q '^# e2e_ios.sh: uninstalled com.x.app; removed build/ios/iphonesimulator$' "$d/log" || fail "note: $(cat "$d/log")"
+  res=$(case_run 'fvm flutter drive --driver={driver} --target={target} -d {udid}' 0 1)
+  assert_eq removed "$res" "default runner, uninstall failing"
+  grep -q 'uninstall of com.x.app failed or app not installed' "$d/log" || fail "failed uninstall must not be logged as done: $(cat "$d/log")"
+  grep -q '^# e2e_ios.sh: uninstalled' "$d/log" && fail "log claims an uninstall that failed"
+  res=$(case_run 'fvm flutter drive --driver={driver} --target={target} -d {udid}' 1 0)
+  assert_eq kept "$res" "--keep-build"
+  res=$(case_run 'fvm flutter drive --no-build --driver={driver} --target={target} -d {udid}' 0 0)
+  assert_eq kept "$res" "--no-build runner"
+  res=$(case_run 'flutter drive --use-application-binary=/x/Runner.app --target={target}' 0 0)
+  assert_eq kept "$res" "--use-application-binary runner"
+  res=$(case_run 'bash ./my_runner.sh {target}' 0 0)
+  assert_eq kept "$res" "custom (non flutter drive) runner"
+  grep -q 'kept build/ios/iphonesimulator' "$d/log" || fail "note should say the build dir was kept: $(cat "$d/log")"
+  grep -q '^# --- runner output ---$' "$d/log" || fail "sentinel line missing from the log"
+  note "default: removed; --keep-build, --no-build, --use-application-binary, custom runner: kept"
+  unset -f case_run
+}
+
+# T-0055 review, through the real script: --keep-build is accepted and keeps
+# the build dir; without it a flutter-drive-style runner finds it deleted.
+test_T-0055-AC1_keep_build_flag_through_the_script() {
+  ensure_stub_project
+  local proj="$WORK/t55keep-e2e"
+  rm -rf "$proj"
+  cp -R "$STUB" "$proj"
+  mkdir -p "$proj/build/ios/iphonesimulator"
+  : >"$proj/build/ios/iphonesimulator/stale"
+  # The "flutter drive" words only make the script treat it as that kind of runner.
+  local cmd_gone="test ! -e '$proj/build/ios/iphonesimulator/stale' # flutter drive"
+  local cmd_kept="test -e '$proj/build/ios/iphonesimulator/stale' # flutter drive"
+  local out="$OUT/t55-keep-run.out" ev="$EV/t55-keep" rc=0
+  run_e2e "$out" --task "$TASK" --role engineer --project "$proj" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    --keep-build --runner-cmd "$cmd_kept" || rc=$?
+  note "--keep-build: exit $rc on $(out_value "$out" SIMULATOR_NAME)"
+  assert_eq 0 "$rc" "runner finds the build dir with --keep-build"
+  rc=0
+  run_e2e "$out" --task "$TASK" --role engineer --project "$proj" \
+    --device "$DEVICE" --runtime "$RUNTIME" --evidence-dir "$ev" \
+    --runner-cmd "$cmd_gone" || rc=$?
+  note "default: exit $rc on $(out_value "$out" SIMULATOR_NAME)"
+  assert_eq 0 "$rc" "runner finds the build dir deleted by default"
+}
+
+# T-0055 review: the bundle id is the Debug id; a $(VAR) value is refused; the
+# pbxproj fallback skips RunnerTests; --bundle-id wins.
+test_T-0055-AC1_bundle_id_resolution() {
+  local d="$WORK/t55bid" res
+  rm -rf "$d"
+  mkdir -p "$d/ok/ios/Runner.xcodeproj" "$d/var/ios/Runner.xcodeproj" "$d/none"
+  printf '\t\tPRODUCT_BUNDLE_IDENTIFIER = com.x.RunnerTests;\n\t\tPRODUCT_BUNDLE_IDENTIFIER = com.x.app;\n' >"$d/ok/ios/Runner.xcodeproj/project.pbxproj"
+  printf '\t\tPRODUCT_BUNDLE_IDENTIFIER = "$(APP_ID)";\n' >"$d/var/ios/Runner.xcodeproj/project.pbxproj"
+  bid() { "$BASH_BIN" -c 'source "$1"; PROJECT_DIR=$2; BUNDLE_ID=$3; project_bundle_id' _ "$E2E" "$1" "${2:-}"; }
+  res=$(bid "$d/ok")
+  assert_eq com.x.app "$res" "fallback parse skips RunnerTests"
+  res=$(bid "$d/var")
+  assert_eq "" "$res" "a \$(VAR) value is refused"
+  res=$(bid "$d/none")
+  assert_eq "" "$res" "no Xcode project gives nothing"
+  res=$(bid "$d/ok" com.y.override)
+  assert_eq com.y.override "$res" "--bundle-id wins"
+  unset -f bid
+}
+
 # ------------------------------------------- code-review regression tests ---
 # Each one is named after the AC whose guarantee it protects.
 
@@ -884,6 +1123,13 @@ test_T-0012-AC5_fvm_checked_only_when_runner_uses_it
 test_T-0012-AC6_cleanup_only_mc_simulators
 test_T-0012-AC6_cleanup_fails_loudly_when_listing_fails
 test_T-0012-AC7_small_screenshot_not_upscaled
+test_T-0055-AC1_good_pass_runtime_fail_build_fail
+test_T-0055-AC1_stale_build_dir_removed_only_for_flutter_drive_runner
+test_T-0055-AC1_keep_build_flag_through_the_script
+test_T-0055-AC1_bundle_id_resolution
+test_T-0055-AC2_every_marker_is_found_in_a_log
+test_T-0055-AC2_fake_runner_printing_a_marker_with_exit_0_is_fail
+test_T-0055-AC2_command_text_with_marker_is_not_a_failure
 "
 
 # ----------------------------------------------------------- suite runner ---
