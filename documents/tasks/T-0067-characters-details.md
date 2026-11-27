@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (handed off for `/code-review` and the TL's merge gates; ADR-0015, no Verifier) |
+| Status | Done (merged 2026-11-27 `21b57873`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates. No Verifier. |
 | Branch | `fleet/T-0067-characters-details` |
@@ -114,3 +114,9 @@ Every test below was grepped at the handoff commit.
 - `appearances` (comics, series, events) is served and parsed but not shown: its counts are random and would contradict the comics row.
 - One rule for singular or plural class names in the SC brick (F-0067 section 1).
 - T-0066 replaces the sign-in sheet: `CharacterDetailsNavigatorImpl.requestSignIn` calls `requestFixtureSignIn`, exactly as the other five wirings do, so its merge switches them together.
+
+## Merge (TL)
+- 2026-11-27: `/code-review` found 3 important favourite-bloc issues (a missed announcement while busy, out-of-order reads, refresh flicker), all shared with `comics_details`, plus the AC-ID traceability nit. Fix round `721eab3e` fixed them in **both** blocs and restored both old IDs in the renamed tests.
+- TL checks: no deleted or skipped tests; the 13 "removed" assertions are re-indented, with equal counts added per file.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 228/228 tests, lint clean, `mc_arch_check` OK, sim app built, format gate and provenance passed, and a 20-run uncached flake check over 12 targets was clean.
+- Follow-up: P-121.

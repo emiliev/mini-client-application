@@ -11,7 +11,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Remote** | [github.com/emiliev/mini-client-application](https://github.com/emiliev/mini-client-application) (private); `origin/main` is the integration branch ([ADR-0004](adr/0004-git-integration-workflow.md)) |
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0066 (fix round), T-0067 (fix round), T-0068 (CI run 2) |
+| **Active crew** | T-0066 (fix round), T-0068 (CI run 2) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -29,6 +29,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0067 merged: the character profile** (F002). Portrait, bio, a stats chart, the character's comics and a favourite now sit behind "See full profile". The comic page's favourite got the same race fixes.
 - **T-0065 merged: the `tool/mcgen` core** (P2-01). Spec model and lint, seeded RNG, deterministic writer, manifest, keep regions, clobber guard, `gen --check`, and import resolution. The per-archetype templates (P2-04 to P2-07) come next. ADR-0016 accepted.
 - **T-0063 merged: `settings_appearance`, the ST exemplar.** Theme mode, density and reduce motion apply to the whole app at once, are saved on the device, and sync to the signed-in account (`mc_appearance`, ADR-0013).
 - **T-0064 merged: `trivia_quiz`, the IX exemplar.** Timed 10-question rounds with a pure-Dart scoring engine that agrees with the server's, a 50/50 hint, pause on background, and results charts. ADR-0014 accepted. It was the first merge under ADR-0015.
