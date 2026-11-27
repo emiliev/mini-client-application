@@ -54,25 +54,27 @@ void main() {
       }
     });
 
-    test('T-0053-AC2 every reserved prefix is rejected, the kit may use them',
-        () {
-      for (final prefix in AnalyticsRules.reservedPrefixes) {
-        final name = '${prefix}thing';
-        expect(
-          AnalyticsRules.validateName(name).map((v) => v.kind),
-          [AnalyticsViolationKind.reservedName],
-          reason: name,
-        );
-        expect(
-          AnalyticsRules.validateName(name, allowReserved: true),
-          isEmpty,
-        );
-      }
-      expect(AnalyticsRules.reservedPrefixes, contains('mc_'));
-      // A name that merely contains a prefix is fine.
-      expect(AnalyticsRules.validateName('my_mc_thing'), isEmpty);
-      expect(AnalyticsRules.validateName('mc'), isEmpty);
-    });
+    test(
+      'T-0053-AC2 every reserved prefix is rejected, the kit may use them',
+      () {
+        for (final prefix in AnalyticsRules.reservedPrefixes) {
+          final name = '${prefix}thing';
+          expect(
+            AnalyticsRules.validateName(name).map((v) => v.kind),
+            [AnalyticsViolationKind.reservedName],
+            reason: name,
+          );
+          expect(
+            AnalyticsRules.validateName(name, allowReserved: true),
+            isEmpty,
+          );
+        }
+        expect(AnalyticsRules.reservedPrefixes, contains('mc_'));
+        // A name that merely contains a prefix is fine.
+        expect(AnalyticsRules.validateName('my_mc_thing'), isEmpty);
+        expect(AnalyticsRules.validateName('mc'), isEmpty);
+      },
+    );
   });
 
   group('T-0053-AC2 params', () {
@@ -89,22 +91,24 @@ void main() {
       expect(AnalyticsRules.validateEvent('e', const {}), isEmpty);
     });
 
-    test('T-0053-AC2 param keys follow the name rules, 40 characters at most',
-        () {
-      expect(AnalyticsRules.validateEvent('e', {_name(40): 1}), isEmpty);
-      expect(
-        AnalyticsRules.validateEvent('e', {_name(41): 1}).map((v) => v.kind),
-        [AnalyticsViolationKind.paramKeyTooLong],
-      );
-      expect(
-        AnalyticsRules.validateEvent('e', {'Bad Key': 1}).map((v) => v.kind),
-        [AnalyticsViolationKind.badParamKey],
-      );
-      expect(
-        AnalyticsRules.validateEvent('e', {'': 1}).map((v) => v.kind),
-        [AnalyticsViolationKind.badParamKey],
-      );
-    });
+    test(
+      'T-0053-AC2 param keys follow the name rules, 40 characters at most',
+      () {
+        expect(AnalyticsRules.validateEvent('e', {_name(40): 1}), isEmpty);
+        expect(
+          AnalyticsRules.validateEvent('e', {_name(41): 1}).map((v) => v.kind),
+          [AnalyticsViolationKind.paramKeyTooLong],
+        );
+        expect(
+          AnalyticsRules.validateEvent('e', {'Bad Key': 1}).map((v) => v.kind),
+          [AnalyticsViolationKind.badParamKey],
+        );
+        expect(
+          AnalyticsRules.validateEvent('e', {'': 1}).map((v) => v.kind),
+          [AnalyticsViolationKind.badParamKey],
+        );
+      },
+    );
 
     test('T-0053-AC2 the keys the kit adds cannot be passed', () {
       for (final key in AnalyticsRules.reservedParamKeys) {
@@ -156,7 +160,11 @@ void main() {
     });
 
     test('T-0053-AC2 NaN and infinity are rejected', () {
-      for (final value in [double.nan, double.infinity, double.negativeInfinity]) {
+      for (final value in [
+        double.nan,
+        double.infinity,
+        double.negativeInfinity,
+      ]) {
         expect(
           AnalyticsRules.validateEvent('e', {'d': value}).map((v) => v.kind),
           [AnalyticsViolationKind.nonFiniteNumber],
@@ -260,8 +268,7 @@ void main() {
       );
     });
 
-    test('T-0053-AC2 an invalid entry throws even while consent is denied',
-        () {
+    test('T-0053-AC2 an invalid entry throws even while consent is denied', () {
       final rig = Rig(consent: AnalyticsConsent.denied);
 
       expect(
@@ -284,20 +291,22 @@ void main() {
   });
 
   group('T-0053-AC2 release mode drops and reports once', () {
-    test('T-0053-AC2 an invalid event is dropped and reported exactly once',
-        () async {
-      final rig = Rig(debugMode: false);
+    test(
+      'T-0053-AC2 an invalid event is dropped and reported exactly once',
+      () async {
+        final rig = Rig(debugMode: false);
 
-      rig.analytics.track(const AnalyticsEvent('Bad Name'));
-      await settle();
+        rig.analytics.track(const AnalyticsEvent('Bad Name'));
+        await settle();
 
-      expect(rig.names, isEmpty);
-      expect(rig.errors, hasLength(1));
-      expect(rig.errors.single.fatal, isFalse);
-      final error = rig.errors.single.error as AnalyticsValidationError;
-      expect(error.what, 'event "Bad Name"');
-      expect(error.violations.single.kind, AnalyticsViolationKind.badName);
-    });
+        expect(rig.names, isEmpty);
+        expect(rig.errors, hasLength(1));
+        expect(rig.errors.single.fatal, isFalse);
+        final error = rig.errors.single.error as AnalyticsValidationError;
+        expect(error.what, 'event "Bad Name"');
+        expect(error.violations.single.kind, AnalyticsViolationKind.badName);
+      },
+    );
 
     test('T-0053-AC2 one report per invalid entry, however many rules it '
         'breaks', () async {
@@ -315,18 +324,23 @@ void main() {
       );
     });
 
-    test('T-0053-AC2 screen and user property are dropped and reported too',
-        () async {
-      final rig = Rig(debugMode: false);
+    test(
+      'T-0053-AC2 screen and user property are dropped and reported too',
+      () async {
+        final rig = Rig(debugMode: false);
 
-      rig.analytics.screen('Bad Screen');
-      rig.analytics.setUserProperty('Bad Key', 'x');
-      await settle();
+        rig.analytics.screen('Bad Screen');
+        rig.analytics.setUserProperty('Bad Key', 'x');
+        await settle();
 
-      expect(rig.sink.screens, isEmpty);
-      expect(rig.sink.records.whereType<AnalyticsUserPropertyRecord>(), isEmpty);
-      expect(rig.errors, hasLength(2));
-    });
+        expect(rig.sink.screens, isEmpty);
+        expect(
+          rig.sink.records.whereType<AnalyticsUserPropertyRecord>(),
+          isEmpty,
+        );
+        expect(rig.errors, hasLength(2));
+      },
+    );
 
     test('T-0053-AC2 a valid event after an invalid one is delivered, with '
         'no gap in seq', () async {
@@ -414,23 +428,25 @@ void main() {
       });
     });
 
-    test('T-0053-AC2 later edits to the caller\'s map do not reach the sink',
-        () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
-      final params = <String, Object>{'id': 1};
+    test(
+      'T-0053-AC2 later edits to the caller\'s map do not reach the sink',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
+        final params = <String, Object>{'id': 1};
 
-      rig.analytics.track(AnalyticsEvent('a', params: params));
-      params['id'] = 2;
-      params['extra'] = 3;
-      await rig.analytics.setConsent(AnalyticsConsent.granted);
-      await settle();
+        rig.analytics.track(AnalyticsEvent('a', params: params));
+        params['id'] = 2;
+        params['extra'] = 3;
+        await rig.analytics.setConsent(AnalyticsConsent.granted);
+        await settle();
 
-      expect(rig.sink.events.last.params, {'id': 1});
-      expect(
-        () => rig.sink.events.last.params['x'] = 1,
-        throwsUnsupportedError,
-      );
-    });
+        expect(rig.sink.events.last.params, {'id': 1});
+        expect(
+          () => rig.sink.events.last.params['x'] = 1,
+          throwsUnsupportedError,
+        );
+      },
+    );
 
     test('T-0053-AC2 a screen is the kit event with screen_name', () async {
       final rig = Rig();
@@ -462,9 +478,9 @@ void main() {
       await settle();
 
       expect(
-        rig.sink.records
-            .whereType<AnalyticsUserPropertyRecord>()
-            .map((r) => (r.key, r.value)),
+        rig.sink.records.whereType<AnalyticsUserPropertyRecord>().map(
+          (r) => (r.key, r.value),
+        ),
         [('plan', 'free'), ('age', 30), ('score', 1.5), ('beta', true)],
       );
     });

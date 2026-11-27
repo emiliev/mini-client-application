@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
+  mc_analytics: any
   mc_api_auth: any
   mc_di: any
   mc_fixtures_identity: any

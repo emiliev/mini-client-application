@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:app_core/src/di/mocked_backend_di_initializer.dart';
 import 'package:app_core/src/router/router_ref.dart';
+import 'package:mc_analytics/mc_analytics.dart';
 import 'package:mc_api_auth/mc_api_auth.dart';
 import 'package:mc_api_client/mc_api_client.dart';
 import 'package:mc_config/mc_config.dart';
@@ -22,12 +23,15 @@ import 'package:mc_storage/mc_storage.dart';
 /// before it (plan 01 lists the bus later; T-0039), and api auth goes on the
 /// shared Dio, so it comes right after the API client. The formatters' locale
 /// data loads where plan 01 has `L10nCoreDIInitializer` (T-0041), last before
-/// the wirings. Not in the list yet, because their packages do not exist:
-/// analytics, feature flags and l10n core.
+/// the wirings. Analytics (T-0053) comes right after storage, not right after
+/// monitoring as plan 01 has it: it keeps the consent choice in `mc_storage`.
+/// Not in the list yet, because their packages do not exist: feature flags and
+/// l10n core.
 List<McDIInitializer> rootInitializers({
   required ConfigSource config,
   required Directory storageDirectory,
   List<MonitoringSink>? monitoringSinks,
+  List<AnalyticsSink>? analyticsSinks,
   List<MockDomain> mockDomains = const [],
   RouterRef? routerRef,
   List<McDIInitializer> wirings = const [],
@@ -37,6 +41,7 @@ List<McDIInitializer> rootInitializers({
     ConfigDIInitializer(config),
     MonitoringDIInitializer(sinks: monitoringSinks),
     StorageDIInitializer(storageDirectory),
+    AnalyticsDIInitializer(sinks: analyticsSinks),
     const EventBusDIInitializer(),
     const SessionDIInitializer(),
     MockedBackendDIInitializer(adapter: backendAdapter, domains: mockDomains),

@@ -18,26 +18,36 @@ void trackOneOfEach(Analytics analytics) {
 
 void main() {
   group('T-0053-AC1 nothing reaches a sink without consent', () {
-    test('T-0053-AC1 unknown: track, screen and user property deliver 0', () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
+    test(
+      'T-0053-AC1 unknown: track, screen and user property deliver 0',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
 
-      trackOneOfEach(rig.analytics);
-      await settle();
+        trackOneOfEach(rig.analytics);
+        await settle();
 
-      expect(rig.sink.records, isEmpty);
-      // Buffered, not lost: session start + the three.
-      expect(rig.analytics.bufferedCount, 4);
-    });
+        expect(rig.sink.records, isEmpty);
+        // Buffered, not lost: session start + the three.
+        expect(rig.analytics.bufferedCount, 4);
+      },
+    );
 
-    test('T-0053-AC1 denied: track, screen and user property deliver 0', () async {
-      final rig = Rig(consent: AnalyticsConsent.denied);
+    test(
+      'T-0053-AC1 denied: track, screen and user property deliver 0',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.denied);
 
-      trackOneOfEach(rig.analytics);
-      await settle();
+        trackOneOfEach(rig.analytics);
+        await settle();
 
-      expect(rig.sink.records, isEmpty);
-      expect(rig.analytics.bufferedCount, 0, reason: 'denied buffers nothing');
-    });
+        expect(rig.sink.records, isEmpty);
+        expect(
+          rig.analytics.bufferedCount,
+          0,
+          reason: 'denied buffers nothing',
+        );
+      },
+    );
 
     test('T-0053-AC1 the monitoring sink gets nothing either', () async {
       final unknown = Rig(
@@ -92,18 +102,20 @@ void main() {
       expect((records[4] as AnalyticsEventRecord).name, 'last');
     });
 
-    test('T-0053-AC1 an entry tracked after the switch follows the buffer',
-        () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
-      rig.analytics.track(const AnalyticsEvent('buffered'));
+    test(
+      'T-0053-AC1 an entry tracked after the switch follows the buffer',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
+        rig.analytics.track(const AnalyticsEvent('buffered'));
 
-      unawaited(rig.analytics.setConsent(AnalyticsConsent.granted));
-      rig.analytics.track(const AnalyticsEvent('after'));
-      await settle();
+        unawaited(rig.analytics.setConsent(AnalyticsConsent.granted));
+        rig.analytics.track(const AnalyticsEvent('after'));
+        await settle();
 
-      expect(rig.names, ['buffered', 'after']);
-      expect(rig.sink.records.map((r) => r.seq), [1, 2, 3]);
-    });
+        expect(rig.names, ['buffered', 'after']);
+        expect(rig.sink.records.map((r) => r.seq), [1, 2, 3]);
+      },
+    );
 
     test('T-0053-AC1 a session that rotated while buffered keeps both ids '
         'and counts each from 1', () async {
@@ -126,20 +138,22 @@ void main() {
       );
     });
 
-    test('T-0053-AC1 events flush once: a second grant delivers nothing',
-        () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
-      rig.analytics.track(const AnalyticsEvent('a'));
-      await rig.analytics.setConsent(AnalyticsConsent.granted);
-      await settle();
-      final delivered = rig.sink.records.length;
+    test(
+      'T-0053-AC1 events flush once: a second grant delivers nothing',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
+        rig.analytics.track(const AnalyticsEvent('a'));
+        await rig.analytics.setConsent(AnalyticsConsent.granted);
+        await settle();
+        final delivered = rig.sink.records.length;
 
-      await rig.analytics.setConsent(AnalyticsConsent.denied);
-      await rig.analytics.setConsent(AnalyticsConsent.granted);
-      await settle();
+        await rig.analytics.setConsent(AnalyticsConsent.denied);
+        await rig.analytics.setConsent(AnalyticsConsent.granted);
+        await settle();
 
-      expect(rig.sink.records, hasLength(delivered));
-    });
+        expect(rig.sink.records, hasLength(delivered));
+      },
+    );
   });
 
   group('T-0053-AC1 unknown to denied discards', () {
@@ -198,18 +212,20 @@ void main() {
       expect(rig.sink.records, isEmpty);
     });
 
-    test('T-0053-AC1 entries delivered before the switch stay delivered',
-        () async {
-      final rig = Rig();
-      rig.analytics.track(const AnalyticsEvent('before'));
-      await settle();
+    test(
+      'T-0053-AC1 entries delivered before the switch stay delivered',
+      () async {
+        final rig = Rig();
+        rig.analytics.track(const AnalyticsEvent('before'));
+        await settle();
 
-      unawaited(rig.analytics.setConsent(AnalyticsConsent.denied));
-      rig.analytics.track(const AnalyticsEvent('after'));
-      await settle();
+        unawaited(rig.analytics.setConsent(AnalyticsConsent.denied));
+        rig.analytics.track(const AnalyticsEvent('after'));
+        await settle();
 
-      expect(rig.names, ['before']);
-    });
+        expect(rig.names, ['before']);
+      },
+    );
 
     test('T-0053-AC1 a sink that denies in the middle of a flush stops the '
         'rest', () async {
@@ -263,50 +279,61 @@ void main() {
 
       expect(rig.sink.records, hasLength(100));
       expect(rig.sink.events.first.name, sessionStartEventName);
-      expect(rig.sink.records.map((r) => r.seq), [for (var i = 1; i <= 100; i++) i]);
-    });
-
-    test('T-0053-AC1 the 101st drops the oldest and reports the count',
-        () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
-
-      for (var i = 0; i < 100; i++) {
-        rig.analytics.track(AnalyticsEvent('e$i'));
-      }
-      expect(rig.analytics.bufferedCount, 100);
-      expect(rig.analytics.droppedCount, 1);
-      expect(rig.monitoringEvents.map((e) => e.name), [
-        'analytics_buffer_overflow',
+      expect(rig.sink.records.map((r) => r.seq), [
+        for (var i = 1; i <= 100; i++) i,
       ]);
-      expect(rig.monitoringEvents.single.attributes, {
-        'dropped': 1,
-        'limit': 100,
-      });
-
-      unawaited(rig.analytics.setConsent(AnalyticsConsent.granted));
-      await settle();
-
-      // The session start was the oldest; e0 is now first, and seq has no
-      // gap although one entry was dropped.
-      expect(rig.sink.records, hasLength(100));
-      expect(rig.sink.events.first.name, 'e0');
-      expect(rig.sink.events.last.name, 'e99');
-      expect(rig.sink.records.map((r) => r.seq), [for (var i = 1; i <= 100; i++) i]);
     });
 
-    test('T-0053-AC1 the total dropped is reported when consent is chosen',
-        () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
-      for (var i = 0; i < 130; i++) {
-        rig.analytics.track(AnalyticsEvent('e$i'));
-      }
-      expect(rig.analytics.droppedCount, 31);
+    test(
+      'T-0053-AC1 the 101st drops the oldest and reports the count',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
 
-      await rig.analytics.setConsent(AnalyticsConsent.denied);
+        for (var i = 0; i < 100; i++) {
+          rig.analytics.track(AnalyticsEvent('e$i'));
+        }
+        expect(rig.analytics.bufferedCount, 100);
+        expect(rig.analytics.droppedCount, 1);
+        expect(rig.monitoringEvents.map((e) => e.name), [
+          'analytics_buffer_overflow',
+        ]);
+        expect(rig.monitoringEvents.single.attributes, {
+          'dropped': 1,
+          'limit': 100,
+        });
 
-      expect(rig.monitoringEvents.map((e) => e.attributes['dropped']), [1, 31]);
-      expect(rig.analytics.bufferedCount, 0);
-    });
+        unawaited(rig.analytics.setConsent(AnalyticsConsent.granted));
+        await settle();
+
+        // The session start was the oldest; e0 is now first, and seq has no
+        // gap although one entry was dropped.
+        expect(rig.sink.records, hasLength(100));
+        expect(rig.sink.events.first.name, 'e0');
+        expect(rig.sink.events.last.name, 'e99');
+        expect(rig.sink.records.map((r) => r.seq), [
+          for (var i = 1; i <= 100; i++) i,
+        ]);
+      },
+    );
+
+    test(
+      'T-0053-AC1 the total dropped is reported when consent is chosen',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
+        for (var i = 0; i < 130; i++) {
+          rig.analytics.track(AnalyticsEvent('e$i'));
+        }
+        expect(rig.analytics.droppedCount, 31);
+
+        await rig.analytics.setConsent(AnalyticsConsent.denied);
+
+        expect(rig.monitoringEvents.map((e) => e.attributes['dropped']), [
+          1,
+          31,
+        ]);
+        expect(rig.analytics.bufferedCount, 0);
+      },
+    );
 
     test('T-0053-AC1 a later unknown period is reported afresh', () async {
       final rig = Rig(consent: AnalyticsConsent.unknown);
@@ -324,19 +351,21 @@ void main() {
       expect(rig.monitoringEvents.single.attributes['dropped'], 1);
     });
 
-    test('T-0053-AC1 going back to unknown trims what was queued to 100',
-        () async {
-      final rig = Rig();
-      for (var i = 0; i < 120; i++) {
-        rig.analytics.track(AnalyticsEvent('e$i'));
-      }
+    test(
+      'T-0053-AC1 going back to unknown trims what was queued to 100',
+      () async {
+        final rig = Rig();
+        for (var i = 0; i < 120; i++) {
+          rig.analytics.track(AnalyticsEvent('e$i'));
+        }
 
-      unawaited(rig.analytics.setConsent(AnalyticsConsent.unknown));
-      await settle();
+        unawaited(rig.analytics.setConsent(AnalyticsConsent.unknown));
+        await settle();
 
-      expect(rig.analytics.bufferedCount, 100);
-      expect(rig.sink.records, isEmpty);
-    });
+        expect(rig.analytics.bufferedCount, 100);
+        expect(rig.sink.records, isEmpty);
+      },
+    );
   });
 
   group('T-0053-AC1 consent changes and persistence', () {
@@ -344,8 +373,7 @@ void main() {
     setUp(() => dir = Directory.systemTemp.createTempSync('mc_analytics_t'));
     tearDown(() => dir.deleteSync(recursive: true));
 
-    test('T-0053-AC1 consentChanges emits each change, not a repeat',
-        () async {
+    test('T-0053-AC1 consentChanges emits each change, not a repeat', () async {
       final rig = Rig(consent: AnalyticsConsent.unknown);
       final seen = <AnalyticsConsent>[];
       final sub = rig.analytics.consentChanges.listen(seen.add);
@@ -409,47 +437,51 @@ void main() {
       );
     });
 
-    test('T-0053-AC1 a damaged or unrecognised saved value never grants',
-        () async {
-      final files = FileStore(dir);
-      final store = ConsentStore(files);
+    test(
+      'T-0053-AC1 a damaged or unrecognised saved value never grants',
+      () async {
+        final files = FileStore(dir);
+        final store = ConsentStore(files);
 
-      File('${dir.path}/${_hex(ConsentStore.defaultKey)}.json')
-          .writeAsStringSync('{ not json');
-      expect(
-        await store.restore(AnalyticsConsent.granted),
-        AnalyticsConsent.unknown,
-      );
+        File('${dir.path}/${_hex(ConsentStore.defaultKey)}.json')
+            .writeAsStringSync('{ not json');
+        expect(
+          await store.restore(AnalyticsConsent.granted),
+          AnalyticsConsent.unknown,
+        );
 
-      await files.write(ConsentStore.defaultKey, 'yes please');
-      expect(
-        await store.restore(AnalyticsConsent.granted),
-        AnalyticsConsent.unknown,
-      );
+        await files.write(ConsentStore.defaultKey, 'yes please');
+        expect(
+          await store.restore(AnalyticsConsent.granted),
+          AnalyticsConsent.unknown,
+        );
 
-      await files.write(ConsentStore.defaultKey, null);
-      expect(
-        await store.restore(AnalyticsConsent.denied),
-        AnalyticsConsent.denied,
-        reason: 'a null value is "nothing saved"',
-      );
-    });
+        await files.write(ConsentStore.defaultKey, null);
+        expect(
+          await store.restore(AnalyticsConsent.denied),
+          AnalyticsConsent.denied,
+          reason: 'a null value is "nothing saved"',
+        );
+      },
+    );
 
-    test('T-0053-AC1 a failed save is reported and the choice still applies',
-        () async {
-      final rig = Rig(
-        consent: AnalyticsConsent.unknown,
-        persist: (_) async => throw const StorageFailure('k', 'disk full'),
-      );
-      rig.analytics.track(const AnalyticsEvent('a'));
+    test(
+      'T-0053-AC1 a failed save is reported and the choice still applies',
+      () async {
+        final rig = Rig(
+          consent: AnalyticsConsent.unknown,
+          persist: (_) async => throw const StorageFailure('k', 'disk full'),
+        );
+        rig.analytics.track(const AnalyticsEvent('a'));
 
-      await rig.analytics.setConsent(AnalyticsConsent.denied);
+        await rig.analytics.setConsent(AnalyticsConsent.denied);
 
-      expect(rig.analytics.consent, AnalyticsConsent.denied);
-      expect(rig.analytics.bufferedCount, 0);
-      expect(rig.errors, hasLength(1));
-      expect(rig.errors.single.error, isA<StorageFailure>());
-    });
+        expect(rig.analytics.consent, AnalyticsConsent.denied);
+        expect(rig.analytics.bufferedCount, 0);
+        expect(rig.errors, hasLength(1));
+        expect(rig.errors.single.error, isA<StorageFailure>());
+      },
+    );
 
     test('T-0053-AC1 reset drops what waits and keeps consent', () async {
       final rig = Rig(consent: AnalyticsConsent.unknown);
@@ -464,6 +496,5 @@ void main() {
   });
 }
 
-String _hex(String key) => key.codeUnits
-    .map((b) => b.toRadixString(16).padLeft(2, '0'))
-    .join();
+String _hex(String key) =>
+    key.codeUnits.map((b) => b.toRadixString(16).padLeft(2, '0')).join();

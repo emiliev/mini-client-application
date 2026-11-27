@@ -68,26 +68,30 @@ void main() {
     return getIt;
   }
 
-  test('T-0053-AC1 the default consent is unknown without a config value',
-      () async {
-    final getIt = await boot();
+  test(
+    'T-0053-AC1 the default consent is unknown without a config value',
+    () async {
+      final getIt = await boot();
 
-    expect(getIt<Analytics>().consent, AnalyticsConsent.unknown);
-    await getIt.reset();
-  });
+      expect(getIt<Analytics>().consent, AnalyticsConsent.unknown);
+      await getIt.reset();
+    },
+  );
 
-  test('T-0053-AC1 the config default applies: granted in dev and e2e',
-      () async {
-    final sink = InMemoryAnalyticsSink();
-    final getIt = await boot(consent: 'granted', sinks: [sink]);
+  test(
+    'T-0053-AC1 the config default applies: granted in dev and e2e',
+    () async {
+      final sink = InMemoryAnalyticsSink();
+      final getIt = await boot(consent: 'granted', sinks: [sink]);
 
-    getIt<Analytics>().track(const AnalyticsEvent('a'));
-    await settle();
+      getIt<Analytics>().track(const AnalyticsEvent('a'));
+      await settle();
 
-    expect(getIt<Analytics>().consent, AnalyticsConsent.granted);
-    expect(sink.events.map((e) => e.name), [sessionStartEventName, 'a']);
-    await getIt.reset();
-  });
+      expect(getIt<Analytics>().consent, AnalyticsConsent.granted);
+      expect(sink.events.map((e) => e.name), [sessionStartEventName, 'a']);
+      await getIt.reset();
+    },
+  );
 
   test('T-0053-AC1 an unrecognised config value does not grant', () async {
     final getIt = await boot(consent: 'yes');
@@ -124,7 +128,9 @@ void main() {
     final getIt = GetIt.asNewInstance();
     for (final init in <McDIInitializer>[
       McDIInitializer((g, _) => g.registerSingleton<AppConfig>(_config(null))),
-      McDIInitializer((g, _) => g.registerSingleton<Monitoring>(Monitoring(const []))),
+      McDIInitializer(
+        (g, _) => g.registerSingleton<Monitoring>(Monitoring(const [])),
+      ),
       StorageDIInitializer(missing),
       AnalyticsDIInitializer(debugMode: true),
     ]) {
@@ -163,22 +169,24 @@ void main() {
     await getIt.reset();
   });
 
-  test('T-0053-AC3 disposing the container stops observing the lifecycle',
-      () async {
-    final getIt = await boot();
-    final analytics = getIt<Analytics>();
-    await getIt.reset();
-    final first = analytics.sessionId;
-    final binding = TestWidgetsFlutterBinding.instance;
+  test(
+    'T-0053-AC3 disposing the container stops observing the lifecycle',
+    () async {
+      final getIt = await boot();
+      final analytics = getIt<Analytics>();
+      await getIt.reset();
+      final first = analytics.sessionId;
+      final binding = TestWidgetsFlutterBinding.instance;
 
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
-    now = now.add(const Duration(minutes: 30));
-    binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      now = now.add(const Duration(minutes: 30));
+      binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
 
-    expect(analytics.sessionId, first);
-    // Not a closed-stream error either.
-    await analytics.setConsent(AnalyticsConsent.granted);
-  });
+      expect(analytics.sessionId, first);
+      // Not a closed-stream error either.
+      await analytics.setConsent(AnalyticsConsent.granted);
+    },
+  );
 
   test('T-0053-AC3 observeLifecycle false never observes it', () async {
     final getIt = await boot(observeLifecycle: false);
@@ -194,13 +202,15 @@ void main() {
     await getIt.reset();
   });
 
-  test('T-0053-AC1 the initializer needs config, monitoring and storage',
-      () async {
-    final getIt = GetIt.asNewInstance();
+  test(
+    'T-0053-AC1 the initializer needs config, monitoring and storage',
+    () async {
+      final getIt = GetIt.asNewInstance();
 
-    await expectLater(
-      Future<void>.sync(() => AnalyticsDIInitializer().init(getIt)),
-      throwsA(anything),
-    );
-  });
+      await expectLater(
+        Future<void>.sync(() => AnalyticsDIInitializer().init(getIt)),
+        throwsA(anything),
+      );
+    },
+  );
 }

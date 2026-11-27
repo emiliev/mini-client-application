@@ -11,7 +11,7 @@ List<RouteBase> get comicsRoutes => $appRoutes;
 /// `/comics/:id`: one comic. The flow starts from the id alone, so a deep
 /// link (`miniclient://app/comics/501500`) opens it directly. The app shell
 /// nests it under home (T-0049), so a cold link has a back button.
-@TypedGoRoute<ComicDetailsRoute>(path: '/comics/:id')
+@TypedGoRoute<ComicDetailsRoute>(path: '/comics/:id', name: 'comics_details')
 class ComicDetailsRoute extends GoRouteData with $ComicDetailsRoute {
   const ComicDetailsRoute({required this.id});
 

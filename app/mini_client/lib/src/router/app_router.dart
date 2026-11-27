@@ -19,6 +19,8 @@ GoRouter buildAppRouter({required String initialLocation}) => GoRouter(
   overridePlatformDefaultLocation: true,
   // A FlowCall (AppFlows' wait) is transient: not serialised, not warned on.
   extraCodec: const FlowExtraCodec(),
+  // Screen tracking (T-0053): every route's `name` is its screen.
+  observers: appRouterObservers(),
   // Every entity route nests under home (plan 01 §4.2, T-0049), so a link
   // opens `[home, target]` and the first screen can go back.
   routes: nestUnderHome($appRoutes, [

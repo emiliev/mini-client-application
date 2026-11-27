@@ -49,7 +49,8 @@ void main() {
             TextButton(
               onPressed: () => showModalBottomSheet<void>(
                 context: context,
-                builder: (_) => const SizedBox(height: 100, child: Text('Sheet')),
+                builder: (_) =>
+                    const SizedBox(height: 100, child: Text('Sheet')),
               ),
               child: const Text('open sheet'),
             ),
@@ -111,8 +112,9 @@ void main() {
     expect(await screens(tester), ['home']);
   });
 
-  testWidgets('T-0053-AC4 push then pop records home, list, home',
-      (tester) async {
+  testWidgets('T-0053-AC4 push then pop records home, list, home', (
+    tester,
+  ) async {
     final router = await pumpRouter(tester);
 
     await tap(tester, 'open list');
@@ -122,8 +124,9 @@ void main() {
     expect(await screens(tester), ['home', 'characters_list', 'home']);
   });
 
-  testWidgets('T-0053-AC4 go replaces the stack and tracks the target once',
-      (tester) async {
+  testWidgets('T-0053-AC4 go replaces the stack and tracks the target once', (
+    tester,
+  ) async {
     await pumpRouter(tester);
 
     await tap(tester, 'go list');
@@ -131,8 +134,9 @@ void main() {
     expect(await screens(tester), ['home', 'characters_list']);
   });
 
-  testWidgets('T-0053-AC4 a nested page, then back to its parent',
-      (tester) async {
+  testWidgets('T-0053-AC4 a nested page, then back to its parent', (
+    tester,
+  ) async {
     final router = await pumpRouter(tester);
 
     unawaited(router.push('/detail'));
@@ -143,8 +147,7 @@ void main() {
     expect(await screens(tester), ['home', 'detail_page', 'home']);
   });
 
-  testWidgets('T-0053-AC4 a replacement tracks the new page',
-      (tester) async {
+  testWidgets('T-0053-AC4 a replacement tracks the new page', (tester) async {
     await pumpRouter(tester);
 
     await tap(tester, 'replace with list');
@@ -152,8 +155,9 @@ void main() {
     expect(await screens(tester), ['home', 'characters_list']);
   });
 
-  testWidgets('T-0053-AC4 a dialog is ignored, opening and closing it',
-      (tester) async {
+  testWidgets('T-0053-AC4 a dialog is ignored, opening and closing it', (
+    tester,
+  ) async {
     final router = await pumpRouter(tester);
 
     await tap(tester, 'open dialog');
@@ -176,16 +180,19 @@ void main() {
     expect(await screens(tester), ['home']);
   });
 
-  testWidgets('T-0053-AC4 a dialog over a pushed page does not repeat it',
-      (tester) async {
+  testWidgets('T-0053-AC4 a dialog over a pushed page does not repeat it', (
+    tester,
+  ) async {
     final router = await pumpRouter(tester);
     await tap(tester, 'open list');
     final context = tester.element(find.text('List'));
 
-    unawaited(showDialog<void>(
-      context: context,
-      builder: (_) => const AlertDialog(title: Text('Over list')),
-    ));
+    unawaited(
+      showDialog<void>(
+        context: context,
+        builder: (_) => const AlertDialog(title: Text('Over list')),
+      ),
+    );
     await tester.pumpAndSettle();
     Navigator.of(context, rootNavigator: true).pop();
     await tester.pumpAndSettle();
@@ -206,8 +213,9 @@ void main() {
     expect(await screens(tester), ['home', 'home']);
   });
 
-  testWidgets('T-0053-AC4 pushing the same screen twice tracks it twice',
-      (tester) async {
+  testWidgets('T-0053-AC4 pushing the same screen twice tracks it twice', (
+    tester,
+  ) async {
     await pumpRouter(tester);
 
     await tap(tester, 'open list');
@@ -222,8 +230,9 @@ void main() {
     ]);
   });
 
-  testWidgets('T-0053-AC4 a rebuild with no route change tracks nothing',
-      (tester) async {
+  testWidgets('T-0053-AC4 a rebuild with no route change tracks nothing', (
+    tester,
+  ) async {
     await pumpRouter(tester);
 
     await tester.pumpWidget(const SizedBox());
@@ -261,8 +270,9 @@ void main() {
       expect(await screens(tester), ['home', 'a_page', 'b_page', 'c_page']);
     });
 
-    testWidgets('T-0053-AC4 names that are not screen names are skipped',
-        (tester) async {
+    testWidgets('T-0053-AC4 names that are not screen names are skipped', (
+      tester,
+    ) async {
       final key = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
         MaterialApp(
@@ -283,5 +293,28 @@ void main() {
       // No AssertionError either: the observer never passes a bad name on.
       expect(await screens(tester), ['home']);
     });
+  });
+
+  test('T-0053-AC4 a lazy observer looks Analytics up at the first screen, '
+      'not when it is made', () async {
+    var lookups = 0;
+    final observer = AnalyticsRouteObserver.lazy(() {
+      lookups++;
+      return rig.analytics;
+    });
+    Route<void> route(String? name) => MaterialPageRoute<void>(
+      settings: RouteSettings(name: name),
+      builder: (_) => const SizedBox(),
+    );
+
+    expect(lookups, 0);
+    observer.didChangeTop(route(null), null);
+    observer.didChangeTop(route('/path'), null);
+    expect(lookups, 0, reason: 'nothing to track yet');
+    observer.didChangeTop(route('home'), null);
+    await settle();
+
+    expect(lookups, 1);
+    expect(rig.sink.screens, ['home']);
   });
 }

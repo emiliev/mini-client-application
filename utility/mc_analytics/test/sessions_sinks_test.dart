@@ -101,35 +101,37 @@ void main() {
       expect(sessionStarts(rig), ['cold_start']);
     });
 
-    test('T-0053-AC3 the lifecycle states map to background and foreground',
-        () async {
-      final rig = Rig();
-      final observer = AnalyticsLifecycleObserver(rig.analytics);
-      final first = rig.analytics.sessionId;
+    test(
+      'T-0053-AC3 the lifecycle states map to background and foreground',
+      () async {
+        final rig = Rig();
+        final observer = AnalyticsLifecycleObserver(rig.analytics);
+        final first = rig.analytics.sessionId;
 
-      Future<void> away(AppLifecycleState state) async {
-        observer.didChangeAppLifecycleState(state);
+        Future<void> away(AppLifecycleState state) async {
+          observer.didChangeAppLifecycleState(state);
+          rig.now = rig.now.add(const Duration(minutes: 31));
+          observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
+          await settle();
+        }
+
+        // inactive is not a background.
+        observer.didChangeAppLifecycleState(AppLifecycleState.inactive);
         rig.now = rig.now.add(const Duration(minutes: 31));
         observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
-        await settle();
-      }
+        expect(rig.analytics.sessionId, first);
 
-      // inactive is not a background.
-      observer.didChangeAppLifecycleState(AppLifecycleState.inactive);
-      rig.now = rig.now.add(const Duration(minutes: 31));
-      observer.didChangeAppLifecycleState(AppLifecycleState.resumed);
-      expect(rig.analytics.sessionId, first);
-
-      for (final state in [
-        AppLifecycleState.paused,
-        AppLifecycleState.hidden,
-        AppLifecycleState.detached,
-      ]) {
-        final before = rig.analytics.sessionId;
-        await away(state);
-        expect(rig.analytics.sessionId, isNot(before), reason: '$state');
-      }
-    });
+        for (final state in [
+          AppLifecycleState.paused,
+          AppLifecycleState.hidden,
+          AppLifecycleState.detached,
+        ]) {
+          final before = rig.analytics.sessionId;
+          await away(state);
+          expect(rig.analytics.sessionId, isNot(before), reason: '$state');
+        }
+      },
+    );
   });
 
   group('T-0053-AC3 cold start, ids and seq', () {
@@ -177,7 +179,9 @@ void main() {
       }
       await settle();
 
-      expect(rig.sink.records.map((r) => r.seq), [for (var i = 1; i <= 11; i++) i]);
+      expect(rig.sink.records.map((r) => r.seq), [
+        for (var i = 1; i <= 11; i++) i,
+      ]);
       expect(rig.sink.records.map((r) => r.sessionId).toSet(), hasLength(1));
     });
 
@@ -198,33 +202,37 @@ void main() {
       );
     });
 
-    test('T-0053-AC3 the kit emits mc_session_start first, with its reason',
-        () async {
-      final rig = Rig();
-      await settle();
+    test(
+      'T-0053-AC3 the kit emits mc_session_start first, with its reason',
+      () async {
+        final rig = Rig();
+        await settle();
 
-      final start = rig.sink.events.single;
-      expect(start.name, sessionStartEventName);
-      expect(start.params, {'reason': 'cold_start'});
-      expect(start.seq, 1);
-      expect(start.sessionId, rig.analytics.sessionId);
-    });
+        final start = rig.sink.events.single;
+        expect(start.name, sessionStartEventName);
+        expect(start.params, {'reason': 'cold_start'});
+        expect(start.seq, 1);
+        expect(start.sessionId, rig.analytics.sessionId);
+      },
+    );
 
-    test('T-0053-AC3 reset starts a new session and drops what waited',
-        () async {
-      final rig = Rig(consent: AnalyticsConsent.unknown);
-      final before = rig.analytics.sessionId;
-      rig.analytics.track(const AnalyticsEvent('old'));
+    test(
+      'T-0053-AC3 reset starts a new session and drops what waited',
+      () async {
+        final rig = Rig(consent: AnalyticsConsent.unknown);
+        final before = rig.analytics.sessionId;
+        rig.analytics.track(const AnalyticsEvent('old'));
 
-      rig.analytics.reset();
-      await rig.analytics.setConsent(AnalyticsConsent.granted);
-      await settle();
+        rig.analytics.reset();
+        await rig.analytics.setConsent(AnalyticsConsent.granted);
+        await settle();
 
-      expect(rig.analytics.sessionId, isNot(before));
-      expect(rig.names, isEmpty);
-      expect(sessionStarts(rig), ['reset']);
-      expect(rig.sink.records.single.seq, 1);
-    });
+        expect(rig.analytics.sessionId, isNot(before));
+        expect(rig.names, isEmpty);
+        expect(sessionStarts(rig), ['reset']);
+        expect(rig.sink.records.single.seq, 1);
+      },
+    );
 
     test('T-0053-AC3 reset after delivery: the next entries are in the new '
         'session from 1', () async {
@@ -244,25 +252,31 @@ void main() {
   });
 
   group('T-0053-AC3 sinks', () {
-    test('T-0053-AC3 a sink that throws does not stop the other sinks',
-        () async {
-      final bad = ThrowingSink();
-      final rig = Rig(extraSinks: [bad]);
-      final after = InMemoryAnalyticsSink();
-      rig.analytics.addSink(after);
+    test(
+      'T-0053-AC3 a sink that throws does not stop the other sinks',
+      () async {
+        final bad = ThrowingSink();
+        final rig = Rig(extraSinks: [bad]);
+        final after = InMemoryAnalyticsSink();
+        rig.analytics.addSink(after);
 
-      rig.analytics.track(const AnalyticsEvent('a'));
-      rig.analytics.track(const AnalyticsEvent('b'));
-      await settle();
+        rig.analytics.track(const AnalyticsEvent('a'));
+        rig.analytics.track(const AnalyticsEvent('b'));
+        await settle();
 
-      expect(rig.names, ['a', 'b']);
-      expect(after.events.map((e) => e.name), [
-        sessionStartEventName,
-        'a',
-        'b',
-      ]);
-      expect(bad.calls, greaterThanOrEqualTo(2), reason: 'it keeps being called');
-    });
+        expect(rig.names, ['a', 'b']);
+        expect(after.events.map((e) => e.name), [
+          sessionStartEventName,
+          'a',
+          'b',
+        ]);
+        expect(
+          bad.calls,
+          greaterThanOrEqualTo(2),
+          reason: 'it keeps being called',
+        );
+      },
+    );
 
     test('T-0053-AC3 a sink listed after a throwing one still gets every '
         'entry', () async {
@@ -275,19 +289,21 @@ void main() {
       expect(late.events.map((e) => e.name), [sessionStartEventName, 'a']);
     });
 
-    test('T-0053-AC3 a throwing sink is reported once, not per entry',
-        () async {
-      final rig = Rig(extraSinks: [ThrowingSink()]);
+    test(
+      'T-0053-AC3 a throwing sink is reported once, not per entry',
+      () async {
+        final rig = Rig(extraSinks: [ThrowingSink()]);
 
-      for (var i = 0; i < 5; i++) {
-        rig.analytics.track(AnalyticsEvent('e$i'));
-      }
-      await settle();
+        for (var i = 0; i < 5; i++) {
+          rig.analytics.track(AnalyticsEvent('e$i'));
+        }
+        await settle();
 
-      expect(rig.errors, hasLength(1));
-      expect(rig.errors.single.error, isA<StateError>());
-      expect(rig.errors.single.stackTrace, isNotNull);
-    });
+        expect(rig.errors, hasLength(1));
+        expect(rig.errors.single.error, isA<StateError>());
+        expect(rig.errors.single.stackTrace, isNotNull);
+      },
+    );
 
     test('T-0053-AC3 each throwing sink is reported once', () async {
       final rig = Rig(extraSinks: [ThrowingSink(), ThrowingSink()]);
@@ -324,70 +340,79 @@ void main() {
       expect(extra.records, isEmpty);
     });
 
-    test('T-0053-AC3 the in-memory sink keeps order, screens and clears',
-        () async {
-      final rig = Rig();
-      rig.analytics
-        ..screen('home')
-        ..track(const AnalyticsEvent('a'))
-        ..screen('characters_list');
-      await settle();
+    test(
+      'T-0053-AC3 the in-memory sink keeps order, screens and clears',
+      () async {
+        final rig = Rig();
+        rig.analytics
+          ..screen('home')
+          ..track(const AnalyticsEvent('a'))
+          ..screen('characters_list');
+        await settle();
 
-      expect(rig.sink.screens, ['home', 'characters_list']);
-      expect(rig.sink.events.map((e) => e.name), [
-        sessionStartEventName,
-        screenViewEventName,
-        'a',
-        screenViewEventName,
-      ]);
-      expect(() => rig.sink.records.add(rig.sink.records.first), throwsUnsupportedError);
+        expect(rig.sink.screens, ['home', 'characters_list']);
+        expect(rig.sink.events.map((e) => e.name), [
+          sessionStartEventName,
+          screenViewEventName,
+          'a',
+          screenViewEventName,
+        ]);
+        expect(
+          () => rig.sink.records.add(rig.sink.records.first),
+          throwsUnsupportedError,
+        );
 
-      rig.sink.clear();
-      expect(rig.sink.records, isEmpty);
-    });
+        rig.sink.clear();
+        expect(rig.sink.records, isEmpty);
+      },
+    );
 
-    test('T-0053-AC3 MonitoringAnalyticsSink forwards events as EventEntry',
-        () async {
-      final rig = Rig(forwardToMonitoring: true);
-      final session = rig.analytics.sessionId;
+    test(
+      'T-0053-AC3 MonitoringAnalyticsSink forwards events as EventEntry',
+      () async {
+        final rig = Rig(forwardToMonitoring: true);
+        final session = rig.analytics.sessionId;
 
-      rig.analytics.track(
-        const AnalyticsEvent('comic_opened', params: {'id': 7, 'title': 'x'}),
-      );
-      rig.analytics.screen('home');
-      await settle();
+        rig.analytics.track(
+          const AnalyticsEvent('comic_opened', params: {'id': 7, 'title': 'x'}),
+        );
+        rig.analytics.screen('home');
+        await settle();
 
-      final events = rig.monitoringEvents;
-      expect(events.map((e) => e.name), [
-        sessionStartEventName,
-        'comic_opened',
-        screenViewEventName,
-      ]);
-      expect(events[1].attributes, {
-        'id': 7,
-        'title': 'x',
-        'session_id': session,
-        'seq': 2,
-      });
-      expect(events[2].attributes, {
-        'screen_name': 'home',
-        'session_id': session,
-        'seq': 3,
-      });
-    });
+        final events = rig.monitoringEvents;
+        expect(events.map((e) => e.name), [
+          sessionStartEventName,
+          'comic_opened',
+          screenViewEventName,
+        ]);
+        expect(events[1].attributes, {
+          'id': 7,
+          'title': 'x',
+          'session_id': session,
+          'seq': 2,
+        });
+        expect(events[2].attributes, {
+          'screen_name': 'home',
+          'session_id': session,
+          'seq': 3,
+        });
+      },
+    );
 
-    test('T-0053-AC3 MonitoringAnalyticsSink forwards user properties',
-        () async {
-      final rig = Rig(forwardToMonitoring: true);
+    test(
+      'T-0053-AC3 MonitoringAnalyticsSink forwards user properties',
+      () async {
+        final rig = Rig(forwardToMonitoring: true);
 
-      rig.analytics.setUserProperty('plan', 'free');
-      await settle();
+        rig.analytics.setUserProperty('plan', 'free');
+        await settle();
 
-      final event = rig.monitoringEvents.last;
-      expect(event.name, 'user_property');
-      expect(event.attributes['key'], 'plan');
-      expect(event.attributes['value'], 'free');
-      expect(event.attributes['seq'], 2);
-    });
+        final event = rig.monitoringEvents.last;
+        expect(event.name, 'user_property');
+        expect(event.attributes['key'], 'plan');
+        expect(event.attributes['value'], 'free');
+        expect(event.attributes['seq'], 2);
+      },
+    );
   });
 }

@@ -14,9 +14,15 @@ import 'package:mc_analytics/src/event.dart';
 /// Add it to `GoRouter(observers: [...])`. A nested flow's own navigator has
 /// no observer here, so the pages inside a flow are not tracked.
 class AnalyticsRouteObserver extends NavigatorObserver {
-  AnalyticsRouteObserver(this._analytics);
+  AnalyticsRouteObserver(Analytics analytics) : _resolve = (() => analytics);
 
-  final Analytics _analytics;
+  /// Looks [analytics] up when the first screen is tracked, not when the
+  /// observer is made: a router can be built before its container is ready,
+  /// and a router that never shows a page never needs it.
+  AnalyticsRouteObserver.lazy(Analytics Function() analytics)
+    : _resolve = analytics;
+
+  final Analytics Function() _resolve;
   Route<dynamic>? _last;
 
   @override
@@ -31,6 +37,6 @@ class AnalyticsRouteObserver extends NavigatorObserver {
     if (name == null || !AnalyticsRules.isValidName(name)) {
       return;
     }
-    _analytics.screen(name);
+    _resolve().screen(name);
   }
 }

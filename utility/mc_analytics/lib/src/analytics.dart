@@ -305,7 +305,10 @@ class Analytics {
     unawaited(
       _monitoring.trackEvent(
         'analytics_buffer_overflow',
-        attributes: {'dropped': _droppedInPeriod, 'limit': analyticsBufferLimit},
+        attributes: {
+          'dropped': _droppedInPeriod,
+          'limit': analyticsBufferLimit,
+        },
       ),
     );
   }

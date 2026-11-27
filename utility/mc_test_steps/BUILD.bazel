@@ -8,6 +8,7 @@ package(default_visibility = ["//visibility:public"])
 _LANG = "3.13"
 
 _DEPS = [
+    "//utility/mc_analytics",
     "//utility/mc_api_auth",
     "//utility/mc_di",
     "//utility/mc_fixtures_identity",
@@ -43,6 +44,17 @@ flutter_test(
     size = "small",
     language_version = _LANG,
     main = "test/data_table_test.dart",
+    package_name = "mc_test_steps",
+    deps = _DEPS + [":mc_test_steps"],
+)
+
+# T-0053-AC4: the analytics steps and their negative controls.
+flutter_test(
+    name = "analytics_steps_test",
+    size = "small",
+    data = ["//utility/mc_ds_theme:fonts"],
+    language_version = _LANG,
+    main = "test/analytics_steps_test.dart",
     package_name = "mc_test_steps",
     deps = _DEPS + [":mc_test_steps"],
 )
