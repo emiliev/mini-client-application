@@ -1,7 +1,7 @@
-# e2e_ios.sh: T-0056 engineer on mc-T-0056-engineer-18159 (ADBB42DD-3E2A-4F4D-B9C1-F665DFF82512)
+# e2e_ios.sh: T-0056 engineer on mc-T-0056-engineer-7407 (67A0AFFF-1C06-432B-BD46-1643DB32379E)
 # cwd: /tmp/mc-T-0056-engineer-e2e/app/mini_client
-# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.GhmiC2/screenshots/3-store_category_deeplink_test
-$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/store_category_deeplink_test.dart -d ADBB42DD-3E2A-4F4D-B9C1-F665DFF82512
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/14-store_category_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/store_category_deeplink_test.dart -d 67A0AFFF-1C06-432B-BD46-1643DB32379E
 
 Resolving dependencies in `/private/tmp/mc-T-0056-engineer-e2e`...
 Downloading packages...
@@ -21,24 +21,24 @@ Got dependencies in `/private/tmp/mc-T-0056-engineer-e2e`!
 12 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Xcode build...                                          
-Xcode build done.                                           13.1s
-VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58690/IhvMicoDSJ4=/
-VMServiceFlutterDriver: Isolate found with number: 3428931085908635
-VMServiceFlutterDriver: Isolate 3428931085908635 is runnable.
+Xcode build done.                                           12.5s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:57681/aS8fS9qlyc0=/
+VMServiceFlutterDriver: Isolate found with number: 6899741887808615
+VMServiceFlutterDriver: Isolate 6899741887808615 is runnable.
 VMServiceFlutterDriver: Isolate is paused at start.
 VMServiceFlutterDriver: Attempting to resume isolate
 flutter: 00:00 +0: T-0056-AC5 the cold link to a category opens it, and Back walks to the store and then home
 VMServiceFlutterDriver: Connected to Flutter application.
 flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
-flutter: [event] mc_session_start {reason: cold_start, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 1}
+flutter: [event] mc_session_start {reason: cold_start, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 1}
 flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: store_category, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 2}
 flutter: [debug] GET /v1/flags -> 200
-flutter: [event] mc_screen_view {screen_name: store_category, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 2}
 flutter: [debug] BannersBloc: _Load _Loading -> _Loading
 flutter: [debug] DealsBloc: _Load _Loading -> _Loading
 flutter: [debug] CategoriesBloc: _Load _Loading -> _Loading
 flutter: [debug] FeaturedBloc: _Load _Loading -> _Loading
-flutter: [debug] CartSummaryBloc: _Load _SignedOut -> _SignedOut
+flutter: [debug] CartSummaryBloc: _Load _Loading -> _SignedOut
 flutter: [debug] CategoryProductsBloc: _PageChanged _Loading -> _Loading
 flutter: [debug] GET /v1/store/banners -> 200
 flutter: [debug] GET /v1/store/deals -> 200
@@ -47,22 +47,22 @@ flutter: [debug] GET /v1/store/featured -> 200
 flutter: [debug] GET /v1/store/categories/heroes/products -> 200
 flutter: [debug] GET /v1/store/categories -> 200
 flutter: [debug] BannersBloc: _Load _Loading -> _Ready
-flutter: [event] store_section_viewed {section: banners, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 3}
+flutter: [event] store_section_viewed {section: banners, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 3}
 flutter: [debug] DealsBloc: _Load _Loading -> _Ready
-flutter: [event] store_section_viewed {section: deals, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 4}
+flutter: [event] store_section_viewed {section: deals, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 4}
 flutter: [debug] CategoriesBloc: _Load _Loading -> _Ready
-flutter: [event] store_section_viewed {section: categories, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 5}
+flutter: [event] store_section_viewed {section: categories, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 5}
 flutter: [debug] FeaturedBloc: _Load _Loading -> _Ready
-flutter: [event] store_section_viewed {section: featured, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 6}
+flutter: [event] store_section_viewed {section: featured, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 6}
 flutter: [debug] CategoryProductsBloc: _PageChanged _Loading -> _Success
 VMServiceFlutterDriver: request_data message is taking a long time to complete...
-flutter: [event] mc_screen_view {screen_name: store_home, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 7}
-flutter: [event] mc_screen_view {screen_name: home, session_id: 2c6681643f427b79b125bbd6c843b293, seq: 8}
+flutter: [event] mc_screen_view {screen_name: store_home, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 7}
+flutter: [event] mc_screen_view {screen_name: home, session_id: d7c45b71b93f78bae93e0a092aac129b, seq: 8}
 flutter: 00:09 +1: (tearDownAll)
 flutter: 00:09 +2: All tests passed!
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.GhmiC2/screenshots/3-store_category_deeplink_test/48_deep_link_category.png (397444)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.GhmiC2/screenshots/3-store_category_deeplink_test/48b_back_from_category_is_store.png (426450)
-SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.GhmiC2/screenshots/3-store_category_deeplink_test/48c_back_from_store_is_home.png (315801)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/14-store_category_deeplink_test/48_deep_link_category.png (397444)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/14-store_category_deeplink_test/48b_back_from_category_is_store.png (426450)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.ZH2Ik4/screenshots/14-store_category_deeplink_test/48c_back_from_store_is_home.png (315801)
 All tests passed.
 
 # exit code: 0
