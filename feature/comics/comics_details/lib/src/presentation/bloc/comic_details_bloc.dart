@@ -17,10 +17,16 @@ part 'comic_details_bloc.freezed.dart';
 part 'comic_details_event.dart';
 part 'comic_details_state.dart';
 
+/// How long after handing a character or creator over a second hand-over is
+/// ignored: the second tap of a double tap (P-089). By then the opened page
+/// covers this one. The same value as `discovery_search`'s open guard.
+const Duration openGuard = Duration(milliseconds: 500);
+
 /// The details page's bloc: loads the comic the flow opened on (and its
 /// cast), opens its cover inside the flow, and hands a tapped character or
 /// creator over to the app through the navigator, which only blocs call
-/// (plan 01 §4.1).
+/// (plan 01 §4.1). A second hand-over within [openGuard] is ignored, so a
+/// double tap opens one page.
 ///
 /// Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never
 /// Flutter, so every generator that reads it runs on analyzer summaries.
@@ -44,6 +50,9 @@ final class ComicDetailsBloc
   /// True while a load is in flight: a second Retry tap does not start a
   /// second request.
   bool _loading = false;
+
+  /// Runs for [openGuard] after a character or creator was handed over.
+  Timer? _openGuard;
 
   Future<void> _onEvent(
     ComicDetailsEvent event,
@@ -75,9 +84,28 @@ final class ComicDetailsBloc
           _flow.update((s) => s.copyWith(cover: comic));
         }
       case _OpenCharacter(:final id):
-        _navigator.openCharacter(id);
+        if (_startOpenGuard()) {
+          _navigator.openCharacter(id);
+        }
       case _OpenCreator(:final id):
-        _navigator.openCreator(id);
+        if (_startOpenGuard()) {
+          _navigator.openCreator(id);
+        }
     }
+  }
+
+  /// False while an earlier hand-over still guards; else starts the guard.
+  bool _startOpenGuard() {
+    if (_openGuard?.isActive ?? false) {
+      return false;
+    }
+    _openGuard = Timer(openGuard, () {});
+    return true;
+  }
+
+  @override
+  Future<void> close() {
+    _openGuard?.cancel();
+    return super.close();
   }
 }

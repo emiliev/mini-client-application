@@ -86,6 +86,30 @@ Feature: A comic's page
     And I tap the creator {'Esme Garrow'}
     Then the app was asked to open creator {'Esme Garrow'} of comic {501500}
 
+  @T-0050-AC3
+  Scenario: A double tap on a character hands it over once (P-089)
+    When I open comic {501500}
+    And I tap the cast member {'Amber Vanguard'} twice in quick succession
+    Then the app was asked to open character {'Amber Vanguard'}
+
+  @T-0050-AC3
+  Scenario: A second tap 499 ms after the first is still the same tap (P-089)
+    When I open comic {501500}
+    And I tap the cast member {'Amber Vanguard'} and again after {499} milliseconds
+    Then the app was asked to open character {'Amber Vanguard'}
+
+  @T-0050-AC3
+  Scenario: A tap 501 ms after the first opens the character again (P-089)
+    When I open comic {501500}
+    And I tap the cast member {'Amber Vanguard'} and again after {501} milliseconds
+    Then the app was asked to open character {'Amber Vanguard'} {2} times
+
+  @T-0050-AC3
+  Scenario: A double tap on a creator hands them over once (P-089)
+    When I open comic {501500}
+    And I tap the creator {'Esme Garrow'} twice in quick succession
+    Then the app was asked to open creator {'Esme Garrow'} of comic {501500}
+
   Scenario: Tapping the cover opens it full size inside the flow
     When I open comic {501500}
     And I tap the cover

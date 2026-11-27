@@ -25,7 +25,8 @@ Future<void> signsInJustBeforeTheAppSends(
 ) async {
   final user = fixtureUsers.firstWhere(
     (u) => u.email == email,
-    orElse: () => throw ArgumentError.value(email, 'email', 'Not a fixture user'),
+    orElse: () =>
+        throw ArgumentError.value(email, 'email', 'Not a fixture user'),
   );
   final session = diContainer<Session>();
   var fired = false;
