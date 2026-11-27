@@ -21,6 +21,7 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 
 | [T-0052](T-0052-feature-flags.md) | `mc_feature_flags` (typed flags, experiments, overrides, remote fetch) + flags slice of `mc_fixtures_platform` | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | T-0039 | `fleet/T-0052-feature-flags` |
 | [T-0054](T-0054-flow-results-hardening.md) | `AppFlows` hardening: per-call tokens, safe extras, results under overlays, not-found way home (P-094 to P-098) | **In Progress** | Engineer (Sonnet) / Verifier (Opus) | T-0049 | `fleet/T-0054-flow-results-hardening` |
+| [T-0055](T-0055-e2e-false-pass.md) | `tool/e2e_ios.sh` false PASS when a target's app fails to build; re-baseline the e2e suite | **In Progress** | Engineer (Sonnet) / Verifier (Sonnet) | — | `fleet/T-0055-e2e-false-pass` |
 
 ## Done
 | ID | Title | Result |
