@@ -277,8 +277,7 @@ final class Rig {
     bool holding = false,
     bool start = true,
   }) async {
-    await flags.dispose();
-    await session.dispose();
+    await quiesce();
     return Rig.create(
       env: env ?? this.env,
       dir: dir,
@@ -310,11 +309,42 @@ final class Rig {
     }
   }
 
-  Future<void> dispose({bool deleteDir = true}) async {
+  /// Stops the flags and the session and waits for every storage write or
+  /// delete they or the test started (session saves, the cache, the install
+  /// id, overrides), however it was started, so nothing is still running when
+  /// the directory is deleted. Safe to call twice.
+  Future<void> quiesce() async {
     await flags.dispose();
+    for (var round = 0; round < 5; round++) {
+      await flags.settled();
+      await Future.wait(
+        List.of(tracking.pending).map(
+          (f) => f.then<void>((_) {}, onError: (Object _) {}),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+    }
     await session.dispose();
+  }
+
+  Future<void> dispose({bool deleteDir = true}) async {
+    await quiesce();
     if (deleteDir && dir.existsSync()) {
       dir.deleteSync(recursive: true);
+    }
+  }
+}
+
+/// Quiesces every rig, and only then deletes their directories (a relaunched
+/// rig shares its directory with the one before it).
+Future<void> disposeAll(Iterable<Rig> rigs) async {
+  final all = List.of(rigs);
+  for (final rig in all) {
+    await rig.quiesce();
+  }
+  for (final rig in all) {
+    if (rig.dir.existsSync()) {
+      rig.dir.deleteSync(recursive: true);
     }
   }
 }

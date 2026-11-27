@@ -20,6 +20,9 @@ String _config(String env) =>
     '{"env":"$env","backend":{"seed":42,"latencyMs":0,"scenario":"happy"},'
     '"apiBaseUrl":"https://mock.mini-client.invalid","build":"1"}';
 
+/// The stores of the tests so far: teardown waits for their writes.
+final List<TrackingStore> stores = [];
+
 /// What the root list has registered before `FeatureFlagsDIInitializer`.
 Future<(GetIt, Directory, GateAdapter, Session)> _root({
   String env = 'dev',
@@ -28,7 +31,8 @@ Future<(GetIt, Directory, GateAdapter, Session)> _root({
 }) async {
   final directory = dir ?? Directory.systemTemp.createTempSync('mc_ff_di');
   final getIt = GetIt.asNewInstance();
-  final store = FileStore(directory);
+  final store = TrackingStore(directory);
+  stores.add(store);
   final session = await Session.restore(store);
   final gate = GateAdapter(
     MockBackend(
@@ -59,7 +63,11 @@ Future<void> _init(GetIt getIt) =>
 
 void main() {
   final dirs = <Directory>[];
-  tearDown(() {
+  tearDown(() async {
+    for (final store in stores) {
+      await Future.wait(List.of(store.pending));
+    }
+    stores.clear();
     for (final dir in dirs) {
       if (dir.existsSync()) {
         dir.deleteSync(recursive: true);

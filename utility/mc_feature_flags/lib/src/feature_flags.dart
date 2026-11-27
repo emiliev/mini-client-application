@@ -388,7 +388,7 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     _installIdSaving = true;
     Future<Result<void, StorageFailure>> write;
     try {
-      write = _store.write(flagsInstallIdKey, id);
+      write = _track(_store.write(flagsInstallIdKey, id));
     } on Object catch (error) {
       _installIdSaving = false;
       _reportOnce('install-id', 'could not save the install id: $error');
@@ -424,14 +424,12 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
       // The saved body is the previous user's targeted answer: do not leave it
       // on disk. (The next successful fetch writes the new user's.)
       unawaited(
-        _store
-            .delete(flagsCacheKey)
-            .then(
-              (result) => result.fold(
-                (_) {},
-                (failure) => _warn('could not clear the cache: $failure'),
-              ),
-            ),
+        _track(_store.delete(flagsCacheKey)).then(
+          (result) => result.fold(
+            (_) {},
+            (failure) => _warn('could not clear the cache: $failure'),
+          ),
+        ),
       );
     }
     _remote = null;
@@ -488,7 +486,9 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
       }
       _remote = snapshot;
       _notify();
-      final saved = await _store.write(flagsCacheKey, snapshot.toJson());
+      final saved = await _track(
+        _store.write(flagsCacheKey, snapshot.toJson()),
+      );
       saved.fold(
         (_) {},
         (failure) => _warn('could not save the cache: $failure'),
@@ -496,6 +496,36 @@ final class FeatureFlags implements FeatureFlagsReader, FeatureFlagOverrides {
     } on Object catch (error) {
       // Nothing escapes: a failed fetch keeps the current values.
       _warn('fetch failed: $error');
+    }
+  }
+
+  final Set<Future<Object?>> _writes = {};
+
+  /// Remembers a storage write or delete this object started, so a test can
+  /// wait for it ([settled]).
+  Future<R> _track<R>(Future<R> write) {
+    _writes.add(write);
+    unawaited(
+      write
+          .then<void>((_) {}, onError: (Object _) {})
+          .whenComplete(() => _writes.remove(write)),
+    );
+    return write;
+  }
+
+  /// Completes when every storage write or delete this object started (the
+  /// cache, its deletion, the install id) has finished, including any that
+  /// start while it waits. For tests that delete the storage directory
+  /// afterwards: await it instead of sleeping. It does not wait for a request
+  /// that is still in flight (a held response may never come); a request
+  /// that finishes starts its write at once, so release it first.
+  Future<void> settled() async {
+    while (_writes.isNotEmpty) {
+      await Future.wait(
+        List.of(_writes).map(
+          (f) => f.then<void>((_) {}, onError: (Object _) {}),
+        ),
+      );
     }
   }
 

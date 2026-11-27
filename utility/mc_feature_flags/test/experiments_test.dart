@@ -115,9 +115,7 @@ void main() {
   }
 
   tearDown(() async {
-    for (final rig in rigs) {
-      await rig.dispose();
-    }
+    await disposeAll(rigs);
     rigs.clear();
   });
 
