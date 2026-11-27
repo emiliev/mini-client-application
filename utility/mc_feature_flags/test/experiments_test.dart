@@ -447,6 +447,11 @@ void main() {
             'rich': 5,
           }),
           _remote('store_home_layout', {'control': 1.5, 'rich': 1}),
+          _remote('store_home_layout', {
+            'control': 0.5,
+            'compact': 0,
+            'rich': 3,
+          }),
           _remote('store_home_layout', {'surprise': 1}),
           _remote('store_home_layout', {'control': 0, 'rich': 0}),
           <Object?>[
@@ -475,6 +480,11 @@ void main() {
         expect(
           rig.reports.where((m) => m.contains('store_home_layout')).length,
           1,
+        );
+        expect(
+          rig.reports.where((m) => m.contains('fetch failed')),
+          isEmpty,
+          reason: 'a malformed experiment never fails the whole fetch',
         );
       },
     );
