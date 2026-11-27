@@ -489,6 +489,32 @@ void main() {
       },
     );
 
+    test(
+      'T-0052-AC2 remote weights that give no declared variant a '
+      'positive weight fall back to the declared weights, also when the '
+      'control would be the answer (u-102 is rich by the declared weights)',
+      () async {
+        final rig = await make();
+        await rig.signIn('u-102');
+        for (final entries in [
+          _remote('store_home_layout', {'control': 0, 'compact': 0, 'rich': 0}),
+          _remote('store_home_layout', {'surprise': 3}),
+        ]) {
+          rig.stub.experiments = entries;
+          await rig.flags.refresh();
+          expect(
+            rig.flags.variant(storeHomeLayout),
+            'rich',
+            reason: '$entries',
+          );
+        }
+        expect(
+          rig.reports.where((m) => m.contains('store_home_layout')).length,
+          1,
+        );
+      },
+    );
+
     test('T-0052-AC2 the last-known-good weights are used after a restart '
         'with the backend failing', () async {
       final first = await make();
