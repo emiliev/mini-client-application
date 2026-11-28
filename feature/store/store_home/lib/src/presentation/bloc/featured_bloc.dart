@@ -56,6 +56,7 @@ final class FeaturedBloc
       case _Refresh(:final done):
         await refresh(emit, done);
       case _Open(:final product):
+        // mcgen:keep featured.open
         if (startOpenGuard(product.id.value)) {
           tracker.itemTapped(
             section,
@@ -64,6 +65,7 @@ final class FeaturedBloc
           );
           _navigator.openComic(product.id);
         }
+      // mcgen:end featured.open
     }
   }
 
