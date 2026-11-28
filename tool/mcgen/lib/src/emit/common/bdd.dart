@@ -64,7 +64,7 @@ const sharedSteps = {
 };
 
 final _keyword = RegExp(r'^(Given|When|Then|And|But)\s+');
-final _param = RegExp(r'\{[^}]*\}');
+final _param = RegExp(r'\{[^}]*\}|<\w+>');
 
 /// A step line without its Gherkin keyword.
 String stepText(String line) => line.replaceFirst(_keyword, '');
@@ -90,16 +90,24 @@ List<String> stepParams(String line) => [
     m[0]!.substring(1, m[0]!.length - 1),
 ];
 
+/// A step line, not a `#` comment or a `|` data-table row (a feature may carry
+/// both among its steps; they are written to the `.feature` file and are no
+/// step).
+bool _isStep(String line) {
+  final t = line.trimLeft();
+  return !t.startsWith('#') && !t.startsWith('|');
+}
+
 /// Every step line of [features], in file order: backgrounds, then each
 /// scenario's steps, then each outline's.
 Iterable<String> allSteps(List<BddFeatureSpec> features) sync* {
   for (final f in features) {
-    yield* f.backgroundSteps;
+    yield* f.backgroundSteps.where(_isStep);
     for (final s in f.scenarios) {
-      yield* s.steps;
+      yield* s.steps.where(_isStep);
     }
     for (final o in f.outlines) {
-      yield* o.steps;
+      yield* o.steps.where(_isStep);
     }
   }
 }
@@ -123,7 +131,8 @@ List<List<String>> outlineExamples(RuleSpec rule) {
   ];
 }
 
-/// The feature file of [f]: `Feature:`, its description, the Background,
+/// The feature file of [f] (a table cell that ends in a space is written as
+/// it is: a hand-aligned table keeps its own padding): `Feature:`, its description, the Background,
 /// then each scenario with its tags (the id first) and Examples table, then
 /// each outline, whose Examples are its rule's examples ([rules] by id).
 String renderFeature(
@@ -173,7 +182,7 @@ String renderFeature(
         ..writeln('    Examples:');
       for (final row in examples) {
         b.writeln(
-          '      | ${[for (final (c, cell) in row.indexed) cell.padRight(widths[c])].join(' | ')} |',
+          '      | ${[for (final (c, cell) in row.indexed) cell.endsWith(' ') ? cell : cell.padRight(widths[c])].join(' | ')} |',
         );
       }
     }

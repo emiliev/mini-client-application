@@ -83,7 +83,9 @@ final class CharacterDetailsBloc
         }
       case _OpenComic(:final id):
         if (_startOpenGuard(id)) {
+          // mcgen:keep details.openComic
           _navigator.openComic(id);
+          // mcgen:end details.openComic
         }
     }
   }

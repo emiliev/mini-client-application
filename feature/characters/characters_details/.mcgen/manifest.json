@@ -1,0 +1,290 @@
+{
+  "archetype": "section_detail",
+  "files": {
+    "BUILD.bazel": {
+      "hash": "9e39173e26abc6f111a952545f33bb12c73a0b3a1ade6a7ab43718a4d5ecccd2",
+      "ownership": "managed"
+    },
+    "l10n.yaml": {
+      "hash": "072e2755dfe63938c652d9e9d5096f915f5f8b94cf9493c9f60f28dca24aefab",
+      "ownership": "managed"
+    },
+    "lib/characters_details.dart": {
+      "hash": "84a3b67630055f48e2393fef4ab313c14a337d688d63aa1324cab2b6b2dd8013",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "8fce61bf377a9fcb2ec7c0ee44b80e3345c6c7a0e4e36506e6f085d08c6b6400",
+      "ownership": "managed"
+    },
+    "lib/src/di/flow_scope.dart": {
+      "hash": "8b71585fbedfd758041d78acc2b5a71d13962165569499756cced0a47767bcdc",
+      "ownership": "managed"
+    },
+    "lib/src/domain/api/characters_details_api.dart": {
+      "hash": "4ea404347ad0b6dd53f96d8077aad64a29a11978aa7265ed6741e03895180291",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character.dart": {
+      "hash": "a4f64681da2873b69d7fa77d209b6fa8f80e0a9845808e6d755099feb8417a24",
+      "ownership": "owned"
+    },
+    "lib/src/domain/model/character_analytics.dart": {
+      "hash": "a8e34848ea5d2f13582325d404914d089e0ed0cdbb0ca6b131edadac0cb6799f",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_dto.dart": {
+      "hash": "bdb6214c191a3e66a65b9d6c10356c513244e0cdeabe01fcfafd42444ad48362",
+      "ownership": "owned"
+    },
+    "lib/src/domain/model/character_id.dart": {
+      "hash": "64713747e5eea6ae5dd42509deac5cf083df344410f9c6521aaad267e2d917ea",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_mapper.dart": {
+      "hash": "d735a2d3ffd25d15dc43ece7f80a1e90277807cab312fc50a3f55c8ea9842753",
+      "ownership": "owned"
+    },
+    "lib/src/domain/model/comic_id.dart": {
+      "hash": "ff3b2cee2bc347f9742070d274d38797a39e934c6f35524ae45195eb41fbc8c5",
+      "ownership": "managed"
+    },
+    "lib/src/domain/repository/characters_details_repository.dart": {
+      "hash": "1bdc03bca1b09729716749fd341b68f904e68ebbafb714bcf78e3ec076d6b181",
+      "ownership": "managed"
+    },
+    "lib/src/flow/characters_details_flow.dart": {
+      "hash": "7028f076a7f0721683645f05951dbc0d49b46f607632b3f0af7f422e3f31aec0",
+      "ownership": "managed"
+    },
+    "lib/src/flow/characters_details_flow_state.dart": {
+      "hash": "4458f85f4748b188dc49fe559ccd4c9474ac70c5c3f365dc2a2edbaea20d9e44",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_details_de.arb": {
+      "hash": "a7459f0b7a619b57f284c4fea1bc50c618cb721d3a9d1832fd6a7805411aebea",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_details_en.arb": {
+      "hash": "f5a7982262b13508156f25b4bc25c3defb9345cceb455cc9769d51452ca77989",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_details_en_XA.arb": {
+      "hash": "c07e7d045dd994f5806fef34fc85e1b5d578a47225aa8bfddfe19cab04b6b38f",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/characters_details_navigator.dart": {
+      "hash": "075621709b9a8d923b93d86b377b50018a9cb03285138e62772cd2632973e043",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_details_bloc.dart": {
+      "hash": "1b918dc6b82da28236d3a7043e77c31c913a21a54cbc9733278393bd5b8ce7ab",
+      "keep": {
+        "details.openComic": "66fd1c9f3efe61f789b521f29635198832f67f909d583e3735ee201c69832dc4"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_details_event.dart": {
+      "hash": "53c413dde504aee5aee33662b3d1215c4002cab2ba6c2e15978338d3294015bd",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_details_state.dart": {
+      "hash": "cafd2771ef677bdaa7bb98647e50772ddc30f36776406b8e74cca108c299ab46",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_favourite_bloc.dart": {
+      "hash": "feca377aff550fc9ab851bcf441b997563f133beacb937d388e43397c6f39b36",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_favourite_event.dart": {
+      "hash": "c1d23f37fd3e1889869814d0221fac55e2ec7baca901c35705bf4d209fb347fd",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_favourite_state.dart": {
+      "hash": "4f04e2c34925efa449b20d098d59f7e3185ee01d84d1fdc7a201ad6d6f203c28",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/page/character_details_page.dart": {
+      "hash": "c211a9a0b5e4f0fa0faee9bba446c7aa9b1c04bab960c08eb918875a89febcfe",
+      "ownership": "owned"
+    },
+    "lib/src/presentation/widget/failure_message.dart": {
+      "hash": "9d082f390462c757d65380287bc9e5c3be2c370544d3cf543aca014a33df63f1",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/favourite_toggle.dart": {
+      "hash": "93718ebc1b35bf5eb702d1c01fd74ace93e3bbf88db020295f0e7ac51346d490",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "7d31c1d4b3bb572090390755cb6c2f117412f430a5cd9dfe7f7c90edeceb2827",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "441eafa02383165260b0d9ef62538c6640bc34a87fee443d312985653d3033f1",
+      "ownership": "managed"
+    },
+    "test/feature/characters_details.feature": {
+      "hash": "e172abc3ae56801b1cdb3c1ec7b20bc965985d1064e7d180f01813c66e1fbab8",
+      "ownership": "managed"
+    },
+    "test/feature/characters_details_favourite.feature": {
+      "hash": "9b490f621d1763fa6193597bee9287fbafede90d8c89bc20494d098cfb4c7e2a",
+      "ownership": "managed"
+    },
+    "test/feature/characters_details_synthetic.feature": {
+      "hash": "55ede73d13137952431dd915055271db16f400e37b966f3e119803084e0651fe",
+      "ownership": "managed"
+    },
+    "test/feature/step/another_page_announces_a_change_to.dart": {
+      "hash": "aade67898bf88aa658a85f22d010f2a3ef456d51239307bb27c404761a25d64d",
+      "ownership": "managed"
+    },
+    "test/feature/step/character_is_a_favourite_of.dart": {
+      "hash": "e0e194ef6b2169cbc5ade521be4a566378772fe47b350581102e524ac1d20027",
+      "ownership": "managed"
+    },
+    "test/feature/step/character_is_not_a_favourite_of.dart": {
+      "hash": "fa790367d666cefed35f98e0bdcd4637cb4af4086cedaf18d032e76294ce51d6",
+      "ownership": "managed"
+    },
+    "test/feature/step/has_character_among_their_favourites.dart": {
+      "hash": "0a5d0aff57b50951e7461b79735e21255cd27e4b68cc6c59b816ad98833c0b2c",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_character.dart": {
+      "hash": "e373d694ad6f81f032ba1ac53a46e006bac72d0c4d5582e88e077aacf5707292",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_character_on_two_pages.dart": {
+      "hash": "35789ba46f733151b1e46f7eabf33992423bd65cb8883d00733c0df86fa1b1d2",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_profile_to_the_end.dart": {
+      "hash": "feceaf5ad42edd71ac292c8895c6271223abec3eb084d1717a305b6e25172b5b",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_profile_until_i_see.dart": {
+      "hash": "15ff68b76e44690d780fac0bf3476dcdccd99ac2742a4954bfaad31088c93993",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_see_the_bio_of_character.dart": {
+      "hash": "bc167c343d0de75a529ac2c0d7243e519f10e77302958846009d0b352ae03502",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_see_the_header_of_character_with_its_bundled_portrait.dart": {
+      "hash": "2c7e655e52618da0fbd6bc8aada14c32503984c0a3735ee62d3388fe2bdf65d2",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_on_page.dart": {
+      "hash": "145092e9b857ac197eaa8ba25fa6de0fe563bfb0b392c62e39229b61953f118b",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_comic.dart": {
+      "hash": "58ea981805029f3359a2971ce49efe904f1db89ab344af1bf2db167f12f703b8",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_comic_and_again_after_milliseconds.dart": {
+      "hash": "e0cda5b1fc92dad7ad895efb862790a4354e2d21cdd4589421bdeda6a5da94c5",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_comic_and_then_after_milliseconds.dart": {
+      "hash": "dd5b9e9578af9c871d770a87bcf27e45b41e944e175f4afb166660d935d77eb2",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_comic_twice_in_quick_succession.dart": {
+      "hash": "e173f6b985f1c7f40ddaacfb6625221fae81b7545a03547fe1c3aebdaec8248d",
+      "ownership": "owned"
+    },
+    "test/feature/step/page_shows.dart": {
+      "hash": "36f182e0b0d46ce614d1a50f792d4c672ba965f4a625eec32cbfb8e83e49dce3",
+      "ownership": "managed"
+    },
+    "test/feature/step/signing_in_is_cancelled.dart": {
+      "hash": "38ef2e54dfccfd854a7e6af21f0e643e815e7764094f13cc86c9785fb185745c",
+      "ownership": "managed"
+    },
+    "test/feature/step/signing_in_succeeds_as.dart": {
+      "hash": "486a64ef1cadba1b2f772ddf8ad5e52247a78aab40d7969c679c6ad32da64c0b",
+      "ownership": "managed"
+    },
+    "test/feature/step/signs_in_elsewhere.dart": {
+      "hash": "421b5b81e769e858df0d691592a05e43e00924b824a2c76a2a40538d802876e1",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_announced_change_to.dart": {
+      "hash": "431ec70cb14a1c9344d4229e11ffc416cd30afc1bbb612c7a3bfa715e7bab1f8",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_comic.dart": {
+      "hash": "55eb8ce5f90fa600d9ff9c876d7f643b771c745f5b74bbb6ffb1e7f15a342c8c",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_comic_times.dart": {
+      "hash": "ec529a0fe66089e9a7033f9a0eb160eedc4602fabcc1fcaf98372c40f38155a7",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_comics_and.dart": {
+      "hash": "7a537529fc8b8430257011fa2d09a0eff70f4364721b62f86eac7370c26da1cb",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_sign_in_time.dart": {
+      "hash": "6cb0ee272f425ed8f47b4d68636c71ecc869a3f7342189717513e1c60d663629",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_comics_row_lists_the_comics_of_character.dart": {
+      "hash": "7913f44e3c37aa166963857cd52e67d5d382f75b3f1b15e6e2825262c8392295",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_fact_reads.dart": {
+      "hash": "c037b897f95059126c5d6a628bcb77f0e80d9d7181030242311aea163e6d1793",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_favourite_of_character_was_tracked_times.dart": {
+      "hash": "2da1e7d622da925a41968ef76c08e1d5607e227dde00eedfd6055c952ce0affe",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_favourite_toggle_shows_enabled_and_on.dart": {
+      "hash": "efa35ae7d620fab82b0bb442240dda78967ef1c131b40a342b89353486e1b3a0",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_session_ends_elsewhere.dart": {
+      "hash": "715616ff89b434ecbe1d035090fdc12d43cf71cf17234afb838e8fc2ac355588",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_stats_chart_reads_then.dart": {
+      "hash": "0d54ce942c17b3df558d322ffad902c5599b73b00fbc6039d0feda8cc8bb5047",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_stats_chart_shows_the_stats_of_character.dart": {
+      "hash": "3a77d6140c1854914a7855e3d0912214be69f31e4550d1806790322411047453",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_user_is_signed_out.dart": {
+      "hash": "29dd831971ad9b9598f160827ad6fe1ac60a178aff0db09b758b9d4cabcc867e",
+      "ownership": "managed"
+    },
+    "test/feature/step/there_is_no_comics_row.dart": {
+      "hash": "5212ffef3303bc1f3527879a682345e7cb5947432b2add22f6cee49bd573f967",
+      "ownership": "owned"
+    },
+    "test/feature/util/characters_details_env.dart": {
+      "hash": "3a8722a9effab06c1a0ea23e518f5f743c034c8abfcd33da21ceb41386b7fd6a",
+      "ownership": "owned"
+    },
+    "test/feature/util/favourites_probe.dart": {
+      "hash": "3ea8cb83bca4fed02d9160b20ae2f3e8e3ba46c666011c20233344a17b5b5d5b",
+      "ownership": "managed"
+    },
+    "test/flow_scope_test.dart": {
+      "hash": "df4bcf355f664d4cec240486d34ee0febe670ea906200e40317cd5276388ea61",
+      "ownership": "owned"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "characters_details",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x0c755d221c3d0bed",
+  "spec_hash": "05366aef5f5218029c3cc9ee157385d64bfae0392725c9689a04b5d911b0ed3b"
+}
