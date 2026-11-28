@@ -1,0 +1,34 @@
+name: feature_form_wizard_package
+description: A form/wizard feature's package files - pubspec.yaml and l10n.yaml (T-0075). mcgen computes the dependency lists from the generated code's use-graph. BUILD.bazel is written only for a skeleton module (feature_form_wizard_build).
+version: 0.1.0
+
+# mcgen precomputes every value (plan 02 section 2.4); by hand:
+#   mason make feature_form_wizard_package -c vars.json
+vars:
+  pubspec_preamble:
+    type: string
+    description: Comment lines above `name:` (each ending in a newline), or empty.
+  name:
+    type: string
+    description: The package name.
+  pascal:
+    type: string
+    description: The package name in PascalCase.
+  description:
+    type: string
+    description: The pubspec description.
+  sdk:
+    type: string
+    description: The environment sdk constraint.
+  flutter:
+    type: string
+    description: The environment flutter constraint.
+  dependencies:
+    type: array
+    description: 'Items {"entry": "<name>: <constraint>"}, sorted.'
+  dev_dependencies:
+    type: array
+    description: 'Items {"entry": "<name>: <constraint>"}, sorted.'
+  l10n_file:
+    type: string
+    description: The gen-l10n output file's stem (`reading_list_editor_l10n`), which a flow's own name may shorten.

@@ -1,0 +1,8 @@
+# IDE and `fvm flutter gen-l10n` baseline only. The Bazel rule ignores this file
+# (rules_flutter §6); BUILD.bazel carries the same settings.
+arb-dir: lib/src/l10n
+template-arb-file: {{{name}}}_en.arb
+output-localization-file: {{{l10n_file}}}.dart
+output-class: {{{pascal}}}L10n
+output-dir: lib/src/l10n
+nullable-getter: false

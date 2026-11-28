@@ -1,0 +1,8 @@
+name: feature_form_wizard_di
+description: A form/wizard feature's DI initializer (Tide's boilerplate shape). A Dart brick - declarations only; references are written «Name» and mcgen writes the imports (T-0075).
+version: 0.1.0
+
+vars:
+  pascal:
+    type: string
+    description: The package name in PascalCase.

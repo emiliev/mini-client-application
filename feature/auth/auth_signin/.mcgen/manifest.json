@@ -1,0 +1,63 @@
+{
+  "archetype": "form_wizard",
+  "files": {
+    "l10n.yaml": {
+      "hash": "f497a53f35a7d3d27d9a9c8c1f5fcf2a677dc61347c3c416e3bb7d5da6834249",
+      "ownership": "managed"
+    },
+    "lib/auth_signin.dart": {
+      "hash": "d5edb7c0e22d7a7a7e218fbf690d6f7bedf59f061ee422da33794ae2005ae928",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "5cff388bbd13df89f8494d8889ffdf942ff6c4b1c188e912e68ce57c9b188929",
+      "ownership": "managed"
+    },
+    "lib/src/flow/auth_signin_flow.dart": {
+      "hash": "c2410672ab6bc97d4444571baa80f23f129dc7bb88334e8ddca128cd31c762c1",
+      "ownership": "managed"
+    },
+    "lib/src/flow/auth_signin_flow_state.dart": {
+      "hash": "dfe9e46a7ee465886307ed5d3ace7d193903317d5431ff1e1a9003ca05bbb56d",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/auth_signin_de.arb": {
+      "hash": "baaa8690cd59dc39101e74f1c4c4f727824dbfae78d4ac0ce86979e3902cf69d",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/auth_signin_en.arb": {
+      "hash": "abff4095b57db02884df7f485d60b64e430f8c4a5c0a014c3590a603de3b27e9",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/auth_signin_en_XA.arb": {
+      "hash": "e413cb58f1f111cda6c3f97c2fac64f453e2e38b720bb31c22a4780920f6f98f",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/auth_signin_navigator.dart": {
+      "hash": "9298992080088ceb40816fae50e5ad98f5d1e682c75b3f3ed077348e2cc4f406",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "bf03274d21ffef168baec857cd71cbd4fccfeebcc64978b26e8415d194da9ad2",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "13f23a6c8a9f7abf1c1df442fca43dc519ee25f75b1a89023976c7290985d9d4",
+      "ownership": "managed"
+    },
+    "test/feature/auth_signin_l10n.feature": {
+      "hash": "832fc5947377fed1f5d120b1755afde2471b8ca61d6b0d86e3549b46e9c1be55",
+      "ownership": "managed"
+    },
+    "test/feature/auth_signin_sign_in.feature": {
+      "hash": "08ef2a61e88a4da8d3e9f93bbf51b21ad6062319fe6fa597337bf0591a291a1b",
+      "ownership": "managed"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "auth_signin",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x31eb203af12dcaef",
+  "spec_hash": "3fe56026af6eaa5697ec132ee551e64d653ee32219e92a6da7d5e544c4f8d5fc"
+}

@@ -1,0 +1,1245 @@
+# The form/wizard exemplar, three-step shape (T-0075, P2-06). `mcgen gen
+# library_reading_list_editor --check` renders this spec and compares the
+# render with this package, byte for byte outside keep regions and owned files
+# (plan 02 KD1, ADR-0017). The package stays hand-built (ejected); gen writes
+# only .mcgen/manifest.json.
+#
+# The archetype owns what every form or wizard feature shares: the barrel, the
+# DI initializer, the navigator contract, the flow state, the flow (its
+# arguments, result and pages), the architecture test,
+# the package files, the strings and the .feature files. The wizard's rules,
+# the bloc, the domain, the step pages, the test env, the steps, the contract
+# tests, the golden test and BUILD.bazel are the module's own (owned).
+schema: mcgen/1
+module: library_reading_list_editor
+tier: feature
+archetype: form_wizard
+ownership: ejected
+exemplar: true
+description: A three-step wizard that creates or edits a reading list and ends with the saved list's id.
+deps:
+  - bloc
+  - dio
+  - flutter
+  - flutter_bloc
+  - freezed_annotation
+  - json_annotation
+  - mc_api_auth
+  - mc_api_client
+  - mc_api_errors
+  - mc_bloc_kit
+  - mc_di
+  - mc_ds_buttons
+  - mc_ds_feedback
+  - mc_ds_forms
+  - mc_ds_inputs
+  - mc_ds_layout
+  - mc_ds_media
+  - mc_ds_navigation
+  - mc_ds_theme
+  - mc_ds_tokens
+  - mc_event_bus
+  - mc_feature_flow
+  - mc_forms
+  - mc_l10n_core
+  - mc_media
+  - mc_monitoring
+  - mc_paging
+  - mc_prelude
+  - mc_session
+  - retrofit
+dev_deps:
+  - flutter_test
+  - mc_fixtures_comics
+  - mc_fixtures_identity
+  - mc_fixtures_library
+  - mc_fixtures_media
+  - mc_mocked_backend
+  - mc_storage
+  - mc_test_utils
+  - mocktail
+  - test
+owned:
+  - BUILD.bazel
+  - lib/src/domain/**
+  - lib/src/presentation/**
+  - test/contract/**
+  - test/feature/step/**
+  - test/feature/util/**
+  - test/flow_scope_test.dart
+  - test/golden/**
+
+navigator:
+  name: ReadingListEditorNavigator
+  doc: |-
+    What library_reading_list_editor needs from outside: intents in the
+    feature's own language, never routes (plan 01 §4.1). Implemented in
+    `app/wiring/library_wiring` (T-0048). Only blocs call it.
+
+    The editor's result (the saved list) does not go through the navigator:
+    the flow completes with it (`ReadingListEditorFlow.onComplete`) and the
+    wiring hands it back to whoever opened the editor (plan 01 §4.3).
+  outbound: ["requestSignIn() -> Future<bool>"]
+
+options:
+  pascal: ReadingListEditor
+  stem: reading_list_editor
+  l10n_file: reading_list_editor_l10n
+  arb: block_placeholders
+  types:
+    ReadingListId: domain/model/reading_list_id.dart
+    ReadingListDetailsPage: presentation/page/details_page.dart
+    ReadingListComicsPage: presentation/page/comics_page.dart
+    ReadingListReviewPage: presentation/page/review_page.dart
+  barrel: [ReadingListId]
+  flow:
+    key: editing
+    args:
+      - name: editing
+        type: ReadingListId?
+        doc: The list to edit; null creates a new one.
+    result:
+      type: ReadingListId?
+      cast: result as ReadingListId?
+    state: "ReadingListEditorFlowState(editing: editing)"
+    pages:
+      - name: details
+        widget: "ReadingListDetailsPage()"
+        const: true
+      - name: comics
+        widget: "ReadingListComicsPage()"
+        const: true
+        when: "state.step >= 1"
+      - name: review
+        widget: "ReadingListReviewPage()"
+        const: true
+        when: "state.step >= 2"
+  flow_state:
+    fields:
+      - name: editing
+        type: ReadingListId?
+        doc: |-
+          The list being edited; null when a new list is created. The flow
+          starts from the id alone (plan 01 §4.4).
+      - name: step
+        type: int
+        default: "0"
+        doc: |-
+          The deepest open step page (0 to 2). It mirrors the wizard's step:
+          the bloc writes it after each step change, and a pop of a step page
+          (back gesture, back button) is applied to the wizard.
+  architecture:
+    tag: T-0048-AC7
+    pure_files_over: 12
+  prose:
+    pubspec.preamble: |-
+      T-0048 (P1-20): the library_reading_list_editor exemplar feature (archetype
+      FW). Phase D's generators copy this package's shape for every form/wizard
+      feature (plan 01 §3.3).
+    barrel.preamble: |-
+      The public surface (R4, checked by mc_arch_check and the architecture
+      test): the flow, its navigator, and the flow's argument and result type.
+      No `library;` directive (Tide's `unnecessary_library_directive`).
+    architecture.barrel_phrase: argument and result type
+    architecture.shown_comment: "The flow, its navigator, and the flow's argument and result type."
+    navigator.requestSignIn: |-
+      Reading lists belong to a signed-in user. Completes with true once
+      someone is signed in, false when the user backed out. The feature does
+      not know how signing in works; the app decides (a sheet, a route).
+    flow_state.doc: |-
+      The step pages that are open: step 0 (details) is the flow's root, step 1
+      (comics) and step 2 (order and review) are pushed on it, so a back
+      gesture on a later step returns to the step before it inside the flow.
+      Pure Dart, so the blocs that update it stay Flutter-free (R15).
+
+      The wizard's values are not here: they live in the editor bloc's
+      `WizardController`, which outlives the step pages. A pop restores the
+      flow state the lower page had (`FeatureFlow`), which would drop what was
+      entered on the popped step; the wizard keeps it (T-0048-AC6).
+    flow.doc: |-
+      The feature's only entry point (R4): a three-step wizard that creates a
+      reading list, or edits the one [editing] names, and **ends with a
+      result**.
+
+      The flow result (plan 01 §4.3, first used here; the FW archetype's shape):
+      - When the wizard saves, the flow completes with the saved list's id:
+        [onComplete] is called once with it.
+      - When the flow ends without saving (the user declined to sign in, or
+        closed the editor after the session changed), [onComplete] is called
+        once with null.
+      - When the user leaves by Back from step 1, the app's route is popped and
+        [onComplete] is not called; the route's own pop gives its caller null.
+
+      The app builds it from a route (`/me/lists/new`, `/me/lists/:id/edit`,
+      library_wiring), whose [onComplete] pops that route with the id, so
+      whoever pushed the route awaits the result. Tests pass a recorder. It
+      starts from the id alone (plan 01 §4.4).
+
+      Immutable after creation: the flow reads [navigator] and [editing] once,
+      when its scope opens. A different [editing] builds a new flow (its
+      `FeatureFlow` is keyed by it).
+    flow.result_doc: |-
+      The flow's result: the saved list's id, or null when it ended without
+      saving. Called at most once.
+    flow.pages_comment: |-
+      One page per step, pushed in order, so a back gesture on a later
+      step returns to the step before it.
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: readingListEditorTitle
+      description: "App bar title while the editor opens, signs in or cannot continue."
+      text: {en: "Reading list", de: "Leseliste", en_XA: "[Ŕéàðíñĝ ļíšţ ~~~~~]"}
+    - key: readingListEditorNewTitle
+      description: "App bar title of step 1 when a new list is created."
+      text: {en: "New reading list", de: "Neue Leseliste", en_XA: "[Ñéŵ ŕéàðíñĝ ļíšţ ~~~~~~]"}
+    - key: readingListEditorEditTitle
+      description: "App bar title of step 1 when an existing list is edited."
+      text: {en: "Edit reading list", de: "Leseliste bearbeiten", en_XA: "[Éðíţ ŕéàðíñĝ ļíšţ ~~~~~~~]"}
+    - key: readingListEditorLoading
+      description: "Screen-reader label while the edited list loads."
+      text: {en: "Loading the reading list", de: "Die Leseliste wird geladen", en_XA: "[Ļóàðíñĝ ţĥé ŕéàðíñĝ ļíšţ ~~~~~~~~~~]"}
+    - key: readingListEditorSignInTitle
+      description: "Title while the app asks the user to sign in before the editor opens."
+      text: {en: "Sign in to continue", de: "Melde dich an, um fortzufahren", en_XA: "[Šíĝñ íñ ţó çóñţíñúé ~~~~~~~~]"}
+    - key: readingListEditorSignInMessage
+      description: "Message below the sign-in title."
+      text: {en: "Reading lists are saved to your account.", de: "Leselisten werden in deinem Konto gespeichert.", en_XA: "[Ŕéàðíñĝ ļíšţš àŕé šàvéð ţó ýóúŕ àççóúñţ. ~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorNotFoundTitle
+      description: "Title when the edited list does not exist or belongs to another user."
+      text: {en: "List not found", de: "Liste nicht gefunden", en_XA: "[Ļíšţ ñóţ ƒóúñð ~~~~~~]"}
+    - key: readingListEditorNotFoundMessage
+      description: "Message below the not-found title."
+      text: {en: "This reading list does not exist or is not yours.", de: "Diese Leseliste gibt es nicht, oder sie gehört dir nicht.", en_XA: "[Ţĥíš ŕéàðíñĝ ļíšţ ðóéš ñóţ éxíšţ óŕ íš ñóţ ýóúŕš. ~~~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorLoadErrorTitle
+      description: "Title when the edited list fails to load; the reason and Retry follow."
+      text: {en: "The reading list could not be loaded", de: "Die Leseliste konnte nicht geladen werden", en_XA: "[Ţĥé ŕéàðíñĝ ļíšţ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~~]"}
+    - key: readingListEditorSessionEndedTitle
+      description: "Title when the user signed out, or another user signed in, while editing."
+      text: {en: "You are no longer signed in as before", de: "Du bist nicht mehr wie zuvor angemeldet", en_XA: "[Ýóú àŕé ñó ļóñĝéŕ šíĝñéð íñ àš ƀéƒóŕé ~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorSessionEndedMessage
+      description: "Message below the session-ended title; a Close button follows."
+      text: {en: "The account changed while you were editing, so nothing more was saved.", de: "Das Konto hat sich während der Bearbeitung geändert, daher wurde nichts weiter gespeichert.", en_XA: "[Ţĥé àççóúñţ çĥàñĝéð ŵĥíļé ýóú ŵéŕé éðíţíñĝ, šó ñóţĥíñĝ ɱóŕé ŵàš šàvéð. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorStep
+      description: "The wizard's step indicator."
+      placeholders: {"step": {"type": "int"}, "total": {"type": "int"}}
+      text: {en: "Step {step} of {total}", de: "Schritt {step} von {total}", en_XA: "[Šţéþ {step} óƒ {total} ~~~~]"}
+    - key: readingListEditorBack
+      description: "Goes to the previous step."
+      text: {en: "Back", de: "Zurück", en_XA: "[Ɓàçķ ~~]"}
+    - key: readingListEditorNext
+      description: "Goes to the next step."
+      text: {en: "Next", de: "Weiter", en_XA: "[Ñéxţ ~~]"}
+    - key: readingListEditorCreate
+      description: "Finishes the wizard and saves a new list."
+      text: {en: "Create list", de: "Liste erstellen", en_XA: "[Çŕéàţé ļíšţ ~~~~]"}
+    - key: readingListEditorSave
+      description: "Finishes the wizard and saves an edited list."
+      text: {en: "Save changes", de: "Änderungen speichern", en_XA: "[Šàvé çĥàñĝéš ~~~~~]"}
+    - key: readingListEditorBlockedHint
+      description: "Screen-reader hint on a disabled Next or Finish."
+      text: {en: "Fix the fields above to continue", de: "Korrigiere die Felder oben, um fortzufahren", en_XA: "[Ƒíx ţĥé ƒíéļðš àƀóvé ţó çóñţíñúé ~~~~~~~~~~~~~]"}
+    - key: readingListEditorDetailsTitle
+      description: "Heading of step 1's fields."
+      text: {en: "Details", de: "Details", en_XA: "[Ðéţàíļš ~~~]"}
+    - key: readingListEditorDetailsHint
+      description: "Line below the details heading."
+      text: {en: "Name your list and choose who can see it.", de: "Gib deiner Liste einen Namen und wähle, wer sie sehen kann.", en_XA: "[Ñàɱé ýóúŕ ļíšţ àñð çĥóóšé ŵĥó çàñ šéé íţ. ~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorNameLabel
+      description: "Label of the list name field."
+      text: {en: "Name", de: "Name", en_XA: "[Ñàɱé ~~]"}
+    - key: readingListEditorDescriptionLabel
+      description: "Label of the list description field."
+      text: {en: "Description (optional)", de: "Beschreibung (optional)", en_XA: "[Ðéšçŕíþţíóñ (óþţíóñàļ) ~~~~~~~~~]"}
+    - key: readingListEditorVisibilityLabel
+      description: "Label above the private / public choice."
+      text: {en: "Who can see it", de: "Wer sie sehen kann", en_XA: "[Ŵĥó çàñ šéé íţ ~~~~~~]"}
+    - key: readingListEditorPrivate
+      description: "Visibility: only the owner sees the list."
+      text: {en: "Private", de: "Privat", en_XA: "[Þŕívàţé ~~~]"}
+    - key: readingListEditorPublic
+      description: "Visibility: everyone can see the list."
+      text: {en: "Public", de: "Öffentlich", en_XA: "[Þúƀļíç ~~]"}
+    - key: readingListEditorNameRequired
+      description: "Error under an empty name."
+      text: {en: "Give your list a name.", de: "Gib deiner Liste einen Namen.", en_XA: "[Ĝívé ýóúŕ ļíšţ à ñàɱé. ~~~~~~~~~]"}
+    - key: readingListEditorTooLong
+      description: "Error under a name or description that is too long."
+      placeholders: {"max": {"type": "int"}}
+      text: {en: "Use at most {max} characters.", de: "Verwende höchstens {max} Zeichen.", en_XA: "[Úšé àţ ɱóšţ {max} çĥàŕàçţéŕš. ~~~~~~~~~~]"}
+    - key: readingListEditorNameRefused
+      description: "Error under the name when the server refused it: the user already has a list of that name."
+      text: {en: "You already have a list with this name. Please choose another.", de: "Du hast schon eine Liste mit diesem Namen. Bitte wähle einen anderen.", en_XA: "[Ýóú àļŕéàðý ĥàvé à ļíšţ ŵíţĥ ţĥíš ñàɱé. Þļéàšé çĥóóšé àñóţĥéŕ. ~~~~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorDescriptionRefused
+      description: "Error under the description when the server refused it."
+      text: {en: "This description was not accepted. Please change it.", de: "Diese Beschreibung wurde nicht angenommen. Bitte ändere sie.", en_XA: "[Ţĥíš ðéšçŕíþţíóñ ŵàš ñóţ àççéþţéð. Þļéàšé çĥàñĝé íţ. ~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorComicsRequired
+      description: "Error on step 2 when no comic is picked."
+      text: {en: "Pick at least one comic.", de: "Wähle mindestens einen Comic aus.", en_XA: "[Þíçķ àţ ļéàšţ óñé çóɱíç. ~~~~~~~~~~]"}
+    - key: readingListEditorComicsTooMany
+      description: "Error on step 2 when too many comics are picked."
+      placeholders: {"max": {"type": "int"}}
+      text: {en: "Pick at most {max} comics.", de: "Wähle höchstens {max} Comics aus.", en_XA: "[Þíçķ àţ ɱóšţ {max} çóɱíçš. ~~~~~~~~]"}
+    - key: readingListEditorComicsRefused
+      description: "Error on step 2 when the server refused the comics."
+      text: {en: "These comics were not accepted. Please change your picks.", de: "Diese Comics wurden nicht angenommen. Bitte ändere deine Auswahl.", en_XA: "[Ţĥéšé çóɱíçš ŵéŕé ñóţ àççéþţéð. Þļéàšé çĥàñĝé ýóúŕ þíçķš. ~~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorComicsTitle
+      description: "App bar title of step 2."
+      text: {en: "Pick comics", de: "Comics auswählen", en_XA: "[Þíçķ çóɱíçš ~~~~]"}
+    - key: readingListEditorSearchLabel
+      description: "Placeholder and accessible name of the comic search field."
+      text: {en: "Search comics by title", de: "Comics nach Titel suchen", en_XA: "[Šéàŕçĥ çóɱíçš ƀý ţíţļé ~~~~~~~~~]"}
+    - key: readingListEditorSearchClear
+      description: "Accessible name of the search field's clear button."
+      text: {en: "Clear search", de: "Suche löschen", en_XA: "[Çļéàŕ šéàŕçĥ ~~~~~]"}
+    - key: readingListEditorPickedCount
+      description: "How many comics are picked, above the picked chips."
+      placeholders: {"count": {"type": "int"}}
+      text: {en: "{count, plural, =0{No comics picked yet} =1{1 comic picked} other{{count} comics picked}}", de: "{count, plural, =0{Noch keine Comics ausgewählt} =1{1 Comic ausgewählt} other{{count} Comics ausgewählt}}", en_XA: "[{count, plural, =0{Ñó çóɱíçš þíçķéð ýéţ} =1{1 çóɱíç þíçķéð} other{{count} çóɱíçš þíçķéð}} ~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorNoResults
+      description: "Shown when the search finds nothing."
+      placeholders: {"query": {"type": "String"}}
+      text: {en: "No comic title starts with “{query}”.", de: "Kein Comictitel beginnt mit „{query}“.", en_XA: "[Ñó çóɱíç ţíţļé šţàŕţš ŵíţĥ “{query}”. ~~~~~~~~~~~~]"}
+    - key: readingListEditorSearchErrorTitle
+      description: "Title when the comic search fails; the reason and Retry follow."
+      text: {en: "The comics could not be loaded", de: "Die Comics konnten nicht geladen werden", en_XA: "[Ţĥé çóɱíçš çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~]"}
+    - key: readingListEditorSearching
+      description: "Screen-reader label while the search runs."
+      text: {en: "Searching comics", de: "Comics werden gesucht", en_XA: "[Šéàŕçĥíñĝ çóɱíçš ~~~~~~]"}
+    - key: readingListEditorAddComic
+      description: "Accessible action of a search result that is not picked."
+      placeholders: {"title": {"type": "String"}}
+      text: {en: "Add {title}", de: "{title} hinzufügen", en_XA: "[Àðð {title} ~~]"}
+    - key: readingListEditorRemoveComic
+      description: "Accessible action of a picked search result or chip."
+      placeholders: {"title": {"type": "String"}}
+      text: {en: "Remove {title}", de: "{title} entfernen", en_XA: "[Ŕéɱóvé {title} ~~~]"}
+    - key: readingListEditorReviewTitle
+      description: "App bar title of step 3."
+      text: {en: "Order and review", de: "Reihenfolge und Übersicht", en_XA: "[Óŕðéŕ àñð ŕévíéŵ ~~~~~~]"}
+    - key: readingListEditorNoDescription
+      description: "Shown in the review instead of an empty description."
+      text: {en: "No description", de: "Keine Beschreibung", en_XA: "[Ñó ðéšçŕíþţíóñ ~~~~~~]"}
+    - key: readingListEditorOrderTitle
+      description: "Heading above the picked comics in step 3."
+      text: {en: "Reading order", de: "Lesereihenfolge", en_XA: "[Ŕéàðíñĝ óŕðéŕ ~~~~~]"}
+    - key: readingListEditorOrderHint
+      description: "Line below the reading order heading."
+      text: {en: "Drag a comic, or use the arrows, to change the order.", de: "Ziehe einen Comic oder nutze die Pfeile, um die Reihenfolge zu ändern.", en_XA: "[Ðŕàĝ à çóɱíç, óŕ úšé ţĥé àŕŕóŵš, ţó çĥàñĝé ţĥé óŕðéŕ. ~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: readingListEditorMoveUp
+      description: "Moves a comic one place up in the reading order."
+      placeholders: {"title": {"type": "String"}}
+      text: {en: "Move {title} up", de: "{title} nach oben", en_XA: "[Ṁóvé {title} úþ ~~~]"}
+    - key: readingListEditorMoveDown
+      description: "Moves a comic one place down in the reading order."
+      placeholders: {"title": {"type": "String"}}
+      text: {en: "Move {title} down", de: "{title} nach unten", en_XA: "[Ṁóvé {title} ðóŵñ ~~~~]"}
+    - key: readingListEditorSaving
+      description: "Shown in step 3 while the list is saved."
+      text: {en: "Saving the list", de: "Die Liste wird gespeichert", en_XA: "[Šàvíñĝ ţĥé ļíšţ ~~~~~~]"}
+    - key: readingListEditorSaveFailed
+      description: "Title of the inline error in step 3 when saving failed; the reason and Retry follow."
+      text: {en: "The list could not be saved", de: "Die Liste konnte nicht gespeichert werden", en_XA: "[Ţĥé ļíšţ çóúļð ñóţ ƀé šàvéð ~~~~~~~~~~~]"}
+bdd:
+  - feature: reading_list_editor_create
+    title: "Create a reading list"
+    description: |-
+      Readers collect comics into reading lists: a name, who can see it, and the
+      comics in the order they want to read them. Three steps lead there, and
+      the editor hands the new list back to whoever opened it.
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+      - "And the backend serves {'library.default'}"
+    scenarios:
+      - title: "Three steps create a list with the comics in the chosen order"
+        tags: [T-0048-AC1, smoke]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "Then I see {'New reading list'}"
+          - "And I am on step {1}"
+          - "When I enter {'Amber reads'} as the name"
+          - "And I enter {'Where Amber begins.'} as the description"
+          - "And I tap {'Public'}"
+          - "And I tap {'Next'}"
+          - "Then I am on step {2}"
+          - "When I search for {'Amber Chr'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I pick {'Amber Chronicles #2'}"
+          - "And I pick {'Amber Chronicles #3'}"
+          - "Then I see {'3 comics picked'}"
+          - "And the picked comics are"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Chronicles #2' |"
+          - "  | 'Amber Chronicles #3' |"
+          - "When I tap {'Next'}"
+          - "Then I am on step {3}"
+          - "And I see {'Amber reads'}"
+          - "And I see {'Where Amber begins.'}"
+          - "And the reading order is"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Chronicles #2' |"
+          - "  | 'Amber Chronicles #3' |"
+          - "When I move {'Amber Chronicles #3'} up"
+          - "Then the reading order is"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Chronicles #3' |"
+          - "  | 'Amber Chronicles #2' |"
+          - "When I tap {'Create list'}"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the backend received {'POST /v1/me/lists'} with the body"
+          - "  | 'key'         | 'json'                     |"
+          - "  | 'name'        | '\"Amber reads\"'            |"
+          - "  | 'description' | '\"Where Amber begins.\"'    |"
+          - "  | 'visibility'  | '\"public\"'                 |"
+          - "  | 'comicIds'    | '[500060, 500062, 500061]' |"
+          - "And the backend received {'POST /v1/me/lists'} with the bearer of {'reader@mini-client.test'}"
+          - "And the backend answered {'POST /v1/me/lists'} with {201}"
+          - "And the editor completed with list {'l-5'}"
+          - "And list {'l-5'} of {'reader@mini-client.test'} is named {'Amber reads'}"
+          - "And list {'l-5'} of {'reader@mini-client.test'} holds the comics"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Chronicles #3' |"
+          - "  | 'Amber Chronicles #2' |"
+          - "And the app announced {1} change to {'readingLists'}"
+      - title: "The name is sent trimmed, a private list is the default, and a picked comic can be dropped again"
+        tags: [T-0048-AC1]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter {'  Weekend  '} as the name"
+          - "And I tap {'Next'}"
+          - "And I search for {'Amber Fr'}"
+          - "And I pick {'Amber Frontier #1'}"
+          - "And I pick {'Amber Frontier #2'}"
+          - "And I tap {'Amber Frontier #1'} in the picked comics"
+          - "Then the picked comics are"
+          - "  | 'title'             |"
+          - "  | 'Amber Frontier #2' |"
+          - "When I pick {'Amber Frontier #2'}"
+          - "Then I see {'No comics picked yet'}"
+          - "When I pick {'Amber Frontier #3'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create list'}"
+          - "Then the backend received {'POST /v1/me/lists'} with the body"
+          - "  | 'key'         | 'json'      |"
+          - "  | 'name'        | '\"Weekend\"' |"
+          - "  | 'description' | '\"\"'        |"
+          - "  | 'visibility'  | '\"private\"' |"
+          - "  | 'comicIds'    | '[501502]'  |"
+          - "And the editor completed with list {'l-5'}"
+      - title: "An invalid step keeps Next disabled, and a tap on it shows why"
+        tags: [T-0048-AC6]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "Then the button {'Next'} is disabled"
+          - "And I don't see {'Give your list a name.'}"
+          - "When I tap {'Next'}"
+          - "Then I am on step {1}"
+          - "And the error {'Give your list a name.'} shows under the field {'Name'}"
+          - "When I enter {'Amber reads'} as the name"
+          - "Then I don't see {'Give your list a name.'}"
+          - "When I tap {'Next'}"
+          - "Then I am on step {2}"
+          - "And the button {'Next'} is disabled"
+          - "And I don't see {'Pick at least one comic.'}"
+          - "When I tap {'Next'}"
+          - "Then I am on step {2}"
+          - "And the comics error reads {'Pick at least one comic.'}"
+          - "And the backend received {0} requests for {'POST /v1/me/lists'}"
+      - title: "The details follow the backend's rules"
+        tags: [T-0048-AC1]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter <name> as the name"
+          - "And I enter <description> as the description"
+          - "Then the error <error> shows under the field <field>"
+          - "And the button {'Next'} is disabled"
+        examples:
+          - ["name", "description", "error                          ", "field"]
+          - ["'   '", "''", "'Give your list a name.'       ", "'Name'"]
+          - ["'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'", "''", "'Use at most 60 characters.'   ", "'Name'"]
+          - ["'Ok'", "'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'", "'Use at most 280 characters.'", "'Description (optional)'"]
+      - title: "Sixty characters, trimmed, are a valid name"
+        tags: [T-0048-AC1]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter {' aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa '} as the name"
+          - "Then I don't see {'Use at most 60 characters.'}"
+          - "When I tap {'Next'}"
+          - "Then I am on step {2}"
+      - title: "A failed save shows an inline error with Retry, and Retry resends once with nothing lost"
+        tags: [T-0048-AC2]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend fails {'POST /v1/me/lists'} with {'server_error'}"
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I search for {'Amber Chr'}"
+          - "And I pick {'Amber Chronicles #2'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create list'}"
+          - "Then I am on step {3}"
+          - "And the save error reads {'The server had a problem. Please try again later.'}"
+          - "And the editor has not ended"
+          - "And the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the reading order is"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #2' |"
+          - "  | 'Amber Chronicles #1' |"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the backend received {2} requests for {'POST /v1/me/lists'}"
+          - "And the backend received {'POST /v1/me/lists'} with the body"
+          - "  | 'key'         | 'json'             |"
+          - "  | 'name'        | '\"Amber reads\"'    |"
+          - "  | 'description' | '\"\"'               |"
+          - "  | 'visibility'  | '\"private\"'        |"
+          - "  | 'comicIds'    | '[500061, 500060]' |"
+          - "And the editor completed with list {'l-5'}"
+          - "And the app announced {1} change to {'readingLists'}"
+      - title: "A name the backend refuses takes the wizard back to step 1 with the error under the name"
+        tags: [T-0048-AC2]
+        steps:
+          - "# The one rule only the backend can check: a reader's list names are"
+          - "# unique (case-insensitive, after trimming), and they have \"Weekend Reads\"."
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter {' weekend reads '} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create list'}"
+          - "Then the backend answered {'POST /v1/me/lists'} with {400}"
+          - "And I am on step {1}"
+          - "And the error {'You already have a list with this name. Please choose another.'} shows under the field {'Name'}"
+          - "And the button {'Next'} is disabled"
+          - "And the editor has not ended"
+          - "And the app announced {0} change to {'readingLists'}"
+          - "When I enter {' weekend reads '} as the name"
+          - "Then the error {'You already have a list with this name. Please choose another.'} shows under the field {'Name'}"
+          - "When I enter {'Weekend reads, again'} as the name"
+          - "Then I don't see {'You already have a list with this name. Please choose another.'}"
+          - "When I tap {'Next'}"
+          - "Then the picked comics are"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "When I tap {'Next'}"
+          - "And I tap {'Create list'}"
+          - "Then the backend received {2} requests for {'POST /v1/me/lists'}"
+          - "And the editor completed with list {'l-5'}"
+      - title: "Lengths count what a reader sees, on both sides: sixty flags are a valid name"
+        tags: [T-0048-AC1]
+        steps:
+          - "# A flag is two code points; the form and the backend both count it once."
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter {'🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪🇩🇪'} as the name"
+          - "Then I don't see {'Use at most 60 characters.'}"
+          - "When I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create list'}"
+          - "Then the backend answered {'POST /v1/me/lists'} with {201}"
+          - "And the editor completed with list {'l-5'}"
+      - title: "Signed out, the editor asks to sign in first and then opens on step 1"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "Then the app was asked to sign in {1} time"
+          - "And I don't see {'Step 1 of 3'}"
+          - "And the backend received {0} requests for {'* /v1/me/lists'}"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "Then I see {'New reading list'}"
+          - "And I am on step {1}"
+          - "And the editor has not ended"
+      - title: "Signed out, backing out of sign-in closes the editor with no result"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And signing in is cancelled"
+          - "Then the editor ended without a list"
+          - "And the app was asked to sign in {1} time"
+          - "And the backend received {0} requests for {'* /v1/me/lists'}"
+          - "And the backend received {0} requests for {'* /v1/me/lists/:id'}"
+      - title: "Search narrows the comics, says when nothing matches, and recovers from a failure"
+        tags: [T-0048-AC1]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "Then the backend received {'GET /v1/comics?limit=20'}"
+          - "When I search for {'zzz'}"
+          - "Then I see {'No comic title starts with “zzz”.'}"
+          - "And the backend received {'GET /v1/comics?titleStartsWith=zzz&limit=20'}"
+          - "Given the backend fails {'GET /v1/comics'} with {'server_error'}"
+          - "When I search for {'Amber'}"
+          - "Then I see {'The comics could not be loaded'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then I see {'Amber Chronicles #1'}"
+  - feature: reading_list_editor_edit
+    title: "Edit a reading list"
+    description: |-
+      A reader opens one of their lists in the same three steps, finds every
+      step filled in, and saves only what they changed.
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+      - "And the backend serves {'library.default'}"
+      - "And I am signed in as {'reader@mini-client.test'}"
+    scenarios:
+      - title: "Editing loads the list and fills in every step"
+        tags: [T-0048-AC3, smoke]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "Then I see {'Edit reading list'}"
+          - "And the name field shows {'Spider-Verse Starter'}"
+          - "And the description field shows {'Where to begin.'}"
+          - "And the visibility is {'Public'}"
+          - "And the backend received {1} requests for {'GET /v1/me/lists/l-1'}"
+          - "When I tap {'Next'}"
+          - "Then the picked comics are"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Frontier #1'   |"
+          - "  | 'Amber Legacy #1'     |"
+          - "When I tap {'Next'}"
+          - "Then the reading order is"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Frontier #1'   |"
+          - "  | 'Amber Legacy #1'     |"
+          - "And I see {'Save changes'}"
+      - title: "Saving without a change sends nothing and completes with the same id"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Save changes'}"
+          - "Then the backend received {0} requests for {'PUT /v1/me/lists/:id'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}"
+          - "And the editor completed with list {'l-1'}"
+          - "And the app announced {0} change to {'readingLists'}"
+      - title: "A new name sends only the details"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Save changes'}"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the backend received {'PUT /v1/me/lists/l-1'} with the body"
+          - "  | 'key'         | 'json'                  |"
+          - "  | 'name'        | '\"Spider-Verse Basics\"' |"
+          - "  | 'description' | '\"Where to begin.\"'     |"
+          - "  | 'visibility'  | '\"public\"'              |"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}"
+          - "And the editor completed with list {'l-1'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} is named {'Spider-Verse Basics'}"
+          - "And the app announced {1} change to {'readingLists'}"
+      - title: "A new order sends only the items"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "And I tap {'Save changes'}"
+          - "Then the backend received {0} requests for {'PUT /v1/me/lists/:id'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/lists/l-1/items'}"
+          - "And the backend received {'PUT /v1/me/lists/l-1/items'} with the body"
+          - "  | 'key'      | 'json'                     |"
+          - "  | 'comicIds' | '[500060, 500540, 501500]' |"
+          - "And the editor completed with list {'l-1'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} holds the comics"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Legacy #1'     |"
+          - "  | 'Amber Frontier #1'   |"
+      - title: "Details and comics that both changed are both sent, the details first"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I tap {'Private'}"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Save changes'}"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/lists/l-1/items'}"
+          - "And the backend received {'PUT /v1/me/lists/l-1/items'} with the body"
+          - "  | 'key'      | 'json'             |"
+          - "  | 'comicIds' | '[501500, 500540]' |"
+          - "And the requests to the list went in the order"
+          - "  | 'route'                      |"
+          - "  | 'GET /v1/me/lists/l-1'       |"
+          - "  | 'PUT /v1/me/lists/l-1'       |"
+          - "  | 'PUT /v1/me/lists/l-1/items' |"
+          - "And the editor completed with list {'l-1'}"
+          - "And the app announced {1} change to {'readingLists'}"
+      - title: "When the details saved and the comics failed, Retry sends only the comics"
+        tags: [T-0048-AC3, T-0048-AC2]
+        steps:
+          - "Given the backend fails {'PUT /v1/me/lists/l-1/items'} with {'server_error'}"
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "And I tap {'Save changes'}"
+          - "Then the save error reads {'The server had a problem. Please try again later.'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the editor has not ended"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the editor completed with list {'l-1'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} is named {'Spider-Verse Basics'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} holds the comics"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Legacy #1'     |"
+          - "  | 'Amber Frontier #1'   |"
+      - title: "A list that is not the reader's shows that it was not found"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for <list>"
+          - "Then I see {'List not found'}"
+          - "And I see {'This reading list does not exist or is not yours.'}"
+          - "And I don't see {'Step 1 of 3'}"
+          - "And I don't see {'Retry'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id'}"
+          - "And the editor has not ended"
+        examples:
+          - ["list"]
+          - ["'l-4'"]
+          - ["'l-999'"]
+      - title: "A list that fails to load explains the problem, and Retry recovers"
+        tags: [T-0048-AC3, T-0048-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/me/lists/l-1'} with {'offline'}"
+          - "When I open the reading list editor for {'l-1'}"
+          - "Then I see {'The reading list could not be loaded'}"
+          - "And I see {'No connection. Check your network and try again.'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the name field shows {'Spider-Verse Starter'}"
+      - title: "A list holds at most 100 comics"
+        tags: [T-0048-AC1]
+        steps:
+          - "Given {'reader@mini-client.test'} has a list of {100} comics"
+          - "When I open the reading list editor for {'l-5'}"
+          - "And I tap {'Next'}"
+          - "And I search for {'Amber Fr'}"
+          - "And I pick {'Amber Frontier #1'}"
+          - "Then the comics error reads {'Pick at most 100 comics.'}"
+          - "And the button {'Next'} is disabled"
+          - "When I pick {'Amber Frontier #1'}"
+          - "Then I see {'100 comics picked'}"
+          - "And I don't see {'Pick at most 100 comics.'}"
+      - title: "A list without comics can still be renamed"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for {'l-3'}"
+          - "And I tap {'Next'}"
+          - "Then I see {'No comics picked yet'}"
+          - "And I don't see {'Pick at least one comic.'}"
+          - "When I tap {'Back'}"
+          - "And I enter {'Some day'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Save changes'}"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-3'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}"
+          - "And the editor completed with list {'l-3'}"
+          - "And list {'l-3'} of {'reader@mini-client.test'} is named {'Some day'}"
+      - title: "Removing every comic of a list is not a change the editor saves"
+        tags: [T-0048-AC3]
+        steps:
+          - "When I open the reading list editor for {'l-2'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Amber Chronicles #6'} in the picked comics"
+          - "And I tap {'Amber Chronicles #16'} in the picked comics"
+          - "Then the comics error reads {'Pick at least one comic.'}"
+          - "And the button {'Next'} is disabled"
+  - feature: reading_list_editor_races
+    title: "The editor stays consistent while requests are in flight"
+    description: |-
+      A save, a search or a load can take a while. Meanwhile the reader may tap
+      twice, go back, or the session may change: the editor sends one save,
+      keeps every value, and never writes for, or hands a list to, an account
+      the editing did not start in.
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+      - "And the backend serves {'library.default'}"
+      - "And I am signed in as {'reader@mini-client.test'}"
+    scenarios:
+      - title: "A double Create sends one POST and completes once"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create list'} twice in quick succession"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the editor completed with list {'l-5'}"
+          - "And the app announced {1} change to {'readingLists'}"
+      - title: "A double Save sends each changed part once"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "And I tap {'Save changes'} twice in quick succession"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/lists/l-1/items'}"
+          - "And the editor completed with list {'l-1'}"
+      - title: "While the save runs the buttons are off, going back is refused and nothing is lost"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I pick {'Amber Chronicles #2'}"
+          - "And I tap {'Next'}"
+          - "Given the backend holds {'POST /v1/me/lists'}"
+          - "When I tap {'Create list'}"
+          - "And the app sends {'POST /v1/me/lists'}"
+          - "Then the editor shows that it is saving"
+          - "And the button {'Create list'} is disabled"
+          - "And the button {'Back'} is disabled"
+          - "When I swipe back"
+          - "Then I am on step {3}"
+          - "When I move {'Amber Chronicles #2'} up"
+          - "Then the reading order is"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Chronicles #2' |"
+          - "When the backend releases {'POST /v1/me/lists'}"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the editor completed with list {'l-5'}"
+      - title: "Going back by the button and by the swipe keeps every step's values"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I enter {'Where Amber begins.'} as the description"
+          - "And I tap {'Public'}"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I pick {'Amber Chronicles #2'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Chronicles #2'} up"
+          - "And I swipe back"
+          - "Then I am on step {2}"
+          - "And the picked comics are"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #2' |"
+          - "  | 'Amber Chronicles #1' |"
+          - "When I tap {'Back'}"
+          - "Then I am on step {1}"
+          - "And the name field shows {'Amber reads'}"
+          - "And the description field shows {'Where Amber begins.'}"
+          - "And the visibility is {'Public'}"
+          - "When I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "Then the reading order is"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #2' |"
+          - "  | 'Amber Chronicles #1' |"
+          - "When I tap {'Create list'}"
+          - "Then the backend received {'POST /v1/me/lists'} with the body"
+          - "  | 'key'         | 'json'                  |"
+          - "  | 'name'        | '\"Amber reads\"'         |"
+          - "  | 'description' | '\"Where Amber begins.\"' |"
+          - "  | 'visibility'  | '\"public\"'              |"
+          - "  | 'comicIds'    | '[500061, 500060]'      |"
+          - "And the editor completed with list {'l-5'}"
+      - title: "Going back while a search is held, its late answer changes nothing"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "Given the backend holds {'GET /v1/comics?titleStartsWith=Amber Fr'}"
+          - "When I search for {'Amber Fr'}"
+          - "And the app sends {'GET /v1/comics?titleStartsWith=Amber Fr'}"
+          - "And I tap {'Back'}"
+          - "Then I am on step {1}"
+          - "When the backend releases {'GET /v1/comics?titleStartsWith=Amber Fr'}"
+          - "And I tap {'Next'}"
+          - "Then I am on step {2}"
+          - "And the picked comics are"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "And I see {'Amber Chronicles #2'}"
+          - "And I don't see {'Amber Frontier #1'}"
+      - title: "Another user signing in during the save gets nothing written, and the list is not handed out"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "Given the backend holds {'POST /v1/me/lists'}"
+          - "When I tap {'Create list'}"
+          - "And the app sends {'POST /v1/me/lists'}"
+          - "And {'collector@mini-client.test'} signs in elsewhere"
+          - "And the backend releases {'POST /v1/me/lists'}"
+          - "Then I see {'You are no longer signed in as before'}"
+          - "And the editor has not ended"
+          - "And the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the backend received {'POST /v1/me/lists'} with a token of {'reader@mini-client.test'}"
+          - "And {'collector@mini-client.test'} has {1} reading lists"
+          - "And the app announced {1} change to {'readingLists'}"
+          - "When I tap {'Close'}"
+          - "Then the editor ended without a list"
+      - title: "A sign-out during the save writes nothing more and hands out no list"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "Given the backend holds {'POST /v1/me/lists'}"
+          - "When I tap {'Create list'}"
+          - "And the app sends {'POST /v1/me/lists'}"
+          - "And the session ends elsewhere"
+          - "And the backend releases {'POST /v1/me/lists'}"
+          - "Then I see {'You are no longer signed in as before'}"
+          - "And the editor is back on its first page"
+          - "And the editor has not ended"
+          - "When I tap {'Close'}"
+          - "Then the editor ended without a list"
+      - title: "A sign-out before Finish ends the editing and sends nothing"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And the session ends elsewhere"
+          - "Then I see {'You are no longer signed in as before'}"
+          - "And I don't see {'Create list'}"
+          - "And the backend received {0} requests for {'POST /v1/me/lists'}"
+      - title: "Another user signing in between the two writes of an edit stops the second"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "Given the backend holds {'PUT /v1/me/lists/l-1'}"
+          - "When I tap {'Save changes'}"
+          - "And the app sends {'PUT /v1/me/lists/l-1'}"
+          - "And {'collector@mini-client.test'} signs in elsewhere"
+          - "And the backend releases {'PUT /v1/me/lists/l-1'}"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the backend received {'PUT /v1/me/lists/l-1'} with a token of {'reader@mini-client.test'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}"
+          - "And I see {'You are no longer signed in as before'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} holds the comics"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Frontier #1'   |"
+          - "  | 'Amber Legacy #1'     |"
+      - title: "Another user signing in right before the POST is sent writes nothing for them"
+        tags: [T-0050-AC2]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Next'}"
+          - "And {'collector@mini-client.test'} signs in just before the app sends {'POST /v1/me/lists'}"
+          - "And I tap {'Create list'}"
+          - "And the app finishes writing to storage"
+          - "Then the backend received {0} requests for {'POST /v1/me/lists'}"
+          - "And the session belongs to {'collector@mini-client.test'}"
+          - "And I see {'You are no longer signed in as before'}"
+          - "And the editor has not ended"
+          - "And {'collector@mini-client.test'} has {1} reading lists"
+          - "And {'reader@mini-client.test'} has {3} reading lists"
+          - "And the app announced {0} change to {'readingLists'}"
+          - "When I tap {'Close'}"
+          - "Then the editor ended without a list"
+      - title: "Another user signing in right before the second write of an edit sends it for no one"
+        tags: [T-0050-AC2]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "And {'collector@mini-client.test'} signs in just before the app sends {'PUT /v1/me/lists/l-1/items'}"
+          - "And I tap {'Save changes'}"
+          - "And the app finishes writing to storage"
+          - "Then the backend received {1} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the session belongs to {'collector@mini-client.test'}"
+          - "And the backend received {'PUT /v1/me/lists/l-1'} with a token of {'reader@mini-client.test'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}"
+          - "And I see {'You are no longer signed in as before'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} holds the comics"
+          - "  | 'title'               |"
+          - "  | 'Amber Chronicles #1' |"
+          - "  | 'Amber Frontier #1'   |"
+          - "  | 'Amber Legacy #1'     |"
+      - title: "Another user signing in right before the first write of an edit sends nothing"
+        tags: [T-0050-AC2]
+        steps:
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "And {'collector@mini-client.test'} signs in just before the app sends {'PUT /v1/me/lists/l-1'}"
+          - "And I tap {'Save changes'}"
+          - "And the app finishes writing to storage"
+          - "Then the backend received {0} requests for {'PUT /v1/me/lists/l-1'}"
+          - "And the session belongs to {'collector@mini-client.test'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/lists/:id/items'}"
+          - "And I see {'You are no longer signed in as before'}"
+          - "And the app announced {0} change to {'readingLists'}"
+      - title: "A session change while the list loads shows no list of the old session"
+        tags: [T-0048-AC6]
+        steps:
+          - "Given the backend holds {'GET /v1/me/lists/l-1'}"
+          - "When I open the reading list editor for {'l-1'}"
+          - "And the app sends {'GET /v1/me/lists/l-1'}"
+          - "And {'collector@mini-client.test'} signs in elsewhere"
+          - "And the backend releases {'GET /v1/me/lists/l-1'}"
+          - "Then I see {'You are no longer signed in as before'}"
+          - "And I don't see {'Spider-Verse Starter'}"
+          - "And I don't see {'Step 1 of 3'}"
+      - title: "A slow search that answers after a newer one changes nothing"
+        tags: [T-0048-AC6]
+        steps:
+          - "When I open the reading list editor"
+          - "And I enter {'Amber reads'} as the name"
+          - "And I tap {'Next'}"
+          - "Given the backend holds {'GET /v1/comics?titleStartsWith=Amber Ch'}"
+          - "When I search for {'Amber Ch'}"
+          - "And the app sends {'GET /v1/comics?titleStartsWith=Amber Ch'}"
+          - "And I search for {'Amber Fr'}"
+          - "Then I see {'Amber Frontier #1'}"
+          - "When the backend releases {'GET /v1/comics?titleStartsWith=Amber Ch'}"
+          - "Then I see {'Amber Frontier #1'}"
+          - "And I don't see {'Amber Chronicles #3'}"
+      - title: "A half-saved edit is announced: the details saved, the comics failed"
+        tags: [T-0048-AC6]
+        steps:
+          - "Given the backend fails {'PUT /v1/me/lists/l-1/items'} with {'server_error'}"
+          - "When I open the reading list editor for {'l-1'}"
+          - "And I enter {'Spider-Verse Basics'} as the name"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I move {'Amber Legacy #1'} up"
+          - "And I tap {'Save changes'}"
+          - "Then the save error reads {'The server had a problem. Please try again later.'}"
+          - "And list {'l-1'} of {'reader@mini-client.test'} is named {'Spider-Verse Basics'}"
+          - "And the app announced {1} change to {'readingLists'}"
+          - "And the editor has not ended"
+  - feature: reading_list_editor_l10n
+    title: "The reading list editor speaks the reader's language"
+    description: |-
+      Every step title, label, validation message and button comes from the
+      feature's own strings, in German as in English, and long translations fit
+      on every step at large text sizes.
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+      - "And the backend serves {'library.default'}"
+    scenarios:
+      - title: "In German every step, label, message and button is German"
+        tags: [T-0048-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "Then I see the texts"
+          - "  | 'text'                                                          |"
+          - "  | 'Neue Leseliste'                                                |"
+          - "  | 'Schritt 1 von 3'                                               |"
+          - "  | 'Details'                                                       |"
+          - "  | 'Gib deiner Liste einen Namen und wähle, wer sie sehen kann.'  |"
+          - "  | 'Name'                                                          |"
+          - "  | 'Beschreibung (optional)'                                       |"
+          - "  | 'Wer sie sehen kann'                                            |"
+          - "  | 'Privat'                                                        |"
+          - "  | 'Öffentlich'                                                    |"
+          - "  | 'Zurück'                                                        |"
+          - "  | 'Weiter'                                                        |"
+          - "When I tap {'Weiter'}"
+          - "Then the error {'Gib deiner Liste einen Namen.'} shows under the field {'Name'}"
+          - "When I enter {'Amber'} in the field {'Name'}"
+          - "And I enter {'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'} in the field {'Beschreibung (optional)'}"
+          - "Then the error {'Verwende höchstens 280 Zeichen.'} shows under the field {'Beschreibung (optional)'}"
+          - "When I enter {''} in the field {'Beschreibung (optional)'}"
+          - "And I tap {'Weiter'}"
+          - "Then I see the texts"
+          - "  | 'text'                         |"
+          - "  | 'Comics auswählen'             |"
+          - "  | 'Schritt 2 von 3'              |"
+          - "  | 'Noch keine Comics ausgewählt' |"
+          - "When I tap {'Weiter'}"
+          - "Then the comics error reads {'Wähle mindestens einen Comic aus.'}"
+          - "When I pick {'Amber Chronicles #1'}"
+          - "Then I see {'1 Comic ausgewählt'}"
+          - "When I tap {'Weiter'}"
+          - "Then I see the texts"
+          - "  | 'text'                                                                    |"
+          - "  | 'Reihenfolge und Übersicht'                                               |"
+          - "  | 'Schritt 3 von 3'                                                         |"
+          - "  | 'Keine Beschreibung'                                                      |"
+          - "  | 'Lesereihenfolge'                                                         |"
+          - "  | 'Ziehe einen Comic oder nutze die Pfeile, um die Reihenfolge zu ändern.' |"
+          - "  | 'Liste erstellen'                                                         |"
+          - "Given the backend fails {'POST /v1/me/lists'} with {'server_error'}"
+          - "When I tap {'Liste erstellen'}"
+          - "Then I see the texts"
+          - "  | 'text'                                                                       |"
+          - "  | 'Die Liste konnte nicht gespeichert werden'                                  |"
+          - "  | 'Auf dem Server ist ein Fehler aufgetreten. Bitte versuche es später erneut.' |"
+          - "  | 'Erneut versuchen'                                                           |"
+      - title: "In German, editing and the states around it are German"
+        tags: [T-0048-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor for {'l-1'}"
+          - "Then I see {'Leseliste bearbeiten'}"
+          - "When I tap {'Weiter'}"
+          - "Then I see {'3 Comics ausgewählt'}"
+          - "When I tap {'Weiter'}"
+          - "Then I see {'Änderungen speichern'}"
+          - "When the session ends elsewhere"
+          - "Then I see the texts"
+          - "  | 'text'                                                                                       |"
+          - "  | 'Du bist nicht mehr wie zuvor angemeldet'                                                    |"
+          - "  | 'Das Konto hat sich während der Bearbeitung geändert, daher wurde nichts weiter gespeichert.' |"
+          - "  | 'Schließen'                                                                                  |"
+      - title: "In German a list that is not the reader's is \"not found\""
+        tags: [T-0048-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor for {'l-4'}"
+          - "Then I see the texts"
+          - "  | 'text'                                                  |"
+          - "  | 'Liste nicht gefunden'                                  |"
+          - "  | 'Diese Leseliste gibt es nicht, oder sie gehört dir nicht.' |"
+      - title: "In the pseudo-locale nothing overflows on any step at <scale>x"
+        tags: [T-0048-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "Then nothing overflows"
+          - "When I tap {'[Ñéxţ ~~]'}"
+          - "Then I see {'[Ĝívé ýóúŕ ļíšţ à ñàɱé. ~~~~~~~~~]'}"
+          - "And nothing overflows"
+          - "When I enter {'Amber reads'} in the field {'[Ñàɱé ~~]'}"
+          - "And I tap {'[Þúƀļíç ~~]'}"
+          - "And I tap {'[Ñéxţ ~~]'}"
+          - "Then I see {'[Þíçķ çóɱíçš ~~~~]'}"
+          - "When I tap {'[Ñéxţ ~~]'}"
+          - "Then the comics error reads {'[Þíçķ àţ ļéàšţ óñé çóɱíç. ~~~~~~~~~~]'}"
+          - "And nothing overflows"
+          - "When I pick {'Amber Chronicles #1'}"
+          - "And I pick {'Amber Chronicles #2'}"
+          - "And I tap {'[Ñéxţ ~~]'}"
+          - "Then I see {'[Óŕðéŕ àñð ŕévíéŵ ~~~~~~]'}"
+          - "And nothing overflows"
+          - "Given the backend fails {'POST /v1/me/lists'} with {'server_error'}"
+          - "When I tap {'[Çŕéàţé ļíšţ ~~~~]'}"
+          - "Then I see {'[Ţĥé ļíšţ çóúļð ñóţ ƀé šàvéð ~~~~~~~~~~~]'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In the pseudo-locale the states outside the wizard fit at <scale>x"
+        tags: [T-0048-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "When I open the reading list editor"
+          - "Then nothing overflows"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "And the session ends elsewhere"
+          - "Then nothing overflows"
+          - "When I tap {'[Çļóšé ~~]'}"
+          - "Then the editor ended without a list"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In German the backend's refusal of a name is German, under the name"
+        tags: [T-0050-AC3, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor"
+          - "And I enter {' weekend reads '} as the name"
+          - "And I tap {'Weiter'}"
+          - "And I pick {'Amber Chronicles #1'}"
+          - "And I tap {'Weiter'}"
+          - "And I tap {'Liste erstellen'}"
+          - "Then the backend answered {'POST /v1/me/lists'} with {400}"
+          - "And I see {'Schritt 1 von 3'}"
+          - "And the error {'Du hast schon eine Liste mit diesem Namen. Bitte wähle einen anderen.'} shows under the field {'Name'}"
+      - title: "In the pseudo-locale a list that is not the reader's fits at <scale>x"
+        tags: [T-0050-AC3, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the reading list editor for {'l-4'}"
+          - "Then I see {'[Ļíšţ ñóţ ƒóúñð ~~~~~~]'}"
+          - "And I see {'[Ţĥíš ŕéàðíñĝ ļíšţ ðóéš ñóţ éxíšţ óŕ íš ñóţ ýóúŕš. ~~~~~~~~~~~~~~~~~~~~]'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In the pseudo-locale a list that could not be loaded fits at <scale>x"
+        tags: [T-0050-AC3, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "And the backend fails {'GET /v1/me/lists/l-1'} with {'server_error'}"
+          - "When I open the reading list editor for {'l-1'}"
+          - "Then I see {'[Ţĥé ŕéàðíñĝ ļíšţ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~~]'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]

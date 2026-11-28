@@ -119,9 +119,9 @@ Feature: Create a reading list
     And the button {'Next'} is disabled
 
     Examples:
-      | name                                                            | description | error                           | field                    |
-      | '   '                                                           | ''          | 'Give your list a name.'        | 'Name'                   |
-      | 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' | ''          | 'Use at most 60 characters.'    | 'Name'                   |
+      | name                                                            | description                                                                                                                                                                                                                                                                                 | error                           | field                    |
+      | '   '                                                           | ''                                                                                                                                                                                                                                                                                          | 'Give your list a name.'        | 'Name'                   |
+      | 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' | ''                                                                                                                                                                                                                                                                                          | 'Use at most 60 characters.'    | 'Name'                   |
       | 'Ok'                                                            | 'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd' | 'Use at most 280 characters.' | 'Description (optional)' |
 
   @T-0048-AC1
