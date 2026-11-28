@@ -426,9 +426,9 @@ String _flags(DbModel m) =>
     '${imports(['package:mc_feature_flags/mc_feature_flags.dart'])}\n\n'
     '${m.flags.map((f) => '${m.doc('flag.${f.name}', f.doc ?? 'The ${f.key} flag.')}'
         'const FeatureFlag<bool> ${f.name} = FeatureFlag<bool>(\n'
-        "  key: '${f.key}',\n"
+        '  key: ${dartString(f.key)},\n'
         '  defaultValue: ${f.defaultValue},\n'
-        "  description: '${f.description.replaceAll("'", r"\'")}',\n"
+        '  description: ${dartString(f.description)},\n'
         '  codec: BoolFlagCodec(),\n'
         ');').join('\n\n')}\n';
 

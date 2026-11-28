@@ -7,6 +7,7 @@
 
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:mcgen/mcgen.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -189,18 +190,17 @@ void main() {
     test('T-0076-AC2 gen writes only the manifest into the exemplar, and the '
         'committed manifest is the one it writes', () {
       final root = _copyRoot('manifest');
-      final before = {
+      Map<String, String> hashes() => {
         for (final f in listTree(p.join(root.path, _rel)))
           if (!f.startsWith('.mcgen'))
-            f: File(p.join(root.path, _rel, f)).readAsBytesSync().length,
+            f: sha256
+                .convert(File(p.join(root.path, _rel, f)).readAsBytesSync())
+                .toString(),
       };
+      final before = hashes();
       final r = mcgen(['gen', '--root', root.path, 'store_home']);
       expect(r.code, 0, reason: '$r');
-      expect({
-        for (final f in listTree(p.join(root.path, _rel)))
-          if (!f.startsWith('.mcgen'))
-            f: File(p.join(root.path, _rel, f)).readAsBytesSync().length,
-      }, before);
+      expect(hashes(), before);
       expect(
         readFile(root, '$_rel/.mcgen/manifest.json'),
         File(p.join(repoRoot, _rel, '.mcgen/manifest.json')).readAsStringSync(),
@@ -360,6 +360,129 @@ void main() {
           ),
         ),
         contains('options.screens.detail: a detail page needs its screen name'),
+      );
+    });
+
+    test('T-0076-AC3 navigator: a method takes at most one argument, so no '
+        'parameter name repeats', () {
+      expect(
+        _lint(
+          'nav1',
+          (s) => s.replaceFirst(
+            'openSearch(String)',
+            '"openSearch(String, String)"',
+          ),
+        ),
+        contains(
+          'navigator.outbound[1]: navigator method "openSearch" takes 2 arguments; a dashboard navigator method takes at most one',
+        ),
+      );
+    });
+
+    test('T-0076-AC3 session section: open_call takes no argument and '
+        'requestSignIn returns a Future', () {
+      expect(
+        _lint(
+          'ss1',
+          (s) => s.replaceFirst(
+            '      open_call: openCart\n',
+            '      open_call: openComic\n',
+          ),
+        ),
+        contains(
+          'options.sections[4].open_call: the session section calls "openComic" with no argument, but the navigator method takes one',
+        ),
+      );
+      expect(
+        _lint(
+          'ss2',
+          (s) => s.replaceFirst(
+            'requestSignIn() -> Future<bool>',
+            'requestSignIn() -> bool',
+          ),
+        ),
+        contains(
+          'options.sections[4] (requestSignIn): requestSignIn must return a Future (it is awaited), not "bool"',
+        ),
+      );
+      expect(
+        _lint(
+          'ss3',
+          (s) => s.replaceFirst(
+            'requestSignIn() -> Future<bool>',
+            'requestSignIn()',
+          ),
+        ),
+        contains(
+          'options.sections[4] (requestSignIn): requestSignIn must return a Future (it is awaited), not "void"',
+        ),
+      );
+    });
+
+    test('T-0076-AC3 a session section says so when it ignores a key', () {
+      expect(
+        _lint(
+          'ig',
+          (s) => s.replaceFirst(
+            '      open_id: summary\n',
+            '      open_id: summary\n      open: |-\n        x();\n      members: x\n      top: y\n',
+          ),
+        ),
+        containsAll([
+          'options.sections[4].open: a session section has its own template and ignores "open"',
+          'options.sections[4].members: a session section has its own template and ignores "members"',
+          'options.sections[4].top: a session section has its own template and ignores "top"',
+        ]),
+      );
+    });
+
+    test('T-0076-AC3 unique flag names and keys, unique bloc and widget '
+        'names, lower camel section names', () {
+      expect(
+        _lint(
+          'u1',
+          (s) => s.replaceFirst(
+            '  detail:\n',
+            '    - name: storeHomeFeatured\n      key: store.home_featured\n      default: true\n      description: again\n  detail:\n',
+          ),
+        ),
+        containsAll([
+          'options.flags[1].name: two flags are named "storeHomeFeatured"',
+          'options.flags[1].key: two flags have the key "store.home_featured"',
+        ]),
+      );
+      expect(
+        _lint(
+          'u2',
+          (s) => s.replaceFirst(
+            '    - name: deals\n',
+            '    - name: deals\n      bloc: Banners\n',
+          ),
+        ),
+        contains(
+          'options.sections[1].bloc: two sections have the bloc "Banners"',
+        ),
+      );
+      expect(
+        _lint(
+          'u3',
+          (s) => s.replaceFirst(
+            '    - name: deals\n',
+            '    - name: deals\n      widget: BannersSection\n',
+          ),
+        ),
+        contains(
+          'options.sections[1].widget: two sections have the widget "BannersSection"',
+        ),
+      );
+      expect(
+        _lint(
+          'u4',
+          (s) => s.replaceFirst('    - name: deals\n', '    - name: Deals_\n'),
+        ),
+        contains(
+          'options.sections[1].name: section name "Deals_" is not lower camel case',
+        ),
       );
     });
 
@@ -603,6 +726,52 @@ void main() {
         gb.files['lib/src/domain/model/store_analytics.dart']!.content,
         contains("spotlight('spotlight')"),
       );
+    });
+  });
+
+  group('T-0076-AC3 what the templates write', () {
+    test(
+      'T-0076-AC3 a flag key and description are escaped as Dart strings',
+      () {
+        final root = _copyRoot(
+          'escape',
+          edit: (s) => s
+              .replaceFirst(
+                'description: Shows the featured products section on the store home.',
+                'description: "Costs \$5, C:\\\\dir, it\'s"',
+              )
+              .replaceFirst(
+                'key: store.home_featured',
+                'key: "a\'b\\\\c"',
+              ),
+        );
+        final gen = _render(root.path);
+        final flags = gen.files['lib/src/flags/store_home_flags.dart']!.content;
+        expect(flags, contains(r"description: 'Costs \$5, C:\\dir, it\'s'"));
+        expect(flags, contains(r"key: 'a\'b\\c'"));
+      },
+    );
+
+    test('T-0076-AC3 the detail open guard takes the id type the spec '
+        'declares, Object by default, so a String id analyses', () {
+      String guard(String Function(String) edit) {
+        final root = _copyRoot('guard', edit: edit);
+        return _render(root.path)
+            .files['lib/src/presentation/bloc/category_products_bloc.dart']!
+            .content;
+      }
+
+      final asString = guard(
+        (s) => s.replaceFirst('item_id_type: int', 'item_id_type: String'),
+      );
+      expect(asString, contains('String? _openTarget;'));
+      expect(asString, contains('bool _startOpenGuard(String target)'));
+      final byDefault = guard(
+        (s) => s.replaceFirst('    item_id_type: int\n', ''),
+      );
+      expect(byDefault, contains('Object? _openTarget;'));
+      expect(byDefault, contains('bool _startOpenGuard(Object target)'));
+      expect(byDefault, isNot(contains('int?')));
     });
   });
 }

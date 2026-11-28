@@ -817,7 +817,7 @@ final class <<Bloc>> extends McBloc<<<Event>>, <<State>>> {
   final <<Open>> _<<name>>;
   late final PagingController<<<item>>> _paging;
   Timer? _openGuard;
-  int? _openTarget;
+  <<target_type>>? _openTarget;
 
   Future<void> _onEvent(
     <<Event>> event,
@@ -902,7 +902,7 @@ final class <<Bloc>> extends McBloc<<<Event>>, <<State>>> {
     _ => s,
   };
 
-  bool _startOpenGuard(int target) {
+  bool _startOpenGuard(<<target_type>> target) {
     if ((_openGuard?.isActive ?? false) && _openTarget == target) {
       return false;
     }
@@ -931,6 +931,7 @@ final class <<Bloc>> extends McBloc<<<Event>>, <<State>>> {
       'file': d.blocBase,
       'stem': d.stem,
       'arg': d.arg,
+      'target_type': d.itemIdType,
       'd_size': m.doc(
         'detail.page_size',
         'Items per request: ${d.pageSize}, the contract\'s default page.',

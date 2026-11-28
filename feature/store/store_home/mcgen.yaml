@@ -91,6 +91,7 @@ options:
     open_call: openComic
     open_kind: comic
     page_size: 20
+    item_id_type: int
   sections:
     - name: banners
       item: StoreBanner

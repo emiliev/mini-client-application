@@ -151,6 +151,7 @@ class DbDetail {
     required this.openKind,
     required this.pageSize,
     required this.pageSizeDoc,
+    required this.itemIdType,
   });
 
   /// `category`: the flow state's field, `OpenCategory`, `openCategory`,
@@ -169,6 +170,10 @@ class DbDetail {
   final String openKind;
   final int pageSize;
   final String? pageSizeDoc;
+
+  /// The Dart type of an item's `id.value` (the open guard compares it):
+  /// `int`, `String`, or `Object` when the item's id is any.
+  final String itemIdType;
 
   String get pascal => pascalCase(name);
   String get open => 'Open$pascal';
@@ -402,6 +407,7 @@ class DbModel {
           'open_kind',
           'page_size',
           'page_size_doc',
+          'item_id_type',
         ]);
       m.detail = DbDetail(
         name: d.str('name'),
@@ -414,6 +420,7 @@ class DbModel {
         openKind: d.str('open_kind'),
         pageSize: d.integer('page_size'),
         pageSizeDoc: d.optStr('page_size_doc'),
+        itemIdType: d.str('item_id_type', 'Object'),
       );
     } else {
       m.detail = null;
@@ -516,9 +523,20 @@ class DbModel {
       err('options.sections', 'a dashboard needs at least two sections');
     }
     final names = <String>{};
+    final blocNames = <String>{};
+    final widgetNames = <String>{};
     for (final (i, s) in m.sections.indexed) {
       final p = 'options.sections[$i]';
       if (!names.add(s.name)) err('$p.name', 'duplicate section "${s.name}"');
+      if (!RegExp(r'^[a-z][A-Za-z0-9]*$').hasMatch(s.name)) {
+        err('$p.name', 'section name "${s.name}" is not lower camel case');
+      }
+      if (!blocNames.add(s.blocName)) {
+        err('$p.bloc', 'two sections have the bloc "${s.blocName}"');
+      }
+      if (!widgetNames.add(s.widget)) {
+        err('$p.widget', 'two sections have the widget "${s.widget}"');
+      }
       if (s.fetch == null && s.fetchMethod == null) {
         err(p, 'section "${s.name}" needs "fetch" or "fetch_method"');
       }
@@ -538,6 +556,19 @@ class DbModel {
           ('open_kind', s.openKind),
         ]) {
           if (v.isEmpty) err('$p.$k', 'a session section needs "$k"');
+        }
+        for (final (k, v) in [
+          ('open', s.openDefault),
+          ('members', s.members ?? ''),
+          ('top', s.top ?? ''),
+          ('fetch_method', s.fetchMethod ?? ''),
+        ]) {
+          if (v.isNotEmpty) {
+            err(
+              '$p.$k',
+              'a session section has its own template and ignores "$k"',
+            );
+          }
         }
         if (s.fetch == null) {
           err(
@@ -561,20 +592,21 @@ class DbModel {
               'page: options.detail is missing',
         );
       }
-      for (final role
-          in s.uses.contains(DbUse.navigator)
-              ? const ['navigator']
-              : const <String>[]) {
-        if (spec.navigator == null) err('$p.uses', 'no $role');
-      }
     }
     if (m.sections.every((s) => s.flag != null)) {
       err('options.sections', 'at least one section is not behind a flag');
     }
-    if (m.hasClock && !m.sections.any((s) => s.uses.contains(DbUse.clock))) {
-      err('options.sections', 'unreachable');
-    }
     // flags
+    final flagNames = <String>{};
+    final flagKeys = <String>{};
+    for (final (i, f) in m.flags.indexed) {
+      if (!flagNames.add(f.name)) {
+        err('options.flags[$i].name', 'two flags are named "${f.name}"');
+      }
+      if (!flagKeys.add(f.key)) {
+        err('options.flags[$i].key', 'two flags have the key "${f.key}"');
+      }
+    }
     final usedFlags = {
       for (final s in m.sections)
         if (s.flag != null) s.flag!.name,
@@ -610,11 +642,35 @@ class DbModel {
       }
     }
 
+    for (final (i, o) in spec.navigator!.outbound.indexed) {
+      if (o.args.length > 1) {
+        err(
+          'navigator.outbound[$i]',
+          'navigator method "${o.name}" takes ${o.args.length} arguments; a '
+              'dashboard navigator method takes at most one',
+        );
+      }
+    }
     if (d != null) method(d.openCall, 'options.detail.open_call');
     for (final (i, s) in m.sections.indexed) {
       if (s.isSession) {
         method(s.openCall, 'options.sections[$i].open_call');
         method('requestSignIn', 'options.sections[$i] (requestSignIn)');
+        if ((methods[s.openCall]?.args.length ?? 0) != 0) {
+          err(
+            'options.sections[$i].open_call',
+            'the session section calls "${s.openCall}" with no argument, but '
+                'the navigator method takes one',
+          );
+        }
+        final signIn = methods['requestSignIn'];
+        if (signIn != null && signIn.returns?.name != 'Future') {
+          err(
+            'options.sections[$i] (requestSignIn)',
+            'requestSignIn must return a Future (it is awaited), not '
+                '"${signIn.returns ?? 'void'}"',
+          );
+        }
         if (!m.kinds.contains(s.openKind)) {
           err(
             'options.sections[$i].open_kind',
@@ -669,8 +725,7 @@ class DbModel {
         );
       }
     }
-    if (m.idOf(m.ids.firstOrNull?.name ?? '') != null &&
-        m.ids.map((i) => i.name).toSet().length != m.ids.length) {
+    if (m.ids.map((i) => i.name).toSet().length != m.ids.length) {
       err('options.ids', 'options.ids lists an id twice');
     }
     for (final k in m.params.keys) {
