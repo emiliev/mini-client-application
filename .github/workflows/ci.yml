@@ -9,7 +9,12 @@ on:
     branches:
       - main
       - 'fleet/**'
+    # Docs-only pushes (journal, STATUS, task records) skip CI: a warm macOS run bills ~250 minutes (P-123).
+    paths-ignore: &docs_only
+      - 'documents/**'
+      - '**/*.md'
   pull_request:
+    paths-ignore: *docs_only
   workflow_dispatch:
 
 # A newer push to the same ref cancels the older run (a PR and its branch push are separate refs).

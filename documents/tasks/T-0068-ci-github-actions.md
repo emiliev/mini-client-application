@@ -86,3 +86,4 @@ Implemented and proven locally (AC1, AC2, AC5). Cache sizes: repository 3.5 GB, 
 - On this Mac, a fresh clone takes 341 s cold and 49 s warm. GitHub's runner is about 4× slower on the cold build.
 - At 10× minutes for private-repo macOS, a warm run costs about 250 billed minutes and a cold one about 440.
 - The TL merged `--no-ff`. On the merge result: `check` passed, 236/236 tests, lint clean, the format gate passed, and `tool/test/bazelw_test.sh` passed. The push to `main` starts the first CI run on `main`.
+- 2026-11-28 (TL follow-up): docs-only pushes (`documents/**`, `**/*.md`) skip CI through `paths-ignore` on `push` and `pull_request`, because the TL's journal and STATUS pushes each started a warm macOS run (about 250 billed minutes). `actionlint` is clean. `workflow_dispatch` still runs on demand.
