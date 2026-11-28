@@ -1,0 +1,17 @@
+$ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer run --lockfile_mode=error --config=ci //tool/mc_arch_check:bin
+INFO: Invocation ID: 6a6dd85a-8e70-4ba9-ad3d-1b8e95021797
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded)
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured)
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: Elapsed time: 3.757s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/tool/mc_arch_check/bin
+mc_arch_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a3c9c981faf666af8)
+exit=0

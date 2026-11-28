@@ -49,3 +49,42 @@ Batches (Phase E) must not hand-edit app glue. `mcgen wire` regenerates the shar
 
 ## Log
 - 2026-11-28: Created and dispatched (TL), as part of the third wave.
+- 2026-11-28 (Engineer, Opus):
+  - Probed the 11 feature BUILD files against the import graph. `_PURE_DEPS` derive exactly. `_FLUTTER_DEPS` match in 9 of 11. `_TEST_DEPS` are always a superset of the imports of the step and util files.
+  - The extras are over-approximations, so a pure template would change 8 graphs. So buildgen merges instead (ADR-0018): it keeps prose, `# keep` items and one hand region.
+  - Captured `bazel query` before, ran `buildgen --adopt` over the 11 files, captured after: identical in all four views (labels, kinds, 29,921 edges, every target's attributes). Then moved the app's wiring list to `wirings.bzl`: identical again.
+- 2026-11-28 (Engineer):
+  - Wire derives all 11 `flow_scope.dart` files byte for byte, once `context.di<T>()` reads count.
+  - Added the app's wiring list (`wirings.dart`), `wirings.bzl`, `GeneratedLocations`, the `/catalogue` debug route and its test, and generated wiring groups.
+  - Moved the list-detail BUILD template and `flow_scope.dart` out of the archetype (P-126). `characters_list` still round-trips.
+  - The first AC3 probe run failed: `app_test` asserted `hasLength(7)` wirings, and the probe's own `grep -q` failed under pipefail. Fixed both.
+- 2026-11-28 (Engineer):
+  - Merged `origin/main` (T-0073).
+  - The search archetype still rendered `flow_scope.dart`. It now leaves the file to wire, keeps the list's packages in its pubspec, and its two exemplar manifests were regenerated.
+  - The probe passes on the merged HEAD: sim build, `test //...` 252 of 252, the new flow opens from `/catalogue`. The gates are green.
+
+## Outcome
+- **Changed** (branch `fleet/T-0074-mcgen-wire-buildgen`; handoff HEAD in the report):
+  - `tool/mcgen/lib/src/{buildgen,wire}/`, the CLI, `mcgen.yaml` `wire:`, and the README;
+  - the list-detail archetype (no BUILD template, no flow scope: P-126) and the search archetype (no flow scope);
+  - the 11 feature BUILD files (adopted, graph-neutral), the root pubspec (members sorted), the exemplar specs and manifests;
+  - `app/mini_client`: `wirings.dart`, `wirings.bzl`, the router, `catalogue_test`, and `app_test` / `analytics_screens_test` adjusted;
+  - `app_core`: `CataloguePage`, `GeneratedLocations`, `AppLocations.catalogue`;
+  - `tool/ci/ci.sh` gate 6 also runs `wire --check` and `buildgen --check`.
+
+| AC | Evidence |
+|---|---|
+| T-0074-AC1 | `tool/mcgen/test/buildgen_test.dart`: 11 `T-0074-AC1 …` tests, including `buildgen --check exits 0 on the repo: every feature BUILD file is up to date` and `adopt marks unexplained items # keep and moves unknown statements into the hand region, so the file builds the same`. Graph neutrality: [T-0074-AC1_graph_neutral.md](../evidence/T-0074/T-0074-AC1_graph_neutral.md) |
+| T-0074-AC2 | `tool/mcgen/test/wire_test.dart`: 6 `T-0074-AC2 …` tests, including `wire --check exits 0 on the repo, every covered file up to date` and `root imports: injectable constructors, modules and scope reads, …`. Covered and uncovered files: F-0074 §4 |
+| T-0074-AC3 | [T-0074-AC3_wire_probe.md](../evidence/T-0074/T-0074-AC3_wire_probe.md): temp copy, the spec added by hand and nothing else, gen, wire and buildgen, sim build, `test //...` 252 of 252. `app/mini_client/test/catalogue_test.dart`: 3 `T-0074-AC3 …` tests (`the catalogue opens zz_ld_probe at its route, …` ran in the probe). `wire_test.dart`: 2 `T-0074-AC3 …` tests |
+| T-0074-AC4 | [T-0065-AC5_gates.md](../evidence/T-0074/T-0065-AC5_gates.md) (184 mcgen tests; lockfiles unchanged), `T-0074-AC4_{test,lint,arch,sim,flake20,format,rules_fork,lockfiles}.log`, `tool/ci/ci.sh --only 6` PASS. F-0074 written; ADR-0018 drafted |
+
+- **Test integrity:**
+  - `list_detail_test` now compares 54 files, not 56, and expects no BUILD or flow scope: those moved to buildgen and wire, and their own tests cover them.
+  - `cli_test` no longer lists wire and buildgen as "not yet".
+  - `app_test`'s "all 7 wirings are composed" names the 7 initializers in order instead of `hasLength(7)`, so a generated group may follow them.
+  - `analytics_screens_test` expects `catalogue` plus one route per catalogue entry.
+  - Nothing was skipped. No `// ignore` was added.
+- **Decisions:** ADR-0018 (Proposed).
+- **Findings:** F-0074.
+- **Follow-ups** (F-0074, Implications): route specs so wire can own the hand-written groups; shrink the 75 `# keep` items; drop the search skeleton's owned BUILD (and SC's, T-0072); buildgen for utility packages.

@@ -1,0 +1,17 @@
+$ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer build --lockfile_mode=error --config=ci --config=lint //...
+INFO: Invocation ID: 53e2d9f9-32ae-44ba-8ba4-dd77eee2ee6d
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 653 targets (0 packages loaded)
+Analyzing: 653 targets (0 packages loaded, 0 targets configured)
+Analyzing: 653 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 653 targets (0 packages loaded, 0 targets configured).
+[88 / 126] [Prepa] Creating symlink utility/mc_appearance/di_test
+[322 / 331] [Prepa] Creating symlink utility/mc_session/no_flutter_test ... (3 actions, 0 running)
+INFO: Found 653 targets...
+INFO: Elapsed time: 5.904s, Critical Path: 0.15s
+INFO: 86 processes: 68 action cache hit, 3 disk cache hit, 83 internal.
+INFO: Build completed successfully, 86 total actions
+exit=0
