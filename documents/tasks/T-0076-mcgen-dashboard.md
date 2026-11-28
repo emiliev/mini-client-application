@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-28 `99d40574`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree); follows the T-0069/T-0072/T-0073 pattern |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0076-mcgen-dashboard` |
@@ -87,3 +87,13 @@ Add the DB archetype. The exemplar `store_home` must round-trip. It is the only 
 - The probe script runs `gen`, `wire`, `buildgen`; the probe fixtures no longer carry a BUILD (buildgen writes it). Both probes pass (4 of 4 and 78 of 78 BDD, plus their architecture, contract and flow-scope tests).
 - `wire` does not route a dashboard yet (P-128 e): repo-wide it warns, shows a disabled catalogue entry and exits 0. Tests: `T-0076-AC3 wire cannot route a dashboard yet: repo-wide it warns, shows a disabled catalogue entry and does not fail`, `T-0076-AC3 the dashboard pubspec has the packages wire's flow scope imports`, `T-0076-AC3 the exemplar renders no flow scope: wire owns it`.
 - Gates: `T-0065-AC5_gates.sh` (250 mcgen tests), `test --lockfile_mode=error //...` 247 of 247, lint, every `gen --check`, `wire --check`, `buildgen --check` and `check --all` clean.
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 5 important gaps (String ids, multi-argument navigator methods, the session-call shape, uniqueness and identifiers, escaping) and a test that compared only byte lengths. Fix round `57807b3f`: all fixed, using `dartString` for escaping and a SHA-256 comparison in the test.
+- Contract switch to T-0074 at `1ab7fbad`: the archetype no longer writes `flow_scope`, the pubspec gains the root-import packages, the probe script runs gen → wire → buildgen, and DB flows produce a warning (not wired) instead of an error.
+- TL checks: the exemplar diff is keep markers, the spec, the manifest and one trailing blank line; no deleted or skipped tests.
+- The TL merged `--no-ff`. On the merge result:
+  - 247/247 tests, lint clean, `mc_arch_check` OK, format gate passed;
+  - mcgen gates passed;
+  - `wire`, `buildgen` and `check --all` are up to date, and all 6 round-trips pass.
+- Hand share 64 %. The probes reuse `store_home`'s hand-written files, so they prove only the managed layer.

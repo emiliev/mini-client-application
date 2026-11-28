@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification |
+| Status | Done (merged 2026-11-28 `071062c4`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree); follows the T-0069/T-0072/T-0073 pattern |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0075-mcgen-form-wizard` |
@@ -92,3 +92,13 @@ Add the FW archetype. The exemplar `library_reading_list_editor` (multi-step wiz
   - **Probe script:** `gen`, then `wire`, then `buildgen` per probe. Both probes pass under Bazel with 7 of 7 scenarios each.
   - **`wire` and a managed FW module:** `T-0075-AC3 wire only warns about a form_wizard flow and lists it as not wired; ...` runs `gen`, `wire` and `buildgen` in a temp repo: a warning, a catalogue note, exit 0, and both `--check`s exit 0. In the repo itself, a probe left in the tree makes only the workspace `pubspec.yaml` out of date, as for any uncommitted module.
   - **Gates:** `T-0065-AC5_gates.sh`, the seven `gen --check`s, `wire --check` (16 files), `buildgen --check` (11 files), `check --all` and `test --lockfile_mode=error //...` (247 of 247) pass.
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 6 important skeleton and lint gaps and 2 nits. Fix round `8729f2af` fixed all of them; escaping uses `dartString`.
+- Contract switch to T-0074 at `25fe1327`: BUILD, `flow_scope` and `root_imports` are dropped; the pubspec gains `mc_di`, `mc_monitoring` and `mc_session`; the probe script runs gen → wire → buildgen; FW flows produce a warning (not wired).
+- TL checks: the exemplar diffs are specs, manifests and two accepted whitespace realignments in Examples tables; no deleted or skipped tests.
+- The TL merged `--no-ff` after T-0076 and resolved the `archetypes.dart` registry conflict by keeping both entries. On the merge result:
+  - 247/247 tests, lint clean, format gate passed;
+  - mcgen gates passed;
+  - `wire`, `buildgen` and `check --all` (8 modules) are up to date, and all 8 round-trips pass.
+- Hand share 89 % and 95 %. New FW modules get a text-fields-only skeleton (F-0075 §1, accepted).

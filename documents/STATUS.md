@@ -12,7 +12,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **CI** | GitHub Actions (`.github/workflows/ci.yml`, `tool/ci/ci.sh`, 11 gates) on `main`, `fleet/**`, PRs and on demand; cold 44 min, warm 25 min (T-0068) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0075, T-0076 (contract switch to wire/buildgen) |
+| **Active crew** | none |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -30,6 +30,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0075 and T-0076 merged: the `mcgen` FW and DB archetypes.** 5 of 7 feature archetypes are templated (LD, SC, SR, FW, DB), and all 8 modules regenerate byte for byte on `main`.
 - **T-0074 merged: `mcgen wire` and `buildgen`** (P2-08). Generated BUILD files (all 11 features match), `flow_scope.dart`, workspace members, the app wiring list and generated wiring groups; a `/catalogue` route lists generated flows. ADR-0018 accepted.
 - **T-0072 merged: `mcgen` section-detail archetype.** `comics_details` and `characters_details` regenerate byte for byte. Three of seven feature archetypes are templated (LD, SR, SC).
 - **T-0073 merged: `mcgen` search archetype.** `discovery_search` (grouped) and `characters_search` (paged, facets) both regenerate byte for byte.
@@ -64,7 +65,7 @@ _Last updated: 2026-11-27 by Tech Lead_
   - T-0073: `mcgen` SR archetype
   - T-0074: `mcgen wire`/`buildgen` (P2-08)
 - **Next:**
-  - FW (T-0075) and DB (T-0076) archetypes in progress; ST and IX next;
+  - ST and IX archetypes, then P-128 (a) and (e): route specs for the hand-written groups, and wire routing for FW and DB (needed before batches);
   - P-123 (CI speed);
   - then the Phase E batches.
 
