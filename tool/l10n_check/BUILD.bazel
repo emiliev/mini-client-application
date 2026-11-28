@@ -31,6 +31,7 @@ dart_test(
         "//feature/discovery/discovery_search:arbs",
         "//feature/library/library_reading_list_editor:arbs",
         "//feature/settings/settings_appearance:arbs",
+        "//feature/settings/settings_home:arbs",
         "//feature/store/store_home:arbs",
         "//feature/trivia/trivia_quiz:arbs",
         "//utility/mc_l10n_core:arbs",

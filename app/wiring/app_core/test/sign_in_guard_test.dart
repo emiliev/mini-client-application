@@ -74,6 +74,7 @@ void main() {
       '/store/categories/c-1',
       '/store/checkout-help',
       '/libraryx',
+      '/settings',
       '/settings/appearance',
       '/auth/sign-in',
       '/auth/sign-in?from=%2Fme%2Flists%2Fnew',

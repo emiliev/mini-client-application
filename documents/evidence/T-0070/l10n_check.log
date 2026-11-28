@@ -1,0 +1,9 @@
+
+INFO: Analyzed target //tool/l10n_check:bin (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: Elapsed time: 3.025s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/tool/l10n_check/bin <args omitted>
+l10n_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1d52d970a9af6139)
+l10n rc 0

@@ -13,10 +13,10 @@ export 'package:account_wiring/src/routes/auth_routes.dart' show SignInRoute;
 export 'package:account_wiring/src/routes/route_targets.dart'
     show AccountRouteTargets;
 export 'package:account_wiring/src/routes/settings_routes.dart'
-    show SettingsAppearanceRoute;
+    show SettingsAppearanceRoute, SettingsHomeRoute;
 
-/// The account group's routes (the appearance settings and the sign-in;
-/// profile later).
+/// The account group's routes (the settings index with the appearance
+/// settings under it, and the sign-in; profile later).
 List<RouteBase> get accountRoutes => <RouteBase>[
   ...settingsRoutes,
   ...authRoutes,

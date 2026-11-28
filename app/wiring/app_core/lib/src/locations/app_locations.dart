@@ -78,7 +78,12 @@ abstract final class AppLocations {
     ).toString();
   }
 
-  /// The appearance settings (T-0063). Equals
+  /// The settings index (T-0070). Equals `SettingsHomeRoute().location` in
+  /// account_wiring. The appearance settings are nested under it.
+  static const String settings = '/settings';
+
+  /// The appearance settings (T-0063), under the settings index: a link
+  /// opens `[home, settings, appearance]`. Equals
   /// `SettingsAppearanceRoute().location` in account_wiring.
   static const String settingsAppearance = '/settings/appearance';
 

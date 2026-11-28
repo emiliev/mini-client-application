@@ -7,6 +7,7 @@ import 'package:auth_signin/auth_signin.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:settings_appearance/settings_appearance.dart';
+import 'package:settings_home/settings_home.dart';
 
 /// The account group's root registrations: the navigator implementations
 /// (injectable) and the route targets the typed routes resolve (by hand,
@@ -19,6 +20,7 @@ class AccountWiringDIInitializer extends McDIInitializer {
     await const AccountNavigatorsDIInitializer().init(getIt);
     getIt.registerLazySingleton<AccountRouteTargets>(
       () => AccountRouteTargetsImpl(
+        settingsHome: getIt<SettingsHomeNavigator>(),
         settingsAppearance: getIt<SettingsAppearanceNavigator>(),
         authSignIn: getIt<AuthSignInNavigator>(),
       ),

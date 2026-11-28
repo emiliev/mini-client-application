@@ -1,0 +1,18 @@
+{
+  "@@locale": "en_XA",
+  "settingsHomeTitle": "[Šéţţíñĝš ~~~]",
+  "settingsHomeAccountHeader": "[Àççóúñţ ~~~]",
+  "settingsHomeNotSignedIn": "[Ńóţ šíĝñéð íñ ~~~~~]",
+  "settingsHomeSignedInAs": "[Šíĝñéð íñ àš {name} ~~~~~]",
+  "settingsHomeSignIn": "[Šíĝñ íñ ~~~]",
+  "settingsHomeSignOut": "[Šíĝñ óúţ ~~~]",
+  "settingsHomeAppearance": "[Àþþéàŕàñçé ~~~~]",
+  "settingsHomeThemeSystem": "[Šýšţéɱ ~~]",
+  "settingsHomeThemeLight": "[Ļíĝĥţ ~~]",
+  "settingsHomeThemeDark": "[Ðàŕķ ~~]",
+  "settingsHomeAboutHeader": "[Àƀóúţ ~~]",
+  "settingsHomeAboutVersion": "[Ṽéŕšíóñ ~~~]",
+  "settingsHomeAboutVersionValue": "[{version} (ƀúíļð {build}) ~~~~]",
+  "settingsHomeAboutBuild": "[Ɓúíļð ~~]",
+  "settingsHomeAboutSeed": "[Ṁóçķéð ƀàçķéñð šééð ~~~~~~~~]"
+}

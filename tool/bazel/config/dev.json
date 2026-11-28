@@ -3,5 +3,6 @@
   "backend": { "seed": 42, "latencyMs": 250, "scenario": "happy" },
   "apiBaseUrl": "https://mock.mini-client.invalid/",
   "build": "1",
+  "version": "0.1.0",
   "analytics": { "defaultConsent": "granted" }
 }

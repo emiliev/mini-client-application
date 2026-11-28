@@ -1,0 +1,18 @@
+{
+  "@@locale": "de",
+  "settingsHomeTitle": "Einstellungen",
+  "settingsHomeAccountHeader": "Konto",
+  "settingsHomeNotSignedIn": "Nicht angemeldet",
+  "settingsHomeSignedInAs": "Angemeldet als {name}",
+  "settingsHomeSignIn": "Anmelden",
+  "settingsHomeSignOut": "Abmelden",
+  "settingsHomeAppearance": "Darstellung",
+  "settingsHomeThemeSystem": "System",
+  "settingsHomeThemeLight": "Hell",
+  "settingsHomeThemeDark": "Dunkel",
+  "settingsHomeAboutHeader": "Info",
+  "settingsHomeAboutVersion": "Version",
+  "settingsHomeAboutVersionValue": "{version} (Build {build})",
+  "settingsHomeAboutBuild": "Build",
+  "settingsHomeAboutSeed": "Seed des simulierten Backends"
+}

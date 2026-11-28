@@ -60,7 +60,7 @@ class HomePlaceholderPage extends StatefulWidget {
   /// Opens the trivia quiz (T-0064).
   final VoidCallback onOpenTrivia;
 
-  /// Opens the appearance settings (T-0063).
+  /// Opens the settings index (T-0063, T-0070).
   final VoidCallback onOpenSettings;
 
   /// Opens the editor on a new list; completes with its id, or null.
