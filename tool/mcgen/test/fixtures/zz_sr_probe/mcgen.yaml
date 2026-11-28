@@ -1,0 +1,171 @@
+# T-0073-AC3: a throwaway search module, the proof that the archetype
+# generalises past its exemplars. Comics instead of characters, one sort
+# facet, paging, another page size and nouns than characters_search.
+# Never committed as a module: test/search_test.dart renders it, and
+# tool/T-0073-AC3_sr_probe.sh copies it to feature/zz_probe/zz_sr_probe,
+# generates it there, runs its BDD test and its analysis under Bazel, and
+# deletes it again.
+schema: mcgen/1
+module: zz_sr_probe
+tier: feature
+archetype: search
+ownership: mixed
+description: A throwaway search over comics with a sort facet and paging (T-0073-AC3).
+
+navigator:
+  name: ZzSrProbeNavigator
+  doc: What zz_sr_probe needs from outside.
+  outbound: [openSeries(SeriesId), openComic(ComicId)]
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - {key: zzSrProbeTitle, description: Title of the search page., text: {en: Search comics, de: Comics suchen}}
+    - {key: zzSrProbeFieldLabel, description: Placeholder and accessible name of the search field., text: {en: Search comics by title, de: Comics nach Titel suchen}}
+    - {key: zzSrProbeClearQuery, description: Accessible name of the button that empties the search field., text: {en: Clear search, de: Suche löschen}}
+    - {key: zzSrProbeSortLabel, description: Accessible name of the group of sort chips., text: {en: Sort by, de: Sortieren nach}}
+    - {key: zzSrProbeSortTitleAscending, description: "Sort chip: by title, A to Z.", text: {en: Title A–Z, de: Titel A–Z}}
+    - {key: zzSrProbeSortTitleDescending, description: "Sort chip: by title, Z to A.", text: {en: Title Z–A, de: Titel Z–A}}
+    - {key: zzSrProbeSearching, description: Screen-reader label while a search is in flight., text: {en: Searching, de: Suche läuft}}
+    - {key: zzSrProbeEmptyTitle, description: Title when a search found nothing., text: {en: No comics found, de: Keine Comics gefunden}}
+    - key: zzSrProbeEmptyMessage
+      description: Message below the no-results title.
+      placeholders: {query: {type: String}}
+      text:
+        en: "No comic’s title starts with “{query}”. Check the spelling."
+        de: "Kein Comic-Titel beginnt mit „{query}“. Prüfe die Schreibweise."
+    - {key: zzSrProbeErrorTitle, description: Title when the first page of a search fails., text: {en: The search failed, de: Die Suche ist fehlgeschlagen}}
+    - {key: zzSrProbeLoadMoreFailed, description: Footer text when a later page fails; Retry follows., text: {en: Could not load more comics., de: Weitere Comics konnten nicht geladen werden.}}
+    - {key: zzSrProbeLoading, description: Screen-reader label while the first page loads., text: {en: Loading comics, de: Comics werden geladen}}
+    - {key: zzSrProbeRecent, description: Section title above the recent searches., text: {en: Recent searches, de: Letzte Suchen}}
+    - {key: zzSrProbeClearRecent, description: "Action beside the recent searches: forgets them all.", text: {en: Clear, de: Löschen}}
+    - {key: zzSrProbeClearFailed, description: Inline error below the recent searches after Clear failed., text: {en: Your recent searches could not be cleared. Please try again., de: Deine letzten Suchen konnten nicht gelöscht werden. Bitte versuche es erneut.}}
+    - {key: zzSrProbeNoRecent, description: Shown instead of the recent searches when there are none., text: {en: Search for comics by the start of their title., de: Suche Comics nach dem Anfang ihres Titels.}}
+
+bdd:
+  - feature: zz_sr_probe
+    title: Search comics by title
+    description: |-
+      Fans type the start of a title and see the comics that match, in title
+      order, page by page, and open one.
+    background: "Given the backend serves {'comics.default'}"
+    scenarios:
+      - id: MC-zz_sr_probe-01
+        title: Typing a prefix shows the matching comics in title order
+        tags: [smoke]
+        steps:
+          - When I open the search
+          - "And I type {'amb'}"
+          - "Then the backend received {1} requests for {'GET /v1/comics'}"
+          - "And the backend received {'GET /v1/comics?titleStartsWith=amb&orderBy=title&offset=0&limit=20'}"
+          - "And I see {'Amber Chronicles #1'}"
+          - "And the sort {'Title A–Z'} is chosen"
+      - id: MC-zz_sr_probe-02
+        title: A prefix nothing matches shows the empty state
+        steps:
+          - When I open the search
+          - "And I type {'zzzz'}"
+          - "Then I see {'No comics found'}"
+          - "And I see {'No comic’s title starts with “zzzz”. Check the spelling.'}"
+      - id: MC-zz_sr_probe-08
+        title: A one-letter query sends nothing and shows the recent searches
+        steps:
+          - When I open the search
+          - "And I type {'a'}"
+          - "Then the backend received {0} requests for {'GET /v1/comics'}"
+          - And the facets are not shown
+      - id: MC-zz_sr_probe-03
+        title: A failed search explains the problem and retries
+        steps:
+          - "Given the backend fails {'GET /v1/comics'} with {'server_error'}"
+          - When I open the search
+          - "And I type {'amb'}"
+          - "Then I see {'The search failed'}"
+          - When the backend recovers
+          - "And I tap {'Retry'}"
+          - "Then I see {'Amber Chronicles #1'}"
+      - id: MC-zz_sr_probe-04
+        title: Scrolling to the end of the first page loads the second once
+        steps:
+          - When I open the search
+          - "And I type {'amb'}"
+          - And I scroll the results until the next page loads
+          - "Then the backend received {1} requests for {'GET /v1/comics?titleStartsWith=amb&orderBy=title&offset=20&limit=20'}"
+      - id: MC-zz_sr_probe-05
+        title: A sort chip searches the same query again from the first page
+        steps:
+          - When I open the search
+          - "And I type {'amb'}"
+          - "And I tap the sort chip {'Title Z–A'}"
+          - "Then the backend received {1} requests for {'GET /v1/comics?titleStartsWith=amb&orderBy=-title&offset=0&limit=20'}"
+          - "And the sort {'Title Z–A'} is chosen"
+      - id: MC-zz_sr_probe-06
+        title: The recent searches keep what was found, and the facets wait for a query
+        steps:
+          - When I open the search
+          - "And I search for each of {'amb'}"
+          - And the app finishes writing to storage
+          - And I open the search again
+          - "Then the recent searches are {'amb'}"
+          - And the facets are not shown
+      - id: MC-zz_sr_probe-07
+        title: A double tap on a result hands it over once
+        steps:
+          - When I open the search
+          - "And I type {'amb'}"
+          - "And I tap the result {'Amber Chronicles #1'} twice in quick succession"
+          - "Then the app was asked to open comic {'Amber Chronicles #1'}"
+
+options:
+  mode: paged
+  query:
+    min_length: 2
+  item: comic
+  items: comics
+  ids:
+    - {name: SeriesId, type: int, doc: "A series' id in this feature's own vocabulary."}
+    - {name: ComicId, type: int, doc: "A comic's id in this feature's own vocabulary."}
+  files:
+    entity: comic.dart
+    facets: comic_facets.dart
+    tile: comic_result_tile.dart
+    empty_message: empty_search_message.dart
+    facets_view: search_facets.dart
+  names:
+    facets: ComicFacets
+    query: ComicsSearchQuery
+    sort: ComicSort
+    tile: ComicResultTile
+    tile_arg: comic
+    facets_view: SearchFacets
+  results:
+    entity: Comic
+    page_size: 20
+    page_size_const: comicsSearchPageSize
+    open: openComic
+    empty_message: emptySearchMessage(l10n, query)
+  facets:
+    - {name: sort, type: ComicSort, event: sortChanged, doc: A sort chip was chosen.}
+  tests:
+    lookup.openComic: comicTitled
+    result_arg: title
+  tags:
+    architecture: T-0073-AC3
+    flow_scope: T-0073-AC3
+  skeleton:
+    path: v1/comics
+    prefix_param: titleStartsWith
+    title: title
+    image: cover
+    image_dto: CoverDto
+    record: ComicRecord
+    records: ComicUniverse(42).byTitle
+    fixture_package: mc_fixtures_comics
+    domain: ComicsMockDomain
+    fixture_sets: comicsFixtureSets
+    fixture_set: comics.default
+    example_query: amb
+    example_title: "Amber Chronicles #1"
+    sorts:
+      - {name: titleAscending, wire: title}
+      - {name: titleDescending, wire: "-title"}

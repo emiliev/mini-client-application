@@ -1,0 +1,210 @@
+{
+  "archetype": "search",
+  "files": {
+    "l10n.yaml": {
+      "hash": "d05e284523b641866ee6bef7538419cec63ac8ffa243544206990680beeee31c",
+      "ownership": "managed"
+    },
+    "lib/characters_search.dart": {
+      "hash": "e6ef5fa90950028e174862fd2194b627a2ab78d45066cee0cfef5f9485765433",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "220ab01b011ce125354eda481a5c3716c9fc223d8432bd84c161626b6a2a3fbb",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_module.dart": {
+      "hash": "9e339a9aba41536b77423bd77170200a5df03ce5737572e3ede4f04e4a009fe6",
+      "ownership": "managed"
+    },
+    "lib/src/di/flow_scope.dart": {
+      "hash": "4f0560c0b0d3e1e76426ef0c6eaf6a8ba72b02859d9d591a4376400fac6f91fe",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_analytics.dart": {
+      "hash": "4854f9d8fb8f599435123ac76d64f40c0d9f1478958c8946d8812e4c7d0e796e",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_id.dart": {
+      "hash": "db0a2ed69a53620a91efa4b12b7a2b4e7fdd1cf93b6e52092c3330b4ef310962",
+      "ownership": "managed"
+    },
+    "lib/src/flow/characters_search_flow.dart": {
+      "hash": "c6f354b9e4defa35e51d536995fc4ae194d5e3e2d6cd395b09c8b06c74bbedb0",
+      "ownership": "managed"
+    },
+    "lib/src/flow/characters_search_flow_state.dart": {
+      "hash": "a4762cd125db8a982493f9cebe908191b00375bad8cd7773ad7c714d374b82b3",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_search_de.arb": {
+      "hash": "a13c6017487f0e5044eaaab607339f452fd382130f478697940368f49fcf6f15",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_search_en.arb": {
+      "hash": "aa38183f0b805ea3414cbf273af58357301aab37468bc0af281509afde6ede9f",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_search_en_XA.arb": {
+      "hash": "74c1689a02ccc18ec8d9aceeadbcc9919d866b9b4ae1a92314bb90d42e151155",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/characters_search_navigator.dart": {
+      "hash": "9ca034d24e8135e434f475ccbd5d804c70c145458c99c8d1995c47acdd96be80",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/characters_search_bloc.dart": {
+      "hash": "3f0e66b7a3706437ebb4dd53bd6f36f3434eb9a00c6f50a6571342628f990f3b",
+      "keep": {
+        "search.open": "51e312f4afbb7cd387f77d44d8da348bc66a63ebec6051214fa842be69dcc5a0"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/characters_search_event.dart": {
+      "hash": "04bd77337698885f4b9ed737ef6a4e0d4521ed11c7e17c64b6c0da8442b97655",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/characters_search_state.dart": {
+      "hash": "5fabc50eb43e5d9ecc75a1145e3c8de77dd7dc2c374513e13be516f7afaa2ea5",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/page/characters_search_page.dart": {
+      "hash": "00a5186fafba59b5549c70e26e5c96741364b373ff91292e08d7821422866e4a",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/failure_message.dart": {
+      "hash": "9d082f390462c757d65380287bc9e5c3be2c370544d3cf543aca014a33df63f1",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/search_history_view.dart": {
+      "hash": "0a5b5b1d9343425ff1daa93afd606b9a33ee3f603f5e0144f455e522422bd283",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "73841b6d9d2520669bc1d90c4b633f8af0a0280c31d05f593976210ff62cd27e",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "9f88f6ec0adf0702e0c8d9a3d76cd2f228cb80a21996d74df24e16710e0f363b",
+      "ownership": "managed"
+    },
+    "test/feature/characters_search.feature": {
+      "hash": "1902c851681ed5c88d6b00c66cc3e260fc4b3fedbbbcc32247765950e4f1d11d",
+      "ownership": "managed"
+    },
+    "test/feature/characters_search_facets.feature": {
+      "hash": "8941dda2616c5469b7240b4ae30926e0cb7349e46de0d798f8086e33eeacd506",
+      "ownership": "managed"
+    },
+    "test/feature/characters_search_open.feature": {
+      "hash": "975faaa2c471fb34126ebc62ac3db5a3bbbd18411e6e11b2061ecf4d4400c031",
+      "ownership": "managed"
+    },
+    "test/feature/characters_search_typing.feature": {
+      "hash": "fd1dbee522ccfaeebfb9a37c68260adcd2c60c6c99fe0af933c0d8c10b4ff6df",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_search.dart": {
+      "hash": "e15fc4f628e2ae68e616fa5bcd02640563c99f912030a3e0213a069fa3c2b80b",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_search_again.dart": {
+      "hash": "036019ac1a37993d2ac480ad0964fc2f35857a43883a5a268b172949c7f5d14a",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_search_for.dart": {
+      "hash": "93d6de5ec7fb0d617fdd563b08a8b4bed3e12f137c8ce3182a770916a91b70cc",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_search_for_without_waiting.dart": {
+      "hash": "eb4fca3001ff9536f0ed35b44268d9ae3863bc0e8d4b25fd2eada4a5f1b1b19d",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_results_to_the_end.dart": {
+      "hash": "ae142366f2c28caff3f81d6ba6ea0a1903edc5079d935b44a8e58947cbe451d6",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_results_until_the_next_page_loads.dart": {
+      "hash": "092e094442032594acca72993831bd105a78622dac4a2d9a80162c1cfddf34e7",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_search_for_each_of.dart": {
+      "hash": "c9e8c2242d87280c21fd09092cf3047bab730b295e7243677a9252cc6c9c0247",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_recent_search.dart": {
+      "hash": "ebdbe8c4ec868933a5200e1051cde997e44de446561d9ac839d43f49a14e2328",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_result.dart": {
+      "hash": "1ff9acee38363c11c21e428b5c0fa42981f2fe0d506b54bfa9c9298bf3927fd6",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_result_and_again_after_milliseconds.dart": {
+      "hash": "9b2e35e250c647fca64dc07386ca5f071c0a47354de4721289af0b08e8529c38",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_result_twice_in_quick_succession.dart": {
+      "hash": "23a2676a0bb064ff73730ba21f56faac2a16c47f8c7633ebcca7197a0824a563",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_sort_chip.dart": {
+      "hash": "38712d6389231633214ddb27db19489a55ae5b89a8369b511de1dbe86e9ebd82",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_team_chip.dart": {
+      "hash": "a4970f9245eb938874f8e00c1a139c2e350cd0eb7770bb0ecdc7419d9bea3034",
+      "ownership": "managed"
+    },
+    "test/feature/step/no_team_is_chosen.dart": {
+      "hash": "f2440005b39ab9c7845e71e491d7f9aa6e09bfd65a7841686a6b29ba562a995d",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_character.dart": {
+      "hash": "6527f87378d94e02114253fda9456c8ff669f4219228d64c414738a7de052c73",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_character_times.dart": {
+      "hash": "2315b121e92a284b28b8d58f117e30326a91080713b2dc6a74056b147d1820b4",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_facets_are_not_shown.dart": {
+      "hash": "b736331dadc71a145550fa84d06095704184a73eb2925129997041ab2e8f5623",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_recent_searches_are.dart": {
+      "hash": "a53c74a88d4b2fd1c3e4be1282ebaa6a7fecfb5190d9ab9c2d7d912e65c3526b",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_results_show_the_first_characters_for.dart": {
+      "hash": "d09ed96f2cc01b85995d259628c3730d82a5e66b8b2cc3e7768b9abff2a9c120",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_results_show_the_first_characters_for_of_team.dart": {
+      "hash": "999807455d8633bcf8a0b8081b17b2d477114be07547b39f261dbbecfca73319",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_results_show_the_first_characters_for_of_team_sorted_by.dart": {
+      "hash": "702d887ab2efc6079cb4495848ce62f3025ef10c1d8cec9a4e8c98874432c30c",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_results_show_the_first_characters_for_sorted_by.dart": {
+      "hash": "cef24e0f468492517916ca4f2d95448bea0875be71d6c3b527f3baee2f5a3113",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_sort_is_chosen.dart": {
+      "hash": "57404a78a16324390e524c3ba7bdcb167e557c15ef1af09b4e294d3ae99aa658",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_team_is_chosen.dart": {
+      "hash": "87c1cf9d3399f1936321443e379ffce830cfbdfabf4a21184f45de3911dd7bd9",
+      "ownership": "managed"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "characters_search",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x26062af5d9ba82d7",
+  "spec_hash": "71835a9b403acea3fd4fffeececce4d341753fbb979289971f6c31ec12e4d56f"
+}

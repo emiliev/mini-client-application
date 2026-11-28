@@ -3,9 +3,11 @@
 
 import 'package:mcgen/src/core/archetype.dart';
 import 'package:mcgen/src/emit/feature_list_detail/list_detail.dart';
+import 'package:mcgen/src/emit/feature_search/search.dart';
 import 'package:mcgen/src/emit/utility_hello/utility_hello.dart';
 
 const Map<String, Archetype> archetypes = {
   'list_detail': ListDetailArchetype(),
+  'search': SearchArchetype(),
   'utility_hello': UtilityHelloArchetype(),
 };
