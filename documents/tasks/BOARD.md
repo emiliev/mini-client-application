@@ -5,9 +5,9 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0069](T-0069-mcgen-list-detail.md) | `mcgen` list-detail archetype; `characters_list` round-trips byte for byte (P2-04); ADR-0017 | merged `6d34c618` |
 | [T-0071](T-0071-characters-search.md) | `characters_search` (F003): prefix search, sort and team facets, history | merged `8e45bf30` |
 | [T-0070](T-0070-settings-home.md) | `settings_home` (F055) with the `/settings` parent route | merged `d235ffee` |
-| [T-0069](T-0069-mcgen-list-detail.md) | `mcgen` list-detail archetype: `characters_list` regenerates byte for byte (P2-04) | **In Progress** | Engineer (Opus) / ADR-0015 | T-0065 | `fleet/T-0069-mcgen-list-detail` |
 | [T-0068](T-0068-ci-github-actions.md) | CI: GitHub Actions (macOS, Bazel caches) runs the merge gates on `main`, `fleet/**`, PRs and on demand | merged `fe063d24` |
 | [T-0066](T-0066-auth-sign-in.md) | `auth_signin` (F045) and the `/me/**` sign-in guard; fixture sheet removed | merged `4607381c` |
 | [T-0067](T-0067-characters-details.md) | `characters_details` (F002): the profile behind "See full profile" | merged `21b57873` |

@@ -1,6 +1,6 @@
 # ADR-0017: mcgen exemplars, the additive `mcgen/1` extensions, and the list-detail spec model
 
-- **Status:** Proposed (crew: Engineer, T-0069)
+- **Status:** Accepted (TL, 2026-11-28, at the T-0069 merge `6d34c618`)
 - **Date:** 2026-11-28
 - **Deciders:** Tech Lead
 - **Related:** T-0069, F-0069, ADR-0016, ADR-0015, F-0065, plan 02 §2.2 to §2.6 and KD1, P2-04 to P2-07

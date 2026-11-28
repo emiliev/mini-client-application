@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | Handed off (TL review) |
+| Status | Done (merged 2026-11-28 `6d34c618`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (**Opus**: the first real archetype; it sets the pattern for P2-05 to P2-07) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0069-mcgen-list-detail` |
@@ -125,3 +125,20 @@ This is the first real template. Define the **list-detail (LD) archetype** in `m
   - P-120 (c) and (e) are still open;
   - P2-08 should own BUILD and `flow_scope.dart`;
   - keep regions around top-level declarations would let the env be managed (an ADR question).
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 4 important issues and 5 nits:
+  - important: the pseudo fallback was used for every locale, ICU placeholders were accented, outlines were dropped, and ignored local files broke the round-trip;
+  - nits: fixed in the same round.
+
+  Fix round `c0ffd641` also merged `main` with T-0071's `characters_list` changes. List actions are now an archetype concept, with a new keep region `list.openSearch`. The round-trip compares 56 files byte for byte, and the hand share is 18.0 %.
+- **TL checks:**
+  - `characters_list` changes are keep markers, the spec and the manifest only;
+  - no deleted tests;
+  - outside mcgen, only `format_gate.sh` changed (P-120(a)).
+- **Merge result** (`--no-ff` by the TL):
+  - `check` passed, 246/246 tests, lint clean, `mc_arch_check` OK;
+  - format gate passed, `T-0065-AC5_gates.sh` passed;
+  - `mcgen gen characters_list --check` reports up to date on `main`;
+  - lockfiles unchanged.
+- **ADR-0017 accepted.** P-120 (a), (b) and (d) are done; follow-ups go to P-126.
