@@ -1,0 +1,17 @@
+INFO: Invocation ID: 3787821d-53de-4d77-8b70-fc0195f3e3f6
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded)
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured)
+Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured).
+INFO: Found 1 target...
+INFO: Elapsed time: 3.828s, Critical Path: 0.00s
+INFO: 1 process: 1 internal.
+INFO: Build completed successfully, 1 total action
+INFO: Running command line: bazel-bin/tool/mc_arch_check/bin
+mc_arch_check: OK (/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a48fbeccf54317814)
+exit 0
+ALLDONE

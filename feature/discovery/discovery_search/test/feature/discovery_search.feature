@@ -173,9 +173,9 @@ Feature: Search characters and comics
     And the backend received {<requests>} requests for {'GET /v1/search'}
 
     Examples:
-      | query           | requests |
-      | 'é'             | 0        |
-      | 'e\u0301'       | 1        |
+      | query          | requests |
+      | 'é'            | 0        |
+      | 'e\u0301'      | 1        |
       | '\u0301\u0301' | 1        |
 
   @T-0046-AC3

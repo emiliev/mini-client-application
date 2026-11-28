@@ -166,7 +166,9 @@ final class CharactersSearchBloc
           return;
         }
         _openGuard = Timer(openGuard, () {});
+        // mcgen:keep search.open
         _navigator.openCharacter(id);
+      // mcgen:end search.open
       case _LoadHistory():
         final version = _historyVersion;
         final loaded = await _history.load();
