@@ -105,7 +105,7 @@
       "ownership": "managed"
     },
     "lib/src/presentation/page/character_details_page.dart": {
-      "hash": "c211a9a0b5e4f0fa0faee9bba446c7aa9b1c04bab960c08eb918875a89febcfe",
+      "hash": "941431186e0e6e494df8b4dcf8c7b58042ac9f634121874b57ff418b269c7e73",
       "ownership": "owned"
     },
     "lib/src/presentation/widget/failure_message.dart": {
@@ -286,5 +286,5 @@
   "ownership": "ejected",
   "schema": "mcgen-manifest/1",
   "seed": "0x0c755d221c3d0bed",
-  "spec_hash": "05366aef5f5218029c3cc9ee157385d64bfae0392725c9689a04b5d911b0ed3b"
+  "spec_hash": "6e81418df244dbf760fad506644f823d1f7642fb0e4c2fa2b662da56f1334a14"
 }

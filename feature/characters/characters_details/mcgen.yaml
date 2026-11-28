@@ -407,11 +407,11 @@ bdd:
           - "Then I see {<text>}"
           - "And nothing overflows"
         examples:
-          - ["scale", "id", "text"]
+          - ["scale", "id", "text                                    "]
           - ["1", "999999", "'Figur nicht gefunden'                  "]
-          - ["2", "999999", "'Figur nicht gefunden'"]
-          - ["1", "100002", "'Die Figur konnte nicht geladen werden'"]
-          - ["2", "100002", "'Die Figur konnte nicht geladen werden'"]
+          - ["2", "999999", "'Figur nicht gefunden'                  "]
+          - ["1", "100002", "'Die Figur konnte nicht geladen werden' "]
+          - ["2", "100002", "'Die Figur konnte nicht geladen werden' "]
       - title: "In the pseudo-locale at <scale>x the not-found and the failed states do not overflow"
         tags: [T-0067-AC4, l10n]
         steps:
@@ -422,11 +422,11 @@ bdd:
           - "Then I see {<text>}"
           - "And nothing overflows"
         examples:
-          - ["scale", "id    ", "text                                                  "]
-          - ["1    ", "999999", "'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                      "]
-          - ["2    ", "999999", "'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                      "]
-          - ["1    ", "100002", "'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'  "]
-          - ["2    ", "100002", "'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'  "]
+          - ["scale", "id", "text                                                  "]
+          - ["1", "999999", "'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                      "]
+          - ["2", "999999", "'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                      "]
+          - ["1", "100002", "'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'  "]
+          - ["2", "100002", "'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'  "]
   - feature: characters_details_favourite
     title: "Favourite a character"
     description: |-

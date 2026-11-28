@@ -131,8 +131,8 @@ List<List<String>> outlineExamples(RuleSpec rule) {
   ];
 }
 
-/// The feature file of [f] (a table cell that ends in a space is written as
-/// it is: a hand-aligned table keeps its own padding): `Feature:`, its description, the Background,
+/// The feature file of [f] (every Examples cell is padded to its column's
+/// width; a hand-padded cell that is already wider stays as it is): `Feature:`, its description, the Background,
 /// then each scenario with its tags (the id first) and Examples table, then
 /// each outline, whose Examples are its rule's examples ([rules] by id).
 String renderFeature(
@@ -173,16 +173,24 @@ String renderFeature(
       b.writeln('    $step');
     }
     if (examples.isNotEmpty) {
+      // A column is as wide as its widest cell that does not end in a space.
+      // A cell that does end in one is hand-padded: it is padded like any
+      // other when it is narrower than the column, and kept when it is not
+      // (a column of such cells is written exactly as given).
       final widths = [
         for (var c = 0; c < examples.first.length; c++)
-          examples.map((r) => r[c].length).reduce((a, b) => a > b ? a : b),
+          [
+            for (final r in examples)
+              if (!r[c].endsWith(' ')) r[c].length,
+            0,
+          ].reduce((a, b) => a > b ? a : b),
       ];
       b
         ..writeln()
         ..writeln('    Examples:');
       for (final row in examples) {
         b.writeln(
-          '      | ${[for (final (c, cell) in row.indexed) cell.endsWith(' ') ? cell : cell.padRight(widths[c])].join(' | ')} |',
+          '      | ${[for (final (c, cell) in row.indexed) cell.padRight(widths[c])].join(' | ')} |',
         );
       }
     }

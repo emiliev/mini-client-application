@@ -38,11 +38,17 @@ List<String> envNames(ScModel m) => [
 
 Map<String, String> _vars(ScModel m) => {
   'module': m.module,
-  'item': m.item,
+  'item': m.itemWords,
+  'itemCamel': m.itemCamel,
+  'idPrim': m.idPrim,
+  'favouriteUrl':
+      '/${m.favouritePath.replaceFirst('{id}', '\$${m.itemCamel}')}',
   'Item': m.itemPascal,
   'items': m.items,
-  'scroll': m.scroll,
-  'page': m.scroll == m.item ? 'details page' : '${m.scroll} page',
+  'scroll': m.scroll.replaceAll('_', ' '),
+  'page': m.scroll == m.item
+      ? 'details page'
+      : '${m.scroll.replaceAll('_', ' ')} page',
   'Prefix': m.prefix,
   'prefixCamel': m.prefixCamel,
   'Flow': m.flow,
@@ -248,13 +254,13 @@ DartLibrary _probe(ScModel m, Map<String, String> v) {
   WidgetTester tester,
   String email,
   String method,
-  int <<item>>,
+  <<idPrim>> <<itemCamel>>,
 ) async {
   final user = «fixtureUser»(email);
   final dio = McTestSession.current.backend.backend.createDio();
   final response = await tester.runAsync(
     () => dio.request<Object?>(
-      '/v1/me/favourites/<<favouriteKind>>/$<<item>>',
+      '<<favouriteUrl>>',
       options: Options(
         method: method,
         headers: {'Authorization': 'Bearer ${mintAccessToken(user.id, 9999)}'},
@@ -419,7 +425,7 @@ Widget <<envHost>>(Widget flow, {AssetBundle? bundle}) => McMediaScope(
 );
 
 /// The flow as the app builds it, over the session's navigator mock.
-Widget <<envUnderTest>>(int id) =>
+Widget <<envUnderTest>>(<<idPrim>> id) =>
     <<Flow>>(navigator: <<envNavigator>>(), <<idArg>>: <<IdType>>(id));
 
 <<extra>>

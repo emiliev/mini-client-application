@@ -16,7 +16,7 @@ const stepTemplates = <String, StepT>{
   'open': StepT(
     r'''Enters the feature the way the app does: through its flow (barrel only),
 with the navigator passed in the constructor [tide-nav §3.1].''',
-    r'''Future<void> <<fn>>(WidgetTester tester, int id) async {
+    r'''Future<void> <<fn>>(WidgetTester tester, <<idPrim>> id) async {
   await «<<envContainer>>»();
   await «initFlow»(tester, () => «<<envHost>>»(«<<envUnderTest>>»(id)));
   await «mcSettle»(tester);
@@ -27,7 +27,7 @@ with the navigator passed in the constructor [tide-nav §3.1].''',
     r'''Two flows of the same <<item>>, one above the other (as two tabs or two
 stacked routes would hold them), each with its own scope and blocs, over
 one app root: one session, one bus, one backend.''',
-    r'''Future<void> <<fn>>(WidgetTester tester, int id) async {
+    r'''Future<void> <<fn>>(WidgetTester tester, <<idPrim>> id) async {
   await «<<envContainer>>»();
   Widget page(int n) => Expanded(
     child: KeyedSubtree(
@@ -247,11 +247,11 @@ it as a toggle that is on (the `Semantics(toggled:)` around the button).''',
 identity domain under their bearer.''',
     r'''Future<void> <<fn>>(
   WidgetTester tester,
-  int <<item>>,
+  <<idPrim>> <<itemCamel>>,
   String email,
 ) async {
-  final response = await «favouritesProbe»(tester, email, 'GET', <<item>>);
-  expect(response.statusCode, 200, reason: '<<item>> $<<item>> is a favourite');
+  final response = await «favouritesProbe»(tester, email, 'GET', <<itemCamel>>);
+  expect(response.statusCode, 200, reason: '<<item>> $<<itemCamel>> is a favourite');
 }''',
     [],
   ),
@@ -259,11 +259,11 @@ identity domain under their bearer.''',
     r'''The backend holds no such favourite for that user (`404 not_favourite`).''',
     r'''Future<void> <<fn>>(
   WidgetTester tester,
-  int <<item>>,
+  <<idPrim>> <<itemCamel>>,
   String email,
 ) async {
-  final response = await «favouritesProbe»(tester, email, 'GET', <<item>>);
-  expect(response.statusCode, 404, reason: '<<item>> $<<item>> is not a favourite');
+  final response = await «favouritesProbe»(tester, email, 'GET', <<itemCamel>>);
+  expect(response.statusCode, 404, reason: '<<item>> $<<itemCamel>> is not a favourite');
 }''',
     [],
   ),
@@ -272,10 +272,10 @@ identity domain under their bearer.''',
     r'''Future<void> <<fn>>(
   WidgetTester tester,
   String email,
-  int <<item>>,
+  <<idPrim>> <<itemCamel>>,
 ) async {
-  final response = await «favouritesProbe»(tester, email, 'PUT', <<item>>);
-  expect(response.statusCode, 200, reason: 'seeded <<item>> $<<item>>');
+  final response = await «favouritesProbe»(tester, email, 'PUT', <<itemCamel>>);
+  expect(response.statusCode, 200, reason: 'seeded <<item>> $<<itemCamel>>');
 }''',
     [],
   ),

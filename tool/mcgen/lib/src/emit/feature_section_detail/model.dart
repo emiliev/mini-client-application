@@ -247,6 +247,16 @@ class ScModel {
   String get module => spec.module;
   String get itemPascal => pascalCase(item);
   String get itemCamel => camelCase(item);
+
+  /// The item as prose reads it (`story_arc` -> `story arc`).
+  String get itemWords => item.replaceAll('_', ' ');
+
+  /// The primitive type of the item's id (`int`, `String`).
+  String get idPrim => ids.first.type;
+
+  /// The primitive type of the id [name].
+  String idPrimOf(String name) =>
+      ids.firstWhere((i) => i.name == name, orElse: () => ids.first).type;
   String get itemsCamel => camelCase(items);
   String get itemsPascal => pascalCase(items);
   String get prefixCamel => camelCase(prefix);
@@ -341,7 +351,7 @@ class ScModel {
     m.favouriteKind = r.str('favourite_kind', m.item);
     m.favouritePath = r.str(
       'favourite_path',
-      'v1/me/favourites/${m.item}/{id}',
+      'v1/me/favourites/${m.favouriteKind}/{id}',
     );
     m.description = spec.description ?? '';
     m.opens = r.items('opens', (x) {
@@ -524,6 +534,48 @@ class ScModel {
     }
     if (out.isNotEmpty) return out;
     final methods = {for (final o in spec.navigator!.outbound) o.name: o};
+    final entities = {for (final e in spec.entities) e.name: e};
+    void needEntity(String name, String path, {bool dto = false}) {
+      final e = entities[name];
+      if (e == null) {
+        err(spec.optionsNode, path, 'no entity "$name" in entities');
+      } else if (dto != (e.json == true)) {
+        err(
+          spec.optionsNode,
+          path,
+          dto
+              ? '"$name" must be a DTO: add `json: true`'
+              : '"$name" is a DTO (`json: true`), but a domain entity is needed',
+        );
+      }
+    }
+
+    needEntity(m.entity, 'options.entity');
+    needEntity(m.dto, 'options.dto', dto: true);
+    if (m.related case final r?) {
+      needEntity(r.summary, 'options.related.summary');
+      needEntity(r.pageDto, 'options.related.page_dto', dto: true);
+    }
+    final entity = entities[m.entity];
+    if (entity != null) {
+      if (!entity.fields.any((f) => f.name == m.titleField)) {
+        err(
+          spec.optionsNode,
+          'options.title',
+          '"${m.entity}" has no field "${m.titleField}"',
+        );
+      }
+      for (final (i, o) in m.opens.indexed) {
+        final f = o.field;
+        if (f != null && !entity.fields.any((x) => x.name == f)) {
+          err(
+            spec.optionsNode,
+            'options.opens[$i].field',
+            '"${m.entity}" has no field "$f"',
+          );
+        }
+      }
+    }
     if (m.ids.isEmpty) {
       err(spec.optionsNode, 'options.ids', 'the first id is the item\'s');
     }
@@ -607,5 +659,7 @@ class ScModel {
       'FavouriteSaveFailed',
     ])
       key(s),
+    for (final o in opens)
+      if (o.field != null) key('Open${pascalCase(o.label)}'),
   ];
 }

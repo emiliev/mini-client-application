@@ -6,7 +6,7 @@
 import 'package:mcgen/src/core/emit.dart';
 import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
-import 'package:mcgen/src/emit/feature_section_detail/blocs.dart';
+import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/emit/feature_section_detail/common.dart';
 import 'package:mcgen/src/emit/feature_section_detail/favourite_templates.dart';
 import 'package:mcgen/src/emit/feature_section_detail/model.dart';
@@ -64,7 +64,7 @@ void _detailsPage(EmitContext ctx, ScModel m) {
   ].join();
   ctx.library(
     DartLibrary(
-      '$_page/${m.item}_details_page.dart',
+      '$_page/${snakeCase(m.item)}_details_page.dart',
       imports: [material],
       decls: [
         RawDecl(
@@ -144,7 +144,7 @@ void _detailsPage(EmitContext ctx, ScModel m) {
         ClassDecl(
           '_Sections',
           superclass: Code('StatelessWidget'),
-          doc: 'The loaded ${m.item}, section by section.',
+          doc: 'The loaded ${m.itemWords}, section by section.',
           members: [
             RawMember(
               Code('const _Sections({required this.$item});'),
@@ -154,7 +154,7 @@ void _detailsPage(EmitContext ctx, ScModel m) {
               Code(
                 '@override\n'
                 'Widget build(BuildContext context) {\n'
-                '  final l10n = ${ref(m.l10nClass)}.of(context);\n'
+                '${rows.isEmpty ? '' : '  final l10n = ${ref(m.l10nClass)}.of(context);\n'}'
                 '  return ListView(\n'
                 '    key: ${m.detailsBodyKey},\n'
                 '    padding: const EdgeInsets.all(16),\n'
@@ -174,7 +174,7 @@ void _detailsPage(EmitContext ctx, ScModel m) {
   );
 }
 
-String pascalLabel(String label) => pascalOf(label);
+String pascalLabel(String label) => pascalCase(label);
 
 void _coverPage(EmitContext ctx, ScModel m, ScCover c) {
   final item = m.itemCamel;
@@ -187,7 +187,7 @@ void _coverPage(EmitContext ctx, ScModel m, ScCover c) {
           c.page,
           superclass: Code('StatelessWidget'),
           doc:
-              'The ${m.item}\'s ${c.field}, inside the flow (a flow page, not a route).',
+              'The ${m.itemWords}\'s ${c.field}, inside the flow (a flow page, not a route).',
           members: [
             RawMember(
               Code('const ${c.page}({required this.$item, super.key});'),

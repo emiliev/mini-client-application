@@ -6,6 +6,7 @@
 import 'package:mcgen/src/core/emit.dart';
 import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
+import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/emit/feature_section_detail/common.dart';
 import 'package:mcgen/src/emit/feature_section_detail/favourite_templates.dart';
 import 'package:mcgen/src/emit/feature_section_detail/model.dart';
@@ -40,7 +41,8 @@ void _detailsBloc(EmitContext ctx, ScModel m) {
   final related = m.related;
   final cover = m.cover;
   final multi = m.opens.length > 1;
-  final base = '${m.itemCamel}_details';
+  final base = '${snakeCase(m.item)}_details';
+  final guards = m.opens.isNotEmpty;
   final stateCls = m.detailsState;
   final eventCls = m.detailsEvent;
   final bloc = m.detailsBloc;
@@ -158,7 +160,12 @@ void _detailsBloc(EmitContext ctx, ScModel m) {
   );
 
   // the bloc
-  final guardType = multi ? '(String, int)' : ref(m.opens.single.id);
+  final prims = {for (final o in m.opens) m.idPrimOf(o.id)};
+  final guardType = !guards
+      ? ''
+      : multi
+      ? '(String, ${prims.length == 1 ? prims.single : 'Object'})'
+      : ref(m.opens.first.id);
   final loadBody = related == null
       ? '          final result = await _repository.fetch${m.itemPascal}(_flow.state.${m.idArg});\n'
             '          emit(\n'
@@ -212,7 +219,7 @@ void _detailsBloc(EmitContext ctx, ScModel m) {
         '$bloc(\n'
         '  this._repository,\n'
         '  this._flow,\n'
-        '  this._navigator,\n'
+        '${guards ? '  this._navigator,\n' : ''}'
         '  ${ref('Monitoring')} monitoring,\n'
         ') : super(const $stateCls.loading(), monitoring: monitoring) {\n'
         '  on<$eventCls>(_onEvent);\n'
@@ -223,8 +230,8 @@ void _detailsBloc(EmitContext ctx, ScModel m) {
     RawMember(
       Code(
         'final ${ref(m.repository)} _repository;\n'
-        'final ${ref('FeatureFlowController')}<${ref(m.flowState)}> _flow;\n'
-        'final ${ref(m.navigator)} _navigator;',
+        'final ${ref('FeatureFlowController')}<${ref(m.flowState)}> _flow;'
+        '${guards ? '\nfinal ${ref(m.navigator)} _navigator;' : ''}',
       ),
     ),
     RawMember(
@@ -233,17 +240,19 @@ void _detailsBloc(EmitContext ctx, ScModel m) {
           'True while a load is in flight: a second Retry tap does not start a\n'
           'second request.',
     ),
-    RawMember(
-      Code('Timer? _openGuard;'),
-      doc: m.text(
-        'details_bloc.guard_timer',
-        'Runs for [openGuard] after ${_anyOf(labels)} was handed over.',
+    if (guards)
+      RawMember(
+        Code('Timer? _openGuard;'),
+        doc: m.text(
+          'details_bloc.guard_timer',
+          'Runs for [openGuard] after ${_anyOf(labels)} was handed over.',
+        ),
       ),
-    ),
-    RawMember(
-      Code('$guardType? _openTarget;'),
-      doc: 'What the running guard was started for.',
-    ),
+    if (guards)
+      RawMember(
+        Code('$guardType? _openTarget;'),
+        doc: 'What the running guard was started for.',
+      ),
     RawMember(
       Code(
         'Future<void> _onEvent(\n'
@@ -268,69 +277,74 @@ void _detailsBloc(EmitContext ctx, ScModel m) {
         '}$stateOf',
       ),
     ),
-    RawMember(
-      Code(
-        'bool _startOpenGuard($guardType target) {\n'
-        '  if ((_openGuard?.isActive ?? false) && _openTarget == target) {\n'
-        '    return false;\n'
-        '  }\n'
-        '  _openGuard?.cancel();\n'
-        '  _openGuard = Timer(openGuard, () {});\n'
-        '  _openTarget = target;\n'
-        '  return true;\n'
-        '}',
-      ),
-      doc: m.text(
-        'details_bloc.start_guard',
-        reflow(
-          'False while a hand-over of the same [target] still guards (the second tap of a double tap); else starts the guard for it. A different target goes through at once: popping back and tapping something else within [openGuard] is not a double tap.',
-          indent: 2,
+    if (guards)
+      RawMember(
+        Code(
+          'bool _startOpenGuard($guardType target) {\n'
+          '  if ((_openGuard?.isActive ?? false) && _openTarget == target) {\n'
+          '    return false;\n'
+          '  }\n'
+          '  _openGuard?.cancel();\n'
+          '  _openGuard = Timer(openGuard, () {});\n'
+          '  _openTarget = target;\n'
+          '  return true;\n'
+          '}',
+        ),
+        doc: m.text(
+          'details_bloc.start_guard',
+          reflow(
+            'False while a hand-over of the same [target] still guards (the second tap of a double tap); else starts the guard for it. A different target goes through at once: popping back and tapping something else within [openGuard] is not a double tap.',
+            indent: 2,
+          ),
         ),
       ),
-    ),
-    RawMember(
-      Code(
-        'Future<void> close() {\n'
-        '  _openGuard?.cancel();\n'
-        '  return super.close();\n'
-        '}',
+    if (guards)
+      RawMember(
+        Code(
+          'Future<void> close() {\n'
+          '  _openGuard?.cancel();\n'
+          '  return super.close();\n'
+          '}',
+        ),
+        annotations: [Code('@override')],
       ),
-      annotations: [Code('@override')],
-    ),
   ];
   ctx.library(
     DartLibrary(
       '$_bloc/${base}_bloc.dart',
-      imports: [dartAsync],
+      imports: [if (guards) dartAsync],
       parts: [
         '${base}_bloc.freezed.dart',
         '${base}_event.dart',
         '${base}_state.dart',
       ],
       decls: [
-        RawDecl(
-          Code('const Duration openGuard = Duration(milliseconds: 500);'),
-          name: 'openGuard',
-          doc: m.text(
-            'details_bloc.open_guard',
-            reflow(
-              'How long after handing ${_anyOf(labels)} over a second hand-over of the same one is ignored: the second tap of a double tap (P-089). By then the opened page covers this one. The same value as `discovery_search`\'s open guard.',
+        if (guards)
+          RawDecl(
+            Code('const Duration openGuard = Duration(milliseconds: 500);'),
+            name: 'openGuard',
+            doc: m.text(
+              'details_bloc.open_guard',
+              reflow(
+                'How long after handing ${_anyOf(labels)} over a second hand-over of the same one is ignored: the second tap of a double tap (P-089). By then the opened page covers this one. The same value as `discovery_search`\'s open guard.',
+              ),
             ),
           ),
-        ),
         ClassDecl(
           bloc,
           modifiers: 'final',
           superclass: Code('${ref('McBloc')}<$eventCls, $stateCls>'),
           doc: m.text(
             'details_bloc.doc',
-            "The details page's bloc: loads the $item, and hands a tapped target over to\n"
-                'the app through the navigator, which only blocs call (plan 01 §4.1). A second\n'
-                'hand-over of the same target within [openGuard] is ignored, so a double tap\n'
-                'opens one page.\n'
+            (guards
+                    ? "The details page's bloc: loads the $item, and hands a tapped target over to\n"
+                          'the app through the navigator, which only blocs call (plan 01 §4.1). A second\n'
+                          'hand-over of the same target within [openGuard] is ignored, so a double tap\n'
+                          'opens one page.\n'
+                    : "The details page's bloc: loads the $item.\n") +
                 '\n'
-                'Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never\n'
-                'Flutter, so every generator that reads it runs on analyzer summaries.',
+                    'Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never\n'
+                    'Flutter, so every generator that reads it runs on analyzer summaries.',
           ),
           annotations: [Code('@${ref('injectable')}')],
           members: members,
@@ -391,7 +405,7 @@ void _favouriteBloc(EmitContext ctx, ScModel m) {
   final flags = {if (a != null) 'analytics'};
   final vars = {
     'Item': m.itemPascal,
-    'item': m.item,
+    'item': m.itemWords,
     'itemCamel': m.itemCamel,
     'Prefix': m.prefix,
     'prefixCamel': m.prefixCamel,
@@ -404,14 +418,14 @@ void _favouriteBloc(EmitContext ctx, ScModel m) {
     'analyticsEvent': a?.event ?? '',
   };
   String t(String raw) => tpl(flagged(raw, flags), vars).trimRight();
-  final base = '${m.item}_favourite';
+  final base = '${snakeCase(m.item)}_favourite';
   final bloc = m.favouriteBloc;
   final signal = a == null
       ? 'Every saved write publishes `DataChanged(\'favourites\')` once, and a '
-            '`DataChanged(\'favourites\')` from anyone else (another page of the same ${m.item}) reads the flag again.'
+            '`DataChanged(\'favourites\')` from anyone else (another page of the same ${m.itemWords}) reads the flag again.'
       : 'Every saved write publishes `DataChanged(\'favourites\')` once, a saved '
             'favourite (not a removal) tracks `${a.event}`, and a '
-            '`DataChanged(\'favourites\')` from anyone else (another page of the same ${m.item}) reads the flag again.';
+            '`DataChanged(\'favourites\')` from anyone else (another page of the same ${m.itemWords}) reads the flag again.';
   final doc = m.text(
     'favourite_bloc.doc',
     "The favourite toggle's bloc.\n"
@@ -419,7 +433,7 @@ void _favouriteBloc(EmitContext ctx, ScModel m) {
         '- **Signed out:** a tap means "add it". It asks the app to sign in and\n'
         '  waits (`requestSignIn()`). On false nothing changes and no request is\n'
         '  made. On true it first reads the flag for the new session: if that user\n'
-        '  already has the ${m.item}, nothing is written; otherwise it is saved.\n'
+        '  already has the ${m.itemWords}, nothing is written; otherwise it is saved.\n'
         '- **Signed in:** a tap flips the toggle at once (optimistic), then writes;\n'
         '  a failed write flips it back and shows an inline error.\n'
         '- **One at a time:** a tap while a sign-in or a write is in flight is\n'

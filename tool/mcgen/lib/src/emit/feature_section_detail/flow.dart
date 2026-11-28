@@ -139,7 +139,7 @@ void emitFlow(EmitContext ctx, ScModel m) {
           doc: m.text(
             'flow_state.doc',
             'What the flow shows, not which page is on top (plan 01 §4.1): the\n'
-                '${m.item} it opened on. Pure Dart, so the blocs that read it stay\n'
+                '${m.itemWords} it opened on. Pure Dart, so the blocs that read it stay\n'
                 'Flutter-free (R15).',
           ),
           annotations: [Code('@${ref('freezed')}')],
@@ -148,11 +148,11 @@ void emitFlow(EmitContext ctx, ScModel m) {
               Code(
                 'const factory ${m.flowState}({\n'
                 '${documented([
-                  (m.text('flow_state.id', 'The ${m.item} the flow opened on; the flow starts from the id alone (plan 01 §4.4).'), 'required ${ref(m.itemIdType)} ${m.idArg},'),
+                  (m.text('flow_state.id', 'The ${m.itemWords} the flow opened on; the flow starts from the id alone (plan 01 §4.4).'), 'required ${ref(m.itemIdType)} ${m.idArg},'),
                   if (cover != null) (
                       m.text(
                         'flow_state.cover',
-                        'The loaded ${m.item} whose ${cover.field} page is open.',
+                        'The loaded ${m.itemWords} whose ${cover.field} page is open.',
                       ),
                       '${ref(m.entity)}? ${cover.field},',
                     ),
@@ -204,7 +204,7 @@ void emitFlow(EmitContext ctx, ScModel m) {
           superclass: Code('StatelessWidget'),
           doc: m.text(
             'flow.doc',
-            "The feature's only entry point (R4): one ${m.item}'s page in sections,\n"
+            "The feature's only entry point (R4): one ${m.itemWords}'s page in sections,\n"
                 'whose actions leave the feature through [navigator].\n'
                 '\n'
                 'The app builds it from a route with the navigator implementation from\n'
@@ -227,7 +227,7 @@ void emitFlow(EmitContext ctx, ScModel m) {
                 documented([
                   (null, 'final ${ref(m.navigator)} navigator;'),
                   (
-                    m.text('flow.id', 'The ${m.item} to show.'),
+                    m.text('flow.id', 'The ${m.itemWords} to show.'),
                     'final ${ref(m.itemIdType)} ${m.idArg};',
                   ),
                 ]),

@@ -504,7 +504,7 @@ void main() {
       );
     });
 
-    test('T-0072-AC3 a section_detail spec for a missing entity is an emit '
+    test('T-0072-AC3 a section_detail spec for a missing entity is a lint '
         'diagnostic, not a crash', () {
       final root = _probeRoot(
         'probe-entity',
@@ -513,7 +513,10 @@ void main() {
       addTearDown(() => root.deleteSync(recursive: true));
       final r = mcgen(['gen', '--check', '--root', root.path, 'zz_sc_probe']);
       expect(r.code, 1, reason: '$r');
-      expect(r.err, contains('no entity "Gadget" in entities'));
+      expect(
+        r.err,
+        contains('options.entity: no entity "Gadget" in entities'),
+      );
     });
   });
 

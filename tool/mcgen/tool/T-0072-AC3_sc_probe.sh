@@ -1,6 +1,6 @@
 #!/bin/bash
 # T-0072-AC3: the section-detail archetype generalises past its exemplars. A
-# throwaway SC module (tool/mcgen/test/fixtures/zz_sc_probe/mcgen.yaml: other
+# throwaway SC module (plus two more, see below) (tool/mcgen/test/fixtures/zz_sc_probe/mcgen.yaml: other
 # nouns, one hand-over with its id on the entity, no second request, no inner
 # page, no analytics) is
 #   1. generated into feature/zz_probe/zz_sc_probe by `mcgen gen`;
@@ -33,15 +33,23 @@ step() {  # step <label> <command...>
   fi
 }
 report "# T-0072-AC3: a throwaway section-detail module" "" "HEAD \`$(git rev-parse --short HEAD)\`" ""
-mkdir -p "$PROBE"
-cp tool/mcgen/test/fixtures/zz_sc_probe/mcgen.yaml "$PROBE/mcgen.yaml"
-step "mcgen gen zz_sc_probe" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen zz_sc_probe
-report "  - $(find "$PROBE" -type f | wc -l | tr -d ' ') files generated"
-step "mcgen gen --check zz_sc_probe (idempotent)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen --check zz_sc_probe
-step "bazel build --config=lint //$PROBE/... (mc_analysis, no issue)" bzw build --config=lint "//$PROBE/..."
-step "bazel test //$PROBE/... (uncached)" bzw test --nocache_test_results --test_output=errors "//$PROBE/..."
+# zz_sc_probe: the full probe (tests run). zz_sc_plain: no hand-over (tests
+# run). zz_sc_story: a two-word item, String ids, nested DTOs, two hand-overs
+# (analysed and built only; its backend has no String-id route).
+for m in zz_sc_probe zz_sc_plain zz_sc_story; do
+  mkdir -p "feature/zz_probe/$m"
+  cp "tool/mcgen/test/fixtures/$m/mcgen.yaml" "feature/zz_probe/$m/mcgen.yaml"
+  step "mcgen gen $m" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen "$m"
+  report "  - $(find "feature/zz_probe/$m" -type f | wc -l | tr -d ' ') files generated"
+  step "mcgen gen --check $m (idempotent)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen --check "$m"
+done
+step "bazel build --config=lint //feature/zz_probe/... (mc_analysis, no issue)" bzw build --config=lint "//feature/zz_probe/..."
+step "bazel test //$PROBE/... and zz_sc_plain (uncached)" bzw test --nocache_test_results --test_output=errors "//$PROBE/..." "//feature/zz_probe/zz_sc_plain/..."
 if [[ -f "bazel-testlogs/$PROBE/bdd_test/test.log" ]]; then
   report "  - BDD scenarios: $(grep -c '^  PASS ' "bazel-testlogs/$PROBE/bdd_test/test.log") passed, $(grep -c '^  FAIL ' "bazel-testlogs/$PROBE/bdd_test/test.log") failed"
+fi
+if [[ -f "bazel-testlogs/feature/zz_probe/zz_sc_plain/bdd_test/test.log" ]]; then
+  report "  - zz_sc_plain BDD scenarios: $(grep -c '^  PASS ' "bazel-testlogs/feature/zz_probe/zz_sc_plain/bdd_test/test.log") passed"
 fi
 for t in architecture_test bdd_test flow_scope_test; do
   if grep -q "PASSED" "$log" && plain "$log" | grep -q "//$PROBE:$t .*PASSED"; then

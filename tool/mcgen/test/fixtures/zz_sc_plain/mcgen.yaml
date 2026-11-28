@@ -1,0 +1,74 @@
+# T-0072 review round: a third throwaway section-detail module with no
+# hand-over at all: the navigator has only `requestSignIn`, so the details
+# bloc has no navigator, no open guard and no timer.
+# Never committed as a module: tool/mcgen/tool/T-0072-AC3_sc_probe.sh copies
+# it to feature/zz_probe/zz_sc_plain, builds it with `--config=lint` and runs
+# its tests.
+schema: mcgen/1
+module: zz_sc_plain
+tier: feature
+archetype: section_detail
+ownership: mixed
+description: A throwaway ticket page with a favourite and no hand-over (T-0072 review).
+dev_deps: [mc_mocked_backend]
+
+entities:
+  - name: Ticket
+    fields:
+      - {name: id, type: TicketId}
+      - {name: title, type: String}
+  - name: TicketDto
+    json: true
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+
+navigator:
+  name: ZzScPlainNavigator
+  doc: What zz_sc_plain needs from outside.
+  outbound: ["requestSignIn() -> bool"]
+
+l10n:
+  locales: [en, de]
+  strings:
+    - {key: zzScPlainTitle, description: Title before it loads., text: {en: Ticket, de: Ticket}}
+    - {key: zzScPlainLoading, description: Loading label., text: {en: Loading, de: Wird geladen}}
+    - {key: zzScPlainErrorTitle, description: Error title., text: {en: Could not be loaded, de: Konnte nicht geladen werden}}
+    - {key: zzScPlainNotFoundTitle, description: Not found title., text: {en: Ticket not found, de: Nicht gefunden}}
+    - {key: zzScPlainNotFoundMessage, description: Not found message., text: {en: It does not exist., de: Es gibt ihn nicht.}}
+    - {key: zzScPlainFavouriteAdd, description: Add., text: {en: Add to favourites, de: Hinzufügen}}
+    - {key: zzScPlainFavouriteRemove, description: Remove., text: {en: Remove from favourites, de: Entfernen}}
+    - {key: zzScPlainFavouriteSaveFailed, description: Save failed., text: {en: Could not save., de: Nicht gespeichert.}}
+    - {key: zzScPlainFavouriteLoadFailed, description: Load failed., text: {en: Could not check., de: Nicht geprüft.}}
+
+bdd:
+  - feature: zz_sc_plain
+    title: A ticket's page
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+    scenarios:
+      - id: MC-zz_sc_plain-01
+        title: The page loads and the favourite works
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - When I open ticket {501500}
+          - "And I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And ticket {501500} is a favourite of {'reader@mini-client.test'}"
+
+options:
+  item: ticket
+  items: tickets
+  prefix: ZzScPlain
+  ids:
+    - {name: TicketId, type: int}
+  entity: Ticket
+  item_path: v1/comics/{id}
+  favourite_kind: comic
+  tests:
+    fixture_sets: [comics.default]
+    env:
+      fixture_packages: mc_fixtures_comics
+      fixture_set_lists: comicsFixtureSets
+      sample_id: "501500"

@@ -8,6 +8,7 @@ import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
 import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
+import 'package:mcgen/src/core/spec/types.dart';
 import 'package:mcgen/src/emit/feature_section_detail/common.dart';
 import 'package:mcgen/src/emit/feature_section_detail/model.dart';
 
@@ -38,7 +39,7 @@ void emitDomain(EmitContext ctx, ScModel m) {
 
 DartLibrary _api(ScModel m) {
   final fav = m.favouritePath;
-  final item = m.item;
+  final item = m.itemWords;
   final extras =
       "{@${ref('Extras')}() Map<String, dynamic> extras = const {},}";
   String path(String p) => p;
@@ -49,7 +50,7 @@ DartLibrary _api(ScModel m) {
     ),
     RawMember(
       Code(
-        'Future<${ref(m.dto)}> get${m.itemPascal}(@${ref('Path')}(\'id\') int id);',
+        'Future<${ref(m.dto)}> get${m.itemPascal}(@${ref('Path')}(\'id\') ${m.idPrim} id);',
       ),
       doc: m.text(
         'api.get_item',
@@ -61,7 +62,7 @@ DartLibrary _api(ScModel m) {
       RawMember(
         Code(
           'Future<${ref(r.pageDto)}> get${r.pascal}(\n'
-          "  @${ref('Query')}('${r.param}') int ${r.param},\n"
+          "  @${ref('Query')}('${r.param}') ${m.idPrim} ${r.param},\n"
           "  @${ref('Query')}('limit') int limit,\n"
           ');',
         ),
@@ -73,7 +74,7 @@ DartLibrary _api(ScModel m) {
       ),
     RawMember(
       Code(
-        'Future<${ref('FavouriteDto')}> getFavourite(@${ref('Path')}(\'id\') int id);',
+        'Future<${ref('FavouriteDto')}> getFavourite(@${ref('Path')}(\'id\') ${m.idPrim} id);',
       ),
       doc: m.text(
         'api.get_favourite',
@@ -99,7 +100,7 @@ DartLibrary _api(ScModel m) {
       RawMember(
         Code(
           'Future<${ref('FavouriteDto')}> ${verb}Favourite(\n'
-          "  @${ref('Path')}('id') int id, $extras\n"
+          "  @${ref('Path')}('id') ${m.idPrim} id, $extras\n"
           ');',
         ),
         doc: m.text('api.${verb}_favourite', reflow(text, indent: 2)),
@@ -132,7 +133,7 @@ DartLibrary _api(ScModel m) {
 }
 
 DartLibrary _repository(ScModel m) {
-  final item = m.item;
+  final item = m.itemWords;
   final id = ref(m.itemIdType);
   final failure = ref('ApiFailure');
   final result = ref('Result');
@@ -269,7 +270,7 @@ DartLibrary _analytics(ScModel m, ScAnalytics a) => DartLibrary(
       name: a.eventConst,
       doc: m.text(
         'analytics.event',
-        'The signed-in user saved the ${m.item} among their favourites.',
+        'The signed-in user saved the ${m.itemWords} among their favourites.',
       ),
     ),
     ExtensionDeclFix.of(
@@ -286,7 +287,7 @@ DartLibrary _analytics(ScModel m, ScAnalytics a) => DartLibrary(
           "    trackEvent(${a.eventConst}, {'id': id.value});",
       memberDoc: m.text(
         'analytics.method',
-        '`${a.event}` with `id`, the ${m.item}\'s id. Only a saved favourite\n'
+        '`${a.event}` with `id`, the ${m.itemWords}\'s id. Only a saved favourite\n'
             'counts: not a removal, a failed write or a sign-in that was backed out\n'
             'of.',
       ),
@@ -435,13 +436,38 @@ void _skeleton(EmitContext ctx, ScModel m) {
   );
   // One mapper per DTO whose name is a domain entity's plus `Dto`: the same
   // field names, an id wrapped in its id type, a nested DTO converted.
+  // The expression turning DTO field [f] (same name) into the domain field:
+  // an id is wrapped in its id type, a nested DTO converted with its own
+  // `toDomain`, a list element by element; a nullable one is null-checked.
+  final domainNames = {for (final e in domain) e.name};
+  String one(TypeExpr t, String v) {
+    if (idTypes.containsKey(t.name)) return '${ref(t.name)}($v)';
+    if (domainNames.contains(t.name) && dtoNames.contains('${t.name}Dto')) {
+      return '$v.toDomain()';
+    }
+    return v;
+  }
+
+  String convert(FieldSpec f) {
+    final t = f.type;
+    final isList = t.name == 'List' && t.args.length == 1;
+    final inner = isList ? t.args.single : t;
+    final needs = one(inner, 'e') != 'e';
+    final v = f.name;
+    if (!needs) return v;
+    final nn = t.nullable ? '$v!' : v;
+    final value = isList
+        ? '[for (final e in $nn) ${one(inner, 'e')}]'
+        : one(inner, nn);
+    return t.nullable ? '$v == null ? null : $value' : value;
+  }
+
   final decls = <Decl>[];
   for (final d in dtos) {
     final target = domain.where((e) => '${e.name}Dto' == d.name).firstOrNull;
     if (target == null) continue;
     final args = [
-      for (final f in target.fields)
-        '${f.name}: ${idTypes.containsKey(f.type.name) ? '${ref(f.type.name)}(${f.name})' : f.name}',
+      for (final f in target.fields) '${f.name}: ${convert(f)}',
     ];
     decls.add(
       RawDecl(
