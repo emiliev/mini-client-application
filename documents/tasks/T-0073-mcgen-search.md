@@ -72,3 +72,20 @@ Add the SR archetype to `mcgen`. The exemplar `discovery_search` (grouped result
   - a skeleton for the grouped shape, and for a nullable or second facet;
   - P2-08's buildgen should own `BUILD.bazel` and `flow_scope.dart`;
   - a 20-run flake check of the new `zz_sr_probe` targets is not meaningful, because the module is never committed.
+
+## Review round (ADR-0015's single fix round)
+- 2026-11-28 (Engineer): `/code-review` found 5 important issues. Each was a spec that lint accepted and gen then failed on or got wrong.
+  1. **Roles.** Lint checks every `options.names` and `options.files` role of the mode (paged and grouped). `SrError` has a `toString`, so gen no longer prints "Instance of 'SrError'".
+  2. **The open id type** comes from the argument of the navigator method `results.open` names (`m.openId`), in the bloc, its imports and the skeleton. The probe now has `ids: [SeriesId, ComicId]`, `openSeries` and `openComic`, and passes under Bazel.
+  3. **`query.min_length` in paged mode** is honoured: the template adds `minQueryLength` and a guard that shows the recent searches. It is written only when the value is above 1, so `characters_search` is unchanged. The probe uses 2, with a BDD scenario for a one-letter query.
+  4. **Barrel and architecture test:** lint requires `options.ids` to equal the navigator's argument types exactly (both directions).
+  5. **`analytics.file` and `analytics.const`:** lint requires both or neither.
+  - Removed the undeclared `// ignore: unused_element`, its typedef and the `yaml` import.
+  - The bloc now imports only the open id's file.
+  - **Accepted by the TL:** the whitespace-only change to the Examples table in `discovery_search.feature`.
+- **Tests:** `T-0073-AC3 open takes the id type of the navigator method it names, not the first id`, `T-0073-AC3 lint names every missing role, id mismatch and half an analytics block, and gen never prints an SrError instance`, `T-0073-AC3 a grouped spec missing its roles is a lint error`. The probe's `min_length` is asserted in `T-0073-AC3 the probe is its own module, not an exemplar with names swapped`.
+- **Follow-ups (nits not fixed):**
+  - the skeleton should check the sort facet's `event` and `type`;
+  - reject the other mode's option keys (`facets` in a grouped spec, `hits` in a paged one);
+  - the bloc and DI docs say "at most 10" instead of using `history.cap`;
+  - escape spec strings that are written into Dart literals (`history.key`, `analytics` names).

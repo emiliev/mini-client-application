@@ -34,6 +34,19 @@ String pagedBloc(SrModel m, Map<String, String> v) {
       'How long typing must pause before a search goes out.',
     ),
     'd_page_size': doc(m, 'bloc.page_size', '${v['Items']} per request.'),
+    'min_const': m.minLength > 1
+        ? '${doc(m, 'bloc.min_length', 'The shortest query that is searched; a shorter one sends no request and\nshows the recent searches.')}'
+              'const int minQueryLength = ${m.minLength};\n\n'
+        : '',
+    'search_case': m.minLength > 1
+        ? '        if (query.runes.length < minQueryLength) {\n'
+              '          _stop();\n'
+              '          _showHistory(emit);\n'
+              '        } else {\n'
+              '          _saved = null;\n'
+              '          await _start(query, emit);\n'
+              '        }'
+        : '        _saved = null;\n        await _start(query, emit);',
     'd_guard': doc(m, 'bloc.open_guard', _openGuardDoc),
     'd_class': doc(m, 'bloc.doc', _pagedClassDoc(facetsBullet)),
     'facet_cases': cases,
@@ -139,7 +152,7 @@ const _groupedClassDoc =
 const _paged = r'''
 <<d_debounce>>const Duration searchDebounce = Duration(milliseconds: <<debounce>>);
 
-<<d_page_size>>const int <<pageSizeConst>> = <<pageSize>>;
+<<min_const>><<d_page_size>>const int <<pageSizeConst>> = <<pageSize>>;
 
 <<d_guard>>const Duration openGuard = Duration(milliseconds: <<guard>>);
 
@@ -213,8 +226,7 @@ final class <<Bloc>>
       case _Submitted(:final text):
         _query.submit(text);
       case _Search(:final query):
-        _saved = null;
-        await _start(query, emit);
+<<search_case>>
       case _Cleared():
         _stop();
         _showHistory(emit);

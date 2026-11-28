@@ -21,7 +21,6 @@
 import 'package:mcgen/src/core/diagnostics.dart';
 import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
-import 'package:yaml/yaml.dart';
 
 /// Thrown by [SrModel.parse] for options it cannot read; lint reports them.
 class SrError implements Exception {
@@ -29,6 +28,9 @@ class SrError implements Exception {
 
   final String path;
   final String message;
+
+  @override
+  String toString() => '$path: $message';
 }
 
 enum SrMode { paged, grouped }
@@ -131,6 +133,15 @@ class SrModel {
   // tests
   late final Map<String, String> tests;
   late final Map<String, String> tags;
+
+  /// The id type the open event carries: the argument of the navigator method
+  /// `results.open` names (paged).
+  String get openId {
+    for (final o in spec.navigator!.outbound) {
+      if (o.name == openCalls && o.args.length == 1) return o.args.single;
+    }
+    throw SrError('options.results.open', 'no navigator method "$openCalls"');
+  }
 
   bool get paged => mode == SrMode.paged;
   bool get grouped => mode == SrMode.grouped;
@@ -409,6 +420,44 @@ class SrModel {
       }
     }
 
+    final roles = m.paged
+        ? (
+            const ['facets', 'query', 'tile', 'tile_arg', 'facets_view'],
+            const ['entity', 'facets', 'tile', 'empty_message', 'facets_view'],
+          )
+        : (
+            const ['results', 'hit', 'filter', 'results_view'],
+            const ['results', 'results_view'],
+          );
+    for (final role in roles.$1) {
+      if (!m.names.containsKey(role)) {
+        err('options.names.$role', 'options.names needs "$role"');
+      }
+    }
+    for (final role in roles.$2) {
+      if (!m.files.containsKey(role)) {
+        err('options.files.$role', 'options.files needs "$role"');
+      }
+    }
+    if ((m.screenFile == null) != (m.screenConst == null)) {
+      err(
+        'options.analytics',
+        'options.analytics needs both "file" and "const", or neither',
+      );
+    }
+    final argTypes = {
+      for (final o in spec.navigator!.outbound) ...o.args,
+    };
+    final idNames = {for (final i in m.ids) i.name};
+    for (final a in argTypes.difference(idNames)) {
+      err('options.ids', 'the navigator takes "$a", which options.ids lacks');
+    }
+    for (final i in idNames.difference(argTypes)) {
+      err(
+        'options.ids',
+        'options.ids has "$i", which no navigator method takes',
+      );
+    }
     if (m.paged) {
       method(m.openCalls, 'options.results.open');
       if (m.facets.isEmpty) {
@@ -453,21 +502,8 @@ class SrModel {
           'a skeleton has exactly one facet, named "sort"',
         );
       }
-      for (final role in const ['sort', 'tile', 'tile_arg', 'facets_view']) {
-        if (!m.names.containsKey(role)) {
-          err('options.names.$role', 'options.names needs "$role"');
-        }
-      }
-      for (final role in const [
-        'entity',
-        'facets',
-        'tile',
-        'empty_message',
-        'facets_view',
-      ]) {
-        if (!m.files.containsKey(role)) {
-          err('options.files.$role', 'options.files needs "$role"');
-        }
+      if (!m.names.containsKey('sort')) {
+        err('options.names.sort', 'options.names needs "sort"');
       }
       for (final s in m.sorts) {
         final k = m.key('Sort${pascalCase(s.$1)}');
@@ -612,6 +648,3 @@ class _Reader {
     };
   }
 }
-
-// ignore: unused_element
-typedef _Unused = YamlNode;

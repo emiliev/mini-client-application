@@ -312,7 +312,7 @@ DartLibrary skelContractTest(SrModel m, Map<String, String> v) {
     imports: [
       m.uri('domain/api/${m.module}_api.dart'),
       m.uri('domain/model/${m.file('facets')}'),
-      m.uri('domain/model/${m.ids.first.file}'),
+      m.uri('domain/model/${v['idFile']}'),
       m.uri('domain/repository/${m.module}_repository.dart'),
       'package:flutter_test/flutter_test.dart',
       'package:${v['fixturePackage']}/${v['fixturePackage']}.dart',

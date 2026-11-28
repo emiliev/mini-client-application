@@ -347,7 +347,8 @@ void main() {
       );
       final bloc =
           gen.files['lib/src/presentation/bloc/zz_sr_probe_bloc.dart']!.content;
-      expect(bloc, isNot(contains('minQueryLength')));
+      expect(bloc, contains('const int minQueryLength = 2;'));
+      expect(bloc, contains('if (query.runes.length < minQueryLength)'));
       expect(bloc, contains('const int comicsSearchPageSize = 20;'));
       // Nothing of the exemplars' vocabulary leaks into the probe.
       for (final f in gen.files.values) {
@@ -477,9 +478,9 @@ void main() {
         ['error [search] options.colour: unknown key "colour"'],
       );
       expect(
-        lintWith((s) => s.replaceFirst('open: openComic', 'open: openSeries')),
+        lintWith((s) => s.replaceFirst('open: openComic', 'open: openNothing')),
         [
-          'error [search] options.results.open: the navigator has no method "openSeries"',
+          'error [search] options.results.open: the navigator has no method "openNothing"',
         ],
       );
       expect(
@@ -510,6 +511,111 @@ void main() {
           'error [search] options.facets: a paged search needs at least one facet',
         ],
       );
+    });
+
+    test('T-0073-AC3 open takes the id type of the navigator method it names, '
+        'not the first id', () {
+      final root = _probeRoot('probe-openid');
+      addTearDown(() => root.deleteSync(recursive: true));
+      final gen = _render(root.path, '$_probeRel/mcgen.yaml');
+      final event = gen
+          .files['lib/src/presentation/bloc/zz_sr_probe_event.dart']!
+          .content;
+      expect(event, contains('ZzSrProbeEvent.open(ComicId id)'));
+      expect(event, isNot(contains('SeriesId')));
+      final bloc =
+          gen.files['lib/src/presentation/bloc/zz_sr_probe_bloc.dart']!.content;
+      expect(bloc, contains("domain/model/comic_id.dart'"));
+      expect(bloc, isNot(contains('series_id')));
+      expect(
+        gen.files['test/architecture/architecture_test.dart']!.content,
+        contains("'SeriesId',"),
+      );
+    });
+
+    test('T-0073-AC3 lint names every missing role, id mismatch and half an '
+        'analytics block, and gen never prints an SrError instance', () {
+      List<String> lintWith(String Function(String) edit) {
+        final root = _probeRoot('probe-roles', edit: edit);
+        addTearDown(() => root.deleteSync(recursive: true));
+        final r = mcgen(['spec', 'lint', '--root', root.path, 'zz_sr_probe']);
+        expect(r.code, 1, reason: '$r');
+        final g = mcgen(['gen', '--check', '--root', root.path, 'zz_sr_probe']);
+        expect(g.err, isNot(contains('Instance of')), reason: g.err);
+        return [
+          for (final l in r.err.trim().split('\n'))
+            l.substring(l.indexOf('error')),
+        ];
+      }
+
+      expect(
+        lintWith(
+          (s) => s.replaceFirst('    tile: comic_result_tile.dart\n', ''),
+        ),
+        ['error [search] options.files.tile: options.files needs "tile"'],
+      );
+      expect(
+        lintWith((s) => s.replaceFirst('    facets_view: SearchFacets\n', '')),
+        [
+          'error [search] options.names.facets_view: options.names needs "facets_view"',
+        ],
+      );
+      expect(
+        lintWith((s) => s.replaceFirst('    query: ComicsSearchQuery\n', '')),
+        ['error [search] options.names.query: options.names needs "query"'],
+      );
+      expect(
+        lintWith(
+          (s) => s.replaceFirst(
+            '  outbound: [openSeries(SeriesId), openComic(ComicId)]',
+            '  outbound: [openComic(ComicId)]',
+          ),
+        ),
+        [
+          'error [search] options.ids: options.ids has "SeriesId", which no navigator method takes',
+        ],
+      );
+      expect(
+        lintWith(
+          (s) => s.replaceFirst(
+            "    - {name: SeriesId, type: int, doc: \"A series' id in this feature's own vocabulary.\"}\n",
+            '',
+          ),
+        ),
+        [
+          'error [search] options.ids: the navigator takes "SeriesId", which options.ids lacks',
+        ],
+      );
+      expect(
+        lintWith(
+          (s) => s.replaceFirst(
+            'options:\n',
+            'options:\n  analytics:\n    file: comic_analytics.dart\n',
+          ),
+        ),
+        [
+          'error [search] options.analytics: options.analytics needs both "file" and "const", or neither',
+        ],
+      );
+    });
+
+    test('T-0073-AC3 a grouped spec missing its roles is a lint error', () {
+      final root = _copyRoot(
+        _grouped,
+        'grouped-roles',
+        edit: (s) =>
+            s.replaceFirst('    results_view: SearchResultsView\n', ''),
+      );
+      addTearDown(() => root.deleteSync(recursive: true));
+      final r = mcgen([
+        'spec',
+        'lint',
+        '--root',
+        root.path,
+        'discovery_search',
+      ]);
+      expect(r.code, 1, reason: '$r');
+      expect(r.err, contains('options.names needs "results_view"'));
     });
 
     test('T-0073-AC3 a prose slot no template uses fails gen, naming it', () {

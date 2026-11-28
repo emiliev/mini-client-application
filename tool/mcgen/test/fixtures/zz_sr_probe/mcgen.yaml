@@ -15,7 +15,7 @@ description: A throwaway search over comics with a sort facet and paging (T-0073
 navigator:
   name: ZzSrProbeNavigator
   doc: What zz_sr_probe needs from outside.
-  outbound: [openComic(ComicId)]
+  outbound: [openSeries(SeriesId), openComic(ComicId)]
 
 l10n:
   locales: [en, de, en_XA]
@@ -67,6 +67,13 @@ bdd:
           - "And I type {'zzzz'}"
           - "Then I see {'No comics found'}"
           - "And I see {'No comic’s title starts with “zzzz”. Check the spelling.'}"
+      - id: MC-zz_sr_probe-08
+        title: A one-letter query sends nothing and shows the recent searches
+        steps:
+          - When I open the search
+          - "And I type {'a'}"
+          - "Then the backend received {0} requests for {'GET /v1/comics'}"
+          - And the facets are not shown
       - id: MC-zz_sr_probe-03
         title: A failed search explains the problem and retries
         steps:
@@ -111,9 +118,12 @@ bdd:
 
 options:
   mode: paged
+  query:
+    min_length: 2
   item: comic
   items: comics
   ids:
+    - {name: SeriesId, type: int, doc: "A series' id in this feature's own vocabulary."}
     - {name: ComicId, type: int, doc: "A comic's id in this feature's own vocabulary."}
   files:
     entity: comic.dart

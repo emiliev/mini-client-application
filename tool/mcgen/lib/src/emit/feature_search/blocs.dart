@@ -53,7 +53,9 @@ void emitBlocs(EmitContext ctx, SrModel m) {
         if (m.paged) ...[
           m.uri('domain/model/${m.file('entity')}'),
           m.uri('domain/model/${m.file('facets')}'),
-          for (final id in m.ids) m.uri('domain/model/${id.file}'),
+          m.uri(
+            'domain/model/${m.ids.firstWhere((i) => i.name == m.openId).file}',
+          ),
         ] else
           m.uri('domain/model/${m.file('results')}'),
       ],
@@ -91,7 +93,7 @@ Map<String, String> _vars(SrModel m) => {
     'pageSizeConst': m.pageSizeConst,
     'pageSize': '${m.pageSize}',
     'open': m.openCalls,
-    'Id': m.ids.first.name,
+    'Id': m.openId,
   } else ...{
     'Results': m.name('results'),
     'Hit': m.name('hit'),
