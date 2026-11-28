@@ -12,7 +12,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **CI** | GitHub Actions (`.github/workflows/ci.yml`, `tool/ci/ci.sh`, 11 gates) on `main`, `fleet/**`, PRs and on demand; cold 44 min, warm 25 min (T-0068) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0072 (fix round), T-0074 (Opus) |
+| **Active crew** | T-0074 (Opus) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -30,6 +30,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0072 merged: `mcgen` section-detail archetype.** `comics_details` and `characters_details` regenerate byte for byte. Three of seven feature archetypes are templated (LD, SR, SC).
 - **T-0073 merged: `mcgen` search archetype.** `discovery_search` (grouped) and `characters_search` (paged, facets) both regenerate byte for byte.
 - **T-0069 merged: the first `mcgen` archetype (list-detail, P2-04).** `characters_list` regenerates byte for byte from its spec (56 files), and a throwaway second list-detail module generates and passes under Bazel. ADR-0017 accepted.
 - **T-0071 merged: character search.** A name-prefix search with sort and team filters, recent searches and paging, reached from the characters list's app bar.

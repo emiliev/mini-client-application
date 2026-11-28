@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (engineer handoff; ADR-0015 review next) |
+| Status | Done (merged 2026-11-28 `48dd4443`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree). The pattern exists now (T-0069), so this task follows it rather than designing anew. |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0072-mcgen-section-detail` |
@@ -80,3 +80,15 @@ Add the SC archetype to `mcgen`. **Two real modules** must round-trip, the exemp
 - **Also:** the skeleton page no longer declares an unused `l10n` when it has no hand-over; prose says "story arc" for `story_arc`.
 - **Merged** `origin/main` (T-0073); `archetypes.dart` has `list_detail`, `search`, `section_detail`, `utility_hello`.
 - **Gates at the review-round HEAD:** 194 mcgen tests; `test --lockfile_mode=error //...` 246/246; lint, `mc_arch_check`, `rules_fork.sh check`, the format gate and the lockfiles are clean (`documents/evidence/T-0072/`).
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 8 important lint and emit gaps and 1 nit. Fix round `6ff48c69`:
+  - all 8 gaps fixed (favourite path and probe URL, no-opens modules, non-int ids, multi-word items, the open strings, entity checks, the mapper);
+  - the shared Examples-table padding fixed;
+  - the probe extended to 3 module shapes.
+- **TL checks:** exemplar diffs are keep markers, specs and manifests only; no `// ignore:`.
+- **The TL merged `--no-ff`.** On the merge result:
+  - 246/246 tests, lint clean, format gate passed;
+  - `T-0065-AC5_gates.sh` passed (194 mcgen tests);
+  - `gen --check` is up to date for all five modules (`characters_list`, `discovery_search`, `characters_search`, `comics_details`, `characters_details`).
+- Hand share: about 61 %, because pages and models are owned (P-127).
