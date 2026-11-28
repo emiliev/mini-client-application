@@ -1,0 +1,163 @@
+# T-0069-AC3: a throwaway list-detail module, the proof that the archetype
+# generalises past its exemplar. Other entities, fields, endpoint, nouns and
+# page size than characters_list, no list filter and no preview section.
+# Never committed as a module: test/list_detail_test.dart renders it, and
+# tool/T-0069-AC3_ld_probe.sh copies it to feature/zz_probe/zz_ld_probe,
+# generates it there, runs its BDD test and its analysis under Bazel, and
+# deletes it again.
+schema: mcgen/1
+module: zz_ld_probe
+tier: feature
+archetype: list_detail
+ownership: mixed
+description: A throwaway list of comics with an in-flow preview (T-0069-AC3).
+
+entities:
+  - name: Comic
+    fields:
+      - {name: id, type: ComicId}
+      - {name: title, type: String}
+      - {name: cover, type: ApiImage}
+  - name: ComicDto
+    json: true
+    doc: A comic summary as `GET /v1/comics` sends it (CONTRACT.md of `mc_fixtures_comics`).
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+      - {name: issueNumber, type: int}
+      - {name: seriesId, type: int}
+      - {name: releaseDate, type: String}
+      - {name: cover, type: CoverDto}
+  - name: CoverDto
+    json: true
+    fields:
+      - {name: path, type: String}
+      - {name: variant, type: String}
+
+endpoints:
+  - id: getComics
+    method: GET
+    path: v1/comics
+    returns: ApiPage<ComicDto>
+    query:
+      - {name: offset, type: int, default: 0}
+      - {name: limit, type: int, default: 20}
+
+navigator:
+  name: ZzLdProbeNavigator
+  doc: What zz_ld_probe needs from outside.
+  outbound: [openComic(ComicId)]
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: zzLdProbeTitle
+      description: Title of the comics list.
+      text: {en: Comics, de: Comics}
+    - key: zzLdProbeLoading
+      description: Screen-reader label while the first page loads.
+      text: {en: Loading comics, de: Comics werden geladen}
+    - key: zzLdProbeEmptyTitle
+      description: Title of the empty list.
+      text: {en: No comics yet, de: Noch keine Comics}
+    - key: zzLdProbeEmptyMessage
+      description: Message below the empty-list title.
+      text: {en: New comics will show up here., de: Neue Comics erscheinen hier.}
+    - key: zzLdProbeErrorTitle
+      description: Title when the first page fails.
+      text: {en: Comics could not be loaded, de: Comics konnten nicht geladen werden}
+    - key: zzLdProbeLoadMoreFailed
+      description: Footer text when a later page fails.
+      text: {en: Could not load more comics., de: Weitere Comics konnten nicht geladen werden.}
+    - key: zzLdProbePreviewOpenDetails
+      description: Button on the preview that opens the comic's page.
+      text: {en: Open details, de: Details öffnen}
+
+bdd:
+  - feature: zz_ld_probe
+    title: Browse comics
+    background: "Given the backend serves {'comics.default'}"
+    scenarios:
+      - id: MC-zz_ld_probe-01
+        title: The first page lists 20 comics in title order
+        steps:
+          - When I open the comics list
+          - "Then I see {'Comics'}"
+          - "And the backend received {'GET /v1/comics?offset=0&limit=20'}"
+          - And I see the first {20} comics in title order with their bundled art
+      - id: MC-zz_ld_probe-02
+        title: Scrolling loads the next page once
+        steps:
+          - When I open the comics list
+          - And I scroll the comics list until the next page loads
+          - "Then the backend received {1} requests for {'GET /v1/comics?offset=20&limit=20'}"
+          - And the comics list shows {40} comics
+      - id: MC-zz_ld_probe-03
+        title: The preview hands over to the app exactly once
+        steps:
+          - When I open the comics list
+          - "And I tap {'Amber Chronicles #1'}"
+          - "Then I see the comic preview for {'Amber Chronicles #1'}"
+          - "When I tap {'Open details'}"
+          - "Then the app was asked to open comic {'Amber Chronicles #1'}"
+      - id: MC-zz_ld_probe-04
+        title: Going back from the preview keeps the list where I left it
+        steps:
+          - When I open the comics list
+          - "And I scroll the comics list until I see {'Amber Crossing #1'}"
+          - "And I tap {'Amber Crossing #1'}"
+          - When I swipe back
+          - Then I don't see the comic preview
+          - And the comics list keeps its scroll position
+      - id: MC-zz_ld_probe-05
+        title: A failed first page offers Retry
+        steps:
+          - "Given the backend fails {'GET /v1/comics'} with {'server_error'}"
+          - When I open the comics list
+          - "Then I see {'Comics could not be loaded'}"
+          - When the backend recovers
+          - "And I tap {'Retry'}"
+          - "Then I see {'Amber Chronicles #1'}"
+      - id: MC-zz_ld_probe-06
+        title: In German the preview button comes from the German strings
+        steps:
+          - "Given the device locale is {'de'}"
+          - When I open the comics list
+          - "And I tap {'Amber Chronicles #1'}"
+          - "Then I see {'Details öffnen'}"
+  - feature: zz_ld_probe_empty
+    title: An empty catalogue
+    scenarios:
+      - id: MC-zz_ld_probe-07
+        title: An empty catalogue says so
+        steps:
+          - "Given the backend serves {'comics.empty'}"
+          - When I open the comics list
+          - "Then I see {'No comics yet'}"
+
+options:
+  item: comic
+  items: comics
+  ids:
+    - {name: ComicId, type: int}
+  list:
+    entity: Comic
+    endpoint: getComics
+    page_size: 20
+    title: title
+    image: cover
+  mappers:
+    - {dto: ComicDto, to: Comic}
+    - {dto: CoverDto, to: ApiImage, via: {variant: ImageVariant.fromWire}}
+  preview:
+    actions:
+      - {event: openDetails, calls: openComic, doc: '"Open details": hand over to the app.'}
+  tests:
+    fixture_sets: [comics.default]
+    record: {title: title, image: cover}
+    env:
+      fixture_packages: mc_fixtures_comics
+      fixture_set_lists: comicsFixtureSets
+      record_type: ComicRecord
+      records: ComicUniverse(42).byTitle
+      mock_domain: ComicsMockDomain

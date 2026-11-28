@@ -577,7 +577,8 @@ class _Reader {
   }
 
   Iterable<MapEntry<String, YamlNode>> get entries => [
-    for (final e in _map?.nodes.entries ?? const <MapEntry<Object?, YamlNode>>[])
+    for (final e
+        in _map?.nodes.entries ?? const <MapEntry<Object?, YamlNode>>[])
       MapEntry('${(e.key as YamlNode).value}', e.value),
   ];
 

@@ -70,6 +70,7 @@ const firstPartyKitSymbols = <String, List<String>>{
   ],
   'package:mc_mocked_backend/mc_mocked_backend.dart': [
     'MockBackend',
+    'MockDomain',
     'canonicalJson',
     'defaultMockClock',
   ],

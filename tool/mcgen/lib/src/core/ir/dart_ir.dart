@@ -316,9 +316,12 @@ class DartLibrary {
   String? get partOfPath {
     final of = partOf;
     if (of == null) return null;
-    final dir = path.contains('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    final dir = path.contains('/')
+        ? path.substring(0, path.lastIndexOf('/'))
+        : '';
     return dir.isEmpty ? of : '$dir/$of';
   }
+
   final List<Decl> decls;
 
   /// The `package:` URI when the file is under `lib/`, else null.

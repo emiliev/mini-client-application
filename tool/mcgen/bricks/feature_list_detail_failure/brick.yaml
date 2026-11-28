@@ -1,0 +1,5 @@
+name: feature_list_detail_failure
+description: What a feature shows for a failed request, from the shared error copy. A Dart brick - declarations only; references are written «Name» and mcgen writes the imports (T-0069).
+version: 0.1.0
+
+vars: {}

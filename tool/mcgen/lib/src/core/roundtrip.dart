@@ -13,9 +13,10 @@ import 'package:mcgen/src/core/keep.dart';
 import 'package:path/path.dart' as p;
 
 /// Paths an exemplar has that are never generator output: tool/ide_sync and
-/// `pub get` artefacts (all git-ignored) and the manifest.
+/// `pub get` artefacts (all git-ignored), the manifest and the spec itself.
 const defaultExemplarIgnores = [
   '.mcgen/**',
+  'mcgen.yaml',
   '**/*.g.dart',
   '**/*.freezed.dart',
   'lib/src/di/*.config.dart',

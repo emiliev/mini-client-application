@@ -31,7 +31,9 @@ final class CharacterPreviewBloc
     on<CharacterPreviewEvent>((event, emit) {
       switch (event) {
         case _SeeFullProfile():
+          // mcgen:keep preview.seeFullProfile
           _navigator.openCharacter(state.id);
+        // mcgen:end preview.seeFullProfile
       }
     });
   }

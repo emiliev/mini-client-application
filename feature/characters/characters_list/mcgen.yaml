@@ -1,0 +1,509 @@
+# The list-detail exemplar's spec (T-0069, P2-04). `mcgen gen characters_list
+# --check` renders it and compares the render with this package, byte for
+# byte outside keep regions and owned files (plan 02 KD1, ADR-0017). The
+# package stays hand-built (ejected); gen writes only .mcgen/manifest.json.
+#
+# Most of this file is prose: the exemplar's comments are hand-written, so the
+# spec carries the ones the templates cannot derive (options.prose, doc:).
+schema: mcgen/1
+module: characters_list
+tier: feature
+archetype: list_detail
+ownership: ejected
+exemplar: true
+description: Paged grid of characters with an in-flow preview that hands over to the full profile.
+deps: [mc_ds_theme]
+# Hand-written after their first write (ADR-0017): the fixture lookups of the
+# test env, the contract test and the goldens that predate ADR-0015.
+owned:
+  - test/contract/**
+  - test/feature/util/**
+  - test/golden/**
+# What an action does is where list-detail features differ most: each
+# preview action's and each section item's handler is a keep region.
+keep: [preview.seeFullProfile, section.RelatedComics.open]
+
+entities:
+  - name: Character
+    doc: |-
+      A character as this feature shows it. Domain model: no JSON, so a bare
+      `@freezed` (R30 is about models with JSON); the wire shape is
+      `CharacterDto`.
+    fields:
+      - {name: id, type: CharacterId}
+      - {name: name, type: String}
+      - {name: image, type: ApiImage}
+  - name: RelatedComic
+    doc: |-
+      A comic the previewed character appears in, as the preview lists it.
+      Domain model: no JSON (the wire shape is `RelatedComicDto`).
+    fields:
+      - {name: id, type: ComicId}
+      - {name: title, type: String}
+      - {name: cover, type: ApiImage}
+  - name: CharacterDto
+    json: true
+    doc: |-
+      A character summary as `GET /v1/characters` sends it (CONTRACT.md of
+      `mc_fixtures_characters`). The contract test pins it to the fixture JSON.
+
+      The JSON flags are spelled out (R30): under the Bazel shim a bare
+      `@freezed` silently loses its JSON (F-0025).
+    fields:
+      - {name: id, type: int}
+      - {name: name, type: String}
+      - {name: description, type: String}
+      - {name: modified, type: DateTime}
+      - {name: thumbnail, type: ThumbnailDto}
+  - name: ThumbnailDto
+    json: true
+    doc: "The `thumbnail` object: an image path plus its variant's wire name."
+    fields:
+      - {name: path, type: String}
+      - {name: variant, type: String}
+  - name: RelatedComicDto
+    json: true
+    doc: |-
+      A comic summary as `GET /v1/comics?characterId=` sends it (CONTRACT.md of
+      `mc_fixtures_comics`): the preview's related comics (T-0041). The cover
+      has the thumbnail's shape.
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+      - {name: issueNumber, type: int}
+      - {name: seriesId, type: int}
+      - {name: releaseDate, type: String, doc: "A `YYYY-MM-DD` day, kept as text so it round-trips."}
+      - {name: cover, type: ThumbnailDto}
+
+endpoints:
+  - id: getCharacters
+    method: GET
+    path: v1/characters
+    returns: ApiPage<CharacterDto>
+    query:
+      - {name: offset, type: int, default: 0}
+      - {name: limit, type: int, default: 30}
+      - {name: team, type: String?}
+  - id: getComicsOf
+    method: GET
+    path: v1/comics
+    returns: ApiPage<RelatedComicDto>
+    doc: |-
+      The comics [characterId] appears in, in title order (the preview's
+      related comics, T-0041).
+    query:
+      - {name: characterId, type: int, required: true}
+      - {name: limit, type: int, default: 5}
+
+navigator:
+  name: CharactersListNavigator
+  doc: |-
+    What characters_list needs from outside: intents in the feature's own
+    language, never routes (plan 01 §4.1). Implemented in
+    `app/wiring/universe_wiring` (T-0033). Only blocs call it.
+
+    `requestSignIn` (plan 01 §3.3) joins when this feature needs a signed-in
+    user.
+  outbound: [openCharacter(CharacterId), openComic(ComicId)]
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: charactersListTitle
+      description: Title of the characters list.
+      text: {en: Characters, de: Figuren, en_XA: "[Çĥàŕàçţéŕš ~~~~]"}
+    - key: charactersListLoading
+      description: Screen-reader label while the first page loads.
+      text: {en: Loading characters, de: Figuren werden geladen, en_XA: "[Ļóàðíñĝ çĥàŕàçţéŕš ~~~~~~~~]"}
+    - key: charactersListEmptyTitle
+      description: Title of the empty list.
+      text: {en: No characters yet, de: Noch keine Figuren, en_XA: "[Ñó çĥàŕàçţéŕš ýéţ ~~~~~~~]"}
+    - key: charactersListEmptyMessage
+      description: Message below the empty-list title.
+      text: {en: New characters will show up here., de: Neue Figuren erscheinen hier., en_XA: "[Ñéŵ çĥàŕàçţéŕš ŵíļļ šĥóŵ úþ ĥéŕé. ~~~~~~~~~~~~~~]"}
+    - key: charactersListErrorTitle
+      description: Title when the first page fails; the reason and Retry follow.
+      text: {en: Characters could not be loaded, de: Figuren konnten nicht geladen werden, en_XA: "[Çĥàŕàçţéŕš çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~]"}
+    - key: charactersListLoadMoreFailed
+      description: Footer text when a later page fails; Retry follows.
+      text: {en: Could not load more characters., de: Weitere Figuren konnten nicht geladen werden., en_XA: "[Çóúļð ñóţ ļóàð ɱóŕé çĥàŕàçţéŕš. ~~~~~~~~~~~~~]"}
+    - key: charactersListPreviewSeeFullProfile
+      description: Button on the preview that opens the character's full profile.
+      text: {en: See full profile, de: Vollständiges Profil ansehen, en_XA: "[Šéé fúļļ þŕófíļé ~~~~~~~]"}
+    - key: charactersListPreviewComics
+      description: Section title on the preview above the comics the character appears in.
+      text: {en: Comics, de: Comics, en_XA: "[Çóɱíçš ~~]"}
+    - key: charactersListPreviewComicsLoading
+      description: Screen-reader label while the related comics load.
+      text: {en: Loading comics, de: Comics werden geladen, en_XA: "[Ļóàðíñĝ çóɱíçš ~~~~~]"}
+    - key: charactersListPreviewComicsEmpty
+      description: Shown when the character appears in no comic.
+      text: {en: No comics yet., de: Noch keine Comics., en_XA: "[Ñó çóɱíçš ýéţ. ~~~~~]"}
+    - key: charactersListPreviewComicsFailed
+      description: Shown when the related comics fail to load; Retry follows.
+      text: {en: Comics could not be loaded., de: Comics konnten nicht geladen werden., en_XA: "[Çóɱíçš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~]"}
+
+bdd:
+  - feature: characters_list
+    title: Browse characters
+    description: |-
+      Fans see the characters in name order, preview one inside the list and
+      open its full profile.
+    background:
+      - "Given the backend serves {'characters.default'}"
+      - "And the backend serves {'comics.default'}"
+    scenarios:
+      - title: The first page lists 30 characters in name order
+        tags: [T-0032-AC1, smoke]
+        steps:
+          - When I open the characters list
+          - "Then I see {'Characters'}"
+          - "And the backend received {'GET /v1/characters?offset=0&limit=30'}"
+          - And I see the first {30} characters in name order with their bundled art
+      - title: A failed first page explains the problem and retries
+        tags: [T-0032-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/characters'} with {<failure>}"
+          - When I open the characters list
+          - "Then I see {'Characters could not be loaded'}"
+          - And I see {<message>}
+          - When the backend recovers
+          - "And I tap {'Retry'}"
+          - "Then I see {'Amber Alchemist'}"
+          - "And I don't see {'Characters could not be loaded'}"
+        examples:
+          - [failure, message]
+          - ["'server_error'", "'The server had a problem. Please try again later.'"]
+          - ["'timeout'", "'The request took too long. Please try again.'"]
+          - ["'offline'", "'No connection. Check your network and try again.'"]
+          - ["'malformed'", "'Something went wrong.'"]
+      - title: A failed second page keeps the loaded characters and offers Retry
+        tags: [T-0032-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/characters?offset=30'} with {'server_error'}"
+          - When I open the characters list
+          - And I scroll the characters list to the end
+          - "Then I see {'Could not load more characters.'}"
+          - "And I see {'Retry'}"
+          - And the characters list shows {30} characters
+          - When the backend recovers
+          - "And I tap {'Retry'}"
+          - Then the characters list shows {60} characters
+          - "And I don't see {'Could not load more characters.'}"
+      - title: Tapping a character opens its preview inside the flow
+        tags: [T-0032-AC3]
+        steps:
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "Then I see the character preview for {'Amber Alchemist'}"
+          - "And I see {'See full profile'}"
+      - title: The full profile hands over to the app exactly once
+        tags: [T-0032-AC3]
+        steps:
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "And I tap {'See full profile'}"
+          - "Then the app was asked to open character {'Amber Alchemist'}"
+      - title: A second tap while the preview slides in keeps the first character
+        tags: [T-0032-AC3]
+        steps:
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'} and {'Amber Bard'} in quick succession"
+          - "Then I see the character preview for {'Amber Alchemist'}"
+          - "When I tap {'See full profile'}"
+          - "Then the app was asked to open character {'Amber Alchemist'}"
+      - title: Going back from the preview keeps the list where I left it
+        tags: [T-0032-AC3]
+        steps:
+          - When I open the characters list
+          - "And I scroll the characters list until I see {'Amber Herald'}"
+          - "And I tap {'Amber Herald'}"
+          - "Then I see the character preview for {'Amber Herald'}"
+          - When I swipe back
+          - Then I don't see the character preview
+          - And the characters list keeps its scroll position
+          - "And I see {'Amber Herald'}"
+          - And the characters list shows {30} characters
+          - "And the backend received {1} requests for {'GET /v1/characters'}"
+      - title: In German the title and the preview button come from the German strings
+        tags: [T-0032-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - When I open the characters list
+          - "Then I see {'Figuren'}"
+          - "When I tap {'Amber Alchemist'}"
+          - "Then I see {'Vollständiges Profil ansehen'}"
+      - title: The pseudo-locale renders the list and the preview without overflow
+        tags: [T-0032-AC4, l10n]
+        steps:
+          - Given the pseudo-locale is active
+          - When I open the characters list
+          - "Then I see {'[Çĥàŕàçţéŕš ~~~~]'}"
+          - And nothing overflows
+          - "When I tap {'Amber Alchemist'}"
+          - "Then I see {'[Šéé fúļļ þŕófíļé ~~~~~~~]'}"
+          - And nothing overflows
+  - feature: characters_list_paging
+    title: Characters list paging
+    description: |-
+      The list loads more characters as fans scroll, stops at the last one, and
+      says so when there are none.
+    scenarios:
+      - title: Scrolling to the end of the first page loads the second once
+        tags: [T-0032-AC5]
+        steps:
+          - "Given the backend serves {'characters.default'}"
+          - When I open the characters list
+          - And I scroll the characters list until the next page loads
+          - "Then the backend received {1} requests for {'GET /v1/characters?offset=30&limit=30'}"
+          - "And the backend received {2} requests for {'GET /v1/characters'}"
+          - And the characters list shows {60} characters
+      - title: At the last page no further page is requested
+        tags: [T-0032-AC5]
+        steps:
+          - "Given the backend serves {'characters.paged_45'}"
+          - When I open the characters list
+          - And I scroll the characters list to the end
+          - "Then I see {'Hero 45'}"
+          - And the characters list shows {45} characters
+          - "And the backend received {2} requests for {'GET /v1/characters'}"
+          - When I scroll the characters list to the end
+          - "Then the backend received {2} requests for {'GET /v1/characters'}"
+      - title: An empty catalogue says so
+        steps:
+          - "Given the backend serves {'characters.empty'}"
+          - When I open the characters list
+          - "Then I see {'No characters yet'}"
+          - "And I see {'New characters will show up here.'}"
+      - title: Pulling down reloads the first page
+        steps:
+          - "Given the backend serves {'characters.paged_45'}"
+          - When I open the characters list
+          - And I pull to refresh
+          - "Then the backend received {2} requests for {'GET /v1/characters?offset=0'}"
+          - And the characters list shows {30} characters
+  - feature: characters_list_related_comics
+    title: A character's comics
+    description: |-
+      The preview lists the comics the character appears in, and each one leads
+      to that comic's page (T-0041, P-068).
+    background: "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: The preview lists the comics the character appears in
+        tags: [T-0041-AC5]
+        steps:
+          - "Given the backend serves {'comics.default'}"
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "Then I see {'Comics'}"
+          - "And I see the related comics of {'Amber Alchemist'}"
+          - "And the backend received {'GET /v1/comics?characterId=100486&limit=5'}"
+      - title: A related comic hands over to the app exactly once
+        tags: [T-0041-AC5]
+        steps:
+          - "Given the backend serves {'comics.default'}"
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "And I scroll the preview until I see {'Amber Requiem #8'}"
+          - "And I tap {'Amber Requiem #8'}"
+          - "Then the app was asked to open comic {'Amber Requiem #8'}"
+      - title: Related comics that fail to load offer Retry, and the preview stays
+        steps:
+          - "Given the backend serves {'comics.default'}"
+          - "And the backend fails {'GET /v1/comics'} with {'server_error'}"
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "Then I see the character preview for {'Amber Alchemist'}"
+          - "And I see {'Comics could not be loaded.'}"
+          - When the backend recovers
+          - "And I scroll the preview until I see {'Retry'}"
+          - "And I tap {'Retry'}"
+          - "Then I see the related comics of {'Amber Alchemist'}"
+      - title: A double Retry of the related comics sends one request
+        tags: [T-0041-AC5]
+        steps:
+          - "Given the backend serves {'comics.default'}"
+          - "And the backend fails {'GET /v1/comics'} with {'malformed'}"
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "Then I see {'Comics could not be loaded.'}"
+          - When the backend recovers
+          - "And I scroll the preview until I see {'Retry'}"
+          - "And I tap {'Retry'} twice in quick succession"
+          - "Then I see the related comics of {'Amber Alchemist'}"
+          - "And the backend received {2} requests for {'GET /v1/comics'}"
+      - title: A character in no comic says so
+        steps:
+          - "Given the backend serves {'comics.empty'}"
+          - When I open the characters list
+          - "And I tap {'Amber Alchemist'}"
+          - "Then I see {'No comics yet.'}"
+
+options:
+  item: character
+  items: characters
+  ids:
+    - name: CharacterId
+      type: int
+      doc: |-
+        A character's id in this feature's own vocabulary (features never share
+        types, plan 01 §4.3). The navigator takes it, so the barrel exports it.
+
+        An extension type: an `int` at run time, but not interchangeable with
+        other ids at compile time.
+    - name: ComicId
+      type: int
+      doc: |-
+        A comic's id in this feature's own vocabulary: one of the character's
+        related comics on the preview. The navigator takes it (`openComic`), so
+        the barrel exports it. It is not the type `comics_details` declares
+        (features never share types, plan 01 §4.3); the wiring maps between them.
+  list:
+    entity: Character
+    endpoint: getCharacters
+    page_size: 30
+    title: name
+    image: image
+    filters:
+      - name: teamId
+        type: String?
+        query: team
+        doc: The team the list is filtered to; null for every team.
+        arg_doc: Starts the list filtered to one team.
+        query_doc: "Null: every team."
+  mappers:
+    - {dto: CharacterDto, to: Character, fields: {image: thumbnail}}
+    - {dto: ThumbnailDto, to: ApiImage, via: {variant: ImageVariant.fromWire}}
+    - {dto: RelatedComicDto, to: RelatedComic}
+  preview:
+    actions:
+      - event: seeFullProfile
+        calls: openCharacter
+        doc: '"See full profile": hand over to the app.'
+    sections:
+      - name: RelatedComics
+        item: comic
+        items: comics
+        entity: RelatedComic
+        endpoint: getComicsOf
+        by: characterId
+        limit: 5
+        title: title
+        image: cover
+        calls: openComic
+  tests:
+    fixture_sets: [characters.default]
+    records: defaultCast
+    record: {title: name, image: thumbnail}
+    section_records:
+      RelatedComics: {title: title, image: cover}
+    legacy_goldens: true
+    tags:
+      architecture: T-0032-AC6
+      flow_scope.resolves: T-0032-AC6
+      flow_scope.filter.teamId: T-0032-AC1
+      flow_scope.root: T-0032-AC6
+      flow_scope.app_bar: T-0040-AC3
+      contract: T-0032-AC6
+      contract.RelatedComics: T-0041-AC5
+    # The first write of the (owned) env and contract test.
+    env:
+      fixture_packages: mc_fixtures_characters mc_fixtures_comics mc_mocked_backend
+      fixture_set_lists: charactersFixtureSets comicsFixtureSets
+      record_type: CharacterRecord
+      records: CharacterUniverse(42, defaultMockClock).byName
+      mock_domain: CharactersMockDomain
+      RelatedComics.by: "100486"
+      RelatedComics.mock_domain: ComicsMockDomain
+  prose:
+    pubspec.preamble: |-
+      T-0032 (P1-17): the characters_list exemplar feature (archetype LD). Phase D's
+      generators copy this package's shape (plan 01 §3.3).
+    build.preamble: |-
+      T-0032 (P1-17): `characters_list`, the LD exemplar feature (plan 01 §3.3).
+      Phase D's buildgen emits this file; until then it is written by hand.
+      No per-package analysis_options.yaml: the root file applies (F-0021).
+
+      Every generator runs as a Bazel action; nothing generated is committed:
+        freezed      character, character_dto, related_comic, flow state, list
+                     bloc (state part), related comics bloc
+        json         character_dto                  (over its freezed output)
+        retrofit     characters_list_api            (fork patch 0001)
+        injectable   5 shards + di_initializer.config.dart (fork patch 0002)
+        gen-l10n     lib/src/l10n/characters_list_l10n*.dart
+        BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
+
+      Staging (plan 03 §3.4, §4.7). Generators read only Flutter-free libraries
+      (R15): `_stage` holds the hand-written pure files. Two lanes are narrower so
+      that a body edit in the bloc re-runs neither the retrofit part nor the
+      injectable aggregate (T-0032-AC6):
+        - the retrofit and json actions see only the DTO and its freezed output
+          (`_stage_dto`), never `_stage`;
+        - the injectable aggregate sees only the init file and the shards; a bloc
+          edit re-runs the shards (all of them, F-0028 §5) but they come out
+          byte-identical, so the aggregate is an action-cache hit.
+    mapper.doc: |-
+      Wire to domain. An unknown variant name throws a `FormatException`, which
+      the repository's `apiCall` turns into `ApiMalformed`.
+    query.doc: "What the list asks the backend for: one page, optionally of one team."
+    repository.fetchRelatedComics: The first [limit] comics [character] appears in, in title order.
+    navigator.openCharacter: 'The preview''s "See full profile": hands over to characters_details.'
+    navigator.openComic: "A related comic on the preview: hands over to comics_details (T-0041)."
+    flow_scope.doc: |-
+      The root services this flow's container forwards (R17): the parameter
+      types of every injectable constructor and `@factoryMethod` in the package,
+      minus what the package registers itself and what the flow provides
+      (`FeatureFlowController`, the navigator).
+
+      HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from
+      the same analyzer input injectable reads, and `mcgen check` fail on drift
+      (Phase D, follow-up in T-0032). Until then `test/flow_scope_test.dart`
+      opens the flow over the production-shaped test root and resolves every
+      registration, so a missing import fails a test, not the app.
+    flow.doc: |-
+      The feature's only entry point (R4): a paged grid of characters whose
+      preview opens inside the flow, and whose "See full profile" leaves the
+      feature through [navigator].
+
+      The app builds it from a route (`RouteTargets`, T-0033) with the
+      navigator implementation from its wiring; tests pass a mock.
+
+      Immutable after creation: the flow reads [navigator] and [initialTeamId]
+      once, when its scope opens (`provide:` runs once per flow instance). A
+      rebuild with a different navigator keeps the first one; a different
+      [initialTeamId] builds a new flow (its
+      `FeatureFlow` is keyed by it), with a fresh scope, state and first page.
+    list_bloc.page_size: "Characters per request: the first page shows 30 (T-0032-AC1)."
+    preview_bloc.doc: |-
+      The preview page's bloc. Its state is the character the flow state
+      selected (the summary the list loaded: no second request); "See full
+      profile" leaves the feature through the navigator, which only blocs call
+      (plan 01 §4.1).
+    section.RelatedComics.bloc: |-
+      The preview's related comics (T-0041, P-068): the first comics the
+      character appears in, each leaving the feature through the navigator's
+      `openComic`, which only blocs call (plan 01 §4.1). Its own bloc, so a
+      failure here never hides the preview.
+    preview_page.doc: |-
+      The in-flow preview of one character (a flow page, not a route): its art,
+      its name, "See full profile" and the comics it appears in, each of which
+      leaves the feature. The flow keys it by the character's id, so another
+      character gets a new page and blocs.
+    section.RelatedComics.doc: |-
+      The preview's related comics: a section title, then the comics the
+      character appears in, each a link that leaves the feature (through the
+      bloc). Its failure is inline, with Retry; the preview above it stays.
+    step.the_characters_list_shows_characters.usage: the characters list shows {60} characters
+    step.the_app_was_asked_to_open_comic.doc: |-
+      The navigator contract: `openComic` with that comic's id (from the comics
+      fixture), exactly once, and nothing else.
+    step.preview_for.art: |-
+      The character's own art in this preview's Scaffold (the related comics
+      below it show covers of their own, T-0041).
+    flow_scope_test.preamble: |-
+      The flow as a unit of wiring, entered through the barrel only. R17: its
+      hand-written root imports (lib/src/di/flow_scope.dart) are complete, and a
+      missing one fails at flow creation, naming the type (`mcgen wire` will
+      generate the list, Phase D). The flow is immutable after creation: a new
+      team builds a new flow.
+    architecture.export.ComicId: "T-0041: openComic's argument."

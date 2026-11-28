@@ -169,7 +169,7 @@ void main() {
       expect(spec.keep, ['rules.badge.body']);
     });
 
-    test('T-0065-AC4 against the real repo, only the archetype is unknown (P2-04 adds list_detail)', () {
+    test('T-0065-AC4 against the real repo, the core lint accepts it; only list_detail\'s options are missing (T-0069)', () {
       final text = readFixture('plan02_example.yaml');
       const rel = 'feature/characters/characters_list/mcgen.yaml';
       final spec = loadSpec(text: text, file: rel, schema: schema);
@@ -181,8 +181,11 @@ void main() {
           archetypes: archetypes,
         ),
       );
+      // Until P2-04 this was "unknown archetype list_detail". The abridged
+      // plan 02 example predates the archetype's options, so list_detail's
+      // own lint is all that rejects it now.
       expect(d.map((x) => '$x'), [
-        '$rel:4:12: error [archetype] archetype: unknown archetype "list_detail" (known: utility_hello)',
+        '$rel:1:1: error [list_detail] options.item: "item" must be a string',
       ]);
     });
 

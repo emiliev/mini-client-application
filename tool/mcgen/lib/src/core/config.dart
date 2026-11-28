@@ -17,6 +17,7 @@ class McgenConfig {
     required this.languageVersion,
     required this.sdkConstraint,
     required this.formatterVersion,
+    this.flutterConstraint,
     this.pageWidth = 80,
     this.thirdParty = const {},
     this.sdkPackages = const {},
@@ -40,6 +41,7 @@ class McgenConfig {
       languageVersion: '${need<Object>(dart, 'language_version')}',
       sdkConstraint: need<String>(dart, 'sdk_constraint'),
       formatterVersion: '${need<Object>(dart, 'formatter_version')}',
+      flutterConstraint: dart['flutter_constraint'] as String?,
       pageWidth: (dart['page_width'] as int?) ?? 80,
       thirdParty: packages is YamlMap
           ? {for (final e in packages.entries) '${e.key}': '${e.value}'}
@@ -59,6 +61,9 @@ class McgenConfig {
 
   /// The pinned SDK's `dart format --version`; mcgen refuses any other.
   final String formatterVersion;
+
+  /// The `environment: flutter:` constraint Flutter packages carry.
+  final String? flutterConstraint;
   final int pageWidth;
 
   /// Third-party package -> pubspec constraint, for packages emitters use.
