@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (Engineer handoff) |
+| Status | Done (merged 2026-11-28 `96793201`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree). It follows the T-0069 pattern. |
 | Verification | ADR-0015: `/code-review`, one fix round, then the TL merge gates |
 | Branch | `fleet/T-0073-mcgen-search` |
@@ -89,3 +89,15 @@ Add the SR archetype to `mcgen`. The exemplar `discovery_search` (grouped result
   - reject the other mode's option keys (`facets` in a grouped spec, `hits` in a paged one);
   - the bloc and DI docs say "at most 10" instead of using `history.cap`;
   - escape spec strings that are written into Dart literals (`history.key`, `analytics` names).
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 5 important lint gaps (roles, the open id type, paged `min_length`, barrel vs arch test, the analytics pair) and an undeclared `// ignore:`. Fix round `06b13463` fixed all six; 4 nits went to P-127.
+- **TL checks:**
+  - the exemplar diffs are keep markers, specs and manifests;
+  - one accepted whitespace realignment of the `discovery_search.feature` Examples table (padding by string length);
+  - no `// ignore:` remains.
+- **The TL merged `--no-ff`.** On the merge result:
+  - 246/246 tests, lint clean, format gate passed;
+  - `T-0065-AC5_gates.sh` passed (167 mcgen tests);
+  - `gen --check` is up to date for `characters_list`, `discovery_search` and `characters_search`.
+- Hand share in the exemplars is 54 % and 65 %: domain and results UI are owned, and the probe shows the template produces a full module (F-0073).
