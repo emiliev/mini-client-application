@@ -1,0 +1,177 @@
+# T-0072-AC3: a throwaway section-detail module, the proof that the archetype
+# generalises past its two exemplars. Other nouns (an issue, not a comic or a
+# character), one hand-over (to a series) with its id on the entity, no second
+# request, no inner page, no analytics, and the favourite kind of the comics
+# domain although the item is called an issue.
+# Never committed as a module: test/section_detail_test.dart renders it, and
+# tool/T-0072-AC3_sc_probe.sh copies it to feature/zz_probe/zz_sc_probe,
+# generates it there, runs its BDD test and its analysis under Bazel, and
+# deletes it again.
+schema: mcgen/1
+module: zz_sc_probe
+tier: feature
+archetype: section_detail
+ownership: mixed
+description: A throwaway issue page with a favourite and a hand-over to its series (T-0072-AC3).
+dev_deps: [mc_mocked_backend]
+keep: [details.openSeries]
+
+entities:
+  - name: Issue
+    doc: An issue as this page shows it.
+    fields:
+      - {name: id, type: IssueId}
+      - {name: title, type: String}
+      - {name: description, type: String}
+      - {name: seriesId, type: SeriesId}
+  - name: IssueDto
+    json: true
+    doc: One comic as `GET /v1/comics/:id` sends it (CONTRACT.md of `mc_fixtures_comics`), as the page reads it.
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+      - {name: description, type: String}
+      - {name: seriesId, type: int}
+
+navigator:
+  name: ZzScProbeNavigator
+  doc: What zz_sc_probe needs from outside.
+  outbound: [openSeries(SeriesId), "requestSignIn() -> bool"]
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: zzScProbeTitle
+      description: Title of the issue page before the issue has loaded.
+      text: {en: Issue, de: Ausgabe}
+    - key: zzScProbeLoading
+      description: Screen-reader label while the issue loads.
+      text: {en: Loading the issue, de: Die Ausgabe wird geladen}
+    - key: zzScProbeErrorTitle
+      description: Title when the issue fails to load; the reason and Retry follow.
+      text: {en: The issue could not be loaded, de: Die Ausgabe konnte nicht geladen werden}
+    - key: zzScProbeNotFoundTitle
+      description: Title when no issue has the requested id.
+      text: {en: Issue not found, de: Ausgabe nicht gefunden}
+    - key: zzScProbeNotFoundMessage
+      description: Message below the not-found title.
+      text: {en: This issue does not exist., de: Diese Ausgabe gibt es nicht.}
+    - key: zzScProbeOpenSeries
+      description: Button that opens the issue's series.
+      text: {en: Open series, de: Serie öffnen}
+    - key: zzScProbeFavouriteAdd
+      description: Favourite toggle while the issue is not a favourite.
+      text: {en: Add to favourites, de: Zu Favoriten hinzufügen}
+    - key: zzScProbeFavouriteRemove
+      description: Favourite toggle while the issue is a favourite.
+      text: {en: Remove from favourites, de: Aus Favoriten entfernen}
+    - key: zzScProbeFavouriteSaveFailed
+      description: Inline error below the toggle after a failed write.
+      text: {en: Your favourites could not be updated., de: Deine Favoriten konnten nicht aktualisiert werden.}
+    - key: zzScProbeFavouriteLoadFailed
+      description: Inline error below the toggle when reading the favourite failed.
+      text: {en: Your favourites could not be checked., de: Deine Favoriten konnten nicht geprüft werden.}
+
+bdd:
+  - feature: zz_sc_probe
+    title: An issue's page
+    description: |-
+      Readers open one issue, see it, favourite it and open its series.
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+    scenarios:
+      - id: MC-zz_sc_probe-01
+        title: The page loads the issue
+        steps:
+          - When I open issue {501500}
+          - "Then the backend received {'GET /v1/comics/501500'}"
+          - "And I see {'Amber Frontier #1'}"
+          - "And I see {'Add to favourites'}"
+      - id: MC-zz_sc_probe-02
+        title: An unknown issue says so
+        steps:
+          - When I open issue {999999}
+          - "Then I see {'Issue not found'}"
+      - id: MC-zz_sc_probe-03
+        title: A failed load offers Retry
+        steps:
+          - "Given the backend fails {'GET /v1/comics/501500'} with {'server_error'}"
+          - When I open issue {501500}
+          - "Then I see {'The issue could not be loaded'}"
+          - When the backend recovers
+          - "And I tap {'Retry'}"
+          - "Then I see {'Amber Frontier #1'}"
+      - id: MC-zz_sc_probe-04
+        title: The series opens through the app, once
+        steps:
+          - When I open issue {501500}
+          - "And I tap {'Open series'}"
+          - Then the app was asked to open series {501500}
+      - id: MC-zz_sc_probe-05
+        title: A signed-in reader favourites the issue
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - When I open issue {501500}
+          - "And I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the favourite toggle shows {'Remove from favourites'} enabled and on"
+          - "And issue {501500} is a favourite of {'reader@mini-client.test'}"
+          - "And the app announced {1} change to {'favourites'}"
+      - id: MC-zz_sc_probe-06
+        title: Backing out of sign-in changes nothing and sends nothing
+        steps:
+          - When I open issue {501500}
+          - "And I tap {'Add to favourites'}"
+          - And signing in is cancelled
+          - "Then I see {'Add to favourites'}"
+          - "And the app was asked to sign in {1} time"
+          - "And the backend received {0} requests for {'* /v1/me/favourites/:kind/:id'}"
+      - id: MC-zz_sc_probe-07
+        title: In German the toggle comes from the German strings
+        steps:
+          - "Given the device locale is {'de'}"
+          - When I open issue {501500}
+          - "Then I see {'Zu Favoriten hinzufügen'}"
+      - id: MC-zz_sc_probe-08
+        title: Two pages of the same issue agree on the favourite
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - When I open issue {501500} on two pages
+          - "And I tap {'Add to favourites'} on page {1}"
+          - "Then page {2} shows {'Remove from favourites'}"
+
+options:
+  item: issue
+  items: issues
+  prefix: ZzScProbe
+  scroll: issue
+  ids:
+    - {name: IssueId, type: int}
+    - {name: SeriesId, type: int}
+  entity: Issue
+  dto: IssueDto
+  item_path: v1/comics/{id}
+  favourite_kind: comic
+  favourite_path: v1/me/favourites/comic/{id}
+  opens:
+    - calls: openSeries
+      id: SeriesId
+      label: series
+      event_doc: The series was tapped.
+      field: seriesId
+      lookup: issueRecord
+      lookup_param: issue
+      lookup_param_type: int
+      id_field: seriesId
+  tests:
+    fixture_sets: [comics.default]
+    env:
+      fixture_packages: mc_fixtures_comics
+      fixture_set_lists: comicsFixtureSets
+      sample_id: "501500"
+      extra: |-
+        final ComicUniverse comicUniverse = ComicUniverse(42);
+
+        ComicRecord issueRecord(int id) =>
+            comicUniverse.findComic(id) ?? (throw ArgumentError.value(id, 'issue'));

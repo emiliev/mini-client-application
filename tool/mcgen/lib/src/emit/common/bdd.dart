@@ -64,7 +64,7 @@ const sharedSteps = {
 };
 
 final _keyword = RegExp(r'^(Given|When|Then|And|But)\s+');
-final _param = RegExp(r'\{[^}]*\}');
+final _param = RegExp(r'\{[^}]*\}|<\w+>');
 
 /// A step line without its Gherkin keyword.
 String stepText(String line) => line.replaceFirst(_keyword, '');
@@ -90,16 +90,24 @@ List<String> stepParams(String line) => [
     m[0]!.substring(1, m[0]!.length - 1),
 ];
 
+/// A step line, not a `#` comment or a `|` data-table row (a feature may carry
+/// both among its steps; they are written to the `.feature` file and are no
+/// step).
+bool _isStep(String line) {
+  final t = line.trimLeft();
+  return !t.startsWith('#') && !t.startsWith('|');
+}
+
 /// Every step line of [features], in file order: backgrounds, then each
 /// scenario's steps, then each outline's.
 Iterable<String> allSteps(List<BddFeatureSpec> features) sync* {
   for (final f in features) {
-    yield* f.backgroundSteps;
+    yield* f.backgroundSteps.where(_isStep);
     for (final s in f.scenarios) {
-      yield* s.steps;
+      yield* s.steps.where(_isStep);
     }
     for (final o in f.outlines) {
-      yield* o.steps;
+      yield* o.steps.where(_isStep);
     }
   }
 }
@@ -123,7 +131,8 @@ List<List<String>> outlineExamples(RuleSpec rule) {
   ];
 }
 
-/// The feature file of [f]: `Feature:`, its description, the Background,
+/// The feature file of [f] (every Examples cell is padded to its column's
+/// width; a hand-padded cell that is already wider stays as it is): `Feature:`, its description, the Background,
 /// then each scenario with its tags (the id first) and Examples table, then
 /// each outline, whose Examples are its rule's examples ([rules] by id).
 String renderFeature(
@@ -164,9 +173,17 @@ String renderFeature(
       b.writeln('    $step');
     }
     if (examples.isNotEmpty) {
+      // A column is as wide as its widest cell that does not end in a space.
+      // A cell that does end in one is hand-padded: it is padded like any
+      // other when it is narrower than the column, and kept when it is not
+      // (a column of such cells is written exactly as given).
       final widths = [
         for (var c = 0; c < examples.first.length; c++)
-          examples.map((r) => r[c].length).reduce((a, b) => a > b ? a : b),
+          [
+            for (final r in examples)
+              if (!r[c].endsWith(' ')) r[c].length,
+            0,
+          ].reduce((a, b) => a > b ? a : b),
       ];
       b
         ..writeln()

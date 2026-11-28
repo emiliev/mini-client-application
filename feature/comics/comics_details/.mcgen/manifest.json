@@ -1,0 +1,303 @@
+{
+  "archetype": "section_detail",
+  "files": {
+    "BUILD.bazel": {
+      "hash": "719d453d54be8abc5495c6f2cec05e23839f11b2de1ccc553c7796d7796eb554",
+      "ownership": "managed"
+    },
+    "l10n.yaml": {
+      "hash": "777a4cb191e6507e2debe7541616425a2123e41518538edd95773ba2e1af2860",
+      "ownership": "managed"
+    },
+    "lib/comics_details.dart": {
+      "hash": "a09b040277f322effd008438c8314411eadbbd6d80c74bb253fd8a82906d1cba",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "86d623f0e280375f0aa62291534771c1d23ef702d7ed9e3d728161001aba93f1",
+      "ownership": "managed"
+    },
+    "lib/src/di/flow_scope.dart": {
+      "hash": "3d8d6899bb980af1f53c0a5c871015612efef86a611adc8c039f9994ba1d348d",
+      "ownership": "managed"
+    },
+    "lib/src/domain/api/comics_details_api.dart": {
+      "hash": "fb9ac048dd752742609ffcf47e5bd172cf21ad5d56f77c6f1d88d2931f4b1ebe",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_id.dart": {
+      "hash": "4b4aa3b75653980f2c9956d9fcd707272128deae1c18947a5edb772373e6fff1",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/comic.dart": {
+      "hash": "8ce74be6c8062eedb1d9eb6e14cd110e20e6fd91f05bdc9623ca17fc0b5fd33e",
+      "ownership": "owned"
+    },
+    "lib/src/domain/model/comic_dto.dart": {
+      "hash": "28375bb1f8be8736ca77a91f217e8ea7117bc265071c649e51a14ebb11a16924",
+      "ownership": "owned"
+    },
+    "lib/src/domain/model/comic_id.dart": {
+      "hash": "3833ea1673e004828f6a6584e6edeb653218cf4cfd59d892b61292f67baa457e",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/comic_mapper.dart": {
+      "hash": "2c07045ede899ab864edd15c7e979dddadd07a8c11c0b6ad85921141f78b797e",
+      "ownership": "owned"
+    },
+    "lib/src/domain/model/creator_id.dart": {
+      "hash": "e312c9a81a6bda3609c2fff4a2854ad47e8daecf2434df440c6ac0974940af6f",
+      "ownership": "managed"
+    },
+    "lib/src/domain/repository/comics_details_repository.dart": {
+      "hash": "53d1da1b2c8cd3a7f14f9c2a2291b5ed65876eb1edc7a39d37777fb6beebc0c6",
+      "ownership": "managed"
+    },
+    "lib/src/flow/comics_details_flow.dart": {
+      "hash": "596b4b8b1b932747bbcb32126d513d29e59f80799c8bbd018e7c5cc90bc4348f",
+      "ownership": "managed"
+    },
+    "lib/src/flow/comics_details_flow_state.dart": {
+      "hash": "450b93d760ff8fc97ad3bd12db0ae60ea44db625b59b572d35aa6f6a8fac3b8d",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/comics_details_de.arb": {
+      "hash": "809ec2ebca14401f4ac21be2d26bdbbc5588c6de427f22e949bf993abe861a08",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/comics_details_en.arb": {
+      "hash": "5c992cd5392c1a4ed4ccb4aff36e6dadc57871e33627640fa080d3289a231b09",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/comics_details_en_XA.arb": {
+      "hash": "881cda1ef797142de0a8784a8115410f1ede70a91088486636dfcaf6fc1cc7af",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/comics_details_navigator.dart": {
+      "hash": "452f19dd63bc276950a10747ef0af40a38048e1e963edd5fc83ef8db17df6055",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/comic_details_bloc.dart": {
+      "hash": "0349acb2bc7b3931c2cc41126a3b356a69e7ec814661f1e0354a59dc7a9740b7",
+      "keep": {
+        "details.openCharacter": "c08330c77b3c8ea022733392d524fe12755261fcacb72e0fd7cd471c3e518591",
+        "details.openCreator": "f4b59ea0514c8998ef0f443d6d9d3d8bfc95b1373648faea4b0010ab9e5a0596"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/comic_details_event.dart": {
+      "hash": "5d60be46c977e045b098f2b780109b31c6b249c994fb6b6c985ec1309398fa86",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/comic_details_state.dart": {
+      "hash": "9420dd3a7803862bf65cd601738681dc089f615cbf54446ecd375dc36a681172",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/comic_favourite_bloc.dart": {
+      "hash": "7ce2b568da64373aff12c68d34d5d7dcd5e26d730523af3f1ebbf689a3132f7b",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/comic_favourite_event.dart": {
+      "hash": "2c5c74ec4ddf4071a9a5e6e89caf53a9daeacf896ad88af3c677dfe1c9c40ff7",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/comic_favourite_state.dart": {
+      "hash": "f3b71bd3fcca45f21c4ae2cd1e426262e8ec6b841e98bf2e9d7c806adaa1679a",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/page/comic_cover_page.dart": {
+      "hash": "62e15b5c8bb45286663757e3f7aed80c80acd13846d70bc777561a98387b74e5",
+      "ownership": "owned"
+    },
+    "lib/src/presentation/page/comic_details_page.dart": {
+      "hash": "c337c1e097cbe5d8a6cb979d2e6b085a408105475172258e965b27247fa85ecd",
+      "ownership": "owned"
+    },
+    "lib/src/presentation/widget/failure_message.dart": {
+      "hash": "9d082f390462c757d65380287bc9e5c3be2c370544d3cf543aca014a33df63f1",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/favourite_toggle.dart": {
+      "hash": "013247de0ec47f5ba8e268e662876efc0502c8a63e876c47073102e3fee2e158",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "da4c64c6d894b7eceff8a43deffb7cddafda8a86937817e2b24d04388b53ef2e",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "20d02ce9ca45c4fc790035faec67f432ec5cfa8370cc1c7b4779552c629f2eea",
+      "ownership": "managed"
+    },
+    "test/feature/comics_details.feature": {
+      "hash": "65d42d2edecbc5ec5cc4fddd6299939797434f02c1a80b128f704ab9a0141ee7",
+      "ownership": "managed"
+    },
+    "test/feature/comics_details_favourite.feature": {
+      "hash": "49b705a6df90a0a8ab1e2f8667d5cd20a4d9b65cb4ad3e39e05fcf1e9bbe487f",
+      "ownership": "managed"
+    },
+    "test/feature/step/another_page_announces_a_change_to.dart": {
+      "hash": "9350abf78af4e960222384113d4d2b8500c5f11573df42362d812adae4880d00",
+      "ownership": "managed"
+    },
+    "test/feature/step/comic_is_a_favourite_of.dart": {
+      "hash": "1be1007c37cc2f2569f40d3294f0b2462844582c030c76b0978346ff1a4e51c9",
+      "ownership": "managed"
+    },
+    "test/feature/step/comic_is_not_a_favourite_of.dart": {
+      "hash": "de2d5e19277fb842421e4f1737044017b405a7d429fb4bcd21e75d2872e99c2a",
+      "ownership": "managed"
+    },
+    "test/feature/step/has_comic_among_their_favourites.dart": {
+      "hash": "4ef0c269e283077ce920d8bdfca3ee428b4d4aee0e638740c70fb141eda886a0",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_dont_see_the_cover_page.dart": {
+      "hash": "66e36965eab9f0d7017c6db2f585363151f43aadd9d1480692b7ab412c0fbed3",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_open_comic.dart": {
+      "hash": "bf1c9f1548a069e8a1209fb6dc666929bcb3506eeadd7fdfe1ecdb4bb6dbe296",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_comic_on_two_pages.dart": {
+      "hash": "bf4cf8cf89bb274d491e45a1944b3f8867d124087df597c82ea0ddf5c6bc39e1",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_comic_to_the_end.dart": {
+      "hash": "9ff07268791ffc725edb6fef8eee927089a3d61d36749150e304b69ffdeaae6c",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_comic_until_i_see.dart": {
+      "hash": "47447fa5b44862241549a1650dc15b59d2b96928d387ec4dd67e3fea78e9522a",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_see_the_cover_page_of_comic.dart": {
+      "hash": "a5c9d16244573b73127990c7945153799cccf9c2b489708bf74c5d5c5e1365da",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_see_the_header_of_comic_with_its_bundled_cover.dart": {
+      "hash": "69cf8c9aae66a437a1633458cb98873460e773202898d41638688821bc11d67e",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_see_the_synopsis_of_comic.dart": {
+      "hash": "6deb798a92c47e051dc97b7ef1358d5940c1be7fb23a9f715e74fcec71dc96d0",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_on_page.dart": {
+      "hash": "e7fab0eddecb527d4c0a4b4e9ffcaaf2620e724a3b44f9124e1e36744749e2ae",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_cast_member.dart": {
+      "hash": "6768a714dd99fc7df6a386880badaa500943520a27ea215381feced542005564",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_cast_member_and_again_after_milliseconds.dart": {
+      "hash": "6fe27574ab0ec974ee32b9aca962051ea82241b0f8abee485f1a457aab69b00c",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_cast_member_and_then_after_milliseconds.dart": {
+      "hash": "f956906d7e6a5e44d44027331d3b7cc75f113d8c250dd9875bccac845c014172",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_cast_member_twice_in_quick_succession.dart": {
+      "hash": "487569517a5a2a432a5d16bde8bd6afa123dbcc7bf8702c9c3cd535e4ae1c62f",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_cover.dart": {
+      "hash": "2cb6c2a6290b0b379ec7cdebba5065a1fc3185f2e81dd617d45de7188994ae1f",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_creator.dart": {
+      "hash": "f7730736112379d04d863d31a93ac2fc7d070b444b2df5ed6655b29197678499",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_the_creator_twice_in_quick_succession.dart": {
+      "hash": "2588106a967c9d093aadc6d0dcb8820faf6e6636887dc16a7e195eb011d1c803",
+      "ownership": "owned"
+    },
+    "test/feature/step/page_shows.dart": {
+      "hash": "d0995a2cbda916f4c6195368ef2fa3abddfa8f1216e2e93fac4786a00885bfce",
+      "ownership": "managed"
+    },
+    "test/feature/step/signing_in_is_cancelled.dart": {
+      "hash": "eec4b7b9dbc37c1f70469eb2c7662f200841d34de315a7584786430622778478",
+      "ownership": "managed"
+    },
+    "test/feature/step/signing_in_succeeds_as.dart": {
+      "hash": "96d8f62b2fcb82ebcc375d013bc8229c1f52265f87433fc59161672512367069",
+      "ownership": "managed"
+    },
+    "test/feature/step/signs_in_elsewhere.dart": {
+      "hash": "d19d20e4280492ffe55fdb20f1b7ca5fc967672df4b0f756022bce5281078923",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_announced_change_to.dart": {
+      "hash": "25e7e542e4600f004ec743282303bd070498aba53f6f780986ecab14069b0175",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_character.dart": {
+      "hash": "39c68ee28603561384489268cda9be706fa1d9fb1324905971664d939ee1a8ae",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_character_times.dart": {
+      "hash": "43271a9be19d191c4a3a657596c2f70a43dd783ae553abe9b6a83ac959e1e579",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_characters_and.dart": {
+      "hash": "7681b0b28dfaba23eca06fbcb5b447db1faa12329ed2d2135d4758150c6fa37e",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_open_creator_of_comic.dart": {
+      "hash": "cfc74a5e21278992ce36d5298566cc2b825a15ad191adef2cf727c1e53bb5262",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_sign_in_time.dart": {
+      "hash": "0384e8e1eb93ba751795ffadc8bac5a2afdad45c930763d656b5bad2c06529a6",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_characters_section_lists_the_cast_of_comic.dart": {
+      "hash": "ea52c1de1cec16fc164a8c0225f9029994d702ea2cffa68cc8824453598d5311",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_creators_section_lists_the_credits_of_comic.dart": {
+      "hash": "7c48d6aacb11ce94e7a6a3567fd3ec85e0a2a463ca21366d25bb9b05cadb261a",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_fact_reads.dart": {
+      "hash": "2be0201c7d0b41d42a9e0031f253d9caa28d34bfd27d0e2e12ca954ffc5bdeb8",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_favourite_toggle_shows_enabled_and_on.dart": {
+      "hash": "efa35ae7d620fab82b0bb442240dda78967ef1c131b40a342b89353486e1b3a0",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_session_ends_elsewhere.dart": {
+      "hash": "715616ff89b434ecbe1d035090fdc12d43cf71cf17234afb838e8fc2ac355588",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_user_is_signed_out.dart": {
+      "hash": "29dd831971ad9b9598f160827ad6fe1ac60a178aff0db09b758b9d4cabcc867e",
+      "ownership": "managed"
+    },
+    "test/feature/util/comics_details_env.dart": {
+      "hash": "a733d97dee74bfb4debbcaa9e619a3e3d9df41ab6c1546c5b1c841a7d241ae89",
+      "ownership": "owned"
+    },
+    "test/feature/util/favourites_probe.dart": {
+      "hash": "0820e1e96f5c5d4bb5585a7c31291d24e770816fde99eeac955304ae0a671aa5",
+      "ownership": "managed"
+    },
+    "test/flow_scope_test.dart": {
+      "hash": "49b5865f7b76c36a439ff4a1d31ba32d8ae0d94b3a92f3076d44804276e3a692",
+      "ownership": "owned"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "comics_details",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x384fd30cd001ab17",
+  "spec_hash": "0071e9800815bd18b7bcdc8117bccf61db33ab0bd1823507f4437f59b170e974"
+}
