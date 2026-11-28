@@ -12,7 +12,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **CI** | GitHub Actions (`.github/workflows/ci.yml`, `tool/ci/ci.sh`, 11 gates) on `main`, `fleet/**`, PRs and on demand; cold 44 min, warm 25 min (T-0068) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | none |
+| **Active crew** | T-0077 (Sonnet), T-0078 (Sonnet), T-0079 (Opus) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -65,7 +65,7 @@ _Last updated: 2026-11-27 by Tech Lead_
   - T-0073: `mcgen` SR archetype
   - T-0074: `mcgen wire`/`buildgen` (P2-08)
 - **Next:**
-  - ST and IX archetypes, then P-128 (a) and (e): route specs for the hand-written groups, and wire routing for FW and DB (needed before batches);
+  - Fourth wave: T-0077 (ST), T-0078 (IX), T-0079 (route specs + FW/DB routing). After it, the first Phase E batch;
   - P-123 (CI speed);
   - then the Phase E batches.
 

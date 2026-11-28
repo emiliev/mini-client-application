@@ -5,6 +5,9 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0077](T-0077-mcgen-settings.md) | `mcgen` ST archetype: `settings_appearance` + `settings_home` round-trip | **In Progress** | Engineer (Sonnet) / ADR-0015 | T-0074 | `fleet/T-0077-mcgen-settings` |
+| [T-0078](T-0078-mcgen-interactive.md) | `mcgen` IX archetype: `trivia_quiz` round-trip + 2 probes | **In Progress** | Engineer (Sonnet) / ADR-0015 | T-0074 | `fleet/T-0078-mcgen-interactive` |
+| [T-0079](T-0079-mcgen-route-specs.md) | `mcgen wire` owns the hand-written groups (route specs); FW/DB routing (P-128 a, e) | **In Progress** | Engineer (Opus) / ADR-0015 | T-0074, T-0075, T-0076 | `fleet/T-0079-mcgen-route-specs` |
 | [T-0075](T-0075-mcgen-form-wizard.md) | `mcgen` FW archetype: `library_reading_list_editor` and `auth_signin` round-trip | merged `071062c4` |
 | [T-0076](T-0076-mcgen-dashboard.md) | `mcgen` DB archetype: `store_home` round-trip, plus 2 probes | merged `99d40574` |
 | [T-0074](T-0074-mcgen-wire-buildgen.md) | `mcgen wire` + `buildgen`, `/catalogue` (P2-08); ADR-0018 | merged `f7230291` |
