@@ -84,3 +84,11 @@ Add the FW archetype. The exemplar `library_reading_list_editor` (multi-step wiz
 - **Nits fixed:** the flow-argument check matches by word, and a bad name is reported at `options.flow.args[i].name` or `options.flow_state.fields[i].name`.
 - **Accepted by the TL:** the hand share (89 % and 95 %) and the whitespace-only realignment of one Examples table in each of `auth_signin_l10n.feature` and `reading_list_editor_create.feature`.
 - **After T-0074 merges:** drop `BUILD.bazel` and `flow_scope.dart` from the archetype, add the root-import packages to the pubspec, and switch the probe script to gen, wire, buildgen.
+
+## Contract switch (after T-0074)
+- 2026-11-28 (Engineer): merged `origin/main` (T-0074).
+  - **Dropped from the archetype:** `BUILD.bazel` (`skeleton_build.dart`, brick `feature_form_wizard_build`), `lib/src/di/flow_scope.dart` and the `options.root_imports` key. The round-trip already ignores both files (`defaultExemplarIgnores`). The exemplar specs lost `root_imports`, the `flow_scope.doc` slot and the types only the root imports used. Both exemplars still round-trip, and their pubspecs are unchanged.
+  - **Pubspec:** adds `mc_di`, `mc_monitoring` and `mc_session` (what the flow scope imports). `dio` stays with the module's own use-graph and `deps`, since `auth_signin` has none.
+  - **Probe script:** `gen`, then `wire`, then `buildgen` per probe. Both probes pass under Bazel with 7 of 7 scenarios each.
+  - **`wire` and a managed FW module:** `T-0075-AC3 wire only warns about a form_wizard flow and lists it as not wired; ...` runs `gen`, `wire` and `buildgen` in a temp repo: a warning, a catalogue note, exit 0, and both `--check`s exit 0. In the repo itself, a probe left in the tree makes only the workspace `pubspec.yaml` out of date, as for any uncommitted module.
+  - **Gates:** `T-0065-AC5_gates.sh`, the seven `gen --check`s, `wire --check` (16 files), `buildgen --check` (11 files), `check --all` and `test --lockfile_mode=error //...` (247 of 247) pass.

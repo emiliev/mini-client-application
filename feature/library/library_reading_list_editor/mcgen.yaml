@@ -6,7 +6,7 @@
 #
 # The archetype owns what every form or wizard feature shares: the barrel, the
 # DI initializer, the navigator contract, the flow state, the flow (its
-# arguments, result and pages), the root-import list, the architecture test,
+# arguments, result and pages), the architecture test,
 # the package files, the strings and the .feature files. The wizard's rules,
 # the bloc, the domain, the step pages, the test env, the steps, the contract
 # tests, the golden test and BUILD.bazel are the module's own (owned).
@@ -91,12 +91,7 @@ options:
     ReadingListDetailsPage: presentation/page/details_page.dart
     ReadingListComicsPage: presentation/page/comics_page.dart
     ReadingListReviewPage: presentation/page/review_page.dart
-    Dio: package:dio/dio.dart
-    EventBus: package:mc_event_bus/mc_event_bus.dart
-    Monitoring: package:mc_monitoring/mc_monitoring.dart
-    SessionReader: package:mc_session/mc_session.dart
   barrel: [ReadingListId]
-  root_imports: [Dio, EventBus, Monitoring, SessionReader]
   flow:
     key: editing
     args:
@@ -151,17 +146,6 @@ options:
       Reading lists belong to a signed-in user. Completes with true once
       someone is signed in, false when the user backed out. The feature does
       not know how signing in works; the app decides (a sheet, a route).
-    flow_scope.doc: |-
-      The root services this flow's container forwards (R17): the parameter
-      types of every injectable constructor and `@factoryMethod` in the package,
-      minus what the package registers itself and what the flow provides
-      (`FeatureFlowController`, the navigator).
-
-      HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from
-      the same analyzer input injectable reads, and `mcgen check` fail on drift
-      (Phase D). Until then `test/flow_scope_test.dart` opens the flow over the
-      production-shaped test root and resolves every registration, so a missing
-      import fails a test, not the app.
     flow_state.doc: |-
       The step pages that are open: step 0 (details) is the flow's root, step 1
       (comics) and step 2 (order and review) are pushed on it, so a back

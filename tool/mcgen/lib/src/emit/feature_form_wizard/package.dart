@@ -37,6 +37,12 @@ void emitPackage(EmitContext ctx, FwModel m) {
         'get_it',
         'flutter_localizations',
         'intl',
+        // The root-import list's (`lib/src/di/flow_scope.dart`, which `mcgen
+        // wire` writes since T-0074): `RootImport` over the services the
+        // flow's injectable classes take (Dio, Monitoring, the session ...).
+        'mc_di',
+        'mc_monitoring',
+        'mc_session',
       };
       final dev = {
         ...graph.devDeps.where((p) => !lib.contains(p)),

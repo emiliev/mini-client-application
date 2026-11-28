@@ -9,6 +9,9 @@
 import 'dart:io';
 
 import 'package:mcgen/mcgen.dart';
+import 'package:mcgen/src/wire/app.dart';
+import 'package:mcgen/src/wire/flow_scope.dart';
+import 'package:mcgen/src/wire/groups.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -107,6 +110,44 @@ List<String> _lintWith(String name, String Function(String) edit) {
   ];
 }
 
+void _copyFile(Directory root, String rel) {
+  File(p.join(root.path, rel))
+    ..parent.createSync(recursive: true)
+    ..writeAsBytesSync(File(p.join(repoRoot, rel)).readAsBytesSync());
+}
+
+/// A temp root with what `mcgen wire` reads (as wire_test.dart's).
+Directory _wireRoot(String tag) {
+  final root = tempRoot('T-0075-wire-$tag');
+  addTearDown(() => root.deleteSync(recursive: true));
+  for (final f in [
+    'pubspec.yaml',
+    appPubspecPath,
+    appWiringsBzlPath,
+    appWiringsPath,
+    generatedLocationsPath,
+    'app/wiring/app_core/lib/src/locations/app_locations.dart',
+  ]) {
+    _copyFile(root, f);
+  }
+  for (final d in Directory(p.join(repoRoot, 'app/wiring')).listSync()) {
+    final rel = p.relative(d.path, from: repoRoot);
+    if (File(p.join(d.path, 'pubspec.yaml')).existsSync()) {
+      _copyFile(root, '$rel/pubspec.yaml');
+    }
+  }
+  for (final d in Directory(p.join(repoRoot, 'utility')).listSync()) {
+    if (d is! Directory) continue;
+    final rel = p.relative(d.path, from: repoRoot);
+    for (final f in listTree(d.path)) {
+      if (f == 'pubspec.yaml' || f.startsWith('lib/')) {
+        _copyFile(root, '$rel/$f');
+      }
+    }
+  }
+  return root;
+}
+
 void main() {
   group('T-0075-AC1 the exemplars round-trip', () {
     for (final rel in _both) {
@@ -133,7 +174,6 @@ void main() {
         for (final f in [
           'lib/$name.dart',
           'lib/src/di/di_initializer.dart',
-          'lib/src/di/flow_scope.dart',
           'lib/src/l10n/${name}_de.arb',
           'pubspec.yaml',
           'test/architecture/architecture_test.dart',
@@ -233,6 +273,7 @@ void main() {
             expect(path, isNot(startsWith('test/feature/step/')));
             expect(path, isNot(startsWith('test/feature/util/')));
             expect(path, isNot('BUILD.bazel'));
+            expect(path, isNot('lib/src/di/flow_scope.dart'));
           }
         }
       },
@@ -359,7 +400,6 @@ void main() {
       addTearDown(() => root.deleteSync(recursive: true));
       final gen = _render(root.path, '${_probeRel('zz_fw_probe')}/mcgen.yaml');
       for (final f in [
-        'BUILD.bazel',
         'lib/src/domain/repository/zz_fw_probe_repository.dart',
         'lib/src/presentation/bloc/zz_fw_probe_bloc.dart',
         'lib/src/presentation/form/zz_fw_probe_form.dart',
@@ -504,16 +544,15 @@ void main() {
 
       test('T-0075-AC3 root imports and the flow: roles the flow and the flow '
           'scope read', () {
+        // `mcgen wire` writes the root-import list: the spec has no say.
         expect(
           _lintWith(
             'zz_fw_probe',
-            (s) => s.replaceFirst(
-              'root_imports: [Dio, Monitoring, SessionReader]',
-              'root_imports: [Dio, Monitoring, SessionReader, Ghost]',
-            ),
+            (s) =>
+                s.replaceFirst('options:\n', 'options:\n  root_imports: [X]\n'),
           ),
           [
-            'error [form_wizard] options.root_imports: root import "Ghost" is not in options.types',
+            'error [form_wizard] options.root_imports: unknown key "root_imports"',
           ],
         );
         expect(
@@ -620,15 +659,6 @@ void main() {
             ),
             contains(
               'error [form_wizard] l10n.strings: form_wizard needs the string "zzFwProbeNameLabel"',
-            ),
-          );
-          expect(
-            lint(
-              'root_imports: [Dio, Monitoring, SessionReader]',
-              'root_imports: [Monitoring, SessionReader]',
-            ),
-            contains(
-              'error [form_wizard] options.root_imports: a skeleton sends its request through Dio, reads the session and reports to monitoring: root_imports needs "Dio"',
             ),
           );
           expect(
@@ -931,6 +961,49 @@ void main() {
     test('T-0075-AC4 form_wizard is registered, and only for features', () {
       expect(archetypes.keys, contains('form_wizard'));
       expect(archetypes['form_wizard']!.tiers, {Tier.feature});
+    });
+  });
+
+  group('T-0075-AC3 wire and buildgen with a managed form/wizard module', () {
+    test('T-0075-AC3 wire only warns about a form_wizard flow and lists it as '
+        'not wired; it fails neither wire nor wire --check, and the flow '
+        'scope and BUILD come from wire and buildgen', () {
+      final root = _wireRoot('fw');
+      const rel = 'feature/zz_probe/zz_fw_probe';
+      writeFile(root, '$rel/mcgen.yaml', readFixture('zz_fw_probe/mcgen.yaml'));
+      for (final args in [
+        ['gen', 'zz_fw_probe'],
+        ['wire'],
+        ['buildgen'],
+      ]) {
+        final r = mcgen([...args, '--root', root.path]);
+        expect(r.code, 0, reason: '${args.first}: $r');
+        if (args.first == 'wire') {
+          expect(
+            r.err,
+            contains(
+              'warning: $rel/mcgen.yaml: not wired: wire cannot route a '
+              '"form_wizard" flow yet',
+            ),
+          );
+        }
+      }
+      expect(
+        readFile(root, '$rel/$flowScopePath'),
+        contains('RootImport<Dio>()'),
+      );
+      expect(
+        readFile(root, '$rel/BUILD.bazel'),
+        contains('name = "zz_fw_probe"'),
+      );
+      expect(
+        readFile(root, appWiringsPath),
+        contains("CatalogueEntry(\n    module: 'zz_fw_probe',\n    note:"),
+      );
+      final c = mcgen(['wire', '--check', '--root', root.path]);
+      expect(c.code, 0, reason: 'a warning is not drift: $c');
+      final b = mcgen(['buildgen', '--check', '--root', root.path]);
+      expect(b.code, 0, reason: '$b');
     });
   });
 }

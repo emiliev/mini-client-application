@@ -6,7 +6,7 @@
 #
 # The archetype owns what every form or wizard feature shares: the barrel, the
 # DI initializer, the navigator contract, the flow state, the flow (its
-# arguments, result and pages), the root-import list, the architecture test,
+# arguments, result and pages), the architecture test,
 # the package files, the strings and the .feature files. The form's rules,
 # the bloc, the domain, the pages, the test env, the steps, the contract tests
 # and BUILD.bazel are the module's own (owned).
@@ -81,11 +81,7 @@ options:
     SignInReason: domain/model/sign_in_reason.dart
     SignInResult: domain/model/sign_in_result.dart
     SignInPage: presentation/page/sign_in_page.dart
-    AuthApi: package:mc_api_auth/mc_api_auth.dart
-    Monitoring: package:mc_monitoring/mc_monitoring.dart
-    SessionReader: package:mc_session/mc_session.dart
   barrel: [DemoAccount, SignInReason, SignInResult]
-  root_imports: [AuthApi, Monitoring, SessionReader]
   flow:
     args:
       - name: reason
@@ -120,16 +116,6 @@ options:
       The public surface (R4, checked by mc_arch_check and the architecture
       test): the flow, its navigator, and the flow's argument and result types.
       No `library;` directive (Tide's `unnecessary_library_directive`).
-    flow_scope.doc: |-
-      The root services this flow's container forwards (R17): the parameter
-      types of every injectable constructor and `@factoryMethod` in the package,
-      minus what the package registers itself and what the flow provides
-      (`FeatureFlowController`, the navigator).
-
-      HAND-WRITTEN FOR NOW (as in library_reading_list_editor):
-      `test/flow_scope_test.dart` opens the flow over the production-shaped test
-      root and resolves every registration, so a missing import fails a test,
-      not the app.
     flow_state.doc: |-
       The flow's arguments, which the flow starts from (plan 01 §4.4). The form
       has one page, so nothing changes while it is open; the form's values live

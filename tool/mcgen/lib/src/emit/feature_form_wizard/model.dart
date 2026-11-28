@@ -127,7 +127,6 @@ class FwModel {
   late final String l10nFile;
   late final Map<String, String> types;
   late final List<String> barrel;
-  late final List<String> rootImports;
   late final String? flowKey;
   late final List<FwArg> flowArgs;
   late final String resultType;
@@ -199,7 +198,6 @@ class FwModel {
         'l10n_file',
         'types',
         'barrel',
-        'root_imports',
         'flow',
         'flow_state',
         'architecture',
@@ -212,7 +210,6 @@ class FwModel {
     m.l10nFile = r.str('l10n_file', '${m.stem}_l10n');
     m.types = r.strMap('types');
     m.barrel = r.strList('barrel');
-    m.rootImports = r.strList('root_imports');
     final f = r.child('flow')
       ..only(const ['key', 'args', 'result', 'state', 'pages']);
     m.flowKey = f.optStr('key');
@@ -408,15 +405,6 @@ class FwModel {
           node,
           'options.barrel',
           'barrel type "$id" is not in options.types',
-        );
-      }
-    }
-    for (final id in m.rootImports) {
-      if (!m.types.containsKey(id)) {
-        err(
-          node,
-          'options.root_imports',
-          'root import "$id" is not in options.types',
         );
       }
     }
@@ -736,16 +724,6 @@ class FwSkeleton {
           node,
           'options.skeleton.submit',
           'request body key "$k" is written twice (fields and submit.extra)',
-        );
-      }
-    }
-    for (final r in const ['Dio', 'SessionReader', 'Monitoring']) {
-      if (!m.rootImports.contains(r)) {
-        err(
-          node,
-          'options.root_imports',
-          'a skeleton sends its request through Dio, reads the session and '
-              'reports to monitoring: root_imports needs "$r"',
         );
       }
     }

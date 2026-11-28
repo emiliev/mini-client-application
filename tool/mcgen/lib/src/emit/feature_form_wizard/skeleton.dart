@@ -12,7 +12,6 @@ import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
 import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/emit/feature_form_wizard/model.dart';
-import 'package:mcgen/src/emit/feature_form_wizard/skeleton_build.dart';
 import 'package:mcgen/src/emit/feature_form_wizard/skeleton_templates.dart';
 import 'package:mcgen/src/emit/feature_form_wizard/skeleton_tests.dart';
 import 'package:mcgen/src/emit/feature_form_wizard/text.dart';
@@ -194,7 +193,6 @@ void emitSkeleton(EmitContext ctx, FwModel m) {
     defines: '${m.pascal}StepPage',
   );
   emitSkeletonTests(ctx, m, v);
-  emitSkeletonBuild(ctx, m);
 }
 
 /// The values every template reads.

@@ -1,13 +1,13 @@
 # T-0065-AC5: tool/mcgen gates
 
-HEAD `83408897`
+HEAD `9e2a95d9`
 
 - PASS: pub get --offline in tool/mcgen
 - PASS: pub get --offline in tool/loc
 - PASS: format gate with nested .dart_tool in tool/mcgen and tool/loc (P-117)
 - PASS: dart analyze tool/mcgen
 - PASS: dart test tool/mcgen
-  - 00:29 +225: All tests passed!
+  - 00:18 +254: All tests passed!
 - PASS: pubspec.lock and MODULE.bazel.lock unchanged against origin/main
 
 **PASS T-0065-AC5**

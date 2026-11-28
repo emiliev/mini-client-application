@@ -178,11 +178,7 @@ options:
   types:
     ShelfId: domain/model/shelf_id.dart
     ZzFwProbeStepPage: presentation/page/zz_fw_probe_step_page.dart
-    Dio: package:dio/dio.dart
-    Monitoring: package:mc_monitoring/mc_monitoring.dart
-    SessionReader: package:mc_session/mc_session.dart
   barrel: [ShelfId]
-  root_imports: [Dio, Monitoring, SessionReader]
   flow:
     result:
       type: ShelfId?

@@ -153,11 +153,7 @@ options:
   types:
     NoteId: domain/model/note_id.dart
     ZzFwPlainStepPage: presentation/page/zz_fw_plain_step_page.dart
-    Dio: package:dio/dio.dart
-    Monitoring: package:mc_monitoring/mc_monitoring.dart
-    SessionReader: package:mc_session/mc_session.dart
   barrel: [NoteId]
-  root_imports: [Dio, Monitoring, SessionReader]
   flow:
     result:
       type: NoteId?

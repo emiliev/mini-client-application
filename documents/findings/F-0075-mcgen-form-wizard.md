@@ -8,8 +8,8 @@
 ## Summary
 `mcgen gen library_reading_list_editor --check` and `mcgen gen auth_signin --check` both exit 0. The `form_wizard` archetype renders 17 and 15 files, each equal to the exemplar byte for byte. It reads one `options` block (names, types, flow arguments, result, pages, flow-state fields, root imports, architecture-test facts) plus the core spec's navigator, strings and BDD.
 
-- **Rendered (managed):** the barrel, the DI initializer, the root-import list (`flow_scope.dart`), the navigator, the flow state, the flow, the three ARBs, `l10n.yaml`, `pubspec.yaml`, the `.feature` files and the architecture test.
-- **Hand-written (owned):** the domain (API, DTOs, repository), the form's rules, the bloc with its events and state, the step pages and widgets, the test env, every step file, the contract and bloc-guard tests, the golden and `BUILD.bazel`.
+- **Rendered (managed):** the barrel, the DI initializer, the navigator, the flow state, the flow, the three ARBs, `l10n.yaml`, `pubspec.yaml`, the `.feature` files and the architecture test.
+- **Hand-written (owned):** the domain (API, DTOs, repository), the form's rules, the bloc with its events and state, the step pages and widgets, the test env, every step file, the contract and bloc-guard tests, the golden.
 - **Two shapes, one template:** a three-step wizard whose flow has an argument (`editing`), a key and a nullable result; a one-form flow with two arguments, a non-null result and no key.
 - **A skeleton** (`options.skeleton`) writes a working owned module from a spec: a `WizardController` over text fields (a form is a wizard of one step), one write pinned to the session epoch, the flow result and the server's verdicts mapped to the field they name. Two throwaway modules, `zz_fw_probe` (3 steps, result `ShelfId`) and `zz_fw_plain` (1 step, result `NoteId`, a field whose name differs from its request key), generate, analyse clean under `mc_analysis`, and pass their BDD (7 and 7 scenarios), flow-scope and architecture tests under Bazel ([T-0075-AC3_fw_probe.md](../evidence/T-0075/T-0075-AC3_fw_probe.md)).
 - **Nothing was added to `emit/common`.** `archetypes.dart` gained one import and one line. `pseudo()` and `kit_symbols` are reused as they are.
@@ -60,7 +60,7 @@
 - The lint style: every role an emitter reads has a message, and every lint rule has a rejection test (`T-0075-AC3 lint ...` in `form_wizard_test.dart`).
 
 ## 5. Not done, and why
-- **`BUILD.bazel` and `flow_scope.dart`** are still rendered or first-written here. T-0074 (`wire`, `buildgen`) takes them over; the TL's note says to drop them when it lands (they are separate commits).
+- **`BUILD.bazel` and `flow_scope.dart`** are `mcgen buildgen`'s and `mcgen wire`'s since T-0074. The archetype writes neither; the round-trip ignores both; the pubspec lists `mc_di`, `mc_monitoring` and `mc_session` (what the flow scope imports); `options.root_imports` is gone. `wire` does not route a form_wizard flow yet (P-128 (e)): it warns, adds a catalogue note, and fails neither `wire` nor `wire --check`.
 - **No bloc, event or state template for an exemplar.** See section 1; the skeleton is the template.
 - **A skeleton supports text fields only.** A choice (an enum such as a visibility), a picked list, a gate (`requestSignIn`) and edit mode are hand-written, as in both exemplars.
 - **The skeleton's request goes through `Dio` directly** (one `POST`, a response with an id), not a retrofit API with DTOs: it keeps the probe's codegen to freezed, injectable and gen-l10n. The exemplar wizard uses retrofit.
