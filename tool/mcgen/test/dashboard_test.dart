@@ -512,4 +512,97 @@ void main() {
       expect('${r.out}${r.err}', contains('nothing.uses.this'));
     });
   });
+
+  group('T-0076-AC3 the probes are not the exemplar with names swapped', () {
+    Directory probe(String mod, String tag) {
+      final root = tempRoot(tag);
+      addTearDown(() => root.deleteSync(recursive: true));
+      for (final d in Directory(p.join(repoRoot, 'utility')).listSync()) {
+        final pubspec = File(p.join(d.path, 'pubspec.yaml'));
+        if (pubspec.existsSync()) {
+          writeFile(
+            root,
+            'utility/${p.basename(d.path)}/pubspec.yaml',
+            pubspec.readAsStringSync(),
+          );
+        }
+      }
+      writeFile(
+        root,
+        'feature/zz_probe/$mod/mcgen.yaml',
+        readFixture('$mod/mcgen.yaml'),
+      );
+      return root;
+    }
+
+    GeneratedModule gen(Directory root, String mod) => _generator.generate(
+      loadSpec(
+        text: readFile(root, 'feature/zz_probe/$mod/mcgen.yaml'),
+        file: 'feature/zz_probe/$mod/mcgen.yaml',
+        schema: schema,
+      ),
+      index: RepoIndex.scan(root.path),
+      forbidden: [root.path, mcgenDir],
+    );
+
+    test('T-0076-AC3 both probe specs lint clean and render the same bytes '
+        'in two roots', () {
+      for (final mod in ['zz_db_a', 'zz_db_b']) {
+        final a = probe(mod, '$mod-a');
+        final b = probe(mod, '$mod-b');
+        final lint = mcgen(['spec', 'lint', '--root', a.path, mod]);
+        expect(lint.code, 0, reason: '$lint');
+        final ga = gen(a, mod);
+        final gb = gen(b, mod);
+        expect(ga.files.keys, gb.files.keys);
+        for (final k in ga.files.keys) {
+          expect(ga.files[k]!.content, gb.files[k]!.content, reason: k);
+        }
+      }
+    });
+
+    test('T-0076-AC3 probe A has three sections and no detail page, flag or '
+        'flags file; probe B has five, a flag and a paged detail page', () {
+      final ga = gen(probe('zz_db_a', 'a'), 'zz_db_a');
+      final blocs = [
+        for (final k in ga.files.keys)
+          if (k.startsWith('lib/src/presentation/bloc/') &&
+              k.endsWith('_bloc.dart'))
+            k,
+      ];
+      expect(
+        blocs.map(p.basename),
+        [
+          'cart_summary_bloc.dart',
+          'deals_bloc.dart',
+          'featured_bloc.dart',
+          'store_section_bloc.dart',
+        ]..sort(),
+      );
+      expect(
+        ga.files.keys,
+        isNot(contains('lib/src/flags/zz_db_a_flags.dart')),
+      );
+      expect(ga.files.keys.where((k) => k.contains('category')), isEmpty);
+      final page =
+          ga.files['lib/src/presentation/page/zz_db_a_page.dart']!.content;
+      expect(page, isNot(contains('FeatureFlagsReader')));
+      final gb = gen(probe('zz_db_b', 'b'), 'zz_db_b');
+      final pageB =
+          gb.files['lib/src/presentation/page/zz_db_b_page.dart']!.content;
+      expect(pageB, contains('SpotlightSection()'));
+      expect(pageB, contains('if (_spotlight)'));
+      expect(pageB, isNot(contains('FeaturedSection')));
+      expect(
+        gb
+            .files['lib/src/presentation/bloc/category_products_bloc.dart']!
+            .content,
+        contains('PagingController<Product>'),
+      );
+      expect(
+        gb.files['lib/src/domain/model/store_analytics.dart']!.content,
+        contains("spotlight('spotlight')"),
+      );
+    });
+  });
 }

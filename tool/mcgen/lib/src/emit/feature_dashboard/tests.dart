@@ -8,6 +8,7 @@
 // ...); the env is where the module's fixtures and finders live, so a step
 // file stays the same for every dashboard.
 
+import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/emit/common/bdd.dart';
 import 'package:mcgen/src/emit/feature_dashboard/model.dart';
 import 'package:mcgen/src/emit/feature_dashboard/step_templates.dart';
@@ -36,8 +37,29 @@ Map<String, String> stepsUsed(DbModel m) {
 }
 
 void emitTests(Out ctx, DbModel m) {
-  for (final MapEntry(key: name, value: text) in stepsUsed(m).entries) {
-    final fn = stepFunctionName(text);
+  final steps = {...stepsUsed(m)};
+  // A step template may call another step's function (`only the section shows
+  // an error` calls `the section shows its error with retry`): that step's
+  // file is emitted too, used by a feature or not.
+  for (var more = true; more;) {
+    more = false;
+    for (final name in steps.keys.toList()) {
+      final template = stepTemplates[_templateKey(m, name)];
+      if (template == null) continue;
+      for (final dep in RegExp(
+        r"^import '(\w+)\.dart';",
+        multiLine: true,
+      ).allMatches(template)) {
+        final file = dep[1]!;
+        if (!steps.containsKey(file)) {
+          steps[file] = file.replaceAll('_', ' ');
+          more = true;
+        }
+      }
+    }
+  }
+  for (final MapEntry(key: name, value: text) in steps.entries) {
+    final fn = camelCase(name);
     final path = 'test/feature/step/$name.dart';
     final template = stepTemplates[_templateKey(m, name)];
     final usage = m.text('step.$name.usage', text);

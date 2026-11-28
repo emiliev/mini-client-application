@@ -1,0 +1,57 @@
+import 'package:flutter/widgets.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mc_ds_cards/mc_ds_cards.dart';
+import 'package:mc_ds_lists/mc_ds_lists.dart';
+
+import '../util/zz_db_b_env.dart';
+
+/// Usage: the category page shows the first {20} products of {'cosmic'}
+///
+/// The paged grid holds exactly the first [count] products of the category,
+/// in the fixtures' title order, each at the price the cart charges, and
+/// its first card on screen is the first product. The loaded items are read
+/// from the grid's own `McPagedGrid.state` (dynamically: the product type is
+/// package-private, R7), so the step does not scroll, which would load the
+/// next page.
+Future<void> theCategoryPageShowsTheFirstProductsOf(
+  WidgetTester tester,
+  int count,
+  String category,
+) async {
+  await letSectionsLand(tester);
+  final expected = storeCatalogue.productsOf(category).take(count).toList();
+  expect(expected, hasLength(count));
+  final grid = find.byKey(categoryGridKey);
+  expect(grid, findsOneWidget, reason: 'the category grid');
+  final dynamic state = (tester.widget(grid) as McPagedGrid<dynamic>).state;
+  final items = state.items as List<dynamic>;
+  expect(
+    [for (final dynamic p in items) p.title as String],
+    [for (final p in expected) p.title],
+    reason: 'the loaded products, in order',
+  );
+  for (var i = 0; i < count; i++) {
+    final dynamic product = items[i];
+    final dynamic price = product.dealPrice ?? product.price;
+    expect(
+      price.minorUnits as int,
+      expected[i].unitPriceCents,
+      reason: '${expected[i].title} costs what the cart charges',
+    );
+  }
+  // The top of the grid (jumping there loads nothing).
+  tester
+      .state<ScrollableState>(
+        find.descendant(of: grid, matching: find.byType(Scrollable)).first,
+      )
+      .position
+      .jumpTo(0);
+  await tester.pump();
+  final firstCard = tester
+      .widgetList<McMediaCard>(
+        find.descendant(of: grid, matching: find.byType(McMediaCard)),
+      )
+      .first;
+  expect(firstCard.title, expected.first.title);
+  expect(firstCard.subtitle, euros(expected.first.unitPriceCents));
+}

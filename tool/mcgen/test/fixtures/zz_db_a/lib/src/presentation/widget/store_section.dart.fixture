@@ -1,0 +1,232 @@
+import 'package:flutter/material.dart';
+import 'package:mc_api_errors/mc_api_errors.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
+import 'package:mc_ds_layout/mc_ds_layout.dart';
+import 'package:mc_ds_navigation/mc_ds_navigation.dart';
+import 'package:mc_ds_theme/mc_ds_theme.dart';
+import 'package:mc_ds_tokens/mc_ds_tokens.dart';
+import 'package:mc_l10n_core/mc_l10n_core.dart';
+import 'package:zz_db_a/src/domain/model/store_analytics.dart';
+import 'package:zz_db_a/src/l10n/zz_db_a_l10n.dart';
+import 'package:zz_db_a/src/presentation/widget/failure_message.dart';
+
+/// The keys of a section and of its parts, for tests and the e2e journey
+/// (`zz_db_a.<section>`, `.skeleton`, `.error`, `.empty`, `.content`).
+ValueKey<String> sectionKey(StoreSection section) =>
+    ValueKey('zz_db_a.${section.wireName}');
+
+ValueKey<String> sectionPartKey(StoreSection section, String part) =>
+    ValueKey('zz_db_a.${section.wireName}.$part');
+
+/// One section of the store home: its header, then whichever of its own
+/// states it is in. Each section has its own skeleton, error card and empty
+/// line, so a section that loads or fails never changes another.
+class StoreSectionFrame extends StatelessWidget {
+  const StoreSectionFrame({
+    required this.section,
+    required this.title,
+    required this.child,
+    super.key,
+  });
+
+  final StoreSection section;
+  final String title;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    key: sectionKey(section),
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      McSectionHeader(title: title),
+      child,
+    ],
+  );
+}
+
+/// A section's skeleton while it loads: grey blocks of the content's shape,
+/// announced once to a screen reader.
+class SectionSkeleton extends StatelessWidget {
+  const SectionSkeleton({
+    required this.section,
+    required this.label,
+    required this.height,
+    this.itemWidth,
+    super.key,
+  });
+
+  final StoreSection section;
+
+  /// "Loading deals", for a screen reader.
+  final String label;
+
+  final double height;
+
+  /// The width of one block in a carousel; null for one full-width block.
+  final double? itemWidth;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.mcPalette.surfaceVariant;
+    Widget block(double? width) => SizedBox(
+      width: width,
+      height: height,
+      child: DecoratedBox(
+        decoration: BoxDecoration(color: color, borderRadius: McRadius.mdAll),
+      ),
+    );
+    final width = itemWidth;
+    return Semantics(
+      key: sectionPartKey(section, 'skeleton'),
+      label: label,
+      liveRegion: true,
+      container: true,
+      excludeSemantics: true,
+      child: Padding(
+        padding: McInsets.horizontal,
+        child: width == null
+            ? block(null)
+            : SizedBox(
+                height: height,
+                child: ClipRect(
+                  child: OverflowBox(
+                    alignment: AlignmentDirectional.centerStart,
+                    maxWidth: double.infinity,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < 4; i++) ...[
+                          if (i > 0) const SizedBox(width: McSpacing.md),
+                          block(width),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+      ),
+    );
+  }
+}
+
+/// A section's own error card: what failed, why (the shared error copy) and
+/// a Retry that reloads this section only.
+class SectionError extends StatelessWidget {
+  const SectionError({
+    required this.section,
+    required this.title,
+    required this.error,
+    required this.onRetry,
+    super.key,
+  });
+
+  final StoreSection section;
+  final String title;
+  final ApiFailure error;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    final core = McL10nCoreL10n.of(context);
+    final p = context.mcPalette;
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      key: sectionPartKey(section, 'error'),
+      padding: McInsets.horizontal,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: p.surface,
+          borderRadius: McRadius.mdAll,
+          border: Border.all(color: p.error),
+        ),
+        child: Padding(
+          padding: McInsets.card,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                liveRegion: true,
+                child: Text(
+                  title,
+                  style: text.labelLarge?.copyWith(color: p.error),
+                ),
+              ),
+              const McGap.xs(),
+              Text(failureMessage(error, core), style: text.bodySmall),
+              const McGap.sm(),
+              McButton(
+                label: core.commonRetry,
+                variant: McButtonVariant.secondary,
+                onPressed: onRetry,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A section with nothing to show: one quiet line.
+class SectionEmpty extends StatelessWidget {
+  const SectionEmpty({required this.section, required this.message, super.key});
+
+  final StoreSection section;
+  final String message;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    key: sectionPartKey(section, 'empty'),
+    padding: McInsets.horizontal,
+    child: Text(message, style: Theme.of(context).textTheme.bodyMedium),
+  );
+}
+
+/// A horizontal carousel of [count] items [itemWidth] wide and [height]
+/// tall (the height follows the text scale; see the callers).
+class SectionCarousel extends StatelessWidget {
+  const SectionCarousel({
+    required this.section,
+    required this.height,
+    required this.itemWidth,
+    required this.count,
+    required this.itemBuilder,
+    super.key,
+  });
+
+  final StoreSection section;
+  final double height;
+  final double itemWidth;
+  final int count;
+  final IndexedWidgetBuilder itemBuilder;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+    key: sectionPartKey(section, 'content'),
+    height: height,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      padding: McInsets.horizontal,
+      itemCount: count,
+      separatorBuilder: (_, _) => const SizedBox(width: McSpacing.md),
+      itemBuilder: (context, index) =>
+          SizedBox(width: itemWidth, child: itemBuilder(context, index)),
+    ),
+  );
+}
+
+/// The height of [lines] lines of [style] at the context's text scale.
+double scaledLines(BuildContext context, TextStyle style, int lines) =>
+    lines *
+    MediaQuery.textScalerOf(context).scale(style.fontSize!) *
+    style.height!;
+
+/// A shared shorthand for the feature's strings.
+extension StoreL10nContext on BuildContext {
+  ZzDbAL10n get storeL10n => ZzDbAL10n.of(this);
+}
+
+/// The typography the sections measure their carousels with.
+abstract final class SectionType {
+  static const TextStyle title = McTypeScale.label;
+  static const TextStyle detail = McTypeScale.caption;
+}

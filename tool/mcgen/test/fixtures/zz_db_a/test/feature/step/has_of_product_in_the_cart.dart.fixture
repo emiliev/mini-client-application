@@ -1,0 +1,15 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/zz_db_a_env.dart';
+
+/// Usage: {'reader@mini-client.test'} has {2} of product {500060} in the cart
+///
+/// Sets the line on the backend before the store opens, as another device
+/// would (a minted token straight on the engine; the harness records no
+/// request).
+Future<void> hasOfProductInTheCart(
+  WidgetTester tester,
+  String email,
+  int quantity,
+  int productId,
+) => putInCart(tester, email, productId, quantity);

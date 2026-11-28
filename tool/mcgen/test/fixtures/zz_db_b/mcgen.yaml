@@ -1,0 +1,1465 @@
+# T-0076-AC3: a throwaway dashboard module (never committed under feature/;
+# tool/mcgen/tool/T-0076-AC3_db_probe.sh copies it there, generates it and
+# runs it under Bazel). The owned files beside it are zz_db_b's, under
+# another module name.
+#
+schema: mcgen/1
+module: zz_db_b
+tier: feature
+archetype: dashboard
+ownership: mixed
+description: The store front in independent sections (banners, deals, categories, featured, cart), and a category's products.
+deps: [mc_api_auth, mc_api_client, mc_ds_buttons, mc_ds_cards, mc_ds_feedback, mc_ds_layout, mc_ds_lists, mc_ds_media, mc_ds_theme, mc_formatters, mc_l10n_core, mc_media, retrofit]
+dev_deps: [mc_fixtures_commerce, mc_fixtures_identity, mc_fixtures_media, mc_mocked_backend, mc_storage, mocktail]
+owned:
+  - BUILD.bazel
+  - lib/src/domain/api/**
+  - lib/src/domain/model/store.dart
+  - lib/src/domain/model/store_dto.dart
+  - lib/src/domain/model/store_mapper.dart
+  - lib/src/domain/repository/**
+  - lib/src/presentation/page/category_page.dart
+  - lib/src/presentation/widget/**
+  - test/contract/**
+  - test/feature/util/**
+  - test/flow_scope_test.dart
+  - test/golden/**
+keep: [banners.open, banners.members, categories.open, deals.open, spotlight.open]
+
+navigator:
+  name: ZzDbBNavigator
+  doc: |-
+    What zz_db_b needs from outside: intents in the feature's own
+    language, never routes (plan 01 §4.1). Implemented in
+    `app/wiring/commerce_wiring` (T-0056). Only blocs call it.
+
+    Four of the DB archetype's six methods (plan 01 §6.1). Deferred until
+    their features exist: `openCheckout()` (with the checkout feature, F078)
+    and `openPromo(code)` (promo entry). A category of the store is not a
+    navigator call: it is a page of this flow.
+  outbound: [openComic(ComicId), openSearch(String), openCart(), requestSignIn() -> Future<bool>]
+
+options:
+  prefix: Store
+  barrel: [ComicId, CategoryId]
+  kinds: [comic, category, search, cart]
+  params: {openSearch: query}
+  screens: {home: zz_db_b, detail: store_category}
+  ids:
+    - name: CategoryId
+      type: String
+      doc: |-
+        A store category's id (`heroes`, `cosmic`, ...). The flow can open at a
+        category (`/store/categories/:id`), so the barrel exports it.
+
+        An extension type: a `String` at run time, but not interchangeable with
+        other text at compile time.
+    - name: ComicId
+      type: int
+      doc: |-
+        A comic's id in this feature's own vocabulary (features never share types,
+        plan 01 §4.3): a product, a deal and a comic banner open the comic by it,
+        so the barrel exports it with the navigator.
+
+        An extension type: an `int` at run time, but not interchangeable with
+        other ids at compile time.
+  flags:
+    - name: zzDbBFeatured
+      key: store.home_featured
+      default: true
+      description: Shows the featured products section on the store home.
+  detail:
+    name: category
+    id: CategoryId
+    item: Product
+    items: products
+    fetch_page: fetchCategoryPage
+    lookup: fetchCategories
+    open_call: openComic
+    open_kind: comic
+    page_size: 20
+  sections:
+    - name: banners
+      item: StoreBanner
+      arg: banner
+      fetch: fetchBanners
+      uses: [flow, navigator]
+      open: |-
+        if (startOpenGuard(banner.id)) {
+          _open(banner);
+        }
+      members: |-
+        void _open(StoreBanner banner) {
+          switch (banner.target) {
+            case ComicTarget(:final id):
+              tracker.itemTapped(section, StoreItemKind.comic, '${id.value}');
+              _navigator.openComic(id);
+            case CategoryTarget(:final id):
+              tracker.itemTapped(section, StoreItemKind.category, id.value);
+              _flow.openCategory(OpenCategory(id: id));
+            case SearchTarget(:final query):
+              tracker.itemTapped(section, StoreItemKind.search, query);
+              _navigator.openSearch(query);
+          }
+        }
+    - name: deals
+      item: Deal
+      arg: deal
+      data: RunningDeals
+      ready_params: List<Deal> deals, DateTime now
+      ready_args: data.deals, data.asOf
+      empty_when: data.deals.isEmpty
+      uses: [navigator, clock]
+      top: |-
+        /// The deals that run at `asOf`, the time they arrived.
+        typedef RunningDeals = ({List<Deal> deals, DateTime asOf});
+      fetch_method: |2-
+          /// The deals that still run when they arrive, with that time: one that has
+          /// ended (the backend's list is a moment's, the clock moves on) is left
+          /// out, so an all-ended list is the empty state.
+          @override
+          Future<Result<RunningDeals, ApiFailure>> fetch() async {
+            final result = await _repository.fetchDeals();
+            final now = _clock.now();
+            return result.map(
+              (deals) => (
+                deals: [
+                  for (final deal in deals)
+                    if (deal.runsAt(now)) deal,
+                ],
+                asOf: now,
+              ),
+            );
+          }
+      open: |-
+        final id = deal.product.id;
+        if (startOpenGuard(id.value)) {
+          tracker.itemTapped(section, StoreItemKind.comic, '${id.value}');
+          _navigator.openComic(id);
+        }
+    - name: categories
+      item: StoreCategory
+      arg: category
+      fetch: fetchCategories
+      uses: [flow]
+      open: |-
+        if (startOpenGuard(category.id.value)) {
+          tracker.itemTapped(
+            section,
+            StoreItemKind.category,
+            category.id.value,
+          );
+          _flow.openCategory(
+            OpenCategory(id: category.id, name: category.name),
+          );
+        }
+    - name: spotlight
+      bloc: Featured
+      widget: SpotlightSection
+      item: Product
+      arg: product
+      ready_params: List<Product> products
+      fetch: fetchFeatured
+      uses: [navigator]
+      flag: zzDbBFeatured
+      open: |-
+        if (startOpenGuard(product.id.value)) {
+          tracker.itemTapped(
+            section,
+            StoreItemKind.comic,
+            '${product.id.value}',
+          );
+          _navigator.openComic(product.id);
+        }
+    - name: cart
+      kind: session
+      bloc: CartSummary
+      item: CartSummary
+      data: CartSummary
+      ready_params: CartSummary cart
+      empty_when: data.itemCount == 0
+      fetch: fetchCart
+      uses: [navigator, session]
+      open_call: openCart
+      open_kind: cart
+      open_id: summary
+  tests:
+    money: "true"
+    tag_barrel: T-0056-AC8
+    tag_money: T-0056-AC1
+    page: store
+  prose:
+    banners.doc: |-
+      The banners section: loads `GET v1/store/banners` on its own, and hands a
+      tapped banner over to where it leads: a comic (the app), a category (a
+      page of this flow) or a search (the app).
+    banners.event.doc: |-
+      What the banners section asks for. Hand-written sealed events with private
+      cases (Tide), so a page can only create them through the factories.
+    banners.event.load: |-
+      The first load: the page adds it once it is shown (F-0056 §1).
+    banners.event.retry: |-
+      Retry after a failure: loads this section again, and only this one.
+    banners.event.refresh: |-
+      Pull to refresh: reloads and keeps the banners meanwhile. [done]
+      completes when the answer arrived, so the refresh control closes.
+    banners.event.open: |-
+      A banner was tapped.
+    banners.state.doc: |-
+      A section's state (Tide's shape: private cases read with `state.when`,
+      R16). `copyWith` is off: the bloc emits whole states.
+    banners.state.loading: |-
+      The banners are on their way: the section shows its skeleton.
+    banners.state.empty: |-
+      The store has no banners right now.
+    banners.state.failure: |-
+      The banners could not be loaded: the section's own error card with
+      Retry. `McBloc` reports it to monitoring (D-16).
+    deals.doc: |-
+      The deals section: loads `GET v1/store/deals` on its own, with the time
+      its countdowns are read against (the injected [StoreClock]), and hands a
+      tapped deal's comic over to the app.
+    deals.event.doc: |-
+      What the deals section asks for (Tide's sealed events, private cases).
+    deals.event.load: |-
+      The first load: the page adds it once it is shown (F-0056 §1).
+    deals.event.retry: |-
+      Retry after a failure: loads this section again, and only this one.
+    deals.event.refresh: |-
+      Pull to refresh; [done] completes when the answer arrived.
+    deals.event.open: |-
+      A deal was tapped: its comic opens.
+    deals.state.doc: |-
+      A section's state (Tide's shape, R16).
+    deals.state.ready: |-
+      The deals that still run, and the time their "ends in" is counted from
+      (the injected clock, read when they arrived).
+    categories.doc: |-
+      The categories section: loads `GET v1/store/categories` on its own, and
+      opens a tapped category's page inside the flow.
+    categories.event.doc: |-
+      What the categories section asks for (Tide's sealed events).
+    categories.event.load: |-
+      The first load: the page adds it once it is shown (F-0056 §1).
+    categories.event.retry: |-
+      Retry after a failure: loads this section again, and only this one.
+    categories.event.refresh: |-
+      Pull to refresh; [done] completes when the answer arrived.
+    categories.event.open: |-
+      A category was tapped: its page opens inside the flow.
+    categories.state.doc: |-
+      A section's state (Tide's shape, R16).
+    spotlight.doc: |-
+      The featured section: loads `GET v1/store/featured` on its own, and hands
+      a tapped product's comic over to the app. It exists only while the flag
+      `store.home_featured` is on: the page does not build it otherwise, so
+      this bloc is never created and nothing is requested.
+    spotlight.event.doc: |-
+      What the featured section asks for (Tide's sealed events).
+    spotlight.event.load: |-
+      The first load: the page adds it once it is shown (F-0056 §1).
+    spotlight.event.retry: |-
+      Retry after a failure: loads this section again, and only this one.
+    spotlight.event.refresh: |-
+      Pull to refresh; [done] completes when the answer arrived.
+    spotlight.event.open: |-
+      A product was tapped: its comic opens.
+    spotlight.state.doc: |-
+      A section's state (Tide's shape, R16).
+    cart.doc: |-
+      The cart section: the signed-in user's item count and total
+      (`GET v1/me/cart`), which opens the cart.
+
+      - **Signed out** the summary is hidden: the section offers to sign in
+        and sends nothing. A tap asks the app (`requestSignIn()`) and waits;
+        whatever the answer, the session decides what shows next.
+      - **The session decides.** It follows `SessionReader.authState`: a
+        sign-in, a sign-out or a user switch anywhere reloads the section for
+        the session now current, once per session epoch. An answer that arrives
+        for an older epoch (a same-user re-sign-in sends no `authState` event)
+        also reloads it.
+      - **Every await is a session boundary** (F-0040 fact 21): a cart read
+        started for one session and answered under another is dropped before
+        any state is written, and the request itself is pinned to its epoch
+        (T-0050), so it never goes out with another user's bearer.
+    cart.event.doc: |-
+      What the cart section asks for (Tide's sealed events).
+    cart.event.load: |-
+      The first load: the page adds it once it is shown (F-0056 §1).
+    cart.event.retry: |-
+      Retry after a failure: loads this section again, and only this one.
+    cart.event.refresh: |-
+      Pull to refresh; [done] completes when the answer arrived (at once
+      while signed out: there is nothing to reload).
+    cart.event.sign_in: |-
+      Signed out, "Sign in to see your cart" was tapped.
+    cart.event.open: |-
+      The summary was tapped: the cart opens.
+    cart.event.session_changed: |-
+      Internal: `SessionReader.authState` changed (a sign-in, a sign-out or a
+      user switch, here or anywhere else in the app).
+    cart.state.doc: |-
+      The cart section's state (Tide's shape, R16): the four section cases,
+      plus the two a signed-out user sees.
+    cart.state.empty: |-
+      Signed in, with nothing in the cart.
+    cart.state.signed_out: |-
+      Nobody is signed in: the summary is hidden and nothing is requested;
+      the section offers to sign in.
+    cart.state.signing_in: |-
+      The app is signing someone in for this section (`requestSignIn()`).
+      A static message, no spinner: it may wait for the user indefinitely
+      (F-0048 §5.10).
+    cart.show_doc: |-
+      Shows the section for the session now current: signed out, or its cart.
+    step.every_section_but_is_ready.usage: |-
+      every section but {'deals'} is ready
+    step.every_section_but_shows_its_error.usage: |-
+      every section but {'deals'} shows its error
+    step.i_leave_the_store.usage: |-
+      I leave the store
+    step.i_open_a_dialog_over_the_store_and_close_it.usage: |-
+      I open a dialog over the store and close it
+    step.i_open_the_store.usage: |-
+      I open the store
+    step.i_pull_the_store_to_refresh.usage: |-
+      I pull the store to refresh
+    step.i_tap_in_the_section.usage: |-
+      I tap {'Amber Frontier #2'} in the {'deals'} section
+    step.i_tap_in_the_section_and_again_after_milliseconds.usage: |-
+      I tap {'Amber Frontier #2'} in the {'deals'} section and again after {499} milliseconds
+    step.i_tap_in_the_section_twice_in_quick_succession.usage: |-
+      I tap {'Amber Frontier #2'} in the {'deals'} section twice in quick succession
+    step.i_tap_retry_in_the_section.usage: |-
+      I tap Retry in the {'deals'} section
+    step.i_tap_retry_in_the_section_twice_in_quick_succession.usage: |-
+      I tap Retry in the {'deals'} section twice in quick succession
+    step.only_the_section_shows_an_error.usage: |-
+      only the {'deals'} section shows an error
+    step.the_section_is_announced_as.usage: |-
+      the {'deals'} section is announced as {'Wird geladen: Angebote'}
+    step.the_section_is_loading.usage: |-
+      the {'deals'} section is loading
+    step.the_section_is_ready.usage: |-
+      the {'deals'} section is ready
+    step.the_section_shows.usage: |-
+      the {'deals'} section shows {'No deals right now.'}
+    step.the_section_shows_its_error_with_retry.usage: |-
+      the {'deals'} section shows its error with Retry
+    step.the_section_was_viewed_times.usage: |-
+      the section {'deals'} was viewed {1} times
+    step.the_sections_are.usage: |-
+      the sections are {'Highlights, Deals, Categories, Featured, Your cart'}
+    step.the_store_tap_was_tracked_with_section_kind_and_id.usage: |-
+      the store tap was tracked with section {'deals'}, kind {'comic'} and id {'501501'}
+    banners.retry_comment: |-
+      Only from the error: a second tap finds the section loading.
+    base.doc: |-
+      The shape every section bloc of a dashboard shares (DB archetype,
+      F-0056). One bloc per section, each with its own events and its own
+      freezed state (`loading`, `ready`, `empty`, `failure`, plus what a
+      section adds): this base holds only the mechanics, so the five sections
+      behave alike and none can affect another.
+
+      - **[load]** shows the section's loading state, fetches, and shows
+        `ready`, `empty` or `failure`. **Retry** is a [load] of this section
+        only. **Pull to refresh** is a [refresh]: the shown state stays until the
+        answer lands.
+      - **The newest answer wins.** Every load bumps a generation; an answer is
+        applied only if no load started after it, so a refresh racing an
+        in-flight load (or the other way round) ends on the latest request's
+        answer, whichever arrives first (F-0046 fact 7). [fetch] may also
+        answer null to drop an answer for a session that is gone (the cart).
+      - **`store_section_viewed`** is tracked once per bloc, that is once per
+        visit of the page, the first time the section is `ready`: not when it
+        failed or is empty, and after a Retry that succeeds.
+
+      [E] is the section's event type, [S] its state, [T] what it fetches.
+      Pure Dart (R15).
+    base.open_guard: |-
+      How long after a hand-over a second hand-over of the same item is
+      ignored: the second tap of a double tap (P-089). The same value as the
+      other exemplars' open guard.
+    detail.page_size: |-
+      Products per request: 20, the contract's default page.
+    detail.doc: |-
+      The category page's bloc: one category's products through a
+      [PagingController] (offset and limit: load, load more at the end of the
+      list, refresh, retry), and a tapped product's comic handed over to the
+      app. The category is the one the flow shows (opened above the store home,
+      or the flow's only page for `/store/categories/:id`).
+
+      When the opener did not know the category's name (a banner, a deep link),
+      it is looked up once in `GET v1/store/categories` and written into the
+      flow state, which titles the page; if that fails, the page keeps its
+      generic title.
+    detail.event.doc: |-
+      What the category page asks for (Tide's sealed events).
+    detail.event.load: |-
+      Starts over with the first page (the bloc adds it itself).
+    detail.event.load_more: |-
+      The grid scrolled past its load-more threshold.
+    detail.event.retry: |-
+      Repeats the request that failed (the first page or a later one).
+    detail.event.refresh: |-
+      Pull to refresh: reloads the first page and keeps the items meanwhile.
+    detail.event.open: |-
+      A product was tapped: its comic opens.
+    detail.event.page_changed: |-
+      Internal: the paging controller produced a new state.
+    detail.event.resolve_name: |-
+      Internal: the opener did not know the category's name; look it up.
+    detail.state.doc: |-
+      Tide's state shape (R16). `copyWith` is off: freezed's deep copy of a
+      `PagedState` field would name `$PagedStateCopyWith` (F-0031 Part A
+      fact 2), and the bloc emits whole states.
+    detail.state.loading: |-
+      The first page is on its way.
+    detail.state.success: |-
+      Something to show: products (perhaps loading or failing more), or a
+      settled empty category.
+    detail.state.not_found: |-
+      No category has this id (`404`). Not a failure: nothing to retry.
+    detail.state.failure: |-
+      The first page failed. `McBloc` reports it to monitoring (D-16).
+    detail.open.doc: |-
+      A category opens as a page of this flow, not a route (plan 01 §4.1): the
+      categories grid and a category banner both open it here.
+    detail.open.method: |-
+      Opens [category]'s page above the store home. One at a time: a second
+      tap while the page slides in keeps the first (F-0031 fact 9).
+    flow_state.doc: |-
+      What the flow shows, not which page is on top (plan 01 §4.1). Pure Dart,
+      so the blocs that update it stay Flutter-free (R15).
+    flow_state.root: |-
+      The flow opened at this category (`/store/categories/:id`): the
+      category page is its only page, so Back leaves the flow (to the
+      store route below it, T-0049's nested back stack).
+    flow_state.current: |-
+      The category whose page is open above the store home.
+    flow_state.open: |-
+      A category page to show: its id, and its name when the opener knew it
+      (the categories grid does; a banner and a deep link do not, so the page
+      looks it up).
+    flow.doc: |-
+      The feature's only entry point (R4): the store front in independent
+      sections, whose categories open inside the flow, and whose products,
+      banners and cart leave the feature through [navigator].
+
+      The app builds it from a route (`/store`, or `/store/categories/:id` with
+      [initialCategory], commerce_wiring) with the navigator implementation
+      from its wiring and the backend's [clock]; tests pass a mock and the
+      fixtures' clock. It starts from the id alone (plan 01 §4.4).
+
+      Its two pages are screens: `zz_db_b` and `store_category`, tracked
+      from inside the flow by `AnalyticsFlowObserver` (P-103, F-0056).
+
+      Immutable after creation: the flow reads [navigator] and [clock] once,
+      when its scope opens (`provide:` runs once per flow instance). A
+      different [initialCategory] builds a new flow (its `FeatureFlow` is keyed
+      by it).
+    flow.clock: |-
+      The time the deals count down against.
+    flow.initial: |-
+      Opens the flow at this category: its page is the only one, so Back
+      leaves the flow.
+    flow_scope.doc: |-
+      The root services this flow's container forwards (R17): the parameter
+      types of every injectable constructor and `@factoryMethod` in the package,
+      minus what the package registers itself and what the flow provides
+      (`FeatureFlowController`, the navigator, the `StoreClock`), plus the two
+      the flow's widgets read: `FeatureFlagsReader` (the store home page's
+      flag) and `AnalyticsTracker` (also the flow observer's).
+
+      HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from
+      the same analyzer input injectable reads, and `mcgen check` fail on drift
+      (Phase D). Until then `test/flow_scope_test.dart` opens the flow over the
+      production-shaped test root and resolves every registration, so a missing
+      import fails a test, not the app.
+    navigator.openComic: |-
+      A product, a deal or a banner that targets a comic: hands over to the
+      comic's page.
+    navigator.openSearch: |-
+      A banner that targets a search: hands over to the search, starting with
+      [query].
+    navigator.openCart: |-
+      The cart summary: hands over to the cart (a placeholder until the cart
+      feature exists).
+    navigator.requestSignIn: |-
+      The cart needs a signed-in user. Completes with true once someone
+      signed in, false when the user backed out. The feature does not know
+      how signing in works; the app decides.
+    analytics.screens: |-
+      The screen names of the flow's two pages: their `McFlowPage` names, which
+      `AnalyticsFlowObserver` tracks. The first equals the app route's name
+      (`/store` is `zz_db_b`), so it is not tracked twice.
+    analytics.viewed: |-
+      A section reached `ready` for the first time in this visit.
+    analytics.tapped: |-
+      An item of the store was tapped.
+    analytics.section: |-
+      Where on the store something was seen or tapped: the analytics `section`
+      parameter.
+    analytics.detail_doc: |-
+      The products of the category page (not a section of the home, so it
+      has no `store_section_viewed`).
+    analytics.kind: |-
+      What a tapped item leads to: the analytics `kind` parameter.
+    analytics.tracking: |-
+      The store's analytics vocabulary over the blocs' pure-Dart port
+      (`AnalyticsTracker`, R15): event names and params are spelled once, here.
+    analytics.section_viewed: |-
+      `store_section_viewed` with `section`.
+    analytics.item_tapped: |-
+      `store_item_tapped` with `section`, `kind` and `id` (the target's id:
+      a comic id, a category id, a search query, or `summary` for the cart).
+    flag.zzDbBFeatured: |-
+      The featured section of the store home (the first flag, T-0056). Off: the
+      section is not built, so its bloc never exists and `GET v1/store/featured`
+      is never sent.
+
+      A feature declares its flags as `const` values in its own package; the
+      kit holds none. The page reads it once, when it opens (a section does not
+      come and go under the reader), through the root's `FeatureFlagsReader`.
+    clock.doc: |-
+      The time the deals count down against ("ends in 3 days"). Injected: the
+      app passes the backend's clock (the mocked backend's is fixed at
+      `2026-01-01T00:00Z`, so its deals always end 1 to 8 days later), and tests
+      pass the fixtures' fixed clock. Provided by the flow (`provide:`), so it is
+      not a root import.
+    page.body_key: |-
+      Key of the store home's scrolling body, for tests.
+    page.doc: |-
+      The store home: provides one bloc per section and nothing else (Tide).
+
+      - **Sections are independent.** Each section has its own bloc, request
+        and states. The visit's start reads every bloc (creating it) and adds
+        its `load`, so every section loads in parallel, also those below the
+        fold, which a lazy list has not built yet (F-0040 fact 6).
+      - **The flag decides which sections exist**, read once when the page
+        opens: with `store.home_featured` off, the featured section and its bloc
+        are never created, so its endpoint is never called.
+      - **A visit starts when the page is shown** (F-0056 §1): the blocs exist
+        but stay idle while the page is built under another screen (the store
+        below a cold `/store/categories/:id` link). The first time the page is
+        the flow's top page and the flow's route is the app's current route,
+        every section loads, once; the visit lasts as long as the page, so a
+        comic opened and closed over the store loads and tracks nothing again.
+    page.flag.spotlight: |-
+      Read once per visit: a section does not come and go under the reader
+      when the remote flags arrive.
+    page.did_change_dependencies: |-
+      Depends on the flow's scope, so it runs again when whether the flow is
+      visible in the app changes (`FlowScope.outerIsCurrent`: its own route,
+      and every flow around it). The store page is always its flow's first
+      page when it is built (the category page only ever opens above it), so
+      its own flow page needs no check.
+    barrel.preamble: |-
+      The public surface (R4, checked by mc_arch_check and the architecture
+      test): the flow, its navigator, the flow's argument type and the
+      navigator's argument types. No `library;` directive (Tide's
+      `unnecessary_library_directive`).
+    pubspec.preamble: |-
+      T-0056 (P1-21): the zz_db_b exemplar feature (archetype DB). Phase D's
+      generators copy this package's shape for every dashboard feature (plan 01
+      §3.3).
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: zzDbBTitle
+      description: "The store home's app bar title."
+      text: {en: "Store", de: "Shop", en_XA: "[Šţóŕé ~~]"}
+    - key: zzDbBBanners
+      description: "Header of the banners section."
+      text: {en: "Highlights", de: "Highlights", en_XA: "[Ĥíĝĥļíĝĥţš ~~~~]"}
+    - key: zzDbBDeals
+      description: "Header of the deals section."
+      text: {en: "Deals", de: "Angebote", en_XA: "[Ðéàļš ~~]"}
+    - key: zzDbBCategories
+      description: "Header of the categories section."
+      text: {en: "Categories", de: "Kategorien", en_XA: "[Çàţéĝóŕíéš ~~~~]"}
+    - key: zzDbBFeatured
+      description: "Header of the featured products section."
+      text: {en: "Featured", de: "Empfohlen", en_XA: "[Ƒéàţúŕéð ~~~]"}
+    - key: zzDbBCart
+      description: "Header of the cart summary section."
+      text: {en: "Your cart", de: "Dein Warenkorb", en_XA: "[Ýóúŕ çàŕţ ~~~~]"}
+    - key: zzDbBSectionLoading
+      description: "Screen-reader label of a section's skeleton while it loads."
+      placeholders: {"section": {"type": "String", "example": "Deals"}}
+      text: {en: "Loading {section}", de: "Wird geladen: {section}", en_XA: "[Ļóàðíñĝ {section} ~~~~]"}
+    - key: zzDbBBannersError
+      description: "The banners section's error card title."
+      text: {en: "The highlights could not be loaded.", de: "Die Highlights konnten nicht geladen werden.", en_XA: "[Ţĥé ĥíĝĥļíĝĥţš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~~~~~]"}
+    - key: zzDbBDealsError
+      description: "The deals section's error card title."
+      text: {en: "The deals could not be loaded.", de: "Die Angebote konnten nicht geladen werden.", en_XA: "[Ţĥé ðéàļš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~~~]"}
+    - key: zzDbBCategoriesError
+      description: "The categories section's error card title."
+      text: {en: "The categories could not be loaded.", de: "Die Kategorien konnten nicht geladen werden.", en_XA: "[Ţĥé çàţéĝóŕíéš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~~~~~]"}
+    - key: zzDbBFeaturedError
+      description: "The featured section's error card title."
+      text: {en: "The featured comics could not be loaded.", de: "Die empfohlenen Comics konnten nicht geladen werden.", en_XA: "[Ţĥé ƒéàţúŕéð çóɱíçš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~~~~~~~]"}
+    - key: zzDbBCartError
+      description: "The cart section's error card title."
+      text: {en: "Your cart could not be loaded.", de: "Dein Warenkorb konnte nicht geladen werden.", en_XA: "[Ýóúŕ çàŕţ çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~~~]"}
+    - key: zzDbBBannersEmpty
+      description: "The banners section when the store has none."
+      text: {en: "No highlights right now.", de: "Gerade gibt es keine Highlights.", en_XA: "[Ñó ĥíĝĥļíĝĥţš ŕíĝĥţ ñóŵ. ~~~~~~~~~~]"}
+    - key: zzDbBDealsEmpty
+      description: "The deals section when there are none."
+      text: {en: "No deals right now.", de: "Gerade gibt es keine Angebote.", en_XA: "[Ñó ðéàļš ŕíĝĥţ ñóŵ. ~~~~~~~~]"}
+    - key: zzDbBCategoriesEmpty
+      description: "The categories section when there are none."
+      text: {en: "No categories yet.", de: "Noch keine Kategorien.", en_XA: "[Ñó çàţéĝóŕíéš ýéţ. ~~~~~~~]"}
+    - key: zzDbBFeaturedEmpty
+      description: "The featured section when there is nothing."
+      text: {en: "Nothing is featured right now.", de: "Gerade wird nichts empfohlen.", en_XA: "[Ñóţĥíñĝ íš ƒéàţúŕéð ŕíĝĥţ ñóŵ. ~~~~~~~~~~~~]"}
+    - key: zzDbBCartEmpty
+      description: "The cart section of a signed-in user with no items."
+      text: {en: "Your cart is empty.", de: "Dein Warenkorb ist leer.", en_XA: "[Ýóúŕ çàŕţ íš éɱþţý. ~~~~~~~~]"}
+    - key: zzDbBDealEndsIn
+      description: "How long a running deal still runs, in whole days left (rounded down; 0 is less than a day). Ended deals are not shown."
+      placeholders: {"days": {"type": "int", "example": "3"}}
+      text: {en: "{days, plural, =0{Ends today} =1{Ends in 1 day} other{Ends in {days} days}}", de: "{days, plural, =0{Endet heute} =1{Endet in 1 Tag} other{Endet in {days} Tagen}}", en_XA: "[{days, plural, =0{Éñðš ţóðàý} =1{Éñðš íñ 1 ðàý} other{Éñðš íñ {days} ðàýš}} ~~~~~~]"}
+    - key: zzDbBDealDiscount
+      description: "A deal's discount badge (a minus sign, then the percentage)."
+      placeholders: {"percent": {"type": "int", "example": "25"}}
+      text: {en: "−{percent}%", de: "−{percent} %", en_XA: "[−{percent}% ~~]"}
+    - key: zzDbBDealPrices
+      description: "Screen-reader text of a deal's two prices (the struck-through one first)."
+      placeholders: {"original": {"type": "String", "example": "€14.43"}, "price": {"type": "String", "example": "€12.99"}}
+      text: {en: "Was {original}, now {price}", de: "Vorher {original}, jetzt {price}", en_XA: "[Ŵàš {original}, ñóŵ {price} ~~~~~~]"}
+    - key: zzDbBCategoryCount
+      description: "How many comics a category has."
+      placeholders: {"count": {"type": "int", "example": "60"}}
+      text: {en: "{count, plural, =0{No comics} =1{1 comic} other{{count} comics}}", de: "{count, plural, =0{Keine Comics} =1{1 Comic} other{{count} Comics}}", en_XA: "[{count, plural, =0{Ñó çóɱíçš} =1{1 çóɱíç} other{{count} çóɱíçš}} ~~~~]"}
+    - key: zzDbBCartItems
+      description: "How many items are in the cart."
+      placeholders: {"count": {"type": "int", "example": "3"}}
+      text: {en: "{count, plural, =1{1 item} other{{count} items}}", de: "{count, plural, =1{1 Artikel} other{{count} Artikel}}", en_XA: "[{count, plural, =1{1 íţéɱ} other{{count} íţéɱš}} ~~~~]"}
+    - key: zzDbBCartTotal
+      description: "The cart's total, formatted money."
+      placeholders: {"total": {"type": "String", "example": "€45.99"}}
+      text: {en: "Total {total}", de: "Summe {total}", en_XA: "[Ţóţàļ {total} ~~~~]"}
+    - key: zzDbBCartOpen
+      description: "Opens the cart."
+      text: {en: "View cart", de: "Zum Warenkorb", en_XA: "[Víéŵ çàŕţ ~~~~]"}
+    - key: zzDbBCartSignedOut
+      description: "The cart section while nobody is signed in."
+      text: {en: "Sign in to see your cart.", de: "Melde dich an, um deinen Warenkorb zu sehen.", en_XA: "[Šíĝñ íñ ţó šéé ýóúŕ çàŕţ. ~~~~~~~~~~]"}
+    - key: zzDbBCartSignIn
+      description: "Asks the app to sign someone in, to show their cart."
+      text: {en: "Sign in", de: "Anmelden", en_XA: "[Šíĝñ íñ ~~~]"}
+    - key: zzDbBCartSigningIn
+      description: "The cart section while the app signs someone in."
+      text: {en: "Waiting for you to sign in.", de: "Wir warten auf deine Anmeldung.", en_XA: "[Ŵàíţíñĝ ƒóŕ ýóú ţó šíĝñ íñ. ~~~~~~~~~~~]"}
+    - key: storeCategoryTitle
+      description: "The category page's title while its name is not known."
+      text: {en: "Category", de: "Kategorie", en_XA: "[Çàţéĝóŕý ~~~]"}
+    - key: storeCategoryLoading
+      description: "Screen-reader label while a category's products load."
+      text: {en: "Loading products", de: "Produkte werden geladen", en_XA: "[Ļóàðíñĝ þŕóðúçţš ~~~~~~]"}
+    - key: storeCategoryEmptyTitle
+      description: "Title of an empty category."
+      text: {en: "Nothing here yet", de: "Hier ist noch nichts", en_XA: "[Ñóţĥíñĝ ĥéŕé ýéţ ~~~~~~]"}
+    - key: storeCategoryEmptyMessage
+      description: "Message of an empty category."
+      text: {en: "This category has no comics for sale right now.", de: "In dieser Kategorie gibt es gerade keine Comics zu kaufen.", en_XA: "[Ţĥíš çàţéĝóŕý ĥàš ñó çóɱíçš ƒóŕ šàļé ŕíĝĥţ ñóŵ. ~~~~~~~~~~~~~~~~~~~]"}
+    - key: storeCategoryErrorTitle
+      description: "Title of the category page when its first page failed."
+      text: {en: "The products could not be loaded", de: "Die Produkte konnten nicht geladen werden", en_XA: "[Ţĥé þŕóðúçţš çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]"}
+    - key: storeCategoryLoadMoreFailed
+      description: "The footer when a later page of products failed."
+      text: {en: "More products could not be loaded.", de: "Weitere Produkte konnten nicht geladen werden.", en_XA: "[Ɱóŕé þŕóðúçţš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~~~~~]"}
+    - key: storeCategoryNotFoundTitle
+      description: "Title for a category id the store does not know."
+      text: {en: "This category is not in the store", de: "Diese Kategorie gibt es im Shop nicht", en_XA: "[Ţĥíš çàţéĝóŕý íš ñóţ íñ ţĥé šţóŕé ~~~~~~~~~~~~~]"}
+    - key: storeCategoryNotFoundMessage
+      description: "Message for a category id the store does not know."
+      text: {en: "It may have been renamed or removed.", de: "Vielleicht wurde sie umbenannt oder entfernt.", en_XA: "[Íţ ɱàý ĥàvé ƀééñ ŕéñàɱéð óŕ ŕéɱóvéð. ~~~~~~~~~~~~~~]"}
+
+bdd:
+  - feature: zz_db_b
+    title: "The store front"
+    description: |-
+      The store home shows its sections one under the other: highlights, deals,
+      categories, featured comics and the cart. Each loads, fails and retries on
+      its own. A category opens its products inside the store; a comic, a search
+      and the cart are other features.
+    background:
+      - "Given the backend serves {'commerce.default'}"
+      - "And the backend serves {'identity.default'}"
+    scenarios:
+      - title: "Signed in, the five sections show the store in order"
+        id: MC-zz_db_b-01
+        tags: [T-0056-AC1, smoke]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has {2} of product {500060} in the cart"
+          - "And {'reader@mini-client.test'} has {1} of product {500120} in the cart"
+          - "When I open the store"
+          - "Then the sections are {'Highlights, Deals, Categories, Featured, Your cart'}"
+          - "And the banners section shows every banner of the store"
+          - "And the deals section shows every deal with both prices"
+          - "And the categories section shows every category of the store"
+          - "And the featured section shows every featured comic with its price"
+          - "And the cart section shows the cart of {'reader@mini-client.test'}"
+          - "And the backend received {1} requests for {'GET /v1/store/banners'}"
+          - "And the backend received {1} requests for {'GET /v1/store/deals'}"
+          - "And the backend received {1} requests for {'GET /v1/store/categories'}"
+          - "And the backend received {1} requests for {'GET /v1/store/featured'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+          - "And the backend received {'GET /v1/me/cart'} with the bearer of {'reader@mini-client.test'}"
+      - title: "Signed out, the cart summary is hidden and nothing asks for it"
+        id: MC-zz_db_b-02
+        tags: [T-0056-AC1]
+        steps:
+          - "When I open the store"
+          - "Then the sections are {'Highlights, Deals, Categories, Featured, Your cart'}"
+          - "And the {'cart'} section shows {'Sign in to see your cart.'}"
+          - "And the backend received {0} requests for {'GET /v1/me/cart'}"
+          - "And the app was asked to sign in {0} time"
+      - title: "With the featured flag off, the featured section is absent and never requested"
+        id: MC-zz_db_b-03
+        tags: [T-0056-AC1, T-0056-AC7]
+        steps:
+          - "Given the flag {'store.home_featured'} is {false}"
+          - "When I open the store"
+          - "Then the sections are {'Highlights, Deals, Categories, Your cart'}"
+          - "And the backend received {0} requests for {'GET /v1/store/featured'}"
+          - "And the backend received {1} requests for {'GET /v1/store/deals'}"
+          - "And the section {'spotlight'} was viewed {0} times"
+          - "And the section {'deals'} was viewed {1} times"
+      - title: "With the featured flag on, the featured section is there (control)"
+        id: MC-zz_db_b-04
+        tags: [T-0056-AC1, T-0056-AC7]
+        steps:
+          - "Given the flag {'store.home_featured'} is {true}"
+          - "When I open the store"
+          - "Then the sections are {'Highlights, Deals, Categories, Featured, Your cart'}"
+          - "And the featured section shows every featured comic with its price"
+          - "And the backend received {1} requests for {'GET /v1/store/featured'}"
+      - title: "A flag value of the wrong type is the default: featured shows"
+        id: MC-zz_db_b-05
+        tags: [T-0056-AC1]
+        steps:
+          - "Given the flag {'store.home_featured'} is {'off'}"
+          - "When I open the store"
+          - "Then the sections are {'Highlights, Deals, Categories, Featured, Your cart'}"
+      - title: "When every store route fails, each section shows its own error and each Retry recovers only its own section"
+        id: MC-zz_db_b-06
+        tags: [T-0056-AC2]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend runs the scenario {'commerce.server_error'}"
+          - "When I open the store"
+          - "Then the {'banners'} section shows its error with Retry"
+          - "And the {'deals'} section shows its error with Retry"
+          - "And the {'categories'} section shows its error with Retry"
+          - "And the {'spotlight'} section shows its error with Retry"
+          - "And the {'cart'} section shows its error with Retry"
+          - "When the backend recovers"
+          - "And I tap Retry in the {'deals'} section"
+          - "Then the {'deals'} section is ready"
+          - "And the {'banners'} section shows its error with Retry"
+          - "And the {'categories'} section shows its error with Retry"
+          - "And the {'spotlight'} section shows its error with Retry"
+          - "And the {'cart'} section shows its error with Retry"
+          - "And the backend received {3} requests for {'GET /v1/store/banners'}"
+          - "And the backend received {4} requests for {'GET /v1/store/deals'}"
+          - "When I tap Retry in the {'banners'} section"
+          - "Then the {'banners'} section is ready"
+          - "And the {'categories'} section shows its error with Retry"
+          - "When I tap Retry in the {'categories'} section"
+          - "And I tap Retry in the {'spotlight'} section"
+          - "And I tap Retry in the {'cart'} section"
+          - "Then the {'categories'} section is ready"
+          - "And the {'spotlight'} section is ready"
+          - "And the {'cart'} section shows {'Your cart is empty.'}"
+          - "And the backend received {4} requests for {'GET /v1/store/banners'}"
+          - "And the backend received {4} requests for {'GET /v1/store/deals'}"
+          - "And the backend received {4} requests for {'GET /v1/me/cart'}"
+      - title: "A double tap on Retry loads the section once"
+        id: MC-zz_db_b-07
+        tags: [T-0056-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/store/deals'} with {'server_error'}"
+          - "When I open the store"
+          - "Then the {'deals'} section shows its error with Retry"
+          - "When the backend recovers"
+          - "And I tap Retry in the {'deals'} section twice in quick succession"
+          - "Then the {'deals'} section is ready"
+          - "And the backend received {4} requests for {'GET /v1/store/deals'}"
+      - title: "An empty store shows each section's empty state"
+        id: MC-zz_db_b-08
+        tags: [T-0056-AC2]
+        steps:
+          - "Given the backend runs the scenario {'commerce.empty'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open the store"
+          - "Then the {'banners'} section shows {'No highlights right now.'}"
+          - "And the {'deals'} section shows {'No deals right now.'}"
+          - "And the {'categories'} section shows {'No categories yet.'}"
+          - "And the {'spotlight'} section shows {'Nothing is featured right now.'}"
+          - "And the {'cart'} section shows {'Your cart is empty.'}"
+          - "And no analytics event was tracked"
+      - title: "A deal opens its comic, once"
+        id: MC-zz_db_b-09
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Amber Frontier #2'} in the {'deals'} section"
+          - "Then the app was asked to open comic {501501} {1} times"
+          - "And the analytics event {'store_item_tapped'} was tracked with"
+          - "  | 'key'     | 'json'      |"
+          - "  | 'section' | '\"deals\"' |"
+          - "  | 'kind'    | '\"comic\"' |"
+          - "  | 'id'      | '\"501501\"' |"
+      - title: "A second tap on a deal within 500 ms is ignored; one after it opens the comic again"
+        id: MC-zz_db_b-10
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Amber Frontier #2'} in the {'deals'} section twice in quick succession"
+          - "Then the app was asked to open comic {501501} {1} times"
+          - "When I tap {'Amber Frontier #2'} in the {'deals'} section and again after {499} milliseconds"
+          - "Then the app was asked to open comic {501501} {2} times"
+          - "When I tap {'Amber Frontier #2'} in the {'deals'} section and again after {500} milliseconds"
+          - "Then the app was asked to open comic {501501} {4} times"
+      - title: "Two different deals tapped in one frame open both comics"
+        id: MC-zz_db_b-11
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Amber Frontier #2'} and {'Brass Reckoning #1'} in the {'deals'} section in quick succession"
+          - "Then the app was asked to open comic {501501} {1} times, then comic {502240}"
+      - title: "A second category tapped while the first opens keeps the first"
+        id: MC-zz_db_b-12
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Heroes'} and {'Villains'} in the {'categories'} section in quick succession"
+          - "Then the category page of {'heroes'} is open, titled {'Heroes'}"
+      - title: "A featured comic opens its comic, once"
+        id: MC-zz_db_b-13
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Amber Crossing #1'} in the {'spotlight'} section"
+          - "Then the app was asked to open comic {501740} {1} times"
+      - title: "A comic banner opens its comic, a search banner the search"
+        id: MC-zz_db_b-14
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'New this week'} in the {'banners'} section"
+          - "Then the app was asked to open comic {500540} {1} times"
+          - "When I tap {'Amber season'} in the {'banners'} section"
+          - "Then the app was asked to search for {'amber'}"
+          - "And the app was asked to open the cart {0} times"
+      - title: "A category banner opens the category inside the store and names it"
+        id: MC-zz_db_b-15
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Heroes assemble'} in the {'banners'} section"
+          - "Then the category page of {'heroes'} is open, titled {'Heroes'}"
+          - "And the category page shows the first {20} products of {'heroes'}"
+          - "And the app was asked to open no comic"
+      - title: "A category opens inside the store, and the next page loads at the end of the list"
+        id: MC-zz_db_b-16
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Cosmic'} in the {'categories'} section"
+          - "Then the category page of {'cosmic'} is open, titled {'Cosmic'}"
+          - "And the category page shows the first {20} products of {'cosmic'}"
+          - "And the backend received {0} requests for {'GET /v1/store/categories/cosmic/products?offset=20'}"
+          - "When I scroll the category to the end"
+          - "Then the backend received {1} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}"
+          - "And the category page shows the first {40} products of {'cosmic'}"
+          - "When I tap {'Gale Chronicles #1'} on the category page"
+          - "Then the app was asked to open comic {500160} {1} times"
+      - title: "Back from the category returns to the store, which keeps its sections"
+        id: MC-zz_db_b-17
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Heroes'} in the {'categories'} section"
+          - "Then the category page of {'heroes'} is open, titled {'Heroes'}"
+          - "When I swipe back"
+          - "Then the {'categories'} section is ready"
+          - "And the backend received {1} requests for {'GET /v1/store/categories'}"
+          - "And the backend received {1} requests for {'GET /v1/store/deals'}"
+      - title: "The cart summary opens the cart"
+        id: MC-zz_db_b-18
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has {1} of product {500060} in the cart"
+          - "When I open the store"
+          - "And I tap {'View cart'} in the {'cart'} section"
+          - "Then the app was asked to open the cart {1} times"
+      - title: "The category's next page fails, the footer offers Retry, and Retry loads it (Verifier round)"
+        id: MC-zz_db_b-19
+        tags: [T-0056-AC2]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Cosmic'} in the {'categories'} section"
+          - "Then the category page shows the first {20} products of {'cosmic'}"
+          - "Given the backend fails {'GET /v1/store/categories/cosmic/products?offset=20'} with {'server_error'}"
+          - "When I scroll the category to the end"
+          - "Then I see {'More products could not be loaded.'}"
+          - "And the backend received {3} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the backend received {4} requests for {'GET /v1/store/categories/cosmic/products?offset=20&limit=20'}"
+          - "And the category page shows the first {40} products of {'cosmic'}"
+      - title: "The category's first page fails with a full-page error, and Retry loads it (Verifier round)"
+        id: MC-zz_db_b-20
+        tags: [T-0056-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/store/categories/heroes/products'} with {'server_error'}"
+          - "When I open the store at category {'heroes'}"
+          - "Then I see {'The products could not be loaded'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the category page shows the first {20} products of {'heroes'}"
+      - title: "With the flag off, no featured request even after Retry elsewhere and pull to refresh (Verifier round)"
+        id: MC-zz_db_b-21
+        tags: [T-0056-AC1]
+        steps:
+          - "Given the flag {'store.home_featured'} is {false}"
+          - "And the backend fails {'GET /v1/store/deals'} with {'server_error'}"
+          - "When I open the store"
+          - "And the backend recovers"
+          - "And I tap Retry in the {'deals'} section"
+          - "And I pull the store to refresh"
+          - "Then the backend received {0} requests for {'GET /v1/store/featured'}"
+          - "And the sections are {'Highlights, Deals, Categories, Your cart'}"
+  - feature: zz_db_b_cart
+    title: "The cart summary follows the session"
+    description: |-
+      Signed out, the store hides the cart summary and offers to sign in; the app
+      decides how. Signed in, the summary is that user's cart, and it follows every
+      change of session: a load that belongs to a session that is gone never shows.
+    background:
+      - "Given the backend serves {'commerce.default'}"
+      - "And the backend serves {'identity.default'}"
+      - "And {'reader@mini-client.test'} has {2} of product {500060} in the cart"
+      - "And {'collector@mini-client.test'} has {1} of product {500120} in the cart"
+    scenarios:
+      - title: "Signed out, the cart waits for sign-in and then shows that user's cart"
+        id: MC-zz_db_b-22
+        tags: [T-0056-AC3, smoke]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Sign in'} in the {'cart'} section"
+          - "Then the app was asked to sign in {1} time"
+          - "And the {'cart'} section shows {'Waiting for you to sign in.'}"
+          - "And the backend received {0} requests for {'GET /v1/me/cart'}"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "Then the cart section shows the cart of {'reader@mini-client.test'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+          - "And the backend received {'GET /v1/me/cart'} with the bearer of {'reader@mini-client.test'}"
+          - "And the section {'cart'} was viewed {1} times"
+      - title: "Signed out, backing out of sign-in keeps the summary hidden and sends nothing"
+        id: MC-zz_db_b-23
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Sign in'} in the {'cart'} section"
+          - "And signing in is cancelled"
+          - "Then the {'cart'} section shows {'Sign in to see your cart.'}"
+          - "And the app was asked to sign in {1} time"
+          - "And the backend received {0} requests for {'GET /v1/me/cart'}"
+          - "And the backend received {0} requests for {'* /v1/me'}"
+      - title: "Signed out, a double tap asks to sign in once"
+        id: MC-zz_db_b-24
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Sign in'} in the {'cart'} section twice in quick succession"
+          - "Then the app was asked to sign in {1} time"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "Then the cart section shows the cart of {'reader@mini-client.test'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+      - title: "A user switch elsewhere reloads the cart for the new user"
+        id: MC-zz_db_b-25
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the store"
+          - "Then the cart section shows the cart of {'reader@mini-client.test'}"
+          - "When {'collector@mini-client.test'} signs in elsewhere"
+          - "Then the cart section shows the cart of {'collector@mini-client.test'}"
+          - "And the backend received {2} requests for {'GET /v1/me/cart'}"
+      - title: "A user switch while the cart is loading drops the old user's answer"
+        id: MC-zz_db_b-26
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend holds the next {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "Then the {'cart'} section is loading"
+          - "When {'collector@mini-client.test'} signs in elsewhere"
+          - "Then the cart section shows the cart of {'collector@mini-client.test'}"
+          - "When the backend releases {'GET /v1/me/cart'}"
+          - "Then the cart section shows the cart of {'collector@mini-client.test'}"
+          - "And the backend received {2} requests for {'GET /v1/me/cart'}"
+          - "And the section {'cart'} was viewed {1} times"
+      - title: "A sign-out while the cart is loading shows the signed-out offer, not the old cart"
+        id: MC-zz_db_b-27
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend holds {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "And the session ends elsewhere"
+          - "And the backend releases {'GET /v1/me/cart'}"
+          - "Then the {'cart'} section shows {'Sign in to see your cart.'}"
+          - "And the section {'cart'} was viewed {0} times"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+      - title: "A sign-out elsewhere hides the summary again"
+        id: MC-zz_db_b-28
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open the store"
+          - "Then the cart section shows the cart of {'reader@mini-client.test'}"
+          - "When the session ends elsewhere"
+          - "Then the {'cart'} section shows {'Sign in to see your cart.'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+      - title: "A sign-in elsewhere while the store waits for its own sign-in loads the cart once"
+        id: MC-zz_db_b-29
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Sign in'} in the {'cart'} section"
+          - "And {'collector@mini-client.test'} signs in elsewhere"
+          - "Then the cart section shows the cart of {'collector@mini-client.test'}"
+          - "When signing in is cancelled"
+          - "Then the cart section shows the cart of {'collector@mini-client.test'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+      - title: "A failed cart read says so in its own section, and Retry reads it again"
+        id: MC-zz_db_b-30
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend fails {'GET /v1/me/cart'} with {'server_error'}"
+          - "When I open the store"
+          - "Then the {'cart'} section shows its error with Retry"
+          - "And the {'deals'} section is ready"
+          - "When the backend recovers"
+          - "And I tap Retry in the {'cart'} section"
+          - "Then the cart section shows the cart of {'reader@mini-client.test'}"
+      - title: "Pull to refresh while signed out reloads the store and not the cart"
+        id: MC-zz_db_b-31
+        tags: [T-0056-AC3]
+        steps:
+          - "When I open the store"
+          - "And I pull the store to refresh"
+          - "Then the backend received {2} requests for {'GET /v1/store/deals'}"
+          - "And the backend received {0} requests for {'GET /v1/me/cart'}"
+          - "And the {'cart'} section shows {'Sign in to see your cart.'}"
+      - title: "A user switch right before the cart read is sent shows the new user's cart and nothing fails"
+        id: MC-zz_db_b-32
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'collector@mini-client.test'} signs in just before the app sends {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app finishes writing to storage"
+          - "Then the cart section shows the cart of {'collector@mini-client.test'}"
+          - "And the session belongs to {'collector@mini-client.test'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+          - "And the backend received {'GET /v1/me/cart'} with a token of {'collector@mini-client.test'}"
+          - "And no error was reported"
+      - title: "A same-user re-sign-in while the cart is loading ends on that user's cart (review round)"
+        id: MC-zz_db_b-33
+        tags: [T-0056-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend holds the next {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "Then the {'cart'} section is loading"
+          - "When {'reader@mini-client.test'} signs in elsewhere"
+          - "And the backend releases {'GET /v1/me/cart'}"
+          - "Then the cart section shows the cart of {'reader@mini-client.test'}"
+          - "And the backend received {2} requests for {'GET /v1/me/cart'}"
+          - "And the section {'cart'} was viewed {1} times"
+  - feature: zz_db_b_l10n
+    title: "The store in German and in the pseudo-locale"
+    description: |-
+      Every string and every price follows the locale. In the pseudo-locale,
+      whose strings are longer, nothing overflows at the default text size or at
+      twice it.
+    background:
+      - "Given the backend serves {'commerce.default'}"
+      - "And the backend serves {'identity.default'}"
+    scenarios:
+      - title: "In German the sections, the deal prices and the cart are German"
+        id: MC-zz_db_b-34
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has {2} of product {500060} in the cart"
+          - "When I open the store"
+          - "Then the sections are {'Highlights, Angebote, Kategorien, Empfohlen, Dein Warenkorb'}"
+          - "And I see {'Shop'}"
+          - "And the deal of product {501501} reads {'10,83 €'}, {'12,03 €'} struck through and {'Endet in 1 Tag'}"
+          - "And the deal of product {502240} reads {'11,89 €'}, {'13,99 €'} struck through and {'Endet in 2 Tagen'}"
+          - "And the {'cart'} section shows {'2 Artikel'}"
+          - "And the {'cart'} section shows {'Summe 24,24 €'}"
+          - "And the {'categories'} section shows {'60 Comics'}"
+      - title: "In German an empty and a failing section are German"
+        id: MC-zz_db_b-35
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And the backend fails {'GET /v1/store/deals'} with {'server_error'}"
+          - "When I open the store"
+          - "Then the {'deals'} section shows {'Die Angebote konnten nicht geladen werden.'}"
+          - "And the {'deals'} section shows {'Erneut versuchen'}"
+          - "And the {'cart'} section shows {'Melde dich an, um deinen Warenkorb zu sehen.'}"
+      - title: "In German a loading section is announced in a number-neutral phrase (review round)"
+        id: MC-zz_db_b-36
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "And the backend holds {'GET /v1/store/deals'}"
+          - "And the backend holds {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "Then the {'deals'} section is announced as {'Wird geladen: Angebote'}"
+          - "And the {'cart'} section is announced as {'Wird geladen: Dein Warenkorb'}"
+          - "When the backend releases {'GET /v1/store/deals'}"
+          - "And the backend releases {'GET /v1/me/cart'}"
+          - "Then the {'deals'} section is ready"
+      - title: "In German the category page is German"
+        id: MC-zz_db_b-37
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open the store at category {'nope'}"
+          - "Then I see {'Diese Kategorie gibt es im Shop nicht'}"
+          - "And I see {'Kategorie'}"
+      - title: "In English the deal prices are formatted from cents"
+        id: MC-zz_db_b-38
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "When I open the store"
+          - "Then the deal of product {501501} reads {'€10.83'}, {'€12.03'} struck through and {'Ends in 1 day'}"
+          - "And the deal of product {500280} reads {'€5.11'}, {'€10.22'} struck through and {'Ends in 8 days'}"
+      - title: "The pseudo-locale renders the store without overflow"
+        id: MC-zz_db_b-39
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is {<scale>}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has {2} of product {500060} in the cart"
+          - "When I open the store"
+          - "And I scroll through the whole store"
+          - "Then nothing overflows"
+          - "And I see {'[Šţóŕé ~~]'}"
+          - "When I tap {'Heroes'} in the {'categories'} section"
+          - "Then nothing overflows"
+          - "When I scroll the category to the end"
+          - "Then nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "The pseudo-locale renders every section's error and the sign-in offer without overflow"
+        id: MC-zz_db_b-40
+        tags: [T-0056-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is {<scale>}"
+          - "And the backend runs the scenario {'commerce.server_error'}"
+          - "When I open the store"
+          - "And I scroll through the whole store"
+          - "Then nothing overflows"
+          - "And the {'deals'} section shows its error with Retry"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+  - feature: zz_db_b_sections
+    title: "Independent sections"
+    description: |-
+      Every section of the store home has its own request and its own states. A
+      section that fails or is slow never blanks or blocks another, and when two
+      loads of one section overlap, the newest request's answer is what shows.
+    background:
+      - "Given the backend serves {'commerce.default'}"
+      - "And the backend serves {'identity.default'}"
+      - "And I am signed in as {'reader@mini-client.test'}"
+      - "And {'reader@mini-client.test'} has {1} of product {500060} in the cart"
+    scenarios:
+      - title: "Only the failing section shows an error; the other four render"
+        id: MC-zz_db_b-41
+        tags: [T-0056-AC6]
+        steps:
+          - "Given the backend runs the scenario {<scenario>}"
+          - "When I open the store"
+          - "Then only the {<section>} section shows an error"
+          - "And the section {<section>} was viewed {0} times"
+          - "When the backend recovers"
+          - "And I tap Retry in the {<section>} section"
+          - "Then the {<section>} section is ready"
+          - "And the section {<section>} was viewed {1} times"
+        examples:
+          - ["scenario", "section"]
+          - ["'store.banners_error'", "'banners'"]
+          - ["'store.deals_error'", "'deals'"]
+          - ["'store.categories_error'", "'categories'"]
+          - ["'store.featured_error'", "'spotlight'"]
+          - ["'store.cart_error'", "'cart'"]
+      - title: "Every section sends its request when the store opens, before any scrolling"
+        id: MC-zz_db_b-42
+        tags: [T-0056-AC6]
+        steps:
+          - "When I open the store"
+          - "Then the backend received {1} requests for {'GET /v1/store/banners'}"
+          - "And the backend received {1} requests for {'GET /v1/store/deals'}"
+          - "And the backend received {1} requests for {'GET /v1/store/categories'}"
+          - "And the backend received {1} requests for {'GET /v1/store/featured'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+      - title: "A slow section never blocks the others from rendering"
+        id: MC-zz_db_b-43
+        tags: [T-0056-AC6]
+        steps:
+          - "Given the backend holds {'GET /v1/store/deals'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/store/deals'}"
+          - "Then the {'deals'} section is loading"
+          - "And the {'banners'} section is ready"
+          - "And the {'categories'} section is ready"
+          - "And the {'spotlight'} section is ready"
+          - "And the {'cart'} section is ready"
+          - "When the backend releases {'GET /v1/store/deals'}"
+          - "Then the {'deals'} section is ready"
+          - "And the deals section shows every deal with both prices"
+      - title: "A refresh while a load is in flight ends on the refresh's answer, even when the old one arrives last"
+        id: MC-zz_db_b-44
+        tags: [T-0056-AC6]
+        steps:
+          - "Given the backend holds the next {'GET /v1/store/deals'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/store/deals'}"
+          - "Then the {'deals'} section is loading"
+          - "When I pull the store to refresh"
+          - "Then the {'deals'} section is ready"
+          - "And the backend received {2} requests for {'GET /v1/store/deals'}"
+          - "Given the backend fails {'GET /v1/store/deals'} with {'server_error'}"
+          - "When the backend releases {'GET /v1/store/deals'}"
+          - "Then the {'deals'} section is ready"
+          - "And the backend received {4} requests for {'GET /v1/store/deals'}"
+          - "And the section {'deals'} was viewed {1} times"
+      - title: "A failed refresh wins over an older load that succeeds after it"
+        id: MC-zz_db_b-45
+        tags: [T-0056-AC6]
+        steps:
+          - "Given the backend holds the next {'GET /v1/store/deals'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/store/deals'}"
+          - "Given the backend fails {'GET /v1/store/deals'} with {'server_error'}"
+          - "When I pull the store to refresh"
+          - "Then the {'deals'} section shows its error with Retry"
+          - "When the backend recovers"
+          - "And the backend releases {'GET /v1/store/deals'}"
+          - "Then the {'deals'} section shows its error with Retry"
+          - "And the backend received {4} requests for {'GET /v1/store/deals'}"
+          - "And the section {'deals'} was viewed {0} times"
+          - "When I tap Retry in the {'deals'} section"
+          - "Then the {'deals'} section is ready"
+      - title: "Pull to refresh reloads every section at once and keeps what is shown meanwhile"
+        id: MC-zz_db_b-46
+        tags: [T-0056-AC6]
+        steps:
+          - "When I open the store"
+          - "Given the backend holds {'GET /v1/store/banners'}"
+          - "And the backend holds {'GET /v1/store/categories'}"
+          - "When I pull the store to refresh"
+          - "Then the backend received {2} requests for {'GET /v1/store/banners'}"
+          - "And the backend received {2} requests for {'GET /v1/store/deals'}"
+          - "And the backend received {2} requests for {'GET /v1/store/categories'}"
+          - "And the backend received {2} requests for {'GET /v1/store/featured'}"
+          - "And the backend received {2} requests for {'GET /v1/me/cart'}"
+          - "And the {'banners'} section is ready"
+          - "And the {'categories'} section is ready"
+          - "When the backend releases {'GET /v1/store/banners'}"
+          - "And the backend releases {'GET /v1/store/categories'}"
+          - "Then the {'banners'} section is ready"
+          - "And the section {'banners'} was viewed {1} times"
+      - title: "Each section is viewed once per visit, never when it failed, and after its Retry succeeds"
+        id: MC-zz_db_b-47
+        tags: [T-0056-AC7]
+        steps:
+          - "Given the backend fails {'GET /v1/store/featured'} with {'server_error'}"
+          - "When I open the store"
+          - "Then the section {'banners'} was viewed {1} times"
+          - "And the section {'deals'} was viewed {1} times"
+          - "And the section {'categories'} was viewed {1} times"
+          - "And the section {'cart'} was viewed {1} times"
+          - "And the section {'spotlight'} was viewed {0} times"
+          - "And the analytics event {'store_section_viewed'} was tracked with"
+          - "  | 'key'     | 'json'      |"
+          - "  | 'section' | '\"deals\"'   |"
+          - "When I pull the store to refresh"
+          - "Then the section {'deals'} was viewed {1} times"
+          - "When the backend recovers"
+          - "And I tap Retry in the {'spotlight'} section"
+          - "Then the section {'spotlight'} was viewed {1} times"
+          - "When I tap {'Heroes'} in the {'categories'} section"
+          - "And I swipe back"
+          - "Then the section {'deals'} was viewed {1} times"
+      - title: "The screens are tracked in order for store, category and back"
+        id: MC-zz_db_b-48
+        tags: [T-0056-AC7]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Heroes'} in the {'categories'} section"
+          - "Then the category page of {'heroes'} is open, titled {'Heroes'}"
+          - "When I swipe back"
+          - "Then the screens tracked are {'zz_db_b, store_category, zz_db_b'}"
+          - "And the screen {'store_category'} was tracked"
+      - title: "A store opened at a category tracks only the category screen"
+        id: MC-zz_db_b-49
+        tags: [T-0056-AC7]
+        steps:
+          - "When I open the store at category {'heroes'}"
+          - "Then the category page of {'heroes'} is open, titled {'Heroes'}"
+          - "And the screens tracked are {'store_category'}"
+      - title: "Every kind of tap is tracked with its section, kind and id"
+        id: MC-zz_db_b-50
+        tags: [T-0056-AC7]
+        steps:
+          - "When I open the store"
+          - "And I tap {<item>} in the {<section>} section"
+          - "Then the store tap was tracked with section {<section>}, kind {<kind>} and id {<id>}"
+        examples:
+          - ["item", "section", "kind", "id"]
+          - ["'New this week'", "'banners'", "'comic'", "'500540'"]
+          - ["'Heroes assemble'", "'banners'", "'category'", "'heroes'"]
+          - ["'Amber season'", "'banners'", "'search'", "'amber'"]
+          - ["'Amber Frontier #2'", "'deals'", "'comic'", "'501501'"]
+          - ["'Cosmic'", "'categories'", "'category'", "'cosmic'"]
+          - ["'Amber Crossing #1'", "'spotlight'", "'comic'", "'501740'"]
+          - ["'View cart'", "'cart'", "'cart'", "'summary'"]
+      - title: "A held section never blocks the other four (Verifier round)"
+        id: MC-zz_db_b-51
+        tags: [T-0056-AC6]
+        steps:
+          - "Given the backend holds {<route>}"
+          - "When I open the store"
+          - "And the app sends {<route>}"
+          - "Then the {<section>} section is loading"
+          - "And every section but {<section>} is ready"
+          - "And the section {<section>} was viewed {0} times"
+          - "When the backend releases {<route>}"
+          - "Then the {<section>} section is ready"
+          - "And the section {<section>} was viewed {1} times"
+        examples:
+          - ["section", "route                      "]
+          - ["'banners'", "'GET /v1/store/banners'    "]
+          - ["'deals'", "'GET /v1/store/deals'      "]
+          - ["'categories'", "'GET /v1/store/categories' "]
+          - ["'spotlight'", "'GET /v1/store/featured'   "]
+          - ["'cart'", "'GET /v1/me/cart'          "]
+      - title: "A double Retry sends one request and recovers only its own section (Verifier round)"
+        id: MC-zz_db_b-52
+        tags: [T-0056-AC2]
+        steps:
+          - "Given the backend runs the scenario {'commerce.server_error'}"
+          - "When I open the store"
+          - "Then the backend received {3} requests for {<route>}"
+          - "When the backend recovers"
+          - "And I tap Retry in the {<section>} section twice in quick succession"
+          - "Then the {<section>} section is ready"
+          - "And the backend received {4} requests for {<route>}"
+          - "And every section but {<section>} shows its error"
+          - "And the section {<section>} was viewed {1} times"
+        examples:
+          - ["section", "route                      "]
+          - ["'banners'", "'GET /v1/store/banners'    "]
+          - ["'deals'", "'GET /v1/store/deals'      "]
+          - ["'categories'", "'GET /v1/store/categories' "]
+          - ["'spotlight'", "'GET /v1/store/featured'   "]
+          - ["'cart'", "'GET /v1/me/cart'          "]
+      - title: "Leaving the store while the cart loads, then its late answer: nothing fails (Verifier round)"
+        id: MC-zz_db_b-53
+        tags: [T-0056-AC3]
+        steps:
+          - "Given the backend holds the next {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "And I leave the store"
+          - "And the backend releases {'GET /v1/me/cart'}"
+          - "Then no error was reported"
+          - "And the section {'cart'} was viewed {0} times"
+      - title: "Leaving the store while the cart loads, a sign-out, then the late answer: nothing fails (Verifier round)"
+        id: MC-zz_db_b-54
+        tags: [T-0056-AC3]
+        steps:
+          - "Given the backend holds the next {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "And I leave the store"
+          - "And the session ends elsewhere"
+          - "And the backend releases {'GET /v1/me/cart'}"
+          - "Then no error was reported"
+      - title: "Leaving the store while the cart loads, a same-user re-sign-in, then the late answer: nothing fails (Verifier round)"
+        id: MC-zz_db_b-55
+        tags: [T-0056-AC3]
+        steps:
+          - "Given the backend holds the next {'GET /v1/me/cart'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/me/cart'}"
+          - "And I leave the store"
+          - "And {'reader@mini-client.test'} signs in elsewhere"
+          - "And the backend releases {'GET /v1/me/cart'}"
+          - "Then no error was reported"
+      - title: "Leaving the store while deals load: the late answer tracks nothing (Verifier round)"
+        id: MC-zz_db_b-56
+        tags: [T-0056-AC7]
+        steps:
+          - "Given the backend holds {'GET /v1/store/deals'}"
+          - "When I open the store"
+          - "And the app sends {'GET /v1/store/deals'}"
+          - "And I leave the store"
+          - "And the backend releases {'GET /v1/store/deals'}"
+          - "Then the section {'deals'} was viewed {0} times"
+          - "And no error was reported"
+      - title: "A dialog over the store changes nothing: no reload, no second view (Verifier round)"
+        id: MC-zz_db_b-57
+        tags: [T-0056-AC7]
+        steps:
+          - "When I open the store"
+          - "And I open a dialog over the store and close it"
+          - "Then the backend received {1} requests for {'GET /v1/store/deals'}"
+          - "And the backend received {1} requests for {'GET /v1/me/cart'}"
+          - "And the section {'deals'} was viewed {1} times"
+          - "And the section {'cart'} was viewed {1} times"
+          - "And the screens tracked are {'zz_db_b'}"
+      - title: "Store, category, back, category, back: views once, screens in order (Verifier round)"
+        id: MC-zz_db_b-58
+        tags: [T-0056-AC7]
+        steps:
+          - "When I open the store"
+          - "And I tap {'Heroes'} in the {'categories'} section"
+          - "And I swipe back"
+          - "And I tap {'Cosmic'} in the {'categories'} section"
+          - "And I swipe back"
+          - "Then the screens tracked are {'zz_db_b, store_category, zz_db_b, store_category, zz_db_b'}"
+          - "And the section {'banners'} was viewed {1} times"
+          - "And the backend received {1} requests for {'GET /v1/store/banners'}"
