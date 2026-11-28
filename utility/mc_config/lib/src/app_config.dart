@@ -61,7 +61,10 @@ class AppConfig {
     apiBaseUrl: json['apiBaseUrl'] as String,
     build: json['build'] as String,
     // Optional (T-0070): the settings index shows it when there is one.
-    version: json['version'] is String ? json['version'] as String : null,
+    version: switch (json['version']) {
+      final String v when v.isNotEmpty => v,
+      _ => null,
+    },
     analytics: AnalyticsConfig.fromJson(json['analytics']),
   );
 
@@ -80,7 +83,7 @@ class AppConfig {
   final String build;
 
   /// The app's release version, as the settings index shows it (T-0070).
-  /// Null when `version` is missing or not a string.
+  /// Null when `version` is missing, empty or not a string.
   final String? version;
   final AnalyticsConfig analytics;
 }

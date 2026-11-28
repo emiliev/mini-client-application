@@ -111,6 +111,21 @@ Feature: Settings
     And I don't see {'Sign out'}
 
   @T-0070-AC2
+  Scenario: The server is slow to answer the sign-out: the index shows Not signed in at once, with Sign in enabled
+    Given the backend holds {'POST /v1/auth/sign-out'}
+    And I am signed in as {'collector@mini-client.test'}
+    When I open the settings
+    And I tap {'Sign out'}
+    And the app ends the session and waits for the server
+    Then I see {'Not signed in'}
+    And the button {'Sign in'} is enabled
+    When the backend releases {'POST /v1/auth/sign-out'}
+    And the app finishes waiting for the server
+    Then I see {'Not signed in'}
+    And the button {'Sign in'} is enabled
+    And the app was asked to sign out {1} time
+
+  @T-0070-AC2
   Scenario: A double tap on Sign out asks the app once
     Given I am signed in as {'collector@mini-client.test'}
     When I open the settings

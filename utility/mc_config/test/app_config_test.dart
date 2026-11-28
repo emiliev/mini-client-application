@@ -19,8 +19,14 @@ void main() {
     expect(config.apiBaseUrl, 'https://api.test/');
   });
 
-  test('T-0070-AC1 version is optional: a string is kept, anything else is '
-      'null', () {
+  test('T-0070-AC1 version is optional: a non-empty string is kept, anything '
+      'else (missing, empty, a number) is null', () {
+    expect(
+      AppConfig.parse(
+        _json.replaceFirst('"build":"3"', '"build":"3","version":""'),
+      ).version,
+      isNull,
+    );
     expect(AppConfig.parse(_json).version, isNull);
     expect(
       AppConfig.parse(

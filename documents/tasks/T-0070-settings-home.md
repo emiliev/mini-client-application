@@ -104,3 +104,13 @@ Every test below was grepped at the handoff commit.
 - Additions only: `mc_config:app_config_test` (version), `l10n_check:workspace_gate_test` (the `settings_home` set).
 
 No test was deleted, skipped or weakened, and there is no `// ignore:`.
+
+## Review round (TL `/code-review`; the one fix round, ADR-0015)
+- **Important 1, fixed:** Sign in stayed disabled while the server's sign-out ran. `SettingsHomeBloc` no longer awaits `signOut()`: the busy flag clears when the session is gone (`_show` sees no user) or when the app answers, whichever comes first. A failure is still reported once. Test: BDD "The server is slow to answer the sign-out: the index shows Not signed in at once, with Sign in enabled" (held `POST /v1/auth/sign-out`, the button enabled before the release, and one sign-out request).
+- **Nit 3, fixed:** `requestAppSignIn` has `required SignInPurpose? purpose`; the index passes `purpose: null`.
+- **Nit 5, fixed:** an empty `version` is missing in `AppConfig` (test in `mc_config:app_config_test`, "T-0070-AC1 version is optional …").
+- `origin/main` merged (docs only). Re-run: `test --lockfile_mode=error //...` 241/241, lint, `mc_arch_check`, `rules_fork.sh check`, format gate, `l10n_check`, and the 50-run check on the changed and sibling targets (23 of 23, [log](../evidence/T-0070/runs_per_test_50.txt)). No journey changed, so e2e was not re-run.
+
+### Follow-ups (for the TL's `pending-work.md`)
+- Retry or report a failed `GET v1/me`, and do not show a raw internal id (`u-101`) as the name.
+- A test that the configs' `version` equals `app/mini_client/pubspec.yaml`'s version.
