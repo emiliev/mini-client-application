@@ -58,7 +58,8 @@ const _expectedRouteNames = {
 /// generated flow's route is named after its module (T-0074).
 final Set<String> _allRouteNames = {
   ..._expectedRouteNames,
-  for (final e in catalogueEntries) e.module,
+  for (final e in catalogueEntries)
+    if (e.location != null) e.module,
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {

@@ -281,7 +281,7 @@ abstract class ZzModule {
         expect(
           read(appWiringsPath),
           contains(
-            "CatalogueEntry(module: 'zz_ld_probe', location: GeneratedLocations.zzLdProbe)",
+            "CatalogueEntry(module: 'zz_ld_probe', location: '/zz-ld-probe')",
           ),
         );
         expect(read(appWiringsPath), contains('  ...zzProbeRoutes,\n'));
@@ -332,6 +332,311 @@ abstract class ZzModule {
       );
       expect(mcgen(['wire', '--root', root.path]).code, 0);
       expect(nav.readAsStringSync(), edited);
+    });
+  });
+
+  group('T-0074 review round: wire', () {
+    /// [fixture]'s spec as module [module] under feature/zz_probe/.
+    void addSpec(
+      Directory root,
+      String fixture,
+      String module, {
+      String Function(String)? edit,
+    }) {
+      var text = readFixture('$fixture/mcgen.yaml');
+      if (module != fixture) {
+        final from = pascal(fixture);
+        final to = pascal(module);
+        text = text
+            .replaceAll(fixture, module)
+            .replaceAll(from, to)
+            .replaceAll(camel(fixture), camel(module));
+      }
+      writeFile(
+        root,
+        'feature/zz_probe/$module/mcgen.yaml',
+        edit == null ? text : edit(text),
+      );
+    }
+
+    const group = 'app/wiring/zz_probe_wiring';
+    String nav(String m) =>
+        '$group/lib/src/navigators/${m}_navigator_impl.dart';
+    bool exists(Directory root, String rel) =>
+        File(p.join(root.path, rel)).existsSync();
+
+    test('T-0074-AC2 removing spec b: wire --check reports what it would '
+        'delete, wire deletes b\'s navigator and entries, and a group with no '
+        'flow left goes entirely', () {
+      final root = _root('orphans');
+      addSpec(root, 'zz_ld_probe', 'zz_ld_probe');
+      addSpec(root, 'zz_ld_probe', 'zz_ld_other');
+      expect(mcgen(['wire', '--root', root.path]).code, 0);
+      expect(exists(root, nav('zz_ld_other')), isTrue);
+      final marker = readFile(root, '$group/.mcgen/wire.json');
+      expect(
+        marker,
+        contains('"lib/src/navigators/zz_ld_other_navigator_impl.dart": "'),
+      );
+
+      Directory(p.join(root.path, 'feature/zz_probe/zz_ld_other')).deleteSync(
+        recursive: true,
+      );
+      final c = mcgen(['wire', '--check', '--root', root.path]);
+      expect(c.code, 1, reason: '$c');
+      expect(
+        c.err,
+        contains(
+          '${nav('zz_ld_other')}: out of date, no longer generated: would delete',
+        ),
+      );
+      final w = mcgen(['wire', '--root', root.path]);
+      expect(w.code, 0, reason: '$w');
+      expect(
+        w.out,
+        contains('${nav('zz_ld_other')}: deleted (no longer generated)'),
+      );
+      expect(exists(root, nav('zz_ld_other')), isFalse);
+      expect(exists(root, nav('zz_ld_probe')), isTrue);
+      expect(
+        readFile(root, generatedLocationsPath),
+        isNot(contains('zzLdOther')),
+      );
+      expect(readFile(root, appWiringsPath), isNot(contains('zz_ld_other')));
+      expect(mcgen(['wire', '--check', '--root', root.path]).code, 0);
+
+      Directory(p.join(root.path, 'feature/zz_probe')).deleteSync(
+        recursive: true,
+      );
+      expect(mcgen(['wire', '--root', root.path]).code, 0);
+      expect(Directory(p.join(root.path, group)).existsSync(), isFalse);
+      expect(readFile(root, 'pubspec.yaml'), isNot(contains(group)));
+      expect(
+        readFile(root, appPubspecPath),
+        isNot(contains('zz_probe_wiring')),
+      );
+      expect(
+        readFile(root, appWiringsBzlPath),
+        isNot(contains('zz_probe_wiring')),
+      );
+      expect(mcgen(['wire', '--check', '--root', root.path]).code, 0);
+    });
+
+    test('T-0074-AC2 an orphaned navigator someone edited stops wire (nothing '
+        'written) until --force deletes it', () {
+      final root = _root('orphan-edited');
+      addSpec(root, 'zz_ld_probe', 'zz_ld_probe');
+      addSpec(root, 'zz_ld_probe', 'zz_ld_other');
+      expect(mcgen(['wire', '--root', root.path]).code, 0);
+      final f = File(p.join(root.path, nav('zz_ld_other')));
+      f.writeAsStringSync('${f.readAsStringSync()}// mapped by hand\n');
+      Directory(p.join(root.path, 'feature/zz_probe/zz_ld_other')).deleteSync(
+        recursive: true,
+      );
+      final before = readFile(root, appWiringsPath);
+      for (final args in [
+        ['wire'],
+        ['wire', '--check'],
+      ]) {
+        final r = mcgen([...args, '--root', root.path]);
+        expect(r.code, 1, reason: '$r');
+        expect(r.err, contains('orphan-owned: ${nav('zz_ld_other')}'));
+      }
+      expect(f.existsSync(), isTrue);
+      expect(readFile(root, appWiringsPath), before, reason: 'nothing written');
+      final forced = mcgen(['wire', '--force', '--root', root.path]);
+      expect(forced.code, 0, reason: '$forced');
+      expect(forced.out, contains('(forced over an edit)'));
+      expect(f.existsSync(), isFalse);
+    });
+
+    test('T-0074-AC2 an ejected module whose package exists stays wired; one '
+        'with no package is listed as not wired', () {
+      final root = _root('ejected');
+      addSpec(
+        root,
+        'zz_ld_probe',
+        'zz_ld_probe',
+        edit: (s) => s.replaceFirst('ownership: mixed', 'ownership: ejected'),
+      );
+      writeFile(
+        root,
+        'feature/zz_probe/zz_ld_probe/pubspec.yaml',
+        'name: zz_ld_probe\n',
+      );
+      expect(mcgen(['wire', '--root', root.path]).code, 0);
+      expect(exists(root, nav('zz_ld_probe')), isTrue);
+      expect(
+        readFile(root, appWiringsPath),
+        contains("location: '/zz-ld-probe'"),
+      );
+
+      File(p.join(root.path, 'feature/zz_probe/zz_ld_probe/pubspec.yaml'))
+          .deleteSync();
+      final r = mcgen(['wire', '--root', root.path]);
+      expect(r.code, 0, reason: '$r');
+      expect(
+        r.err,
+        contains('not wired: ejected, and its package does not exist'),
+      );
+      expect(
+        readFile(root, appWiringsPath),
+        contains("note: 'not wired: ejected, and its package does not exist'"),
+      );
+    });
+
+    test('T-0074-AC2 the repo-wide path routes managed search and '
+        'section-detail flows (a query, an id); an archetype wire cannot route '
+        'is a warning and a catalogue note, not a failure', () {
+      final root = _root('archetypes');
+      addSpec(root, 'zz_sr_probe', 'zz_sr_probe');
+      addSpec(root, 'zz_sc_probe', 'zz_sc_probe');
+      addSpec(
+        root,
+        'zz_ld_probe',
+        'zz_xx_probe',
+        edit: (s) =>
+            s.replaceFirst('archetype: list_detail', 'archetype: zz_form'),
+      );
+      final r = mcgen(['wire', '--root', root.path]);
+      expect(r.code, 0, reason: '$r');
+      expect(
+        r.err,
+        contains('warning: feature/zz_probe/zz_xx_probe/mcgen.yaml: not wired'),
+      );
+      final routes = readFile(
+        root,
+        '$group/lib/src/routes/zz_probe_routes.dart',
+      );
+      expect(routes, contains("path: '/zz-sr-probe', name: 'zz_sr_probe'"));
+      expect(routes, contains('const ZzSrProbeRoute({this.q});'));
+      expect(routes, contains("path: '/zz-sc-probe/:id', name: 'zz_sc_probe'"));
+      expect(routes, contains('const ZzScProbeRoute({required this.id});'));
+      expect(routes, contains('  final int id;'));
+      final impl = readFile(
+        root,
+        '$group/lib/src/routes/route_targets_impl.dart',
+      );
+      expect(impl, contains('initialQuery: query'));
+      expect(impl, contains('issueId: zz_sc_probe.IssueId(id)'));
+      final loc = readFile(root, generatedLocationsPath);
+      expect(
+        loc,
+        contains("static String zzScProbe(int id) => '/zz-sc-probe/\$id';"),
+      );
+      expect(loc, contains('static String zzSrProbe([String? query])'));
+      final list = readFile(root, appWiringsPath);
+      expect(list, contains("location: '/zz-sc-probe/501500'"));
+      expect(list, contains("location: '/zz-sr-probe'"));
+      expect(list, contains("module: 'zz_xx_probe'"));
+      expect(list, contains('wire cannot route a "zz_form" flow yet'));
+      final drift = readFile(
+        root,
+        '$group/test/routes_test.dart',
+      ).replaceAll(RegExp(r'\s+'), ' ');
+      expect(
+        drift,
+        contains(
+          'GeneratedLocations.zzScProbe(501500), const ZzScProbeRoute(id: 501500).location',
+        ),
+      );
+      expect(
+        drift,
+        contains(
+          "GeneratedLocations.zzSrProbe('a & b'), const ZzSrProbeRoute(q: 'a & b').location",
+        ),
+      );
+      expect(mcgen(['wire', '--check', '--root', root.path]).code, 0);
+    });
+
+    test('T-0074-AC2 root imports: the @factoryMethod member is the one '
+        'injectable calls, and a @preResolve Future<T> registers T', () {
+      final root = _root('factory');
+      const f = 'feature/x/zz_fm';
+      writeFile(root, '$f/pubspec.yaml', 'name: zz_fm\n');
+      writeFile(root, '$f/lib/src/di/di_initializer.dart', '// init\n');
+      writeFile(root, '$f/lib/src/flow/zz_fm_flow.dart', '// flow\n');
+      writeFile(root, '$f/lib/src/domain/repo.dart', '''
+import 'package:dio/dio.dart';
+import 'package:mc_session/mc_session.dart';
+import 'package:mc_storage/mc_storage.dart';
+
+@injectable
+class ZzStore {
+  ZzStore._(this._session);
+
+  final SessionReader _session;
+
+  @factoryMethod
+  @preResolve
+  static Future<ZzStore> create(Dio dio, ZzPrefs prefs) async => ZzStore._(null);
+}
+
+@module
+abstract class ZzModule {
+  @preResolve
+  @singleton
+  Future<ZzPrefs> prefs(FileStore store) async => ZzPrefs();
+}
+''');
+      final imports = rootImports('zz_fm', p.join(root.path, f), root.path);
+      expect([for (final i in imports) i.type], ['Dio', 'FileStore']);
+    });
+
+    test('T-0074-AC2 every archetype\'s pubspec has the packages wire\'s flow '
+        'scope imports (list-detail\'s whatever its blocs import)', () {
+      for (final fixture in ['zz_ld_probe', 'zz_sr_probe', 'zz_sc_probe']) {
+        final root = _root('pubspec-$fixture');
+        addSpec(root, fixture, fixture);
+        expect(mcgen(['gen', fixture, '--root', root.path]).code, 0);
+        final dir = p.join(root.path, 'feature/zz_probe/$fixture');
+        expect(mcgen(['wire', dir, '--root', root.path]).code, 0);
+        final scope = File(p.join(dir, flowScopePath)).readAsStringSync();
+        final pubspec = File(p.join(dir, 'pubspec.yaml')).readAsStringSync();
+        final deps = pubspec.substring(
+          pubspec.indexOf('dependencies:'),
+          pubspec.indexOf('dev_dependencies:'),
+        );
+        for (final m in RegExp(r"import 'package:(\w+)/").allMatches(scope)) {
+          expect(
+            deps,
+            contains('  ${m.group(1)}:'),
+            reason: '$fixture: ${m.group(1)}',
+          );
+        }
+        if (fixture == 'zz_ld_probe') {
+          for (final pkg in ['dio', 'mc_di', 'mc_monitoring']) {
+            expect(deps, contains('  $pkg:'), reason: pkg);
+          }
+        }
+      }
+    });
+
+    test('T-0074-AC2 a comment inside the workspace or dependencies block is a '
+        'clear error, not a lost line', () {
+      expect(
+        () => workspaceMembers('workspace:\n  - a\n  # why\n  - b\n', ['a']),
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            contains('comment inside "workspace:"'),
+          ),
+        ),
+      );
+      expect(
+        () => appWiringDeps(
+          'dependencies:\n  a: any\n  # why\n  b: any\n',
+          GroupPlan([]),
+        ),
+        throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'message',
+            contains('comment inside "dependencies:"'),
+          ),
+        ),
+      );
     });
   });
 }

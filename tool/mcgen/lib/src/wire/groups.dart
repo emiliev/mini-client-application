@@ -8,11 +8,11 @@
 // group cannot be wired yet: its routes, targets and navigators are hand
 // code (F-0074 section 4).
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:mcgen/src/core/repo.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
+import 'package:mcgen/src/emit/feature_section_detail/model.dart';
 import 'package:path/path.dart' as p;
 
 /// The marker of a generated group (buildgen reads it).
@@ -76,19 +76,125 @@ String camel(String snake) {
   return '${s[0].toLowerCase()}${s.substring(1)}';
 }
 
+/// The archetypes whose flows wire can route, and how each one's flow is
+/// built: list-detail takes only its navigator, search an optional query
+/// (`?q=`), section-detail a required id (`/:id`).
+const routedArchetypes = {'list_detail', 'search', 'section_detail'};
+
 /// A flow wire routes: one generated feature.
 class WiredFlow {
-  WiredFlow(this.spec);
+  WiredFlow(this.spec) {
+    if (spec.archetype == 'section_detail') {
+      final m = ScModel.parse(spec);
+      _flow = m.flow;
+      _idArg = m.idArg;
+      _idType = m.itemIdType;
+      _idIsInt = m.ids.first.type == 'int';
+    } else {
+      _flow = '${pascal(spec.module)}Flow';
+    }
+  }
 
   final ModuleSpec spec;
+  late final String _flow;
+  String? _idArg;
+  String? _idType;
+  bool _idIsInt = true;
 
   String get module => spec.module;
-  String get flow => '${pascal(module)}Flow';
+  String get flow => _flow;
   String get route => '${pascal(module)}Route';
   String get navigator => spec.navigator!.name;
   String get target => camel(module);
-  String get path => '/${module.replaceAll('_', '-')}';
   String get prefix => module;
+  String get base => '/${module.replaceAll('_', '-')}';
+
+  bool get hasId => _idArg != null;
+  bool get hasQuery => spec.archetype == 'search';
+  String get idDart => _idIsInt ? 'int' : 'String';
+
+  /// The route's path template.
+  String get path => hasId ? '$base/:id' : base;
+
+  /// The typed route's constructor parameters and fields.
+  String get routeParams =>
+      hasId ? '{required this.id}' : (hasQuery ? '{this.q}' : '');
+  List<String> get routeFields => [
+    if (hasId) '  final $idDart id;',
+    if (hasQuery) '  final String? q;',
+  ];
+
+  /// The `RouteTargets` member's signature, and the route's call of it.
+  String get targetSig => hasId
+      ? '$target($idDart id)'
+      : (hasQuery ? '$target({String? query})' : '$target()');
+  String get targetCall =>
+      hasId ? '$target(id)' : (hasQuery ? '$target(query: q)' : '$target()');
+
+  /// The flow's arguments beyond the navigator.
+  String get flowArgs => hasId
+      ? ', $_idArg: $prefix.$_idType(id)'
+      : (hasQuery ? ', initialQuery: query' : '');
+
+  /// The id the catalogue opens: the first `I open <item> {id}` of the
+  /// spec's scenarios, else 1.
+  String get sampleId {
+    for (final f in spec.bdd) {
+      for (final sc in f.scenarios) {
+        for (final step in sc.steps) {
+          final m = RegExp(r'I open [a-z ]+ \{([^}]+)\}').firstMatch(step);
+          if (m != null) {
+            final v = m.group(1)!.replaceAll("'", '');
+            if (!_idIsInt || int.tryParse(v) != null) return v;
+          }
+        }
+      }
+    }
+    return '1';
+  }
+
+  String get _sampleDart => _idIsInt ? sampleId : "'$sampleId'";
+
+  /// The `GeneratedLocations` member.
+  String get locationMember => hasId
+      ? (_idIsInt
+            ? "static String $target(int id) => '$base/\$id';"
+            : "static String $target(String id) => '$base/\${Uri.encodeComponent(id)}';")
+      : hasQuery
+      ? "static String $target([String? query]) => Uri(path: '$base', "
+            "queryParameters: query == null ? null : {'q': query}).toString();"
+      : "static const String $target = '$base';";
+
+  /// `GeneratedLocations` calls paired with the typed routes they equal.
+  List<(String, String)> get driftRows => hasId
+      ? [
+          (
+            'GeneratedLocations.$target($_sampleDart)',
+            'const $route(id: $_sampleDart).location',
+          ),
+        ]
+      : hasQuery
+      ? [
+          ('GeneratedLocations.$target()', 'const $route().location'),
+          (
+            "GeneratedLocations.$target('a & b')",
+            "const $route(q: 'a & b').location",
+          ),
+        ]
+      : [('GeneratedLocations.$target', 'const $route().location')];
+
+  /// The location the catalogue pushes.
+  String get catalogueLocation => hasId
+      ? '$base/${_idIsInt ? sampleId : Uri.encodeComponent(sampleId)}'
+      : base;
+}
+
+/// A flow wire leaves out of the app, and why (it is listed, not opened).
+class UnwiredFlow {
+  const UnwiredFlow(this.module, this.reason);
+
+  final String module;
+  final String reason;
 }
 
 /// One wiring group.
@@ -115,10 +221,16 @@ class WiringGroup {
 }
 
 class GroupPlan {
-  GroupPlan(this.all);
+  GroupPlan(this.all, {this.unwired = const [], this.warnings = const []});
 
   /// Every group, in the app's order.
   final List<WiringGroup> all;
+
+  /// Flows wire could not route: the catalogue lists them as not wired.
+  final List<UnwiredFlow> unwired;
+
+  /// What wire tells the user without failing.
+  final List<String> warnings;
 
   Iterable<WiringGroup> get generated => all.where((g) => g.generated);
   Iterable<WiredFlow> get flows => [for (final g in generated) ...g.flows];
@@ -145,26 +257,45 @@ GroupPlan planGroups(
     }
   }
   final flows = <String, List<WiredFlow>>{};
+  final unwired = <UnwiredFlow>[];
+  final warnings = <String>[];
+  void leaveOut(ModuleSpec s, String reason) {
+    unwired.add(UnwiredFlow(s.module, reason));
+    warnings.add('${s.file}: not wired: $reason');
+  }
+
   for (final s in specs) {
-    if (s.tier != Tier.feature || s.ownership == Ownership.ejected) continue;
-    if (s.archetype != 'list_detail') {
-      throw StateError(
-        '${s.file}: wire routes list_detail flows only so far, not '
-        '"${s.archetype}" (F-0074 section 4)',
+    // An exemplar's glue is hand-written; every other feature spec is
+    // wire's, ejected ones too while their package exists (an ejected
+    // module keeps its route: only its own files stop being generated).
+    if (s.tier != Tier.feature || s.exemplar) continue;
+    if (s.ownership == Ownership.ejected &&
+        !File(p.join(root, s.moduleDir, 'pubspec.yaml')).existsSync()) {
+      leaveOut(s, 'ejected, and its package does not exist');
+      continue;
+    }
+    if (!routedArchetypes.contains(s.archetype)) {
+      leaveOut(
+        s,
+        'wire cannot route a "${s.archetype}" flow yet (it routes '
+        '${(routedArchetypes.toList()..sort()).join(', ')}; F-0074 section 4)',
       );
+      continue;
     }
     if (s.navigator == null) {
-      throw StateError('${s.file}: a flow wire routes needs a navigator');
+      leaveOut(s, 'a flow wire routes needs a navigator');
+      continue;
     }
     final parts = s.moduleDir.split('/');
     final domain = parts.length > 2 ? parts[1] : s.module;
     final group = domains[domain] ?? domain;
     if (hand.contains(group)) {
-      throw StateError(
-        '${s.file}: its group "$group" is hand-written '
-        '(app/wiring/${group}_wiring); wire cannot add a generated flow to it '
-        'yet (F-0074 section 4)',
+      leaveOut(
+        s,
+        'its group "$group" is hand-written (app/wiring/${group}_wiring); '
+        'wire cannot add a generated flow to it yet (F-0074 section 4)',
       );
+      continue;
     }
     (flows[group] ??= []).add(WiredFlow(s));
   }
@@ -188,7 +319,8 @@ GroupPlan planGroups(
       if (e.key.endsWith('.dart')) g.files[e.key] = sortDirectiveRuns(e.value);
     }
   }
-  return GroupPlan(groups);
+  unwired.sort((a, b) => a.module.compareTo(b.module));
+  return GroupPlan(groups, unwired: unwired, warnings: warnings);
 }
 
 /// The name of the `AppLocations` method an intent opens, when there is one
@@ -250,14 +382,6 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     '',
   ].join('\n');
 
-  g.files['$dir/$wireMarker'] =
-      '${const JsonEncoder.withIndent('  ').convert({
-        'generator': 'mcgen wire',
-        'group': g.name,
-        'modules': [for (final f in flows) f.module],
-        'owned': [for (final f in flows) 'lib/src/navigators/${f.module}_navigator_impl.dart'],
-      })}\n';
-
   // The barrel.
   g.files['$dir/lib/$pkg.dart'] = [
     wireHeader.trimRight(),
@@ -298,11 +422,13 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
       '/// tracks (T-0053).',
       "@TypedGoRoute<${f.route}>(path: '${f.path}', name: '${f.module}')",
       'class ${f.route} extends GoRouteData with \$${f.route} {',
-      '  const ${f.route}();',
+      '  const ${f.route}(${f.routeParams});',
+      if (f.routeFields.isNotEmpty) '',
+      ...f.routeFields,
       '',
       '  @override',
       '  Widget build(BuildContext context, GoRouterState state) =>',
-      '      diContainer<${g.pascalName}RouteTargets>().${f.target}();',
+      '      diContainer<${g.pascalName}RouteTargets>().${f.targetCall};',
       '}',
     ],
     '',
@@ -318,7 +444,7 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     'abstract interface class ${g.pascalName}RouteTargets {',
     for (final f in flows) ...[
       '  /// ${f.module}: `${f.path}`.',
-      '  ${f.prefix}.${f.flow} ${f.target}();',
+      '  ${f.prefix}.${f.flow} ${f.targetSig};',
     ],
     '}',
     '',
@@ -344,8 +470,8 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     for (final f in flows) ...[
       '',
       '  @override',
-      '  ${f.prefix}.${f.flow} ${f.target}() =>',
-      '      ${f.prefix}.${f.flow}(navigator: _${f.target});',
+      '  ${f.prefix}.${f.flow} ${f.targetSig} =>',
+      '      ${f.prefix}.${f.flow}(navigator: _${f.target}${f.flowArgs});',
     ],
     '}',
     '',
@@ -477,7 +603,7 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     'void main() {',
     "  test('every GeneratedLocations entry of the ${g.name} group equals its typed route', () {",
     for (final f in flows)
-      '    expect(GeneratedLocations.${f.target}, const ${f.route}().location);',
+      for (final (loc, route) in f.driftRows) '    expect($loc, $route);',
     '  });',
     '',
     "  test('every route of the ${g.name} group is named and absolute', () {",
@@ -505,7 +631,7 @@ String generatedLocations(GroupPlan plan) => [
   for (final g in plan.generated)
     for (final f in g.flows) ...[
       '  /// ${f.module}\'s flow, in ${g.package}.',
-      "  static const String ${f.target} = '${f.path}';",
+      '  ${f.locationMember}',
       '',
     ],
   '}',

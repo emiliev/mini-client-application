@@ -85,19 +85,34 @@ void main() {
     );
   });
 
-  for (final e in catalogueEntries) {
+  for (final e in catalogueEntries.where((e) => e.location == null)) {
+    mcTestWidgets('T-0074-AC3 the catalogue lists ${e.module} as not wired, '
+        'with the reason, and does not open it', (tester) async {
+      await boot(tester, AppLocations.catalogue);
+
+      final tile = tester.widget<ListTile>(
+        find.byKey(catalogueEntryKey(e.module)),
+      );
+      expect(tile.enabled, isFalse);
+      expect(tile.onTap, isNull);
+      expect(find.text(e.note!), findsOneWidget);
+    });
+  }
+
+  for (final e in catalogueEntries.where((e) => e.location != null)) {
     mcTestWidgets('T-0074-AC3 the catalogue opens ${e.module} at its route, '
         'and Back returns to the catalogue', (tester) async {
       final router = await boot(tester, AppLocations.catalogue);
+      final location = e.location!;
 
       await tester.tap(find.byKey(catalogueEntryKey(e.module)));
       await tester.pumpAndSettle();
 
-      if (SignInGuard.isProtectedLocation(Uri.parse(e.location))) {
+      if (SignInGuard.isProtectedLocation(Uri.parse(location))) {
         // Signed out, a protected flow asks for sign-in first (F-0066).
         expect(router.state.uri.path, '/auth/sign-in');
       } else {
-        expect(router.state.uri.toString(), e.location);
+        expect(router.state.uri.toString(), location);
         expect(router.state.name, e.module, reason: 'its own typed route');
       }
       expect(find.byKey(catalogueEntryKey(e.module)), findsNothing);
@@ -110,8 +125,12 @@ void main() {
   }
 
   mcTestWidgets('T-0074-AC3 a catalogue tile pushes its location, and Back '
-      'returns to the catalogue', (tester) async {
+      'returns to the catalogue; an unwired one does nothing', (tester) async {
     const entry = CatalogueEntry(module: 'some_flow', location: '/some-flow');
+    const unwired = CatalogueEntry(
+      module: 'later_flow',
+      note: 'not wired: no route yet',
+    );
     final router = GoRouter(
       initialLocation: '/catalogue',
       routes: [
@@ -131,6 +150,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('/some-flow'), findsOneWidget);
+    expect(find.text('not wired: no route yet'), findsOneWidget);
+    await tester.tap(find.byKey(catalogueEntryKey('later_flow')));
+    await tester.pumpAndSettle();
+    expect(router.state.uri.path, '/catalogue', reason: 'an unwired tile');
     await tester.tap(find.byKey(catalogueEntryKey('some_flow')));
     await tester.pumpAndSettle();
     expect(find.text('some flow'), findsOneWidget);

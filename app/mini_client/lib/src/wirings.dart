@@ -36,5 +36,6 @@ List<RouteBase> get wiringRoutes => [
 ];
 
 /// Every flow `mcgen wire` generated, for the `/catalogue` debug screen
-/// (T-0074): each opens from there.
+/// (T-0074): each opens from there. A flow wire could not route is
+/// listed with the reason, and does not open.
 const List<CatalogueEntry> catalogueEntries = [];

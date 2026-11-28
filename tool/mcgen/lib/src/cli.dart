@@ -39,7 +39,7 @@ usage: mcgen <command> [options]
   gen [--check] [--force] <module|path>... render modules (--check: dry run, exit 1 on any diff)
   gen --out <dir> <module|path>            render one module into an empty directory
   check [--all] [<module|path>...]         drift: hand edits, stale manifests, keep damage
-  wire [--check] [<dir>...]                the shared app glue, from every spec (plan 02 section 2.8);
+  wire [--check] [--force] [<dir>...]      the shared app glue, from every spec (plan 02 section 2.8);
                                            with package dirs, only their flow scopes
   buildgen [--check] [--adopt] [<dir>...]  BUILD.bazel of every covered package (ADR-0018)
 
@@ -96,6 +96,7 @@ int runMcgen(
   if (command == 'wire' || command == 'buildgen') {
     parser.addFlag('check', negatable: false);
     if (command == 'buildgen') parser.addFlag('adopt', negatable: false);
+    if (command == 'wire') parser.addFlag('force', negatable: false);
   }
   if (command == 'gen') {
     parser
@@ -141,6 +142,12 @@ int runMcgen(
     } on StateError catch (x) {
       e.writeln('mcgen buildgen: ${x.message}');
       return 1;
+    } on FormatException catch (x) {
+      e.writeln('mcgen buildgen: ${x.message}');
+      return 1;
+    } on FileSystemException catch (x) {
+      e.writeln('mcgen buildgen: ${x.message}: ${x.path}');
+      return 1;
     }
   }
   try {
@@ -178,6 +185,7 @@ int runMcgen(
                     p.split(p.relative(p.absolute(workDir, d), from: root)),
                   ),
               ],
+        force: opts.flag('force'),
         check: opts.flag('check'),
         out: o,
         err: e,

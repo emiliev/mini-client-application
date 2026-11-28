@@ -170,6 +170,12 @@ Map<String, Object?> _vars(
     if (m.dtos.isNotEmpty) 'json_annotation',
     'flutter_localizations',
     'intl',
+    // The root-import list's (`lib/src/di/flow_scope.dart`, which `mcgen
+    // wire` writes since T-0074): the API's Dio and the blocs' Monitoring,
+    // over mc_di's RootImport, whatever the other files import.
+    'dio',
+    'mc_di',
+    'mc_monitoring',
   };
   final testFiles = _packagesOf(g, (p) => !p.startsWith('lib/'));
   final dev = {

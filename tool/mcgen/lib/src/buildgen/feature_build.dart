@@ -525,6 +525,93 @@ String featureBuild(
   );
 
   // --- tests -----------------------------------------------------------------
+  // Every test file with a `main` besides the fixed ones is a target of its
+  // own. A test keeps the name the BUILD file gave it; one the hand region
+  // defines is the hand region's (buildgen then skips it).
+  final special = {
+    'test/flow_scope_test.dart',
+    'test/architecture/architecture_test.dart',
+    ?pkg.contract?.path,
+    ?pkg.golden?.path,
+  };
+  final oldTestNames = <String, String>{
+    for (final s in [
+      ...?existing?.statements,
+      ...?existing?.handStatements,
+    ])
+      if (s.key.startsWith('rule:'))
+        if (s.attr('main') case final main?) main: s.key.substring(5),
+  };
+  final candidates = <DartFile>[
+    for (final f in pkg.test)
+      if (!special.contains(f.path) &&
+          f.path.endsWith('_test.dart') &&
+          !f.path.startsWith('test/feature/') &&
+          RegExp(r'^void main\(', multiLine: true).hasMatch(f.text))
+        f,
+  ];
+  String shortName(DartFile f) {
+    final stem = p.posix.basenameWithoutExtension(f.path);
+    return stem.startsWith('${name}_') ? stem.substring(name.length + 1) : stem;
+  }
+
+  // Two files with the same name in different directories (or a name the
+  // fixed targets use) get their directories in the name:
+  // test/unit/foo_test.dart -> unit_foo_test.
+  final reserved = {
+    name,
+    'bdd_test',
+    'contract_test',
+    'flow_scope_test',
+    'golden_test',
+    'architecture_test',
+    '_pure_srcs_list',
+    ...oldTestNames.values,
+  };
+  final counts = <String, int>{};
+  for (final f in candidates) {
+    if (oldTestNames[f.path] == null) {
+      counts[shortName(f)] = (counts[shortName(f)] ?? 0) + 1;
+    }
+  }
+  final names = <String, String>{};
+  for (final f in candidates) {
+    final carried = oldTestNames[f.path];
+    if (carried != null) {
+      names[f.path] = carried;
+      continue;
+    }
+    final short = shortName(f);
+    names[f.path] = counts[short]! > 1 || reserved.contains(short)
+        ? [
+            ...p.posix.split(p.posix.dirname(f.path)).skip(1),
+            short,
+          ].join('_')
+        : short;
+  }
+  final seen = <String, String>{};
+  for (final e in names.entries) {
+    final other = seen[e.value];
+    if (other != null) {
+      throw StateError(
+        '${pkg.name}: the test targets of $other and ${e.key} would both be '
+        'named "${e.value}"; rename one of the files',
+      );
+    }
+    seen[e.value] = e.key;
+  }
+  final own = <_Test>[];
+  final shared = <_Test>[];
+  for (final f in candidates) {
+    final t = _Test(
+      names[f.path]!,
+      f,
+      shared: f.importsTestUtil,
+      dart: !f.packages.contains('flutter_test') && f.packages.contains('test'),
+    );
+    (t.shared ? shared : own).add(t);
+  }
+
   final testDeps = w.kept('var:_TEST_DEPS', '_TEST_DEPS', {
     ...labels(
       packagesOf([...pkg.steps, ...pkg.util]).difference(_bddOwn),
@@ -535,12 +622,21 @@ String featureBuild(
   const fonts = '//utility/mc_ds_theme:fonts';
   const assets = '//utility/mc_fixtures_media:asset_files';
   final env = pkg.env;
-  if (features.isNotEmpty) {
+  // `_TEST_DEPS` is the BDD suite's, and every test over the env starts
+  // from it (`_TEST_DEPS + [...]`): it exists whenever one of them does.
+  final usesTestDeps =
+      features.isNotEmpty ||
+      shared.isNotEmpty ||
+      pkg.golden != null ||
+      pkg.file('test/flow_scope_test.dart') != null;
+  if (usesTestDeps) {
     w.add(
       'var:_TEST_DEPS',
       w.listVar('_TEST_DEPS', testDeps, keptOf: 'var:_TEST_DEPS'),
       lead: '\n# --- tests (ADR-0015: BDD + contract + unit tests for pure logic; no goldens) ---\n',
     );
+  }
+  if (features.isNotEmpty) {
     w.add(
       'rule:bdd_test',
       'mc_bdd_tests(\n'
@@ -558,45 +654,6 @@ String featureBuild(
           '    deps = _TEST_DEPS,\n'
           ')\n',
     );
-  }
-
-  // Every other test file with a `main` is a target of its own.
-  final special = {
-    'test/flow_scope_test.dart',
-    'test/architecture/architecture_test.dart',
-    ?pkg.contract?.path,
-    ?pkg.golden?.path,
-  };
-  // A test keeps the name the BUILD file gave it; one the hand region
-  // defines is the hand region's (buildgen then skips it).
-  final oldTestNames = <String, String>{
-    for (final s in [
-      ...?existing?.statements,
-      ...?existing?.handStatements,
-    ])
-      if (s.key.startsWith('rule:'))
-        if (s.attr('main') case final main?) main: s.key.substring(5),
-  };
-  final own = <_Test>[];
-  final shared = <_Test>[];
-  for (final f in pkg.test) {
-    if (special.contains(f.path) ||
-        !f.path.endsWith('_test.dart') ||
-        f.path.startsWith('test/feature/') ||
-        !RegExp(r'^void main\(', multiLine: true).hasMatch(f.text)) {
-      continue;
-    }
-    final stem = p.posix.basenameWithoutExtension(f.path);
-    final t = _Test(
-      oldTestNames[f.path] ??
-          (stem.startsWith('${name}_')
-              ? stem.substring(name.length + 1)
-              : stem),
-      f,
-      shared: f.importsTestUtil,
-      dart: !f.packages.contains('flutter_test') && f.packages.contains('test'),
-    );
-    (t.shared ? shared : own).add(t);
   }
 
   String ownTest(

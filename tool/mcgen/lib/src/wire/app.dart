@@ -38,13 +38,31 @@ String appWirings(GroupPlan plan) {
     '];',
     '',
     '/// Every flow `mcgen wire` generated, for the `/catalogue` debug screen',
-    '/// (T-0074): each opens from there.',
+    '/// (T-0074): each opens from there. A flow wire could not route is',
+    '/// listed with the reason, and does not open.',
     'const List<CatalogueEntry> catalogueEntries = [',
     for (final f in plan.flows)
-      "  CatalogueEntry(module: '${f.module}', location: GeneratedLocations.${f.target}),",
+      "  CatalogueEntry(module: '${f.module}', location: '${f.catalogueLocation}'),",
+    for (final u in plan.unwired)
+      "  CatalogueEntry(module: '${u.module}', note: ${dartString('not wired: ${u.reason}')}),",
     '];',
     '',
   ].join('\n');
+}
+
+/// [s] as a single-quoted Dart string literal.
+String dartString(String s) {
+  final b = StringBuffer("'");
+  for (final c in s.split('')) {
+    b.write(switch (c) {
+      r'\' => r'\\',
+      "'" => r"\'",
+      r'$' => r'\$',
+      _ => c,
+    });
+  }
+  b.write("'");
+  return '$b';
 }
 
 /// `app/mini_client/wirings.bzl`: the wiring packages the app depends on.
@@ -69,7 +87,14 @@ String workspaceMembers(String pubspec, List<String> dirs) {
   if (start < 0) throw StateError('pubspec.yaml has no "workspace:" block');
   var end = start + 1;
   final kept = <String>[];
-  while (end < lines.length && lines[end].startsWith('  - ')) {
+  while (end < lines.length &&
+      (lines[end].startsWith('  - ') || lines[end].startsWith('  #'))) {
+    if (lines[end].startsWith('  #')) {
+      throw StateError(
+        'pubspec.yaml: a comment inside "workspace:" (line ${end + 1}); wire '
+        'sorts the members, so put comments above the block',
+      );
+    }
     final m = lines[end].substring(4).trim();
     if (!_memberTrees.any(m.startsWith)) kept.add(m);
     end++;
@@ -97,6 +122,12 @@ String appWiringDeps(String pubspec, GroupPlan plan) {
   while (end < lines.length &&
       (lines[end].startsWith('  ') || lines[end].trim().isEmpty)) {
     if (lines[end].trim().isEmpty) break;
+    if (lines[end].trim().startsWith('#')) {
+      throw StateError(
+        '$appPubspecPath: a comment inside "dependencies:" (line ${end + 1}); '
+        'wire sorts the entries, so put comments above the block',
+      );
+    }
     if (!lines[end].startsWith('    ')) {
       final name = lines[end].trim().split(':').first;
       entries.add((name, [lines[end]]));

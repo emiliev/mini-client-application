@@ -281,4 +281,91 @@ void main() {
       expect(mcgen(['buildgen', '--check', '--root', root.path]).code, 0);
     });
   });
+
+  group('T-0074 review round: buildgen', () {
+    test(
+      'T-0074-AC1 a package with flow_scope_test and no .feature files '
+      'still defines _TEST_DEPS before its tests use it, and has no bdd_test',
+      () {
+        final root = _root('no-features');
+        final dir = Directory(p.join(root.path, _feature, 'test/feature'));
+        for (final f in dir.listSync().whereType<File>()) {
+          if (f.path.endsWith('.feature')) f.deleteSync();
+        }
+        File(p.join(root.path, _feature, 'BUILD.bazel')).deleteSync();
+        expect(mcgen(['buildgen', '--root', root.path]).code, 0);
+        final b = _build(root);
+        expect(b, isNot(contains('name = "bdd_test"')));
+        final defined = b.indexOf('\n_TEST_DEPS = [');
+        final used = b.indexOf('deps = _TEST_DEPS + [');
+        expect(defined, greaterThan(0));
+        expect(used, greaterThan(defined));
+        expect(b, isNot(contains('"mc_bdd_tests"')), reason: 'not loaded');
+      },
+    );
+
+    test('T-0074-AC1 test files with the same name in two directories get '
+        'their directories in the target name', () {
+      final root = _root('same-name');
+      for (final d in ['unit', 'contract']) {
+        writeFile(
+          root,
+          '$_feature/test/$d/rules_test.dart',
+          "import 'package:test/test.dart';\n\nvoid main() {}\n",
+        );
+      }
+      expect(mcgen(['buildgen', '--root', root.path]).code, 0);
+      final b = _build(root);
+      expect(b, contains('name = "unit_rules_test"'));
+      expect(b, contains('name = "contract_rules_test"'));
+      expect(RegExp(r'name = "rules_test"').allMatches(b), isEmpty);
+      final names = RegExp(r'name = "([^"]+)"').allMatches(b).map((m) => m[1]);
+      expect(names.toSet(), hasLength(names.length), reason: 'unique names');
+      expect(mcgen(['buildgen', '--check', '--root', root.path]).code, 0);
+    });
+
+    test('T-0074-AC1 adopt keeps two comprehensions that share a key: each '
+        'once, in order', () {
+      final root = _root('two-comprehensions');
+      final f = File(p.join(root.path, _feature, 'BUILD.bazel'));
+      const a =
+          '[filegroup(\n    name = n,\n    srcs = [],\n) for n in ["first"]]\n';
+      const b =
+          '[filegroup(\n    name = n,\n    srcs = [],\n) for n in ["second"]]\n';
+      f.writeAsStringSync('${f.readAsStringSync()}\n$a\n$b');
+      final parsed = BuildFile.parse(f.readAsStringSync());
+      final keys = [
+        for (final s in parsed.statements)
+          if (s.key.startsWith('expr:[ filegroup')) s.key,
+      ];
+      expect(keys, hasLength(2));
+      expect(keys.toSet(), hasLength(2), reason: 'numbered: <key>, <key>#2');
+      expect(mcgen(['buildgen', '--adopt', '--root', root.path]).code, 0);
+      final adopted = _build(root);
+      expect(RegExp(r'\["first"\]').allMatches(adopted), hasLength(1));
+      expect(RegExp(r'\["second"\]').allMatches(adopted), hasLength(1));
+      expect(
+        adopted.indexOf('["first"]'),
+        lessThan(adopted.indexOf('["second"]')),
+      );
+      expect(
+        adopted.indexOf(handRegionStart),
+        lessThan(adopted.indexOf('["first"]')),
+      );
+      expect(mcgen(['buildgen', '--check', '--root', root.path]).code, 0);
+      expect(mcgen(['buildgen', '--adopt', '--root', root.path]).code, 0);
+      expect(_build(root), adopted, reason: 'adopting again changes nothing');
+    });
+
+    test('T-0074-AC1 a malformed BUILD file is an error through the CLI, '
+        'not a crash', () {
+      final root = _root('malformed');
+      File(p.join(root.path, _feature, 'BUILD.bazel')).writeAsStringSync(
+        'x = [\n',
+      );
+      final r = mcgen(['buildgen', '--check', '--root', root.path]);
+      expect(r.code, 1, reason: '$r');
+      expect(r.err, contains('mcgen buildgen: $_feature/BUILD.bazel'));
+    });
+  });
 }

@@ -116,7 +116,16 @@ class Statement {
   /// What identifies the statement across regenerations: `load:<file>`,
   /// `package`, `var:<NAME>` or `rule:<name>` (the call's `name = "..."`,
   /// unquoted, so a comprehension's `"_%s_freezed"` is `rule:_%s_freezed`).
-  late final String key = _keyOf(code);
+  ///
+  /// Keys repeat (two comprehensions are both `expr:...`), so the second
+  /// statement of a key in a file is `<key>#2`, the third `<key>#3`: they
+  /// pair with buildgen's statements by position.
+  String get key => occurrence == 1 ? baseKey : '$baseKey#$occurrence';
+
+  late final String baseKey = _keyOf(code);
+
+  /// Which statement of its [baseKey] this is in its part of the file.
+  int occurrence = 1;
 
   /// Strings marked `# keep` on their line, by the attribute (or variable)
   /// whose list holds them.
@@ -305,6 +314,12 @@ class BuildFile {
     final handStatements = hand == null
         ? const <Statement>[]
         : _split('$hand\n').$1;
+    for (final part in [statements, handStatements]) {
+      final seen = <String, int>{};
+      for (final st in part) {
+        st.occurrence = seen[st.baseKey] = (seen[st.baseKey] ?? 0) + 1;
+      }
+    }
     return BuildFile._(statements, trailer, hand, handStatements);
   }
 

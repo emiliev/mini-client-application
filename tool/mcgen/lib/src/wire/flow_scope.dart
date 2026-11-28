@@ -64,6 +64,14 @@ List<String> _splitTop(String s) {
 String _baseType(String type) =>
     type.replaceAll('?', '').split('<').first.trim();
 
+/// What a module member registers: its return type, with a `@preResolve`
+/// `Future<T>` unwrapped to `T`.
+String _registered(String type) {
+  final t = type.replaceAll('?', '').trim();
+  final m = RegExp(r'^(?:Future|FutureOr)<(.+)>$').firstMatch(t);
+  return _baseType(m == null ? t : m.group(1)!);
+}
+
 /// The type of one parameter, or null for `super.x`.
 String? _paramType(String param, String classBody) {
   // Passed by the caller at resolve time, not resolved from the container.
@@ -126,17 +134,31 @@ List<_Injectable> _injectables(DartFile f) {
             if (t != null) needs.add(t);
           }
         }
-        out.add(_Injectable({_baseType(m.group(1)!)}, needs, f));
+        out.add(_Injectable({_registered(m.group(1)!)}, needs, f));
       }
       continue;
     }
     final as = RegExp(r'as:\s*(\w+)').firstMatch(a.group(2) ?? '');
-    final ctor = RegExp(
-      r'^\s*(?:const\s+|factory\s+)?' +
+    // injectable builds the class through its `@factoryMethod` (a factory
+    // constructor or a static method) when it has one, else through its
+    // unnamed (or only) constructor.
+    final factory = RegExp(
+      r'^\s*@factoryMethod\b[^\n]*\n(?:\s*@\w+(?:\([^)]*\))?\s*\n)*'
+              r'\s*(?:static\s+[\w<>?, ]+\s+\w+|factory\s+' +
           RegExp.escape(name) +
-          r'(?:\.\w+)?\s*\(',
+          r'(?:\.\w+)?|(?:const\s+)?' +
+          RegExp.escape(name) +
+          r'(?:\.\w+)?)\s*\(',
       multiLine: true,
     ).firstMatch(body);
+    final ctor =
+        factory ??
+        RegExp(
+          r'^\s*(?:const\s+|factory\s+)?' +
+              RegExp.escape(name) +
+              r'(?:\.\w+)?\s*\(',
+          multiLine: true,
+        ).firstMatch(body);
     final needs = <String>[];
     if (ctor != null) {
       final open = body.indexOf('(', ctor.start + ctor.group(0)!.length - 1);

@@ -6,13 +6,17 @@ import 'package:go_router/go_router.dart';
 /// One flow the catalogue opens: a generated feature and where its route
 /// is (T-0074, P2-08). `mcgen wire` writes the list (`catalogueEntries`).
 class CatalogueEntry {
-  const CatalogueEntry({required this.module, required this.location});
+  const CatalogueEntry({required this.module, this.location, this.note});
 
   /// The feature package, which is also its route's (and screen's) name.
   final String module;
 
-  /// The location its route matches (`GeneratedLocations.<module>`).
-  final String location;
+  /// The location its route matches, or null for a flow `mcgen wire` could
+  /// not route (its tile is disabled and shows [note]).
+  final String? location;
+
+  /// Why the flow is not wired.
+  final String? note;
 }
 
 /// The key of an entry's tile.
@@ -43,8 +47,14 @@ class CataloguePage extends StatelessWidget {
                 ListTile(
                   key: catalogueEntryKey(e.module),
                   title: Text(e.module),
-                  subtitle: Text(e.location),
-                  onTap: () => unawaited(context.push(e.location)),
+                  subtitle: Text(e.location ?? e.note ?? 'not wired'),
+                  enabled: e.location != null,
+                  onTap: switch (e.location) {
+                    final String location => () => unawaited(
+                      context.push(location),
+                    ),
+                    null => null,
+                  },
                 ),
             ],
           ),
