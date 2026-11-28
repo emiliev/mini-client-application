@@ -50,14 +50,18 @@ Phase E batches (plan 02 §7.1) must never hand-edit shared glue. After every me
      - `app/mini_client/wirings.bzl` (`WIRINGS`).
 
      The group order comes from `tool/mcgen/mcgen.yaml` `wire.groups`.
-   - **One generated group per domain of the managed and mixed specs** (`wire.domains` maps a domain to a group).
-     - It lives at `app/wiring/<group>_wiring/` and is marked by `.mcgen/wire.json`.
+   - **One generated group per domain of the feature specs wire routes** (`wire.domains` maps a domain to a group).
+     - **Which specs:** every feature spec except an exemplar (whose glue is hand-written). That includes an ejected module while its package exists: ejecting stops gen writing the module, not its route.
+     - **Which archetypes:** `list_detail` (the navigator only), `search` (an optional `?q=`, passed as `initialQuery`) and `section_detail` (`/:id`, passed as the flow's typed id; the catalogue opens the first id the spec's scenarios open).
+     - **Any other archetype, a spec without a navigator, a flow of a hand-written group, or an ejected spec without a package** is a warning. It is left unwired and listed in the catalogue with the reason, so CI stays green when a new archetype produces managed modules.
+     - It lives at `app/wiring/<group>_wiring/` and is marked by `.mcgen/wire.json`. The marker lists the managed files and the first-write hash of each owned one.
+     - **What wire stops generating is deleted:** a managed file always; an owned file (a navigator) only while it is as wire wrote it. An edited orphan stops the run, which writes nothing and names the file, until `--force`. `--check` reports every deletion. A group with no flow left goes entirely, and leaves the app's lists.
      - It has a pubspec, a barrel, one typed route library, the route targets and their implementation, two DI initializers, a `routes_test.dart` drift test and its BUILD file.
      - Each route is absolute at `/<module-with-dashes>`, named after the module. The app nests it under home (F-0049), and the sign-in guard applies to it as to any route (F-0066).
      - The navigator implementations (`lib/src/navigators/<module>_navigator_impl.dart`) are written once and then are the engineer's.
    - **`app_core`'s `GeneratedLocations`:** one location per generated flow. `AppLocations` stays hand-written.
-   - **`/catalogue`** (debug and profile builds only, with no link from home) lists `catalogueEntries`. `//app/mini_client:catalogue_test` opens each entry.
-4. **Not wire-owned until their features have specs:** the 7 hand-written groups, `AppLocations`, the sandbox's router, and the app's and app_core's BUILD files beyond `WIRINGS`. A generated flow whose domain maps to a hand-written group is refused (F-0074 §4).
+   - **`/catalogue`** (debug and profile builds only, with no link from home) lists `catalogueEntries`. `//app/mini_client:catalogue_test` opens each wired entry and checks that each unwired one shows its reason and does not open.
+4. **Not wire-owned until their features have specs:** the 7 hand-written groups, `AppLocations`, the sandbox's router, and the app's and app_core's BUILD files beyond `WIRINGS`. A generated flow whose domain maps to a hand-written group is left unwired with a warning (F-0074 §4).
 
 ## Consequences
 - **Positive:**

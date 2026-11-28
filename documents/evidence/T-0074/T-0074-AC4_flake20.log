@@ -1,5 +1,5 @@
 $ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer test --lockfile_mode=error --runs_per_test=20 --nocache_test_results //app/mini_client:catalogue_test //app/mini_client:analytics_screens_test //app/mini_client:app_test
-INFO: Invocation ID: 36c53b0a-826e-4220-8c65-c7b353cdb6a4
+INFO: Invocation ID: eb923149-21af-4cab-b841-9ab8f685898d
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -7,41 +7,22 @@ WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, dis
 Analyzing: 3 targets (0 packages loaded, 0 targets configured)
 Analyzing: 3 targets (0 packages loaded, 0 targets configured)
 
-Analyzing: 3 targets (0 packages loaded, 5502 targets configured, 942 aspect applications)
+Analyzing: 3 targets (0 packages loaded, 5500 targets configured, 926 aspect applications)
 [1 / 1] no actions running
 INFO: Analyzed 3 targets (0 packages loaded, 5502 targets configured, 945 aspect applications).
-[59,397 / 68,795] checking cached actions
-[89,082 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 0s darwin-sandbox ... (14 actions, 8 running)
-[89,082 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 1s darwin-sandbox ... (14 actions, 9 running)
-[89,087 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
-[89,089 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
-[89,094 / 89,142] Testing //app/mini_client:analytics_screens_test (run 2 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
-[89,098 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
-[89,104 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
-[89,106 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
-[89,107 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,109 / 89,142] Testing //app/mini_client:analytics_screens_test (run 7 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,109 / 89,142] Testing //app/mini_client:analytics_screens_test (run 7 of 20); 5s darwin-sandbox ... (14 actions, 9 running)
-[89,116 / 89,142] Testing //app/mini_client:analytics_screens_test (run 12 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,119 / 89,142] Testing //app/mini_client:analytics_screens_test (run 12 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
-[89,124 / 89,142] Testing //app/mini_client:analytics_screens_test (run 13 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
-[89,125 / 89,142] Testing //app/mini_client:analytics_screens_test (run 13 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
-[89,126 / 89,142] Testing //app/mini_client:analytics_screens_test (run 13 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,129 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 14 of 20); 4s darwin-sandbox ... (13 actions, 8 running)
-[89,129 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 14 of 20); 5s darwin-sandbox ... (13 actions, 9 running)
-[89,136 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 19 of 20); 3s darwin-sandbox ... (6 actions running)
-[89,141 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 20 of 20); 2s darwin-sandbox
-[89,141 / 89,142] 3 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 20 of 20); 3s darwin-sandbox
-INFO: Found 3 test targets...
-INFO: Elapsed time: 27.559s, Critical Path: 8.28s
-INFO: 61 processes: 89081 action cache hit, 1 internal, 60 darwin-sandbox.
-INFO: Build completed successfully, 61 total actions
-//app/mini_client:analytics_screens_test                                 PASSED in 5.4s
-  Stats over 20 runs: max = 5.4s, min = 3.8s, avg = 5.1s, dev = 0.3s
-//app/mini_client:app_test                                               PASSED in 2.3s
-  Stats over 20 runs: max = 2.3s, min = 1.9s, avg = 2.1s, dev = 0.1s
-//app/mini_client:catalogue_test                                         PASSED in 1.4s
-  Stats over 20 runs: max = 1.4s, min = 1.2s, avg = 1.3s, dev = 0.0s
+[57,565 / 70,573] checking cached actions
+[89,081 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 0s darwin-sandbox ... (14 actions, 9 running)
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a3c9c981faf666af8/app/mini_client/BUILD.bazel:318:13: Analyzing Dart sources of //app/mini_client:catalogue_test against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on flutter_test rule target //app/mini_client:catalogue_test) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
 
-Executed 3 out of 3 tests: 3 tests pass.
-exit=0
+warning - app/mini_client/test/catalogue_test.dart:130:11 - The value of the local variable 'unwired' isn't used. Try removing the variable or using it. - unused_local_variable
+
+1 issue found.
+INFO: Elapsed time: 4.276s, Critical Path: 0.24s
+INFO: 15 processes: 89080 action cache hit, 15 internal.
+ERROR: Build did NOT complete successfully
+//app/mini_client:analytics_screens_test                              NO STATUS
+//app/mini_client:app_test                                            NO STATUS
+//app/mini_client:catalogue_test                                      NO STATUS
+
+Executed 0 out of 3 tests: 3 were skipped.
+exit=1

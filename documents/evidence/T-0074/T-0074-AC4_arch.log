@@ -1,5 +1,5 @@
 $ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer run --lockfile_mode=error --config=ci //tool/mc_arch_check:bin
-INFO: Invocation ID: dce9af0e-dd95-47e9-b062-827796e5cc45
+INFO: Invocation ID: 8bda2b64-c738-40ed-9a18-fb99e2860b6b
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -9,7 +9,7 @@ Analyzing: target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configu
 
 INFO: Analyzed target //tool/mc_arch_check:bin (0 packages loaded, 0 targets configured).
 INFO: Found 1 target...
-INFO: Elapsed time: 3.696s, Critical Path: 0.00s
+INFO: Elapsed time: 3.550s, Critical Path: 0.00s
 INFO: 1 process: 1 internal.
 INFO: Build completed successfully, 1 total action
 INFO: Running command line: bazel-bin/tool/mc_arch_check/bin

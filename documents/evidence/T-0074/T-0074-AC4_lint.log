@@ -1,5 +1,5 @@
 $ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer build --lockfile_mode=error --config=ci --config=lint //...
-INFO: Invocation ID: e2d8aa54-7127-43b6-bb62-fa3b347a2d40
+INFO: Invocation ID: f4b58b36-286a-4c55-8ed7-e26bbaf5479f
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -8,8 +8,13 @@ Analyzing: 653 targets (0 packages loaded, 0 targets configured)
 Analyzing: 653 targets (0 packages loaded, 0 targets configured)
 
 INFO: Analyzed 653 targets (0 packages loaded, 0 targets configured).
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a3c9c981faf666af8/app/mini_client/BUILD.bazel:318:13: Analyzing Dart sources of //app/mini_client:catalogue_test against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on flutter_test rule target //app/mini_client:catalogue_test) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+
+warning - app/mini_client/test/catalogue_test.dart:130:11 - The value of the local variable 'unwired' isn't used. Try removing the variable or using it. - unused_local_variable
+
+1 issue found.
 INFO: Found 653 targets...
-INFO: Elapsed time: 3.677s, Critical Path: 0.00s
-INFO: 1 process: 22 action cache hit, 1 internal.
-INFO: Build completed successfully, 1 total action
-exit=0
+INFO: Elapsed time: 3.778s, Critical Path: 0.13s
+INFO: 2 processes: 22 action cache hit, 2 internal.
+ERROR: Build did NOT complete successfully
+exit=1

@@ -89,7 +89,7 @@ The app's own list of wirings moved to `app/mini_client/wirings.bzl` (`_WIRINGS 
 | `AppLocations` entries and drift tests | **for generated flows** | `GeneratedLocations` (app_core, new); each generated group's `test/routes_test.dart` checks each entry against its route. `AppLocations` stays hand-written (its entries belong to hand-written groups and carry their prose) |
 | a wiring's routes, `RouteTargets`, impl and DI | **for generated groups** | the whole `app/wiring/<group>_wiring/` package, marked by `.mcgen/wire.json` |
 | navigator implementation skeletons | **for generated groups**, written once | `openX(XId)` pushes `AppLocations.x(id.value)` when that method exists; otherwise an empty body for the engineer to map. Then the file is theirs: wire never rewrites it, and `--check` does not flag edits |
-| the 7 hand-written groups' routes, targets and navigators | **no** | Their features are exemplars or hand-written, with no route specs. The routes carry prose, typed query parameters (`?q=`), nested paths (`/characters/:id`, `/characters/search`), `$extra` pickers and result routes (`AppFlows`), and the navigators hold mapping logic (sign-in requests, flow results). Generating them byte for byte needs a `route:` spec section for each exemplar first. Until then, **wire refuses a generated flow whose domain maps to a hand-written group**, naming the group (`tool/mcgen/mcgen.yaml` `wire.domains`) |
+| the 7 hand-written groups' routes, targets and navigators | **no** | Their features are exemplars or hand-written, with no route specs. The routes carry prose, typed query parameters (`?q=`), nested paths (`/characters/:id`, `/characters/search`), `$extra` pickers and result routes (`AppFlows`), and the navigators hold mapping logic (sign-in requests, flow results). Generating them byte for byte needs a `route:` spec section for each exemplar first. Until then, **a generated flow whose domain maps to a hand-written group is left unwired** (`tool/mcgen/mcgen.yaml` `wire.domains`): a warning, and a catalogue entry with the reason (§7) |
 | `test/flow_scopes_test.dart` per wiring (plan 01 §4.5) | **no** | no hand-written group has one; each feature's `test/flow_scope_test.dart` resolves its flow's registrations |
 | the sandbox's wiring list (`universe_sandbox`) | **no** | one hand-written group and its own router; the catalogue does not need it |
 | root `BUILD.bazel` `dart_analysis_config` list | **no** | it has one options target, and nothing adds another |
@@ -128,11 +128,36 @@ The app's own list of wirings moved to `app/mini_client/wirings.bzl` (`_WIRINGS 
   - The three archetype probe scripts now run `mcgen wire <module dir>`, and the list-detail and section-detail probes also `mcgen buildgen <module dir>`. All three pass under Bazel ([T-0074-AC4_archetype_probes.md](../evidence/T-0074/T-0074-AC4_archetype_probes.md)).
   - `tool/mcgen/tool/T-0072-AC3_sc_probe.sh` is committed without the exec bit (mode 100644 on `main`): run it with `bash`.
 
+## 7. Review round (8 important findings, one fix round)
+1. **Wire deleted nothing it stopped generating.** `.mcgen/wire.json` now lists a generated group's managed files and the first-write sha256 of each owned one. A later run compares that with the new plan:
+   - a managed orphan is deleted;
+   - an owned orphan (a navigator) is deleted only while its hash still matches;
+   - an edited owned orphan stops the run, which writes nothing and names the file (`orphan-owned`), until `--force`;
+   - `--check` reports each deletion;
+   - a group with no flow left goes entirely: its files, its marker, its BUILD file, its workspace member and its place in the app's lists. Directories it leaves empty go too.
+   - A marker with no hashes counts every owned file as edited, so it is never deleted silently.
+2. **Ejecting a module unwired it.** An ejected spec that is not an exemplar stays routed while its package exists (ejecting stops gen, not the route). One without a package is listed as not wired.
+3. **Wire threw for the whole repo on any managed spec that wasn't list-detail**, which would have turned CI gate 6 red with the first FW or DB module. Now:
+   - `search` and `section_detail` flows are routed: SR with an optional `?q=` (`initialQuery`), SC with `/:id` and its typed id (`IssueId(id)`; int or String ids). The flow and id names come from the archetypes' own models (`ScModel`).
+   - Anything wire cannot route is a warning, not an error: another archetype, a spec without a navigator, a hand-written group's domain, or an ejected spec without a package. It is listed in `catalogueEntries` with a `note` and no location. Its tile is disabled, and `catalogue_test` checks it shows the reason and does not open.
+   - The catalogue's locations are now literals. An SC entry opens the first id its spec's scenarios open (`/zz-sc-probe/501500`).
+4. **`_TEST_DEPS` was undefined** in a package with `flow_scope_test` (or a test over the env) and no `.feature` file. It is now written whenever anything uses it, and `bdd_test` only when there are features.
+5. **Same-named test files in different directories collided.** A default name that repeats, or matches a fixed target or a carried name, gets its directories (`test/unit/rules_test.dart` → `unit_rules_test`). A collision left after that is an error naming both files.
+6. **Adopt dropped or duplicated statements sharing an `expr:` key** (two comprehensions). Repeated keys in a file are now numbered (`<key>`, `<key>#2`, …), so statements pair up by position.
+7. **The injectable scanner** now uses a class's `@factoryMethod` member (a static method or a named factory) when it has one, the member injectable calls, rather than the first constructor. A `@preResolve` module member's `Future<T>` registers `T`.
+8. **The list-detail pubspec** now names the root-import list's packages (`dio`, `mc_di`, `mc_monitoring`), as search and section-detail do. A test generates the LD, SR and SC probes, runs `wire <dir>` and checks that every package the flow scope imports is a dependency.
+
+The nits were small, so they are fixed too:
+- a comment inside `workspace:` or the app's `dependencies:` is now an error that says where to move it (wire sorts those blocks);
+- buildgen's format and file-system errors go through the CLI's error path.
+
+Also: T-0072's probe script now has the exec bit (`git update-index --chmod=+x`).
+
 ## Evidence
 - AC1:
-  - `T-0074-AC1 *` (11 tests) in `tool/mcgen/test/buildgen_test.dart`;
+  - `T-0074-AC1 *` in `tool/mcgen/test/buildgen_test.dart` (11, plus 4 from the review round);
   - [T-0074-AC1_graph_neutral.md](../evidence/T-0074/T-0074-AC1_graph_neutral.md).
-- AC2: `T-0074-AC2 *` (6 tests) in `tool/mcgen/test/wire_test.dart`.
+- AC2: `T-0074-AC2 *` in `tool/mcgen/test/wire_test.dart` (6, plus 7 from the review round).
 - AC3:
   - `T-0074-AC3 *` (2 tests) in `wire_test.dart`;
   - `T-0074-AC3 *` (3 tests) in `app/mini_client/test/catalogue_test.dart`;

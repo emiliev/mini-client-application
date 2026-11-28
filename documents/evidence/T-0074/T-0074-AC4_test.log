@@ -1,58 +1,112 @@
 $ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer test --lockfile_mode=error --config=ci //...
-INFO: Invocation ID: d8aa767f-f7fd-4f78-80cf-75612ea08d9d
+Starting local Bazel server (9.3.0) and connecting to it...
+INFO: Invocation ID: a647584e-594a-447c-a6ac-928f5910eef7
 Computing main repo mapping: 
 Loading: 
-Loading: 0 packages loaded
-Analyzing: 653 targets (46 packages loaded, 0 targets configured)
-Analyzing: 653 targets (46 packages loaded, 9 targets configured)
+Loading: 1 packages loaded
+Analyzing: 653 targets (91 packages loaded, 6 targets configured)
+Analyzing: 653 targets (91 packages loaded, 6 targets configured)
 
-Analyzing: 653 targets (55 packages loaded, 4543 targets configured, 948 aspect applications)
-[21,393 / 21,393] 16 / 16 tests; no actions running
-Analyzing: 653 targets (55 packages loaded, 4652 targets configured, 1237 aspect applications)
-[38,937 / 38,937] 43 / 43 tests; no actions running
-Analyzing: 653 targets (55 packages loaded, 4711 targets configured, 1402 aspect applications)
-[44,296 / 44,296] 94 / 94 tests; no actions running
-Analyzing: 653 targets (55 packages loaded, 4803 targets configured, 1607 aspect applications)
-[58,748 / 59,147] 156 / 159 tests; checking cached actions
-Analyzing: 653 targets (55 packages loaded, 4900 targets configured, 1849 aspect applications)
-[73,404 / 73,567] 212 / 222 tests; Compiling Dart kernel module feature/characters/characters_details/characters_details.flutter.kmod; 0s disk-cache, worker ... (3 actions, 2 running)
-Analyzing: 653 targets (55 packages loaded, 4958 targets configured, 1999 aspect applications)
-[93,009 / 100,475] 216 / 247 tests; Compiling Dart kernel module feature/characters/characters_details/characters_details.flutter.kmod; 1s disk-cache, worker ... (6 actions running)
-INFO: Analyzed 653 targets (55 packages loaded, 4958 targets configured, 2006 aspect applications).
-[111,020 / 111,139] 228 / 247 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 2s disk-cache, worker ... (7 actions running)
-[111,042 / 111,139] 228 / 247 tests; DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_character_details_navigator_impl_inj; 6s disk-cache, worker ... (5 actions, 4 running)
-[111,051 / 111,140] 229 / 247 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 7s disk-cache, worker ... (2 actions running)
-[111,052 / 111,140] 229 / 247 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 8s disk-cache, worker
-[111,138 / 111,157] 229 / 247 tests; Linking Dart kernel @@//app/mini_client:settings_route_test; 0s disk-cache, worker ... (14 actions, 9 running)
-[111,142 / 111,158] 231 / 247 tests; Testing //app/wiring/universe_wiring:routes_test; 1s disk-cache, darwin-sandbox ... (14 actions, 8 running)
-[111,146 / 111,158] 235 / 247 tests; Testing //app/mini_client:sign_in_guard_app_test; 2s disk-cache, darwin-sandbox ... (12 actions, 9 running)
-[111,147 / 111,158] 236 / 247 tests; Testing //app/mini_client:sign_in_guard_app_test; 3s disk-cache, darwin-sandbox ... (11 actions, 9 running)
-[111,150 / 111,158] 240 / 247 tests; Testing //app/mini_client:sign_in_guard_app_test; 5s disk-cache, darwin-sandbox ... (8 actions running)
-[111,153 / 111,158] 242 / 247 tests; Testing //app/mini_client:sign_in_guard_app_test; 6s disk-cache, darwin-sandbox ... (5 actions running)
-[111,154 / 111,158] 243 / 247 tests; Testing //app/mini_client:reading_list_route_test; 4s disk-cache, darwin-sandbox ... (4 actions running)
-[111,157 / 111,158] 246 / 247 tests; Testing //app/mini_client:deep_link_back_stack_test; 4s disk-cache, darwin-sandbox
+Analyzing: 653 targets (328 packages loaded, 16840 targets configured)
+[20 / 20] no actions running
+Analyzing: 653 targets (388 packages loaded, 22779 targets configured, 1332 aspect applications)
+[2,079 / 2,156] checking cached actions
+Analyzing: 653 targets (388 packages loaded, 22984 targets configured, 1953 aspect applications)
+[10,381 / 10,994] 55 / 69 tests; Compiling Dart kernel module app/wiring/app_core/app_core.flutter.kmod; 0s disk-cache, worker
+Analyzing: 653 targets (388 packages loaded, 23023 targets configured, 2133 aspect applications)
+[20,126 / 20,166] 85 / 98 tests; Compiling Dart kernel module app/wiring/app_core/app_core.flutter.kmod; 1s disk-cache, worker
+Analyzing: 653 targets (388 packages loaded, 23086 targets configured, 2388 aspect applications)
+[29,942 / 29,982] 115 / 128 tests; Compiling Dart kernel module app/wiring/app_core/app_core.flutter.kmod; 2s disk-cache, worker
+Analyzing: 653 targets (388 packages loaded, 23182 targets configured, 2630 aspect applications)
+[35,529 / 35,713] 131 / 184 tests; Compiling Dart kernel module app/wiring/app_core/router_ref_and_scheme_test.flutter_entry.kmod; 0s disk-cache, worker ... (13 actions, 4 running)
+Analyzing: 653 targets (388 packages loaded, 23234 targets configured, 2794 aspect applications)
+[42,276 / 42,648] 134 / 208 tests; Compiling Dart kernel module app/wiring/app_core/app_layer_test.flutter_entry.kmod; 0s disk-cache, worker ... (10 actions, 5 running)
+Analyzing: 653 targets (388 packages loaded, 23291 targets configured, 2939 aspect applications)
+[51,904 / 56,135] 140 / 225 tests; Testing //app/wiring/app_core:router_ref_and_scheme_test; 1s disk-cache, darwin-sandbox ... (11 actions, 10 running)
+INFO: Analyzed 653 targets (388 packages loaded, 23328 targets configured, 3036 aspect applications).
+[61,445 / 68,241] 140 / 247 tests; Testing //app/wiring/app_core:router_ref_and_scheme_test; 2s disk-cache, darwin-sandbox ... (9 actions running)
+[90,740 / 102,929] 146 / 247 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 2s disk-cache, darwin-sandbox ... (4 actions running)
+[110,190 / 110,806] 198 / 247 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 3s disk-cache, darwin-sandbox ... (12 actions, 11 running)
+[110,900 / 111,134] 217 / 247 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 4s disk-cache, darwin-sandbox ... (14 actions running)
+[110,902 / 111,134] 219 / 247 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 5s disk-cache, darwin-sandbox ... (14 actions, 12 running)
+[110,904 / 111,134] 221 / 247 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 6s disk-cache, darwin-sandbox ... (14 actions, 10 running)
+[110,906 / 111,134] 223 / 247 tests; DartCodegen @@//app/mini_client:app_routes_go_router_part; 4s disk-cache, worker ... (14 actions, 8 running)
+[110,906 / 111,134] 223 / 247 tests; DartCodegen @@//app/mini_client:app_routes_go_router_part; 12s disk-cache, worker ... (14 actions, 9 running)
+[110,913 / 111,134] 223 / 247 tests; DartCodegen @@//app/wiring/commerce_wiring:_store_routes_go_router_part; 13s disk-cache, worker ... (14 actions, 8 running)
+[110,934 / 111,134] 223 / 247 tests; DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_list_navigator_impl_inj; 13s disk-cache, worker ... (14 actions, 10 running)
+[110,949 / 111,134] 223 / 247 tests; DartCodegen @@//app/wiring/library_wiring:_reading_lists_routes_go_router_part; 3s disk-cache, worker ... (14 actions, 10 running)
+[110,958 / 111,135] 223 / 247 tests; DartCodegen @@//app/wiring/library_wiring:_reading_lists_routes_go_router_part; 4s disk-cache, worker ... (14 actions, 9 running)
+[110,960 / 111,135] 223 / 247 tests; DartCodegen @@//app/wiring/library_wiring:_reading_lists_routes_go_router_part; 5s disk-cache, worker ... (14 actions, 9 running)
+[110,966 / 111,137] 223 / 247 tests; DartCodegen @@//app/wiring/library_wiring:_reading_lists_routes_go_router_part; 6s disk-cache, worker ... (14 actions, 9 running)
+[110,969 / 111,138] 223 / 247 tests; DartCodegen @@//app/wiring/library_wiring:_reading_lists_routes_go_router_part; 7s disk-cache, worker ... (14 actions, 9 running)
+[110,975 / 111,138] 224 / 247 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 6s disk-cache, worker ... (14 actions, 10 running)
+[110,976 / 111,138] 225 / 247 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 7s disk-cache, worker ... (14 actions, 10 running)
+[111,013 / 111,138] 226 / 247 tests; DartCodegen @@//app/wiring/chronicle_wiring:_trivia_routes_go_router_part; 2s disk-cache, worker ... (9 actions running)
+[111,020 / 111,139] 227 / 247 tests; DartCodegen @@//app/wiring/chronicle_wiring:_trivia_routes_go_router_part; 3s disk-cache, worker ... (7 actions running)
+[111,023 / 111,140] 227 / 247 tests; DartCodegen @@//app/wiring/chronicle_wiring:_trivia_routes_go_router_part; 4s disk-cache, worker ... (7 actions running)
+[111,025 / 111,140] 229 / 247 tests; DartCodegen @@//app/wiring/chronicle_wiring:_trivia_routes_go_router_part; 5s disk-cache, worker ... (5 actions running)
+[111,030 / 111,140] 229 / 247 tests; DartCodegen @@//app/wiring/publishing_wiring:_comics_routes_go_router_part; 4s disk-cache, worker ... (4 actions running)
+[111,060 / 111,140] 229 / 247 tests; Compiling Dart kernel module app/wiring/account_wiring/account_wiring.flutter.kmod; 0s disk-cache, worker ... (6 actions running)
+ERROR: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a3c9c981faf666af8/app/mini_client/BUILD.bazel:318:13: Analyzing Dart sources of //app/mini_client:catalogue_test against summaries failed: (Exit 1): dartaotruntime failed: error executing DartAnalyze command (from aspects [@@ai_rules_dart+//dart/private:dart_analyzer_summary.bzl%dart_analyzer_summary, @@ai_rules_dart+//dart/private:dart_analyze_aspect.bzl%dart_analyze] on flutter_test rule target //app/mini_client:catalogue_test) external/ai_rules_flutter++flutter+flutter_darwin-arm64/dart-sdk/bin/dartaotruntime bazel-out/darwin_arm64-opt-exec/bin/external/ai_rules_dart+/dart/private/tools/analyzer_summary.aot ... (remaining 1 argument skipped)
+
+warning - app/mini_client/test/catalogue_test.dart:130:11 - The value of the local variable 'unwired' isn't used. Try removing the variable or using it. - unused_local_variable
+
+1 issue found.
+[111,081 / 111,141] 229 / 247 tests; Compiling Dart kernel module app/wiring/chronicle_wiring/routes_test.flutter_entry.kmod; 0s disk-cache, worker ... (11 actions, 8 running)
+[111,095 / 111,143] 229 / 247 tests; Testing //app/wiring/account_wiring:routes_test; 1s disk-cache, darwin-sandbox ... (14 actions, 7 running)
+[111,110 / 111,147] 231 / 247 tests; Testing //app/wiring/account_wiring:routes_test; 2s disk-cache, darwin-sandbox ... (13 actions, 7 running)
+[111,133 / 111,155] 231 / 247 tests; Testing //app/wiring/account_wiring:routes_test; 3s disk-cache, darwin-sandbox ... (14 actions, 11 running)
+[111,143 / 111,158] 232 / 247 tests; Testing //app/wiring/account_wiring:routes_test; 4s disk-cache, darwin-sandbox ... (14 actions, 8 running)
+[111,145 / 111,158] 234 / 247 tests; Testing //app/wiring/account_wiring:routes_test; 5s disk-cache, darwin-sandbox ... (13 actions, 8 running)
+[111,146 / 111,158] 235 / 247 tests; Testing //app/wiring/account_wiring:routes_test; 6s disk-cache, darwin-sandbox ... (12 actions, 8 running)
+FAIL: //app/mini_client:catalogue_test (Exit 1) (see /private/tmp/mc-ob-T-0074-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/mini_client/catalogue_test/test.log)
+INFO: From Testing //app/mini_client:catalogue_test:
+==================== Test output for //app/mini_client:catalogue_test:
+[debug] BootBloc: BootStarted BootBooting -> BootBooting
+[debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+  PASS  T-0074-AC3 a link opens the catalogue with home under it, listing every generated flow
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: exactly one matching candidate
+  Actual: _TextWidgetFinder:<Found 0 widgets with text "not wired: no route yet": []>
+   Which: means none were found but one was expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (org-dartlang-app:///app/mini_client/test/catalogue_test.dart:153:5)
+<asynchronous suspension>
+#5      McTestSession.guard (package:mc_test_utils/src/session.dart:94:7)
+<asynchronous suspension>
+#6      mcTestWidgets.<anonymous closure> (package:mc_test_utils/src/session.dart:152:9)
+<asynchronous suspension>
+#7      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#8      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1953:5)
+<asynchronous suspension>
+#9      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1707:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  org-dartlang-app:///app/mini_client/test/catalogue_test.dart line 153
+The test description was:
+  T-0074-AC3 a catalogue tile pushes its location, and Back returns to the catalogue; an unwired one
+  does nothing
+════════════════════════════════════════════════════════════════════════════════════════════════════
+  FAIL  T-0074-AC3 a catalogue tile pushes its location, and Back returns to the catalogue; an unwired one does nothing
+        String: Test failed. See exception logs above.
+        The test description was: T-0074-AC3 a catalogue tile pushes its location, and Back returns to the catalogue; an unwired one does nothing
+
+
+1 passed, 1 failed
+================================================================================
+[111,151 / 111,158] 240 / 247 tests, 1 failed; Testing //app/mini_client:reading_list_route_test; 3s disk-cache, darwin-sandbox ... (7 actions running)
+[111,151 / 111,158] 241 / 247 tests, 1 failed; Testing //app/mini_client:reading_list_route_test; 4s disk-cache, darwin-sandbox ... (7 actions running)
+[111,154 / 111,158] 244 / 247 tests, 1 failed; Testing //app/mini_client:deep_link_back_stack_test; 5s disk-cache, darwin-sandbox ... (4 actions running)
+[111,156 / 111,158] 246 / 247 tests, 1 failed; Testing //app/mini_client:analytics_screens_test; 4s disk-cache, darwin-sandbox ... (2 actions running)
+[111,157 / 111,158] 246 / 247 tests, 1 failed; Testing //app/mini_client:sign_in_guard_app_test; 5s disk-cache, darwin-sandbox
 INFO: Found 406 targets and 247 test targets...
-INFO: Elapsed time: 24.464s, Critical Path: 16.15s
-INFO: 155 processes: 105904 action cache hit, 40 disk cache hit, 62 internal, 23 darwin-sandbox, 30 worker.
-INFO: Build completed successfully, 155 total actions
-//app/wiring/account_wiring:routes_test                         (cached) PASSED in 7.9s
-//app/wiring/app_core:app_layer_test                            (cached) PASSED in 1.4s
-//app/wiring/app_core:appearance_shell_test                     (cached) PASSED in 2.5s
-//app/wiring/app_core:boot_test                                 (cached) PASSED in 2.4s
-//app/wiring/app_core:feature_flags_boot_test                   (cached) PASSED in 1.7s
-//app/wiring/app_core:flow_results_hardening_test               (cached) PASSED in 4.9s
-//app/wiring/app_core:flow_results_test                         (cached) PASSED in 2.9s
-//app/wiring/app_core:formatters_root_test                      (cached) PASSED in 0.7s
-//app/wiring/app_core:links_and_hooks_test                      (cached) PASSED in 2.6s
-//app/wiring/app_core:route_nesting_test                        (cached) PASSED in 1.5s
-//app/wiring/app_core:router_observers_test                     (cached) PASSED in 2.2s
-//app/wiring/app_core:router_ref_and_scheme_test                (cached) PASSED in 1.4s
-//app/wiring/app_core:sign_in_guard_router_test                 (cached) PASSED in 2.4s
-//app/wiring/app_core:sign_in_guard_test                        (cached) PASSED in 1.0s
-//app/wiring/chronicle_wiring:routes_test                       (cached) PASSED in 2.4s
-//app/wiring/commerce_wiring:routes_test                        (cached) PASSED in 2.8s
-//app/wiring/discovery_wiring:routes_test                       (cached) PASSED in 0.8s
-//app/wiring/library_wiring:routes_test                         (cached) PASSED in 2.2s
+INFO: Elapsed time: 53.802s, Critical Path: 32.59s
+INFO: 290 processes: 110868 action cache hit, 71 internal, 45 darwin-sandbox, 174 worker.
+ERROR: Build did NOT complete successfully
 //feature/auth/auth_signin:architecture_test                    (cached) PASSED in 0.5s
 //feature/auth/auth_signin:bdd_test                             (cached) PASSED in 14.8s
 //feature/auth/auth_signin:bloc_guards_test                     (cached) PASSED in 2.3s
@@ -264,25 +318,44 @@ INFO: Build completed successfully, 155 total actions
 //utility/mc_test_utils:init_flow_test                          (cached) PASSED in 1.4s
 //utility/mc_test_utils:isolation_test                          (cached) PASSED in 0.8s
 //app/mini_client:analytics_screens_test                                 PASSED in 4.4s
-//app/mini_client:app_test                                               PASSED in 2.1s
-//app/mini_client:bdd_test                                               PASSED in 1.5s
-//app/mini_client:catalogue_test                                         PASSED in 1.3s
-//app/mini_client:characters_search_route_test                           PASSED in 4.0s
+//app/mini_client:app_test                                               PASSED in 2.5s
+//app/mini_client:bdd_test                                               PASSED in 1.7s
+//app/mini_client:characters_search_route_test                           PASSED in 4.4s
 //app/mini_client:comic_route_test                                       PASSED in 2.3s
-//app/mini_client:deep_link_back_stack_test                              PASSED in 4.6s
-//app/mini_client:links_after_flow_test                                  PASSED in 1.4s
-//app/mini_client:not_found_test                                         PASSED in 3.7s
-//app/mini_client:reading_list_route_test                                PASSED in 5.1s
-//app/mini_client:search_route_test                                      PASSED in 3.9s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 5.1s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.7s
+//app/mini_client:not_found_test                                         PASSED in 4.3s
+//app/mini_client:reading_list_route_test                                PASSED in 5.5s
+//app/mini_client:search_route_test                                      PASSED in 4.0s
 //app/mini_client:settings_route_test                                    PASSED in 3.8s
-//app/mini_client:sign_in_guard_app_test                                 PASSED in 6.8s
-//app/mini_client:store_route_test                                       PASSED in 3.1s
-//app/mini_client:trivia_route_test                                      PASSED in 3.8s
-//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 1.0s
-//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.8s
-//app/wiring/publishing_wiring:routes_test                               PASSED in 1.2s
-//app/wiring/universe_wiring:routes_test                                 PASSED in 1.7s
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 6.1s
+//app/mini_client:store_route_test                                       PASSED in 3.6s
+//app/mini_client:trivia_route_test                                      PASSED in 4.3s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 1.3s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 1.0s
+//app/wiring/account_wiring:routes_test                                  PASSED in 6.8s
+//app/wiring/app_core:app_layer_test                                     PASSED in 1.3s
+//app/wiring/app_core:appearance_shell_test                              PASSED in 2.6s
+//app/wiring/app_core:boot_test                                          PASSED in 2.5s
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.6s
+//app/wiring/app_core:flow_results_hardening_test                        PASSED in 6.7s
+//app/wiring/app_core:flow_results_test                                  PASSED in 3.3s
+//app/wiring/app_core:formatters_root_test                               PASSED in 0.7s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.9s
+//app/wiring/app_core:route_nesting_test                                 PASSED in 2.0s
+//app/wiring/app_core:router_observers_test                              PASSED in 1.6s
+//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 2.6s
+//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 4.0s
+//app/wiring/app_core:sign_in_guard_test                                 PASSED in 1.2s
+//app/wiring/chronicle_wiring:routes_test                                PASSED in 1.3s
+//app/wiring/commerce_wiring:routes_test                                 PASSED in 1.5s
+//app/wiring/discovery_wiring:routes_test                                PASSED in 1.4s
+//app/wiring/library_wiring:routes_test                                  PASSED in 1.3s
+//app/wiring/publishing_wiring:routes_test                               PASSED in 1.4s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 1.9s
+//app/mini_client:catalogue_test                                         FAILED in 1.3s
+  /private/tmp/mc-ob-T-0074-engineer/execroot/_main/bazel-out/darwin_arm64-fastbuild/testlogs/app/mini_client/catalogue_test/test.log
 
-Executed 19 out of 247 tests: 247 tests pass.
+Executed 37 out of 247 tests: 246 tests pass and 1 fails locally.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
-exit=0
+exit=1

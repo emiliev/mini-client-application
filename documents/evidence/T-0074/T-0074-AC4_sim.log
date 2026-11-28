@@ -1,5 +1,5 @@
 $ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer build --lockfile_mode=error --config=sim //app/mini_client:mini_client_ios
-INFO: Invocation ID: b26d3235-f844-4655-ae98-b8006c65ab21
+INFO: Invocation ID: 1de1c800-6d01-47b0-aa95-f393664799e9
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -7,18 +7,27 @@ WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, dis
 Analyzing: target //app/mini_client:mini_client_ios (0 packages loaded, 0 targets configured)
 Analyzing: target //app/mini_client:mini_client_ios (0 packages loaded, 0 targets configured)
 
-Analyzing: target //app/mini_client:mini_client_ios (106 packages loaded, 4528 targets configured, 140 aspect applications)
+Analyzing: target //app/mini_client:mini_client_ios (110 packages loaded, 6159 targets configured, 140 aspect applications)
 
 INFO: Analyzed target //app/mini_client:mini_client_ios (112 packages loaded, 9094 targets configured, 595 aspect applications).
-[29,533 / 44,165] [Prepa] Creating symlink feature/comics/comics_details/_di_config_src_domain_api_comics_details_api_inj.pkg_roots.39b0c34c9976a7ea/comics__details/lib/src/presentation/bloc/comic_details_bloc.dart
-[67,397 / 74,566] [Prepa] Creating symlink feature/characters/characters_details/_details_bloc_freezed.pkg_roots.e48ff8ad040f8cff/characters__details/lib/src/presentation/bloc/character_details_bloc.dart
-[87,954 / 87,985] Compiling Dart kernel module feature/characters/characters_details/characters_details.app_debug.flutter.kmod; 0s disk-cache, worker ... (9 actions running)
-[87,956 / 87,985] DartCodegen @@//app/wiring/universe_wiring:_di_config_src_navigators_characters_search_navigator_impl_inj; 1s disk-cache, worker ... (7 actions running)
-[87,980 / 87,985] [Prepa] Linking Dart kernel @@//app/mini_client:mini_client_app
+[25,077 / 38,202] [Prepa] DartCodegen @@//app/mini_client:app_routes_go_router_part
+[56,992 / 60,848] DartCodegen @@//app/mini_client:app_routes_go_router_part; 0s disk-cache, worker ... (7 actions, 6 running)
+[70,192 / 70,621] DartCodegen @@//app/mini_client:app_routes_go_router_part; 2s disk-cache, worker ... (14 actions, 8 running)
+[70,192 / 70,621] DartCodegen @@//app/mini_client:app_routes_go_router_part; 11s disk-cache, worker ... (14 actions, 8 running)
+[70,193 / 70,621] DartCodegen @@//app/wiring/chronicle_wiring:_trivia_routes_go_router_part; 13s disk-cache, worker ... (13 actions, 8 running)
+[78,039 / 78,193] DartCodegen @@//app/wiring/discovery_wiring:_di_config_src_navigators_discovery_search_navigator_impl_inj; 14s disk-cache, worker ... (13 actions, 9 running)
+[87,929 / 87,985] DartCodegen @@//app/wiring/publishing_wiring:_comics_routes_go_router_part; 2s disk-cache, worker ... (14 actions, 8 running)
+[87,931 / 87,985] DartCodegen @@//app/wiring/publishing_wiring:_comics_routes_go_router_part; 4s disk-cache, worker ... (13 actions, 8 running)
+[87,932 / 87,985] DartCodegen @@//app/wiring/library_wiring:_reading_lists_routes_go_router_part; 6s disk-cache, worker ... (12 actions, 8 running)
+[87,950 / 87,985] DartCodegen @@//app/wiring/account_wiring:_auth_routes_go_router_part; 7s disk-cache, worker ... (8 actions running)
+[87,960 / 87,985] DartCodegen @@//app/wiring/account_wiring:_settings_routes_go_router_part; 2s disk-cache, worker ... (5 actions running)
+[87,963 / 87,985] DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 4s disk-cache, worker ... (4 actions running)
+[87,977 / 87,985] Compiling Dart kernel module app/wiring/account_wiring/account_wiring.app_debug.flutter.kmod; 0s disk-cache, worker ... (2 actions running)
+[87,982 / 87,985] Bundling mini_client_ios; 0s disk-cache, darwin-sandbox
 INFO: Found 1 target...
 Target //app/mini_client:mini_client_ios up-to-date:
   bazel-bin/app/mini_client/mini_client_ios.ipa
-INFO: Elapsed time: 10.509s, Critical Path: 6.81s
-INFO: 60 processes: 87925 action cache hit, 28 internal, 6 darwin-sandbox, 26 worker.
-INFO: Build completed successfully, 60 total actions
+INFO: Elapsed time: 31.977s, Critical Path: 23.39s
+INFO: 62 processes: 87923 action cache hit, 26 internal, 6 darwin-sandbox, 30 worker.
+INFO: Build completed successfully, 62 total actions
 exit=0

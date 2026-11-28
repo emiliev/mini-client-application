@@ -136,7 +136,8 @@ void main() {
       routes: [
         GoRoute(
           path: '/catalogue',
-          builder: (context, state) => const CataloguePage(entries: [entry]),
+          builder: (context, state) =>
+              const CataloguePage(entries: [entry, unwired]),
         ),
         GoRoute(
           path: '/some-flow',

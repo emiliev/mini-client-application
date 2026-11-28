@@ -37,11 +37,16 @@ Writes, from every spec and package:
 - the app's wiring list (`app/mini_client/lib/src/wirings.dart`: DI
   initializers, routes, `catalogueEntries`), its `*_wiring` pubspec deps and
   `app/mini_client/wirings.bzl`;
-- one **generated wiring group** per domain of the managed and mixed specs
-  (`app/wiring/<group>_wiring/`, marked by `.mcgen/wire.json`), and
-  `app_core`'s `GeneratedLocations`. Its navigator implementations are
-  written once and are then yours. A flow of a hand-written group is
-  refused for now (F-0074 section 4).
+- one **generated wiring group** per domain of the feature specs it routes
+  (`list_detail`, `search`, `section_detail`; every spec but an exemplar,
+  ejected ones while their package exists), at `app/wiring/<group>_wiring/`,
+  and `app_core`'s `GeneratedLocations`. Its navigator implementations are
+  written once and are then yours. Any other flow (another archetype, a
+  hand-written group's domain) is a warning, listed in the catalogue as not
+  wired (F-0074 section 4);
+- deletions: `.mcgen/wire.json` records what wire wrote in a group, and what
+  it no longer generates is deleted (`--check` reports it). An owned file
+  someone edited stops the run until `--force`.
 
 With package directories, `wire` writes only their flow scopes (a module
 generated outside the app, as `tool/T-0069-AC3_ld_probe.sh` does).
