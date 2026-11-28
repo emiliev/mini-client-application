@@ -12,7 +12,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **CI** | GitHub Actions (`.github/workflows/ci.yml`, `tool/ci/ci.sh`, 11 gates) on `main`, `fleet/**`, PRs and on demand; cold 44 min, warm 25 min (T-0068) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | none (paused by PO until the next session) |
+| **Active crew** | T-0069 (Opus), T-0070 (Sonnet), T-0071 (Sonnet) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -53,13 +53,13 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0048 merged: `library_reading_list_editor`, the FW exemplar.** A 3-step wizard creates or edits a reading list; the result is returned to the caller (the flow-result pattern) and home shows "List created".
 - **T-0046 merged: `discovery_search`, the SR exemplar.** Debounced search across characters and comics, grouped results, type chips, recent-search history, and a Search entry on home with a `miniclient://app/search?q=` link.
 - Resumed 2026-11-27.
-- **Pause (PO, 2026-11-27 night):** finish T-0068 (CI), then start no new tasks until the next session.
-- **Next session, in order:**
-  1. The first CI run on `main` passed (48 min, cold: GitHub caches are branch-scoped). Next: confirm that the second `main` run is warm (about 25 min), then P-123 (profile a warm CI run and cut the fixed overhead).
-  2. Second hybrid wave:
-     - P2-04, templatise the list-detail exemplar (`characters_list`) with a round-trip golden on the `mcgen` core. Address P-120(a) and (b) first.
-     - One or two hand-built features, e.g. `settings_home` with a `/settings` parent route, or `characters_search`.
-  3. Then P2-05 to P2-07 (the remaining archetypes) and P2-08 (`mcgen wire`/`buildgen`), then the batches (Phase E).
+- **Second hybrid wave (2026-11-28):**
+  - T-0069 `mcgen` list-detail archetype (P2-04)
+  - T-0070 `settings_home`
+  - T-0071 `characters_search`
+- **Next:**
+  - P-123 (CI speed: profile a warm run);
+  - P2-05 to P2-07 (the remaining archetypes) and P2-08 (`mcgen wire`/`buildgen`), then the batches (Phase E).
 
 ## Next
 Phase A de-risk spikes ([plan §5](plan/README.md#5-delivery-roadmap)): toolchain + Dart version (P3-01) → retrofit / injectable / BDD codegen shims (P3-03 to P3-05) → go_router + l10n + app shell (P3-07) → flow_builder on 3.47.7 (P1-04), alongside the perf harness (P4-01 to P4-03) and `tool/loc` (P2-02).
