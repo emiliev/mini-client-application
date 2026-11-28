@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (handed off for `/code-review` and the merge gates, ADR-0015) |
+| Status | Done (merged 2026-11-28 `d235ffee`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0070-settings-home` |
@@ -114,3 +114,9 @@ No test was deleted, skipped or weakened, and there is no `// ignore:`.
 ### Follow-ups (for the TL's `pending-work.md`)
 - Retry or report a failed `GET v1/me`, and do not show a raw internal id (`u-101`) as the name.
 - A test that the configs' `version` equals `app/mini_client/pubspec.yaml`'s version.
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 1 important bug (Sign in stayed disabled while the best-effort server sign-out ran) and 4 nits. Fix round `37c93b47`: fixed the bug, plus nit 3 (`purpose` required and nullable) and nit 5 (empty `version`). The remaining nits went to P-124.
+- TL checks: no deleted or skipped tests, and no modified test lost assertions.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 241/241 tests, lint clean, `mc_arch_check` OK, sim app built, format gate passed, and a 20-run uncached flake check over 11 targets was clean.
+- P-119's `settings_home` and `/settings` parent are done.
