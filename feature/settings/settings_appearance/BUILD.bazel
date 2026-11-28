@@ -70,8 +70,8 @@ dart_library(
 
 # --- freezed ----------------------------------------------------------------
 _FREEZED = {
-    "flow_state": "lib/src/flow/settings_appearance_flow_state.dart",
     "appearance_bloc": "lib/src/presentation/bloc/appearance_bloc.dart",
+    "flow_state": "lib/src/flow/settings_appearance_flow_state.dart",
 }
 
 [dart_codegen(
@@ -114,8 +114,8 @@ filegroup(
 )
 
 _CODEGEN = [
-    ":_flow_state_freezed",
     ":_appearance_bloc_freezed",
+    ":_flow_state_freezed",
     ":di_config",
     ":_l10n",
 ]
@@ -157,18 +157,18 @@ flutter_library(
 # widget tests: the German and pseudo-locale BDD scenarios, and the density
 # and theme tests in flow_scope_test.
 _TEST_DEPS = [
-    "//utility/mc_analytics",
+    "//utility/mc_analytics",  # keep
     "//utility/mc_api_auth",
     "//utility/mc_appearance",
     "//utility/mc_di",
     "//utility/mc_ds_inputs",
-    "//utility/mc_ds_navigation",
-    "//utility/mc_ds_overlays",
-    "//utility/mc_feature_flow",
+    "//utility/mc_ds_navigation",  # keep
+    "//utility/mc_ds_overlays",  # keep
+    "//utility/mc_feature_flow",  # keep
     "//utility/mc_fixtures_identity",
-    "//utility/mc_l10n_core",
-    "//utility/mc_mocked_backend",
-    "//utility/mc_session",
+    "//utility/mc_l10n_core",  # keep
+    "//utility/mc_mocked_backend",  # keep
+    "//utility/mc_session",  # keep
     "//utility/mc_storage",
     "@pub_deps//:dio",
     "@pub_deps//:mocktail",

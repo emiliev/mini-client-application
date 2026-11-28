@@ -84,15 +84,15 @@ dart_library(
 
 # --- freezed ----------------------------------------------------------------
 _FREEZED = {
+    "banners_bloc": "lib/src/presentation/bloc/banners_bloc.dart",
+    "cart_summary_bloc": "lib/src/presentation/bloc/cart_summary_bloc.dart",
+    "categories_bloc": "lib/src/presentation/bloc/categories_bloc.dart",
+    "category_products_bloc": "lib/src/presentation/bloc/category_products_bloc.dart",
+    "deals_bloc": "lib/src/presentation/bloc/deals_bloc.dart",
+    "featured_bloc": "lib/src/presentation/bloc/featured_bloc.dart",
+    "flow_state": "lib/src/flow/store_home_flow_state.dart",
     "store": "lib/src/domain/model/store.dart",
     "store_dto": "lib/src/domain/model/store_dto.dart",
-    "flow_state": "lib/src/flow/store_home_flow_state.dart",
-    "banners_bloc": "lib/src/presentation/bloc/banners_bloc.dart",
-    "deals_bloc": "lib/src/presentation/bloc/deals_bloc.dart",
-    "categories_bloc": "lib/src/presentation/bloc/categories_bloc.dart",
-    "featured_bloc": "lib/src/presentation/bloc/featured_bloc.dart",
-    "cart_summary_bloc": "lib/src/presentation/bloc/cart_summary_bloc.dart",
-    "category_products_bloc": "lib/src/presentation/bloc/category_products_bloc.dart",
 }
 
 [dart_codegen(
@@ -215,17 +215,17 @@ filegroup(
 )
 
 _CODEGEN = [
+    ":_banners_bloc_freezed",
+    ":_cart_summary_bloc_freezed",
+    ":_categories_bloc_freezed",
+    ":_category_products_bloc_freezed",
+    ":_deals_bloc_freezed",
+    ":_featured_bloc_freezed",
+    ":_flow_state_freezed",
     ":_store_freezed",
     ":_store_dto_freezed",
     ":_store_dto_g",
     ":_store_home_api_g",
-    ":_flow_state_freezed",
-    ":_banners_bloc_freezed",
-    ":_deals_bloc_freezed",
-    ":_categories_bloc_freezed",
-    ":_featured_bloc_freezed",
-    ":_cart_summary_bloc_freezed",
-    ":_category_products_bloc_freezed",
     ":di_config",
     ":_l10n",
 ]
@@ -266,24 +266,24 @@ flutter_library(
 
 # --- tests (R6: BDD + contract + l10n + golden; no solitary unit tests) -----
 _TEST_DEPS = [
-    "//utility/mc_analytics",
+    "//utility/mc_analytics",  # keep
     "//utility/mc_api_auth",
     "//utility/mc_di",
     "//utility/mc_ds_cards",
-    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_feedback",  # keep
     "//utility/mc_ds_lists",
     "//utility/mc_ds_media",
     "//utility/mc_ds_navigation",
-    "//utility/mc_feature_flags",
+    "//utility/mc_feature_flags",  # keep
     "//utility/mc_feature_flow",
     "//utility/mc_fixtures_commerce",
     "//utility/mc_fixtures_identity",
     "//utility/mc_fixtures_media",
-    "//utility/mc_formatters",
+    "//utility/mc_formatters",  # keep
     "//utility/mc_l10n_core",
-    "//utility/mc_media",
+    "//utility/mc_media",  # keep
     "//utility/mc_mocked_backend",
-    "//utility/mc_session",
+    "//utility/mc_session",  # keep
     "@pub_deps//:dio",
     "@pub_deps//:mocktail",
 ]
@@ -343,28 +343,6 @@ flutter_test(
     ],
 )
 
-flutter_test(
-    name = "golden_test",
-    size = "medium",
-    srcs = glob(["test/feature/util/*.dart"]),
-    data = [
-        "//utility/mc_ds_theme:fonts",
-        "//utility/mc_fixtures_media:asset_files",
-    ] + glob(["test/golden/goldens/**"], allow_empty = True),
-    language_version = _LANG,
-    main = "test/golden/store_home_golden_test.dart",
-    package_name = _PKG,
-    tags = ["golden"],
-    target_compatible_with = ["@platforms//os:macos"],
-    deps = _TEST_DEPS + [
-        ":store_home",
-        "//utility/mc_ds_tokens",
-        "//utility/mc_test_utils",
-        "@pub_deps//:flutter",
-        "@pub_deps//:flutter_test",
-    ],
-)
-
 # R4 and R15 conformance, and no floating-point money. The list of
 # generator-read files is written from the same glob as :_stage, so the check
 # cannot drift from the staging library.
@@ -386,3 +364,27 @@ dart_test(
     package_name = _PKG,
     deps = ["@pub_deps//:test"],
 )
+
+# mcgen:keep build
+flutter_test(
+    name = "golden_test",
+    size = "medium",
+    srcs = glob(["test/feature/util/*.dart"]),
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ] + glob(["test/golden/goldens/**"], allow_empty = True),
+    language_version = _LANG,
+    main = "test/golden/store_home_golden_test.dart",
+    package_name = _PKG,
+    tags = ["golden"],
+    target_compatible_with = ["@platforms//os:macos"],
+    deps = _TEST_DEPS + [
+        ":store_home",
+        "//utility/mc_ds_tokens",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter",
+        "@pub_deps//:flutter_test",
+    ],
+)
+# mcgen:end build

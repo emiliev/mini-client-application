@@ -68,15 +68,6 @@ _PURE_SRCS = glob(
     exclude = MC_GENERATED_DART,
 )
 
-# The engine and what it reads (ADR-0014): scoring, the engine, the domain
-# model. No timers, no clock, no Flutter.
-_ENGINE_SRCS = [
-    "lib/src/domain/engine/scoring.dart",
-    "lib/src/domain/engine/trivia_engine.dart",
-    "lib/src/domain/model/comic_id.dart",
-    "lib/src/domain/model/trivia.dart",
-]
-
 # Generator input only (V3-18): never a dep of the package library or a test.
 dart_library(
     name = "_stage",
@@ -92,12 +83,12 @@ dart_library(
 
 # --- freezed ----------------------------------------------------------------
 _FREEZED = {
-    "trivia": "lib/src/domain/model/trivia.dart",
-    "trivia_dto": "lib/src/domain/model/trivia_dto.dart",
     "flow_state": "lib/src/flow/trivia_quiz_flow_state.dart",
-    "setup_bloc": "lib/src/presentation/bloc/trivia_setup_bloc.dart",
     "play_bloc": "lib/src/presentation/bloc/trivia_play_bloc.dart",
     "results_bloc": "lib/src/presentation/bloc/trivia_results_bloc.dart",
+    "setup_bloc": "lib/src/presentation/bloc/trivia_setup_bloc.dart",
+    "trivia": "lib/src/domain/model/trivia.dart",
+    "trivia_dto": "lib/src/domain/model/trivia_dto.dart",
 }
 
 [dart_codegen(
@@ -113,20 +104,6 @@ _FREEZED = {
         "@pub_deps//:json_annotation",
     ] if name == "trivia_dto" else [":_stage"],
 ) for name, src in _FREEZED.items()]
-
-# The engine lane: analysed by `--config=lint` with only pure-Dart deps, so
-# a Flutter import in the engine or its model fails the lint gate.
-dart_library(
-    name = "_engine",
-    package_name = _PKG,
-    srcs = _ENGINE_SRCS + [":_trivia_freezed"],
-    language_version = _LANG,
-    tags = ["no-dart-format"],
-    deps = [
-        "//utility/mc_media",
-        "@pub_deps//:freezed_annotation",
-    ],
-)
 
 # --- trivia_dto: json over the freezed output -------------------------------
 dart_library(
@@ -230,14 +207,14 @@ filegroup(
 )
 
 _CODEGEN = [
+    ":_flow_state_freezed",
+    ":_play_bloc_freezed",
+    ":_results_bloc_freezed",
+    ":_setup_bloc_freezed",
     ":_trivia_freezed",
     ":_trivia_dto_freezed",
     ":_trivia_dto_g",
     ":_trivia_quiz_api_g",
-    ":_flow_state_freezed",
-    ":_setup_bloc_freezed",
-    ":_play_bloc_freezed",
-    ":_results_bloc_freezed",
     ":di_config",
     ":_l10n",
 ]
@@ -279,26 +256,26 @@ flutter_library(
 # --- tests (BDD + contract + l10n, plus plain unit tests of the engine; no
 # feature goldens: the painters are checked on a recording canvas; ADR-0015) --
 _TEST_DEPS = [
-    "//utility/mc_analytics",
+    "//utility/mc_analytics",  # keep
     "//utility/mc_api_auth",
-    "//utility/mc_ds_buttons",
     "//utility/mc_di",
+    "//utility/mc_ds_buttons",
     "//utility/mc_ds_charts",
     "//utility/mc_ds_media",
-    "//utility/mc_ds_navigation",
+    "//utility/mc_ds_navigation",  # keep
     "//utility/mc_ds_overlays",
-    "//utility/mc_ds_theme",
-    "//utility/mc_ds_tokens",
-    "//utility/mc_feature_flags",
-    "//utility/mc_feature_flow",
+    "//utility/mc_ds_theme",  # keep
+    "//utility/mc_ds_tokens",  # keep
+    "//utility/mc_feature_flags",  # keep
+    "//utility/mc_feature_flow",  # keep
     "//utility/mc_fixtures_editorial",
     "//utility/mc_fixtures_identity",
     "//utility/mc_fixtures_media",
-    "//utility/mc_l10n_core",
-    "//utility/mc_media",
+    "//utility/mc_l10n_core",  # keep
+    "//utility/mc_media",  # keep
     "//utility/mc_mocked_backend",
-    "//utility/mc_monitoring",
-    "//utility/mc_session",
+    "//utility/mc_monitoring",  # keep
+    "//utility/mc_session",  # keep
     "@pub_deps//:dio",
     "@pub_deps//:mocktail",
 ]
@@ -329,7 +306,7 @@ flutter_test(
         ":trivia_quiz",
         "//utility/mc_fixtures_editorial",
         "//utility/mc_fixtures_identity",
-        "//utility/mc_media",
+        "//utility/mc_media",  # keep
         "//utility/mc_mocked_backend",
         "@pub_deps//:dio",
         "@pub_deps//:flutter_test",
@@ -386,6 +363,30 @@ genrule(
     cmd = "cat > $@ <<'EOF'\n" + "\n".join(_PURE_SRCS) + "\nEOF",
 )
 
+# mcgen:keep build
+# The engine and what it reads (ADR-0014): scoring, the engine, the domain
+# model. No timers, no clock, no Flutter.
+_ENGINE_SRCS = [
+    "lib/src/domain/engine/scoring.dart",
+    "lib/src/domain/engine/trivia_engine.dart",
+    "lib/src/domain/model/comic_id.dart",
+    "lib/src/domain/model/trivia.dart",
+]
+
+# The engine lane: analysed by `--config=lint` with only pure-Dart deps, so
+# a Flutter import in the engine or its model fails the lint gate.
+dart_library(
+    name = "_engine",
+    package_name = _PKG,
+    srcs = _ENGINE_SRCS + [":_trivia_freezed"],
+    language_version = _LANG,
+    tags = ["no-dart-format"],
+    deps = [
+        "//utility/mc_media",
+        "@pub_deps//:freezed_annotation",
+    ],
+)
+
 genrule(
     name = "_engine_srcs_list",
     outs = ["test/architecture/engine_srcs.txt"],
@@ -434,3 +435,4 @@ dart_test(
     package_name = _PKG,
     deps = ["@pub_deps//:test"],
 )
+# mcgen:end build
