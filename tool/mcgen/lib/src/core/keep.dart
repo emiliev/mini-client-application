@@ -9,11 +9,19 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 
+/// Whether [path] is a Bazel build file (`BUILD.bazel`, `BUILD`, `*.bzl`).
+bool isBazelFile(String path) {
+  final base = path.split('/').last;
+  return base == 'BUILD.bazel' || base == 'BUILD' || base.endsWith('.bzl');
+}
+
 /// The line-comment prefix keep markers use in a file, or null when the file
 /// kind has no keep regions.
 String? keepPrefixFor(String path) {
   if (path.endsWith('.dart')) return '//';
-  if (path.endsWith('.yaml') || path.endsWith('.yml')) return '#';
+  if (path.endsWith('.yaml') || path.endsWith('.yml') || isBazelFile(path)) {
+    return '#';
+  }
   return null;
 }
 

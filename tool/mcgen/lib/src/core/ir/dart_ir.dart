@@ -272,8 +272,10 @@ class DartLibrary {
   DartLibrary(
     this.path, {
     this.preamble,
+    this.imports = const [],
     this.exports = const [],
     this.parts = const [],
+    this.partOf,
     this.decls = const [],
   }) {
     if (!path.endsWith('.dart') ||
@@ -294,15 +296,45 @@ class DartLibrary {
   /// trailing newline or blank line).
   final String? preamble;
 
+  /// URIs imported whatever the code references: what a keep region's
+  /// hand-written body needs, which mcgen cannot see (the spec declares
+  /// them), or a library used only for its generated part
+  /// (`di_initializer.config.dart`).
+  final List<String> imports;
+
   final List<Exports> exports;
 
   /// `part` URIs, relative (`greeting.freezed.dart`).
   final List<String> parts;
+
+  /// For a part file: its library's URI, relative (`x_bloc.dart`). A part
+  /// has no directives of its own; its references are imported by its
+  /// library, and its declarations are defined there.
+  final String? partOf;
+
+  /// The module-relative path of the library this part belongs to.
+  String? get partOfPath {
+    final of = partOf;
+    if (of == null) return null;
+    final dir = path.contains('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+    return dir.isEmpty ? of : '$dir/$of';
+  }
   final List<Decl> decls;
 
   /// The `package:` URI when the file is under `lib/`, else null.
   String? uriIn(String package) =>
       path.startsWith('lib/') ? 'package:$package/${path.substring(4)}' : null;
+
+  /// The URI other libraries of the module resolve this one's declarations
+  /// to: its `package:` URI under `lib/`, else `path:<module-relative path>`
+  /// (a test file, which only other test files may import, relatively). A
+  /// part's declarations belong to its library.
+  String symbolUri(String package) {
+    final at = partOfPath ?? path;
+    return at.startsWith('lib/')
+        ? 'package:$package/${at.substring(4)}'
+        : 'path:$at';
+  }
 
   Iterable<Code> get codes => [for (final d in decls) ...d.codes];
 

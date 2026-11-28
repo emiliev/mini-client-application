@@ -95,15 +95,26 @@ String _normalise(String path, String content) {
 
 /// Compares [gen] with the exemplar in [exemplarDir]. Exemplar files that
 /// match [ignore] are not expected from the generator.
+///
+/// Owned files (the spec's `owned:` globs, ADR-0017) are hand-written after
+/// their first write: an owned file the generator emits must exist in the
+/// exemplar, but its content is not compared, and an exemplar file matching
+/// an owned glob that the generator does not emit (a legacy golden) is not
+/// expected from it.
 TreeDiff compareToExemplar(
   GeneratedModule gen,
   String exemplarDir, {
   List<String> ignore = defaultExemplarIgnores,
 }) {
-  final exemplar = listTree(exemplarDir, ignore: ignore).toSet();
+  final owned = [for (final g in gen.spec.owned) globToRegExp(g)];
+  final exemplar = {
+    for (final f in listTree(exemplarDir, ignore: ignore))
+      if (gen.files.containsKey(f) || !owned.any((g) => g.hasMatch(f))) f,
+  };
   final generated = gen.files.keys.toSet();
   final differing = <String, String>{};
   for (final path in (generated.intersection(exemplar).toList()..sort())) {
+    if (gen.files[path]!.ownership == 'owned') continue;
     final a = _normalise(path, gen.files[path]!.content);
     final b = _normalise(
       path,

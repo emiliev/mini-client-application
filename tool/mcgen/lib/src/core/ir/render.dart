@@ -8,6 +8,7 @@
 import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
 import 'package:mcgen/src/core/ir/symbols.dart';
+import 'package:path/path.dart' as p;
 
 /// A library after resolution: what it imports and re-exports.
 class ResolvedLibrary {
@@ -15,7 +16,8 @@ class ResolvedLibrary {
 
   final DartLibrary library;
 
-  /// Sorted URIs.
+  /// Sorted URIs: `dart:`, `package:` and `path:` (another test file of the
+  /// module, written as a relative import).
   final List<String> imports;
 
   /// Owning URI -> sorted names to `show`.
@@ -36,18 +38,32 @@ ResolvedLibrary resolveLibrary(
   DartLibrary lib,
   SymbolTable table, {
   String? selfUri,
+  List<DartLibrary> parts = const [],
 }) {
-  final imports = <String>{};
-  for (final code in lib.codes) {
+  final fromTest = !lib.path.startsWith('lib/');
+  final own = selfUri ?? 'path:${lib.path}';
+  final imports = <String>{
+    ...lib.imports,
+    for (final part in parts) ...part.imports,
+  };
+  for (final code in [
+    ...lib.codes,
+    for (final part in parts) ...part.codes,
+  ]) {
     for (final r in code.refs) {
       final String? uri;
       try {
-        uri = table.resolve(r);
+        uri = table.resolve(r, fromTest: fromTest);
       } on SymbolError catch (e) {
         throw SymbolError('${lib.path}: ${e.message}');
       }
-      if (uri != null && uri != selfUri && uri != 'dart:core') imports.add(uri);
+      if (uri != null && uri != own && uri != 'dart:core') imports.add(uri);
     }
+  }
+  if (!fromTest && imports.any(isPathUri)) {
+    throw SymbolError(
+      '${lib.path}: a lib/ file cannot import a test file (${imports.where(isPathUri).join(', ')})',
+    );
   }
   final exports = <String, Set<String>>{};
   for (final e in lib.exports) {
@@ -76,6 +92,13 @@ String renderLibrary(ResolvedLibrary r) {
   final lib = r.library;
   final b = StringBuffer();
   if (lib.preamble != null) b.write(lib.preamble);
+  if (lib.partOf != null) {
+    b
+      ..writeln("part of '${lib.partOf}';")
+      ..writeln();
+    b.write([for (final d in lib.decls) _decl(d)].join('\n\n'));
+    return '${b.toString().trimRight()}\n';
+  }
   final sections = <List<String>>[
     [
       for (final u in r.imports)
@@ -83,7 +106,12 @@ String renderLibrary(ResolvedLibrary r) {
     ],
     [
       for (final u in r.imports)
-        if (!u.startsWith('dart:')) "import '$u';",
+        if (!u.startsWith('dart:') && !isPathUri(u)) "import '$u';",
+    ],
+    [
+      for (final u in r.imports)
+        if (isPathUri(u))
+          "import '${p.posix.relative(u.substring(5), from: p.posix.dirname(lib.path))}';",
     ],
     [
       for (final e in r.exports.entries)

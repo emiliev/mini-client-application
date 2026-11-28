@@ -350,7 +350,9 @@ class _Session {
         err.writeln('  $d');
       }
       err.writeln(
-        'remedies: move the edit into a keep region or the spec, add the file to owned: (mixed modules), or pass --force',
+        drift.every((d) => d.kind == DriftKind.roundTrip)
+            ? 'remedies: an exemplar must equal its render outside keep regions: fix the spec or the templates, or move hand-written code into a keep region'
+            : 'remedies: move the edit into a keep region or the spec, add the file to owned: (mixed modules), or pass --force',
       );
       return 1;
     }
@@ -418,7 +420,7 @@ class _Session {
     final drift = <Drift>[];
     for (final s in specs) {
       GeneratedModule? g;
-      if (s.ownership != Ownership.ejected) {
+      if (s.ownership != Ownership.ejected || s.exemplar) {
         try {
           g = generator.generate(
             s,

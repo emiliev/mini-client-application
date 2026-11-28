@@ -83,6 +83,29 @@ class EntitySpec extends SpecPart {
   final String? doc;
 }
 
+/// A query parameter (ADR-0017): a bare name, or a typed one.
+class QueryParamSpec extends SpecPart {
+  QueryParamSpec(
+    super.node,
+    super.path, {
+    required this.name,
+    this.type,
+    this.defaultValue,
+    this.hasDefault = false,
+    this.required = false,
+    this.doc,
+  });
+
+  final String name;
+
+  /// Null for a bare name: the archetype picks the type.
+  final TypeExpr? type;
+  final Object? defaultValue;
+  final bool hasDefault;
+  final bool required;
+  final String? doc;
+}
+
 class EndpointSpec extends SpecPart {
   EndpointSpec(
     super.node,
@@ -90,7 +113,7 @@ class EndpointSpec extends SpecPart {
     required this.id,
     required this.method,
     required this.urlPath,
-    this.query = const [],
+    this.params = const [],
     this.body,
     this.returns,
     this.auth = false,
@@ -100,7 +123,12 @@ class EndpointSpec extends SpecPart {
   final String id;
   final String method;
   final String urlPath;
-  final List<String> query;
+
+  /// The query parameters, in order.
+  final List<QueryParamSpec> params;
+
+  /// Their names.
+  List<String> get query => [for (final q in params) q.name];
   final TypeExpr? body;
   final TypeExpr? returns;
   final bool auth;
@@ -209,6 +237,23 @@ class NavigatorSpec extends SpecPart {
   final String? doc;
 }
 
+/// One string of the module's ARBs (ADR-0017).
+class L10nStringSpec extends SpecPart {
+  L10nStringSpec(
+    super.node,
+    super.path, {
+    required this.key,
+    required this.text,
+    this.description,
+  });
+
+  final String key;
+
+  /// Locale -> text, in the spec's order.
+  final Map<String, String> text;
+  final String? description;
+}
+
 class L10nSpec extends SpecPart {
   L10nSpec(
     super.node,
@@ -218,6 +263,7 @@ class L10nSpec extends SpecPart {
     this.placeholders = 0,
     this.plurals = 0,
     this.selects = 0,
+    this.strings = const [],
   });
 
   final List<String> locales;
@@ -225,6 +271,7 @@ class L10nSpec extends SpecPart {
   final int placeholders;
   final int plurals;
   final int selects;
+  final List<L10nStringSpec> strings;
 }
 
 class MixinSpec extends SpecPart {
@@ -238,16 +285,22 @@ class ScenarioSpec extends SpecPart {
   ScenarioSpec(
     super.node,
     super.path, {
-    required this.id,
     required this.title,
     required this.steps,
+    this.id,
     this.tags = const [],
+    this.examples = const [],
   });
 
-  final String id;
+  /// `MC-<module>-NN`; null only in an exemplar (ADR-0017).
+  final String? id;
   final String title;
   final List<String> steps;
   final List<String> tags;
+
+  /// A Scenario Outline's Examples table, header row first; empty for a
+  /// plain scenario.
+  final List<List<String>> examples;
 }
 
 class OutlineSpec extends SpecPart {
@@ -269,13 +322,26 @@ class BddFeatureSpec extends SpecPart {
     super.node,
     super.path, {
     required this.feature,
-    this.background,
+    this.title,
+    this.description,
+    this.backgroundSteps = const [],
     this.scenarios = const [],
     this.outlines = const [],
   });
 
   final String feature;
-  final String? background;
+
+  /// The `Feature:` line; null: the feature name in words.
+  final String? title;
+
+  /// The lines under the `Feature:` line.
+  final String? description;
+
+  /// The Background's steps (one or several).
+  final List<String> backgroundSteps;
+
+  /// The first background step (the `background: <step>` form).
+  String? get background => backgroundSteps.firstOrNull;
   final List<ScenarioSpec> scenarios;
   final List<OutlineSpec> outlines;
 }
@@ -292,6 +358,7 @@ class ModuleSpec extends SpecPart {
     required this.archetype,
     required this.ownership,
     required this.specHash,
+    this.exemplar = false,
     this.description,
     this.sizeClass,
     this.seedSalt = 0,
@@ -323,6 +390,10 @@ class ModuleSpec extends SpecPart {
   final Tier tier;
   final String archetype;
   final Ownership ownership;
+
+  /// The archetype's hand-built exemplar (ejected; ADR-0017): gen writes
+  /// only its manifest and `--check` is the round-trip golden.
+  final bool exemplar;
 
   /// sha256 of the canonical JSON of the document: comments and key order in
   /// the YAML do not change it.
@@ -520,6 +591,7 @@ class _Loader {
       tier: tier,
       archetype: m['archetype'] as String,
       ownership: ownership,
+      exemplar: opt<bool>(m, 'exemplar') ?? false,
       specHash: sha256
           .convert(utf8.encode(canonicalJson(yamlToPlain(m))))
           .toString(),
@@ -580,6 +652,19 @@ class _Loader {
               placeholders: opt<int>(l10nNode, 'placeholders') ?? 0,
               plurals: opt<int>(l10nNode, 'plurals') ?? 0,
               selects: opt<int>(l10nNode, 'selects') ?? 0,
+              strings: [
+                for (final (i, n) in list(l10nNode, 'strings').indexed)
+                  L10nStringSpec(
+                    n,
+                    'l10n.strings[$i]',
+                    key: (n as YamlMap)['key'] as String,
+                    description: opt<String>(n, 'description'),
+                    text: {
+                      for (final e in (n['text'] as YamlMap).entries)
+                        '${e.key}': '${e.value}',
+                    },
+                  ),
+              ],
             )
           : null,
       mixins: [
@@ -607,13 +692,34 @@ class _Loader {
     return spec;
   }
 
+  QueryParamSpec _query(YamlNode n, String path) {
+    if (n is! YamlMap) {
+      return QueryParamSpec(n, path, name: '${n.value}');
+    }
+    return QueryParamSpec(
+      n,
+      path,
+      name: n['name'] as String,
+      type: type(n, 'type', path),
+      defaultValue: n.nodes['default'] == null
+          ? null
+          : yamlToPlain(n.nodes['default']!),
+      hasDefault: n.containsKey('default'),
+      required: opt<bool>(n, 'required') ?? false,
+      doc: opt<String>(n, 'doc'),
+    );
+  }
+
   EndpointSpec _endpoint(YamlMap m, String path) => EndpointSpec(
     m,
     path,
     id: m['id'] as String,
     method: m['method'] as String,
     urlPath: m['path'] as String,
-    query: strings(m, 'query'),
+    params: [
+      for (final (i, n) in list(m, 'query').indexed)
+        _query(n, '$path.query[$i]'),
+    ],
     body: type(m, 'body', path),
     returns: type(m, 'returns', path),
     auth: opt<bool>(m, 'auth') ?? false,
@@ -674,16 +780,26 @@ class _Loader {
     m,
     path,
     feature: m['feature'] as String,
-    background: opt<String>(m, 'background'),
+    title: opt<String>(m, 'title'),
+    description: opt<String>(m, 'description'),
+    backgroundSteps: switch (m.nodes['background']) {
+      YamlList() => strings(m, 'background'),
+      final YamlScalar s => ['${s.value}'],
+      _ => const [],
+    },
     scenarios: [
       for (final (i, n) in list(m, 'scenarios').indexed)
         ScenarioSpec(
           n,
           '$path.scenarios[$i]',
-          id: (n as YamlMap)['id'] as String,
+          id: opt<String>(n as YamlMap, 'id'),
           title: n['title'] as String,
           steps: strings(n, 'steps'),
           tags: strings(n, 'tags'),
+          examples: [
+            for (final row in list(n, 'examples'))
+              [for (final c in (row as YamlList).nodes) '${c.value}'],
+          ],
         ),
     ],
     outlines: [

@@ -8,6 +8,7 @@ import 'dart:io';
 import 'package:mcgen/src/core/generator.dart';
 import 'package:mcgen/src/core/keep.dart';
 import 'package:mcgen/src/core/manifest.dart';
+import 'package:mcgen/src/core/roundtrip.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
 import 'package:path/path.dart' as p;
 
@@ -26,7 +27,11 @@ enum DriftKind {
   orphanKeep('orphan-keep'),
 
   /// A file mcgen would write exists but mcgen never wrote it.
-  unmanaged('unmanaged');
+  unmanaged('unmanaged'),
+
+  /// An exemplar differs from its render (ADR-0017): the templates, the
+  /// spec or the exemplar changed outside its keep regions.
+  roundTrip('round-trip');
 
   const DriftKind(this.label);
 
@@ -107,6 +112,7 @@ WritePlan planWrite(
 }) {
   final rel = gen.spec.moduleDir;
   String at(String path) => '$rel/$path';
+  if (gen.spec.exemplar) return _planExemplar(gen, moduleDirAbs);
   if (gen.spec.ownership == Ownership.ejected) {
     return WritePlan(
       moduleDir: rel,
@@ -308,6 +314,40 @@ WritePlan planWrite(
     notes: notes,
     manifestText: text,
     manifestChanged: text != oldText,
+  );
+}
+
+/// An exemplar (ADR-0017) is hand-written: gen never writes its files. The
+/// plan is the round-trip golden (plan 02 KD1): every difference between the
+/// render and the exemplar is drift, and only the manifest is ever written,
+/// so tool/loc can tell the template's lines from the hand-written ones.
+WritePlan _planExemplar(GeneratedModule gen, String moduleDirAbs) {
+  final rel = gen.spec.moduleDir;
+  final diff = compareToExemplar(gen, moduleDirAbs);
+  final drift = <Drift>[
+    for (final f in diff.onlyGenerated)
+      Drift(
+        '$rel/$f',
+        DriftKind.roundTrip,
+        'rendered, but not in the exemplar',
+      ),
+    for (final f in diff.onlyExemplar)
+      Drift(
+        '$rel/$f',
+        DriftKind.roundTrip,
+        'in the exemplar, but not rendered',
+      ),
+    for (final e in diff.differing.entries)
+      Drift('$rel/${e.key}', DriftKind.roundTrip, e.value),
+  ]..sort();
+  final text = gen.manifest.encode();
+  return WritePlan(
+    moduleDir: rel,
+    changes: const [],
+    drift: drift,
+    notes: const ['exemplar: only the manifest is written'],
+    manifestText: text,
+    manifestChanged: text != _read(p.join(moduleDirAbs, manifestPath)),
   );
 }
 

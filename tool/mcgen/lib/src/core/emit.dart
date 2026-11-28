@@ -2,6 +2,7 @@
 
 import 'package:mcgen/src/core/brick.dart';
 import 'package:mcgen/src/core/config.dart';
+import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
 import 'package:mcgen/src/core/ir/render.dart';
 import 'package:mcgen/src/core/ir/symbols.dart';
@@ -107,13 +108,13 @@ class EmitContext {
   String get package => spec.module;
 
   /// Adds a Dart library; its named declarations are registered as defined
-  /// in it (only `lib/` files have a URI others can import).
+  /// in it: under its `package:` URI in `lib/`, else under a `path:` URI
+  /// that only the module's other test files resolve (relatively).
   void library(DartLibrary lib, {bool owned = false}) {
     _claim(lib.path);
     _libraries[lib.path] = lib;
     if (owned) _ownedLibraries.add(lib.path);
-    final uri = lib.uriIn(package);
-    if (uri == null) return;
+    final uri = lib.symbolUri(package);
     for (final d in lib.decls) {
       final name = d.name;
       if (name != null) symbols.define(name, uri);
@@ -161,16 +162,75 @@ class EmitContext {
     }
   }
 
+  /// Renders brick [name] like [brick], but each `.dart` file it produces
+  /// becomes a library: the template holds declarations only, writes its
+  /// references as `«Name»` (see `templateRefs`), and mcgen writes the
+  /// imports. [imports] adds URIs per output path that the code uses without
+  /// naming a symbol; [defines] names what each file declares, so other
+  /// libraries can reference it.
+  void dartBrick(
+    String name,
+    Map<String, Object?> vars, {
+    Map<String, List<String>> imports = const {},
+    Map<String, List<String>> defines = const {},
+    bool owned = false,
+  }) {
+    bricks[name].render(vars).forEach((path, content) {
+      if (!path.endsWith('.dart')) {
+        file(path, content, owned: owned);
+        return;
+      }
+      final names = defines[path] ?? const <String>[];
+      library(
+        DartLibrary(
+          path,
+          imports: imports[path] ?? const [],
+          decls: [
+            RawDecl(
+              Code(templateRefs(content.trimRight())),
+              name: names.firstOrNull,
+            ),
+          ],
+        ),
+        owned: owned,
+      );
+      final lib = _libraries[path]!;
+      for (final n in names.skip(1)) {
+        symbols.define(n, lib.symbolUri(package));
+      }
+    });
+  }
+
   /// Resolves imports, renders every library, then the deferred files.
   /// Throws [SymbolError] for unknown or ambiguous references.
   (List<EmittedFile>, UseGraph) finish() {
+    final parts = <String, List<DartLibrary>>{};
+    for (final l in _libraries.values) {
+      final of = l.partOfPath;
+      if (of == null) continue;
+      if (!_libraries.containsKey(of)) {
+        throw StateError('${l.path} is a part of $of, which is not emitted');
+      }
+      parts.putIfAbsent(of, () => []).add(l);
+    }
     final resolved = [
       for (final path in (_libraries.keys.toList()..sort()))
-        resolveLibrary(
-          _libraries[path]!,
-          symbols,
-          selfUri: _libraries[path]!.uriIn(package),
-        ),
+        if (_libraries[path]!.partOf == null)
+          resolveLibrary(
+            _libraries[path]!,
+            symbols,
+            selfUri: _libraries[path]!.uriIn(package),
+            parts: parts[path] ?? const [],
+          ),
+    ];
+    final partFiles = [
+      for (final l in _libraries.values)
+        if (l.partOf != null)
+          EmittedFile(
+            l.path,
+            renderLibrary(ResolvedLibrary(l, const [], const {})),
+            owned: _ownedLibraries.contains(l.path),
+          ),
     ];
     final graph = UseGraph(package, resolved);
     final out = <EmittedFile>[
@@ -180,6 +240,7 @@ class EmitContext {
           renderLibrary(r),
           owned: _ownedLibraries.contains(r.library.path),
         ),
+      ...partFiles,
       ..._files.values,
       for (final e in _deferred.entries)
         EmittedFile(e.key, e.value.$1(graph), owned: e.value.$2),

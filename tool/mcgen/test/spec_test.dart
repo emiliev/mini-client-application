@@ -415,7 +415,7 @@ ${_feature}rules:
       );
       expect(lines(r.err), [
         'feature/library/library_x/mcgen.yaml:3:7: error [archetype] tier: archetype "utility_hello" is for utility modules, not feature',
-        'feature/library/library_x/mcgen.yaml:6:8: error [ownership] owned: "owned" files only exist in mixed modules; this one is managed',
+        'feature/library/library_x/mcgen.yaml:6:8: error [ownership] owned: "owned" files only exist in mixed modules and exemplars; this one is managed',
       ]);
       final wrongDir = lint('utility/mc_other/mcgen.yaml', helloSpec);
       expect(lines(wrongDir.err), [

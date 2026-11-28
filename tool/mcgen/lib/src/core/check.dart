@@ -19,7 +19,7 @@ List<Drift> checkModule(
   String moduleDirAbs,
   GeneratedModule? gen,
 ) {
-  if (spec.ownership == Ownership.ejected) return const [];
+  if (spec.ownership == Ownership.ejected && !spec.exemplar) return const [];
   final rel = spec.moduleDir;
   final out = <Drift>[];
   final seen = <String>{};
@@ -60,7 +60,12 @@ List<Drift> checkModule(
     );
   }
 
-  for (final e in manifest.files.entries) {
+  // An exemplar is checked against its render (the round-trip below), not
+  // against what the last gen recorded.
+  for (final e
+      in spec.exemplar
+          ? const <MapEntry<String, ManifestEntry>>[]
+          : manifest.files.entries) {
     if (e.value.ownership != 'managed') continue;
     final f = File(p.join(moduleDirAbs, e.key));
     if (!f.existsSync()) {
