@@ -1,6 +1,6 @@
 # T-0073-AC3: a throwaway search module
 
-HEAD `5994fc7b`
+HEAD `d7d3ab35`
 
 - PASS: mcgen gen zz_sr_probe
   - 46 files generated
