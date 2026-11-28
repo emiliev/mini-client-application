@@ -21,7 +21,7 @@ cd "$REPO" || exit 2
 read -r -a DART <<< "${MC_DART:-fvm dart}"
 role="${ROLE:-engineer}"
 COPY="$(mktemp -d "/tmp/mc-T-0074-probe-$role-XXXXXX")"
-OB="/tmp/mc-ob-T-0074-probe-$role"
+OB="/tmp/mc-ob-T-0074-ac3-$role"
 log="$(mktemp)"
 cleanup() {
   (cd "$COPY" 2>/dev/null && "$REPO/tool/bazelw" --output_base="$OB" shutdown >/dev/null 2>&1)
@@ -71,13 +71,16 @@ rm -f "$before"
 
 step "bazel build --config=sim //app/mini_client:mini_client_ios" \
   cbz build --config=sim //app/mini_client:mini_client_ios
-step "bazel test --lockfile_mode=error //... (uncached for the new and app targets)" \
+step "bazel test --lockfile_mode=error //..." \
   cbz test --lockfile_mode=error --test_output=errors //...
-plain "$log" | grep -E "Executed [0-9]+ out of" | sed 's/^/  - /' >> "$REPORT"
+results="$(plain "$log")"
+grep -E "Executed [0-9]+ out of" <<< "$results" | sed 's/^/  - /' >> "$REPORT"
+# Not `plain | grep -q`: grep -q exits at the first match, and under
+# pipefail the SIGPIPE of the writer fails the test.
 for t in //feature/zz_probe/zz_ld_probe:bdd_test //feature/zz_probe/zz_ld_probe:architecture_test \
          //feature/zz_probe/zz_ld_probe:flow_scope_test //app/wiring/zz_probe_wiring:routes_test \
          //app/mini_client:catalogue_test //app/mini_client:analytics_screens_test; do
-  if plain "$log" | grep -qE "^$t +(\(cached\) )?PASSED"; then
+  if grep -E "^$t +(\(cached\) )?PASSED" <<< "$results" > /dev/null; then
     report "  - $t PASSED"
   else
     report "  - **$t not PASSED**"

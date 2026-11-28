@@ -6,7 +6,7 @@
 // except the navigator implementations, which are written once and then
 // belong to the engineer (plan 02 section 2.8). A feature of a hand-written
 // group cannot be wired yet: its routes, targets and navigators are hand
-// code (F-0074, P-127).
+// code (F-0074 section 4).
 
 import 'dart:convert';
 import 'dart:io';
@@ -150,7 +150,7 @@ GroupPlan planGroups(
     if (s.archetype != 'list_detail') {
       throw StateError(
         '${s.file}: wire routes list_detail flows only so far, not '
-        '"${s.archetype}" (P-127)',
+        '"${s.archetype}" (F-0074 section 4)',
       );
     }
     if (s.navigator == null) {
@@ -163,7 +163,7 @@ GroupPlan planGroups(
       throw StateError(
         '${s.file}: its group "$group" is hand-written '
         '(app/wiring/${group}_wiring); wire cannot add a generated flow to it '
-        'yet (P-127)',
+        'yet (F-0074 section 4)',
       );
     }
     (flows[group] ??= []).add(WiredFlow(s));

@@ -209,7 +209,7 @@ abstract class ZzModule {
     });
 
     test('T-0074-AC2 a generated flow in a hand-written group is refused, '
-        'naming the group and P-127', () {
+        'naming the group and F-0074', () {
       final root = _root('hand-group');
       writeFile(
         root,
@@ -222,7 +222,7 @@ abstract class ZzModule {
       final r = mcgen(['wire', '--check', '--root', root.path]);
       expect(r.code, 1, reason: '$r');
       expect(r.err, contains('"publishing" is hand-written'));
-      expect(r.err, contains('P-127'));
+      expect(r.err, contains('F-0074'));
     });
   });
 
