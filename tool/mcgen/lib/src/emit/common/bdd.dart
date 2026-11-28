@@ -91,19 +91,45 @@ List<String> stepParams(String line) => [
 ];
 
 /// Every step line of [features], in file order: backgrounds, then each
-/// scenario's steps.
+/// scenario's steps, then each outline's.
 Iterable<String> allSteps(List<BddFeatureSpec> features) sync* {
   for (final f in features) {
     yield* f.backgroundSteps;
     for (final s in f.scenarios) {
       yield* s.steps;
     }
+    for (final o in f.outlines) {
+      yield* o.steps;
+    }
   }
 }
 
+/// A rule example's value as an Examples cell: strings as Dart string
+/// literals (steps write `{<column>}`), everything else as written.
+String _cell(Object? v) => v is String ? dartString(v) : '$v';
+
+/// The Examples table of a rule-driven outline (R6): one column per key of
+/// the rule's examples, in first-seen order, one row per example.
+List<List<String>> outlineExamples(RuleSpec rule) {
+  final columns = <String>[];
+  for (final e in rule.examples) {
+    for (final k in e.keys) {
+      if (!columns.contains(k)) columns.add(k);
+    }
+  }
+  return [
+    columns,
+    for (final e in rule.examples) [for (final c in columns) _cell(e[c])],
+  ];
+}
+
 /// The feature file of [f]: `Feature:`, its description, the Background,
-/// then each scenario with its tags (the id first) and Examples table.
-String renderFeature(BddFeatureSpec f) {
+/// then each scenario with its tags (the id first) and Examples table, then
+/// each outline, whose Examples are its rule's examples ([rules] by id).
+String renderFeature(
+  BddFeatureSpec f, {
+  Map<String, RuleSpec> rules = const {},
+}) {
   final b = StringBuffer()
     ..writeln(
       'Feature: ${f.title ?? pascalCase(f.feature).replaceAllMapped(RegExp('(?<=[a-z])([A-Z])'), (m) => ' ${m[1]!.toLowerCase()}')}',
@@ -121,30 +147,49 @@ String renderFeature(BddFeatureSpec f) {
       b.writeln('    $s');
     }
   }
-  for (final s in f.scenarios) {
+  void scenario(
+    String? id,
+    List<String> tagList,
+    String title,
+    List<String> steps,
+    List<List<String>> examples,
+  ) {
     b.writeln();
-    final tags = [?s.id, ...s.tags].map((t) => t.startsWith('@') ? t : '@$t');
+    final tags = [?id, ...tagList].map((t) => t.startsWith('@') ? t : '@$t');
     if (tags.isNotEmpty) b.writeln('  ${tags.join(' ')}');
     b.writeln(
-      '  ${s.examples.isEmpty ? 'Scenario' : 'Scenario Outline'}: ${s.title}',
+      '  ${examples.isEmpty ? 'Scenario' : 'Scenario Outline'}: $title',
     );
-    for (final step in s.steps) {
+    for (final step in steps) {
       b.writeln('    $step');
     }
-    if (s.examples.isNotEmpty) {
+    if (examples.isNotEmpty) {
       final widths = [
-        for (var c = 0; c < s.examples.first.length; c++)
-          s.examples.map((r) => r[c].length).reduce((a, b) => a > b ? a : b),
+        for (var c = 0; c < examples.first.length; c++)
+          examples.map((r) => r[c].length).reduce((a, b) => a > b ? a : b),
       ];
       b
         ..writeln()
         ..writeln('    Examples:');
-      for (final row in s.examples) {
+      for (final row in examples) {
         b.writeln(
           '      | ${[for (final (c, cell) in row.indexed) cell.padRight(widths[c])].join(' | ')} |',
         );
       }
     }
+  }
+
+  for (final s in f.scenarios) {
+    scenario(s.id, s.tags, s.title, s.steps, s.examples);
+  }
+  for (final o in f.outlines) {
+    final rule = rules[o.rule];
+    if (rule == null || o.steps.isEmpty || rule.examples.isEmpty) {
+      throw StateError(
+        '${o.path}: outline "${o.id}" needs steps and rule "${o.rule}" with examples',
+      );
+    }
+    scenario(o.id, o.tags, o.title, o.steps, outlineExamples(rule));
   }
   return b.toString();
 }

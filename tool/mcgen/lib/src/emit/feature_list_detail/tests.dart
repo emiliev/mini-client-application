@@ -410,6 +410,105 @@ Map<String, _Step> _stepTemplates(
     );
   });
 
+  // List actions: the navigator call (no argument), and the double tap.
+  for (final a in m.listActions) {
+    out['the_app_was_asked_to_${a.phrase.replaceAll(' ', '_')}'] = _Step(
+      'The navigator contract: `${a.calls}` exactly once, and nothing else.',
+      'WidgetTester tester',
+      tpl('''{
+  final navigator = «<<nav>>»();
+  verify(navigator.${a.calls}).called(1);
+  verifyNoMoreInteractions(navigator);
+}''', v),
+      imports: ['package:mocktail/mocktail.dart'],
+    );
+  }
+  if (m.listActions.isNotEmpty) {
+    out['i_tap_the_icon_button_twice_in_quick_succession'] = _Step(
+      "Two taps within one frame, before the first tap's effect is drawn: both\n"
+          'reach the button, so both events reach its bloc.',
+      'WidgetTester tester,\n  String label,',
+      t(r'''{
+  final target = find.byTooltip(label).hitTestable();
+  expect(target, findsOneWidget, reason: 'exactly one icon button "$label"');
+  await tester.tap(target);
+  await tester.tap(target);
+  await «mcSettle»(tester);
+}'''),
+    );
+  }
+
+  // Filters: open the list with one, and check it lists only its records.
+  for (final f in m.filters) {
+    if (f.type.name != 'String') continue;
+    final what = words(f.query);
+    final param = camelCase(f.query);
+    final w = {
+      ...v,
+      'arg': f.arg,
+      'name': f.name,
+      'param': param,
+      'what': what,
+      'field': m.tests.filterRecords[f.name] ?? f.query,
+      'fixture': m.text('step.filter.${f.name}.records', 'the fixture'),
+    };
+    out['i_open_the_${list}_for_${what.replaceAll(' ', '_')}'] = _Step(
+      tpl("Enters the feature with the flow's `<<arg>>` set to [<<name>>].", w),
+      'WidgetTester tester,\n  String ${f.name},',
+      tpl(r'''{
+  await «initFlow»(
+    tester,
+    () => «<<host>>»(
+      <<flow>>(
+        navigator: «<<nav>>»(),
+        <<arg>>: <<name>>,
+      ),
+    ),
+  );
+  await «mcSettle»(tester);
+}''', w),
+      imports: [barrel],
+    );
+    out['the_${list}_shows_the_first_${items}_of_${what.replaceAll(' ', '_')}'] =
+        _Step(
+          tpl(
+            'The grid is not empty, and walking it with real drags shows exactly the\n'
+            'first [count] <<items>> of [<<param>>] in <<recordTitle>> order: every card is one of\n'
+            "that <<what>>'s, and none of another <<what>>'s comes between them.",
+            w,
+          ),
+          'WidgetTester tester,\n  int count,\n  String $param,',
+          tpl(r'''{
+  final expected = [
+    for (final c in «<<records>>»)
+      if (c.<<field>> == <<param>>) c.<<recordTitle>>,
+  ].take(count).toList();
+  expect(expected, hasLength(count), reason: '<<fixture>> has $count of $<<param>>');
+  final seen = <String>[];
+  for (var drags = 0; seen.length < count; drags++) {
+    if (drags > 100) {
+      fail('saw ${seen.length} of $count <<items>> after 100 drags: $seen');
+    }
+    final cards = find.descendant(
+      of: find.byKey(«<<gridKey>>»),
+      matching: find.byType(«McMediaCard»),
+    );
+    for (final element in cards.evaluate()) {
+      final title = (element.widget as «McMediaCard»).title!;
+      if (!seen.contains(title) && seen.length < count) {
+        seen.add(title);
+      }
+    }
+    if (seen.length < count) {
+      await tester.drag(«<<scrollable>>»(), const Offset(0, -300));
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+  }
+  expect(seen, expected);
+}''', w),
+        );
+  }
+
   if (m.sections.isNotEmpty) {
     out['i_scroll_the_preview_until_i_see'] = _Step(
       'Real drags of the preview page until [text] is on screen.',

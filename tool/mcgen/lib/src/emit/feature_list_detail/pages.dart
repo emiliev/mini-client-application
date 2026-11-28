@@ -81,6 +81,7 @@ void _listPage(EmitContext ctx, LdModel m) {
                 '      // The flow has its own navigator: this leaves the flow from its root page.\n'
                 '      leading: const ${ref('McFlowBackButton')}(),\n'
                 '      title: l10n.${m.key('Title')},\n'
+                '${m.listActions.isEmpty ? '' : '      actions: [\n${[for (final a in m.listActions) '        ${ref('McIconButton')}(\n          icon: Icons.${a.icon},\n          semanticLabel: l10n.${m.key(a.string)},\n          onPressed: () => bloc.add(const ${ref(m.listEvent)}.${a.event}()),\n        ),\n'].join()}      ],\n'}'
                 '    ),\n'
                 '    body: ${ref('BlocBuilder')}<${ref(m.listBloc)}, ${ref(m.listState)}>(\n'
                 '      builder: (context, state) => state.when(\n'

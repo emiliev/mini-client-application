@@ -6,6 +6,7 @@
 // only ever be emitted inside function and method bodies (plan 02 section 2.6).
 
 import 'package:mcgen/src/core/ir/code.dart';
+import 'package:path/path.dart' as p;
 
 /// A statement in a body.
 sealed class Stmt {
@@ -319,7 +320,7 @@ class DartLibrary {
     final dir = path.contains('/')
         ? path.substring(0, path.lastIndexOf('/'))
         : '';
-    return dir.isEmpty ? of : '$dir/$of';
+    return p.posix.normalize(dir.isEmpty ? of : '$dir/$of');
   }
 
   final List<Decl> decls;

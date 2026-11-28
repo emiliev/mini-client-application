@@ -30,6 +30,7 @@ tier: utility
 archetype: utility_hello
 ownership: managed
 description: A test module.
+l10n: {locales: [en, de]}
 entities:
   - name: Note
     fields:

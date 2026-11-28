@@ -233,6 +233,11 @@
       "properties": {
         "key": {"$ref": "#/$defs/memberName"},
         "description": {"type": "string", "minLength": 1},
+        "placeholders": {
+          "description": "gen-l10n's placeholders metadata, written into the template ARB as given.",
+          "type": "object",
+          "additionalProperties": {"type": "object"}
+        },
         "text": {"type": "object", "additionalProperties": {"type": "string"}}
       }
     },
@@ -272,7 +277,14 @@
       "properties": {
         "id": {"type": "string"},
         "rule": {"$ref": "#/$defs/memberName"},
-        "title": {"type": "string", "minLength": 1}
+        "title": {"type": "string", "minLength": 1},
+        "steps": {
+          "description": "The outline's steps; <column> placeholders name the rule examples' keys (ADR-0017).",
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "tags": {"type": "array", "items": {"type": "string", "pattern": "^@?[A-Za-z0-9_-]+$"}}
       }
     },
     "bddFeature": {

@@ -17,6 +17,9 @@ vars:
   name:
     type: string
     description: The package name.
+  lang:
+    type: string
+    description: The Dart language version (tool/mcgen/mcgen.yaml dart.language_version).
   pascal:
     type: string
     description: The package name in PascalCase.

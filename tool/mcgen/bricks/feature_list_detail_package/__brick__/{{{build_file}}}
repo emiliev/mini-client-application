@@ -7,7 +7,7 @@ package(default_visibility = ["//visibility:private"])
 
 _PKG = "{{{name}}}"
 
-_LANG = "3.13"  # the pubspec floor; codegen equals build_runner only with it (F-0011)
+_LANG = "{{{lang}}}"  # the pubspec floor; codegen equals build_runner only with it (F-0011)
 
 _INIT = "lib/src/di/di_initializer.dart"
 

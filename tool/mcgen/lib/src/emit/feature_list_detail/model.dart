@@ -77,6 +77,35 @@ class LdAction {
   String get stringKey => 'Preview${pascalCase(event)}';
 }
 
+/// A list action: an app-bar icon button whose event leaves the feature
+/// through a navigator method that takes no argument (`openSearch`). A
+/// second tap within [guardMs] is ignored, so a double tap leaves once.
+class LdListAction {
+  const LdListAction({
+    required this.event,
+    required this.calls,
+    required this.icon,
+    required this.string,
+    required this.phrase,
+    required this.guardMs,
+    this.doc,
+  });
+
+  final String event;
+  final String calls;
+
+  /// The `Icons.<icon>` name.
+  final String icon;
+
+  /// The l10n key suffix of its accessible name (`Search`).
+  final String string;
+
+  /// How the BDD step names the call: `the app was asked to <phrase>`.
+  final String phrase;
+  final int guardMs;
+  final String? doc;
+}
+
 /// A preview section: items related to the previewed one, from their own
 /// endpoint, each leaving the feature through a navigator method.
 class LdSection {
@@ -157,6 +186,7 @@ class LdTests {
     required this.tags,
     required this.legacyGoldens,
     required this.env,
+    this.filterRecords = const {},
   });
 
   /// Fixture sets every flow test serves first (`characters.default`).
@@ -177,6 +207,10 @@ class LdTests {
 
   /// What the env's first write needs (owned afterwards).
   final Map<String, String> env;
+
+  /// Filter name -> the record field that holds the value its step shows
+  /// (`teamId` -> `team`: the list for a team shows that team's records).
+  final Map<String, String> filterRecords;
 }
 
 class LdModel {
@@ -197,6 +231,7 @@ class LdModel {
   late final List<LdMapper> mappers;
   late final String artVariant;
   late final List<LdAction> actions;
+  late final List<LdListAction> listActions;
   late final List<LdSection> sections;
   late final LdTests tests;
   late final Map<String, String> prose;
@@ -345,6 +380,32 @@ class LdModel {
           );
         }(),
     ];
+    m.listActions = [
+      for (final (i, n) in list.list('actions').indexed)
+        () {
+          final x = _Reader(n, 'options.list.actions[$i]');
+          final event = x.str('event');
+          final calls = x.str('calls', event);
+          x.only(const [
+            'event',
+            'calls',
+            'icon',
+            'string',
+            'phrase',
+            'guard_ms',
+            'doc',
+          ]);
+          return LdListAction(
+            event: event,
+            calls: calls,
+            icon: x.str('icon'),
+            string: x.str('string', pascalCase(event)),
+            phrase: x.str('phrase', snakeCase(calls).replaceAll('_', ' ')),
+            guardMs: x.optInt('guard_ms') ?? 500,
+            doc: x.optStr('doc'),
+          );
+        }(),
+    ];
     final preview = r.child('preview');
     m.artVariant = preview.str('art_variant', 'portraitLarge');
     m.actions = [
@@ -395,6 +456,7 @@ class LdModel {
       tags: t.strMap('tags'),
       legacyGoldens: t.boolean('legacy_goldens'),
       env: t.strMap('env'),
+      filterRecords: t.strMap('filter_records'),
     );
     m.prose = r.strMap('prose');
     r.only(const [
@@ -415,6 +477,7 @@ class LdModel {
       'title',
       'image',
       'filters',
+      'actions',
     ]);
     preview.only(const ['art_variant', 'actions', 'sections']);
     t.only(const [
@@ -425,6 +488,7 @@ class LdModel {
       'tags',
       'legacy_goldens',
       'env',
+      'filter_records',
     ]);
     return m;
   }
@@ -476,10 +540,18 @@ class LdModel {
       }
     }
 
-    void method(String name, String path) {
+    void method(String name, String path, {bool takesId = true}) {
       final o = methods[name];
       if (o == null) {
         err(spec.optionsNode, path, 'the navigator has no method "$name"');
+      } else if (!takesId) {
+        if (o.args.isNotEmpty) {
+          err(
+            spec.optionsNode,
+            path,
+            'navigator method "$name" is a list action, so it takes no argument',
+          );
+        }
       } else if (o.args.length != 1 || !m.ids.any((i) => i.name == o.args[0])) {
         err(
           spec.optionsNode,
@@ -547,6 +619,17 @@ class LdModel {
         );
       }
     }
+    for (final f in spec.bdd) {
+      for (final o in f.outlines) {
+        if (o.steps.isEmpty) {
+          err(
+            o.node,
+            '${o.path}.steps',
+            'outline "${o.id}" needs steps: its Examples are rule "${o.rule}"\'s examples',
+          );
+        }
+      }
+    }
     if (m.actions.isEmpty) {
       err(
         spec.optionsNode,
@@ -569,6 +652,9 @@ class LdModel {
     }
     for (final (i, a) in m.actions.indexed) {
       method(a.calls, 'options.preview.actions[$i].calls');
+    }
+    for (final (i, a) in m.listActions.indexed) {
+      method(a.calls, 'options.list.actions[$i].calls', takesId: false);
     }
     for (final (i, s) in m.sections.indexed) {
       entity(s.entity, 'options.preview.sections[$i].entity');
@@ -594,14 +680,30 @@ class LdModel {
     };
     final locales = spec.l10n?.locales ?? const [];
     for (final k in m.requiredStrings) {
-      final s = strings[k];
-      if (s == null) {
+      if (!strings.containsKey(k)) {
         err(spec.node, 'l10n.strings', 'list_detail needs the string "$k"');
-        continue;
       }
+    }
+    if (locales.isNotEmpty && locales.first == 'en_XA') {
+      err(
+        spec.l10n!.node,
+        'l10n.locales',
+        'the template locale (the first) cannot be the pseudo-locale en_XA',
+      );
+    }
+    for (final s in strings.values) {
       for (final l in locales) {
         if (l != 'en_XA' && !s.text.containsKey(l)) {
-          err(s.node, '${s.path}.text', '"$k" has no "$l" text');
+          err(s.node, '${s.path}.text', '"${s.key}" has no "$l" text');
+        }
+      }
+      for (final l in s.text.keys) {
+        if (!locales.contains(l)) {
+          err(
+            s.node,
+            '${s.path}.text',
+            '"${s.key}" has "$l" text, but "$l" is not in l10n.locales',
+          );
         }
       }
     }
@@ -620,6 +722,7 @@ class LdModel {
     ])
       key(s),
     for (final a in actions) key(a.stringKey),
+    for (final a in listActions) key(a.string),
     for (final s in sections)
       for (final suffix in ['', 'Loading', 'Empty', 'Failed'])
         key('Preview${s.strings}$suffix'),
@@ -651,6 +754,13 @@ class _Reader {
     final v = _value(key);
     if (v == null) return null;
     if (v is! String) fail(key, '"$key" must be a string');
+    return v;
+  }
+
+  int? optInt(String key) {
+    final v = _value(key);
+    if (v == null) return null;
+    if (v is! int) fail(key, '"$key" must be an integer');
     return v;
   }
 

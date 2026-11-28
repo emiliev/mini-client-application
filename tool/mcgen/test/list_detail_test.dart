@@ -118,7 +118,7 @@ void main() {
         'test/feature/util/characters_list_env.dart',
       });
       final compared = gen.files.length - owned.length;
-      expect(compared, 50);
+      expect(compared, 56);
       expect(gen.files.keys, contains('BUILD.bazel'));
       expect(gen.files.keys, contains('lib/src/l10n/characters_list_de.arb'));
       expect(

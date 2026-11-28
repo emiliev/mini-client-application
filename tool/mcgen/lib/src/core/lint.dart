@@ -369,7 +369,8 @@ List<Diagnostic> lintSpec(ModuleSpec spec, LintContext ctx) {
   }
 
   // --- gen-l10n reads a locale out of the ARB file name (F-0066) -------------
-  final locales = {...?spec.l10n?.locales, 'en', 'de'}.toList()..sort();
+  // Only a module with strings has ARB files.
+  final locales = [...?spec.l10n?.locales]..sort();
   for (final locale in locales) {
     final read = genL10nFileLocale('${spec.module}_$locale');
     if (read != locale) {

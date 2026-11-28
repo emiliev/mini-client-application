@@ -245,9 +245,13 @@ class L10nStringSpec extends SpecPart {
     required this.key,
     required this.text,
     this.description,
+    this.placeholders = const {},
   });
 
   final String key;
+
+  /// gen-l10n's `placeholders` metadata, as given (`{count: {type: int}}`).
+  final Map<String, Object?> placeholders;
 
   /// Locale -> text, in the spec's order.
   final Map<String, String> text;
@@ -310,11 +314,17 @@ class OutlineSpec extends SpecPart {
     required this.id,
     required this.rule,
     required this.title,
+    this.steps = const [],
+    this.tags = const [],
   });
 
   final String id;
   final String rule;
   final String title;
+
+  /// The Scenario Outline's steps; its Examples are the rule's examples.
+  final List<String> steps;
+  final List<String> tags;
 }
 
 class BddFeatureSpec extends SpecPart {
@@ -659,6 +669,10 @@ class _Loader {
                     'l10n.strings[$i]',
                     key: (n as YamlMap)['key'] as String,
                     description: opt<String>(n, 'description'),
+                    placeholders: n.nodes['placeholders'] is YamlMap
+                        ? (yamlToPlain(n.nodes['placeholders']!)!
+                              as Map<String, Object?>)
+                        : const {},
                     text: {
                       for (final e in (n['text'] as YamlMap).entries)
                         '${e.key}': '${e.value}',
@@ -810,6 +824,8 @@ class _Loader {
           id: (n as YamlMap)['id'] as String,
           rule: n['rule'] as String,
           title: n['title'] as String,
+          steps: strings(n, 'steps'),
+          tags: strings(n, 'tags'),
         ),
     ],
   );

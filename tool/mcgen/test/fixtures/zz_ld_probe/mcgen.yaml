@@ -1,6 +1,8 @@
 # T-0069-AC3: a throwaway list-detail module, the proof that the archetype
 # generalises past its exemplar. Other entities, fields, endpoint, nouns and
-# page size than characters_list, no list filter and no preview section.
+# page size than characters_list, no list filter and no preview section;
+# a rule-driven Scenario Outline, and strings with a placeholder and a plural
+# whose en_XA is computed (T-0069 review round).
 # Never committed as a module: test/list_detail_test.dart renders it, and
 # tool/T-0069-AC3_ld_probe.sh copies it to feature/zz_probe/zz_ld_probe,
 # generates it there, runs its BDD test and its analysis under Bazel, and
@@ -72,6 +74,24 @@ l10n:
     - key: zzLdProbePreviewOpenDetails
       description: Button on the preview that opens the comic's page.
       text: {en: Open details, de: Details öffnen}
+    - key: zzLdProbeShown
+      description: How many comics the list holds (not shown yet; checks gen-l10n takes the plural).
+      placeholders: {count: {type: int}}
+      text:
+        en: "{count, plural, =0{No comics} =1{One comic} other{{count} comics}}"
+        de: "{count, plural, =0{Keine Comics} =1{Ein Comic} other{{count} Comics}}"
+    - key: zzLdProbeGreeting
+      description: A greeting (not shown yet; checks gen-l10n takes the placeholder).
+      placeholders: {name: {type: String}}
+      text: {en: "Hello {name}", de: "Hallo {name}"}
+
+rules:
+  - id: previewTitle
+    kind: classifier
+    doc: Tapping a comic previews that comic.
+    examples:
+      - {tap: 'Amber Chronicles #1', expect: 'Amber Chronicles #1'}
+      - {tap: 'Amber Chronicles #2', expect: 'Amber Chronicles #2'}
 
 bdd:
   - feature: zz_ld_probe
@@ -125,6 +145,14 @@ bdd:
           - When I open the comics list
           - "And I tap {'Amber Chronicles #1'}"
           - "Then I see {'Details öffnen'}"
+    outlines:
+      - id: MC-zz_ld_probe-08
+        rule: previewTitle
+        title: Tapping a comic previews that comic
+        steps:
+          - When I open the comics list
+          - And I tap {<tap>}
+          - Then I see the comic preview for {<expect>}
   - feature: zz_ld_probe_empty
     title: An empty catalogue
     scenarios:

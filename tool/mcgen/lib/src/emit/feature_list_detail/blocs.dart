@@ -113,6 +113,16 @@ void _listBloc(EmitContext ctx, LdModel m) {
             '_Preview',
             [(ref(e), item)],
           ),
+          for (final a in m.listActions)
+            (
+              m.text(
+                'list_action.${a.event}.doc',
+                a.doc ?? 'The app bar\'s ${words(a.event)} action.',
+              ),
+              '${a.event}()',
+              '_${pascalCase(a.event)}',
+              const <(String, String)>[],
+            ),
         ],
         internal: [
           (
@@ -184,6 +194,18 @@ void _listBloc(EmitContext ctx, LdModel m) {
             '${pascalCase(m.items)} per request.',
           ),
         ),
+        for (final a in m.listActions)
+          RawDecl(
+            Code(
+              'const Duration ${a.event}Guard = Duration(milliseconds: ${a.guardMs});',
+            ),
+            name: '${a.event}Guard',
+            doc: m.text(
+              'list_action.${a.event}.guard',
+              'How long after `${a.event}` a second one is ignored: the second tap\n'
+                  'of a double tap.',
+            ),
+          ),
         ClassDecl(
           m.listBloc,
           modifiers: 'final',
@@ -203,7 +225,7 @@ void _listBloc(EmitContext ctx, LdModel m) {
           members: [
             RawMember(
               Code(
-                '${m.listBloc}(this._repository, this._flow, ${ref('Monitoring')} monitoring)\n'
+                '${m.listBloc}(this._repository, this._flow, ${m.listActions.isEmpty ? '' : 'this._navigator, '}${ref('Monitoring')} monitoring)\n'
                 '  : super(const ${m.listState}.loading(), monitoring: monitoring) {\n'
                 '  _paging = ${ref('PagingController')}<${ref(e)}>(\n'
                 '    fetcher: (request) => _repository.fetchPage(\n'
@@ -227,6 +249,8 @@ void _listBloc(EmitContext ctx, LdModel m) {
               Code(
                 'final ${ref(m.repository)} _repository;\n'
                 'final ${ref('FeatureFlowController')}<${ref(m.flowState)}> _flow;\n'
+                '${m.listActions.isEmpty ? '' : 'final ${ref(m.navigator)} _navigator;\n'}'
+                '${[for (final a in m.listActions) 'Timer? _${a.event}Guard;\n'].join()}'
                 'late final ${ref('PagingController')}<${ref(e)}> _paging;',
               ),
             ),
@@ -255,6 +279,7 @@ void _listBloc(EmitContext ctx, LdModel m) {
                 '      if (_flow.state.preview == null) {\n'
                 '        _flow.update((s) => s.copyWith(preview: $item));\n'
                 '      }\n'
+                '${[for (final a in m.listActions) _listActionCase(m, a)].join()}'
                 '    case _PageChanged(:final page):\n'
                 '      emit(_toState(page));\n'
                 '  }\n'
@@ -281,6 +306,8 @@ void _listBloc(EmitContext ctx, LdModel m) {
               Code('Future<void> close()'),
               annotations: [Code('@override')],
               body: Body([
+                for (final a in m.listActions)
+                  CodeStmt(Code('_${a.event}Guard?.cancel();')),
                 CodeStmt(Code('_paging.dispose();')),
                 CodeStmt(Code('return super.close();')),
               ]),
@@ -291,6 +318,16 @@ void _listBloc(EmitContext ctx, LdModel m) {
     ),
   );
 }
+
+/// A list action's case: the call runs once per guard window, so a double
+/// tap leaves the feature once.
+String _listActionCase(LdModel m, LdListAction a) =>
+    '    case _${pascalCase(a.event)}():\n'
+    '${commentLines(m.text('list_action.${a.event}.comment', 'One ${words(a.event)} per tap: a double tap must not run it twice.'), indent: '      ')}'
+    '      if (!(_${a.event}Guard?.isActive ?? false)) {\n'
+    '        _${a.event}Guard = Timer(${a.event}Guard, () {});\n'
+    '${keepRegion('list.${a.event}', '_navigator.${a.calls}();', indent: '        ')}\n'
+    '      }\n';
 
 void _previewBloc(EmitContext ctx, LdModel m) {
   final e = m.listEntity;

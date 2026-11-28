@@ -36,6 +36,10 @@ mkdir -p "$PROBE"
 cp tool/mcgen/test/fixtures/zz_ld_probe/mcgen.yaml "$PROBE/mcgen.yaml"
 step "mcgen gen zz_ld_probe" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen zz_ld_probe
 report "  - $(find "$PROBE" -type f | wc -l | tr -d ' ') files generated"
+# The review round's probes: an outline from a rule's examples, and a
+# pseudo-translated plural and placeholder that gen-l10n must accept.
+report "  - outline: $(grep -c "^      | 'Amber" "$PROBE/test/feature/zz_ld_probe.feature") Examples rows in zz_ld_probe.feature"
+report "  - en_XA: \`$(grep -h 'zzLdProbeShown\|zzLdProbeGreeting' "$PROBE/lib/src/l10n/zz_ld_probe_en_XA.arb" | tr -s ' ' | tr '\n' ' ')\`"
 step "mcgen gen --check zz_ld_probe (idempotent)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen --check zz_ld_probe
 step "bazel build --config=lint //$PROBE/... (mc_analysis, no issue)" bzw build --config=lint "//$PROBE/..."
 step "bazel test //$PROBE/... (uncached)" bzw test --nocache_test_results --test_output=errors "//$PROBE/..."

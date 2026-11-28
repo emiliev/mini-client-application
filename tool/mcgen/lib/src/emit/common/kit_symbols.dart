@@ -36,7 +36,11 @@ const firstPartyKitSymbols = <String, List<String>>{
     'RootImport',
     'initializeDIContainer',
   ],
-  'package:mc_ds_buttons/mc_ds_buttons.dart': ['McButton', 'McButtonVariant'],
+  'package:mc_ds_buttons/mc_ds_buttons.dart': [
+    'McButton',
+    'McButtonVariant',
+    'McIconButton',
+  ],
   'package:mc_ds_cards/mc_ds_cards.dart': ['McMediaCard'],
   'package:mc_ds_feedback/mc_ds_feedback.dart': [
     'McEmptyView',

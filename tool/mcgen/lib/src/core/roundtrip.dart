@@ -26,7 +26,42 @@ const defaultExemplarIgnores = [
   // What `flutter pub get` and `flutter create` may leave (git-ignored).
   '.flutter-plugins-dependencies',
   '.metadata',
+  // Local files the repo's .gitignore (or a global one) keeps out of git:
+  // editors, the OS, coverage runs. Outside a git checkout (a temp copy)
+  // these are all the round-trip can know of; inside one, `git
+  // check-ignore` also drops whatever else git ignores.
+  '**/.DS_Store',
+  '**/*.iml',
+  '**/*.swp',
+  '.idea/**',
+  '**/.idea/**',
+  '.vscode/**',
+  'coverage/**',
 ];
+
+/// The paths of [rels] (relative to [dir]) that git ignores there: none
+/// outside a git checkout, or when git is not on the PATH. Tracked files are
+/// never reported (`git check-ignore` skips the index's files).
+Set<String> gitIgnored(String dir, List<String> rels) {
+  if (rels.isEmpty) return const {};
+  try {
+    final r = Process.runSync('git', [
+      '-C',
+      dir,
+      'check-ignore',
+      '--',
+      ...rels,
+    ]);
+    // 0: some ignored, 1: none, 128: not a work tree.
+    if (r.exitCode != 0) return const {};
+    return {
+      for (final l in (r.stdout as String).split('\n'))
+        if (l.trim().isNotEmpty) l.trim(),
+    };
+  } on ProcessException {
+    return const {};
+  }
+}
 
 class TreeDiff {
   const TreeDiff(this.onlyGenerated, this.onlyExemplar, this.differing);
@@ -111,9 +146,13 @@ TreeDiff compareToExemplar(
   List<String> ignore = defaultExemplarIgnores,
 }) {
   final owned = [for (final g in gen.spec.owned) globToRegExp(g)];
+  final listed = listTree(exemplarDir, ignore: ignore);
+  final ignored = gitIgnored(exemplarDir, listed);
   final exemplar = {
-    for (final f in listTree(exemplarDir, ignore: ignore))
-      if (gen.files.containsKey(f) || !owned.any((g) => g.hasMatch(f))) f,
+    for (final f in listed)
+      if (!ignored.contains(f) &&
+          (gen.files.containsKey(f) || !owned.any((g) => g.hasMatch(f))))
+        f,
   };
   final generated = gen.files.keys.toSet();
   final differing = <String, String>{};

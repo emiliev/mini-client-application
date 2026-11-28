@@ -148,6 +148,16 @@ class Generator {
       throw McgenException.message(spec.file, 'brick', e.message);
     } on StateError catch (e) {
       throw McgenException.message(spec.file, 'emit', e.message);
+    } on FormatException catch (e) {
+      throw McgenException.message(spec.file, 'emit', e.message);
+    } on Object catch (e) {
+      // Lint should have stopped the spec; whatever an archetype still
+      // throws is reported against the spec, never as a crash.
+      throw McgenException.message(
+        spec.file,
+        'emit',
+        'archetype "${spec.archetype}" failed (${e.runtimeType}): $e',
+      );
     }
 
     final ownedGlobs = [for (final g in spec.owned) globToRegExp(g)];

@@ -112,7 +112,9 @@ WritePlan planWrite(
 }) {
   final rel = gen.spec.moduleDir;
   String at(String path) => '$rel/$path';
-  if (gen.spec.exemplar) return _planExemplar(gen, moduleDirAbs);
+  if (gen.spec.exemplar) {
+    return _planExemplar(gen, moduleDirAbs, forced: force);
+  }
   if (gen.spec.ownership == Ownership.ejected) {
     return WritePlan(
       moduleDir: rel,
@@ -321,7 +323,11 @@ WritePlan planWrite(
 /// plan is the round-trip golden (plan 02 KD1): every difference between the
 /// render and the exemplar is drift, and only the manifest is ever written,
 /// so tool/loc can tell the template's lines from the hand-written ones.
-WritePlan _planExemplar(GeneratedModule gen, String moduleDirAbs) {
+WritePlan _planExemplar(
+  GeneratedModule gen,
+  String moduleDirAbs, {
+  bool forced = false,
+}) {
   final rel = gen.spec.moduleDir;
   final diff = compareToExemplar(gen, moduleDirAbs);
   final drift = <Drift>[
@@ -345,7 +351,11 @@ WritePlan _planExemplar(GeneratedModule gen, String moduleDirAbs) {
     moduleDir: rel,
     changes: const [],
     drift: drift,
-    notes: const ['exemplar: only the manifest is written'],
+    notes: [
+      'exemplar: only the manifest is written',
+      if (forced)
+        'exemplar: --force has no effect (a round-trip cannot be forced)',
+    ],
     manifestText: text,
     manifestChanged: text != _read(p.join(moduleDirAbs, manifestPath)),
   );

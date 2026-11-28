@@ -21,7 +21,7 @@ owned:
   - test/golden/**
 # What an action does is where list-detail features differ most: each
 # preview action's and each section item's handler is a keep region.
-keep: [preview.seeFullProfile, section.RelatedComics.open]
+keep: [list.openSearch, preview.seeFullProfile, section.RelatedComics.open]
 
 entities:
   - name: Character
@@ -104,7 +104,7 @@ navigator:
 
     `requestSignIn` (plan 01 §3.3) joins when this feature needs a signed-in
     user.
-  outbound: [openCharacter(CharacterId), openComic(ComicId)]
+  outbound: [openCharacter(CharacterId), openComic(ComicId), openSearch()]
 
 l10n:
   locales: [en, de, en_XA]
@@ -142,6 +142,9 @@ l10n:
     - key: charactersListPreviewComicsFailed
       description: Shown when the related comics fail to load; Retry follows.
       text: {en: Comics could not be loaded., de: Comics konnten nicht geladen werden., en_XA: "[Çóɱíçš çóúļð ñóţ ƀé ļóàðéð. ~~~~~~~~~~]"}
+    - key: charactersListSearch
+      description: Accessible name of the app bar action that opens the character search.
+      text: {en: Search characters, de: Figuren suchen, en_XA: "[Šéàŕçĥ çĥàŕàçţéŕš ~~~~~~]"}
 
 bdd:
   - feature: characters_list
@@ -338,6 +341,57 @@ bdd:
           - When I open the characters list
           - "And I tap {'Amber Alchemist'}"
           - "Then I see {'No comics yet.'}"
+  - feature: characters_list_search
+    title: Opening the search from the characters list
+    description: The app bar's search action hands over to the character search.
+    background: "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: The search action asks the app to open the search exactly once
+        tags: [T-0071-AC4]
+        steps:
+          - When I open the characters list
+          - "And I tap the icon button {'Search characters'}"
+          - Then the app was asked to open the search
+      - title: A double tap on the search action opens it once
+        tags: [T-0071-AC4]
+        steps:
+          - When I open the characters list
+          - "And I tap the icon button {'Search characters'} twice in quick succession"
+          - Then the app was asked to open the search
+      - title: The search action is German in German and does not overflow at twice the text size
+        tags: [T-0071-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - And the text scale is {2}
+          - When I open the characters list
+          - "And I tap the icon button {'Figuren suchen'}"
+          - Then the app was asked to open the search
+          - And nothing overflows
+      - title: The search action reads in the pseudo-locale without overflow
+        tags: [T-0071-AC4, l10n]
+        steps:
+          - Given the pseudo-locale is active
+          - And the text scale is {2}
+          - When I open the characters list
+          - "And I tap the icon button {'[Šéàŕçĥ çĥàŕàçţéŕš ~~~~~~]'}"
+          - Then the app was asked to open the search
+          - And nothing overflows
+  - feature: characters_list_team
+    title: The characters list for one team
+    description: A list opened with a team id shows that team's characters, in name order.
+    background: "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: A list opened with a team shows only that team's characters
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the characters list for team {'harbor-watch'}"
+          - "Then the backend received {1} requests for {'GET /v1/characters?team=harbor-watch&offset=0&limit=30'}"
+          - "And the characters list shows the first {30} characters of team {'Harbor Watch'}"
+      - title: A list opened with an id no team has is empty, not the whole cast
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the characters list for team {'red'}"
+          - "Then I see {'No characters yet'}"
 
 options:
   item: character
@@ -371,6 +425,12 @@ options:
         doc: The team the list is filtered to; null for every team.
         arg_doc: Starts the list filtered to one team.
         query_doc: "Null: every team."
+    actions:
+      - event: openSearch
+        icon: search
+        string: Search
+        phrase: open the search
+        doc: "The app bar's search action: the search opens (T-0071)."
   mappers:
     - {dto: CharacterDto, to: Character, fields: {image: thumbnail}}
     - {dto: ThumbnailDto, to: ApiImage, via: {variant: ImageVariant.fromWire}}
@@ -398,6 +458,7 @@ options:
     section_records:
       RelatedComics: {title: title, image: cover}
     legacy_goldens: true
+    filter_records: {teamId: team}
     tags:
       architecture: T-0032-AC6
       flow_scope.resolves: T-0032-AC6
@@ -507,3 +568,13 @@ options:
       generate the list, Phase D). The flow is immutable after creation: a new
       team builds a new flow.
     architecture.export.ComicId: "T-0041: openComic's argument."
+    navigator.openSearch: "The app bar's search action: hands over to characters_search (T-0071)."
+    list_action.openSearch.guard: |-
+      How long after opening the search a second open is ignored: the second tap
+      of a double tap. By then the search page covers the list.
+    list_action.openSearch.comment: "One search per tap: a double tap must not push it twice."
+    step.filter.teamId.records: the cast
+    step.i_open_the_characters_list_for_team.doc: |-
+      Enters the feature the way the route `/characters` with a team does: the
+      flow's `initialTeamId` is the team's id (CONTRACT.md of
+      `mc_fixtures_characters`).
