@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | Done (merged 2026-11-28 `f7230291`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (**Opus**: novel; batches depend on it) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0074-mcgen-wire-buildgen` |
@@ -110,3 +110,19 @@ Batches (Phase E) must not hand-edit app glue. `mcgen wire` regenerates the shar
 - **Decisions:** ADR-0018 (Proposed).
 - **Findings:** F-0074.
 - **Follow-ups** (F-0074, Implications): route specs so wire can own the hand-written groups; shrink the 75 `# keep` items; drop the search skeleton's owned BUILD (and SC's, T-0072); buildgen for utility packages.
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found 8 important issues and 2 nits. Fix round `6fc2cda7`:
+  - wire deletes orphans, with edited owned files guarded;
+  - ejected modules stay wired;
+  - search and section-detail flows are routed, and anything unroutable becomes a warning plus a disabled catalogue entry, never an error;
+  - `_TEST_DEPS`, test-name collisions, adopt pairing, the `@factoryMethod`/`@preResolve` scanner and the list-detail root-import deps are fixed;
+  - both nits are fixed, and the T-0072 probe script got its exec bit.
+- TL checks: no deleted or skipped tests and no `// ignore:`. The 31 changed files outside `tool/mcgen` are the 11 normalised feature BUILDs (proven graph-neutral), the app wiring list and catalogue, `GeneratedLocations`, exemplar manifests, the root pubspec and CI gate 6.
+- The TL merged `--no-ff`. On the merge result:
+  - `check` passed, 247/247 tests, lint clean, `mc_arch_check` OK;
+  - the sim app built, and the format gate and provenance passed;
+  - `T-0065-AC5_gates.sh` passed;
+  - `wire --check` (16 files), `buildgen --check` (11 BUILDs) and `check --all` (5 modules) are all up to date;
+  - a 20-run flake check of the catalogue, analytics and app tests was clean.
+- ADR-0018 accepted. P-126 is done. Follow-ups go to P-128.

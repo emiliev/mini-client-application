@@ -1,6 +1,6 @@
 # ADR-0018: mcgen's wire-owned files and the canonical BUILD form
 
-- **Status:** Proposed (T-0074 Engineer, 2026-11-28)
+- **Status:** Accepted (TL, 2026-11-28, at the T-0074 merge `f7230291`)
 - **Date:** 2026-11-28
 - **Deciders:** Tech Lead
 - **Related:** T-0074, F-0074, ADR-0016, ADR-0017, plan 02 §2.8 and §7.1, plan 01 §3.4, §4.2 and §4.5, P-126, F-0049, F-0066
