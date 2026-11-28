@@ -491,7 +491,8 @@ class DbModel {
       err('navigator', 'a dashboard needs a navigator');
     }
     if (spec.l10n == null) err('l10n', 'a dashboard needs l10n strings');
-    if (spec.bdd.isEmpty) err('bdd', 'a dashboard needs at least one BDD feature');
+    if (spec.bdd.isEmpty)
+      err('bdd', 'a dashboard needs at least one BDD feature');
     if (spec.description == null) {
       err('description', 'a dashboard needs a description (the pubspec)');
     }
@@ -560,9 +561,10 @@ class DbModel {
               'page: options.detail is missing',
         );
       }
-      for (final role in s.uses.contains(DbUse.navigator)
-          ? const ['navigator']
-          : const <String>[]) {
+      for (final role
+          in s.uses.contains(DbUse.navigator)
+              ? const ['navigator']
+              : const <String>[]) {
         if (spec.navigator == null) err('$p.uses', 'no $role');
       }
     }
@@ -614,7 +616,10 @@ class DbModel {
         method(s.openCall, 'options.sections[$i].open_call');
         method('requestSignIn', 'options.sections[$i] (requestSignIn)');
         if (!m.kinds.contains(s.openKind)) {
-          err('options.sections[$i].open_kind', 'options.kinds has no "${s.openKind}"');
+          err(
+            'options.sections[$i].open_kind',
+            'options.kinds has no "${s.openKind}"',
+          );
         }
       }
     }
@@ -638,13 +643,67 @@ class DbModel {
     }
     for (final b in m.barrel) {
       if (!idNames.contains(b)) {
-        err('options.barrel', 'the barrel exports "$b", which options.ids lacks');
+        err(
+          'options.barrel',
+          'the barrel exports "$b", which options.ids lacks',
+        );
       }
+    }
+    // kinds, ids, params, screens and tests: the roles the emitters read
+    if (m.kinds.toSet().length != m.kinds.length) {
+      err('options.kinds', 'options.kinds lists a kind twice');
+    }
+    for (final k in m.kinds) {
+      if (!RegExp(r'^[a-z][A-Za-z0-9]*$').hasMatch(k)) {
+        err('options.kinds', '"$k" is not a lower camel case name');
+      }
+    }
+    if (m.kinds.isEmpty) {
+      err('options.kinds', 'a dashboard needs at least one item kind');
+    }
+    for (final (i, id) in m.ids.indexed) {
+      if (id.type != 'String' && id.type != 'int') {
+        err(
+          'options.ids[$i].type',
+          'an id is a String or an int, not "${id.type}"',
+        );
+      }
+    }
+    if (m.idOf(m.ids.firstOrNull?.name ?? '') != null &&
+        m.ids.map((i) => i.name).toSet().length != m.ids.length) {
+      err('options.ids', 'options.ids lists an id twice');
+    }
+    for (final k in m.params.keys) {
+      if (!methods.containsKey(k)) {
+        err('options.params.$k', 'the navigator has no method "$k"');
+      }
+    }
+    const testKeys = ['money', 'tag_barrel', 'tag_money', 'min_pure', 'page'];
+    for (final k in m.tests.keys) {
+      if (!testKeys.contains(k)) {
+        err(
+          'options.tests.$k',
+          'unknown key "$k" (one of ${testKeys.join(', ')})',
+        );
+      }
+    }
+    if (m.tests['money'] != null &&
+        m.tests['money'] != 'true' &&
+        m.tests['money'] != 'false') {
+      err('options.tests.money', '"money" must be "true" or "false"');
+    }
+    if (m.detail != null && m.screenDetail == m.screenHome) {
+      err(
+        'options.screens',
+        'the home and the detail page need different names',
+      );
+    }
+    if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(m.screenHome)) {
+      err('options.screens.home', '"${m.screenHome}" is not a snake case name');
     }
     // l10n: every string the managed code reads
     final strings = {
-      for (final s in spec.l10n?.strings ?? const <L10nStringSpec>[])
-        s.key: s,
+      for (final s in spec.l10n?.strings ?? const <L10nStringSpec>[]) s.key: s,
     };
     final locales = spec.l10n?.locales ?? const [];
     for (final k in m.requiredStrings) {

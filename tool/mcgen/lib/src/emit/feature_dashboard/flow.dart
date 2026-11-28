@@ -309,8 +309,7 @@ String _flow(DbModel m) {
 String _analytics(DbModel m) {
   final d = m.detail;
   final values = [
-    for (final s in m.sections)
-      "  ${s.name}('${snakeCase(s.name)}'),",
+    for (final s in m.sections) "  ${s.name}('${snakeCase(s.name)}'),",
     if (d != null) ...[
       '',
       ...m
@@ -423,7 +422,8 @@ import 'package:mc_monitoring/mc_monitoring.dart';
   );
 }
 
-String _flags(DbModel m) => '${imports(['package:mc_feature_flags/mc_feature_flags.dart'])}\n\n'
+String _flags(DbModel m) =>
+    '${imports(['package:mc_feature_flags/mc_feature_flags.dart'])}\n\n'
     '${m.flags.map((f) => '${m.doc('flag.${f.name}', f.doc ?? 'The ${f.key} flag.')}'
         'const FeatureFlag<bool> ${f.name} = FeatureFlag<bool>(\n'
         "  key: '${f.key}',\n"

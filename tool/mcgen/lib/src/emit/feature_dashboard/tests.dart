@@ -86,18 +86,14 @@ String _architecture(DbModel m) {
   final tagMoney = m.tests['tag_money'] ?? tag;
   final shown = [m.flow, m.navigator, ...m.barrel];
   return tpl(_archTemplate, {
-    'money_intro': money
-        ? ', and\n// money never in floating point.'
-        : '.',
+    'money_intro': money ? ', and\n// money never in floating point.' : '.',
     'dir': m.spec.moduleDir,
     'module': m.module,
     'tag': tag,
     'shown': [for (final s in shown) "      '$s',"].join('\n'),
     'min_pure': m.tests['min_pure'] ?? '20',
     'money_decl': money ? _moneyDecl : '',
-    'money_test': money
-        ? tpl(_moneyTest, {'tag_money': tagMoney})
-        : '',
+    'money_test': money ? tpl(_moneyTest, {'tag_money': tagMoney}) : '',
     'money_controls_title': money ? ' and see a double' : '',
     'money_controls': money ? _moneyControls : '',
   });

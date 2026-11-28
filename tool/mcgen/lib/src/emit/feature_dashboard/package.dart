@@ -14,7 +14,10 @@ import 'package:mcgen/src/emit/feature_list_detail/package.dart' show pseudo;
 const _brick = 'feature_dashboard_package';
 
 /// `package:<name>/` of an import line.
-final _pkg = RegExp(r'''^import\s+['"]package:([a-z0-9_]+)/''', multiLine: true);
+final _pkg = RegExp(
+  r'''^import\s+['"]package:([a-z0-9_]+)/''',
+  multiLine: true,
+);
 
 /// The packages [sources] import, by name.
 Set<String> packagesOf(Iterable<String> sources) => {

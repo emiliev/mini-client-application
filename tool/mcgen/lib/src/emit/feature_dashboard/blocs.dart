@@ -16,8 +16,14 @@ void emitBlocs(Out ctx, DbModel m) {
   ctx.file('$_bloc/${m.sectionBlocFile}', _base(m));
   for (final s in m.sections) {
     final base = '$_bloc/${s.snake}';
-    ctx.file('${base}_bloc.dart', s.isSession ? _sessionBloc(m, s) : _bloc_(m, s));
-    ctx.file('${base}_event.dart', s.isSession ? _sessionEvent(m, s) : _event(m, s));
+    ctx.file(
+      '${base}_bloc.dart',
+      s.isSession ? _sessionBloc(m, s) : _bloc_(m, s),
+    );
+    ctx.file(
+      '${base}_event.dart',
+      s.isSession ? _sessionEvent(m, s) : _event(m, s),
+    );
     ctx.file('${base}_state.dart', _state(m, s));
   }
   final d = m.detail;
@@ -187,8 +193,7 @@ List<String> _commonImports(DbModel m, DbSection s) => [
   m.uri('domain/model/${m.modelFile}'),
   m.uri('domain/model/${m.analyticsFile}'),
   m.uri('domain/repository/${m.module}_repository.dart'),
-  if (s.uses.contains(DbUse.flow))
-    m.uri('flow/${m.module}_flow_state.dart'),
+  if (s.uses.contains(DbUse.flow)) m.uri('flow/${m.module}_flow_state.dart'),
   if (s.uses.contains(DbUse.navigator))
     m.uri('navigator/${m.module}_navigator.dart'),
   if (s.uses.contains(DbUse.flow) && m.detail != null)
