@@ -38,6 +38,11 @@ final class _SessionChanged extends SettingsHomeEvent {
   const _SessionChanged();
 }
 
+/// Internal: the app's sign-out ended (answered, or failed).
+final class _SignOutEnded extends SettingsHomeEvent {
+  const _SignOutEnded();
+}
+
 /// Internal: the appearance changed. The state is read from the appearance
 /// itself, which is always current.
 final class _AppearanceChanged extends SettingsHomeEvent {

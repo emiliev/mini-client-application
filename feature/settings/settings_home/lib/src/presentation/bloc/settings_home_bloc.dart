@@ -99,7 +99,10 @@ final class SettingsHomeBloc
       case _SignIn():
         await _signIn(emit);
       case _SignOut():
-        await _signOut(emit);
+        _signOut(emit);
+      case _SignOutEnded():
+        _signingOut = false;
+        await _afterAuthChange(emit);
       case _OpenAppearance():
         _navigator.openAppearance();
     }
@@ -113,6 +116,11 @@ final class SettingsHomeBloc
     _shownEpoch = epoch;
     if (_profile?.id != userId) {
       _profile = null;
+    }
+    if (userId == null) {
+      // The session is gone: a sign-out is done for this page, even while
+      // the app still waits for the server's answer.
+      _signingOut = false;
     }
     _emitReady(emit);
     if (userId == null || _profile != null) {
@@ -154,22 +162,32 @@ final class SettingsHomeBloc
     await _afterAuthChange(emit);
   }
 
-  Future<void> _signOut(Emitter<SettingsHomeState> emit) async {
+  /// Not awaited: the app ends the session at once and then waits for the
+  /// server (best effort), and the page must not wait with it. The busy flag
+  /// clears when the session changes (`_show`), or when the app answers,
+  /// whichever comes first.
+  void _signOut(Emitter<SettingsHomeState> emit) {
     if (_signingOut || !_session.isSignedIn) {
       return;
     }
     _signingOut = true;
     _emitReady(emit);
-    try {
-      await _navigator.signOut();
-    } on Object catch (error, stackTrace) {
-      if (!isClosed) {
-        addError(error, stackTrace);
-      }
-    } finally {
-      _signingOut = false;
-    }
-    await _afterAuthChange(emit);
+    unawaited(
+      Future<void>.sync(_navigator.signOut)
+          .then<void>(
+            (_) {},
+            onError: (Object error, StackTrace stackTrace) {
+              if (!isClosed) {
+                addError(error, stackTrace);
+              }
+            },
+          )
+          .whenComplete(() {
+            if (!isClosed) {
+              add(const _SignOutEnded());
+            }
+          }),
+    );
   }
 
   /// Whatever the app answered, the page shows the session now current: a

@@ -35,8 +35,11 @@ class SettingsHomeNavigatorImpl implements SettingsHomeNavigator {
   /// answer (true only once a session exists). False when there is no
   /// navigator to show it on.
   @override
-  Future<bool> requestSignIn() =>
-      requestAppSignIn(routerRef: _routerRef, session: _session);
+  Future<bool> requestSignIn() => requestAppSignIn(
+    routerRef: _routerRef,
+    session: _session,
+    purpose: null,
+  );
 
   @override
   Future<void> signOut() async {
