@@ -35,6 +35,8 @@ report "# T-0073-AC3: a throwaway search module" "" "HEAD \`$(git rev-parse --sh
 mkdir -p "$PROBE"
 cp tool/mcgen/test/fixtures/zz_sr_probe/mcgen.yaml "$PROBE/mcgen.yaml"
 step "mcgen gen zz_sr_probe" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen zz_sr_probe
+# Its root-import list is `mcgen wire`'s (T-0074): the module's own only.
+step "mcgen wire $PROBE (its flow scope)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart wire "$PROBE"
 report "  - $(find "$PROBE" -type f | wc -l | tr -d ' ') files generated"
 report "  - en_XA: \`$(grep -h 'zzSrProbeEmptyMessage' "$PROBE/lib/src/l10n/zz_sr_probe_en_XA.arb" | tr -s ' ' | tr '\n' ' ')\`"
 step "mcgen gen --check zz_sr_probe (idempotent)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen --check zz_sr_probe

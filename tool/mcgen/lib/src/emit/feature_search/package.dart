@@ -38,6 +38,13 @@ void emitPackage(EmitContext ctx, SrModel m) {
         'json_annotation',
         'flutter_localizations',
         'intl',
+        // The root-import list's (`lib/src/di/flow_scope.dart`, which `mcgen
+        // wire` writes since T-0074): Dio, FileStore, Monitoring and the
+        // analytics port, over mc_di's RootImport.
+        'dio',
+        'mc_di',
+        'mc_monitoring',
+        'mc_storage',
       };
       final dev = {
         ...graph.devDeps.where((p) => !lib.contains(p)),

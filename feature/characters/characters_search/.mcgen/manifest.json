@@ -17,10 +17,6 @@
       "hash": "9e339a9aba41536b77423bd77170200a5df03ce5737572e3ede4f04e4a009fe6",
       "ownership": "managed"
     },
-    "lib/src/di/flow_scope.dart": {
-      "hash": "4f0560c0b0d3e1e76426ef0c6eaf6a8ba72b02859d9d591a4376400fac6f91fe",
-      "ownership": "managed"
-    },
     "lib/src/domain/model/character_analytics.dart": {
       "hash": "4854f9d8fb8f599435123ac76d64f40c0d9f1478958c8946d8812e4c7d0e796e",
       "ownership": "managed"
