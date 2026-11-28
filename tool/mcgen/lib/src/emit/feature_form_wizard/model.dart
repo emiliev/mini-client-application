@@ -336,9 +336,64 @@ class FwModel {
     for (final (i, p) in m.pages.indexed) {
       declared(p.widget.split('(').first, 'options.flow.pages[$i].widget');
     }
+    // Expressions the flow writes: every type they name is declared.
+    void expr(String text, String path, {Set<String> also = const {}}) {
+      for (final id in _identifiers(text)) {
+        if (!m.types.containsKey(id) &&
+            !_known.contains(id) &&
+            !also.contains(id)) {
+          err(node, path, 'type "$id" is not in options.types');
+        }
+      }
+    }
+
+    expr(m.flowStateExpr, 'options.flow.state', also: {m.flowState});
+    expr(m.resultCast, 'options.flow.result.cast');
+    for (final (i, a) in m.flowArgs.indexed) {
+      if (a.defaultValue != null) {
+        expr(a.defaultValue!, 'options.flow.args[$i].default');
+      }
+    }
+    for (final (i, a) in m.stateFields.indexed) {
+      if (a.defaultValue != null) {
+        expr(a.defaultValue!, 'options.flow_state.fields[$i].default');
+      }
+    }
+    for (final (i, o) in (spec.navigator?.outbound ?? const []).indexed) {
+      for (final a in o.args) {
+        expr(a, 'navigator.outbound[$i]');
+      }
+      if (o.returns != null) expr('${o.returns}', 'navigator.outbound[$i]');
+    }
+    final ident = RegExp(r'^[a-z][A-Za-z0-9]*$');
+    for (final (i, a) in [...m.flowArgs, ...m.stateFields].indexed) {
+      if (!ident.hasMatch(a.name)) {
+        err(node, 'options.flow[$i].name', '"${a.name}" is not a Dart name');
+      }
+    }
+    final stateNames = {for (final f in m.stateFields) f.name};
+    if (stateNames.length != m.stateFields.length) {
+      err(node, 'options.flow_state.fields', 'a field is declared twice');
+    }
+    if (m.archPureOver < 0) {
+      err(node, 'options.architecture.pure_files_over', 'must not be negative');
+    }
+    for (final (i, p) in m.pages.indexed) {
+      if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(p.name)) {
+        err(
+          node,
+          'options.flow.pages[$i].name',
+          '"${p.name}" is not a snake_case page name',
+        );
+      }
+    }
     for (final id in m.barrel) {
       if (!m.types.containsKey(id)) {
-        err(node, 'options.barrel', 'barrel type "$id" is not in options.types');
+        err(
+          node,
+          'options.barrel',
+          'barrel type "$id" is not in options.types',
+        );
       }
     }
     for (final id in m.rootImports) {
@@ -357,8 +412,7 @@ class FwModel {
         err(node, 'options.types.${e.key}', 'must be a .dart file');
       }
     }
-    // The flow state's fields are what the flow's `state:` expression sets,
-    // and the flow's arguments are what it reads.
+    // Every flow argument is read by the flow's key or its state expression.
     final argNames = {for (final a in m.flowArgs) a.name};
     for (final f in m.stateFields) {
       if (!RegExp('\\b${f.name}\\s*:').hasMatch(m.flowStateExpr)) {
@@ -375,7 +429,7 @@ class FwModel {
         );
       }
     }
-    if (!m.flowStateExpr.startsWith(m.flowState)) {
+    if (!m.flowStateExpr.replaceFirst('const ', '').startsWith(m.flowState)) {
       err(
         node,
         'options.flow.state',
@@ -435,7 +489,7 @@ class FwModel {
   };
 
   static Iterable<String> _identifiers(String type) => RegExp(
-    r'[A-Z][A-Za-z0-9_]*|\b(?:int|bool|double|num)\b',
+    r'(?<![A-Za-z0-9_$])[A-Z][A-Za-z0-9_]*|\b(?:int|bool|double|num)\b',
   ).allMatches(type).map((m) => m[0]!);
 }
 
@@ -515,8 +569,6 @@ class FwSkeleton {
       'Saving',
     ])
       '${m.camel}$s',
-    for (final step in steps)
-      if (step.isReview) '${m.camel}${pascalCase(step.id)}Title',
     for (final f in fields) ...[
       '${m.camel}${f.pascal}Label',
       '${m.camel}${f.pascal}Refused',
@@ -577,28 +629,67 @@ class FwSkeleton {
         'the skeleton result "$resultName" is not in options.types',
       );
     }
+    if (m.types[resultName] != 'domain/model/$resultFile') {
+      err(
+        node,
+        'options.types.$resultName',
+        'a skeleton writes the result at domain/model/$resultFile',
+      );
+    }
+    if (!m.barrel.contains(resultName)) {
+      err(
+        node,
+        'options.barrel',
+        'the barrel exports the result "$resultName"',
+      );
+    }
+    final pageType = '${m.pascal}StepPage';
+    if (m.types[pageType] != 'presentation/page/${m.stem}_step_page.dart') {
+      err(
+        node,
+        'options.types.$pageType',
+        'a skeleton writes the step page at '
+            'presentation/page/${m.stem}_step_page.dart',
+      );
+    }
+    for (final f in fixtures) {
+      if (!RegExp(r'^[a-z]+\.[a-z_]+$').hasMatch(f)) {
+        err(node, 'options.skeleton.fixtures', '"$f" is not <package>.<set>');
+      }
+    }
+    for (final f in fields) {
+      if (!RegExp(r'^[a-z][A-Za-z0-9]*$').hasMatch(f.name)) {
+        err(
+          node,
+          'options.skeleton.steps',
+          'field "${f.name}" is not a Dart name',
+        );
+      }
+    }
+    for (final s in steps) {
+      if (!RegExp(r'^[a-z][a-z0-9_]*$').hasMatch(s.id)) {
+        err(
+          node,
+          'options.skeleton.steps',
+          'step id "${s.id}" is not snake_case',
+        );
+      }
+    }
+    if (!RegExp(r'^[a-z]+( [a-z]+)*$').hasMatch(noun)) {
+      err(node, 'options.skeleton.noun', 'the noun is lower-case words');
+    }
     for (final k in requiredKeys(m)) {
       if (!strings.contains(k)) {
         err(m.spec.node, 'l10n.strings', 'form_wizard needs the string "$k"');
       }
     }
-    for (final r in const ['Dio', 'EventBus']) {
-      if (r == 'EventBus') continue;
+    for (final r in const ['Dio', 'SessionReader', 'Monitoring']) {
       if (!m.rootImports.contains(r)) {
         err(
           node,
           'options.root_imports',
-          'a skeleton sends its request through Dio: root_imports needs "$r"',
-        );
-      }
-    }
-    for (final r in const ['SessionReader', 'Monitoring']) {
-      if (!m.rootImports.contains(r)) {
-        err(
-          node,
-          'options.root_imports',
-          'a skeleton reads the session and reports to monitoring: '
-          'root_imports needs "$r"',
+          'a skeleton sends its request through Dio, reads the session and '
+              'reports to monitoring: root_imports needs "$r"',
         );
       }
     }
@@ -629,13 +720,13 @@ class FwSkeleton {
         node,
         'options.flow.pages',
         'a skeleton has one flow page per step '
-        '(${m.pages.length} pages, ${steps.length} steps)',
+            '(${m.pages.length} pages, ${steps.length} steps)',
       );
     }
     final pageClass = '${m.pascal}StepPage';
     for (final (i, p) in m.pages.indexed) {
-      final want = 'const $pageClass(step: $i)';
-      if (p.widget != want) {
+      final want = '$pageClass(step: $i)';
+      if (p.widget != want || !p.isConst) {
         err(
           node,
           'options.flow.pages[$i].widget',

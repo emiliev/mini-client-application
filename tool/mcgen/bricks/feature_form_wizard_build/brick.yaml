@@ -19,34 +19,19 @@ vars:
     description: The Dart language version (tool/mcgen/mcgen.yaml dart.language_version).
   pascal:
     type: string
-    description: The package name in PascalCase.
+    description: The flow's PascalCase stem (the gen-l10n class is <pascal>L10n).
+  l10n_file:
+    type: string
+    description: The gen-l10n output file's stem.
+  stem:
+    type: string
+    description: The file stem of the flow's files.
   pure_deps:
     type: array
     description: 'Labels of the generator-read files deps, items {"label": "..."}, sorted.'
-  flow_state_src:
-    type: string
-    description: The flow state file.
   freezed:
     type: array
     description: 'Items {"name": "<target stem>", "src": "<file>"}, by name.'
-  dto_name:
-    type: string
-    description: The DTO file's freezed name (its lane is narrow).
-  dto_src:
-    type: string
-    description: The DTO file.
-  dto_rule:
-    type: string
-    description: The DTO section's rule line, padded with dashes to 78 columns.
-  api_rule:
-    type: string
-    description: The API section's rule line, padded with dashes to 78 columns.
-  api_name:
-    type: string
-    description: The API file's stem.
-  api_src:
-    type: string
-    description: The API file.
   injectable:
     type: array
     description: 'Items {"src": "<file>"}: the files with injectable classes, sorted.'
@@ -62,9 +47,3 @@ vars:
   env:
     type: string
     description: The BDD setup file (the test env).
-  contract_main:
-    type: string
-    description: The contract test file.
-  contract_deps:
-    type: array
-    description: 'Labels of the contract test, items {"label": "..."}.'

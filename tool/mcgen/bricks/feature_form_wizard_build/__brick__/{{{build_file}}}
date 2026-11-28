@@ -18,17 +18,17 @@ _PURE_DEPS = [
 {{/pure_deps}}
 ]
 
-# The Flutter-free hand-written files: domain, navigator, flow state, bloc, the
-# DI module and the root-import list. Pages, widgets, the flow widget and l10n
-# are Flutter.
+# The Flutter-free files: domain, navigator, flow state, bloc, the form's rules
+# and the root-import list. Pages, widgets, the flow widget and l10n are
+# Flutter.
 _PURE_SRCS = glob(
     [
-        "lib/src/di/di_module.dart",
         "lib/src/di/flow_scope.dart",
         "lib/src/domain/**/*.dart",
-        "{{{flow_state_src}}}",
+        "lib/src/flow/{{{stem}}}_flow_state.dart",
         "lib/src/navigator/**/*.dart",
         "lib/src/presentation/bloc/**/*.dart",
+        "lib/src/presentation/form/**/*.dart",
     ],
     exclude = MC_GENERATED_DART,
 )
@@ -60,79 +60,8 @@ _FREEZED = {
     generator_bin = "@rules_dart//dart/ext/freezed:shim",
     language_version = _LANG,
     output_suffixes = [".freezed.dart"],
-    # The DTO imports only annotations, so its lane stays narrow.
-    deps = [
-        "@pub_deps//:freezed_annotation",
-        "@pub_deps//:json_annotation",
-    ] if name == "{{{dto_name}}}" else [":_stage"],
+    deps = [":_stage"],
 ) for name, src in _FREEZED.items()]
-
-{{{dto_rule}}}
-dart_library(
-    name = "_stage_dto",
-    package_name = _PKG,
-    srcs = [
-        "{{{dto_src}}}",
-        ":_{{{dto_name}}}_freezed",
-    ],
-    language_version = _LANG,
-    # The json part comes in the next stage, so this library doesn't analyze.
-    tags = [
-        "no-dart-analyze",
-        "no-dart-format",
-    ],
-    deps = [
-        "@pub_deps//:freezed_annotation",
-        "@pub_deps//:json_annotation",
-    ],
-)
-
-dart_codegen(
-    name = "_{{{dto_name}}}_json_part",
-    package_name = _PKG,
-    src = "{{{dto_src}}}",
-    generator_bin = "@rules_dart//dart/ext/json_serializable:shim",
-    language_version = _LANG,
-    output_suffixes = [".json_serializable.g.part"],
-    deps = [":_stage_dto"],
-)
-
-dart_codegen(
-    name = "_{{{dto_name}}}_g",
-    package_name = _PKG,
-    src = "{{{dto_src}}}",
-    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
-    language_version = _LANG,
-    output_suffixes = [".g.dart"],
-    parts = [":_{{{dto_name}}}_json_part"],
-)
-
-{{{api_rule}}}
-dart_codegen(
-    name = "_{{{api_name}}}_retrofit_part",
-    package_name = _PKG,
-    src = "{{{api_src}}}",
-    generator_bin = "@rules_dart//dart/ext/retrofit:shim",
-    language_version = _LANG,
-    output_suffixes = [".retrofit.g.part"],
-    deps = [
-        ":_stage_dto",
-        "//utility/mc_api_client",
-        "@pub_deps//:dio",
-        "@pub_deps//:injectable",
-        "@pub_deps//:retrofit",
-    ],
-)
-
-dart_codegen(
-    name = "_{{{api_name}}}_g",
-    package_name = _PKG,
-    src = "{{{api_src}}}",
-    generator_bin = "@rules_dart//dart/ext/_shared/combining_shim:bin",
-    language_version = _LANG,
-    output_suffixes = [".g.dart"],
-    parts = [":_{{{api_name}}}_retrofit_part"],
-)
 
 # --- injectable (fork patch 0002) -------------------------------------------
 injectable_package(
@@ -157,7 +86,7 @@ flutter_gen_l10n(
     arbs = glob(["lib/src/l10n/*.arb"]),
     nullable_getter = False,
     output_class = "{{{pascal}}}L10n",
-    output_localization_file = "{{{name}}}_l10n.dart",
+    output_localization_file = "{{{l10n_file}}}.dart",
     template_arb_file = "{{{name}}}_en.arb",
 )
 
@@ -194,7 +123,7 @@ flutter_library(
     deps = _PURE_DEPS + _FLUTTER_DEPS,
 )
 
-# --- tests (ADR-0015: BDD + contract + unit tests for pure logic; no goldens) ---
+# --- tests (ADR-0015: BDD plus contract tests; no goldens) ------------------
 _TEST_DEPS = [
 {{#test_deps}}
     "{{{label}}}",
@@ -203,7 +132,6 @@ _TEST_DEPS = [
 
 mc_bdd_tests(
     name = "bdd_test",
-    data = ["//utility/mc_fixtures_media:asset_files"],
     features = glob(["test/feature/*.feature"]),
     language_version = _LANG,
     lib = ":{{{name}}}",
@@ -216,38 +144,21 @@ mc_bdd_tests(
     deps = _TEST_DEPS,
 )
 
-# The repository against the fixture backend (the one src/ importer, R7).
-flutter_test(
-    name = "contract_test",
-    size = "small",
-    language_version = _LANG,
-    main = "{{{contract_main}}}",
-    package_name = _PKG,
-    deps = [
-{{#contract_deps}}
-        "{{{label}}}",
-{{/contract_deps}}
-    ],
-)
-
-# R17: the hand-written root imports resolve every registration of the flow.
+# R17: the root imports resolve every registration of the flow.
 flutter_test(
     name = "flow_scope_test",
     size = "small",
     srcs = glob(["test/feature/util/*.dart"]),
-    data = [
-        "//utility/mc_ds_theme:fonts",
-        "//utility/mc_fixtures_media:asset_files",
-    ],
+    data = ["//utility/mc_ds_theme:fonts"],
     language_version = _LANG,
     main = "test/flow_scope_test.dart",
     package_name = _PKG,
     deps = _TEST_DEPS + [
         ":{{{name}}}",
-        "//utility/mc_di",
+        "//utility/mc_monitoring",
+        "//utility/mc_storage",
         "//utility/mc_test_steps",
         "//utility/mc_test_utils",
-        "@pub_deps//:dio",
         "@pub_deps//:flutter",
         "@pub_deps//:flutter_test",
     ],

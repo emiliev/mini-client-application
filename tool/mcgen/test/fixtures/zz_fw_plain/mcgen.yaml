@@ -1,0 +1,181 @@
+# T-0075-AC3: a throwaway form/wizard module, the one-step shape: one form
+# page (a title, trimmed and required) that sends one POST and ends with the
+# new note's id. Other nouns than the probe next to it, a field whose name
+# differs from its request key, and a public visibility. Generated into
+# feature/zz_probe/zz_fw_plain by tool/mcgen/tool/T-0075-AC3_fw_probe.sh,
+# analysed and tested under Bazel, then deleted.
+schema: mcgen/1
+module: zz_fw_plain
+tier: feature
+archetype: form_wizard
+ownership: mixed
+description: A throwaway one-page form that adds a note and ends with its id.
+deps:
+  - mc_api_client
+dev_deps:
+  - mc_fixtures_identity
+  - mc_fixtures_library
+  - mc_mocked_backend
+
+navigator:
+  name: ZzFwPlainNavigator
+  doc: |-
+    What zz_fw_plain needs from outside. It has no outbound methods: the
+    flow ends with its result (`ZzFwPlainFlow.onComplete`).
+  outbound: []
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: zzFwPlainTitle
+      description: App bar title of the form.
+      text: {en: New note, de: Neue Notiz}
+    - key: zzFwPlainStep
+      description: The step indicator.
+      placeholders: {step: {type: int}, total: {type: int}}
+      text: {en: "Step {step} of {total}", de: "Schritt {step} von {total}"}
+    - key: zzFwPlainBack
+      description: The Back button.
+      text: {en: Back, de: Zurück}
+    - key: zzFwPlainNext
+      description: The Next button.
+      text: {en: Next, de: Weiter}
+    - key: zzFwPlainCreate
+      description: The submit button.
+      text: {en: Save note, de: Notiz speichern}
+    - key: zzFwPlainBlockedHint
+      description: Why the submit button is off.
+      text: {en: "Fill in the form to continue.", de: "Fülle das Formular aus, um fortzufahren."}
+    - key: zzFwPlainSessionEndedTitle
+      description: Title when the session ended while the form was open.
+      text: {en: You are no longer signed in as before, de: Du bist nicht mehr wie zuvor angemeldet}
+    - key: zzFwPlainSessionEndedMessage
+      description: Message below the session-ended title.
+      text: {en: "The account changed, so nothing more was saved.", de: "Das Konto hat sich geändert, deshalb wurde nichts mehr gespeichert."}
+    - key: zzFwPlainSaving
+      description: Screen-reader label while the save runs.
+      text: {en: Saving the note, de: Die Notiz wird gespeichert}
+    - key: zzFwPlainTitleLabel
+      description: Label of the title field.
+      text: {en: Title, de: Titel}
+    - key: zzFwPlainTitleRequired
+      description: Error under an empty title.
+      text: {en: Give your note a title., de: Gib deiner Notiz einen Titel.}
+    - key: zzFwPlainTitleTooLong
+      description: Error under a title that is too long.
+      placeholders: {max: {type: int}}
+      text: {en: "Use at most {max} characters.", de: "Verwende höchstens {max} Zeichen."}
+    - key: zzFwPlainTitleRefused
+      description: Error under a title the backend refused.
+      text: {en: This title was not accepted., de: Dieser Titel wurde nicht akzeptiert.}
+
+bdd:
+  - feature: zz_fw_plain
+    title: Add a note
+    description: |-
+      A note is added by one form page. The form sends one request and ends
+      with the new note's id.
+    background:
+      - "Given the backend serves {'identity.default'}"
+      - "And the backend serves {'library.default'}"
+      - "And I am signed in as {'reader@mini-client.test'}"
+    scenarios:
+      - id: MC-zz_fw_plain-01
+        title: The form opens as the only step with an empty title
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the note flow"
+          - "Then I am on step {1}"
+          - "And I see {'New note'}"
+          - "And the field {'Title'} shows {''}"
+      - id: MC-zz_fw_plain-02
+        title: An empty title blocks the submit and shows why
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the note flow"
+          - "And I tap {'Save note'}"
+          - "Then the error {'Give your note a title.'} shows under the field {'Title'}"
+          - "And the backend received {0} requests for {'POST /v1/me/lists'}"
+          - "And the flow has not completed"
+      - id: MC-zz_fw_plain-03
+        title: A too long title is refused before a request is spent on it
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the note flow"
+          - "And I enter {'ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd'} in the field {'Title'}"
+          - "Then the error {'Use at most 40 characters.'} shows under the field {'Title'}"
+      - id: MC-zz_fw_plain-04
+        title: Submitting sends one request with the trimmed title and ends with the new id
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the note flow"
+          - "And I enter {'  Amber reads  '} in the field {'Title'}"
+          - "And I tap {'Save note'}"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the flow completed with {'l-5'}"
+      - id: MC-zz_fw_plain-05
+        title: A double tap sends one request
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the note flow"
+          - "And I enter {'Amber reads'} in the field {'Title'}"
+          - "And I tap {'Save note'} twice in quick succession"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the flow completed with {'l-5'}"
+      - id: MC-zz_fw_plain-06
+        title: A title the backend refuses shows under the field and keeps the form
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the note flow"
+          - "And I enter {'Weekend Reads'} in the field {'Title'}"
+          - "And I tap {'Save note'}"
+          - "Then the backend answered {'POST /v1/me/lists'} with {400}"
+          - "And the error {'This title was not accepted.'} shows under the field {'Title'}"
+          - "And the flow has not completed"
+    outlines: []
+
+options:
+  pascal: ZzFwPlain
+  arb: block_placeholders
+  types:
+    NoteId: domain/model/note_id.dart
+    ZzFwPlainStepPage: presentation/page/zz_fw_plain_step_page.dart
+    Dio: package:dio/dio.dart
+    Monitoring: package:mc_monitoring/mc_monitoring.dart
+    SessionReader: package:mc_session/mc_session.dart
+  barrel: [NoteId]
+  root_imports: [Dio, Monitoring, SessionReader]
+  flow:
+    result:
+      type: NoteId?
+      cast: result as NoteId?
+    state: const ZzFwPlainFlowState()
+    pages:
+      - name: note
+        widget: "ZzFwPlainStepPage(step: 0)"
+        const: true
+  flow_state:
+    fields:
+      - name: step
+        type: int
+        default: "0"
+        doc: The deepest open step page; a form has one, so it stays 0.
+  architecture:
+    tag: T-0075-AC3
+    pure_files_over: 8
+  skeleton:
+    noun: note
+    result:
+      name: NoteId
+      file: note_id.dart
+    submit:
+      path: v1/me/lists
+      extra:
+        comicIds: "const <int>[]"
+        visibility: "'public'"
+    signed_in: reader@mini-client.test
+    fixtures: [identity.default, library.default]
+    steps:
+      - id: note
+        fields:
+          - {name: title, label: Title, required: true, max: 40, trim: true, body: name}

@@ -1,0 +1,231 @@
+# T-0075-AC3: a throwaway form/wizard module, the three-step shape with a flow
+# result: details (a name), notes (a description) and a review, then one POST.
+# It uses other nouns than library_reading_list_editor (a shelf, not a list)
+# and none of its files. Generated into feature/zz_probe/zz_fw_probe by
+# tool/mcgen/tool/T-0075-AC3_fw_probe.sh, analysed and tested under Bazel,
+# then deleted.
+schema: mcgen/1
+module: zz_fw_probe
+tier: feature
+archetype: form_wizard
+ownership: mixed
+description: A throwaway three-step wizard that creates a shelf and ends with its id.
+deps:
+  - mc_api_client
+dev_deps:
+  - mc_fixtures_identity
+  - mc_fixtures_library
+  - mc_mocked_backend
+
+navigator:
+  name: ZzFwProbeNavigator
+  doc: |-
+    What zz_fw_probe needs from outside. It has no outbound methods: the
+    flow ends with its result (`ZzFwProbeFlow.onComplete`).
+  outbound: []
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: zzFwProbeTitle
+      description: App bar title of every step.
+      text: {en: New shelf, de: Neues Regal}
+    - key: zzFwProbeStep
+      description: The wizard's step indicator.
+      placeholders: {step: {type: int}, total: {type: int}}
+      text: {en: "Step {step} of {total}", de: "Schritt {step} von {total}"}
+    - key: zzFwProbeBack
+      description: The Back button.
+      text: {en: Back, de: Zurück}
+    - key: zzFwProbeNext
+      description: The Next button.
+      text: {en: Next, de: Weiter}
+    - key: zzFwProbeCreate
+      description: The last step's button.
+      text: {en: Create shelf, de: Regal anlegen}
+    - key: zzFwProbeBlockedHint
+      description: Why Next is off.
+      text: {en: "Fill in this step to continue.", de: "Fülle diesen Schritt aus, um fortzufahren."}
+    - key: zzFwProbeSessionEndedTitle
+      description: Title when the session ended while the wizard was open.
+      text: {en: You are no longer signed in as before, de: Du bist nicht mehr wie zuvor angemeldet}
+    - key: zzFwProbeSessionEndedMessage
+      description: Message below the session-ended title.
+      text: {en: "The account changed, so nothing more was saved.", de: "Das Konto hat sich geändert, deshalb wurde nichts mehr gespeichert."}
+    - key: zzFwProbeSaving
+      description: Screen-reader label while the save runs.
+      text: {en: Saving the shelf, de: Das Regal wird gespeichert}
+    - key: zzFwProbeNameLabel
+      description: Label of the name field.
+      text: {en: Name, de: Name}
+    - key: zzFwProbeNameRequired
+      description: Error under an empty name.
+      text: {en: Give your shelf a name., de: Gib deinem Regal einen Namen.}
+    - key: zzFwProbeNameTooLong
+      description: Error under a name that is too long.
+      placeholders: {max: {type: int}}
+      text: {en: "Use at most {max} characters.", de: "Verwende höchstens {max} Zeichen."}
+    - key: zzFwProbeNameRefused
+      description: Error under a name the backend refused.
+      text: {en: This name was not accepted., de: Dieser Name wurde nicht akzeptiert.}
+    - key: zzFwProbeDescriptionLabel
+      description: Label of the notes field.
+      text: {en: Notes, de: Notizen}
+    - key: zzFwProbeDescriptionTooLong
+      description: Error under notes that are too long.
+      placeholders: {max: {type: int}}
+      text: {en: "Use at most {max} characters.", de: "Verwende höchstens {max} Zeichen."}
+    - key: zzFwProbeDescriptionRefused
+      description: Error under notes the backend refused.
+      text: {en: These notes were not accepted., de: Diese Notizen wurden nicht akzeptiert.}
+
+bdd:
+  - feature: zz_fw_probe
+    title: Create a shelf in three steps
+    description: |-
+      A shelf is created by a name, optional notes and a review. The wizard
+      keeps every value, sends one request and ends with the new shelf's id.
+    background:
+      - "Given the backend serves {'identity.default'}"
+      - "And the backend serves {'library.default'}"
+      - "And I am signed in as {'reader@mini-client.test'}"
+    scenarios:
+      - id: MC-zz_fw_probe-01
+        title: The first step opens with an empty name
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "Then I am on step {1}"
+          - "And I see {'New shelf'}"
+          - "And the field {'Name'} shows {''}"
+      - id: MC-zz_fw_probe-02
+        title: An empty name blocks the first step
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "And I tap {'Next'}"
+          - "Then the error {'Give your shelf a name.'} shows under the field {'Name'}"
+          - "And I am on step {1}"
+      - id: MC-zz_fw_probe-03
+        title: Back keeps what was entered
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "And I enter {'Amber reads'} in the field {'Name'}"
+          - "And I tap {'Next'}"
+          - "Then I am on step {2}"
+          - "When I tap {'Back'}"
+          - "Then I am on step {1}"
+          - "And the field {'Name'} shows {'Amber reads'}"
+      - id: MC-zz_fw_probe-04
+        title: Finishing sends one request and ends with the new id
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "And I enter {'Amber reads'} in the field {'Name'}"
+          - "And I tap {'Next'}"
+          - "And I enter {'Mine'} in the field {'Notes'}"
+          - "And I tap {'Next'}"
+          - "Then I am on step {3}"
+          - "And I see {'Name: Amber reads'}"
+          - "When I tap {'Create shelf'}"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the flow completed with {'l-5'}"
+      - id: MC-zz_fw_probe-05
+        title: A double tap on the last step sends one request
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "And I enter {'Amber reads'} in the field {'Name'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create shelf'} twice in quick succession"
+          - "Then the backend received {1} requests for {'POST /v1/me/lists'}"
+          - "And the flow completed with {'l-5'}"
+      - id: MC-zz_fw_probe-06
+        title: A name the backend refuses takes the wizard back to the first step
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "And I enter {' weekend reads '} in the field {'Name'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Create shelf'}"
+          - "Then the backend answered {'POST /v1/me/lists'} with {400}"
+          - "And I am on step {1}"
+          - "And the error {'This name was not accepted.'} shows under the field {'Name'}"
+          - "And the flow has not completed"
+      - id: MC-zz_fw_probe-07
+        title: A session that ends while the save runs hands out no result
+        tags: [T-0075-AC3]
+        steps:
+          - "When I open the shelf flow"
+          - "And I enter {'Amber reads'} in the field {'Name'}"
+          - "And I tap {'Next'}"
+          - "And I tap {'Next'}"
+          - "Given the backend holds {'POST /v1/me/lists'}"
+          - "And I tap {'Create shelf'}"
+          - "And the app sends {'POST /v1/me/lists'}"
+          - "And the session ends elsewhere"
+          - "And the backend releases {'POST /v1/me/lists'}"
+          - "Then I see {'You are no longer signed in as before'}"
+          - "And the flow has not completed"
+    outlines: []
+
+options:
+  pascal: ZzFwProbe
+  arb: block_placeholders
+  types:
+    ShelfId: domain/model/shelf_id.dart
+    ZzFwProbeStepPage: presentation/page/zz_fw_probe_step_page.dart
+    Dio: package:dio/dio.dart
+    Monitoring: package:mc_monitoring/mc_monitoring.dart
+    SessionReader: package:mc_session/mc_session.dart
+  barrel: [ShelfId]
+  root_imports: [Dio, Monitoring, SessionReader]
+  flow:
+    result:
+      type: ShelfId?
+      cast: result as ShelfId?
+    state: const ZzFwProbeFlowState()
+    pages:
+      - name: details
+        widget: "ZzFwProbeStepPage(step: 0)"
+        const: true
+      - name: notes
+        widget: "ZzFwProbeStepPage(step: 1)"
+        const: true
+        when: "state.step >= 1"
+      - name: review
+        widget: "ZzFwProbeStepPage(step: 2)"
+        const: true
+        when: "state.step >= 2"
+  flow_state:
+    fields:
+      - name: step
+        type: int
+        default: "0"
+        doc: The deepest open step page (0 to 2). The bloc mirrors the wizard's step here.
+  architecture:
+    tag: T-0075-AC3
+    pure_files_over: 8
+  skeleton:
+    noun: shelf
+    result:
+      name: ShelfId
+      file: shelf_id.dart
+    submit:
+      path: v1/me/lists
+      extra:
+        comicIds: "const <int>[]"
+        visibility: "'private'"
+    signed_in: reader@mini-client.test
+    fixtures: [identity.default, library.default]
+    steps:
+      - id: details
+        fields:
+          - {name: name, label: Name, required: true, max: 60, trim: true}
+      - id: notes
+        fields:
+          - {name: description, label: Notes, max: 280}
+      - id: review

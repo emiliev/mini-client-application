@@ -46,7 +46,9 @@ void emitPackage(EmitContext ctx, FwModel m) {
       };
       final description = m.spec.description;
       if (description == null) {
-        throw StateError('${m.spec.file}: a form_wizard module needs a description');
+        throw StateError(
+          '${m.spec.file}: a form_wizard module needs a description',
+        );
       }
       return ctx.bricks[_brick].render({
         'pubspec_preamble': preamble == null
