@@ -289,7 +289,8 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     '/// no generator reads it).',
     'class ${g.pascalName}RouteTargetsImpl implements ${g.pascalName}RouteTargets {',
     '  const ${g.pascalName}RouteTargetsImpl({',
-    for (final f in flows) '    required ${f.prefix}.${f.navigator} ${f.target},',
+    for (final f in flows)
+      '    required ${f.prefix}.${f.navigator} ${f.target},',
     '  }) : ${[for (final f in flows) '_${f.target} = ${f.target}'].join(', ')};',
     '',
     for (final f in flows) '  final ${f.prefix}.${f.navigator} _${f.target};',
@@ -347,7 +348,8 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     '    await const ${g.pascalName}NavigatorsDIInitializer().init(getIt);',
     '    getIt.registerLazySingleton<${g.pascalName}RouteTargets>(',
     '      () => ${g.pascalName}RouteTargetsImpl(',
-    for (final f in flows) '        ${f.target}: getIt<${f.prefix}.${f.navigator}>(),',
+    for (final f in flows)
+      '        ${f.target}: getIt<${f.prefix}.${f.navigator}>(),',
     '      ),',
     '    );',
     '  }',
@@ -362,7 +364,8 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     var async = false;
     for (final o in f.spec.navigator!.outbound) {
       final args = [
-        for (final (i, a) in o.args.indexed) '$a ${o.args.length == 1 ? 'id' : 'arg$i'}',
+        for (final (i, a) in o.args.indexed)
+          '$a ${o.args.length == 1 ? 'id' : 'arg$i'}',
       ];
       final ret = o.returns == null ? 'void' : 'Future<${o.returns!.name}>';
       final loc = o.returns == null && o.args.length == 1

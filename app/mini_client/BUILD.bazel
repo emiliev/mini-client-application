@@ -313,6 +313,26 @@ flutter_test(
     ],
 )
 
+# T-0074 (P2-08 AC1): every generated flow opens from `/catalogue`. It reads
+# the list `mcgen wire` writes, so a new generated flow needs no edit here.
+flutter_test(
+    name = "catalogue_test",
+    size = "small",
+    package_name = _PKG,
+    language_version = _LANG,
+    data = [
+        "//utility/mc_ds_theme:fonts",
+        "//utility/mc_fixtures_media:asset_files",
+    ],
+    main = "test/catalogue_test.dart",
+    deps = _RUNTIME_DEPS + [
+        ":mini_client_lib",
+        "//utility/mc_monitoring",
+        "//utility/mc_test_utils",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # T-0063: settings_appearance inside the real app: the whole app re-themes,
 # the choice survives a restart (signed out and signed in), the cold link.
 flutter_test(

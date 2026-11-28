@@ -20,8 +20,7 @@ String appWirings(GroupPlan plan) {
     "import 'package:mc_di/mc_di.dart';",
     for (final g in plan.all)
       "import 'package:${g.package}/${g.package}.dart';",
-  }.toList()
-    ..sort();
+  }.toList()..sort();
   return [
     wireHeader.trimRight(),
     '',
@@ -79,8 +78,7 @@ String workspaceMembers(String pubspec, List<String> dirs) {
     ...kept,
     for (final d in dirs)
       if (_memberTrees.any(d.startsWith)) d,
-  }.toList()
-    ..sort();
+  }.toList()..sort();
   return [
     ...lines.sublist(0, start + 1),
     for (final m in members) '  - $m',

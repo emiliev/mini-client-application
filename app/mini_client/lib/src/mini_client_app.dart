@@ -1,38 +1,25 @@
 import 'dart:io';
 
-import 'package:account_wiring/account_wiring.dart';
 import 'package:app_core/app_core.dart';
-import 'package:chronicle_wiring/chronicle_wiring.dart';
-import 'package:commerce_wiring/commerce_wiring.dart';
-import 'package:discovery_wiring/discovery_wiring.dart';
-
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:library_wiring/library_wiring.dart';
 import 'package:mc_appearance/mc_appearance.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_ds_theme/mc_ds_theme.dart';
 import 'package:mc_storage/mc_storage.dart';
 import 'package:mini_client/src/router/app_router.dart';
-import 'package:publishing_wiring/publishing_wiring.dart';
-import 'package:universe_wiring/universe_wiring.dart';
+import 'package:mini_client/src/wirings.dart';
+
+// The wiring list is `mcgen wire`'s (T-0074): a new wiring group needs no
+// hand edit here.
+export 'package:mini_client/src/wirings.dart'
+    show catalogueEntries, wiringInitializers, wiringRoutes;
 
 /// The asset Bazel bundles from `//tool/bazel/config:app_config` (R13).
 const String appConfigAsset = 'assets/app_config.json';
 
-/// Every wiring's DI initializer (navigator implementations), in group order.
-const List<McDIInitializer> wiringInitializers = [
-  DiscoveryWiringDIInitializer(),
-  UniverseWiringDIInitializer(),
-  PublishingWiringDIInitializer(),
-  ChronicleWiringDIInitializer(),
-  CommerceWiringDIInitializer(),
-  LibraryWiringDIInitializer(),
-  AccountWiringDIInitializer(),
-];
-
 /// The production root list: config from the bundled asset, storage in the
-/// app's data container, and all 7 wirings.
+/// app's data container, and every wiring.
 List<McDIInitializer> appRootInitializers({RouterRef? routerRef}) =>
     rootInitializers(
       config: () => rootBundle.loadString(appConfigAsset),

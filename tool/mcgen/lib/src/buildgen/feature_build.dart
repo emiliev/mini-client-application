@@ -32,7 +32,9 @@ const _bddOwn = {'flutter', 'flutter_test', 'mc_test_steps', 'mc_test_utils'};
 
 bool _matches(String glob, String path) {
   if (glob.endsWith('/**/*.dart')) {
-    return path.startsWith(glob.substring(0, glob.length - '**/*.dart'.length)) &&
+    return path.startsWith(
+          glob.substring(0, glob.length - '**/*.dart'.length),
+        ) &&
         path.endsWith('.dart');
   }
   return glob == path;
@@ -184,7 +186,8 @@ class FeaturePackage {
   DartFile? get contract {
     final c = [
       for (final f in test)
-        if (RegExp(r'^test/contract/[^/]+_contract_test\.dart$').hasMatch(f.path))
+        if (RegExp(r'^test/contract/[^/]+_contract_test\.dart$')
+            .hasMatch(f.path))
           f,
     ];
     return c.length == 1 ? c.single : null;
@@ -193,7 +196,8 @@ class FeaturePackage {
   DartFile? get golden {
     final g = [
       for (final f in test)
-        if (RegExp(r'^test/golden/[^/]+_golden_test\.dart$').hasMatch(f.path)) f,
+        if (RegExp(r'^test/golden/[^/]+_golden_test\.dart$').hasMatch(f.path))
+          f,
     ];
     return g.length == 1 ? g.single : null;
   }
@@ -218,7 +222,8 @@ String featureBuild(
   };
 
   // --- loads, package, constants ---------------------------------------------
-  final usesCodegen = pkg.freezed.isNotEmpty || pkg.dto != null || pkg.api != null;
+  final usesCodegen =
+      pkg.freezed.isNotEmpty || pkg.dto != null || pkg.api != null;
   final dartSyms = [
     if (usesCodegen) 'dart_codegen',
     'dart_library',
@@ -261,7 +266,8 @@ String featureBuild(
     'var:_LANG',
     '_LANG = "3.13"  # the pubspec floor; codegen equals build_runner only with it (F-0011)\n',
   );
-  if (pkg.hasDi) w.add('var:_INIT', '_INIT = "lib/src/di/di_initializer.dart"\n');
+  if (pkg.hasDi)
+    w.add('var:_INIT', '_INIT = "lib/src/di/di_initializer.dart"\n');
 
   // --- the generator-read lane -----------------------------------------------
   final pureDeps = w.kept('var:_PURE_DEPS', '_PURE_DEPS', {
@@ -300,15 +306,15 @@ String featureBuild(
         '    ],\n'
         '    deps = _PURE_DEPS,\n'
         ')\n',
-    lead:
-        '\n# Generator input only (V3-18): never a dep of the package library or a test.\n',
+    lead: '\n# Generator input only (V3-18): never a dep of the package library or a test.\n',
   );
 
   // --- freezed, json, retrofit -----------------------------------------------
   // A freezed target keeps the name the BUILD file gave it; a new one is
   // named after its file.
   final oldNames = {
-    for (final (k, v) in existing?['var:_FREEZED']?.stringPairs ?? const <(String, String)>[])
+    for (final (k, v)
+        in existing?['var:_FREEZED']?.stringPairs ?? const <(String, String)>[])
       v: k,
   };
   final freezed = <(String, String)>[
@@ -322,7 +328,9 @@ String featureBuild(
           for (final (n, s) in freezed)
             if (s == dto.path) n,
         ].firstOrNull;
-  final dtoStem = dto == null ? null : p.posix.basenameWithoutExtension(dto.path);
+  final dtoStem = dto == null
+      ? null
+      : p.posix.basenameWithoutExtension(dto.path);
   if (freezed.isNotEmpty) {
     w.add(
       'var:_FREEZED',
@@ -395,7 +403,9 @@ String featureBuild(
     );
   }
   final api = pkg.api;
-  final apiStem = api == null ? null : p.posix.basenameWithoutExtension(api.path);
+  final apiStem = api == null
+      ? null
+      : p.posix.basenameWithoutExtension(api.path);
   if (api != null) {
     final key = 'rule:_${apiStem}_retrofit_part';
     final deps = w.kept(key, 'deps', {
@@ -407,14 +417,14 @@ String featureBuild(
     w.add(
       key,
       'dart_codegen(\n'
-          '    name = "_${apiStem}_retrofit_part",\n'
-          '    package_name = _PKG,\n'
-          '    src = "${api.path}",\n'
-          '    generator_bin = "@rules_dart//dart/ext/retrofit:shim",\n'
-          '    language_version = _LANG,\n'
-          '    output_suffixes = [".retrofit.g.part"],\n'
-          '${w.listAttr('deps', deps, keptOf: key)}'
-          ')\n',
+      '    name = "_${apiStem}_retrofit_part",\n'
+      '    package_name = _PKG,\n'
+      '    src = "${api.path}",\n'
+      '    generator_bin = "@rules_dart//dart/ext/retrofit:shim",\n'
+      '    language_version = _LANG,\n'
+      '    output_suffixes = [".retrofit.g.part"],\n'
+      '${w.listAttr('deps', deps, keptOf: key)}'
+      ')\n',
       lead: '\n${_rule('$apiStem: retrofit (fork patch 0001)')}\n',
     );
     w.add(
@@ -467,14 +477,15 @@ String featureBuild(
           ')\n',
     );
   }
-  final codegen = <(String, String)>[
-    for (final (n, _) in freezed) (n, ':_${n}_freezed'),
-    if (dto != null) (dtoStem!, ':_${dtoStem}_g'),
-    if (api != null) (apiStem!, ':_${apiStem}_g'),
-  ]..sort((a, b) {
-      final c = a.$1.compareTo(b.$1);
-      return c != 0 ? c : a.$2.compareTo(b.$2);
-    });
+  final codegen =
+      <(String, String)>[
+        for (final (n, _) in freezed) (n, ':_${n}_freezed'),
+        if (dto != null) (dtoStem!, ':_${dtoStem}_g'),
+        if (api != null) (apiStem!, ':_${apiStem}_g'),
+      ]..sort((a, b) {
+        final c = a.$1.compareTo(b.$1);
+        return c != 0 ? c : a.$2.compareTo(b.$2);
+      });
   final codegenTargets = [
     for (final (_, t) in codegen) t,
     if (pkg.hasDi) ':di_config',
@@ -528,8 +539,7 @@ String featureBuild(
     w.add(
       'var:_TEST_DEPS',
       w.listVar('_TEST_DEPS', testDeps, keptOf: 'var:_TEST_DEPS'),
-      lead:
-          '\n# --- tests (ADR-0015: BDD + contract + unit tests for pure logic; no goldens) ---\n',
+      lead: '\n# --- tests (ADR-0015: BDD + contract + unit tests for pure logic; no goldens) ---\n',
     );
     w.add(
       'rule:bdd_test',
@@ -579,16 +589,22 @@ String featureBuild(
     final stem = p.posix.basenameWithoutExtension(f.path);
     final t = _Test(
       oldTestNames[f.path] ??
-          (stem.startsWith('${name}_') ? stem.substring(name.length + 1) : stem),
+          (stem.startsWith('${name}_')
+              ? stem.substring(name.length + 1)
+              : stem),
       f,
       shared: f.importsTestUtil,
-      dart: !f.packages.contains('flutter_test') &&
-          f.packages.contains('test'),
+      dart: !f.packages.contains('flutter_test') && f.packages.contains('test'),
     );
     (t.shared ? shared : own).add(t);
   }
 
-  String ownTest(String key, String tname, DartFile main, {required bool dart}) {
+  String ownTest(
+    String key,
+    String tname,
+    DartFile main, {
+    required bool dart,
+  }) {
     final deps = w.kept(key, 'deps', {':$name', ...labels(main.packages)});
     return '${dart ? 'dart_test' : 'flutter_test'}(\n'
         '    name = "$tname",\n'
@@ -600,7 +616,12 @@ String featureBuild(
         ')\n';
   }
 
-  String sharedTest(String key, String tname, DartFile main, {String extra = ''}) {
+  String sharedTest(
+    String key,
+    String tname,
+    DartFile main, {
+    String extra = '',
+  }) {
     final deps = w.kept(key, 'deps', {
       ':$name',
       ...labels(packagesOf([main, ...pkg.util])),
@@ -627,14 +648,18 @@ String featureBuild(
     );
   }
   for (final t in own..sort((a, b) => a.file.path.compareTo(b.file.path))) {
-    w.add('rule:${t.name}', ownTest('rule:${t.name}', t.name, t.file, dart: t.dart));
+    w.add(
+      'rule:${t.name}',
+      ownTest('rule:${t.name}', t.name, t.file, dart: t.dart),
+    );
   }
   final flowScope = pkg.file('test/flow_scope_test.dart');
   if (flowScope != null) {
     w.add(
       'rule:flow_scope_test',
       sharedTest('rule:flow_scope_test', 'flow_scope_test', flowScope),
-      lead: '\n# R17: the root imports resolve every registration of the flow.\n',
+      lead:
+          '\n# R17: the root imports resolve every registration of the flow.\n',
     );
   }
   for (final t in shared..sort((a, b) => a.file.path.compareTo(b.file.path))) {

@@ -45,7 +45,8 @@ class DartFile {
       if (u.startsWith('package:')) u.substring(8).split('/').first,
   };
 
-  bool get isPartFile => RegExp(r'^\s*part of\b', multiLine: true).hasMatch(text);
+  bool get isPartFile =>
+      RegExp(r'^\s*part of\b', multiLine: true).hasMatch(text);
 
   bool get hasFreezed => parts.any((x) => x.endsWith('.freezed.dart'));
 

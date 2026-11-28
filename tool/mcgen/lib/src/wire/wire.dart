@@ -165,7 +165,11 @@ List<WireOutput> wireAll(
     );
   }
   out.add(
-    WireOutput(appWiringsBzlPath, appWiringsBzl(groups), _read(root, appWiringsBzlPath)),
+    WireOutput(
+      appWiringsBzlPath,
+      appWiringsBzl(groups),
+      _read(root, appWiringsBzlPath),
+    ),
   );
   out.sort((a, b) => a.path.compareTo(b.path));
   return out;

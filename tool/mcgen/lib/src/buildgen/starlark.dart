@@ -73,7 +73,8 @@ List<Token> tokenize(String source) {
       i = j;
     } else if (RegExp(r'[A-Za-z0-9_.]').hasMatch(c)) {
       var j = i;
-      while (j < source.length && RegExp(r'[A-Za-z0-9_.]').hasMatch(source[j])) {
+      while (j < source.length &&
+          RegExp(r'[A-Za-z0-9_.]').hasMatch(source[j])) {
         j++;
       }
       out.add(Token(TokenKind.word, source.substring(i, j), line));
@@ -233,7 +234,9 @@ Map<String, Set<String>> _kept(List<Token> tokens) {
       owners.add(lastAssigned);
     } else if (t.kind == TokenKind.punct && (t.text == ']' || t.text == '}')) {
       if (owners.isNotEmpty) owners.removeLast();
-    } else if (t.kind == TokenKind.punct && t.text == ',' && owners.length <= 1) {
+    } else if (t.kind == TokenKind.punct &&
+        t.text == ',' &&
+        owners.length <= 1) {
       // A new argument of the call (or item of the top-level list).
     }
     if (t.kind == TokenKind.string && owners.isNotEmpty) {
@@ -289,7 +292,8 @@ class BuildFile {
     var main = source;
     if (start >= 0) {
       hand = lines.sublist(start + 1, end).join('\n');
-      if (end + 1 < lines.length && lines.sublist(end + 1).join().trim() != '') {
+      if (end + 1 < lines.length &&
+          lines.sublist(end + 1).join().trim() != '') {
         throw FormatException(
           'the hand region must end the file (found text after line ${end + 1})',
           source,

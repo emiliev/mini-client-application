@@ -50,6 +50,15 @@ const _expectedRouteNames = {
   'settings_appearance',
   // T-0066: the sign-in form.
   'auth_sign_in',
+  // T-0074: the catalogue of generated flows (debug builds).
+  'catalogue',
+};
+
+/// The hand-written routes plus every route `mcgen wire` generated: a
+/// generated flow's route is named after its module (T-0074).
+final Set<String> _allRouteNames = {
+  ..._expectedRouteNames,
+  for (final e in catalogueEntries) e.module,
 };
 
 Iterable<GoRoute> _routes(Iterable<RouteBase> routes) sync* {
@@ -355,8 +364,8 @@ void main() {
     ];
 
     expect(names, everyElement(isNotNull));
-    expect(names.whereType<String>().toSet(), _expectedRouteNames);
-    expect(names, hasLength(_expectedRouteNames.length), reason: 'unique');
+    expect(names.whereType<String>().toSet(), _allRouteNames);
+    expect(names, hasLength(_allRouteNames.length), reason: 'unique');
     for (final name in names.whereType<String>()) {
       expect(AnalyticsRules.isValidName(name), isTrue, reason: name);
     }

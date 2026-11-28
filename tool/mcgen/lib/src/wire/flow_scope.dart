@@ -127,7 +127,9 @@ List<_Injectable> _injectables(DartFile f) {
     }
     final as = RegExp(r'as:\s*(\w+)').firstMatch(a.group(2) ?? '');
     final ctor = RegExp(
-      r'^\s*(?:const\s+|factory\s+)?' + RegExp.escape(name) + r'(?:\.\w+)?\s*\(',
+      r'^\s*(?:const\s+|factory\s+)?' +
+          RegExp.escape(name) +
+          r'(?:\.\w+)?\s*\(',
       multiLine: true,
     ).firstMatch(body);
     final needs = <String>[];
@@ -178,7 +180,10 @@ List<RootImport> rootImports(String name, String dir, String repoRoot) {
       final base = _baseType(t);
       if (registered.contains(base) || provided.contains(base)) continue;
       if (out.containsKey(base)) continue;
-      out[base] = (type: t.replaceAll('?', ''), uri: _uriOf(base, i.file, name, repoRoot));
+      out[base] = (
+        type: t.replaceAll('?', ''),
+        uri: _uriOf(base, i.file, name, repoRoot),
+      );
     }
   }
   return out.values.toList()..sort((a, b) => a.type.compareTo(b.type));
@@ -213,7 +218,8 @@ String _uriOf(String type, DartFile f, String self, String repoRoot) {
 /// declares.
 String rootImportsName(String module, String? existing) {
   if (existing != null) {
-    final m = RegExp(r'const List<RootImport<Object>> (\w+) =').firstMatch(existing);
+    final m = RegExp(r'const List<RootImport<Object>> (\w+) =')
+        .firstMatch(existing);
     if (m != null) return m.group(1)!;
   }
   final parts = module.split('_');
@@ -255,8 +261,7 @@ String flowScopeFile(
   final uris = {
     'package:mc_di/mc_di.dart',
     for (final i in imports) i.uri,
-  }.toList()
-    ..sort();
+  }.toList()..sort();
   final name = rootImportsName(module, existing);
   return [
     for (final u in uris) "import '$u';",
@@ -271,5 +276,8 @@ String flowScopeFile(
 /// Whether [dir] is a package wire writes a flow scope for: a feature with a
 /// flow and a DI initializer.
 bool hasFlowScope(String dir) =>
-    dartFiles(dir, 'lib').any((f) => f.path == 'lib/src/di/di_initializer.dart') &&
+    dartFiles(
+      dir,
+      'lib',
+    ).any((f) => f.path == 'lib/src/di/di_initializer.dart') &&
     dartFiles(dir, 'lib').any((f) => p.posix.dirname(f.path) == 'lib/src/flow');
