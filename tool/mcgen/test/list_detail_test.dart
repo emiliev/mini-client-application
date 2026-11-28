@@ -374,6 +374,59 @@ void main() {
       );
     });
 
+    test('T-0069-AC3 list_detail\'s lint names what a spec gets wrong', () {
+      List<String> lintWith(String Function(String) edit) {
+        final root = _probeRoot('probe-lint');
+        addTearDown(() => root.deleteSync(recursive: true));
+        final spec = File(
+          p.join(root.path, 'feature/zz_probe/zz_ld_probe/mcgen.yaml'),
+        );
+        spec.writeAsStringSync(edit(spec.readAsStringSync()));
+        final r = mcgen(['spec', 'lint', '--root', root.path, 'zz_ld_probe']);
+        expect(r.code, 1, reason: '$r');
+        return [
+          for (final l in r.err.trim().split('\n'))
+            l.substring(l.indexOf('error')),
+        ];
+      }
+
+      expect(
+        lintWith(
+          (s) => s.replaceFirst('    title: title\n', '    title: headline\n'),
+        ),
+        [
+          'error [list_detail] options.list.title: "Comic" has no field "headline"',
+        ],
+      );
+      expect(
+        lintWith(
+          (s) => s.replaceFirst('options:\n', 'options:\n  colour: red\n'),
+        ),
+        ['error [list_detail] options.colour: unknown key "colour"'],
+      );
+      expect(
+        lintWith(
+          (s) => s.replaceFirst(
+            '    - key: zzLdProbeEmptyTitle\n'
+                '      description: Title of the empty list.\n'
+                '      text: {en: No comics yet, de: Noch keine Comics}\n',
+            '',
+          ),
+        ),
+        [
+          'error [list_detail] l10n.strings: list_detail needs the string "zzLdProbeEmptyTitle"',
+        ],
+      );
+      expect(
+        lintWith(
+          (s) => s.replaceFirst('calls: openComic', 'calls: openSeries'),
+        ),
+        [
+          'error [list_detail] options.preview.actions[0].calls: the navigator has no method "openSeries"',
+        ],
+      );
+    });
+
     test('T-0069-AC3 the shared-step table is mc_test_steps\' barrel', () {
       final barrel = p.join(
         repoRoot,

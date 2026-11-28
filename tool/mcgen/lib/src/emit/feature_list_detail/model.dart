@@ -200,7 +200,6 @@ class LdModel {
   late final List<LdSection> sections;
   late final LdTests tests;
   late final Map<String, String> prose;
-  late final Map<String, List<String>> imports;
 
   // --- names ------------------------------------------------------------------
   String get module => spec.module;
@@ -269,22 +268,8 @@ class LdModel {
     return null;
   }
 
-  /// The navigator method [name]'s argument type.
-  String navigatorArg(String name) =>
-      spec.navigator!.outbound.firstWhere((o) => o.name == name).args.single;
-
-  /// The entity whose id the navigator method [name] takes.
-  String entityOpenedBy(String name) {
-    final id = navigatorArg(name);
-    return spec.entities.firstWhere((e) => idOf(e.name) == id).name;
-  }
-
   /// The prose of [slot]: the spec's `options.prose`, else [fallback].
   String text(String slot, String fallback) => prose[slot] ?? fallback;
-
-  /// The prose of [slot], or null when the spec gives none and there is no
-  /// default.
-  String? textOr(String slot, String? fallback) => prose[slot] ?? fallback;
 
   /// The AC tag a test name starts with, plus a space; empty when untagged.
   String tag(String slot) {
@@ -394,10 +379,35 @@ class LdModel {
       env: t.strMap('env'),
     );
     m.prose = r.strMap('prose');
-    m.imports = {
-      for (final e in r.child('imports').entries)
-        e.key: [for (final u in (e.value as YamlList).nodes) '${u.value}'],
-    };
+    r.only(const [
+      'item',
+      'items',
+      'list_noun',
+      'ids',
+      'list',
+      'mappers',
+      'preview',
+      'tests',
+      'prose',
+    ]);
+    list.only(const [
+      'entity',
+      'endpoint',
+      'page_size',
+      'title',
+      'image',
+      'filters',
+    ]);
+    preview.only(const ['art_variant', 'actions', 'sections']);
+    t.only(const [
+      'fixture_sets',
+      'records',
+      'record',
+      'section_records',
+      'tags',
+      'legacy_goldens',
+      'env',
+    ]);
     return m;
   }
 
@@ -461,8 +471,77 @@ class LdModel {
       }
     }
 
+    void field(String entityName, String name, String path) {
+      final e = entities[entityName];
+      if (e != null && !e.fields.any((f) => f.name == name)) {
+        err(spec.optionsNode, path, '"$entityName" has no field "$name"');
+      }
+    }
+
+    void param(String endpointId, String name, String path) {
+      final e = endpoints[endpointId];
+      if (e != null && !e.query.contains(name)) {
+        err(
+          spec.optionsNode,
+          path,
+          'endpoint "$endpointId" has no query parameter "$name"',
+        );
+      }
+    }
+
     entity(m.listEntity, 'options.list.entity');
     endpointOf(m.listEndpoint, 'options.list.endpoint');
+    field(m.listEntity, m.titleField, 'options.list.title');
+    field(m.listEntity, m.imageField, 'options.list.image');
+    param(m.listEndpoint, 'offset', 'options.list.endpoint');
+    param(m.listEndpoint, 'limit', 'options.list.endpoint');
+    for (final (i, f) in m.filters.indexed) {
+      param(m.listEndpoint, f.query, 'options.list.filters[$i].query');
+    }
+    final list = endpoints[m.listEndpoint];
+    for (final q in list?.params ?? const <QueryParamSpec>[]) {
+      final filled =
+          q.name == 'offset' ||
+          q.name == 'limit' ||
+          m.filters.any((f) => f.query == q.name);
+      if (!filled &&
+          (q.required || (!q.hasDefault && q.type?.nullable == false))) {
+        err(
+          q.node,
+          q.path,
+          'the list endpoint\'s "${q.name}" is required, but no filter fills it',
+        );
+      }
+    }
+    for (final e in spec.endpoints) {
+      if (e.urlPath.contains('{')) {
+        err(
+          e.nodeOf('path'),
+          '${e.path}.path',
+          'list_detail has no path parameters yet',
+        );
+      }
+      if (e.method != 'GET' || e.returns == null) {
+        err(
+          e.node,
+          e.path,
+          'list_detail endpoints are GETs with a returns: type',
+        );
+      }
+    }
+    if (m.actions.isEmpty) {
+      err(
+        spec.optionsNode,
+        'options.preview.actions',
+        'the preview needs at least one action',
+      );
+    }
+    final mapped = {for (final x in m.mappers) x.to};
+    for (final e in [m.listEntity, for (final s in m.sections) s.entity]) {
+      if (!mapped.contains(e)) {
+        err(spec.optionsNode, 'options.mappers', 'no mapper produces "$e"');
+      }
+    }
     if (m.idOf(m.listEntity) == null && entities.containsKey(m.listEntity)) {
       err(
         spec.optionsNode,
@@ -477,6 +556,17 @@ class LdModel {
       entity(s.entity, 'options.preview.sections[$i].entity');
       endpointOf(s.endpoint, 'options.preview.sections[$i].endpoint');
       method(s.calls, 'options.preview.sections[$i].calls');
+      field(s.entity, s.title, 'options.preview.sections[$i].title');
+      field(s.entity, s.image, 'options.preview.sections[$i].image');
+      param(s.endpoint, s.by, 'options.preview.sections[$i].by');
+      param(s.endpoint, 'limit', 'options.preview.sections[$i].endpoint');
+      if (m.idOf(s.entity) == null && entities.containsKey(s.entity)) {
+        err(
+          spec.optionsNode,
+          'options.preview.sections[$i].entity',
+          '"${s.entity}" needs an id field typed with one of options.ids',
+        );
+      }
     }
     for (final (i, x) in m.mappers.indexed) {
       entity(x.dto, 'options.mappers[$i].dto');
@@ -581,6 +671,17 @@ class _Reader {
         in _map?.nodes.entries ?? const <MapEntry<Object?, YamlNode>>[])
       MapEntry('${(e.key as YamlNode).value}', e.value),
   ];
+
+  /// Rejects keys outside [keys] (the schema leaves `options` open).
+  void only(List<String> keys) {
+    for (final e
+        in _map?.nodes.entries ?? const <MapEntry<Object?, YamlNode>>[]) {
+      final k = '${(e.key as YamlNode).value}';
+      if (!keys.contains(k)) {
+        throw LdError(e.key as YamlNode, '$path.$k', 'unknown key "$k"');
+      }
+    }
+  }
 
   Map<String, String> strMap(String key) {
     final c = child(key);

@@ -1,0 +1,79 @@
+INFO: Invocation ID: dc96ad40-a601-4238-8c6a-5a0b29837fd3
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 124 targets (11 packages loaded, 0 targets configured)
+Analyzing: 124 targets (11 packages loaded, 0 targets configured)
+
+Analyzing: 124 targets (32 packages loaded, 754 targets configured, 233 aspect applications)
+[10,562 / 12,072] DartCodegen @@//feature/characters/characters_list:_related_comics_bloc_freezed; 0s disk-cache, worker ... (8 actions running)
+Analyzing: 124 targets (32 packages loaded, 825 targets configured, 454 aspect applications)
+[29,119 / 35,669] Testing //app/wiring/app_core:sign_in_guard_router_test; 1s darwin-sandbox ... (7 actions running)
+INFO: Analyzed 124 targets (32 packages loaded, 832 targets configured, 479 aspect applications).
+[70,484 / 76,153] 3 / 40 tests; Testing //app/wiring/app_core:sign_in_guard_router_test; 2s darwin-sandbox ... (6 actions, 5 running)
+[84,057 / 84,165] 6 / 40 tests; Testing //app/wiring/app_core:sign_in_guard_router_test; 3s darwin-sandbox ... (14 actions, 12 running)
+[84,092 / 84,190] 12 / 40 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 1s disk-cache, worker ... (14 actions, 12 running)
+[84,096 / 84,190] 17 / 40 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 3s disk-cache, worker ... (11 actions running)
+[84,101 / 84,190] 22 / 40 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 4s disk-cache, worker ... (6 actions running)
+[84,102 / 84,190] 22 / 40 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 5s disk-cache, worker ... (5 actions running)
+[84,103 / 84,190] 23 / 40 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 6s disk-cache, worker ... (4 actions running)
+[84,103 / 84,190] 24 / 40 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 8s disk-cache, worker ... (4 actions running)
+[84,156 / 84,190] 24 / 40 tests; [Sched] Linking Dart kernel @@//app/mini_client:reading_list_route_test; Downloading app/mini_client/reading_list_route_test.flutter_entry.kmod/entry.dill ... (14 actions, 0 running)
+[84,190 / 84,206] 24 / 40 tests; Testing //app/sandbox/universe_sandbox:universe_sandbox_router_test; 0s darwin-sandbox ... (14 actions, 8 running)
+[84,192 / 84,206] 26 / 40 tests; Testing //app/mini_client:trivia_route_test; 1s darwin-sandbox ... (14 actions, 8 running)
+[84,195 / 84,206] 29 / 40 tests; Testing //app/mini_client:trivia_route_test; 2s darwin-sandbox ... (11 actions, 8 running)
+[84,197 / 84,206] 31 / 40 tests; Testing //app/mini_client:trivia_route_test; 3s darwin-sandbox ... (9 actions, 8 running)
+[84,199 / 84,206] 33 / 40 tests; Testing //app/mini_client:reading_list_route_test; 4s darwin-sandbox ... (7 actions running)
+[84,201 / 84,206] 35 / 40 tests; Testing //app/mini_client:reading_list_route_test; 5s darwin-sandbox ... (5 actions running)
+[84,202 / 84,206] 36 / 40 tests; Testing //app/mini_client:analytics_screens_test; 4s darwin-sandbox ... (4 actions running)
+[84,203 / 84,206] 37 / 40 tests; Testing //app/mini_client:sign_in_guard_app_test; 5s darwin-sandbox ... (3 actions running)
+[84,204 / 84,206] 38 / 40 tests; Testing //app/mini_client:sign_in_guard_app_test; 6s darwin-sandbox ... (2 actions running)
+[84,204 / 84,206] 39 / 40 tests; Testing //app/mini_client:sign_in_guard_app_test; 7s darwin-sandbox ... (2 actions running)
+INFO: Found 84 targets and 40 test targets...
+INFO: Elapsed time: 23.751s, Critical Path: 21.01s
+INFO: 137 processes: 78735 action cache hit, 57 internal, 42 darwin-sandbox, 38 worker.
+INFO: Build completed successfully, 137 total actions
+//app/mini_client:analytics_screens_test                                 PASSED in 5.3s
+//app/mini_client:app_test                                               PASSED in 2.2s
+//app/mini_client:bdd_test                                               PASSED in 1.6s
+//app/mini_client:comic_route_test                                       PASSED in 2.3s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 6.1s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.4s
+//app/mini_client:not_found_test                                         PASSED in 4.8s
+//app/mini_client:reading_list_route_test                                PASSED in 5.5s
+//app/mini_client:search_route_test                                      PASSED in 4.0s
+//app/mini_client:settings_route_test                                    PASSED in 3.2s
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 7.8s
+//app/mini_client:store_route_test                                       PASSED in 3.3s
+//app/mini_client:trivia_route_test                                      PASSED in 3.9s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 0.9s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.8s
+//app/wiring/account_wiring:routes_test                                  PASSED in 6.3s
+//app/wiring/app_core:app_layer_test                                     PASSED in 1.1s
+//app/wiring/app_core:appearance_shell_test                              PASSED in 2.3s
+//app/wiring/app_core:boot_test                                          PASSED in 2.9s
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.3s
+//app/wiring/app_core:flow_results_hardening_test                        PASSED in 3.9s
+//app/wiring/app_core:flow_results_test                                  PASSED in 3.6s
+//app/wiring/app_core:formatters_root_test                               PASSED in 1.0s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.9s
+//app/wiring/app_core:route_nesting_test                                 PASSED in 1.2s
+//app/wiring/app_core:router_observers_test                              PASSED in 1.9s
+//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 1.1s
+//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 4.5s
+//app/wiring/app_core:sign_in_guard_test                                 PASSED in 1.5s
+//app/wiring/chronicle_wiring:routes_test                                PASSED in 1.6s
+//app/wiring/commerce_wiring:routes_test                                 PASSED in 2.1s
+//app/wiring/discovery_wiring:routes_test                                PASSED in 1.2s
+//app/wiring/library_wiring:routes_test                                  PASSED in 1.5s
+//app/wiring/publishing_wiring:routes_test                               PASSED in 1.7s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 1.4s
+//feature/characters/characters_list:architecture_test                   PASSED in 0.4s
+//feature/characters/characters_list:bdd_test                            PASSED in 4.2s
+//feature/characters/characters_list:contract_test                       PASSED in 0.6s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.7s
+//feature/characters/characters_list:golden_test                         PASSED in 2.2s
+
+Executed 40 out of 40 tests: 40 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+exit 0

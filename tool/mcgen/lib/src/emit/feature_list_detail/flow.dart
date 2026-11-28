@@ -4,7 +4,6 @@
 import 'package:mcgen/src/core/emit.dart';
 import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
-import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/emit/feature_list_detail/common.dart';
 import 'package:mcgen/src/emit/feature_list_detail/model.dart';
 
@@ -222,6 +221,3 @@ extension on LdModel {
       for (final a in o.args) a,
   ].toSet().toList();
 }
-
-/// Snake form of a navigator method (`openCharacter` -> `open_character`).
-String navigatorSnake(String method) => snakeCase(method);
