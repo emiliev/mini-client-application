@@ -1,0 +1,572 @@
+INFO: Invocation ID: 8fbc3c36-56a7-4d5c-a45b-d89257251b86
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 652 targets (46 packages loaded, 0 targets configured)
+Analyzing: 652 targets (46 packages loaded, 337 targets configured)
+
+Analyzing: 652 targets (55 packages loaded, 4626 targets configured, 1114 aspect applications)
+[8,414 / 14,322] [Prepa] Creating symlink feature/characters/characters_list/_di_config_src_presentation_bloc_related_comics_bloc_inj.pkg_roots.0e0095b224c27491/mc__api__client/lib/mc_api_client.dart ... (14 actions, 0 running)
+Analyzing: 652 targets (55 packages loaded, 4698 targets configured, 1337 aspect applications)
+[21,587 / 28,075] [Prepa] Compiling Dart exe @@ai_rules_dart+//dart/private/tools:kernel_launcher [for tool] ... (14 actions, 0 running)
+Analyzing: 652 targets (55 packages loaded, 4759 targets configured, 1508 aspect applications)
+[34,328 / 40,191] [Prepa] Creating symlink feature/store/store_home/_di_config_src_presentation_bloc_deals_bloc_inj.pkg_roots.810b55fb55ffe70e/collection/lib/src/combined_wrappers/combined_map.dart ... (11 actions, 0 running)
+INFO: From DartCodegen @@//feature/trivia/trivia_quiz:_trivia_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/characters/characters_search:_character_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/characters/characters_details:_character_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/comics/comics_details:_comic_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+Analyzing: 652 targets (55 packages loaded, 4825 targets configured, 1659 aspect applications)
+[47,505 / 56,646] [Prepa] Creating symlink app/mini_client/app_routes_go_router_part.pkg_roots.49bebe0e090dc797/flutter/lib/src/services/spell_check.dart ... (12 actions, 0 running)
+INFO: From DartAggregateCodegen @@//feature/settings/settings_home:di_config:
+Missing dependencies in settings_home/src/di/di_initializer.dart
+
+[AccountProfileReader] depends on unregistered type [Dio] , from package:dio/dio.dart
+[SettingsHomeBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[SettingsHomeBloc] depends on unregistered type [AppearanceReader] , from package:mc_appearance/mc_appearance.dart
+[SettingsHomeBloc] depends on unregistered type [SettingsHomeNavigator] , from package:settings_home/src/navigator/settings_home_navigator.dart
+[SettingsHomeBloc] depends on unregistered type [AppConfig] , from package:mc_config/mc_config.dart
+[SettingsHomeBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/auth/auth_signin:di_config:
+Missing dependencies in auth_signin/src/di/di_initializer.dart
+
+[AuthSignInBloc] depends on unregistered type [FeatureFlowController<(AuthSignInFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[AuthSignInBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[AuthSignInBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[AuthSignInRepository] depends on unregistered type [AuthApi] , from package:mc_api_auth/mc_api_auth.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/characters/characters_search:di_config:
+Missing dependencies in characters_search/src/di/di_initializer.dart
+
+[CharactersSearchApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[CharactersSearchBloc] depends on unregistered type [FeatureFlowController<(CharactersSearchFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersSearchBloc] depends on unregistered type [CharactersSearchNavigator] , from package:characters_search/src/navigator/characters_search_navigator.dart
+[CharactersSearchBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[SearchHistory] depends on unregistered type [FileStore] , from package:mc_storage/mc_storage.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/characters/characters_list:di_config:
+Missing dependencies in characters_list/src/di/di_initializer.dart
+
+[CharacterPreviewBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharacterPreviewBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListBloc] depends on unregistered type [FeatureFlowController<(CharactersListFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersListBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharactersListBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[RelatedComicsBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[RelatedComicsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartCodegen @@//feature/discovery/discovery_search:_search_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/store/store_home:_store_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//spike/api_envelope:_api_response_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/library/library_reading_list_editor:_reading_list_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//spike/api_envelope:_api_response_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartAggregateCodegen @@//feature/characters/characters_details:di_config:
+Missing dependencies in characters_details/src/di/di_initializer.dart
+
+[CharacterDetailsBloc] depends on unregistered type [FeatureFlowController<(CharacterDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharacterDetailsBloc] depends on unregistered type [CharacterDetailsNavigator] , from package:characters_details/src/navigator/characters_details_navigator.dart
+[CharacterDetailsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharacterDetailsApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[CharacterFavouriteBloc] depends on unregistered type [FeatureFlowController<(CharacterDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharacterFavouriteBloc] depends on unregistered type [CharacterDetailsNavigator] , from package:characters_details/src/navigator/characters_details_navigator.dart
+[CharacterFavouriteBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[CharacterFavouriteBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[CharacterFavouriteBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CharacterFavouriteBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/comics/comics_details:di_config:
+Missing dependencies in comics_details/src/di/di_initializer.dart
+
+[ComicDetailsBloc] depends on unregistered type [FeatureFlowController<(ComicsDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ComicDetailsBloc] depends on unregistered type [ComicsDetailsNavigator] , from package:comics_details/src/navigator/comics_details_navigator.dart
+[ComicDetailsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[ComicsDetailsApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[ComicFavouriteBloc] depends on unregistered type [FeatureFlowController<(ComicsDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ComicFavouriteBloc] depends on unregistered type [ComicsDetailsNavigator] , from package:comics_details/src/navigator/comics_details_navigator.dart
+[ComicFavouriteBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[ComicFavouriteBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[ComicFavouriteBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+Analyzing: 652 targets (55 packages loaded, 4892 targets configured, 1827 aspect applications)
+[59,665 / 73,049] [Prepa] Creating symlink app/wiring/discovery_wiring/_di_config_src_navigators_discovery_search_navigator_impl_inj.pkg_roots.3d864d7cbdac17bd/flutter/lib/src/foundation/synchronous_future.dart ... (14 actions, 0 running)
+INFO: From DartAggregateCodegen @@//feature/settings/settings_appearance:di_config:
+Missing dependencies in settings_appearance/src/di/di_initializer.dart
+
+[AppearanceBloc] depends on unregistered type [AppearanceSettings] , from package:mc_appearance/mc_appearance.dart
+[AppearanceBloc] depends on unregistered type [SettingsAppearanceNavigator] , from package:settings_appearance/src/navigator/settings_appearance_navigator.dart
+[AppearanceBloc] depends on unregistered type [FeatureFlowController<(SettingsAppearanceFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[AppearanceBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[AppearanceBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: Analyzed 652 targets (55 packages loaded, 4949 targets configured, 1984 aspect applications).
+[72,627 / 89,590] Checking Dart formatting of //utility/mc_fixtures_editorial:provider_contract_test; 0s disk-cache ... (14 actions, 0 running)
+[81,487 / 95,664] Bundling Flutter assets @@//app/sandbox/universe_sandbox:universe_sandbox_router_test; 0s disk-cache ... (14 actions, 0 running)
+INFO: From DartAggregateCodegen @@//feature/discovery/discovery_search:di_config:
+Missing dependencies in discovery_search/src/di/di_initializer.dart
+
+[SearchHistory] depends on unregistered type [FileStore] , from package:mc_storage/mc_storage.dart
+[DiscoverySearchApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[DiscoverySearchBloc] depends on unregistered type [FeatureFlowController<(DiscoverySearchFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[DiscoverySearchBloc] depends on unregistered type [DiscoverySearchNavigator] , from package:discovery_search/src/navigator/discovery_search_navigator.dart
+[DiscoverySearchBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/library/library_reading_list_editor:di_config:
+Missing dependencies in library_reading_list_editor/src/di/di_initializer.dart
+
+[ComicPickerBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[ReadingListEditorApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[ReadingListEditorBloc] depends on unregistered type [FeatureFlowController<(ReadingListEditorFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ReadingListEditorBloc] depends on unregistered type [ReadingListEditorNavigator] , from package:library_reading_list_editor/src/navigator/reading_list_editor_navigator.dart
+[ReadingListEditorBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[ReadingListEditorBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[ReadingListEditorBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[90,639 / 106,473] [Prepa] Creating symlink app/wiring/account_wiring/_di_config_src_navigators_auth_signin_navigator_impl_inj.pkg_roots.72ab6a72f290763d/intl/lib/src/web.dart ... (14 actions, 0 running)
+[99,172 / 109,230] DartCodegen @@//feature/store/store_home:_categories_bloc_freezed; 0s disk-cache, worker ... (12 actions, 1 running)
+[106,578 / 109,895] DartCodegen @@//feature/store/store_home:_di_config_src_presentation_bloc_category_products_bloc_inj; 0s disk-cache, worker ... (13 actions, 5 running)
+INFO: From DartAggregateCodegen @@//feature/trivia/trivia_quiz:di_config:
+Missing dependencies in trivia_quiz/src/di/di_initializer.dart
+
+[TriviaQuizApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[TriviaResultsBloc] depends on unregistered type [FeatureFlowController<(TriviaQuizFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[TriviaResultsBloc] depends on unregistered type [TriviaQuizNavigator] , from package:trivia_quiz/src/navigator/trivia_quiz_navigator.dart
+[TriviaResultsBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[TriviaResultsBloc] depends on unregistered type [RoundSeeds] , from package:trivia_quiz/src/domain/model/round_seeds.dart
+[TriviaResultsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[TriviaSetupBloc] depends on unregistered type [FeatureFlowController<(TriviaQuizFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[TriviaSetupBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[TriviaSetupBloc] depends on unregistered type [RoundSeeds] , from package:trivia_quiz/src/domain/model/round_seeds.dart
+[TriviaSetupBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[TriviaPlayBloc] depends on unregistered type [FeatureFlowController<(TriviaQuizFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[TriviaPlayBloc] depends on unregistered type [FeatureFlagsReader] , from package:mc_feature_flags/mc_feature_flags.dart
+[TriviaPlayBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[TriviaPlayBloc] depends on unregistered type [RoundSeeds] , from package:trivia_quiz/src/domain/model/round_seeds.dart
+[TriviaPlayBloc] depends on unregistered type [TriviaTicker] , from package:trivia_quiz/src/domain/time/trivia_ticker.dart
+[TriviaPlayBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/store/store_home:di_config:
+Missing dependencies in store_home/src/di/di_initializer.dart
+
+[CartSummaryBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[CartSummaryBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[CartSummaryBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CartSummaryBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[BannersBloc] depends on unregistered type [FeatureFlowController<(StoreHomeFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[BannersBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[BannersBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[BannersBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[FeaturedBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[FeaturedBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[FeaturedBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[StoreHomeApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[DealsBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[DealsBloc] depends on unregistered type [StoreClock] , from package:store_home/src/domain/model/store_clock.dart
+[DealsBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[DealsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CategoriesBloc] depends on unregistered type [FeatureFlowController<(StoreHomeFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CategoriesBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CategoriesBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CategoryProductsBloc] depends on unregistered type [FeatureFlowController<(StoreHomeFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CategoryProductsBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[CategoryProductsBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CategoryProductsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/publishing_wiring:di_config:
+Missing dependencies in publishing_wiring/src/di/di_initializer.dart
+
+[ComicsDetailsNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[ComicsDetailsNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/chronicle_wiring:di_config:
+Missing dependencies in chronicle_wiring/src/di/di_initializer.dart
+
+[TriviaQuizNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[TriviaQuizNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/discovery_wiring:di_config:
+Missing dependencies in discovery_wiring/src/di/di_initializer.dart
+
+[DiscoverySearchNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/library_wiring:di_config:
+Missing dependencies in library_wiring/src/di/di_initializer.dart
+
+[ReadingListEditorNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[ReadingListEditorNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/universe_wiring:di_config:
+Missing dependencies in universe_wiring/src/di/di_initializer.dart
+
+[CharactersListNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[CharacterDetailsNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[CharacterDetailsNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[CharactersSearchNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/account_wiring:di_config:
+Missing dependencies in account_wiring/src/di/di_initializer.dart
+
+[SettingsAppearanceNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[SettingsAppearanceNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[SettingsHomeNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[SettingsHomeNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[SettingsHomeNavigatorImpl] depends on unregistered type [AuthApi] , from package:mc_api_auth/mc_api_auth.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[110,966 / 111,057] 227 / 246 tests; Compiling Dart kernel module feature/store/store_home/store_home.flutter.kmod; 0s disk-cache, worker ... (3 actions running)
+[110,976 / 111,059] 228 / 246 tests; DartCodegen @@//app/wiring/commerce_wiring:_di_config_src_navigators_store_home_navigator_impl_inj; 1s disk-cache, worker ... (5 actions running)
+[110,980 / 111,061] 228 / 246 tests; DartCodegen @@//app/wiring/commerce_wiring:_di_config_src_navigators_store_home_navigator_impl_inj; 2s disk-cache, worker ... (5 actions running)
+[110,980 / 111,061] 229 / 246 tests; DartCodegen @@//app/wiring/commerce_wiring:_di_config_src_navigators_store_home_navigator_impl_inj; 3s disk-cache, worker ... (5 actions running)
+[110,982 / 111,061] 230 / 246 tests; DartCodegen @@//app/wiring/commerce_wiring:_di_config_src_navigators_store_home_navigator_impl_inj; 5s disk-cache, worker ... (3 actions running)
+[110,983 / 111,061] 230 / 246 tests; DartCodegen @@//app/wiring/commerce_wiring:_store_routes_go_router_part; 7s disk-cache, worker ... (3 actions, 2 running)
+INFO: From DartAggregateCodegen @@//app/wiring/commerce_wiring:di_config:
+Missing dependencies in commerce_wiring/src/di/di_initializer.dart
+
+[StoreHomeNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[StoreHomeNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[111,028 / 111,061] 230 / 246 tests; Testing //feature/store/store_home:bdd_test; 6s disk-cache, darwin-sandbox ... (14 actions, 6 running)
+[111,060 / 111,076] 230 / 246 tests; Testing //feature/store/store_home:bdd_test; 7s disk-cache, darwin-sandbox ... (14 actions, 8 running)
+[111,063 / 111,076] 233 / 246 tests; Testing //feature/store/store_home:bdd_test; 8s disk-cache, darwin-sandbox ... (13 actions, 8 running)
+[111,063 / 111,076] 233 / 246 tests; Testing //feature/store/store_home:bdd_test; 9s disk-cache, darwin-sandbox ... (13 actions, 9 running)
+[111,065 / 111,076] 235 / 246 tests; Testing //feature/store/store_home:bdd_test; 11s disk-cache, darwin-sandbox ... (11 actions, 9 running)
+[111,067 / 111,076] 237 / 246 tests; Testing //feature/store/store_home:bdd_test; 12s disk-cache, darwin-sandbox ... (9 actions, 8 running)
+[111,069 / 111,076] 239 / 246 tests; Testing //app/mini_client:analytics_screens_test; 5s disk-cache, darwin-sandbox ... (7 actions running)
+[111,069 / 111,076] 240 / 246 tests; Testing //app/mini_client:analytics_screens_test; 8s disk-cache, darwin-sandbox ... (7 actions running)
+[111,072 / 111,076] 243 / 246 tests; Testing //app/mini_client:sign_in_guard_app_test; 10s disk-cache, darwin-sandbox ... (4 actions running)
+[111,075 / 111,076] 245 / 246 tests; Testing //app/mini_client:reading_list_route_test; 6s disk-cache, darwin-sandbox
+INFO: Found 406 targets and 246 test targets...
+INFO: Elapsed time: 34.189s, Critical Path: 21.59s
+INFO: 105575 processes: 147 action cache hit, 2615 disk cache hit, 102896 internal, 21 darwin-sandbox, 43 worker.
+INFO: Build completed successfully, 105575 total actions
+//app/sandbox/universe_sandbox:universe_sandbox_links_test      (cached) PASSED in 0.9s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test     (cached) PASSED in 0.8s
+//app/wiring/account_wiring:routes_test                         (cached) PASSED in 6.8s
+//app/wiring/app_core:app_layer_test                            (cached) PASSED in 2.2s
+//app/wiring/app_core:appearance_shell_test                     (cached) PASSED in 4.9s
+//app/wiring/app_core:boot_test                                 (cached) PASSED in 4.5s
+//app/wiring/app_core:feature_flags_boot_test                   (cached) PASSED in 2.6s
+//app/wiring/app_core:flow_results_hardening_test               (cached) PASSED in 8.6s
+//app/wiring/app_core:flow_results_test                         (cached) PASSED in 5.5s
+//app/wiring/app_core:formatters_root_test                      (cached) PASSED in 1.0s
+//app/wiring/app_core:links_and_hooks_test                      (cached) PASSED in 1.6s
+//app/wiring/app_core:route_nesting_test                        (cached) PASSED in 2.5s
+//app/wiring/app_core:router_observers_test                     (cached) PASSED in 2.9s
+//app/wiring/app_core:router_ref_and_scheme_test                (cached) PASSED in 2.5s
+//app/wiring/app_core:sign_in_guard_router_test                 (cached) PASSED in 5.8s
+//app/wiring/app_core:sign_in_guard_test                        (cached) PASSED in 1.5s
+//app/wiring/chronicle_wiring:routes_test                       (cached) PASSED in 1.5s
+//app/wiring/discovery_wiring:routes_test                       (cached) PASSED in 1.4s
+//app/wiring/library_wiring:routes_test                         (cached) PASSED in 1.5s
+//app/wiring/publishing_wiring:routes_test                      (cached) PASSED in 2.4s
+//app/wiring/universe_wiring:routes_test                        (cached) PASSED in 1.6s
+//feature/auth/auth_signin:architecture_test                    (cached) PASSED in 0.5s
+//feature/auth/auth_signin:bdd_test                             (cached) PASSED in 14.8s
+//feature/auth/auth_signin:bloc_guards_test                     (cached) PASSED in 2.3s
+//feature/auth/auth_signin:contract_test                        (cached) PASSED in 0.4s
+//feature/auth/auth_signin:flow_scope_test                      (cached) PASSED in 1.8s
+//feature/auth/auth_signin:unit_test                            (cached) PASSED in 0.6s
+//feature/characters/characters_details:architecture_test       (cached) PASSED in 0.5s
+//feature/characters/characters_details:bdd_test                (cached) PASSED in 14.4s
+//feature/characters/characters_details:bloc_guards_test        (cached) PASSED in 2.6s
+//feature/characters/characters_details:contract_test           (cached) PASSED in 0.8s
+//feature/characters/characters_details:flow_scope_test         (cached) PASSED in 2.5s
+//feature/characters/characters_list:architecture_test          (cached) PASSED in 0.2s
+//feature/characters/characters_list:bdd_test                   (cached) PASSED in 4.4s
+//feature/characters/characters_list:contract_test              (cached) PASSED in 0.7s
+//feature/characters/characters_list:flow_scope_test            (cached) PASSED in 1.4s
+//feature/characters/characters_list:golden_test                (cached) PASSED in 1.8s
+//feature/characters/characters_search:architecture_test        (cached) PASSED in 0.4s
+//feature/characters/characters_search:bdd_test                 (cached) PASSED in 38.8s
+//feature/characters/characters_search:contract_test            (cached) PASSED in 0.6s
+//feature/characters/characters_search:flow_scope_test          (cached) PASSED in 6.8s
+//feature/comics/comics_details:architecture_test               (cached) PASSED in 0.5s
+//feature/comics/comics_details:bdd_test                        (cached) PASSED in 13.3s
+//feature/comics/comics_details:bloc_guards_test                (cached) PASSED in 2.0s
+//feature/comics/comics_details:contract_test                   (cached) PASSED in 0.5s
+//feature/comics/comics_details:flow_scope_test                 (cached) PASSED in 2.5s
+//feature/comics/comics_details:golden_test                     (cached) PASSED in 2.9s
+//feature/discovery/discovery_search:architecture_test          (cached) PASSED in 0.5s
+//feature/discovery/discovery_search:bdd_test                   (cached) PASSED in 37.6s
+//feature/discovery/discovery_search:contract_test              (cached) PASSED in 1.0s
+//feature/discovery/discovery_search:flow_scope_test            (cached) PASSED in 4.3s
+//feature/discovery/discovery_search:golden_test                (cached) PASSED in 6.2s
+//feature/library/library_reading_list_editor:architecture_test (cached) PASSED in 0.3s
+//feature/library/library_reading_list_editor:bdd_test          (cached) PASSED in 18.3s
+//feature/library/library_reading_list_editor:bloc_guards_test  (cached) PASSED in 3.2s
+//feature/library/library_reading_list_editor:contract_test     (cached) PASSED in 1.0s
+//feature/library/library_reading_list_editor:flow_scope_test   (cached) PASSED in 4.2s
+//feature/library/library_reading_list_editor:golden_test       (cached) PASSED in 4.9s
+//feature/settings/settings_appearance:architecture_test        (cached) PASSED in 0.4s
+//feature/settings/settings_appearance:bdd_test                 (cached) PASSED in 5.6s
+//feature/settings/settings_appearance:contract_test            (cached) PASSED in 0.4s
+//feature/settings/settings_appearance:flow_scope_test          (cached) PASSED in 3.0s
+//feature/settings/settings_home:architecture_test              (cached) PASSED in 0.3s
+//feature/settings/settings_home:bdd_test                       (cached) PASSED in 5.3s
+//feature/settings/settings_home:contract_test                  (cached) PASSED in 0.5s
+//feature/settings/settings_home:flow_scope_test                (cached) PASSED in 2.9s
+//feature/settings/settings_home:unit_test                      (cached) PASSED in 0.6s
+//feature/store/store_home:contract_test                        (cached) PASSED in 0.7s
+//feature/trivia/trivia_quiz:architecture_test                  (cached) PASSED in 0.2s
+//feature/trivia/trivia_quiz:bdd_test                           (cached) PASSED in 17.2s
+//feature/trivia/trivia_quiz:contract_test                      (cached) PASSED in 0.5s
+//feature/trivia/trivia_quiz:engine_test                        (cached) PASSED in 0.2s
+//feature/trivia/trivia_quiz:flow_scope_test                    (cached) PASSED in 4.9s
+//feature/trivia/trivia_quiz:outline_matches_contract_test      (cached) PASSED in 0.2s
+//feature/trivia/trivia_quiz:painter_test                       (cached) PASSED in 4.9s
+//spike/bdd_sample:bdd_test                                     (cached) PASSED in 2.4s
+//spike/di_sample:di_sample_test                                (cached) PASSED in 0.2s
+//spike/hello:widget_test                                       (cached) PASSED in 1.5s
+//spike/retrofit_api:characters_api_test                        (cached) PASSED in 0.2s
+//tool/l10n_check:l10n_check_test                               (cached) PASSED in 0.6s
+//tool/l10n_check:workspace_gate_test                           (cached) PASSED in 0.4s
+//tool/mc_arch_check:arch_check_test                            (cached) PASSED in 0.5s
+//utility/mc_analysis:lints_test                                (cached) PASSED in 2.9s
+//utility/mc_analytics:consent_gate_test                        (cached) PASSED in 1.6s
+//utility/mc_analytics:di_test                                  (cached) PASSED in 1.3s
+//utility/mc_analytics:flow_observer_test                       (cached) PASSED in 2.7s
+//utility/mc_analytics:no_third_party_test                      (cached) PASSED in 0.5s
+//utility/mc_analytics:route_observer_test                      (cached) PASSED in 4.0s
+//utility/mc_analytics:sessions_sinks_test                      (cached) PASSED in 1.5s
+//utility/mc_analytics:validation_test                          (cached) PASSED in 1.1s
+//utility/mc_api_auth:auth_api_test                             (cached) PASSED in 1.0s
+//utility/mc_api_auth:auth_interceptor_test                     (cached) PASSED in 0.8s
+//utility/mc_api_auth:auth_pin_test                             (cached) PASSED in 0.4s
+//utility/mc_api_auth:auth_races_test                           (cached) PASSED in 0.9s
+//utility/mc_api_auth:no_flutter_test                           (cached) PASSED in 0.5s
+//utility/mc_api_client:api_client_test                         (cached) PASSED in 0.7s
+//utility/mc_api_client:api_page_test                           (cached) PASSED in 0.3s
+//utility/mc_api_client:no_flutter_test                         (cached) PASSED in 0.3s
+//utility/mc_api_errors:api_failure_test                        (cached) PASSED in 0.2s
+//utility/mc_api_errors:no_flutter_test                         (cached) PASSED in 0.3s
+//utility/mc_appearance:di_test                                 (cached) PASSED in 0.4s
+//utility/mc_appearance:local_test                              (cached) PASSED in 0.7s
+//utility/mc_appearance:no_flutter_test                         (cached) PASSED in 0.4s
+//utility/mc_appearance:preferences_test                        (cached) PASSED in 0.3s
+//utility/mc_appearance:races_test                              (cached) PASSED in 0.6s
+//utility/mc_appearance:sync_test                               (cached) PASSED in 0.8s
+//utility/mc_bloc_kit:feature_flow_controller_test              (cached) PASSED in 0.2s
+//utility/mc_bloc_kit:mc_bloc_test                              (cached) PASSED in 0.2s
+//utility/mc_bloc_kit:purity_test                               (cached) PASSED in 0.2s
+//utility/mc_config:app_config_test                             (cached) PASSED in 0.6s
+//utility/mc_config:bundled_config_test                         (cached) PASSED in 0.4s
+//utility/mc_di:di_container_test                               (cached) PASSED in 0.3s
+//utility/mc_di:recording_test                                  (cached) PASSED in 0.4s
+//utility/mc_ds_buttons:buttons_test                            (cached) PASSED in 1.8s
+//utility/mc_ds_buttons:golden_test                             (cached) PASSED in 1.8s
+//utility/mc_ds_cards:card_test                                 (cached) PASSED in 1.1s
+//utility/mc_ds_cards:golden_test                               (cached) PASSED in 2.4s
+//utility/mc_ds_charts:charts_test                              (cached) PASSED in 6.5s
+//utility/mc_ds_charts:geometry_test                            (cached) PASSED in 0.9s
+//utility/mc_ds_charts:golden_test                              (cached) PASSED in 10.3s
+//utility/mc_ds_charts:painter_test                             (cached) PASSED in 0.9s
+//utility/mc_ds_feedback:feedback_test                          (cached) PASSED in 2.0s
+//utility/mc_ds_feedback:golden_test                            (cached) PASSED in 2.4s
+//utility/mc_ds_forms:forms_test                                (cached) PASSED in 4.0s
+//utility/mc_ds_forms:golden_test                               (cached) PASSED in 4.7s
+//utility/mc_ds_inputs:golden_test                              (cached) PASSED in 9.2s
+//utility/mc_ds_inputs:inputs_test                              (cached) PASSED in 5.4s
+//utility/mc_ds_layout:golden_test                              (cached) PASSED in 2.4s
+//utility/mc_ds_layout:layout_test                              (cached) PASSED in 1.3s
+//utility/mc_ds_lists:golden_test                               (cached) PASSED in 3.9s
+//utility/mc_ds_lists:paged_grid_test                           (cached) PASSED in 3.5s
+//utility/mc_ds_lists:paged_list_test                           (cached) PASSED in 3.7s
+//utility/mc_ds_media:golden_test                               (cached) PASSED in 2.1s
+//utility/mc_ds_media:image_test                                (cached) PASSED in 1.2s
+//utility/mc_ds_media:media_scope_test                          (cached) PASSED in 0.9s
+//utility/mc_ds_navigation:golden_test                          (cached) PASSED in 3.1s
+//utility/mc_ds_navigation:navigation_test                      (cached) PASSED in 3.8s
+//utility/mc_ds_overlays:golden_test                            (cached) PASSED in 7.2s
+//utility/mc_ds_overlays:overlays_test                          (cached) PASSED in 7.8s
+//utility/mc_ds_theme:golden_test                               (cached) PASSED in 1.5s
+//utility/mc_ds_theme:theme_test                                (cached) PASSED in 2.2s
+//utility/mc_ds_tokens:tokens_test                              (cached) PASSED in 0.4s
+//utility/mc_event_bus:event_bus_test                           (cached) PASSED in 0.2s
+//utility/mc_event_bus:no_flutter_test                          (cached) PASSED in 0.2s
+//utility/mc_feature_flags:di_test                              (cached) PASSED in 0.7s
+//utility/mc_feature_flags:evaluation_test                      (cached) PASSED in 1.6s
+//utility/mc_feature_flags:experiments_test                     (cached) PASSED in 2.0s
+//utility/mc_feature_flags:no_flutter_test                      (cached) PASSED in 0.3s
+//utility/mc_feature_flags:registry_overrides_test              (cached) PASSED in 0.9s
+//utility/mc_feature_flags:session_fetch_test                   (cached) PASSED in 1.6s
+//utility/mc_feature_flow:feature_flow_test                     (cached) PASSED in 4.9s
+//utility/mc_feature_flow:flow_back_button_test                 (cached) PASSED in 4.1s
+//utility/mc_feature_flow:flow_kit_test                         (cached) PASSED in 3.5s
+//utility/mc_feature_flow:flow_navigation_channel_test          (cached) PASSED in 1.5s
+//utility/mc_feature_flow:framework_navigation_baseline_test    (cached) PASSED in 1.0s
+//utility/mc_fixtures_characters:characters_test                (cached) PASSED in 1.1s
+//utility/mc_fixtures_characters:fixture_sets_test              (cached) PASSED in 0.7s
+//utility/mc_fixtures_characters:provider_contract_test         (cached) PASSED in 1.0s
+//utility/mc_fixtures_comics:comics_test                        (cached) PASSED in 2.0s
+//utility/mc_fixtures_comics:fixture_sets_test                  (cached) PASSED in 0.8s
+//utility/mc_fixtures_comics:provider_contract_test             (cached) PASSED in 2.6s
+//utility/mc_fixtures_commerce:cart_test                        (cached) PASSED in 1.4s
+//utility/mc_fixtures_commerce:fixture_sets_test                (cached) PASSED in 1.0s
+//utility/mc_fixtures_commerce:money_test                       (cached) PASSED in 0.7s
+//utility/mc_fixtures_commerce:provider_contract_test           (cached) PASSED in 1.2s
+//utility/mc_fixtures_commerce:store_test                       (cached) PASSED in 1.6s
+//utility/mc_fixtures_commerce:validation_test                  (cached) PASSED in 1.2s
+//utility/mc_fixtures_discovery:fixture_sets_test               (cached) PASSED in 0.9s
+//utility/mc_fixtures_discovery:provider_contract_test          (cached) PASSED in 5.6s
+//utility/mc_fixtures_discovery:ranking_test                    (cached) PASSED in 0.6s
+//utility/mc_fixtures_discovery:search_test                     (cached) PASSED in 2.9s
+//utility/mc_fixtures_editorial:determinism_test                (cached) PASSED in 2.8s
+//utility/mc_fixtures_editorial:fixture_sets_test               (cached) PASSED in 3.0s
+//utility/mc_fixtures_editorial:provider_contract_test          (cached) PASSED in 4.6s
+//utility/mc_fixtures_editorial:scoring_test                    (cached) PASSED in 1.3s
+//utility/mc_fixtures_editorial:validation_test                 (cached) PASSED in 1.5s
+//utility/mc_fixtures_identity:identity_test                    (cached) PASSED in 1.2s
+//utility/mc_fixtures_identity:no_flutter_test                  (cached) PASSED in 0.3s
+//utility/mc_fixtures_identity:preferences_test                 (cached) PASSED in 1.7s
+//utility/mc_fixtures_identity:provider_contract_test           (cached) PASSED in 1.2s
+//utility/mc_fixtures_library:fixture_sets_test                 (cached) PASSED in 0.7s
+//utility/mc_fixtures_library:library_test                      (cached) PASSED in 1.1s
+//utility/mc_fixtures_library:provider_contract_test            (cached) PASSED in 5.5s
+//utility/mc_fixtures_library:validation_test                   (cached) PASSED in 2.9s
+//utility/mc_fixtures_media:bundled_image_resolver_test         (cached) PASSED in 0.5s
+//utility/mc_fixtures_media:media_contract_test                 (cached) PASSED in 0.5s
+//utility/mc_fixtures_platform:fixture_sets_test                (cached) PASSED in 0.3s
+//utility/mc_fixtures_platform:flags_test                       (cached) PASSED in 0.5s
+//utility/mc_fixtures_platform:no_flutter_test                  (cached) PASSED in 0.4s
+//utility/mc_fixtures_platform:provider_contract_test           (cached) PASSED in 0.5s
+//utility/mc_formatters:formatters_di_initializer_test          (cached) PASSED in 0.3s
+//utility/mc_formatters:formatters_test                         (cached) PASSED in 0.8s
+//utility/mc_forms:form_controller_test                         (cached) PASSED in 0.2s
+//utility/mc_forms:purity_test                                  (cached) PASSED in 0.3s
+//utility/mc_forms:validators_test                              (cached) PASSED in 0.3s
+//utility/mc_forms:wizard_controller_test                       (cached) PASSED in 0.2s
+//utility/mc_l10n_core:l10n_test                                (cached) PASSED in 1.4s
+//utility/mc_media:api_image_test                               (cached) PASSED in 0.2s
+//utility/mc_media:purity_test                                  (cached) PASSED in 0.2s
+//utility/mc_media:resolved_image_test                          (cached) PASSED in 0.2s
+//utility/mc_mocked_backend:mocked_backend_test                 (cached) PASSED in 2.8s
+//utility/mc_monitoring:monitoring_test                         (cached) PASSED in 0.2s
+//utility/mc_monitoring:no_flutter_test                         (cached) PASSED in 0.3s
+//utility/mc_paging:copywith_barrel_test                        (cached) PASSED in 0.3s
+//utility/mc_paging:debounced_query_test                        (cached) PASSED in 0.3s
+//utility/mc_paging:paged_state_test                            (cached) PASSED in 0.3s
+//utility/mc_paging:paging_controller_test                      (cached) PASSED in 0.4s
+//utility/mc_paging:purity_test                                 (cached) PASSED in 0.2s
+//utility/mc_paging:search_history_test                         (cached) PASSED in 0.4s
+//utility/mc_prelude:result_test                                (cached) PASSED in 0.6s
+//utility/mc_session:no_flutter_test                            (cached) PASSED in 0.4s
+//utility/mc_session:session_di_test                            (cached) PASSED in 0.4s
+//utility/mc_session:session_test                               (cached) PASSED in 0.8s
+//utility/mc_storage:file_store_test                            (cached) PASSED in 0.8s
+//utility/mc_storage:no_flutter_test                            (cached) PASSED in 0.8s
+//utility/mc_test_steps:analytics_steps_test                    (cached) PASSED in 0.8s
+//utility/mc_test_steps:data_table_test                         (cached) PASSED in 0.4s
+//utility/mc_test_steps:flag_steps_test                         (cached) PASSED in 0.7s
+//utility/mc_test_steps:overlay_steps_test                      (cached) PASSED in 1.9s
+//utility/mc_test_utils:auth_container_test                     (cached) PASSED in 0.7s
+//utility/mc_test_utils:flags_container_test                    (cached) PASSED in 0.8s
+//utility/mc_test_utils:fonts_test                              (cached) PASSED in 0.6s
+//utility/mc_test_utils:formatters_container_test               (cached) PASSED in 0.7s
+//utility/mc_test_utils:golden_test                             (cached) PASSED in 1.5s
+//utility/mc_test_utils:harness_test                            (cached) PASSED in 1.6s
+//utility/mc_test_utils:init_flow_test                          (cached) PASSED in 1.4s
+//utility/mc_test_utils:isolation_test                          (cached) PASSED in 0.8s
+//app/mini_client:analytics_screens_test                                 PASSED in 8.9s
+//app/mini_client:app_test                                               PASSED in 3.4s
+//app/mini_client:bdd_test                                               PASSED in 1.6s
+//app/mini_client:characters_search_route_test                           PASSED in 7.2s
+//app/mini_client:comic_route_test                                       PASSED in 2.8s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 8.4s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.5s
+//app/mini_client:not_found_test                                         PASSED in 7.1s
+//app/mini_client:reading_list_route_test                                PASSED in 7.8s
+//app/mini_client:search_route_test                                      PASSED in 6.8s
+//app/mini_client:settings_route_test                                    PASSED in 5.2s
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 10.6s
+//app/mini_client:store_route_test                                       PASSED in 3.6s
+//app/mini_client:trivia_route_test                                      PASSED in 4.5s
+//app/wiring/commerce_wiring:routes_test                                 PASSED in 1.7s
+//feature/store/store_home:architecture_test                             PASSED in 0.3s
+//feature/store/store_home:bdd_test                                      PASSED in 13.1s
+//feature/store/store_home:flow_scope_test                               PASSED in 2.2s
+//feature/store/store_home:golden_test                                   PASSED in 2.1s
+
+Executed 19 out of 246 tests: 246 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
