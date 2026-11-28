@@ -34,6 +34,13 @@ const List<String> characterTeams = [
   'Open Road',
 ];
 
+/// A team's id on the wire (`team`): its name in lower case, each run of
+/// other characters as one `-`. A contract test pins it to the fixture's.
+String characterTeamId(String name) => name
+    .toLowerCase()
+    .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+    .replaceAll(RegExp(r'^-+|-+$'), '');
+
 /// What narrows and orders a search besides the typed prefix. A change of
 /// either sends one new request from the first page.
 final class CharacterFacets {

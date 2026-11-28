@@ -18,13 +18,14 @@ class CharactersSearchRepository {
 
   Future<Result<Page<Character>, ApiFailure>> fetchPage(
     CharactersSearchQuery query,
-  ) => apiCall(
-    () async => (await _api.getCharacters(
+  ) => apiCall(() async {
+    final team = query.facets.team;
+    return (await _api.getCharacters(
       nameStartsWith: query.prefix,
       orderBy: query.facets.sort.wireName,
-      team: query.facets.team,
+      team: team == null ? null : characterTeamId(team),
       offset: query.offset,
       limit: query.limit,
-    )).toDomain(),
-  );
+    )).toDomain();
+  });
 }

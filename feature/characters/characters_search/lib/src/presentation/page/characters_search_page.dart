@@ -5,6 +5,7 @@ import 'package:characters_search/src/domain/model/character_facets.dart';
 import 'package:characters_search/src/l10n/characters_search_l10n.dart';
 import 'package:characters_search/src/presentation/bloc/characters_search_bloc.dart';
 import 'package:characters_search/src/presentation/widget/character_result_tile.dart';
+import 'package:characters_search/src/presentation/widget/empty_search_message.dart';
 import 'package:characters_search/src/presentation/widget/failure_message.dart';
 import 'package:characters_search/src/presentation/widget/search_facets.dart';
 import 'package:characters_search/src/presentation/widget/search_history_view.dart';
@@ -161,7 +162,7 @@ class _CharactersSearchPageContentState
                       return done.future;
                     },
                     emptyTitle: l10n.charactersSearchEmptyTitle,
-                    emptyMessage: l10n.charactersSearchEmptyMessage(query),
+                    emptyMessage: emptySearchMessage(l10n, query, facets.team),
                     errorTitle: l10n.charactersSearchErrorTitle,
                     footerErrorMessage: l10n.charactersSearchLoadMoreFailed,
                     retryLabel: core.commonRetry,
@@ -170,13 +171,7 @@ class _CharactersSearchPageContentState
                 ),
                 empty: (query, facets) => McEmptyView(
                   title: l10n.charactersSearchEmptyTitle,
-                  message: switch (facets.team) {
-                    final team? => l10n.charactersSearchEmptyTeamMessage(
-                      query,
-                      team,
-                    ),
-                    null => l10n.charactersSearchEmptyMessage(query),
-                  },
+                  message: emptySearchMessage(l10n, query, facets.team),
                 ),
                 failure: (_, _, error, _) => McErrorView(
                   title: l10n.charactersSearchErrorTitle,

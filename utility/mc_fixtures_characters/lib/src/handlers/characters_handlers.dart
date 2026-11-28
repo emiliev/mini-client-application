@@ -7,8 +7,8 @@ const int maxLimit = 100;
 /// `GET /v1/characters`: pagination, `nameStartsWith` search and ordering.
 ///
 /// Query: `offset` (default 0), `limit` (1 to 100, default 20),
-/// `nameStartsWith` (case-insensitive), `team` (the exact team name,
-/// case-insensitive; empty means no filter; T-0071), `orderBy` (`name`,
+/// `nameStartsWith` (case-insensitive), `team` (a team id, see
+/// [teamIdOf], case-insensitive; empty means no filter; T-0071), `orderBy` (`name`,
 /// `-name`, `modified`, `-modified`; default `name`). Ties break on `id`, so
 /// the order is total and stable.
 MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
@@ -27,7 +27,7 @@ MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
   if (query.team.isNotEmpty) {
     matches = [
       for (final c in matches)
-        if (c.team.toLowerCase() == query.team) c,
+        if (teamIdOf(c.team) == query.team) c,
     ];
   }
   if (query.orderBy != 'name') {
@@ -44,6 +44,14 @@ MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
     ),
   );
 };
+
+/// A team's id: its name in lower case, each run of other characters as one
+/// `-` (`The Lantern Circle` is `the-lantern-circle`). The list's `team`
+/// parameter is this id.
+String teamIdOf(String name) => name
+    .toLowerCase()
+    .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+    .replaceAll(RegExp(r'^-+|-+$'), '');
 
 typedef _Query = ({
   int offset,

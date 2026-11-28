@@ -64,3 +64,11 @@ Feature: Search characters by name
     Then I see {'Search for characters by the start of their name.'}
     And the backend received {0} requests for {'GET /v1/characters'}
     And the facets are not shown
+
+  @T-0071-AC1
+  Scenario: A linked query is trimmed: the field and the search use the same text
+    When I open the search for {' spi '} without waiting
+    Then the field reads {'spi'}
+    And the backend received {1} requests for {'GET /v1/characters?nameStartsWith=spi'}
+    When {0} milliseconds pass
+    Then the results show the first {30} characters for {'spi'}

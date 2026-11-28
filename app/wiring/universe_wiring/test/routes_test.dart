@@ -73,13 +73,17 @@ final GoRoute _comicsStandIn = GoRoute(
   builder: (context, state) => Text('comic ${state.pathParameters['id']}'),
 );
 
-/// Every [GoRoute] under [routes], depth first.
-Iterable<GoRoute> _goRoutes(List<RouteBase> routes) sync* {
+/// The full path template of every [GoRoute] under [routes] (a child's path
+/// is relative to its parent's), depth first.
+Iterable<String> _templates(List<RouteBase> routes, String parent) sync* {
   for (final route in routes) {
     if (route is GoRoute) {
-      yield route;
+      final full = '$parent/${route.path}'.replaceAll('//', '/');
+      yield full;
+      yield* _templates(route.routes, full);
+    } else {
+      yield* _templates(route.routes, parent);
     }
-    yield* _goRoutes(route.routes);
   }
 }
 
@@ -359,36 +363,46 @@ void main() {
   );
 
   test('T-0033-AC2 every AppLocations entry equals its typed route', () {
-    final drift = <String, ({String location, String route})>{
+    // `template` is the route's full path template: every route of the wiring
+    // must have at least one row, and no row may name a route that is gone.
+    final drift = <String, ({String location, String route, String template})>{
       'characters': (
         location: AppLocations.characters,
         route: const CharactersRoute().location,
+        template: '/characters',
       ),
       'character(7)': (
         location: AppLocations.character(7),
         route: const CharacterDetailsRoute(id: 7).location,
+        template: '/characters/:id',
       ),
       'charactersSearch()': (
         location: AppLocations.charactersSearch(),
         route: const CharactersSearchRoute().location,
+        template: '/characters/search',
       ),
       'charactersSearch(spi)': (
         location: AppLocations.charactersSearch('spi'),
         route: const CharactersSearchRoute(q: 'spi').location,
+        template: '/characters/search',
       ),
       'charactersSearch(a & b)': (
         location: AppLocations.charactersSearch('Spire W & #1'),
         route: const CharactersSearchRoute(q: 'Spire W & #1').location,
+        template: '/characters/search',
       ),
     };
 
     for (final entry in drift.entries) {
       expect(entry.value.location, entry.value.route, reason: entry.key);
     }
-    // A new route in the wiring must be added to the table above (the search
-    // is in it three times, as the typed route has three shapes).
-    expect(_goRoutes(universeRoutes), hasLength(drift.length - 2));
+    // A new route in the wiring must be added to the table above.
+    expect(
+      {for (final row in drift.values) row.template},
+      _templates(universeRoutes, '').toSet(),
+    );
   });
+
   mcTestWidgets('T-0071-AC4 the list\'s openSearch pushes the search location, '
       'and Back returns to the list', (tester) async {
     final router = await _boot(tester);

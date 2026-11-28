@@ -361,7 +361,7 @@ void main() {
       expect(expected, isNotEmpty);
       final page = await _get(
         dio,
-        '/v1/characters?team=${Uri.encodeQueryComponent('harbor WATCH')}'
+        '/v1/characters?team=${Uri.encodeQueryComponent('HARBOR-watch')}'
         '&limit=100',
       );
       expect(page['total'], expected.length);
@@ -382,7 +382,7 @@ void main() {
       expect(expected, isNotEmpty);
       final page = await _get(
         dio,
-        '/v1/characters?team=${Uri.encodeQueryComponent('The Quiet Ones')}'
+        '/v1/characters?team=${'the-quiet-ones'}'
         '&nameStartsWith=spi&orderBy=-name&limit=100',
       );
       expect(page['total'], expected.length);
@@ -396,7 +396,7 @@ void main() {
 
     test('T-0071-AC3: an unknown team matches nothing; an empty one filters '
         'nothing; the synthetic cast has no team', () async {
-      final none = await _get(dio, '/v1/characters?team=Nobody');
+      final none = await _get(dio, '/v1/characters?team=red');
       expect([none['total'], none['count']], [0, 0]);
       final all = await _get(dio, '/v1/characters?team=');
       expect(all['total'], 1500);
@@ -404,7 +404,7 @@ void main() {
         domains: [const SyntheticCharactersDomain(5)],
       ).createDio();
       expect(
-        (await _get(synthetic, '/v1/characters?team=Harbor%20Watch'))['total'],
+        (await _get(synthetic, '/v1/characters?team=harbor-watch'))['total'],
         0,
       );
     });

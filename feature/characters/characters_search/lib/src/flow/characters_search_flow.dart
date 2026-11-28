@@ -39,10 +39,12 @@ class CharactersSearchFlow extends StatelessWidget {
   /// or blank opens on the recent searches, with the keyboard up.
   final String? initialQuery;
 
-  /// [initialQuery], with a blank one as none (`/characters/search?q=`).
+  /// [initialQuery] trimmed, with a blank one as none
+  /// (`/characters/search?q=`): the flow's key, the field's text and the
+  /// search all use this one text, so `?q=%20spi` is `?q=spi`.
   String? get _query {
-    final query = initialQuery;
-    return query == null || query.trim().isEmpty ? null : query;
+    final query = initialQuery?.trim();
+    return query == null || query.isEmpty ? null : query;
   }
 
   @override

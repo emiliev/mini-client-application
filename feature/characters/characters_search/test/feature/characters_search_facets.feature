@@ -49,13 +49,13 @@ Feature: Sort, narrow and page the matches
     When I open the search
     And I type {'amber'}
     And I tap the team chip {'Harbor Watch'}
-    Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=amber&orderBy=name&team=Harbor%20Watch&offset=0&limit=30'}
+    Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=amber&orderBy=name&team=harbor-watch&offset=0&limit=30'}
     And the team {'Harbor Watch'} is chosen
     And the results show the first {8} characters for {'amber'} of team {'Harbor Watch'}
     When I tap the team chip {'Harbor Watch'}
     Then no team is chosen
     And the backend received {3} requests for {'GET /v1/characters'}
-    And the backend received {1} requests for {'GET /v1/characters?team=Harbor%20Watch'}
+    And the backend received {1} requests for {'GET /v1/characters?team=harbor-watch'}
     And the results show the first {30} characters for {'amber'}
 
   @T-0071-AC3
@@ -64,7 +64,7 @@ Feature: Sort, narrow and page the matches
     And I type {'spi'}
     And I tap the team chip {'The Undertow'}
     And I tap the sort chip {'Name Z–A'}
-    Then the backend received {'GET /v1/characters?nameStartsWith=spi&orderBy=-name&team=The%20Undertow&offset=0'}
+    Then the backend received {'GET /v1/characters?nameStartsWith=spi&orderBy=-name&team=the-undertow&offset=0'}
     And the results show the first {13} characters for {'spi'} of team {'The Undertow'} sorted by {'-name'}
 
   @T-0071-AC3
@@ -85,7 +85,7 @@ Feature: Sort, narrow and page the matches
     And I tap the sort chip {'Name Z–A'}
     And I tap the team chip {'Harbor Watch'}
     And I type {'brass'}
-    Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=brass&orderBy=-name&team=Harbor%20Watch&offset=0'}
+    Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=brass&orderBy=-name&team=harbor-watch&offset=0'}
     And the results show the first {5} characters for {'brass'} of team {'Harbor Watch'} sorted by {'-name'}
     And the sort {'Name Z–A'} is chosen
     And the team {'Harbor Watch'} is chosen

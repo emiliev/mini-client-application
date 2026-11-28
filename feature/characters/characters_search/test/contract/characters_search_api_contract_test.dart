@@ -196,6 +196,14 @@ void main() {
       );
     });
 
+    test('T-0071-AC3: a team id on the wire is the fixture\'s own', () {
+      for (final team in characterTeams) {
+        expect(characterTeamId(team), teamIdOf(team), reason: team);
+      }
+      expect(characterTeamId('Harbor Watch'), 'harbor-watch');
+      expect(characterTeamId('The Lantern Circle'), 'the-lantern-circle');
+    });
+
     test('T-0071-AC3: the team chips are exactly the teams of the cast', () {
       expect(characterTeams.toSet(), {for (final c in _cast()) c.team});
       expect(characterTeams, hasLength(8));

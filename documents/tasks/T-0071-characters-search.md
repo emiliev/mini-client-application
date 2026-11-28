@@ -69,7 +69,7 @@ Add a character-only search: type a prefix, get matching characters, and filter 
   - **Bloc:** `DebouncedQuery` (300 ms), `SearchHistory` (cap 10, key `characters_search.history`, its own instance), one `PagingController` per search, a generation guard. States `idle(history)`, `searching`, `results(page)`, `empty`, `failure`; the facet chips show in all but `idle`.
   - **Flow:** one page, the screen `characters_search` (`AnalyticsFlowObserver`).
   - **l10n:** en, de and en_XA (20 keys); the shared error copy from `mc_l10n_core`.
-- **`mc_fixtures_characters`:** `GET /v1/characters?team=` (exact team name, case-insensitive; empty is no filter; an unknown team is `total: 0`). CONTRACT.md updated (the query table and a "Teams" row). No snapshot changed, no existing test edited; 3 new tests (`T-0071-AC3`).
+- **`mc_fixtures_characters`:** `GET /v1/characters?team=` (a team id such as `harbor-watch`, `teamIdOf`; case-insensitive; empty is no filter; an unknown id is `total: 0`). CONTRACT.md updated (the query table and a "Teams" row). No snapshot changed, no existing test edited; 3 new tests (`T-0071-AC3`).
 - **`universe_wiring`:** `CharactersSearchRoute` (`/characters/search?q=`, name `characters_search`, nested under `/characters` before `:id`), `UniverseRouteTargets.charactersSearch({query})`, `CharactersSearchNavigatorImpl` (pushes `CharacterDetailsRoute`), `CharactersListNavigatorImpl.openSearch` (pushes `CharactersSearchRoute`). **`app_core`:** `AppLocations.charactersSearch([query])`.
 - **`characters_list`:** the one new navigator method `openSearch()`, a bloc event `openSearch` (with a 500 ms double-tap guard), the app-bar action (`McIconButton`, tooltip "Search characters"), one l10n key `charactersListSearch` (en, de, en_XA).
 - **`mini_client`:** `test/characters_search_route_test.dart` (the real app: cold link, running-app link, list -> search -> profile) and two e2e targets.
@@ -87,11 +87,11 @@ JUnit names carry the IDs. Everything below passes in `test //...` (241 of 241) 
 | AC6 | [gate logs](../evidence/T-0071/engineer/): `test --lockfile_mode=error //...` 241 of 241 ([test_all.log](../evidence/T-0071/engineer/test_all.log)), `build --config=lint //...`, `mc_arch_check` OK, `rules_fork.sh check`, the format gate (0 changed), `l10n_check` OK, the fixtures check and the relative-path scan, `T-0042-AC4_safety.sh` **PASS** after `tool/ide_sync` ([safety](../evidence/T-0071/engineer/T-0042-AC4_safety.md)), `fvm flutter analyze` clean on the synced tree for characters_search, characters_list, universe_wiring, universe_sandbox, app_core and mini_client (integration tests included). **50 runs, uncached, 0 failures** ([flake_50.log](../evidence/T-0071/engineer/flake_50.log)): `characters_search:bdd_test` (the debounce, history and race scenarios), `:flow_scope_test`, `:contract_test`, `characters_list:bdd_test`, `universe_wiring:routes_test`, `mini_client:characters_search_route_test`. Architecture: `:architecture_test` "T-0071-AC6" x3; `//tool/l10n_check:workspace_gate_test` "T-0071-AC6 the gate checks the characters_search ARB set". Every `T-0071-ACn` name cited here exists (grepped) |
 
 ### Fixture changes
-`mc_fixtures_characters`: the `team` query parameter on `GET /v1/characters` (handler, CONTRACT.md, 3 tests). Deterministic (a filter over the existing cast), additive (no snapshot, field or default moved), and every existing fixture test passes unchanged. Side effect: `characters_list` also sent `team` before and the fixture ignored it; it filters now (no test depended on that).
+`mc_fixtures_characters`: the `team` query parameter on `GET /v1/characters` (handler, CONTRACT.md, 3 tests). Deterministic (a filter over the existing cast), additive (no snapshot, field or default moved), and every existing fixture test passes unchanged. Side effect: `characters_list` also sent `team` (its `initialTeamId`) and the fixture ignored it; it now filters by the same team id, and the review round added a `characters_list` scenario that asserts the rows (`characters_list_team.feature`, `T-0071-AC3`).
 
 ### Existing tests touched (every edit is forced by a new method or route; nothing deleted, skipped or weakened, no `// ignore:`)
 - `characters_list`: **no test edited.** The three goldens `characters_list_loaded.png`, `characters_list_error.png` and `characters_list_empty.png` changed by 151 px each (the new app-bar icon) and were regenerated (`--update-goldens`); `character_preview.png` is unchanged. Before and after: [goldens/](../evidence/T-0071/engineer/goldens/).
-- `universe_wiring/test/routes_test.dart`: `_Targets` implements the new `charactersSearch`; the drift table gained the search entries, and its count check became `drift.length - 2` (three table rows for the one search route).
+- `universe_wiring/test/routes_test.dart`: `_Targets` implements the new `charactersSearch`; the drift table gained the search entries, and its count check was first weakened to `drift.length - 2`; the review round replaced it with a `template` per row and an equality of the table's templates with the full path templates of every route (a missing route fails again).
 - `universe_sandbox/test/fake_targets.dart`: `NoNavigator.openSearch` and `FakeTargets.charactersSearch`.
 - `mini_client/test/analytics_screens_test.dart`: `'characters_search'` in `_expectedRouteNames`.
 - `tool/l10n_check`: the BUILD data and one new test, as T-0046 did.
@@ -104,6 +104,15 @@ JUnit names carry the IDs. Everything below passes in `test //...` (241 of 241) 
 3. **Retry** repeats the failed request only (`PagingController.retry`): the first page, or the failed later page.
 4. **Pull to refresh** reloads the first page of the same search (kept from the list; not an AC).
 
+### Review round (single fix round)
+1. `team` has one meaning, the team id (above). `characters_list` test opens with `harbor-watch` and asserts the first 30 rows are that team's; a second scenario (`red`) shows the empty state. CONTRACT.md updated.
+2. The flow trims `initialQuery` (key, field and search use one text). Tests: BDD "A linked query is trimmed" and `flow_scope_test` "a linked query with spaces is the same flow as the trimmed one".
+5. `emptySearchMessage` is the one helper for the `empty` state and the paged list's empty view.
+6. The drift check counts route templates (see above).
+Re-run: gates, 50 runs of the changed targets, `characters_journey_test`.
+
 ### Follow-ups (for `pending-work.md`)
+- The list's team is not passed to `openSearch` (the search opens on all teams); deliberate for now.
+- The open guards (list and search, 500 ms) are not reset when their route becomes current again.
 - Stale requests are not cancelled (in-process backend; as F-0046 fact 7).
 - `universe_sandbox` still stubs the search; its links test does not cover `/characters/search`.

@@ -89,6 +89,44 @@ void main() {
   );
 
   mcTestWidgets(
+    'T-0071-AC1 a linked query with spaces is the same flow as the trimmed one',
+    (tester) async {
+      serveSearch();
+      final query = ValueNotifier<String>(' spi');
+      addTearDown(query.dispose);
+      await initFlow(
+        tester,
+        () => ValueListenableBuilder<String>(
+          valueListenable: query,
+          builder: (context, q, _) => searchTestHost(
+            CharactersSearchFlow(navigator: searchNavigator(), initialQuery: q),
+          ),
+        ),
+      );
+      await letStorageFinish(tester);
+      final first = tester.element(find.byKey(searchFieldKey));
+      expect((flowStateOf<dynamic>(first) as dynamic).initialQuery, 'spi');
+      expect(tester.widget<EditableText>(searchField()).controller.text, 'spi');
+
+      query.value = 'spi';
+      await letStorageFinish(tester);
+
+      expect(
+        tester.element(find.byKey(searchFieldKey)),
+        same(first),
+        reason: 'the same flow, not a new one',
+      );
+      expect(
+        [
+          for (final r in McTestSession.current.backend.requests)
+            r.query['nameStartsWith'],
+        ],
+        ['spi'],
+      );
+    },
+  );
+
+  mcTestWidgets(
     'T-0071-AC2 the recent searches live under the key characters_search.history, '
     'newest first',
     (tester) async {
