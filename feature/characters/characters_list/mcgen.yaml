@@ -480,29 +480,6 @@ options:
     pubspec.preamble: |-
       T-0032 (P1-17): the characters_list exemplar feature (archetype LD). Phase D's
       generators copy this package's shape (plan 01 §3.3).
-    build.preamble: |-
-      T-0032 (P1-17): `characters_list`, the LD exemplar feature (plan 01 §3.3).
-      Phase D's buildgen emits this file; until then it is written by hand.
-      No per-package analysis_options.yaml: the root file applies (F-0021).
-
-      Every generator runs as a Bazel action; nothing generated is committed:
-        freezed      character, character_dto, related_comic, flow state, list
-                     bloc (state part), related comics bloc
-        json         character_dto                  (over its freezed output)
-        retrofit     characters_list_api            (fork patch 0001)
-        injectable   5 shards + di_initializer.config.dart (fork patch 0002)
-        gen-l10n     lib/src/l10n/characters_list_l10n*.dart
-        BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
-
-      Staging (plan 03 §3.4, §4.7). Generators read only Flutter-free libraries
-      (R15): `_stage` holds the hand-written pure files. Two lanes are narrower so
-      that a body edit in the bloc re-runs neither the retrofit part nor the
-      injectable aggregate (T-0032-AC6):
-        - the retrofit and json actions see only the DTO and its freezed output
-          (`_stage_dto`), never `_stage`;
-        - the injectable aggregate sees only the init file and the shards; a bloc
-          edit re-runs the shards (all of them, F-0028 §5) but they come out
-          byte-identical, so the aggregate is an action-cache hit.
     mapper.doc: |-
       Wire to domain. An unknown variant name throws a `FormatException`, which
       the repository's `apiCall` turns into `ApiMalformed`.
@@ -510,17 +487,6 @@ options:
     repository.fetchRelatedComics: The first [limit] comics [character] appears in, in title order.
     navigator.openCharacter: 'The preview''s "See full profile": hands over to characters_details.'
     navigator.openComic: "A related comic on the preview: hands over to comics_details (T-0041)."
-    flow_scope.doc: |-
-      The root services this flow's container forwards (R17): the parameter
-      types of every injectable constructor and `@factoryMethod` in the package,
-      minus what the package registers itself and what the flow provides
-      (`FeatureFlowController`, the navigator).
-
-      HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from
-      the same analyzer input injectable reads, and `mcgen check` fail on drift
-      (Phase D, follow-up in T-0032). Until then `test/flow_scope_test.dart`
-      opens the flow over the production-shaped test root and resolves every
-      registration, so a missing import fails a test, not the app.
     flow.doc: |-
       The feature's only entry point (R4): a paged grid of characters whose
       preview opens inside the flow, and whose "See full profile" leaves the

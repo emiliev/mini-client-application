@@ -37,6 +37,11 @@ class SearchArchetype extends Archetype {
       m.l10nClass,
       'package:${m.module}/src/l10n/${m.module}_l10n.dart',
     );
+    // `mcgen wire` writes the root-import list (plan 01 §4.5, T-0074).
+    ctx.symbols.external(
+      m.rootImports,
+      'package:${m.module}/src/di/flow_scope.dart',
+    );
     emitFlow(ctx, m);
     emitBlocs(ctx, m);
     emitPages(ctx, m);

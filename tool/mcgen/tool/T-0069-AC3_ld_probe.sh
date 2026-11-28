@@ -35,6 +35,11 @@ report "# T-0069-AC3: a throwaway list-detail module" "" "HEAD \`$(git rev-parse
 mkdir -p "$PROBE"
 cp tool/mcgen/test/fixtures/zz_ld_probe/mcgen.yaml "$PROBE/mcgen.yaml"
 step "mcgen gen zz_ld_probe" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen zz_ld_probe
+# Its root-import list and BUILD.bazel are wire's and buildgen's (T-0074,
+# P-126). Only the module's own files: the app is not wired here (the
+# T-0074-AC3 probe wires a module into the app, in a temp copy).
+step "mcgen wire $PROBE (its flow scope)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart wire "$PROBE"
+step "mcgen buildgen $PROBE" "${DART[@]}" run tool/mcgen/bin/mcgen.dart buildgen "$PROBE"
 report "  - $(find "$PROBE" -type f | wc -l | tr -d ' ') files generated"
 # The review round's probes: an outline from a rule's examples, and a
 # pseudo-translated plural and placeholder that gen-l10n must accept.

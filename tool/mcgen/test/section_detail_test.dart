@@ -108,7 +108,7 @@ void main() {
         'test/feature/util/comics_details_env.dart',
         'test/flow_scope_test.dart',
       },
-      50,
+      48, // 50 until T-0074 moved BUILD.bazel and flow_scope.dart out
     ),
     (
       'characters_details',
@@ -121,7 +121,7 @@ void main() {
         'test/feature/util/characters_details_env.dart',
         'test/flow_scope_test.dart',
       },
-      51,
+      49, // 51 until T-0074 moved BUILD.bazel and flow_scope.dart out
     ),
   ]) {
     group('T-0072-AC1 $name round-trips', () {
@@ -147,10 +147,12 @@ void main() {
             if (f.ownership == 'owned') f.path,
         };
         expect(ownedFiles, containsAll(owned));
-        expect(
-          gen.files.keys,
-          containsAll(['BUILD.bazel', 'pubspec.yaml', 'l10n.yaml']),
-        );
+        expect(gen.files.keys, containsAll(['pubspec.yaml', 'l10n.yaml']));
+        // BUILD.bazel and the root-import list are `mcgen buildgen`'s and
+        // `mcgen wire`'s since T-0074 (buildgen_test and wire_test check
+        // them on these packages).
+        expect(gen.files.keys, isNot(contains('BUILD.bazel')));
+        expect(gen.files.keys, isNot(contains('lib/src/di/flow_scope.dart')));
         expect(
           gen.files.length - ownedFiles.length,
           equals(compared),

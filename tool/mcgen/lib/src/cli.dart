@@ -7,6 +7,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:mcgen/src/archetypes.dart' as registry;
+import 'package:mcgen/src/buildgen/buildgen.dart';
 import 'package:mcgen/src/core/archetype.dart';
 import 'package:mcgen/src/core/brick.dart';
 import 'package:mcgen/src/core/check.dart';
@@ -20,12 +21,11 @@ import 'package:mcgen/src/core/repo.dart';
 import 'package:mcgen/src/core/spec/schema_validator.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
 import 'package:mcgen/src/core/writer.dart';
+import 'package:mcgen/src/wire/wire.dart';
 import 'package:path/path.dart' as p;
 import 'package:yaml/yaml.dart';
 
 const _notYet = {
-  'wire': 'P2-08',
-  'buildgen': 'P2-08',
   'owners': 'P2-08',
   'new': 'P2-08',
   'stats': 'P2-09',
@@ -39,8 +39,11 @@ usage: mcgen <command> [options]
   gen [--check] [--force] <module|path>... render modules (--check: dry run, exit 1 on any diff)
   gen --out <dir> <module|path>            render one module into an empty directory
   check [--all] [<module|path>...]         drift: hand edits, stale manifests, keep damage
+  wire [--check] [--force] [<dir>...]      the shared app glue, from every spec (plan 02 section 2.8);
+                                           with package dirs, only their flow scopes
+  buildgen [--check] [--adopt] [<dir>...]  BUILD.bazel of every covered package (ADR-0018)
 
-  not yet: spec synth (P2-09), wire, buildgen, owners, new (P2-08), stats (P2-09), synth (P2-15)
+  not yet: spec synth (P2-09), owners, new (P2-08), stats (P2-09), synth (P2-15)
 
 common options:
   --root <dir>   the tree to work on (default: the git root above the working directory)
@@ -81,7 +84,7 @@ int runMcgen(
     ..addFlag('all', negatable: false);
   final rest = switch (command) {
     'spec' when args.length > 1 && args[1] == 'lint' => args.sublist(2),
-    'gen' || 'check' => args.sublist(1),
+    'gen' || 'check' || 'wire' || 'buildgen' => args.sublist(1),
     _ => null,
   };
   if (rest == null) {
@@ -89,6 +92,11 @@ int runMcgen(
       ..writeln('mcgen: unknown command "${args.join(' ')}"')
       ..write(_usage);
     return 64;
+  }
+  if (command == 'wire' || command == 'buildgen') {
+    parser.addFlag('check', negatable: false);
+    if (command == 'buildgen') parser.addFlag('adopt', negatable: false);
+    if (command == 'wire') parser.addFlag('force', negatable: false);
   }
   if (command == 'gen') {
     parser
@@ -114,6 +122,34 @@ int runMcgen(
     e.writeln('mcgen: no root: pass --root, or run inside a git checkout');
     return 64;
   }
+  if (command == 'buildgen') {
+    try {
+      return runBuildgen(
+        root,
+        check: opts.flag('check'),
+        adopt: opts.flag('adopt'),
+        only: opts.rest.isEmpty
+            ? null
+            : [
+                for (final d in opts.rest)
+                  p.posix.joinAll(
+                    p.split(p.relative(p.absolute(workDir, d), from: root)),
+                  ),
+              ],
+        out: o,
+        err: e,
+      );
+    } on StateError catch (x) {
+      e.writeln('mcgen buildgen: ${x.message}');
+      return 1;
+    } on FormatException catch (x) {
+      e.writeln('mcgen buildgen: ${x.message}');
+      return 1;
+    } on FileSystemException catch (x) {
+      e.writeln('mcgen buildgen: ${x.message}: ${x.path}');
+      return 1;
+    }
+  }
   try {
     final bricks = command == 'gen' ? opts.option('bricks') : null;
     final session = _Session(
@@ -124,11 +160,9 @@ int runMcgen(
       archetypes ?? registry.archetypes,
       dartExecutable,
     );
-    final specs = session.resolve(
-      opts.rest,
-      all: opts.flag('all'),
-      cwd: workDir,
-    );
+    final specs = command == 'wire'
+        ? const <String>[]
+        : session.resolve(opts.rest, all: opts.flag('all'), cwd: workDir);
     return switch (command) {
       'spec' => session.lint(specs, o, e),
       'gen' when opts.option('out') != null => session.genOut(
@@ -137,6 +171,24 @@ int runMcgen(
         workDir,
         o,
         e,
+      ),
+      'wire' => runWire(
+        root,
+        session.context,
+        session.formatter,
+        config: WireConfig.load(session.tool.configPath),
+        only: opts.rest.isEmpty
+            ? null
+            : [
+                for (final d in opts.rest)
+                  p.posix.joinAll(
+                    p.split(p.relative(p.absolute(workDir, d), from: root)),
+                  ),
+              ],
+        force: opts.flag('force'),
+        check: opts.flag('check'),
+        out: o,
+        err: e,
       ),
       'gen' => session.gen(
         specs,
@@ -192,6 +244,7 @@ class _Session {
   final SpecSchema schema;
   final RepoIndex index;
   late final Generator generator;
+  late final DartFormatter formatter = generator.formatter;
 
   /// Absolute paths output must never contain: the trees mcgen reads.
   List<String> get forbidden => [root, tool.dir];

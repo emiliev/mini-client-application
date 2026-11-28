@@ -1,0 +1,20 @@
+$ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer build --lockfile_mode=error --config=sim //app/mini_client:mini_client_ios
+INFO: Invocation ID: 29cd9354-776c-436d-bedc-e006cbe90c58
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: target //app/mini_client:mini_client_ios (0 packages loaded, 0 targets configured)
+Analyzing: target //app/mini_client:mini_client_ios (0 packages loaded, 0 targets configured)
+
+Analyzing: target //app/mini_client:mini_client_ios (110 packages loaded, 6158 targets configured, 140 aspect applications)
+
+INFO: Analyzed target //app/mini_client:mini_client_ios (112 packages loaded, 9094 targets configured, 595 aspect applications).
+[56,064 / 64,785] checking cached actions
+INFO: Found 1 target...
+Target //app/mini_client:mini_client_ios up-to-date:
+  bazel-bin/app/mini_client/mini_client_ios.ipa
+INFO: Elapsed time: 4.089s, Critical Path: 0.04s
+INFO: 1 process: 87984 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action
+exit=0

@@ -49,3 +49,64 @@ Batches (Phase E) must not hand-edit app glue. `mcgen wire` regenerates the shar
 
 ## Log
 - 2026-11-28: Created and dispatched (TL), as part of the third wave.
+- 2026-11-28 (Engineer, Opus):
+  - Probed the 11 feature BUILD files against the import graph. `_PURE_DEPS` derive exactly. `_FLUTTER_DEPS` match in 8 of 11. `_TEST_DEPS` are always a superset of the imports of the step and util files.
+  - The extras are over-approximations, so a pure template would change all 11 graphs. So buildgen merges instead (ADR-0018): it keeps prose, `# keep` items and one hand region.
+  - Captured `bazel query` before, ran `buildgen --adopt` over the 11 files, captured after: identical in all four views (labels, kinds, 29,921 edges, every target's attributes). Then moved the app's wiring list to `wirings.bzl`: identical again.
+- 2026-11-28 (Engineer):
+  - Wire derives all 11 `flow_scope.dart` files byte for byte, once `context.di<T>()` reads count.
+  - Added the app's wiring list (`wirings.dart`), `wirings.bzl`, `GeneratedLocations`, the `/catalogue` debug route and its test, and generated wiring groups.
+  - Moved the list-detail BUILD template and `flow_scope.dart` out of the archetype (P-126). `characters_list` still round-trips.
+  - The first AC3 probe run failed: `app_test` asserted `hasLength(7)` wirings, and the probe's own `grep -q` failed under pipefail. Fixed both.
+- 2026-11-28 (Engineer):
+  - Merged `origin/main` (T-0073).
+  - The search archetype still rendered `flow_scope.dart`. It now leaves the file to wire, keeps the list's packages in its pubspec, and its two exemplar manifests were regenerated.
+  - The probe passes on the merged HEAD: sim build, `test //...` 252 of 252, the new flow opens from `/catalogue`. The gates are green.
+- 2026-11-28 (Engineer):
+  - Merged `origin/main` again (T-0072).
+  - The section-detail archetype rendered both moved files. It now leaves them to buildgen and wire, keeps the list's packages in its pubspec, and its two exemplar manifests were regenerated.
+  - The LD, SC and SR probe scripts run `wire` (and LD/SC `buildgen`) for their module: all three PASS under Bazel.
+  - Re-ran the gates and the AC3 probe on `ee8474a8`. All are green: `test //...` 247 of 247; lint; `mc_arch_check`; the sim build; a 20-run flake check of `catalogue_test`, `analytics_screens_test` and `app_test`; the format gate; rules_fork; unchanged lockfiles; 211 mcgen tests; CI gate 6. The AC3 probe passed with a sim build and 252 of 252.
+
+- 2026-11-28 (Engineer, review round; one fix round under ADR-0015): fixed all 8 important findings, each with a test (F-0074 §7):
+  1. wire deletes what it stops generating, and an edited owned orphan needs `--force`;
+  2. an ejected module stays wired;
+  3. search and section-detail flows are routed, and any other archetype is a warning plus a catalogue note, never an error;
+  4. `_TEST_DEPS` is defined whenever a test uses it;
+  5. same-named tests get directory-qualified names;
+  6. adopt pairs repeated keys by position;
+  7. the scanner uses `@factoryMethod` and unwraps `@preResolve`;
+  8. list-detail's pubspec names the root-import packages.
+
+  Also fixed the two nits (comments in the parsed blocks; buildgen errors through the CLI) and T-0072's probe exec bit.
+  - The first gate run caught an unused variable in my own catalogue test, which the analyze aspect fails on. Fixed.
+  - Gates on `d34dc446`: rules_fork, `test --lockfile_mode=error //...` 247 of 247, lint, `mc_arch_check`, the sim build, the 20-run flake check, the format gate, unchanged lockfiles, 222 mcgen tests, CI gate 6, every `--check`, and the AC3 probe (sim build, 252 of 252).
+  - Merged `origin/main` (journal only).
+
+## Outcome
+- **Changed** (branch `fleet/T-0074-mcgen-wire-buildgen`; handoff HEAD in the report):
+  - `tool/mcgen/lib/src/{buildgen,wire}/`, the CLI, `mcgen.yaml` `wire:`, and the README;
+  - the list-detail archetype (no BUILD template, no flow scope: P-126), the search archetype (no flow scope) and the section-detail archetype (no BUILD output, no flow scope), and their probe scripts;
+  - the 11 feature BUILD files (adopted, graph-neutral), the root pubspec (members sorted), the exemplar specs and manifests;
+  - `app/mini_client`: `wirings.dart`, `wirings.bzl`, the router, `catalogue_test`, and `app_test` / `analytics_screens_test` adjusted;
+  - `app_core`: `CataloguePage`, `GeneratedLocations`, `AppLocations.catalogue`;
+  - `tool/ci/ci.sh` gate 6 also runs `wire --check` and `buildgen --check`.
+
+| AC | Evidence |
+|---|---|
+| T-0074-AC1 | `tool/mcgen/test/buildgen_test.dart`: 15 `T-0074-AC1 …` tests (4 from the review round: `_TEST_DEPS` with no `.feature`, same-named tests, two comprehensions, a malformed file), including `buildgen --check exits 0 on the repo: every feature BUILD file is up to date` and `adopt marks unexplained items # keep and moves unknown statements into the hand region, so the file builds the same`. Graph neutrality: [T-0074-AC1_graph_neutral.md](../evidence/T-0074/T-0074-AC1_graph_neutral.md) |
+| T-0074-AC2 | `tool/mcgen/test/wire_test.dart`: 13 `T-0074-AC2 …` tests (7 from the review round: orphans, an edited orphan and `--force`, ejected modules, the SR/SC/unknown archetypes on the repo-wide path, `@factoryMethod`/`@preResolve`, the pubspec ⊇ flow-scope imports, comments in parsed blocks), including `wire --check exits 0 on the repo, every covered file up to date` and `root imports: injectable constructors, modules and scope reads, …`. Covered and uncovered files: F-0074 §4 |
+| T-0074-AC3 | [T-0074-AC3_wire_probe.md](../evidence/T-0074/T-0074-AC3_wire_probe.md): temp copy, the spec added by hand and nothing else, gen, wire and buildgen, sim build, `test //...` 252 of 252. `app/mini_client/test/catalogue_test.dart`: `T-0074-AC3 …` tests (one per wired entry, one per unwired entry, plus the fixed two) (`the catalogue opens zz_ld_probe at its route, …` ran in the probe). `wire_test.dart`: 2 `T-0074-AC3 …` tests |
+| T-0074-AC4 | [T-0065-AC5_gates.md](../evidence/T-0074/T-0065-AC5_gates.md) (mcgen tests; lockfiles unchanged), `T-0074-AC4_{test,lint,arch,sim,flake20,format,rules_fork,lockfiles,ci_gate6}.log`, [T-0074-AC4_archetype_probes.md](../evidence/T-0074/T-0074-AC4_archetype_probes.md) (the LD, SC and SR probes still pass). F-0074 written; ADR-0018 drafted |
+
+- **Test integrity:**
+  - `list_detail_test` now compares 54 files, not 56, and expects no BUILD or flow scope: those moved to buildgen and wire, and their own tests cover them. `section_detail_test` likewise: 48 and 49, not 50 and 51.
+  - `section_detail_review_test` checks the two-word item's freezed targets in the BUILD file that buildgen writes for the rendered module. A new module's targets are named after their files (`story_arc_details_bloc`), not the old template's `details_bloc`.
+  - `cli_test` no longer lists wire and buildgen as "not yet".
+  - `app_test`'s "all 7 wirings are composed" names the 7 initializers in order instead of `hasLength(7)`, so a generated group may follow them.
+  - `analytics_screens_test` expects `catalogue` plus one route per wired catalogue entry.
+  - Review round: `wire_test`'s AC3 test expects the literal catalogue location (`location: '/zz-ld-probe'`). Its AC2 test for a hand-written group's flow now expects a warning and exit 0 rather than a refusal (finding 3).
+  - Nothing was skipped. No `// ignore` was added.
+- **Decisions:** ADR-0018 (Proposed).
+- **Findings:** F-0074.
+- **Follow-ups** (F-0074, Implications): route specs so wire can own the hand-written groups; shrink the 75 `# keep` items; drop the search skeleton's owned BUILD (and SC's, T-0072); buildgen for utility packages.

@@ -226,7 +226,7 @@ _FLUTTER_DEPS = [
     "//utility/mc_ds_lists",
     "//utility/mc_ds_media",
     "//utility/mc_ds_navigation",
-    "//utility/mc_ds_theme",
+    "//utility/mc_ds_theme",  # keep
     "//utility/mc_feature_flow",
     "//utility/mc_l10n_core",
     "@pub_deps//:flutter",
@@ -254,7 +254,7 @@ _TEST_DEPS = [
     "//utility/mc_ds_cards",
     "//utility/mc_ds_feedback",
     "//utility/mc_ds_media",
-    "//utility/mc_ds_navigation",
+    "//utility/mc_ds_navigation",  # keep
     "//utility/mc_feature_flow",
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_comics",

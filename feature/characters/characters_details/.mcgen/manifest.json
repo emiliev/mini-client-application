@@ -1,10 +1,6 @@
 {
   "archetype": "section_detail",
   "files": {
-    "BUILD.bazel": {
-      "hash": "9e39173e26abc6f111a952545f33bb12c73a0b3a1ade6a7ab43718a4d5ecccd2",
-      "ownership": "managed"
-    },
     "l10n.yaml": {
       "hash": "072e2755dfe63938c652d9e9d5096f915f5f8b94cf9493c9f60f28dca24aefab",
       "ownership": "managed"
@@ -15,10 +11,6 @@
     },
     "lib/src/di/di_initializer.dart": {
       "hash": "8fce61bf377a9fcb2ec7c0ee44b80e3345c6c7a0e4e36506e6f085d08c6b6400",
-      "ownership": "managed"
-    },
-    "lib/src/di/flow_scope.dart": {
-      "hash": "8b71585fbedfd758041d78acc2b5a71d13962165569499756cced0a47767bcdc",
       "ownership": "managed"
     },
     "lib/src/domain/api/characters_details_api.dart": {

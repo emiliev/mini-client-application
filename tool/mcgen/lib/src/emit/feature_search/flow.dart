@@ -128,45 +128,6 @@ void emitFlow(EmitContext ctx, SrModel m) {
   );
   ctx.library(
     DartLibrary(
-      'lib/src/di/flow_scope.dart',
-      imports: [
-        'package:dio/dio.dart',
-        'package:mc_di/mc_di.dart',
-        'package:mc_monitoring/mc_monitoring.dart',
-        'package:mc_storage/mc_storage.dart',
-      ],
-      decls: [
-        RawDecl(
-          Code(
-            'const List<RootImport<Object>> ${m.rootImports} = [\n'
-            '${analytics ? '  RootImport<AnalyticsTracker>(),\n' : ''}'
-            '  RootImport<Dio>(),\n'
-            '  RootImport<FileStore>(),\n'
-            '  RootImport<Monitoring>(),\n'
-            '];',
-          ),
-          name: m.rootImports,
-          doc: m.text(
-            'flow_scope.doc',
-            "The root services this flow's container forwards (R17): the parameter\n"
-                'types of every injectable constructor, `@factoryMethod` and module member\n'
-                'in the package, ${analytics ? 'plus the screen tracker the flow\'s observer resolves,\n'
-                          'minus what the package registers itself and what the flow provides\n'
-                          '(`FeatureFlowController`, the navigator).' : 'minus what the package registers itself and what the flow\n'
-                          'provides (`FeatureFlowController`, the navigator).'}\n'
-                '\n'
-                'HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from\n'
-                'the same analyzer input injectable reads, and `mcgen check` fail on drift\n'
-                '(Phase D). Until then `test/flow_scope_test.dart` opens the flow over the\n'
-                'production-shaped test root and resolves every registration, so a missing\n'
-                'import fails a test, not the app.',
-          ),
-        ),
-      ],
-    ),
-  );
-  ctx.library(
-    DartLibrary(
       'lib/src/navigator/${m.module}_navigator.dart',
       imports: [
         for (final id in m.ids)

@@ -118,8 +118,11 @@ void main() {
         'test/feature/util/characters_list_env.dart',
       });
       final compared = gen.files.length - owned.length;
-      expect(compared, 56);
-      expect(gen.files.keys, contains('BUILD.bazel'));
+      // 56 until T-0074 moved BUILD.bazel to `mcgen buildgen` and the
+      // root-import list to `mcgen wire` (P-126); their own tests check them.
+      expect(compared, 54);
+      expect(gen.files.keys, isNot(contains('BUILD.bazel')));
+      expect(gen.files.keys, isNot(contains('lib/src/di/flow_scope.dart')));
       expect(gen.files.keys, contains('lib/src/l10n/characters_list_de.arb'));
       expect(
         gen.files.keys,

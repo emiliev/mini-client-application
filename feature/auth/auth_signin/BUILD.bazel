@@ -127,7 +127,7 @@ _FLUTTER_DEPS = [
     "//utility/mc_ds_forms",
     "//utility/mc_ds_layout",
     "//utility/mc_ds_navigation",
-    "//utility/mc_ds_theme",
+    "//utility/mc_ds_theme",  # keep
     "//utility/mc_feature_flow",
     "//utility/mc_l10n_core",
     "@pub_deps//:flutter",
@@ -153,16 +153,16 @@ flutter_library(
 # --- tests (ADR-0015: BDD + contract + l10n; unit tests for pure logic; no
 # goldens) ------------------------------------------------------------------
 _TEST_DEPS = [
-    "//utility/mc_api_auth",
+    "//utility/mc_api_auth",  # keep
     "//utility/mc_di",
     "//utility/mc_ds_forms",
-    "//utility/mc_ds_navigation",
-    "//utility/mc_feature_flow",
+    "//utility/mc_ds_navigation",  # keep
+    "//utility/mc_feature_flow",  # keep
     "//utility/mc_fixtures_identity",
-    "//utility/mc_mocked_backend",
+    "//utility/mc_mocked_backend",  # keep
     "//utility/mc_session",
     "@pub_deps//:dio",
-    "@pub_deps//:mocktail",
+    "@pub_deps//:mocktail",  # keep
 ]
 
 mc_bdd_tests(
@@ -193,26 +193,10 @@ flutter_test(
         "//utility/mc_api_errors",
         "//utility/mc_fixtures_identity",
         "//utility/mc_mocked_backend",
-        "//utility/mc_prelude",
+        "//utility/mc_prelude",  # keep
         "//utility/mc_session",
         "//utility/mc_storage",
-        "@pub_deps//:dio",
-        "@pub_deps//:flutter_test",
-    ],
-)
-
-# The pure logic: reasons, the form's rules, the failure mapping (ADR-0015
-# allows plain unit tests here).
-flutter_test(
-    name = "unit_test",
-    size = "small",
-    language_version = _LANG,
-    main = "test/unit/auth_signin_unit_test.dart",
-    package_name = _PKG,
-    deps = [
-        ":auth_signin",
-        "//utility/mc_api_errors",
-        "//utility/mc_forms",
+        "@pub_deps//:dio",  # keep
         "@pub_deps//:flutter_test",
     ],
 )
@@ -241,6 +225,22 @@ flutter_test(
     ],
 )
 
+# The pure logic: reasons, the form's rules, the failure mapping (ADR-0015
+# allows plain unit tests here).
+flutter_test(
+    name = "unit_test",
+    size = "small",
+    language_version = _LANG,
+    main = "test/unit/auth_signin_unit_test.dart",
+    package_name = _PKG,
+    deps = [
+        ":auth_signin",
+        "//utility/mc_api_errors",
+        "//utility/mc_forms",
+        "@pub_deps//:flutter_test",
+    ],
+)
+
 # R17: the hand-written root imports resolve every registration of the flow.
 flutter_test(
     name = "flow_scope_test",
@@ -253,7 +253,7 @@ flutter_test(
     deps = _TEST_DEPS + [
         ":auth_signin",
         "//utility/mc_monitoring",
-        "//utility/mc_storage",
+        "//utility/mc_storage",  # keep
         "//utility/mc_test_steps",
         "//utility/mc_test_utils",
         "@pub_deps//:flutter",
