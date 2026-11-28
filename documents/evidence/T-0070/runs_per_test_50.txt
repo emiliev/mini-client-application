@@ -1,0 +1,30 @@
+INFO: Found 36 targets and 23 test targets...
+INFO: Elapsed time: 193.899s, Critical Path: 12.24s
+INFO: 1151 processes: 914 action cache hit, 1 internal, 1150 darwin-sandbox.
+INFO: Build completed successfully, 1151 total actions
+//app/mini_client:settings_route_test                                    PASSED in 4.4s
+//app/wiring/account_wiring:routes_test                                  PASSED in 6.4s
+//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 5.0s
+//feature/settings/settings_appearance:architecture_test                 PASSED in 0.5s
+//feature/settings/settings_appearance:bdd_test                          PASSED in 6.7s
+//feature/settings/settings_appearance:contract_test                     PASSED in 0.7s
+//feature/settings/settings_appearance:flow_scope_test                   PASSED in 1.7s
+//feature/settings/settings_home:architecture_test                       PASSED in 0.3s
+//feature/settings/settings_home:bdd_test                                PASSED in 2.7s
+//feature/settings/settings_home:contract_test                           PASSED in 0.6s
+//feature/settings/settings_home:flow_scope_test                         PASSED in 3.3s
+//feature/settings/settings_home:unit_test                               PASSED in 0.7s
+//utility/mc_appearance:di_test                                          PASSED in 0.6s
+//utility/mc_appearance:local_test                                       PASSED in 0.7s
+//utility/mc_appearance:no_flutter_test                                  PASSED in 0.4s
+//utility/mc_appearance:preferences_test                                 PASSED in 0.5s
+//utility/mc_appearance:races_test                                       PASSED in 0.5s
+//utility/mc_appearance:sync_test                                        PASSED in 0.6s
+//utility/mc_config:app_config_test                                      PASSED in 0.5s
+//utility/mc_config:bundled_config_test                                  PASSED in 0.4s
+//utility/mc_session:no_flutter_test                                     PASSED in 0.5s
+//utility/mc_session:session_di_test                                     PASSED in 0.7s
+//utility/mc_session:session_test                                        PASSED in 0.9s
+
+Executed 23 out of 23 tests: 23 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

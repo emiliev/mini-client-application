@@ -21,5 +21,7 @@
   "charactersListPreviewComicsEmpty": "No comics yet.",
   "@charactersListPreviewComicsEmpty": {"description": "Shown when the character appears in no comic."},
   "charactersListPreviewComicsFailed": "Comics could not be loaded.",
-  "@charactersListPreviewComicsFailed": {"description": "Shown when the related comics fail to load; Retry follows."}
+  "@charactersListPreviewComicsFailed": {"description": "Shown when the related comics fail to load; Retry follows."},
+  "charactersListSearch": "Search characters",
+  "@charactersListSearch": {"description": "Accessible name of the app bar action that opens the character search."}
 }

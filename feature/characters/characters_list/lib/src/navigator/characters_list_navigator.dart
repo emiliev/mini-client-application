@@ -13,4 +13,7 @@ abstract interface class CharactersListNavigator {
 
   /// A related comic on the preview: hands over to comics_details (T-0041).
   void openComic(ComicId id);
+
+  /// The app bar's search action: hands over to characters_search (T-0071).
+  void openSearch();
 }

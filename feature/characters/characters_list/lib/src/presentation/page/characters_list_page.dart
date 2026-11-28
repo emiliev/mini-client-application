@@ -7,6 +7,7 @@ import 'package:characters_list/src/presentation/widget/character_tile.dart';
 import 'package:characters_list/src/presentation/widget/failure_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mc_ds_buttons/mc_ds_buttons.dart';
 import 'package:mc_ds_cards/mc_ds_cards.dart';
 import 'package:mc_ds_feedback/mc_ds_feedback.dart';
 import 'package:mc_ds_lists/mc_ds_lists.dart';
@@ -46,6 +47,13 @@ class _CharactersListPageContent extends StatelessWidget {
         // The flow has its own navigator: this leaves the flow from its root page.
         leading: const McFlowBackButton(),
         title: l10n.charactersListTitle,
+        actions: [
+          McIconButton(
+            icon: Icons.search,
+            semanticLabel: l10n.charactersListSearch,
+            onPressed: () => bloc.add(const CharactersListEvent.openSearch()),
+          ),
+        ],
       ),
       body: BlocBuilder<CharactersListBloc, CharactersListState>(
         builder: (context, state) => state.when(

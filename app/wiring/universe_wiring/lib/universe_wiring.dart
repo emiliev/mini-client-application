@@ -8,7 +8,7 @@ export 'package:universe_wiring/src/di/di_initializer.dart'
 export 'package:universe_wiring/src/di/universe_wiring_di_initializer.dart'
     show UniverseWiringDIInitializer;
 export 'package:universe_wiring/src/routes/characters_routes.dart'
-    show CharacterDetailsRoute, CharactersRoute;
+    show CharacterDetailsRoute, CharactersRoute, CharactersSearchRoute;
 export 'package:universe_wiring/src/routes/route_targets.dart'
     show UniverseRouteTargets;
 

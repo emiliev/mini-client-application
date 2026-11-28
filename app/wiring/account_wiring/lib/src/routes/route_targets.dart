@@ -1,6 +1,7 @@
 import 'package:auth_signin/auth_signin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:settings_appearance/settings_appearance.dart';
+import 'package:settings_home/settings_home.dart';
 
 /// What the account group's typed routes build (R15): each member returns a
 /// feature's `*Flow`. The route files import only this interface;
@@ -10,6 +11,9 @@ import 'package:settings_appearance/settings_appearance.dart';
 /// Prefixed with the group (`CommerceRouteTargets`, ...) because the app
 /// imports every wiring's barrel side by side (F-0040 fact 11).
 abstract interface class AccountRouteTargets {
+  /// The settings index: `/settings`.
+  SettingsHomeFlow settingsHome();
+
   /// The appearance settings: `/settings/appearance`.
   SettingsAppearanceFlow settingsAppearance();
 

@@ -1,6 +1,6 @@
 # T-0063: the account group's app layer. Typed routes, navigator
-# implementations and the DI initializer for settings_appearance (plan 01
-# §3.4). The sign-in route (T-0066). Profile and the other settings join
+# implementations and the DI initializer for settings_home (T-0070) and
+# settings_appearance (plan 01 §3.4). The sign-in route (T-0066). Profile and the other settings join
 # with their features.
 name: account_wiring
 version: 0.1.0
@@ -24,6 +24,7 @@ dependencies:
   mc_fixtures_identity: any
   mc_session: any
   settings_appearance: any
+  settings_home: any
 
 dev_dependencies:
   flutter_test:

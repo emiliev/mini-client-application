@@ -1,0 +1,23 @@
+INFO: Invocation ID: 1c38a388-67ad-4b8c-8534-5cf83ee26526
+Computing main repo mapping: 
+
+INFO: Analyzed 6 targets (1 packages loaded, 219 targets configured, 235 aspect applications).
+INFO: Found 6 test targets...
+INFO: Elapsed time: 384.141s, Critical Path: 94.15s
+INFO: 301 processes: 80646 action cache hit, 1 internal, 300 darwin-sandbox.
+INFO: Build completed successfully, 301 total actions
+//app/mini_client:characters_search_route_test                           PASSED in 8.2s
+  Stats over 50 runs: max = 8.2s, min = 5.0s, avg = 7.0s, dev = 0.7s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 4.7s
+  Stats over 50 runs: max = 4.7s, min = 1.5s, avg = 2.8s, dev = 0.8s
+//feature/characters/characters_list:bdd_test                            PASSED in 12.5s
+  Stats over 50 runs: max = 12.5s, min = 3.8s, avg = 5.9s, dev = 2.3s
+//feature/characters/characters_search:bdd_test                          PASSED in 48.6s
+  Stats over 50 runs: max = 48.6s, min = 35.6s, avg = 39.9s, dev = 5.3s
+//feature/characters/characters_search:contract_test                     PASSED in 0.6s
+  Stats over 50 runs: max = 0.6s, min = 0.4s, avg = 0.5s, dev = 0.0s
+//feature/characters/characters_search:flow_scope_test                   PASSED in 5.7s
+  Stats over 50 runs: max = 5.7s, min = 3.9s, avg = 4.7s, dev = 0.6s
+
+Executed 6 out of 6 tests: 6 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.

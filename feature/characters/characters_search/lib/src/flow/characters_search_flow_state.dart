@@ -1,0 +1,15 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'characters_search_flow_state.freezed.dart';
+
+/// What the flow shows, not which page is on top (plan 01 §4.1). Pure Dart,
+/// so the bloc that reads it stays Flutter-free (R15).
+@freezed
+abstract class CharactersSearchFlowState with _$CharactersSearchFlowState {
+  const factory CharactersSearchFlowState({
+    /// The query the flow opened with (`/characters/search?q=spi`): the field
+    /// starts with it and it is searched at once. Null (the flow treats a
+    /// blank query as none) opens on the recent searches.
+    String? initialQuery,
+  }) = _CharactersSearchFlowState;
+}

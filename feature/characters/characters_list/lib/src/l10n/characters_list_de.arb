@@ -10,5 +10,6 @@
   "charactersListPreviewComics": "Comics",
   "charactersListPreviewComicsLoading": "Comics werden geladen",
   "charactersListPreviewComicsEmpty": "Noch keine Comics.",
-  "charactersListPreviewComicsFailed": "Comics konnten nicht geladen werden."
+  "charactersListPreviewComicsFailed": "Comics konnten nicht geladen werden.",
+  "charactersListSearch": "Figuren suchen"
 }

@@ -1,0 +1,23 @@
+{
+  "@@locale": "de",
+  "charactersSearchTitle": "Suche",
+  "charactersSearchFieldLabel": "Figuren nach Namen suchen",
+  "charactersSearchClearQuery": "Suche löschen",
+  "charactersSearchSortLabel": "Sortieren nach",
+  "charactersSearchTeamLabel": "Team",
+  "charactersSearchSortNameAscending": "Name A–Z",
+  "charactersSearchSortNameDescending": "Name Z–A",
+  "charactersSearchSortNewest": "Zuletzt aktualisiert",
+  "charactersSearchSortOldest": "Am längsten nicht aktualisiert",
+  "charactersSearchSearching": "Suche läuft",
+  "charactersSearchEmptyTitle": "Keine Figuren gefunden",
+  "charactersSearchEmptyMessage": "Kein Name einer Figur beginnt mit „{query}“. Prüfe die Schreibweise oder versuche einen anderen Namen.",
+  "charactersSearchEmptyTeamMessage": "Keine Figur von {team} hat einen Namen, der mit „{query}“ beginnt. Versuche ein anderes Team oder einen anderen Namen.",
+  "charactersSearchErrorTitle": "Die Suche ist fehlgeschlagen",
+  "charactersSearchLoadMoreFailed": "Weitere Figuren konnten nicht geladen werden.",
+  "charactersSearchLoading": "Figuren werden geladen",
+  "charactersSearchRecent": "Letzte Suchen",
+  "charactersSearchClearRecent": "Löschen",
+  "charactersSearchClearFailed": "Deine letzten Suchen konnten nicht gelöscht werden. Bitte versuche es erneut.",
+  "charactersSearchNoRecent": "Suche Figuren nach dem Anfang ihres Namens."
+}

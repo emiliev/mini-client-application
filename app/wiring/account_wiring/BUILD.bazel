@@ -29,12 +29,14 @@ _INIT = "lib/src/di/di_initializer.dart"
 _NAVIGATORS = [
     "lib/src/navigators/auth_signin_navigator_impl.dart",
     "lib/src/navigators/settings_appearance_navigator_impl.dart",
+    "lib/src/navigators/settings_home_navigator_impl.dart",
 ]
 
 _DEPS = [
     "//app/wiring/app_core",
     "//feature/auth/auth_signin",
     "//feature/settings/settings_appearance",
+    "//feature/settings/settings_home",
     "//utility/mc_api_auth",
     "//utility/mc_di",
     "//utility/mc_fixtures_identity",
