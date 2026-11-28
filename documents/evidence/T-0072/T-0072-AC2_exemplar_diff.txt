@@ -1,0 +1,41 @@
+ .../characters_details/.mcgen/manifest.json        |  290 ++++++
+ .../presentation/bloc/character_details_bloc.dart  |    2 +
+ feature/characters/characters_details/mcgen.yaml   | 1036 ++++++++++++++++++++
+ feature/comics/comics_details/.mcgen/manifest.json |  303 ++++++
+ .../src/presentation/bloc/comic_details_bloc.dart  |    4 +
+ feature/comics/comics_details/mcgen.yaml           |  874 +++++++++++++++++
+ 6 files changed, 2509 insertions(+)
+diff --git a/feature/characters/characters_details/lib/src/presentation/bloc/character_details_bloc.dart b/feature/characters/characters_details/lib/src/presentation/bloc/character_details_bloc.dart
+index 922a5af0..bb3a4b97 100644
+--- a/feature/characters/characters_details/lib/src/presentation/bloc/character_details_bloc.dart
++++ b/feature/characters/characters_details/lib/src/presentation/bloc/character_details_bloc.dart
+@@ -83,7 +83,9 @@ final class CharacterDetailsBloc
+         }
+       case _OpenComic(:final id):
+         if (_startOpenGuard(id)) {
++          // mcgen:keep details.openComic
+           _navigator.openComic(id);
++          // mcgen:end details.openComic
+         }
+     }
+   }
+diff --git a/feature/comics/comics_details/lib/src/presentation/bloc/comic_details_bloc.dart b/feature/comics/comics_details/lib/src/presentation/bloc/comic_details_bloc.dart
+index 29d7ae44..b68e32e1 100644
+--- a/feature/comics/comics_details/lib/src/presentation/bloc/comic_details_bloc.dart
++++ b/feature/comics/comics_details/lib/src/presentation/bloc/comic_details_bloc.dart
+@@ -88,11 +88,15 @@ final class ComicDetailsBloc
+         }
+       case _OpenCharacter(:final id):
+         if (_startOpenGuard(('character', id.value))) {
++          // mcgen:keep details.openCharacter
+           _navigator.openCharacter(id);
++          // mcgen:end details.openCharacter
+         }
+       case _OpenCreator(:final id):
+         if (_startOpenGuard(('creator', id.value))) {
++          // mcgen:keep details.openCreator
+           _navigator.openCreator(id);
++          // mcgen:end details.openCreator
+         }
+     }
+   }
