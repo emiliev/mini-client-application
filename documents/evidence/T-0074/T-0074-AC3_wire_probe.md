@@ -1,6 +1,6 @@
 # T-0074-AC3: a new list-detail spec, wired by mcgen alone
 
-HEAD `8c04ea2e`, copy `/tmp/mc-T-0074-probe-engineer-k36b1W` (deleted afterwards)
+HEAD `d34dc446`, copy `/tmp/mc-T-0074-probe-engineer-e6l6RJ` (deleted afterwards)
 
 - the copy: 6116 files; the one hand-written addition: `feature/zz_probe/zz_ld_probe/mcgen.yaml`
 - PASS: mcgen gen zz_ld_probe
@@ -76,55 +76,21 @@ pubspec.yaml
 ```
 
 - PASS: bazel build --config=sim //app/mini_client:mini_client_ios
-- **FAIL**: bazel test --lockfile_mode=error //...
-```
-//app/mini_client:app_test                                            NO STATUS
-//app/mini_client:bdd_test                                            NO STATUS
-//app/mini_client:catalogue_test                                      NO STATUS
-//app/mini_client:characters_search_route_test                        NO STATUS
-//app/mini_client:comic_route_test                                    NO STATUS
-//app/mini_client:deep_link_back_stack_test                           NO STATUS
-//app/mini_client:links_after_flow_test                               NO STATUS
-//app/mini_client:not_found_test                                      NO STATUS
-//app/mini_client:reading_list_route_test                             NO STATUS
-//app/mini_client:search_route_test                                   NO STATUS
-//app/mini_client:settings_route_test                                 NO STATUS
-//app/mini_client:sign_in_guard_app_test                              NO STATUS
-//app/mini_client:store_route_test                                    NO STATUS
-//app/mini_client:trivia_route_test                                   NO STATUS
-//app/sandbox/universe_sandbox:universe_sandbox_links_test            NO STATUS
-//app/sandbox/universe_sandbox:universe_sandbox_router_test           NO STATUS
-//app/wiring/account_wiring:routes_test                               NO STATUS
-//app/wiring/chronicle_wiring:routes_test                             NO STATUS
-//app/wiring/universe_wiring:routes_test                              NO STATUS
-//app/wiring/app_core:app_layer_test                                     PASSED in 1.3s
-//app/wiring/app_core:appearance_shell_test                              PASSED in 2.9s
-//app/wiring/app_core:boot_test                                          PASSED in 2.4s
-//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.6s
-//app/wiring/app_core:flow_results_hardening_test                        PASSED in 5.2s
-//app/wiring/app_core:flow_results_test                                  PASSED in 3.1s
-//app/wiring/app_core:formatters_root_test                               PASSED in 0.7s
-//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.8s
-//app/wiring/app_core:route_nesting_test                                 PASSED in 1.2s
-//app/wiring/app_core:router_observers_test                              PASSED in 1.5s
-//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 1.3s
-//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 4.0s
-//app/wiring/app_core:sign_in_guard_test                                 PASSED in 1.1s
-//app/wiring/commerce_wiring:routes_test                                 PASSED in 2.9s
-//app/wiring/discovery_wiring:routes_test                                PASSED in 1.1s
-//app/wiring/library_wiring:routes_test                                  PASSED in 2.1s
-//app/wiring/publishing_wiring:routes_test                               PASSED in 2.2s
-//app/wiring/zz_probe_wiring:routes_test                                 PASSED in 0.5s
-
-Executed 18 out of 252 tests: 232 tests pass and 20 were skipped.
-There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
-```
-  - Executed 18 out of 252 tests: 232 tests pass and 20 were skipped.
+- PASS: bazel test --lockfile_mode=error //...
+  - Executed 20 out of 252 tests: 252 tests pass.
   - //feature/zz_probe/zz_ld_probe:bdd_test PASSED
   - //feature/zz_probe/zz_ld_probe:architecture_test PASSED
   - //feature/zz_probe/zz_ld_probe:flow_scope_test PASSED
   - //app/wiring/zz_probe_wiring:routes_test PASSED
-  - **//app/mini_client:catalogue_test not PASSED**
-  - **//app/mini_client:analytics_screens_test not PASSED**
+  - //app/mini_client:catalogue_test PASSED
+  - //app/mini_client:analytics_screens_test PASSED
 
-**FAIL T-0074-AC3**
+## //app/mini_client:catalogue_test in the copy
+
+```
+  PASS  T-0074-AC3 a link opens the catalogue with home under it, listing every generated flow
+  PASS  T-0074-AC3 the catalogue opens zz_ld_probe at its route, and Back returns to the catalogue
+  PASS  T-0074-AC3 a catalogue tile pushes its location, and Back returns to the catalogue; an unwired one does nothing
+```
+
+**PASS T-0074-AC3**

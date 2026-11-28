@@ -68,6 +68,21 @@ Batches (Phase E) must not hand-edit app glue. `mcgen wire` regenerates the shar
   - The LD, SC and SR probe scripts run `wire` (and LD/SC `buildgen`) for their module: all three PASS under Bazel.
   - Re-ran the gates and the AC3 probe on `ee8474a8`. All are green: `test //...` 247 of 247; lint; `mc_arch_check`; the sim build; a 20-run flake check of `catalogue_test`, `analytics_screens_test` and `app_test`; the format gate; rules_fork; unchanged lockfiles; 211 mcgen tests; CI gate 6. The AC3 probe passed with a sim build and 252 of 252.
 
+- 2026-11-28 (Engineer, review round; one fix round under ADR-0015): fixed all 8 important findings, each with a test (F-0074 §7):
+  1. wire deletes what it stops generating, and an edited owned orphan needs `--force`;
+  2. an ejected module stays wired;
+  3. search and section-detail flows are routed, and any other archetype is a warning plus a catalogue note, never an error;
+  4. `_TEST_DEPS` is defined whenever a test uses it;
+  5. same-named tests get directory-qualified names;
+  6. adopt pairs repeated keys by position;
+  7. the scanner uses `@factoryMethod` and unwraps `@preResolve`;
+  8. list-detail's pubspec names the root-import packages.
+
+  Also fixed the two nits (comments in the parsed blocks; buildgen errors through the CLI) and T-0072's probe exec bit.
+  - The first gate run caught an unused variable in my own catalogue test, which the analyze aspect fails on. Fixed.
+  - Gates on `d34dc446`: rules_fork, `test --lockfile_mode=error //...` 247 of 247, lint, `mc_arch_check`, the sim build, the 20-run flake check, the format gate, unchanged lockfiles, 222 mcgen tests, CI gate 6, every `--check`, and the AC3 probe (sim build, 252 of 252).
+  - Merged `origin/main` (journal only).
+
 ## Outcome
 - **Changed** (branch `fleet/T-0074-mcgen-wire-buildgen`; handoff HEAD in the report):
   - `tool/mcgen/lib/src/{buildgen,wire}/`, the CLI, `mcgen.yaml` `wire:`, and the README;
@@ -79,9 +94,9 @@ Batches (Phase E) must not hand-edit app glue. `mcgen wire` regenerates the shar
 
 | AC | Evidence |
 |---|---|
-| T-0074-AC1 | `tool/mcgen/test/buildgen_test.dart`: 11 `T-0074-AC1 …` tests, including `buildgen --check exits 0 on the repo: every feature BUILD file is up to date` and `adopt marks unexplained items # keep and moves unknown statements into the hand region, so the file builds the same`. Graph neutrality: [T-0074-AC1_graph_neutral.md](../evidence/T-0074/T-0074-AC1_graph_neutral.md) |
-| T-0074-AC2 | `tool/mcgen/test/wire_test.dart`: 6 `T-0074-AC2 …` tests, including `wire --check exits 0 on the repo, every covered file up to date` and `root imports: injectable constructors, modules and scope reads, …`. Covered and uncovered files: F-0074 §4 |
-| T-0074-AC3 | [T-0074-AC3_wire_probe.md](../evidence/T-0074/T-0074-AC3_wire_probe.md): temp copy, the spec added by hand and nothing else, gen, wire and buildgen, sim build, `test //...` 252 of 252. `app/mini_client/test/catalogue_test.dart`: 3 `T-0074-AC3 …` tests (`the catalogue opens zz_ld_probe at its route, …` ran in the probe). `wire_test.dart`: 2 `T-0074-AC3 …` tests |
+| T-0074-AC1 | `tool/mcgen/test/buildgen_test.dart`: 15 `T-0074-AC1 …` tests (4 from the review round: `_TEST_DEPS` with no `.feature`, same-named tests, two comprehensions, a malformed file), including `buildgen --check exits 0 on the repo: every feature BUILD file is up to date` and `adopt marks unexplained items # keep and moves unknown statements into the hand region, so the file builds the same`. Graph neutrality: [T-0074-AC1_graph_neutral.md](../evidence/T-0074/T-0074-AC1_graph_neutral.md) |
+| T-0074-AC2 | `tool/mcgen/test/wire_test.dart`: 13 `T-0074-AC2 …` tests (7 from the review round: orphans, an edited orphan and `--force`, ejected modules, the SR/SC/unknown archetypes on the repo-wide path, `@factoryMethod`/`@preResolve`, the pubspec ⊇ flow-scope imports, comments in parsed blocks), including `wire --check exits 0 on the repo, every covered file up to date` and `root imports: injectable constructors, modules and scope reads, …`. Covered and uncovered files: F-0074 §4 |
+| T-0074-AC3 | [T-0074-AC3_wire_probe.md](../evidence/T-0074/T-0074-AC3_wire_probe.md): temp copy, the spec added by hand and nothing else, gen, wire and buildgen, sim build, `test //...` 252 of 252. `app/mini_client/test/catalogue_test.dart`: `T-0074-AC3 …` tests (one per wired entry, one per unwired entry, plus the fixed two) (`the catalogue opens zz_ld_probe at its route, …` ran in the probe). `wire_test.dart`: 2 `T-0074-AC3 …` tests |
 | T-0074-AC4 | [T-0065-AC5_gates.md](../evidence/T-0074/T-0065-AC5_gates.md) (mcgen tests; lockfiles unchanged), `T-0074-AC4_{test,lint,arch,sim,flake20,format,rules_fork,lockfiles,ci_gate6}.log`, [T-0074-AC4_archetype_probes.md](../evidence/T-0074/T-0074-AC4_archetype_probes.md) (the LD, SC and SR probes still pass). F-0074 written; ADR-0018 drafted |
 
 - **Test integrity:**
@@ -89,7 +104,8 @@ Batches (Phase E) must not hand-edit app glue. `mcgen wire` regenerates the shar
   - `section_detail_review_test` checks the two-word item's freezed targets in the BUILD file that buildgen writes for the rendered module. A new module's targets are named after their files (`story_arc_details_bloc`), not the old template's `details_bloc`.
   - `cli_test` no longer lists wire and buildgen as "not yet".
   - `app_test`'s "all 7 wirings are composed" names the 7 initializers in order instead of `hasLength(7)`, so a generated group may follow them.
-  - `analytics_screens_test` expects `catalogue` plus one route per catalogue entry.
+  - `analytics_screens_test` expects `catalogue` plus one route per wired catalogue entry.
+  - Review round: `wire_test`'s AC3 test expects the literal catalogue location (`location: '/zz-ld-probe'`). Its AC2 test for a hand-written group's flow now expects a warning and exit 0 rather than a refusal (finding 3).
   - Nothing was skipped. No `// ignore` was added.
 - **Decisions:** ADR-0018 (Proposed).
 - **Findings:** F-0074.

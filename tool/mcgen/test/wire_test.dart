@@ -208,8 +208,9 @@ abstract class ZzModule {
       );
     });
 
-    test('T-0074-AC2 a generated flow in a hand-written group is refused, '
-        'naming the group and F-0074', () {
+    test('T-0074-AC2 a generated flow in a hand-written group is left '
+        'unwired: a warning naming the group and F-0074, and a catalogue '
+        'note, with no generated group and wire exiting 0', () {
       final root = _root('hand-group');
       writeFile(
         root,
@@ -219,10 +220,24 @@ abstract class ZzModule {
             .replaceAll('ZzLdProbe', 'ZzMoreComics')
             .replaceAll('zzLdProbe', 'zzMoreComics'),
       );
-      final r = mcgen(['wire', '--check', '--root', root.path]);
-      expect(r.code, 1, reason: '$r');
+      final r = mcgen(['wire', '--root', root.path]);
+      expect(r.code, 0, reason: '$r');
+      expect(
+        r.err,
+        contains('warning: feature/comics/zz_more_comics/mcgen.yaml'),
+      );
       expect(r.err, contains('"publishing" is hand-written'));
       expect(r.err, contains('F-0074'));
+      expect(
+        readFile(root, appWiringsPath),
+        contains("CatalogueEntry(\n    module: 'zz_more_comics',\n    note:"),
+      );
+      expect(
+        Directory(p.join(root.path, 'app/wiring/comics_wiring')).existsSync(),
+        isFalse,
+      );
+      final c = mcgen(['wire', '--check', '--root', root.path]);
+      expect(c.code, 0, reason: 'a warning is not drift: $c');
     });
   });
 

@@ -1,4 +1,4 @@
-ci.sh: repo /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a3c9c981faf666af8, logs /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/tmp.48iZJ7pMJf
+ci.sh: repo /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a3c9c981faf666af8, logs /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T/tmp.H2N5KGxSAP
 ::group::[6/11] mcgen analyze, test, wire and buildgen --check
 ===== [6/11] mcgen analyze, test, wire and buildgen --check =====
 Resolving dependencies...
@@ -40,15 +40,15 @@ No issues found!
 00:00 +18: test/section_detail_review_test.dart: T-0072-AC3 the default favourites path comes from the kind, and the probe and the API use the same path
 00:00 +19: test/section_detail_review_test.dart: T-0072-AC3 the default favourites path comes from the kind, and the probe and the API use the same path
 00:00 +20: test/section_detail_review_test.dart: T-0072-AC3 the default favourites path comes from the kind, and the probe and the API use the same path
-00:00 +21: test/section_detail_review_test.dart: T-0072-AC3 the default favourites path comes from the kind, and the probe and the API use the same path
+00:00 +21: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
 00:00 +22: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
 00:00 +23: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
-00:00 +24: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
-00:00 +25: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
-00:00 +26: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
-00:00 +27: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
-00:00 +28: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
-00:00 +29: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen discovery_search --check exits 0 against the exemplar
+00:00 +24: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
+00:00 +25: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
+00:00 +26: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
+00:00 +27: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
+00:00 +28: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
+00:00 +29: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
 00:00 +30: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
 00:00 +31: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
 00:00 +32: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
@@ -58,7 +58,7 @@ No issues found!
 00:01 +36: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 mcgen gen comics_details --check exits 0 against the merged exemplar
 00:01 +37: test/review_round_test.dart: T-0065-AC2 a file that is no longer generated T-0065-AC2 with a filled keep region, gen refuses and names it; --force deletes and logs it
 00:01 +38: test/review_round_test.dart: T-0065-AC2 a file that is no longer generated T-0065-AC2 with a filled keep region, gen refuses and names it; --force deletes and logs it
-00:01 +39: test/review_round_test.dart: T-0065-AC2 a file that is no longer generated T-0065-AC2 with a filled keep region, gen refuses and names it; --force deletes and logs it
+00:01 +39: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
 00:01 +40: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
 00:01 +41: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
 00:01 +42: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
@@ -66,7 +66,7 @@ No issues found!
 00:01 +44: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
 00:01 +45: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
 00:01 +46: test/imports_test.dart: T-0065-AC5 generated Dart under mc_analysis and the format gate T-0065-AC5 control: the analysis really runs mc_analysis (an unused import is caught)
-00:01 +47: test/section_detail_test.dart: T-0072-AC1 comics_details round-trips T-0072-AC1 comics_details: compareToExemplar finds the render identical to the real exemplar
+00:01 +47: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
 00:01 +48: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
 00:01 +49: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
 00:01 +50: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
@@ -85,7 +85,7 @@ No issues found!
 00:01 +63: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
 00:01 +64: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
 00:01 +65: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
-00:01 +66: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen characters_search --check exits 0 against the exemplar
+00:01 +66: test/review_round_test.dart: T-0065-AC2 check and gen agree on a deleted managed file: stale, recreated
 00:01 +67: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen characters_search --check exits 0 against the exemplar
 00:01 +68: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen characters_search --check exits 0 against the exemplar
 00:01 +69: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 mcgen gen characters_search --check exits 0 against the exemplar
@@ -116,12 +116,12 @@ No issues found!
 00:02 +94: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:02 +95: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:02 +96: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:02 +97: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:02 +98: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:02 +99: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:02 +100: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:02 +101: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:02 +102: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:03 +97: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:03 +98: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:03 +99: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:03 +100: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:03 +101: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:03 +102: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:03 +103: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:03 +104: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:03 +105: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
@@ -132,116 +132,116 @@ No issues found!
 00:03 +110: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:03 +111: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
 00:03 +112: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:03 +113: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:03 +114: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
-00:03 +115: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
-00:03 +116: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
-00:03 +117: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
-00:04 +118: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
-00:04 +119: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
-00:04 +120: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
-00:04 +121: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
+00:04 +113: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:04 +114: test/determinism_test.dart: T-0065-AC3 same seed, two working directories and environments: identical bytes, no absolute paths
+00:04 +115: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
+00:04 +116: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
+00:04 +117: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
+00:04 +118: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
+00:04 +119: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
+00:04 +120: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
+00:04 +121: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 an edit inside the keep region keeps --check green; an edit outside one fails it
 00:04 +122: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
-00:04 +123: test/review_round_t0069_test.dart: T-0069-AC1 review round 4: ignored local files T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check
+00:04 +123: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
 00:04 +124: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
 00:04 +125: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
-00:04 +126: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +127: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +128: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +129: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +130: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +131: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +132: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +133: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +134: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +135: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +136: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +137: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +138: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +139: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +140: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +141: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +142: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +143: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +144: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +145: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +146: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +147: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +148: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +149: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +150: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +151: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +152: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +153: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +154: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +155: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +156: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +157: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +158: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +159: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
-00:04 +160: test/spec_test.dart: T-0065-AC4 the schema T-0065-AC4 against the real repo, the core lint accepts it; only list_detail's options are missing (T-0069)
-00:04 +161: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +162: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +163: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +164: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +165: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +166: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +167: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +168: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +169: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +170: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +171: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +172: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +173: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +174: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +175: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +176: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +177: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:04 +178: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
+00:04 +126: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +127: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +128: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +129: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +130: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +131: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +132: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +133: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +134: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +135: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +136: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +137: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +138: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +139: test/determinism_test.dart: T-0065-AC3 a different seed salt re-rolls the seeded choice, and only that
+00:04 +140: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +141: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +142: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +143: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +144: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +145: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +146: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +147: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +148: test/wire_test.dart: T-0074-AC2 wire agrees with the wire-owned files it covers T-0074-AC2 a generated flow in a hand-written group is left unwired: a warning naming the group and F-0074, and a catalogue note, with no generated group and wire exiting 0
+00:04 +149: test/list_detail_test.dart: T-0069-AC1 the exemplar round-trips T-0069-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:04 +150: test/list_detail_test.dart: T-0069-AC1 the exemplar round-trips T-0069-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:05 +151: test/list_detail_test.dart: T-0069-AC1 the exemplar round-trips T-0069-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:05 +152: test/list_detail_test.dart: T-0069-AC1 the exemplar round-trips T-0069-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:05 +153: test/section_detail_test.dart: T-0072-AC1 a spec change fails --check and names the file T-0072-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:05 +154: test/section_detail_test.dart: T-0072-AC1 a spec change fails --check and names the file T-0072-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:05 +155: test/section_detail_test.dart: T-0072-AC1 a spec change fails --check and names the file T-0072-AC1 an edit inside a keep region keeps --check green; an edit outside one fails it
+00:05 +156: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +157: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +158: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +159: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +160: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +161: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +162: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +163: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +164: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +165: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +166: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +167: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +168: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +169: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +170: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +171: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +172: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +173: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +174: test/search_test.dart: T-0073-AC1 the exemplars round-trip T-0073-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes
+00:05 +175: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
+00:05 +176: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
+00:05 +177: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
+00:05 +178: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
 00:05 +179: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
 00:05 +180: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
 00:05 +181: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
 00:05 +182: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:05 +183: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:05 +184: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
-00:05 +185: test/search_test.dart: T-0073-AC3 a third search module T-0073-AC3 the probe spec lints clean and renders the same bytes in two roots
-00:05 +186: test/search_test.dart: T-0073-AC3 a third search module T-0073-AC3 the probe spec lints clean and renders the same bytes in two roots
-00:05 +187: test/list_detail_test.dart: T-0069-AC3 a second list-detail module T-0069-AC3 the probe is its own module, not the exemplar with names swapped
-00:05 +188: test/list_detail_test.dart: T-0069-AC3 a second list-detail module T-0069-AC3 the probe is its own module, not the exemplar with names swapped
-00:05 +189: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 ejected: nothing is written
-00:05 +190: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 ejected: nothing is written
-00:05 +191: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 ejected: nothing is written
-00:05 +192: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 ejected: nothing is written
-00:05 +193: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 ejected: nothing is written
-00:05 +194: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 ejected: nothing is written
-00:05 +195: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:05 +196: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:05 +197: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:05 +198: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:05 +199: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:05 +200: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:05 +201: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:06 +202: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:06 +203: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:06 +204: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:06 +205: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
-00:06 +206: test/gen_test.dart: T-0065-AC2 mcgen check reports each drift kind T-0065-AC2 stale-manifest: the spec changed, or the module was never generated
-00:06 +207: test/search_test.dart: T-0073-AC3 a third search module T-0073-AC3 open takes the id type of the navigator method it names, not the first id
-00:06 +208: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
-00:06 +209: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
-00:06 +210: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
-00:06 +211: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
-00:06 +212: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
-00:06 +213: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
-00:07 +214: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:06 +183: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 gen, wire and buildgen: the flow scope, a generated group, the app lists and the catalogue entry, then all up to date
+00:06 +184: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +185: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +186: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +187: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +188: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +189: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +190: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +191: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +192: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +193: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +194: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +195: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +196: test/gen_test.dart: T-0065-AC2 ownership modes T-0065-AC2 mixed: an owned file is written once and never again
+00:06 +197: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
+00:06 +198: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
+00:06 +199: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
+00:06 +200: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
+00:06 +201: test/wire_test.dart: T-0074-AC3 a new list-detail spec reaches the app through wire T-0074-AC3 the navigator skeleton is written once: an engineer's edit survives wire, and wire --check does not flag it
+00:06 +202: test/gen_test.dart: T-0065-AC2 mcgen check reports each drift kind T-0065-AC2 a clean module passes
+00:06 +203: test/search_test.dart: T-0073-AC3 a third search module T-0073-AC3 a step no template knows is written once, as a failing stub
+00:07 +204: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +205: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +206: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +207: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +208: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +209: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +210: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +211: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +212: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +213: test/wire_test.dart: T-0074 review round: wire T-0074-AC2 removing spec b: wire --check reports what it would delete, wire deletes b's navigator and entries, and a group with no flow left goes entirely
+00:07 +214: test/search_test.dart: T-0073-AC4 the shared pieces T-0073-AC4 the list-detail exemplar still round-trips: the shared code is untouched
 00:07 +215: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:07 +216: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:07 +217: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:08 +218: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:08 +219: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:09 +220: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:09 +221: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
-00:15 +222: All tests passed!
+00:08 +216: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
+00:08 +217: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
+00:09 +218: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
+00:09 +219: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
+00:10 +220: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
+00:10 +221: test/gen_test.dart: T-0065-AC2 tool/loc agrees with the manifest T-0065-AC2 keep-region lines count as hand, the rest as scaffold
+00:16 +222: All tests passed!
 app/mini_client/lib/src/wirings.dart: up to date
 app/mini_client/pubspec.yaml: up to date
 app/mini_client/wirings.bzl: up to date
@@ -272,8 +272,8 @@ feature/store/store_home/BUILD.bazel: up to date
 feature/trivia/trivia_quiz/BUILD.bazel: up to date
 mcgen buildgen: 11 BUILD file(s), 0 out of date
 ::endgroup::
-===== PASS [6] mcgen analyze, test, wire and buildgen --check (20s) =====
+===== PASS [6] mcgen analyze, test, wire and buildgen --check (22s) =====
 | # | Gate | Result | Seconds |
 |---|---|---|---|
-| 6 | mcgen analyze, test, wire and buildgen --check | PASS | 20 |
-| | total | PASS | 20 |
+| 6 | mcgen analyze, test, wire and buildgen --check | PASS | 22 |
+| | total | PASS | 22 |
