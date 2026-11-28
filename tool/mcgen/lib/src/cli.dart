@@ -168,6 +168,7 @@ int runMcgen(
         root,
         session.context,
         session.formatter,
+        config: WireConfig.load(session.tool.configPath),
         check: opts.flag('check'),
         out: o,
         err: e,
