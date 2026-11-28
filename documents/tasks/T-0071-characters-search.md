@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Verification (handed off) |
+| Status | Done (merged 2026-11-28 `8e45bf30`; review-first and merge gates per ADR-0015) |
 | Owner | crew: Engineer (Sonnet, worktree) |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0071-characters-search` |
@@ -116,3 +116,14 @@ Re-run: gates, 50 runs of the changed targets, `characters_journey_test`.
 - The open guards (list and search, 500 ms) are not reset when their route becomes current again.
 - Stale requests are not cancelled (in-process backend; as F-0046 fact 7).
 - `universe_sandbox` still stubs the search; its links test does not cover `/characters/search`.
+
+## Merge (TL)
+- 2026-11-28: `/code-review` found a regression: the new `team` filter matched team names, while `characters_list` sent team ids, so a team-opened list was empty and its test only checked the query. It also found 5 more issues. Fix round `d7b06b45`:
+  - `team` now means the team id (`teamIdOf`, CONTRACT.md), with a new list test that checks the rows;
+  - the linked query is trimmed;
+  - one shared empty-message helper;
+  - the drift test is strict again (route templates compared).
+
+  Optional items 3 and 4 went to P-125.
+- TL checks: no deleted or skipped tests, and no modified test lost assertions. The 3 `characters_list` goldens were regenerated for the new search icon, with before and after images in evidence.
+- The TL merged `--no-ff`. On the merge result: `check` passed, 246/246 tests, lint clean, `mc_arch_check` OK, sim app built, format gate passed, and a 20-run uncached flake check over 18 targets was clean.

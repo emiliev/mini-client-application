@@ -12,7 +12,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 | **Verification** | Lean since 2026-11-27 ([ADR-0015](adr/0015-lean-verification.md)): no feature goldens, ~15 targeted mutants, correctness-only Verifiers |
 | **CI** | GitHub Actions (`.github/workflows/ci.yml`, `tool/ci/ci.sh`, 11 gates) on `main`, `fleet/**`, PRs and on demand; cold 44 min, warm 25 min (T-0068) |
 | **Merge gate** | Fresh Verifier PASS + clean review + TL re-verifies the merge result ([ADR-0006](adr/0006-verification-strategy.md)) |
-| **Active crew** | T-0069 (Opus), T-0071 (Sonnet) |
+| **Active crew** | T-0069 (in review) |
 
 ## Now
 - Foundation wave done: T-0017 to T-0026 merged.
@@ -30,6 +30,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - **T-0042 merged:** `tool/ide_sync` puts generated code in the checkout, so the IDE, `fvm flutter run`, the debugger and hot reload work (README "Developing").
 - **T-0041 merged: `comics_details`, the second exemplar (SC).** A comic's page with cover, facts (localised), creators, cast, and a favourite that asks you to sign in. It is reachable from the characters preview and by `miniclient://app/comics/<id>`.
 - **SR/FW prerequisites merged:** search fixtures (T-0043), DS inputs (T-0044), the forms and wizard kit (T-0045), library fixtures (T-0047).
+- **T-0071 merged: character search.** A name-prefix search with sort and team filters, recent searches and paging, reached from the characters list's app bar.
 - **T-0070 merged: a Settings screen.** It has the account (sign in or out), Appearance with the current theme, and About. Back goes Appearance → Settings → home.
 - **T-0068 merged: CI.** Every push to `main` runs the 11 merge gates on a GitHub macOS runner, with Bazel caches. It proved green on cold and warm caches and red on a broken test.
 - **T-0066 merged: real sign-in and the `/me/**` guard.** A sign-in screen with demo accounts. Signed-out links to `/me/**`, `/library/**` and `/store/checkout` go to sign-in, then on to the target. Every "sign in to continue" uses it, and the fixture sheet is gone. A narrow auth Verifier passed it.
