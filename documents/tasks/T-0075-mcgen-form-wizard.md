@@ -2,7 +2,7 @@
 
 | Field | Value |
 |---|---|
-| Status | In Progress |
+| Status | In Verification |
 | Owner | crew: Engineer (Sonnet, worktree); follows the T-0069/T-0072/T-0073 pattern |
 | Verification | ADR-0015: `/code-review`, one fix round, TL merge gates |
 | Branch | `fleet/T-0075-mcgen-form-wizard` |
@@ -46,3 +46,29 @@ Add the FW archetype. The exemplar `library_reading_list_editor` (multi-step wiz
 
 ## Log
 - 2026-11-28: Created and dispatched (TL), as part of the third wave.
+- 2026-11-28 (Engineer, Sonnet): Done on `fleet/T-0075-mcgen-form-wizard`.
+  - **Archetype** `form_wizard` (`lib/src/emit/feature_form_wizard/`, bricks `feature_form_wizard_di`, `_package` and `_build`). The spec's `options` carry names, a `types` map (name to file or `package:` URI), the flow's arguments, result, pages and state fields, the barrel, the root imports and the architecture test's facts.
+  - **Exemplars:** `library_reading_list_editor` (three steps, nullable result, keyed flow) and `auth_signin` (one form, two arguments, non-null result) each have a spec (`exemplar: true`) and a manifest. Each exemplar's diff against `main` is the spec, the manifest and whitespace-only realignments of Examples tables (F-0075 section 3.1); no keep region exists.
+  - **Managed:** barrel, DI initializer, root imports, navigator, flow state, flow, ARBs, `l10n.yaml`, `pubspec.yaml`, `.feature` files, architecture test. **Owned:** the domain, the form's rules, the bloc, the pages, the env, the steps, the contract and guard tests, the golden, BUILD (hand share 89 % and 95 %, F-0075 section 1).
+  - **Skeleton** (`options.skeleton`): a new module gets an owned bloc (the guards: closed means stopped, one submit at a time, the epoch rule, `authPinned` write, `reject()` for a `400`), repository, form rules, step page, env, eight steps, flow-scope test and BUILD.
+  - **Probes** `zz_fw_probe` (3 steps) and `zz_fw_plain` (1 step): `tool/mcgen/tool/T-0075-AC3_fw_probe.sh`; gen, idempotent `--check`, `build --config=lint` and uncached `test`, 7 and 6 BDD scenarios.
+  - **No change to `emit/common`.** `archetypes.dart`: one import and one line.
+  - **Tests:** nothing deleted or weakened. `tool/mcgen/test/form_wizard_test.dart` is new.
+  - **Pitfalls and hand share:** [F-0075](../findings/F-0075-mcgen-form-wizard.md).
+
+## Outcome
+**Status: In Verification.** Both exemplars regenerate byte for byte (17 and 15 rendered files). Two throwaway modules generate, analyse clean and pass their BDD under Bazel.
+
+| AC | Evidence |
+|---|---|
+| T-0075-AC1 | `tool/mcgen/test/form_wizard_test.dart`:<br>- `T-0075-AC1 mcgen gen library_reading_list_editor --check exits 0 against the exemplar` and `... gen auth_signin --check ...`<br>- `T-0075-AC1 the round-trip golden of library_reading_list_editor: compareToExemplar finds the render identical to the real exemplar` (and `of auth_signin`)<br>- `T-0075-AC1 a changed spec field makes --check exit 1 and name the file`<br>- `T-0075-AC1 a flow argument renamed in the spec changes the flow, and --check names it`<br>- `T-0075-AC1 gen writes only the manifest into an exemplar, and the committed manifest is the one it writes` |
+| T-0075-AC2 | - [T-0075-AC2_bazel_test_after.log](../evidence/T-0075/T-0075-AC2_bazel_test_after.log): both modules and `//app/...`, 48 of 48 uncached<br>- `git diff` of the exemplars: specs, manifests, and whitespace in two Examples tables<br>- `T-0075-AC2 an exemplar renders only the managed layer: ...`, `T-0075-AC2 the exemplars have no keep region: ...` |
+| T-0075-AC3 | - [T-0075-AC3_fw_probe.md](../evidence/T-0075/T-0075-AC3_fw_probe.md): PASS for both probes<br>- `form_wizard_test.dart`: `T-0075-AC3 both probe specs lint clean and render the same bytes in two roots`, `... the probes are their own modules, not an exemplar with names swapped`, `... the template covers every behaviour the task names`, `... the skeleton files are owned and the managed layer is not`, `... a step no template knows is written once, as a failing stub`, `... a prose slot no template uses fails gen, naming it`, `... a missing de string is a lint error, not pseudo text`<br>- one lint-rejection test per spec role: `T-0075-AC3 unknown and missing options`, `... types: every type a template writes is declared, with a file`, `... root imports and the flow: roles the flow and the flow scope read`, `... flow arguments and the flow state`, `... the skeleton: steps, fields, strings, the result and the page`, `... an archetype error prints the spec path and the message, and gen prints no stack` |
+| T-0075-AC4 | - gate logs in `documents/evidence/T-0075/` (see the handoff)<br>- `T-0075-AC4 every existing exemplar still round-trips` (the five existing `--check`s) and `T-0075-AC4 form_wizard is registered, and only for features`<br>- [F-0075](../findings/F-0075-mcgen-form-wizard.md) |
+
+- **Hand share** (tool/loc): `auth_signin` 1,278 of 1,430 (89 %), `library_reading_list_editor` 3,163 of 3,315 (95 %).
+- **Keep regions:** none.
+- **Follow-ups (for `pending-work.md`):**
+  - once T-0074 lands, `BUILD.bazel` and `flow_scope.dart` leave this archetype;
+  - the skeleton knows text fields only (no choice, picked list, sign-in gate or edit mode);
+  - a bloc template covering both exemplars would be a code DSL: not planned.

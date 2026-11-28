@@ -46,8 +46,9 @@ for m in zz_fw_probe zz_fw_plain; do
   if [[ -f "bazel-testlogs/$P/bdd_test/test.log" ]]; then
     report "  - BDD scenarios: $(grep -c '^  PASS ' "bazel-testlogs/$P/bdd_test/test.log") passed, $(grep -c '^  FAIL ' "bazel-testlogs/$P/bdd_test/test.log") failed"
   fi
+  summary="$(bzw test "//$P/..." 2>&1)"
   for t in architecture_test bdd_test flow_scope_test; do
-    if bzw test "//$P:$t" 2>&1 | grep -q "PASSED"; then
+    if grep -q "//$P:$t .*PASSED" <<< "$summary"; then
       report "  - //$P:$t PASSED"
     else
       report "  - **//$P:$t not PASSED**"
