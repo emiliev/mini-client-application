@@ -55,7 +55,7 @@ _Last updated: 2026-11-27 by Tech Lead_
 - Resumed 2026-11-27.
 - **Pause (PO, 2026-11-27 night):** finish T-0068 (CI), then start no new tasks until the next session.
 - **Next session, in order:**
-  1. Check that the first CI run on `main` (triggered by the T-0068 merge push) is green.
+  1. The first CI run on `main` passed (48 min, cold: GitHub caches are branch-scoped). Next: confirm that the second `main` run is warm (about 25 min), then P-123 (profile a warm CI run and cut the fixed overhead).
   2. Second hybrid wave:
      - P2-04, templatise the list-detail exemplar (`characters_list`) with a round-trip golden on the `mcgen` core. Address P-120(a) and (b) first.
      - One or two hand-built features, e.g. `settings_home` with a `/settings` parent route, or `characters_search`.
