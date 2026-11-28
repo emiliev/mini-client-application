@@ -1,8 +1,9 @@
- .../characters_list/.mcgen/manifest.json           | 225 +++++++++
+ .../characters_list/.mcgen/manifest.json           | 252 +++++++++
  .../presentation/bloc/character_preview_bloc.dart  |   2 +
+ .../presentation/bloc/characters_list_bloc.dart    |   2 +
  .../src/presentation/bloc/related_comics_bloc.dart |   2 +
- feature/characters/characters_list/mcgen.yaml      | 509 +++++++++++++++++++++
- 4 files changed, 738 insertions(+)
+ feature/characters/characters_list/mcgen.yaml      | 580 +++++++++++++++++++++
+ 5 files changed, 838 insertions(+)
 diff --git a/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart b/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart
 index 4a1d2b14..11cd7547 100644
 --- a/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart
@@ -17,6 +18,20 @@ index 4a1d2b14..11cd7547 100644
        }
      });
    }
+diff --git a/feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart b/feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart
+index 8b04ffde..69dff0f1 100644
+--- a/feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart
++++ b/feature/characters/characters_list/lib/src/presentation/bloc/characters_list_bloc.dart
+@@ -89,7 +89,9 @@ final class CharactersListBloc
+         // One search per tap: a double tap must not push it twice.
+         if (!(_openSearchGuard?.isActive ?? false)) {
+           _openSearchGuard = Timer(openSearchGuard, () {});
++          // mcgen:keep list.openSearch
+           _navigator.openSearch();
++          // mcgen:end list.openSearch
+         }
+       case _PageChanged(:final page):
+         emit(_toState(page));
 diff --git a/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart b/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart
 index 4ba67937..b049cd00 100644
 --- a/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart

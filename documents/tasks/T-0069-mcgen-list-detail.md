@@ -72,9 +72,44 @@ This is the first real template. Define the **list-detail (LD) archetype** in `m
   - **Pitfalls** (F-0069 §3):
     - a brick file named `BUILD.bazel` broke `bazel test //...`, so it is named `{{{build_file}}}` now, with a guard test;
     - `dart format` outdents a keep end marker that closes a switch case.
+- 2026-11-28 (Engineer, review round, ADR-0015's single fix round):
+  - **Merge of `origin/main`.** T-0071 changed `characters_list`. The archetype gained list app-bar actions (`options.list.actions`: an icon button, a guarded event and a navigator call without an argument; keep region `list.openSearch`) and filter steps (`I open the <list> for <filter> {..}`, `the <list> shows the first {n} <items> of <filter> {..}`, `options.tests.filter_records`). The spec gained the search action, the string, and the `search` and `team` features. The round-trip is clean again: 56 files compared, 2 owned.
+  - **Finding 1:**
+    - only `en_XA` falls back to pseudo-translation;
+    - lint checks every string for every declared locale, plus text for an undeclared locale and `en_XA` as template;
+    - anything an archetype throws becomes an `emit` diagnostic.
+  - **Finding 2:** `pseudo()` keeps `{placeholder}`s and plural/select syntax, and accents only the messages. `l10n.strings[].placeholders` is written into the template ARB.
+  - **Finding 3:** rule-driven `outlines:` render as a Scenario Outline whose Examples come from the rule's examples. They take new `steps` and `tags`, and LD lint requires steps.
+  - **Finding 4:** the round-trip skips what `git check-ignore` reports, plus a fixed list for copies outside git (`.DS_Store`, `*.iml`, `.idea/`, `.vscode/`, `coverage/`).
+  - **Nits fixed:**
+    - the l10n-name lint runs only with `l10n:`;
+    - the barrel scan memoises each file, so a file reached twice keeps its names;
+    - `_LANG` and the flutter constraint come from `mcgen.yaml`;
+    - `--force` on an exemplar says it has no effect;
+    - `partOfPath` is normalised.
+  - **Probe:** now has an outline (2 rows) and a placeholder and a plural with computed `en_XA`. 9 of 9 BDD scenarios pass under Bazel, and gen-l10n accepts the strings.
 
 ## Outcome
-**Status: Done.** `mcgen gen characters_list --check` exits 0. It compares 50 rendered files byte for byte and checks that the 2 owned ones exist; the only exemplar files not rendered are the spec, the manifest and the five legacy golden files. A throwaway LD module generates, analyses clean, and passes 7 BDD scenarios plus its contract, flow-scope and architecture tests under Bazel.
+**Status: Done (review round applied).** `mcgen gen characters_list --check` exits 0 against the exemplar as merged with `origin/main` (T-0071's search action and team features included). It compares 56 rendered files byte for byte and checks that the 2 owned ones exist; the only exemplar files not rendered are the spec, the manifest and the five legacy golden files. A throwaway LD module generates, analyses clean, and passes 9 BDD scenarios (one an outline with 2 rows) plus its contract, flow-scope and architecture tests under Bazel.
+
+**Review round tests:** `tool/mcgen/test/review_round_t0069_test.dart`:
+- `T-0069-AC3 a missing de string is a lint error, not pseudo text`
+- `T-0069-AC3 a missing en string is a diagnostic, not a crash`
+- `T-0069-AC3 whatever an archetype throws becomes a diagnostic`
+- `T-0069-AC3 a placeholder and a plural survive pseudo()`
+- `T-0069-AC3 the probe's en_XA keeps the plural and its placeholders metadata reaches the template ARB`
+- `T-0069-AC3 a rule-driven outline renders as a Scenario Outline with the rule's examples`
+- `T-0069-AC3 an outline without steps is a lint error`
+- `T-0069-AC1 a .DS_Store, an IDE folder and coverage output do not fail --check`
+- `T-0069-AC1 in a checkout, git check-ignore decides`
+
+**Gates at the review-round HEAD:**
+- `test --lockfile_mode=error //...`: 246/246;
+- lint: PASS;
+- `characters_list`: 5/5 uncached;
+- `T-0065-AC5_gates.sh`: PASS, 146 mcgen tests, lockfiles unchanged;
+- format gate: 0 changed;
+- AC3 probe: PASS.
 
 | AC | Evidence |
 |---|---|
@@ -84,8 +119,8 @@ This is the first real template. Define the **list-detail (LD) archetype** in `m
 | T-0069-AC4 | - (a) `format_gate_test.dart`: `T-0069-AC4 a .dart template under __brick__ does not fail the gate`, `T-0069-AC4 an unformatted file beside a brick still fails it`, `T-0069-AC4 no brick template is a BUILD file, so Bazel never loads a brick as a package`<br>- (b) `kit_symbols_test.dart`: `T-0069-AC4 $uri exports every name the table lists` (one per kit), `T-0069-AC4 the scan finds what a barrel shows and hides`, `T-0069-AC4 registerKitSymbols resolves a kit name to its barrel`<br>- (d) `l10n_names_test.dart`: `T-0069-AC4 the locale gen-l10n reads, as flutter_tools reads it`, `T-0069-AC4 spec lint rejects auth_sign_in and passes auth_signin`, `T-0069-AC4 the ISO 639-1 set is the pinned SDK's, verbatim` |
 | T-0069-AC5 | - [gate_test_all.log](../evidence/T-0069/gate_test_all.log): `test --lockfile_mode=error //...` 236/236<br>- [gate_lint.log](../evidence/T-0069/gate_lint.log): lint PASS<br>- [gate_arch.log](../evidence/T-0069/gate_arch.log): `mc_arch_check` OK<br>- [T-0065-AC5_gates.md](../evidence/T-0069/T-0065-AC5_gates.md): the format gate, mcgen analyze, 137 mcgen tests, and lockfiles unchanged<br>- [ci_gates_rows.txt](../evidence/T-0069/ci_gates_rows.txt): `ci.sh --only` 1, 5, 6, 7, 8 and 9 PASS<br>- [F-0069](../findings/F-0069-mcgen-list-detail.md) |
 
-- **Hand share** (tool/loc): source 2/725, test 275/717, overall 277/1,442 (19.2 %). The test hand lines are the three owned files: env 104, contract 116, golden 55.
-- **Keep regions:** `preview.seeFullProfile` and `section.RelatedComics.open`.
+- **Hand share** (tool/loc, after the merge): source 3/752, test 275/791, overall 278/1,543 (18.0 %). The test hand lines are the three owned files: env 104, contract 116, golden 55.
+- **Keep regions:** `list.openSearch`, `preview.seeFullProfile` and `section.RelatedComics.open`.
 - **Follow-ups (for `pending-work.md`):**
   - P-120 (c) and (e) are still open;
   - P2-08 should own BUILD and `flow_scope.dart`;

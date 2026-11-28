@@ -65,6 +65,8 @@ P2-04 is the first real archetype. Its exemplar, `characters_list`, must regener
      - gain `examples` (a table, header first), which makes the scenario an Outline;
      - their `id` becomes optional, but lint requires it outside exemplars;
      - a present id is rendered as the first tag.
+   - `bdd[].outlines[]` gain `steps` and `tags`. An outline renders as a Scenario Outline whose Examples are its rule's examples (review round).
+   - `l10n.strings[].placeholders` holds gen-l10n's metadata. Only `en_XA` may lack text: it is pseudo-translated with its ICU syntax kept, and any other missing locale is a lint error.
 3. **The LD model:** the `options` keys are `item`, `items`, `list_noun`, `ids`, `list`, `mappers`, `preview`, `tests` and `prose`.
    - Unknown keys are lint errors. So are references to missing entities, fields, endpoints, query parameters, navigator methods and strings.
    - The test env's names follow the same conventions. A managed step references `charactersScrollable`, `characterNamed` and the rest, and the owned env provides them.
@@ -80,7 +82,7 @@ P2-04 is the first real archetype. Its exemplar, `characters_list`, must regener
 
 ## Consequences
 - **Positive:**
-  - `characters_list` round-trips: 50 files compared byte for byte, and 2 owned files checked to exist. The only exemplar files mcgen does not render are the spec, the manifest and the five legacy golden files. A one-field spec change fails `--check` and names the file (T-0069-AC1).
+  - `characters_list` round-trips: 56 files compared byte for byte after the merge with T-0071, and 2 owned files checked to exist. The only exemplar files mcgen does not render are the spec, the manifest and the five legacy golden files. A one-field spec change fails `--check` and names the file (T-0069-AC1).
   - A second LD module with other names, no filter and no section generates, analyses clean and passes 7 BDD scenarios under Bazel (T-0069-AC3).
   - P2-05 to P2-07 reuse several parts:
     - exemplar mode;

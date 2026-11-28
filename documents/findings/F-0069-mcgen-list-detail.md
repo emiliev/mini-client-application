@@ -80,6 +80,13 @@ The spec is 509 lines: 196 BDD, 37 strings, 92 prose and 184 domain and options.
     `mc_ds_theme` is in the exemplar's deps but no file uses it, so the spec lists it (`deps: [mc_ds_theme]`).
 13. **gen-l10n's file-name locale (P-120 (d), F-0066):** flutter_tools tries the whole stem, then the text after each `_`, with intl's `Locale.tryParse`, which also replaces deprecated codes. `auth_sign_in_en` therefore reads as `id_EN`. mcgen pins intl 0.20.3, the version flutter_tools 3.47.7 resolves, and copies flutter_tools' ISO 639-1 set. A test compares that set with the pinned SDK's source. Lint checks `<module>_<locale>` for the spec's locales plus `en` and `de`.
 
+## 3a. Review round (after T-0071 changed the exemplar)
+- **Merging the exemplar's own changes.** T-0071 added an app-bar action, a navigator method without an argument, a string, two features and four steps. The archetype gained a concept rather than exemplar text: **list actions**, which are guarded against double taps, have a keep region around the call, and get their own navigator-contract step and double-tap step. Filter steps are templates too. The round-trip went from 13 drifted files to 0 with no owned file added. Hand share after the merge: 278 of 1,543 lines (18.0 %).
+- **Pseudo-translation must not touch ICU.** `pseudo()` used to turn `{count}` into `{çóúñţ}`, so gen-l10n would reject the ARB. It now keeps placeholders, plural/select keywords and selectors, and accents only their messages. The probe's `en_XA` plural passes gen-l10n under Bazel.
+- **Only `en_XA` may be invented.** A missing `de` string used to ship pseudo text, and a missing `en` string crashed with a TypeError. Lint now checks every string for every locale, and the generator turns anything an archetype throws into a diagnostic.
+- **Outlines** take their Examples from the rule's examples, with strings as Dart literals because steps read `{<column>}`.
+- **Local junk:** the round-trip skips what git ignores, plus a fixed list for copies outside git.
+
 ## 4. What P2-05 to P2-07 can reuse
 - **Exemplar mode** (ADR-0017 §1): `ownership: ejected`, `exemplar: true`, `owned:` for hand-owned files, and `gen --check` as the golden. Copy `list_detail_test.dart`'s AC1 group: the real-exemplar check, the field change, the ARB change, and inside and outside a keep region.
 - **`lib/src/emit/common/`:**
