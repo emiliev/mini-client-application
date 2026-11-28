@@ -7,6 +7,7 @@
 
 const _open = '\u0000';
 const _sep = '\u0001';
+const _silent = '\u0002';
 
 /// A reference to the top-level symbol [name], rendered as [name]. [from]
 /// pins the owning library URI when the name alone is ambiguous or external
@@ -17,6 +18,20 @@ String ref(String name, {String? from}) {
   }
   return from == null ? '$_open$name$_open' : '$_open$name$_sep$from$_open';
 }
+
+/// Like [ref], but renders nothing: the code uses [name] without spelling
+/// it, as an extension member does (`context.read<B>()` needs
+/// `ReadContext`'s library imported).
+String use(String name, {String? from}) =>
+    ref(name, from: from).replaceFirst(_open, '$_open$_silent');
+
+/// Turns a template's references into [ref] markers: `«Name»`, `«Name|uri»`
+/// (pinned) and `«!Name»` ([use]). Dart bricks write references this way,
+/// so a template stays readable and its imports are still resolved.
+String templateRefs(String text) => text.replaceAllMapped(
+  RegExp(r'«(!?)([A-Za-z_$][A-Za-z0-9_$]*)(?:\|([^»]+))?»'),
+  (m) => m[1] == '!' ? use(m[2]!, from: m[3]) : ref(m[2]!, from: m[3]),
+);
 
 /// A symbol reference found in a [Code].
 class SymbolRef {
@@ -54,7 +69,7 @@ class Code {
   Iterable<SymbolRef> get refs sync* {
     final parts = source.split(_open);
     for (var i = 1; i < parts.length; i += 2) {
-      final p = parts[i];
+      final p = parts[i].startsWith(_silent) ? parts[i].substring(1) : parts[i];
       final s = p.indexOf(_sep);
       yield s < 0
           ? SymbolRef(p)
@@ -69,7 +84,7 @@ class Code {
     for (var i = 0; i < parts.length; i++) {
       if (i.isEven) {
         b.write(parts[i]);
-      } else {
+      } else if (!parts[i].startsWith(_silent)) {
         final s = parts[i].indexOf(_sep);
         b.write(s < 0 ? parts[i] : parts[i].substring(0, s));
       }

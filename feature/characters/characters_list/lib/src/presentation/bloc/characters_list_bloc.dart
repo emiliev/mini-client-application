@@ -89,7 +89,9 @@ final class CharactersListBloc
         // One search per tap: a double tap must not push it twice.
         if (!(_openSearchGuard?.isActive ?? false)) {
           _openSearchGuard = Timer(openSearchGuard, () {});
+          // mcgen:keep list.openSearch
           _navigator.openSearch();
+          // mcgen:end list.openSearch
         }
       case _PageChanged(:final page):
         emit(_toState(page));

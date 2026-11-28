@@ -27,7 +27,8 @@ String? headerFor(String path) {
   if (path.endsWith('.dart')) return '// $headerText\n\n';
   if (path.endsWith('.yaml') ||
       path.endsWith('.yml') ||
-      path.endsWith('.feature')) {
+      path.endsWith('.feature') ||
+      isBazelFile(path)) {
     return '# $headerText\n\n';
   }
   return null;
@@ -147,11 +148,21 @@ class Generator {
       throw McgenException.message(spec.file, 'brick', e.message);
     } on StateError catch (e) {
       throw McgenException.message(spec.file, 'emit', e.message);
+    } on FormatException catch (e) {
+      throw McgenException.message(spec.file, 'emit', e.message);
+    } on Object catch (e) {
+      // Lint should have stopped the spec; whatever an archetype still
+      // throws is reported against the spec, never as a crash.
+      throw McgenException.message(
+        spec.file,
+        'emit',
+        'archetype "${spec.archetype}" failed (${e.runtimeType}): $e',
+      );
     }
 
     final ownedGlobs = [for (final g in spec.owned) globToRegExp(g)];
     String ownershipOf(EmittedFile f) =>
-        spec.ownership == Ownership.mixed &&
+        (spec.ownership == Ownership.mixed || spec.exemplar) &&
             (f.owned || ownedGlobs.any((g) => g.hasMatch(f.path)))
         ? 'owned'
         : 'managed';
@@ -161,7 +172,11 @@ class Generator {
     for (final f in emitted) {
       final own = ownershipOf(f);
       ownership[f.path] = own;
-      final header = own == 'managed' ? headerFor(f.path) : null;
+      // An exemplar is hand-written: it renders without the header, so the
+      // round-trip and the manifest hashes see exactly the exemplar's form.
+      final header = own == 'managed' && !spec.exemplar
+          ? headerFor(f.path)
+          : null;
       withHeaders[f.path] = header == null ? f.content : '$header${f.content}';
     }
     final Map<String, String> formatted;

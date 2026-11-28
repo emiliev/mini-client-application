@@ -1,0 +1,24 @@
+INFO: Invocation ID: d09db1b1-d5c7-4800-b179-815cb4b378aa
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 33 targets (0 packages loaded)
+Analyzing: 33 targets (0 packages loaded, 0 targets configured)
+Analyzing: 33 targets (0 packages loaded, 1 target configured)
+
+INFO: Analyzed 33 targets (0 packages loaded, 35 targets configured, 66 aspect applications).
+[9,027 / 9,030] 3 / 5 tests; Testing //feature/characters/characters_list:flow_scope_test; 1s darwin-sandbox ... (3 actions running)
+[9,029 / 9,030] 4 / 5 tests; Testing //feature/characters/characters_list:bdd_test; 2s darwin-sandbox
+INFO: Found 28 targets and 5 test targets...
+INFO: Elapsed time: 7.045s, Critical Path: 2.88s
+INFO: 6 processes: 366 action cache hit, 1 internal, 5 darwin-sandbox.
+INFO: Build completed successfully, 6 total actions
+//feature/characters/characters_list:architecture_test                   PASSED in 0.2s
+//feature/characters/characters_list:bdd_test                            PASSED in 2.9s
+//feature/characters/characters_list:contract_test                       PASSED in 0.4s
+//feature/characters/characters_list:flow_scope_test                     PASSED in 1.0s
+//feature/characters/characters_list:golden_test                         PASSED in 1.3s
+
+Executed 5 out of 5 tests: 5 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+exit 0

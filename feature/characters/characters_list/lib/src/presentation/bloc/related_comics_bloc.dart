@@ -101,7 +101,9 @@ final class RelatedComicsBloc
           _loading = false;
         }
       case _Open(:final id):
+        // mcgen:keep section.RelatedComics.open
         _navigator.openComic(id);
+      // mcgen:end section.RelatedComics.open
     }
   }
 }

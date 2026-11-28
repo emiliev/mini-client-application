@@ -17,6 +17,7 @@ export 'package:mcgen/src/core/ir/render.dart';
 export 'package:mcgen/src/core/ir/symbols.dart';
 export 'package:mcgen/src/core/ir/use_graph.dart';
 export 'package:mcgen/src/core/keep.dart';
+export 'package:mcgen/src/core/l10n_names.dart';
 export 'package:mcgen/src/core/lint.dart';
 export 'package:mcgen/src/core/manifest.dart';
 export 'package:mcgen/src/core/naming.dart';

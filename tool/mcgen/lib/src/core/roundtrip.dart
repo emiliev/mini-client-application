@@ -13,16 +13,55 @@ import 'package:mcgen/src/core/keep.dart';
 import 'package:path/path.dart' as p;
 
 /// Paths an exemplar has that are never generator output: tool/ide_sync and
-/// `pub get` artefacts (all git-ignored) and the manifest.
+/// `pub get` artefacts (all git-ignored), the manifest and the spec itself.
 const defaultExemplarIgnores = [
   '.mcgen/**',
+  'mcgen.yaml',
   '**/*.g.dart',
   '**/*.freezed.dart',
   'lib/src/di/*.config.dart',
   '**/*.injectable.json',
   'lib/src/l10n/*_l10n.dart',
   'lib/src/l10n/*_l10n_*.dart',
+  // What `flutter pub get` and `flutter create` may leave (git-ignored).
+  '.flutter-plugins-dependencies',
+  '.metadata',
+  // Local files the repo's .gitignore (or a global one) keeps out of git:
+  // editors, the OS, coverage runs. Outside a git checkout (a temp copy)
+  // these are all the round-trip can know of; inside one, `git
+  // check-ignore` also drops whatever else git ignores.
+  '**/.DS_Store',
+  '**/*.iml',
+  '**/*.swp',
+  '.idea/**',
+  '**/.idea/**',
+  '.vscode/**',
+  'coverage/**',
 ];
+
+/// The paths of [rels] (relative to [dir]) that git ignores there: none
+/// outside a git checkout, or when git is not on the PATH. Tracked files are
+/// never reported (`git check-ignore` skips the index's files).
+Set<String> gitIgnored(String dir, List<String> rels) {
+  if (rels.isEmpty) return const {};
+  try {
+    final r = Process.runSync('git', [
+      '-C',
+      dir,
+      'check-ignore',
+      '--',
+      ...rels,
+    ]);
+    // 0: some ignored, 1: none, 128: not a work tree.
+    if (r.exitCode != 0) return const {};
+    return {
+      for (final l in (r.stdout as String).split('\n'))
+        if (l.trim().isNotEmpty) l.trim(),
+    };
+  } on ProcessException {
+    return const {};
+  }
+}
 
 class TreeDiff {
   const TreeDiff(this.onlyGenerated, this.onlyExemplar, this.differing);
@@ -95,15 +134,30 @@ String _normalise(String path, String content) {
 
 /// Compares [gen] with the exemplar in [exemplarDir]. Exemplar files that
 /// match [ignore] are not expected from the generator.
+///
+/// Owned files (the spec's `owned:` globs, ADR-0017) are hand-written after
+/// their first write: an owned file the generator emits must exist in the
+/// exemplar, but its content is not compared, and an exemplar file matching
+/// an owned glob that the generator does not emit (a legacy golden) is not
+/// expected from it.
 TreeDiff compareToExemplar(
   GeneratedModule gen,
   String exemplarDir, {
   List<String> ignore = defaultExemplarIgnores,
 }) {
-  final exemplar = listTree(exemplarDir, ignore: ignore).toSet();
+  final owned = [for (final g in gen.spec.owned) globToRegExp(g)];
+  final listed = listTree(exemplarDir, ignore: ignore);
+  final ignored = gitIgnored(exemplarDir, listed);
+  final exemplar = {
+    for (final f in listed)
+      if (!ignored.contains(f) &&
+          (gen.files.containsKey(f) || !owned.any((g) => g.hasMatch(f))))
+        f,
+  };
   final generated = gen.files.keys.toSet();
   final differing = <String, String>{};
   for (final path in (generated.intersection(exemplar).toList()..sort())) {
+    if (gen.files[path]!.ownership == 'owned') continue;
     final a = _normalise(path, gen.files[path]!.content);
     final b = _normalise(
       path,

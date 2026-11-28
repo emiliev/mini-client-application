@@ -1,0 +1,252 @@
+{
+  "archetype": "list_detail",
+  "files": {
+    "BUILD.bazel": {
+      "hash": "941f8167b6103ffc6c3aede3e171da2580a28f05dacebc445b85fd9b8004a410",
+      "ownership": "managed"
+    },
+    "l10n.yaml": {
+      "hash": "354258658d4c3a41511935bdec58b8a8c49d720dc9ec62982130949662545129",
+      "ownership": "managed"
+    },
+    "lib/characters_list.dart": {
+      "hash": "16a32eddf529ed2aa2f9f2fe27d62b387e35b302a857c4defbde615d6c6f11f6",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "e8e4a838c9c8e69b9eadb24348cf54774d58eef2b9a6aadb229e6213c19315ea",
+      "ownership": "managed"
+    },
+    "lib/src/di/flow_scope.dart": {
+      "hash": "e08f4f1159c7597f7155a452ca10eba277fe929fd9442a06aadb7ca27a4b74e4",
+      "ownership": "managed"
+    },
+    "lib/src/domain/api/characters_list_api.dart": {
+      "hash": "1880f81f0a141256e351383d5cca060d94137c8840794577ca18f782d675593e",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character.dart": {
+      "hash": "4d2bfa1bdc329a3bab6e3f2e930c6015f1402ec45474e15886bf13cd370613bb",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_dto.dart": {
+      "hash": "de6097c6d2818de3de96f275a9134c4bde77faed5429a9d33b3a27a6f147120e",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_id.dart": {
+      "hash": "db0a2ed69a53620a91efa4b12b7a2b4e7fdd1cf93b6e52092c3330b4ef310962",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/character_mapper.dart": {
+      "hash": "2179af964ad9af41e106d908c5d5ad34e28d18b886d4cb097b407235175cf2e4",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/characters_query.dart": {
+      "hash": "43f2934d6e788b3737ab1b8fb2ad357e337b99c7a95fb5da04205ef0badc720f",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/comic_id.dart": {
+      "hash": "24e698d5a8dcd1c0e3f21e002e0751ea3faa96537239e2b0cbe650be754b3cf8",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/related_comic.dart": {
+      "hash": "56e2d433dad7a1105aa4cbea728c5a381d8d1d7d9b03138c603ac8e8e0ec8261",
+      "ownership": "managed"
+    },
+    "lib/src/domain/repository/characters_list_repository.dart": {
+      "hash": "1a9e0b86bb04e2323f556ae8cc073acee75ec5e83eb65fd4f6c0820b3e5b31e5",
+      "ownership": "managed"
+    },
+    "lib/src/flow/characters_list_flow.dart": {
+      "hash": "1dd8c83eb4a64f9ca861b5dbd22661b9d71086ff970dff5b739293e723738470",
+      "ownership": "managed"
+    },
+    "lib/src/flow/characters_list_flow_state.dart": {
+      "hash": "f1c0bb4b60ec81ef5b8e9238c45298e324ba9d5924d626ec108135eb1da8bde6",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_list_de.arb": {
+      "hash": "b3a9f6df3a714b02095553988d78fbb7d2763ec37bb528fa32691ee79d7b99ac",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_list_en.arb": {
+      "hash": "b4b8ef27daad1a71559ad2b523e1fcdce0c0f8450aa7fab25d2a0f0d83be98ea",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/characters_list_en_XA.arb": {
+      "hash": "8b22735f3f83d814e73a5a27068121012173fe80b994f47266d973cdb22950ba",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/characters_list_navigator.dart": {
+      "hash": "64d77bfd01afcb1dc623f70a7a1ecd350164fb2205115206b06427c3e036bf9f",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/character_preview_bloc.dart": {
+      "hash": "f5c1d53c97939bd0e8573c2696d57def501e0d70379233f352d6f5f5cd7be9de",
+      "keep": {
+        "preview.seeFullProfile": "d5b64800677fce7028fd6c15113896e1852608cfae731188c54c92506a1d00a8"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/characters_list_bloc.dart": {
+      "hash": "2d3294be67b89c93952c060370214cca595d54f8b3129e19cfb7a38767f12050",
+      "keep": {
+        "list.openSearch": "53d515080b4a701bc8a7816582329793b19db7df9e5f81dfb76b34668649311d"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/characters_list_event.dart": {
+      "hash": "2e879b913a6044a21fddae57f1aff30eae0d7644b90f917a416c91ae3bb24967",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/characters_list_state.dart": {
+      "hash": "6f5ef369162772830c92719bb9439659766591258d32226b631bd02e0ffa8b25",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/related_comics_bloc.dart": {
+      "hash": "7cdb7112d384aedaf9ba10da4f4789e330e3dd3d19d69fe0c6fdeefc3dc9d9f0",
+      "keep": {
+        "section.RelatedComics.open": "f1dc8295342c36b65bbe1ac4c962edec92f6aa7f3ff039b3f4aa9d71b056b7c6"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/page/character_preview_page.dart": {
+      "hash": "89e648cd088d0fa37a2eebb7f14e08f196b8a41c2d333f1928d5f2a377de0c40",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/page/characters_list_page.dart": {
+      "hash": "eea112ba7252f210d9a180495fb96c595ff4e533b1ebe67dd155cc756fa9b893",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/character_tile.dart": {
+      "hash": "f7553ad15dc1abe03c6c9f8cf4fa9ebba2785c5674e6eb20ddbc765797aff00e",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/failure_message.dart": {
+      "hash": "9d082f390462c757d65380287bc9e5c3be2c370544d3cf543aca014a33df63f1",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/widget/related_comics.dart": {
+      "hash": "d0a45746133e29850186d20d2c6b772a6b7a64aad5ce68a55348455d019b33f4",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "d34bd182bbafabd73a7c054e3cc2660845c38b5cb21a112a5c5488ff51f70963",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "e4e4c910a09382181920bb91d140674114745b79f164c974a28232874b443a1c",
+      "ownership": "managed"
+    },
+    "test/contract/characters_api_contract_test.dart": {
+      "hash": "917079c3e1d61703ed7f02044c738a3518630f0ba25d3b9a8c3491b3efb50973",
+      "ownership": "owned"
+    },
+    "test/feature/characters_list.feature": {
+      "hash": "c2cb713585c4ac8541a86011797f33b7a12b908d932153f2d761062b57600edd",
+      "ownership": "managed"
+    },
+    "test/feature/characters_list_paging.feature": {
+      "hash": "0234fec5226f6421034ac41d8b9cebc6c696cf109d10a49ec3da279ded5d889c",
+      "ownership": "managed"
+    },
+    "test/feature/characters_list_related_comics.feature": {
+      "hash": "dde1013314c710205f0ed739a7dbeb1c32bc184b331026abf035be84cd7c567f",
+      "ownership": "managed"
+    },
+    "test/feature/characters_list_search.feature": {
+      "hash": "bfde9a15531d63e22e4a7d06f67766fb3e5484f81aa28a2bc21bb72ab72aabf5",
+      "ownership": "managed"
+    },
+    "test/feature/characters_list_team.feature": {
+      "hash": "c601bd92e76166bd9f6b5af76cbce82241103928b38e9b5379a20dace133b739",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_dont_see_the_character_preview.dart": {
+      "hash": "fcd4ba32cf7075430c182f255c7c29fd5110df2c09816478813c992b957fc19e",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_characters_list.dart": {
+      "hash": "fa9e4b4f973b03d6e5ff2a113f3e90a3485ce5c8c69f29d898d7af48ffd1eeab",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_characters_list_for_team.dart": {
+      "hash": "5abd2dc70416dd929bebc9bfa41e6e8484416f2d7466416f27b08b88780a2f92",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_characters_list_to_the_end.dart": {
+      "hash": "52b1ffe24445d3325e70bc371ddcf76371575e1c269f991c95092862f6488859",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_characters_list_until_i_see.dart": {
+      "hash": "1b5f275f9a0976f42aabb49cc92dca603be5853552836b81cbfb56b847619165",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_characters_list_until_the_next_page_loads.dart": {
+      "hash": "5a163ef6c309723c5b011eb5c550372dc9545bc5fbb0909ffc46d66ad2ab7416",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_preview_until_i_see.dart": {
+      "hash": "09f7efe1edeb917d0df9a38b7c0cc8ba3f0f04085bcc609ab739d8d8155dbe37",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_see_the_character_preview_for.dart": {
+      "hash": "1397b2d87797a94deb403fca851e61d54a50a5d011f1c0d4cc177496da83fb69",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_see_the_first_characters_in_name_order_with_their_bundled_art.dart": {
+      "hash": "1cdf27950c677f0b1d68b3e791336eb36c68e880885c2ce6a8d092cd7bf428d8",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_see_the_related_comics_of.dart": {
+      "hash": "f6dadab02aca9a5b90adfcb9d3e941fd54fe6ae8defe08aa0f0eab8f3b180cf3",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_and_in_quick_succession.dart": {
+      "hash": "551f5a06fa33b85672772ad0d3694704701a71f9252b00c0a237d16299e8dd41",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_the_icon_button_twice_in_quick_succession.dart": {
+      "hash": "efa556aac6645a72aff684a3815d6f669c583babb7cd29990531af44d8e17321",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_character.dart": {
+      "hash": "d2a65cd83c12411a67ae2471fdf4708d774cfe65d38ff10de0ed566821093fcb",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_comic.dart": {
+      "hash": "cf7e72105fd5bcc16d1493aeb830fc0bf4515c1226c7a25f045da13624efddd5",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_app_was_asked_to_open_the_search.dart": {
+      "hash": "c2b55b16282d13a6bad753ed51280185130b5fb8fd824eff4c24b44f45a9fa98",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_characters_list_keeps_its_scroll_position.dart": {
+      "hash": "7769fb55d777263d02f34a5188f58c88f2af33a9862a31716bb36afe5f143a6f",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_characters_list_shows_characters.dart": {
+      "hash": "f27e1f28c686b9fd3d4b1cea4c46b6cf77f628812a2b41f449d713f249e42d60",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_characters_list_shows_the_first_characters_of_team.dart": {
+      "hash": "9b97aad74a1e16af163e776f994b22e1a7c0518ebf6d56b92d9d8dfaa1086e62",
+      "ownership": "managed"
+    },
+    "test/feature/util/characters_list_env.dart": {
+      "hash": "9da0cc0b05d05132e9e07f987e403d53bfa10d87e2b2fbffcfffc0183f166f9b",
+      "ownership": "owned"
+    },
+    "test/flow_scope_test.dart": {
+      "hash": "6b0c0197a255e2fd366db6aa5ab731820bbd0902509d298e51ec64bc8785342a",
+      "ownership": "managed"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "characters_list",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x32bb7e4a00590c53",
+  "spec_hash": "81191d2dd825a9c5b7890fc99a33adef18e3bad0c3bd55b9d56a3c5c59baaa5c"
+}

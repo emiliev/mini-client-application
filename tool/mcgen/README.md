@@ -31,6 +31,32 @@ diff), 3 not built yet, 64 usage. `spec synth`, `wire`, `buildgen`, `owners`,
 | `schema/mcgen-1.json` | the spec schema |
 | `mcgen.yaml` | global seed, the pinned formatter, third-party constraints |
 | `test/golden/utility_hello/` | what the reference archetype must produce, byte for byte |
+| `lib/src/emit/common/` | what every archetype shares: the kit-symbol table (checked against the kits' barrels), the shared-step table, `.feature` rendering |
+| `tool/T-0069-AC3_ld_probe.sh` | generates a throwaway list-detail module into the repo, runs its analysis and tests under Bazel, deletes it |
+
+## Archetypes
+
+| Archetype | Exemplar (its golden) | Since |
+|---|---|---|
+| `list_detail` | `feature/characters/characters_list` | T-0069 (P2-04) |
+| `utility_hello` | none: the reference archetype the core is tested with | T-0065 |
+
+An **exemplar** is hand-built: its spec says `ownership: ejected` and
+`exemplar: true` (ADR-0017). `gen` writes only its `.mcgen/manifest.json`;
+`gen --check` and `check` render the spec and compare the render with the
+module, byte for byte outside keep-region bodies and owned files' contents.
+A template change that alters the exemplar fails there, naming the file and
+its first differing line. See F-0069 for how the list-detail spec is laid out
+and what P2-05 to P2-07 can reuse.
 
 `utility_hello` is a reference archetype for testing the core, not an
 exemplar. See F-0065 for how to add an archetype.
+
+### Bricks
+- Fixed-shape files are mason bricks (`bricks/<brick>/`). A **Dart brick**
+  holds declarations only, writes references as `«Name»` (`«!Name»` for an
+  extension it uses without naming), and is added with `ctx.dartBrick`; mcgen
+  writes its imports (`feature_list_detail_di`).
+- The format gate skips `__brick__/` directories (P-120 (a)), so a template
+  may be named `.dart`. Never name one `BUILD` or `BUILD.bazel`: Bazel would
+  load the brick as a package. Name it after a variable (`{{{build_file}}}`).

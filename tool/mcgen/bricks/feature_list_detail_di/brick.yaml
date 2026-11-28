@@ -1,0 +1,11 @@
+name: feature_list_detail_di
+description: A feature's DI initializer (Tide's boilerplate, verbatim shape). A Dart brick - declarations only; references are written «Name» and mcgen writes the imports (T-0069).
+version: 0.1.0
+
+vars:
+  module:
+    type: string
+    description: The package name.
+  pascal:
+    type: string
+    description: The package name in PascalCase.

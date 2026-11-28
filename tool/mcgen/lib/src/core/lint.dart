@@ -4,6 +4,7 @@
 import 'package:mcgen/src/core/archetype.dart';
 import 'package:mcgen/src/core/config.dart';
 import 'package:mcgen/src/core/diagnostics.dart';
+import 'package:mcgen/src/core/l10n_names.dart';
 import 'package:mcgen/src/core/repo.dart';
 import 'package:mcgen/src/core/spec/spec.dart';
 import 'package:yaml/yaml.dart';
@@ -286,8 +287,32 @@ List<Diagnostic> lintSpec(ModuleSpec spec, LintContext ctx) {
   final ids = <String, YamlNode>{};
   final ruleIds = {for (final r in spec.rules) r.id};
   for (final f in spec.bdd) {
+    for (final s in f.scenarios) {
+      if (s.id == null && !spec.exemplar) {
+        err(
+          s.nodeOf('title'),
+          '${s.path}.id',
+          'scenario-id',
+          'scenario "${s.title}" needs an id (MC-${spec.module}-NN); only an exemplar\'s scenarios may go without (ADR-0017)',
+        );
+      }
+      if (s.examples.isNotEmpty) {
+        final width = s.examples.first.length;
+        for (final (i, row) in s.examples.indexed) {
+          if (row.length != width) {
+            err(
+              s.nodeOf('examples'),
+              '${s.path}.examples[$i]',
+              'bdd',
+              'Examples row ${i + 1} has ${row.length} cell(s); the header has $width',
+            );
+          }
+        }
+      }
+    }
     final entries = <(String, YamlNode, String)>[
-      for (final s in f.scenarios) (s.id, s.nodeOf('id'), '${s.path}.id'),
+      for (final s in f.scenarios)
+        if (s.id case final id?) (id, s.nodeOf('id'), '${s.path}.id'),
       for (final o in f.outlines) (o.id, o.nodeOf('id'), '${o.path}.id'),
     ];
     for (final (id, node, path) in entries) {
@@ -324,13 +349,41 @@ List<Diagnostic> lintSpec(ModuleSpec spec, LintContext ctx) {
   }
 
   // --- ownership -------------------------------------------------------------
-  if (spec.owned.isNotEmpty && spec.ownership != Ownership.mixed) {
+  if (spec.exemplar && spec.ownership != Ownership.ejected) {
+    err(
+      root.nodes['exemplar']!,
+      'exemplar',
+      'ownership',
+      'an exemplar is hand-built, so it is ejected; this one is ${spec.ownership.name}',
+    );
+  }
+  if (spec.owned.isNotEmpty &&
+      spec.ownership != Ownership.mixed &&
+      !spec.exemplar) {
     err(
       root.nodes['owned']!,
       'owned',
       'ownership',
-      '"owned" files only exist in mixed modules; this one is ${spec.ownership.name}',
+      '"owned" files only exist in mixed modules and exemplars; this one is ${spec.ownership.name}',
     );
+  }
+
+  // --- gen-l10n reads a locale out of the ARB file name (F-0066) -------------
+  // Only a module with strings has ARB files.
+  final locales = [...?spec.l10n?.locales]..sort();
+  for (final locale in locales) {
+    final read = genL10nFileLocale('${spec.module}_$locale');
+    if (read != locale) {
+      err(
+        root.nodes['module']!,
+        'module',
+        'l10n-name',
+        'gen-l10n reads ${spec.module}_$locale.arb as locale "$read", not "$locale" '
+            '(F-0066): rename the module so no "_<segment>" after its first '
+            'parses as a locale (e.g. auth_signin, not auth_sign_in)',
+      );
+      break;
+    }
   }
 
   // The archetype's own rules only make sense for a tier it supports.

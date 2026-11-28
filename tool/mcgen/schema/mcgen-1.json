@@ -14,11 +14,15 @@
     "description": {"type": "string", "minLength": 1},
     "size_class": {"enum": ["S", "M", "L", "XL"]},
     "ownership": {"enum": ["managed", "mixed", "ejected"]},
+    "exemplar": {
+      "description": "ejected only (ADR-0017): the module is its archetype's hand-built exemplar. gen writes only its manifest; gen --check and check compare the render with the module, modulo the mcgen header, keep-region bodies and owned files' contents.",
+      "type": "boolean"
+    },
     "seed_salt": {"type": "integer", "minimum": 0},
     "deps": {"$ref": "#/$defs/packageList"},
     "dev_deps": {"$ref": "#/$defs/packageList"},
     "owned": {
-      "description": "mixed only: module-relative paths or globs written once, never again.",
+      "description": "mixed modules and exemplars: module-relative paths or globs written once, never again. An exemplar's owned files are hand-written; the round-trip checks only that they exist.",
       "type": "array",
       "uniqueItems": true,
       "items": {"type": "string", "pattern": "^[^/\\s][^\\s]*$"}
@@ -111,10 +115,24 @@
         "id": {"$ref": "#/$defs/memberName"},
         "method": {"enum": ["GET", "POST", "PUT", "PATCH", "DELETE"]},
         "path": {"type": "string", "pattern": "^[^/\\s][^\\s]*$"},
-        "query": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/memberName"}},
+        "query": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/queryParam"}},
         "body": {"$ref": "#/$defs/typeExpr"},
         "returns": {"$ref": "#/$defs/typeExpr"},
         "auth": {"type": "boolean"},
+        "doc": {"$ref": "#/$defs/doc"}
+      }
+    },
+    "queryParam": {
+      "description": "A query parameter: its name alone, or an object with its Dart type, default and doc (ADR-0017).",
+      "type": ["string", "object"],
+      "pattern": "^[a-z][A-Za-z0-9]*$",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {"$ref": "#/$defs/memberName"},
+        "type": {"$ref": "#/$defs/typeExpr"},
+        "default": {},
+        "required": {"type": "boolean"},
         "doc": {"$ref": "#/$defs/doc"}
       }
     },
@@ -200,7 +218,27 @@
         "keys": {"type": "integer", "minimum": 0},
         "placeholders": {"type": "integer", "minimum": 0},
         "plurals": {"type": "integer", "minimum": 0},
-        "selects": {"type": "integer", "minimum": 0}
+        "selects": {"type": "integer", "minimum": 0},
+        "strings": {
+          "description": "The module's own strings, in ARB order (ADR-0017). text maps a locale to its string; a locale without one is a lint error, except en_XA, which gets a pseudo-translation.",
+          "type": "array",
+          "items": {"$ref": "#/$defs/l10nString"}
+        }
+      }
+    },
+    "l10nString": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "text"],
+      "properties": {
+        "key": {"$ref": "#/$defs/memberName"},
+        "description": {"type": "string", "minLength": 1},
+        "placeholders": {
+          "description": "gen-l10n's placeholders metadata, written into the template ARB as given.",
+          "type": "object",
+          "additionalProperties": {"type": "object"}
+        },
+        "text": {"type": "object", "additionalProperties": {"type": "string"}}
       }
     },
     "mixin": {
@@ -215,12 +253,21 @@
     "scenario": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["id", "title", "steps"],
+      "required": ["title", "steps"],
       "properties": {
-        "id": {"type": "string"},
+        "id": {
+          "description": "MC-<module>-NN, rendered as the first tag. Required, except in an exemplar, whose scenarios carry their own task's tags (ADR-0017).",
+          "type": "string"
+        },
         "title": {"type": "string", "minLength": 1},
         "steps": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
-        "tags": {"type": "array", "items": {"type": "string", "pattern": "^@?[A-Za-z0-9_-]+$"}}
+        "tags": {"type": "array", "items": {"type": "string", "pattern": "^@?[A-Za-z0-9_-]+$"}},
+        "examples": {
+          "description": "Makes the scenario a Scenario Outline: its Examples table, header row first.",
+          "type": "array",
+          "minItems": 2,
+          "items": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+        }
       }
     },
     "outline": {
@@ -230,7 +277,14 @@
       "properties": {
         "id": {"type": "string"},
         "rule": {"$ref": "#/$defs/memberName"},
-        "title": {"type": "string", "minLength": 1}
+        "title": {"type": "string", "minLength": 1},
+        "steps": {
+          "description": "The outline's steps; <column> placeholders name the rule examples' keys (ADR-0017).",
+          "type": "array",
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "tags": {"type": "array", "items": {"type": "string", "pattern": "^@?[A-Za-z0-9_-]+$"}}
       }
     },
     "bddFeature": {
@@ -239,7 +293,15 @@
       "required": ["feature"],
       "properties": {
         "feature": {"$ref": "#/$defs/snakeName"},
-        "background": {"type": "string"},
+        "title": {"description": "The Feature: line (default: the feature name in words).", "type": "string", "minLength": 1},
+        "description": {"description": "The lines under the Feature: line.", "type": "string", "minLength": 1},
+        "background": {
+          "description": "One step, or several (ADR-0017).",
+          "type": ["string", "array"],
+          "minLength": 1,
+          "minItems": 1,
+          "items": {"type": "string", "minLength": 1}
+        },
         "scenarios": {"type": "array", "items": {"$ref": "#/$defs/scenario"}},
         "outlines": {"type": "array", "items": {"$ref": "#/$defs/outline"}}
       }
