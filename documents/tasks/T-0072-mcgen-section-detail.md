@@ -65,3 +65,18 @@ Add the SC archetype to `mcgen`. **Two real modules** must round-trip, the exemp
 
 - **Hand share:** about 61 %: see F-0072 section 1 for why (the pages and models are owned until P2-09).
 - **Follow-ups (for `pending-work.md`):** see F-0072 "Implications".
+
+## Review round (Engineer)
+`/code-review` found 8 important issues, all specs that lint clean and then generate wrong or non-compiling code. Each is fixed with a test in `tool/mcgen/test/section_detail_review_test.dart` (and the AC3 probe script, which now builds three modules under Bazel: `zz_sc_probe`, `zz_sc_plain`, `zz_sc_story`).
+1. The default `favourite_path` comes from `favourite_kind`. Test: `T-0072-AC3 the default favourites path comes from the kind, and the probe and the API use the same path`.
+2. The favourites probe's URL comes from `favourite_path` (item differs from kind; a custom path). Same test; the probe's favourite BDD passes under Bazel.
+3. No `opens`: the details bloc has no navigator, no guard, no timer and no `dart:async`. Test: `T-0072-AC3 a spec with no hand-over has no navigator in its details bloc, no guard and no timer`; `zz_sc_plain` passes its BDD.
+4. Ids use their own `type` (API `@Path`/`@Query`, guard record, steps, env, favourites probe). Test: `T-0072-AC3 a two-word item and String ids: ...`; `zz_sc_story` analyses clean.
+5. File stems use `snakeCase(item)` (`story_arc_details_bloc.dart`, the freezed targets). Same test.
+6. An open with a `field` requires `<prefix>Open<Label>`. Test: `T-0072-AC3 an open with a field needs its Open<Label> string`.
+7. Lint checks `entity`, `dto`, the related summary and page DTO (and `title`, the opens' fields) as diagnostics. Test: `T-0072-AC3 lint reports a missing entity, a DTO that is not one and a missing related entity, each as a diagnostic`.
+8. The mapper wraps ids (null-checked when nullable), converts nested DTOs with `toDomain()`, and lists element by element. Test: `T-0072-AC3 the mapper converts nested DTOs, lists and nullable ids`; `zz_sc_story` analyses clean.
+- **Shared code:** `renderFeature` now pads every Examples cell to its column; a column is as wide as its widest cell that does not end in a space, and a cell that does is hand-padded and kept when wider. A column with any hand-padded width is written exactly as given by the spec, so `characters_details` is byte-identical. Test: `T-0072-AC4 an Examples cell is padded to its column; a hand-padded one is kept only when it is wider`. `characters_list`, `discovery_search`, `characters_search` `--check` are up to date.
+- **Also:** the skeleton page no longer declares an unused `l10n` when it has no hand-over; prose says "story arc" for `story_arc`.
+- **Merged** `origin/main` (T-0073); `archetypes.dart` has `list_detail`, `search`, `section_detail`, `utility_hello`.
+- **Gates at the review-round HEAD:** 194 mcgen tests; `test --lockfile_mode=error //...` 246/246; lint, `mc_arch_check`, `rules_fork.sh check`, the format gate and the lockfiles are clean (`documents/evidence/T-0072/`).

@@ -1,46 +1,35 @@
-INFO: Invocation ID: a5bc5465-abdd-4524-9684-7ba1dc8da500
+INFO: Invocation ID: d85fe7c4-04fb-4136-b5af-a41a541eacdf
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
-Analyzing: 652 targets (16 packages loaded)
-Analyzing: 652 targets (16 packages loaded, 0 targets configured)
-Analyzing: 652 targets (16 packages loaded, 41 targets configured)
+Analyzing: 652 targets (50 packages loaded, 0 targets configured)
+Analyzing: 652 targets (50 packages loaded, 220 targets configured)
 
-INFO: From DartCodegen @@//spike/api_envelope:_api_response_json_part:
-[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
-Analyzing: 652 targets (20 packages loaded, 3816 targets configured, 1076 aspect applications)
-[57,752 / 57,802] 18 / 25 tests; [Prepa] runfiles for @@ai_rules_dart+//dart/ext/json_serializable:shim
-INFO: From DartCodegen @@//spike/api_envelope:_api_response_json_part:
-[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
-INFO: From DartCodegen @@//utility/mc_api_client:_api_page_json_part:
-[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
-Analyzing: 652 targets (20 packages loaded, 3888 targets configured, 1182 aspect applications)
-[88,047 / 88,050] 81 / 82 tests; [Prepa] Compiling Dart kernel module feature/settings/settings_home/contract_test.flutter_entry.kmod
-Analyzing: 652 targets (20 packages loaded, 3948 targets configured, 1379 aspect applications)
-[105,234 / 105,234] 138 / 138 tests; no actions running
-Analyzing: 652 targets (20 packages loaded, 4029 targets configured, 1555 aspect applications)
-[109,396 / 109,396] 221 / 221 tests; no actions running
-INFO: Analyzed 652 targets (20 packages loaded, 4054 targets configured, 1611 aspect applications).
+Analyzing: 652 targets (59 packages loaded, 4589 targets configured, 930 aspect applications)
+[22,275 / 25,103] checking cached actions
+Analyzing: 652 targets (59 packages loaded, 4680 targets configured, 1110 aspect applications)
+[53,473 / 59,514] 7 / 7 tests; checking cached actions
+Analyzing: 652 targets (59 packages loaded, 4740 targets configured, 1280 aspect applications)
+[83,531 / 89,507] 19 / 22 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 0s disk-cache, worker
+Analyzing: 652 targets (59 packages loaded, 4792 targets configured, 1563 aspect applications)
+[103,208 / 103,224] 64 / 64 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 1s disk-cache, worker ... (4 actions running)
+Analyzing: 652 targets (59 packages loaded, 4891 targets configured, 1818 aspect applications)
+[107,141 / 107,165] 160 / 163 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 2s disk-cache, worker ... (4 actions running)
+INFO: Analyzed 652 targets (59 packages loaded, 4973 targets configured, 2004 aspect applications).
+[110,968 / 111,059] 229 / 246 tests; DartCodegen @@//app/wiring/universe_wiring:_characters_routes_go_router_part; 3s disk-cache, worker ... (4 actions running)
+[111,022 / 111,059] 229 / 246 tests; [Prepa] Linking Dart kernel @@//app/wiring/universe_wiring:routes_test
+[111,060 / 111,076] 230 / 246 tests; Testing //app/wiring/universe_wiring:routes_test; 1s disk-cache, darwin-sandbox ... (14 actions, 8 running)
+[111,061 / 111,076] 231 / 246 tests; Testing //app/mini_client:deep_link_back_stack_test; 2s disk-cache, darwin-sandbox ... (14 actions, 8 running)
+[111,063 / 111,076] 233 / 246 tests; Testing //app/mini_client:deep_link_back_stack_test; 3s disk-cache, darwin-sandbox ... (13 actions, 8 running)
+[111,066 / 111,076] 236 / 246 tests; Testing //app/mini_client:deep_link_back_stack_test; 4s disk-cache, darwin-sandbox ... (10 actions, 8 running)
+[111,068 / 111,076] 238 / 246 tests; Testing //app/mini_client:deep_link_back_stack_test; 5s disk-cache, darwin-sandbox ... (8 actions running)
+[111,070 / 111,076] 240 / 246 tests; Testing //app/mini_client:reading_list_route_test; 4s disk-cache, darwin-sandbox ... (6 actions running)
+[111,073 / 111,076] 243 / 246 tests; Testing //app/mini_client:settings_route_test; 3s disk-cache, darwin-sandbox ... (3 actions running)
+[111,075 / 111,076] 245 / 246 tests; Testing //app/mini_client:sign_in_guard_app_test; 5s disk-cache, darwin-sandbox
 INFO: Found 406 targets and 246 test targets...
-INFO: Elapsed time: 7.676s, Critical Path: 0.25s
-INFO: 18046 processes: 2139 action cache hit, 1947 disk cache hit, 16099 internal.
-INFO: Build completed successfully, 18046 total actions
-//app/mini_client:analytics_screens_test                        (cached) PASSED in 5.2s
-//app/mini_client:app_test                                      (cached) PASSED in 1.7s
-//app/mini_client:bdd_test                                      (cached) PASSED in 1.6s
-//app/mini_client:characters_search_route_test                  (cached) PASSED in 4.1s
-//app/mini_client:comic_route_test                              (cached) PASSED in 2.6s
-//app/mini_client:deep_link_back_stack_test                     (cached) PASSED in 5.2s
-//app/mini_client:links_after_flow_test                         (cached) PASSED in 1.4s
-//app/mini_client:not_found_test                                (cached) PASSED in 4.0s
-//app/mini_client:reading_list_route_test                       (cached) PASSED in 5.5s
-//app/mini_client:search_route_test                             (cached) PASSED in 3.6s
-//app/mini_client:settings_route_test                           (cached) PASSED in 4.0s
-//app/mini_client:sign_in_guard_app_test                        (cached) PASSED in 6.7s
-//app/mini_client:store_route_test                              (cached) PASSED in 3.1s
-//app/mini_client:trivia_route_test                             (cached) PASSED in 3.8s
-//app/sandbox/universe_sandbox:universe_sandbox_links_test      (cached) PASSED in 0.9s
-//app/sandbox/universe_sandbox:universe_sandbox_router_test     (cached) PASSED in 0.8s
+INFO: Elapsed time: 23.870s, Critical Path: 20.29s
+INFO: 141 processes: 105836 action cache hit, 47 disk cache hit, 56 internal, 17 darwin-sandbox, 21 worker.
+INFO: Build completed successfully, 141 total actions
 //app/wiring/account_wiring:routes_test                         (cached) PASSED in 9.6s
 //app/wiring/app_core:app_layer_test                            (cached) PASSED in 1.3s
 //app/wiring/app_core:appearance_shell_test                     (cached) PASSED in 2.5s
@@ -57,10 +46,9 @@ INFO: Build completed successfully, 18046 total actions
 //app/wiring/app_core:sign_in_guard_test                        (cached) PASSED in 1.0s
 //app/wiring/chronicle_wiring:routes_test                       (cached) PASSED in 2.7s
 //app/wiring/commerce_wiring:routes_test                        (cached) PASSED in 2.9s
-//app/wiring/discovery_wiring:routes_test                       (cached) PASSED in 2.0s
+//app/wiring/discovery_wiring:routes_test                       (cached) PASSED in 1.4s
 //app/wiring/library_wiring:routes_test                         (cached) PASSED in 2.5s
 //app/wiring/publishing_wiring:routes_test                      (cached) PASSED in 1.5s
-//app/wiring/universe_wiring:routes_test                        (cached) PASSED in 1.7s
 //feature/auth/auth_signin:architecture_test                    (cached) PASSED in 0.5s
 //feature/auth/auth_signin:bdd_test                             (cached) PASSED in 14.8s
 //feature/auth/auth_signin:bloc_guards_test                     (cached) PASSED in 2.3s
@@ -77,21 +65,21 @@ INFO: Build completed successfully, 18046 total actions
 //feature/characters/characters_list:contract_test              (cached) PASSED in 0.7s
 //feature/characters/characters_list:flow_scope_test            (cached) PASSED in 1.4s
 //feature/characters/characters_list:golden_test                (cached) PASSED in 1.8s
-//feature/characters/characters_search:architecture_test        (cached) PASSED in 0.3s
-//feature/characters/characters_search:bdd_test                 (cached) PASSED in 37.0s
+//feature/characters/characters_search:architecture_test        (cached) PASSED in 0.4s
+//feature/characters/characters_search:bdd_test                 (cached) PASSED in 38.8s
 //feature/characters/characters_search:contract_test            (cached) PASSED in 0.6s
-//feature/characters/characters_search:flow_scope_test          (cached) PASSED in 6.6s
+//feature/characters/characters_search:flow_scope_test          (cached) PASSED in 6.8s
 //feature/comics/comics_details:architecture_test               (cached) PASSED in 0.4s
 //feature/comics/comics_details:bdd_test                        (cached) PASSED in 11.1s
 //feature/comics/comics_details:bloc_guards_test                (cached) PASSED in 2.0s
 //feature/comics/comics_details:contract_test                   (cached) PASSED in 0.7s
 //feature/comics/comics_details:flow_scope_test                 (cached) PASSED in 2.6s
 //feature/comics/comics_details:golden_test                     (cached) PASSED in 2.8s
-//feature/discovery/discovery_search:architecture_test          (cached) PASSED in 0.3s
-//feature/discovery/discovery_search:bdd_test                   (cached) PASSED in 43.6s
+//feature/discovery/discovery_search:architecture_test          (cached) PASSED in 0.5s
+//feature/discovery/discovery_search:bdd_test                   (cached) PASSED in 37.6s
 //feature/discovery/discovery_search:contract_test              (cached) PASSED in 1.0s
-//feature/discovery/discovery_search:flow_scope_test            (cached) PASSED in 4.4s
-//feature/discovery/discovery_search:golden_test                (cached) PASSED in 6.3s
+//feature/discovery/discovery_search:flow_scope_test            (cached) PASSED in 4.3s
+//feature/discovery/discovery_search:golden_test                (cached) PASSED in 6.2s
 //feature/library/library_reading_list_editor:architecture_test (cached) PASSED in 0.3s
 //feature/library/library_reading_list_editor:bdd_test          (cached) PASSED in 18.3s
 //feature/library/library_reading_list_editor:bloc_guards_test  (cached) PASSED in 3.2s
@@ -271,7 +259,24 @@ INFO: Build completed successfully, 18046 total actions
 //utility/mc_test_utils:harness_test                            (cached) PASSED in 1.6s
 //utility/mc_test_utils:init_flow_test                          (cached) PASSED in 1.4s
 //utility/mc_test_utils:isolation_test                          (cached) PASSED in 0.8s
+//app/mini_client:analytics_screens_test                                 PASSED in 5.1s
+//app/mini_client:app_test                                               PASSED in 2.2s
+//app/mini_client:bdd_test                                               PASSED in 1.5s
+//app/mini_client:characters_search_route_test                           PASSED in 4.0s
+//app/mini_client:comic_route_test                                       PASSED in 2.4s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 5.3s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.2s
+//app/mini_client:not_found_test                                         PASSED in 3.4s
+//app/mini_client:reading_list_route_test                                PASSED in 5.3s
+//app/mini_client:search_route_test                                      PASSED in 3.9s
+//app/mini_client:settings_route_test                                    PASSED in 4.0s
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 6.1s
+//app/mini_client:store_route_test                                       PASSED in 3.2s
+//app/mini_client:trivia_route_test                                      PASSED in 3.8s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 0.9s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.8s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 1.6s
 
-Executed 0 out of 246 tests: 246 tests pass.
+Executed 17 out of 246 tests: 246 tests pass.
 There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
 exit 0

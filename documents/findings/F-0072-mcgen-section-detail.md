@@ -64,6 +64,11 @@ The archetype manages every file that is the same shape in both modules once nou
 - **Bricks:** `feature_section_detail_package` is a copy of LD's with the SC differences (retrofit deps, several contract targets, the flow-scope deps, the L10n class). `feature_list_detail_failure` is reused as it is.
 - **The pattern** (same as F-0069): write the spec next to the exemplar, generate the templates from it, iterate on `gen --check` until it is up to date, then write a probe and run `tool/mcgen/tool/T-0072-AC3_sc_probe.sh`.
 
+## 3a. Review round: what batch specs hit
+Eight specs-that-lint-clean failures, all fixed (see the task Log): the favourites path defaults from the kind and the favourites probe uses the same path; no hand-over means no navigator, guard or timer in the details bloc; ids keep their own type everywhere (API, guard record, steps, env); every file stem is `snakeCase(item)`; an open with a `field` needs its string; lint checks that the named entities exist and are domain or DTO as needed; and the skeleton mapper handles nested DTOs, lists and nullable ids. The AC3 probe now builds three modules (`zz_sc_probe`, `zz_sc_plain`, `zz_sc_story`).
+- **Examples tables** are padded to the column. A hand-padded cell (ending in a space) is kept only where it is wider; a column with any hand-padded width is given cell by cell, so the ragged `characters_details` table stays byte-identical.
+- **Lesson:** a probe that analyses is worth more than a test of the text. The two-word item and the String ids were found by `bazel build --config=lint`, not by a render comparison.
+
 ## Evidence
 - `T-0072-AC1 *`, `T-0072-AC2 *`, `T-0072-AC3 *` and `T-0072-AC4 *` in `tool/mcgen/test/section_detail_test.dart`; the whole suite is 166 mcgen tests ([T-0065-AC5_gates.md](../evidence/T-0072/T-0065-AC5_gates.md)).
 - The exemplars behave as before: 47 of 47 Bazel tests uncached, `comics_details`, `characters_details` and `//app/...` ([T-0072-AC2_bazel_test_after.log](../evidence/T-0072/T-0072-AC2_bazel_test_after.log)); the diff is keep markers, `mcgen.yaml` and the manifest ([T-0072-AC2_exemplar_diff.txt](../evidence/T-0072/T-0072-AC2_exemplar_diff.txt)).
