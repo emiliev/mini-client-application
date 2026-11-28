@@ -5,6 +5,9 @@ version: 0.1.0
 # mcgen precomputes every value (plan 02 section 2.4); by hand:
 #   mason make feature_list_detail_package -c vars.json
 vars:
+  build_file:
+    type: string
+    description: 'Always "BUILD.bazel". The template is named after this variable because a file named BUILD.bazel would make the brick directory a Bazel package (T-0069, F-0069).'
   pubspec_preamble:
     type: string
     description: Comment lines above `name:` (each ending in a newline), or empty.

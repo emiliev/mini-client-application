@@ -187,6 +187,7 @@ Map<String, Object?> _vars(EmitContext ctx, LdModel m, UseGraph g) {
             '(`_stage_dto`), so a bloc body edit re-runs neither (F-0031 fact 4).',
       ),
     ).replaceAll(RegExp('^//', multiLine: true), '#'),
+    'build_file': 'BUILD.bazel',
     'name': m.module,
     'pascal': m.pascal,
     'description': description,

@@ -47,6 +47,23 @@ void main() {
       },
     );
 
+    test('T-0069-AC4 no brick template is a BUILD file, so Bazel never loads '
+        'a brick as a package', () {
+      final bazel = [
+        for (final f in Directory(
+          p.join(mcgenDir, 'bricks'),
+        ).listSync(recursive: true).whereType<File>())
+          if (const {
+            'BUILD',
+            'BUILD.bazel',
+            'WORKSPACE',
+            'MODULE.bazel',
+          }.contains(p.basename(f.path)))
+            p.relative(f.path, from: mcgenDir),
+      ];
+      expect(bazel, isEmpty);
+    });
+
     test('T-0069-AC4 an unformatted file beside a brick still fails it', () {
       final root = _repo('class   Ordinary {   }\n');
       addTearDown(() => root.deleteSync(recursive: true));
