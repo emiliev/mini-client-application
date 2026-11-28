@@ -1,5 +1,6 @@
 import 'package:characters_details/characters_details.dart' as details;
 import 'package:characters_list/characters_list.dart';
+import 'package:characters_search/characters_search.dart' as search;
 import 'package:universe_wiring/src/routes/route_targets.dart';
 
 /// Builds each route's flow from the feature barrels (R15: unannotated, so no
@@ -7,16 +8,26 @@ import 'package:universe_wiring/src/routes/route_targets.dart';
 class UniverseRouteTargetsImpl implements UniverseRouteTargets {
   const UniverseRouteTargetsImpl({
     required CharactersListNavigator charactersList,
+    required search.CharactersSearchNavigator charactersSearch,
     required details.CharacterDetailsNavigator characterDetails,
   }) : _charactersList = charactersList,
+       _charactersSearch = charactersSearch,
        _characterDetails = characterDetails;
 
   final CharactersListNavigator _charactersList;
+  final search.CharactersSearchNavigator _charactersSearch;
   final details.CharacterDetailsNavigator _characterDetails;
 
   @override
   CharactersListFlow characters() =>
       CharactersListFlow(navigator: _charactersList);
+
+  @override
+  search.CharactersSearchFlow charactersSearch({String? query}) =>
+      search.CharactersSearchFlow(
+        navigator: _charactersSearch,
+        initialQuery: query,
+      );
 
   @override
   details.CharacterDetailsFlow characterDetails(int id) =>

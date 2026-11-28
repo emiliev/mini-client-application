@@ -2,6 +2,7 @@ import 'package:app_core/app_core.dart';
 import 'package:app_core/testing.dart';
 import 'package:characters_details/characters_details.dart' as details;
 import 'package:characters_list/characters_list.dart';
+import 'package:characters_search/characters_search.dart' as search;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -35,10 +36,28 @@ class _FakeDetails extends details.CharacterDetailsFlow {
   );
 }
 
+/// Stands in for the real search (which needs the backend). It shows which
+/// query the route asked for.
+class _FakeSearch extends search.CharactersSearchFlow {
+  const _FakeSearch({required super.navigator, super.initialQuery});
+
+  @override
+  Widget build(BuildContext context) => Text(
+    'fake search ${initialQuery ?? '-'}',
+    key: const Key('fake.characters.search'),
+  );
+}
+
 class _Targets implements UniverseRouteTargets {
   @override
   CharactersListFlow characters() =>
       _FakeList(navigator: diContainer<CharactersListNavigator>());
+
+  @override
+  search.CharactersSearchFlow charactersSearch({String? query}) => _FakeSearch(
+    navigator: diContainer<search.CharactersSearchNavigator>(),
+    initialQuery: query,
+  );
 
   @override
   details.CharacterDetailsFlow characterDetails(int id) => _FakeDetails(
@@ -349,12 +368,131 @@ void main() {
         location: AppLocations.character(7),
         route: const CharacterDetailsRoute(id: 7).location,
       ),
+      'charactersSearch()': (
+        location: AppLocations.charactersSearch(),
+        route: const CharactersSearchRoute().location,
+      ),
+      'charactersSearch(spi)': (
+        location: AppLocations.charactersSearch('spi'),
+        route: const CharactersSearchRoute(q: 'spi').location,
+      ),
+      'charactersSearch(a & b)': (
+        location: AppLocations.charactersSearch('Spire W & #1'),
+        route: const CharactersSearchRoute(q: 'Spire W & #1').location,
+      ),
     };
 
     for (final entry in drift.entries) {
       expect(entry.value.location, entry.value.route, reason: entry.key);
     }
-    // A new route in the wiring must be added to the table above.
-    expect(_goRoutes(universeRoutes), hasLength(drift.length));
+    // A new route in the wiring must be added to the table above (the search
+    // is in it three times, as the typed route has three shapes).
+    expect(_goRoutes(universeRoutes), hasLength(drift.length - 2));
+  });
+  mcTestWidgets('T-0071-AC4 the list\'s openSearch pushes the search location, '
+      'and Back returns to the list', (tester) async {
+    final router = await _boot(tester);
+
+    diContainer<CharactersListNavigator>().openSearch();
+    await tester.pumpAndSettle();
+
+    expect(router.state.uri.toString(), '/characters/search');
+    expect(
+      router.state.uri.toString(),
+      AppLocations.charactersSearch(),
+      reason: 'AppLocations is the same place',
+    );
+    expect(find.text('fake search -'), findsOneWidget);
+    expect(find.byKey(const Key('fake.characters')), findsNothing);
+    expect(router.canPop(), isTrue, reason: 'a push: Back returns');
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('fake.characters')), findsOneWidget);
+    expect(find.byKey(const Key('fake.characters.search')), findsNothing);
+  });
+
+  mcTestWidgets('T-0071-AC4 the search\'s openCharacter pushes the profile '
+      'location, and Back returns to the search', (tester) async {
+    final router = await _boot(tester, initial: '/characters/search?q=a');
+    expect(find.text('fake search a'), findsOneWidget);
+
+    diContainer<search.CharactersSearchNavigator>().openCharacter(
+      const search.CharacterId(100486),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      router.state.uri.toString(),
+      const CharacterDetailsRoute(id: 100486).location,
+    );
+    expect(find.text('fake character 100486'), findsOneWidget);
+    expect(router.canPop(), isTrue);
+
+    router.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.text('fake search a'), findsOneWidget);
+    expect(find.text('fake character 100486'), findsNothing);
+  });
+
+  for (final (link, shown) in [
+    ('/characters/search', 'fake search -'),
+    ('/characters/search?q=a', 'fake search a'),
+    (
+      '/characters/search?q=Spire%20W%20%26%20%231',
+      'fake search Spire W & #1',
+    ),
+  ]) {
+    mcTestWidgets(
+      'T-0071-AC5 the link $link builds the search flow with its query, '
+      'before the :id route can take "search"',
+      (tester) async {
+        await _boot(tester, initial: link);
+
+        expect(find.text(shown), findsOneWidget);
+        expect(find.textContaining('fake character'), findsNothing);
+      },
+    );
+  }
+
+  mcTestWidgets(
+    'T-0071-AC5 a link to the search opens with the list under it',
+    (tester) async {
+      final router = await _boot(tester, initial: '/characters/search?q=a');
+
+      expect(find.text('fake search a'), findsOneWidget);
+      expect(router.canPop(), isTrue, reason: 'the list is the screen below');
+      router.pop();
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('fake.characters')), findsOneWidget);
+    },
+  );
+
+  mcTestWidgets('T-0071-AC4 the route targets build the search with the '
+      'wiring navigator and the query', (tester) async {
+    final session = McTestSession.current;
+    final ref = RouterRef();
+    await McTestContainer.initialize(
+      session,
+      wirings: [RouterDIInitializer(ref), const UniverseWiringDIInitializer()],
+    );
+    final router = ref.attach(GoRouter(routes: universeRoutes));
+    addTearDown(router.dispose);
+
+    final targets = diContainer<UniverseRouteTargets>();
+    final flow = targets.charactersSearch(query: 'spi');
+    expect(flow.initialQuery, 'spi');
+    expect(
+      flow.navigator,
+      same(diContainer<search.CharactersSearchNavigator>()),
+    );
+    expect(targets.charactersSearch().initialQuery, isNull);
+    expect(
+      diContainer<search.CharactersSearchNavigator>(),
+      same(diContainer<search.CharactersSearchNavigator>()),
+      reason: 'a lazy singleton',
+    );
   });
 }
