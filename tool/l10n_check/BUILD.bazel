@@ -26,6 +26,7 @@ dart_test(
         "//feature/auth/auth_signin:arbs",
         "//feature/characters/characters_details:arbs",
         "//feature/characters/characters_list:arbs",
+        "//feature/characters/characters_search:arbs",
         "//feature/comics/comics_details:arbs",
         "//feature/discovery/discovery_search:arbs",
         "//feature/library/library_reading_list_editor:arbs",
