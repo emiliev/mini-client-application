@@ -17,6 +17,9 @@ import 'package:path/path.dart' as p;
 const defaultExemplarIgnores = [
   '.mcgen/**',
   'mcgen.yaml',
+  // `mcgen buildgen`'s and `mcgen wire`'s, not an archetype's (T-0074).
+  'BUILD.bazel',
+  'lib/src/di/flow_scope.dart',
   '**/*.g.dart',
   '**/*.freezed.dart',
   'lib/src/di/*.config.dart',

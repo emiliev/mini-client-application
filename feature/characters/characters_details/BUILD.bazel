@@ -84,9 +84,9 @@ dart_library(
 _FREEZED = {
     "character": "lib/src/domain/model/character.dart",
     "character_dto": "lib/src/domain/model/character_dto.dart",
-    "flow_state": "lib/src/flow/characters_details_flow_state.dart",
     "details_bloc": "lib/src/presentation/bloc/character_details_bloc.dart",
     "favourite_bloc": "lib/src/presentation/bloc/character_favourite_bloc.dart",
+    "flow_state": "lib/src/flow/characters_details_flow_state.dart",
 }
 
 [dart_codegen(
@@ -208,9 +208,9 @@ _CODEGEN = [
     ":_character_dto_freezed",
     ":_character_dto_g",
     ":_characters_details_api_g",
-    ":_flow_state_freezed",
     ":_details_bloc_freezed",
     ":_favourite_bloc_freezed",
+    ":_flow_state_freezed",
     ":di_config",
     ":_l10n",
 ]
@@ -255,11 +255,11 @@ _TEST_DEPS = [
     "//utility/mc_di",
     "//utility/mc_ds_cards",
     "//utility/mc_ds_charts",
-    "//utility/mc_ds_feedback",
+    "//utility/mc_ds_feedback",  # keep
     "//utility/mc_ds_media",
     "//utility/mc_ds_navigation",
     "//utility/mc_event_bus",
-    "//utility/mc_feature_flow",
+    "//utility/mc_feature_flow",  # keep
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_comics",
     "//utility/mc_fixtures_identity",
@@ -298,7 +298,7 @@ flutter_test(
         "//utility/mc_fixtures_characters",
         "//utility/mc_fixtures_comics",
         "//utility/mc_fixtures_identity",
-        "//utility/mc_media",
+        "//utility/mc_media",  # keep
         "//utility/mc_mocked_backend",
         "@pub_deps//:dio",
         "@pub_deps//:flutter_test",
@@ -344,7 +344,7 @@ flutter_test(
     deps = _TEST_DEPS + [
         ":characters_details",
         "//utility/mc_monitoring",
-        "//utility/mc_storage",
+        "//utility/mc_storage",  # keep
         "//utility/mc_test_utils",
         "@pub_deps//:flutter",
         "@pub_deps//:flutter_test",

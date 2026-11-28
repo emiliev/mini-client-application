@@ -42,35 +42,6 @@ void emitFlow(EmitContext ctx, LdModel m) {
 
   ctx.library(
     DartLibrary(
-      'lib/src/di/flow_scope.dart',
-      decls: [
-        RawDecl(
-          Code(
-            'const List<${ref('RootImport')}<Object>> ${m.rootImports} = [\n'
-            '  ${ref('RootImport')}<${ref('Dio')}>(),\n'
-            '  ${ref('RootImport')}<${ref('Monitoring')}>(),\n'
-            '];',
-          ),
-          name: m.rootImports,
-          doc: m.text(
-            'flow_scope.doc',
-            'The root services this flow\'s container forwards (R17): the parameter\n'
-                'types of every injectable constructor and `@factoryMethod` in the package,\n'
-                'minus what the package registers itself and what the flow provides\n'
-                '(`FeatureFlowController`, the navigator).\n'
-                '\n'
-                'Generated with the archetype: a list-detail feature\'s API takes the shared\n'
-                '`Dio`, and its blocs report to `Monitoring`. `test/flow_scope_test.dart`\n'
-                'opens the flow over the production-shaped test root and resolves every\n'
-                'registration, so a missing import fails a test, not the app.',
-          ),
-        ),
-      ],
-    ),
-  );
-
-  ctx.library(
-    DartLibrary(
       'lib/src/navigator/${m.module}_navigator.dart',
       decls: [
         ClassDecl(

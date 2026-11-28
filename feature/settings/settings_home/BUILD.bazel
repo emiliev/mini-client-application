@@ -136,7 +136,7 @@ _FLUTTER_DEPS = [
     "//utility/mc_ds_theme",
     "//utility/mc_ds_tokens",
     "//utility/mc_feature_flow",
-    "//utility/mc_l10n_core",
+    "//utility/mc_l10n_core",  # keep
     "@pub_deps//:flutter",
     "@pub_deps//:flutter_bloc",
     "@pub_deps//:flutter_localizations",
@@ -161,19 +161,19 @@ flutter_library(
 # No goldens: features have none (PO 2026-11-27). AC4's visual checks are
 # widget tests: the German and pseudo-locale BDD scenarios.
 _TEST_DEPS = [
-    "//utility/mc_analytics",
+    "//utility/mc_analytics",  # keep
     "//utility/mc_api_auth",
     "//utility/mc_appearance",
-    "//utility/mc_config",
+    "//utility/mc_config",  # keep
     "//utility/mc_di",
-    "//utility/mc_ds_navigation",
-    "//utility/mc_feature_flow",
+    "//utility/mc_ds_navigation",  # keep
+    "//utility/mc_feature_flow",  # keep
     "//utility/mc_fixtures_identity",
-    "//utility/mc_l10n_core",
-    "//utility/mc_mocked_backend",
-    "//utility/mc_session",
-    "//utility/mc_storage",
-    "@pub_deps//:dio",
+    "//utility/mc_l10n_core",  # keep
+    "//utility/mc_mocked_backend",  # keep
+    "//utility/mc_session",  # keep
+    "//utility/mc_storage",  # keep
+    "@pub_deps//:dio",  # keep
     "@pub_deps//:mocktail",
 ]
 
@@ -202,7 +202,7 @@ flutter_test(
     deps = [
         ":settings_home",
         "//utility/mc_appearance",
-        "//utility/mc_monitoring",
+        "//utility/mc_monitoring",  # keep
         "@pub_deps//:flutter",
         "@pub_deps//:flutter_test",
     ],
@@ -233,7 +233,7 @@ flutter_test(
     package_name = _PKG,
     deps = _TEST_DEPS + [
         ":settings_home",
-        "//utility/mc_ds_theme",
+        "//utility/mc_ds_theme",  # keep
         "//utility/mc_ds_tokens",
         "//utility/mc_monitoring",
         "//utility/mc_test_utils",

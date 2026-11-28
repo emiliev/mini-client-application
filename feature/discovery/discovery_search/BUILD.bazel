@@ -84,10 +84,10 @@ dart_library(
 
 # --- freezed ----------------------------------------------------------------
 _FREEZED = {
-    "search_dto": "lib/src/domain/model/search_dto.dart",
-    "search_results": "lib/src/domain/model/search_results.dart",
     "flow_state": "lib/src/flow/discovery_search_flow_state.dart",
     "search_bloc": "lib/src/presentation/bloc/discovery_search_bloc.dart",
+    "search_dto": "lib/src/domain/model/search_dto.dart",
+    "search_results": "lib/src/domain/model/search_results.dart",
 }
 
 [dart_codegen(
@@ -205,12 +205,12 @@ filegroup(
 )
 
 _CODEGEN = [
-    ":_search_dto_freezed",
-    ":_search_dto_g",
-    ":_search_results_freezed",
     ":_discovery_search_api_g",
     ":_flow_state_freezed",
     ":_search_bloc_freezed",
+    ":_search_dto_freezed",
+    ":_search_dto_g",
+    ":_search_results_freezed",
     ":di_config",
     ":_l10n",
 ]
@@ -248,18 +248,18 @@ flutter_library(
 
 # --- tests (R6: BDD + contract + l10n + golden; no solitary unit tests) -----
 _TEST_DEPS = [
-    "//utility/mc_di",
+    "//utility/mc_di",  # keep
     "//utility/mc_ds_inputs",
     "//utility/mc_ds_media",
-    "//utility/mc_ds_navigation",
-    "//utility/mc_feature_flow",
-    "//utility/mc_fixtures_characters",
-    "//utility/mc_fixtures_comics",
+    "//utility/mc_ds_navigation",  # keep
+    "//utility/mc_feature_flow",  # keep
+    "//utility/mc_fixtures_characters",  # keep
+    "//utility/mc_fixtures_comics",  # keep
     "//utility/mc_fixtures_discovery",
     "//utility/mc_fixtures_media",
     "//utility/mc_media",
     "//utility/mc_mocked_backend",
-    "@pub_deps//:dio",
+    "@pub_deps//:dio",  # keep
     "@pub_deps//:mocktail",
 ]
 

@@ -87,6 +87,10 @@ abstract final class AppLocations {
   /// `SettingsAppearanceRoute().location` in account_wiring.
   static const String settingsAppearance = '/settings/appearance';
 
+  /// The catalogue (T-0074, P2-08): every generated flow, one tap away. A
+  /// debug screen: home has no link to it, and release builds no route.
+  static const String catalogue = '/catalogue';
+
   /// The sign-in screen (T-0066), which ends with a result (push it through
   /// `AppFlows.signIn`). Equals `SignInRoute(...).location` in
   /// account_wiring.

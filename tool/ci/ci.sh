@@ -50,7 +50,11 @@ g_mcgen() {
   done
   cd "$ROOT/tool/mcgen" || return 1
   "${dart[@]}" analyze --fatal-infos || return 1
-  "${dart[@]}" test --reporter=expanded
+  "${dart[@]}" test --reporter=expanded || return 1
+  # T-0074: the wire-owned files and the BUILD files buildgen covers equal a
+  # fresh regeneration (plan 02 section 2.8: never edited by hand).
+  "${dart[@]}" run bin/mcgen.dart wire --check --root "$ROOT" || return 1
+  "${dart[@]}" run bin/mcgen.dart buildgen --check --root "$ROOT"
 }
 g_l10n()        { bzc run --config=ci //tool/l10n_check:bin -- "$ROOT"; }
 g_provenance()  { "$ROOT/tool/checks/T-0035-AC4_provenance.sh"; }
@@ -63,7 +67,7 @@ g_apptests() {
   bzc test --config=ci --config=app //...
 }
 
-NAMES=("rules_fork.sh check" "bazel test //..." "bazel build lint //..." "mc_arch_check" "format gate" "mcgen analyze and test" \
+NAMES=("rules_fork.sh check" "bazel test //..." "bazel build lint //..." "mc_arch_check" "format gate" "mcgen analyze, test, wire and buildgen --check" \
        "l10n_check" "flow_builder provenance" "no direct overlays" "sim app build" "app-tagged tests")
 FUNCS=(g_rules_fork g_test g_lint g_arch g_format g_mcgen g_l10n g_provenance g_overlays g_sim g_apptests)
 

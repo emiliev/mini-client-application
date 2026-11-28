@@ -1,12 +1,14 @@
 export 'package:app_core/src/boot/boot_bloc.dart';
 export 'package:app_core/src/boot/boot_page.dart';
 export 'package:app_core/src/boot/boot_state.dart';
+export 'package:app_core/src/catalogue/catalogue_page.dart';
 export 'package:app_core/src/di/mocked_backend_di_initializer.dart';
 export 'package:app_core/src/di/root_initializers.dart';
 export 'package:app_core/src/guard/sign_in_guard.dart';
 export 'package:app_core/src/links/e2e_start_link.dart';
 export 'package:app_core/src/links/pending_links.dart';
 export 'package:app_core/src/locations/app_locations.dart';
+export 'package:app_core/src/locations/generated_locations.dart';
 export 'package:app_core/src/media/app_media.dart';
 export 'package:app_core/src/router/flow_results.dart';
 export 'package:app_core/src/router/route_nesting.dart';
