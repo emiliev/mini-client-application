@@ -35,6 +35,7 @@ void emitPackage(EmitContext ctx, SrModel m) {
         // injectable's output uses get_it, gen-l10n's flutter_localizations
         // and intl.
         'get_it',
+        'json_annotation',
         'flutter_localizations',
         'intl',
       };
@@ -98,15 +99,15 @@ void _arbs(EmitContext ctx, SrModel m) {
   List<String> meta(L10nStringSpec s) {
     final parts = [
       if (s.description != null) '"description": ${jsonEncode(s.description)}',
-      if (s.placeholders.isNotEmpty)
-        '"placeholders": ${_json(s.placeholders)}',
+      if (s.placeholders.isNotEmpty) '"placeholders": ${_json(s.placeholders)}',
     ];
     final key = jsonEncode('@${s.key}');
     if (parts.isEmpty) return const [];
     if (block && s.placeholders.isNotEmpty) {
       return [
         '$key: {',
-        for (final (i, p) in parts.indexed) '  $p${i < parts.length - 1 ? ',' : ''}',
+        for (final (i, p) in parts.indexed)
+          '  $p${i < parts.length - 1 ? ',' : ''}',
         '}',
       ];
     }

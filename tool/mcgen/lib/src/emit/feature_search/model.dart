@@ -97,7 +97,21 @@ class SrModel {
   late final Map<String, String> files;
   late final Map<String, String> names;
   late final Map<String, String> prose;
-  late final bool skeleton;
+  late final Map<String, String> skeletonOpts;
+
+  /// The skeleton options (`options.skeleton`): scalar entries.
+  bool get skeleton => skeletonOpts.isNotEmpty;
+
+  /// The sorts of a skeleton: (name, wire name).
+  late final List<(String, String)> sorts;
+
+  /// A skeleton option, or an error naming it.
+  String skel(String key) =>
+      skeletonOpts[key] ??
+      (throw SrError(
+        'options.skeleton.$key',
+        'options.skeleton needs "$key"',
+      ));
 
   /// ARB metadata with placeholders on lines of their own.
   late final bool arbBlock;
@@ -232,11 +246,13 @@ class SrModel {
     m.ids = [
       for (final (i, n) in r.list('ids').indexed)
         () {
-          final x = _Reader(n, 'options.ids[$i]')..only(const ['name', 'type', 'doc']);
+          final x = _Reader(n, 'options.ids[$i]')
+            ..only(const ['name', 'type', 'doc']);
           return SrId(x.str('name'), x.str('type'), x.optStr('doc'));
         }(),
     ];
-    final q = r.child('query')..only(const ['min_length', 'debounce_ms', 'open_guard_ms']);
+    final q = r.child('query')
+      ..only(const ['min_length', 'debounce_ms', 'open_guard_ms']);
     m.minLength = q.optInt('min_length') ?? 1;
     m.debounceMs = q.optInt('debounce_ms') ?? 300;
     m.openGuardMs = q.optInt('open_guard_ms') ?? 500;
@@ -254,7 +270,16 @@ class SrModel {
     m.tests = r.strMap('tests');
     m.tags = r.strMap('tags');
     m.prose = r.strMap('prose');
-    m.skeleton = r.boolean('skeleton');
+    final sk = r.child('skeleton');
+    m.skeletonOpts = sk.strMap('');
+    m.sorts = [
+      for (final (i, n) in sk.list('sorts').indexed)
+        () {
+          final x = _Reader(n, 'options.skeleton.sorts[$i]')
+            ..only(const ['name', 'wire']);
+          return (x.str('name'), x.str('wire'));
+        }(),
+    ];
     m.arbBlock = switch (r.optStr('arb')) {
       null || 'inline' => false,
       'block_placeholders' => true,
@@ -265,16 +290,26 @@ class SrModel {
     };
     final res = r.child('results');
     if (m.paged) {
-      res.only(const ['entity', 'page_size', 'page_size_const', 'open', 'empty_message']);
+      res.only(const [
+        'entity',
+        'page_size',
+        'page_size_const',
+        'open',
+        'empty_message',
+      ]);
       m.entity = res.str('entity');
       m.pageSize = res.integer('page_size');
-      m.pageSizeConst = res.str('page_size_const', '${m.itemsCamel}${pascalCase(spec.module.split('_').last)}PageSize');
+      m.pageSizeConst = res.str(
+        'page_size_const',
+        '${m.itemsCamel}${pascalCase(spec.module.split('_').last)}PageSize',
+      );
       m.openCalls = res.str('open');
       m.emptyMessage = res.str('empty_message');
       m.facets = [
         for (final (i, n) in r.list('facets').indexed)
           () {
-            final x = _Reader(n, 'options.facets[$i]')..only(const ['name', 'type', 'event', 'doc']);
+            final x = _Reader(n, 'options.facets[$i]')
+              ..only(const ['name', 'type', 'event', 'doc']);
             final name = x.str('name');
             return SrFacet(
               name: name,
@@ -299,7 +334,8 @@ class SrModel {
       m.hits = [
         for (final (i, n) in r.list('hits').indexed)
           () {
-            final x = _Reader(n, 'options.hits[$i]')..only(const ['class', 'calls']);
+            final x = _Reader(n, 'options.hits[$i]')
+              ..only(const ['class', 'calls']);
             return SrHit(x.str('class'), x.str('calls'));
           }(),
       ];
@@ -321,17 +357,35 @@ class SrModel {
     );
     if (spec.navigator == null) {
       out.add(
-        Diagnostic.at(spec.node, code: 'search', message: 'search needs a navigator', file: spec.file, yamlPath: 'navigator'),
+        Diagnostic.at(
+          spec.node,
+          code: 'search',
+          message: 'search needs a navigator',
+          file: spec.file,
+          yamlPath: 'navigator',
+        ),
       );
     }
     if (spec.l10n == null) {
       out.add(
-        Diagnostic.at(spec.node, code: 'search', message: 'search needs l10n strings', file: spec.file, yamlPath: 'l10n'),
+        Diagnostic.at(
+          spec.node,
+          code: 'search',
+          message: 'search needs l10n strings',
+          file: spec.file,
+          yamlPath: 'l10n',
+        ),
       );
     }
     if (spec.bdd.isEmpty) {
       out.add(
-        Diagnostic.at(spec.node, code: 'search', message: 'search needs at least one BDD feature', file: spec.file, yamlPath: 'bdd'),
+        Diagnostic.at(
+          spec.node,
+          code: 'search',
+          message: 'search needs at least one BDD feature',
+          file: spec.file,
+          yamlPath: 'bdd',
+        ),
       );
     }
     final SrModel m;
@@ -348,14 +402,17 @@ class SrModel {
       if (o == null) {
         err(path, 'the navigator has no method "$name"');
       } else if (o.args.length != 1 || !m.ids.any((i) => i.name == o.args[0])) {
-        err(path, 'navigator method "$name" must take one id type of options.ids');
+        err(
+          path,
+          'navigator method "$name" must take one id type of options.ids',
+        );
       }
     }
 
     if (m.paged) {
       method(m.openCalls, 'options.results.open');
-      if (m.facets.isEmpty && !m.skeleton) {
-        // A paged search without facets is allowed: no facet events.
+      if (m.facets.isEmpty) {
+        err('options.facets', 'a paged search needs at least one facet');
       }
     } else {
       for (final (i, h) in m.hits.indexed) {
@@ -365,6 +422,63 @@ class SrModel {
     }
     if (m.skeleton && !m.paged) {
       err('options.skeleton', 'a skeleton is written for paged searches only');
+    }
+    if (m.skeleton && m.paged) {
+      for (final k in const [
+        'path',
+        'prefix_param',
+        'title',
+        'image',
+        'image_dto',
+        'record',
+        'records',
+        'fixture_package',
+        'domain',
+        'fixture_sets',
+        'fixture_set',
+        'example_query',
+        'example_title',
+      ]) {
+        if (!m.skeletonOpts.containsKey(k)) {
+          err('options.skeleton.$k', 'options.skeleton needs "$k"');
+        }
+      }
+      if (m.sorts.isEmpty) {
+        err('options.skeleton.sorts', 'options.skeleton needs sorts');
+      }
+      if (m.facets.isNotEmpty &&
+          (m.facets.length != 1 || m.facets.single.name != 'sort')) {
+        err(
+          'options.facets',
+          'a skeleton has exactly one facet, named "sort"',
+        );
+      }
+      for (final role in const ['sort', 'tile', 'tile_arg', 'facets_view']) {
+        if (!m.names.containsKey(role)) {
+          err('options.names.$role', 'options.names needs "$role"');
+        }
+      }
+      for (final role in const [
+        'entity',
+        'facets',
+        'tile',
+        'empty_message',
+        'facets_view',
+      ]) {
+        if (!m.files.containsKey(role)) {
+          err('options.files.$role', 'options.files needs "$role"');
+        }
+      }
+      for (final s in m.sorts) {
+        final k = m.key('Sort${pascalCase(s.$1)}');
+        if (!(spec.l10n?.strings.any((x) => x.key == k) ?? false)) {
+          err('l10n.strings', 'search needs the string "$k"');
+        }
+      }
+      if (!(spec.l10n?.strings.any((x) => x.key == m.key('SortLabel')) ??
+          false)) {
+        err('l10n.strings', 'search needs the string "${m.key('SortLabel')}"');
+      }
     }
     final strings = {
       for (final s in spec.l10n?.strings ?? const <L10nStringSpec>[]) s.key: s,
@@ -376,7 +490,10 @@ class SrModel {
       }
     }
     if (locales.isNotEmpty && locales.first == 'en_XA') {
-      err('l10n.locales', 'the template locale (the first) cannot be the pseudo-locale en_XA');
+      err(
+        'l10n.locales',
+        'the template locale (the first) cannot be the pseudo-locale en_XA',
+      );
     }
     for (final s in strings.values) {
       for (final l in locales) {
@@ -386,7 +503,10 @@ class SrModel {
       }
       for (final l in s.text.keys) {
         if (!locales.contains(l)) {
-          err('${s.path}.text', '"${s.key}" has "$l" text, but "$l" is not in l10n.locales');
+          err(
+            '${s.path}.text',
+            '"${s.key}" has "$l" text, but "$l" is not in l10n.locales',
+          );
         }
       }
     }
@@ -420,7 +540,8 @@ class _Reader {
   final Object? value;
   final String path;
 
-  Map<Object?, Object?>? get _map => value is Map ? value! as Map<Object?, Object?> : null;
+  Map<Object?, Object?>? get _map =>
+      value is Map ? value! as Map<Object?, Object?> : null;
 
   Never fail(String key, String message) =>
       throw SrError('$path.$key', message);
@@ -482,11 +603,12 @@ class _Reader {
     }
   }
 
+  /// The scalar entries of the map at [key] (the map itself when empty).
   Map<String, String> strMap(String key) {
-    final c = child(key);
+    final c = key.isEmpty ? this : child(key);
     return {
       for (final e in c._map?.entries ?? const <MapEntry<Object?, Object?>>[])
-        '${e.key}': '${e.value}',
+        if (e.value is! Map && e.value is! List) '${e.key}': '${e.value}',
     };
   }
 }

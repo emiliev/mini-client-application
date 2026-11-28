@@ -96,31 +96,31 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
   final out = <String, _Step>{
     'i_open_the_search': _Step(
       'Enters the feature the way the app does: through its flow (barrel only),\n'
-      'with the navigator passed in the constructor [tide-nav §3.1]. The flow\n'
-      'reads the recent searches from storage before the step ends.',
+          'with the navigator passed in the constructor [tide-nav §3.1]. The flow\n'
+          'reads the recent searches from storage before the step ends.',
       '(WidgetTester tester) => openSearch(tester);',
     ),
     'i_open_the_search_again': _Step(
       'Closes the open search flow (its scope, bloc and history instance go\n'
-      'away) and opens a new one over the same app root and storage, as leaving\n'
-      'the search and coming back does.',
+          'away) and opens a new one over the same app root and storage, as leaving\n'
+          'the search and coming back does.',
       '(WidgetTester tester) => openSearch(tester);',
     ),
     'i_open_the_search_for': _Step(
       'Opens the flow with an initial query, as a link with `?q=spi` does, and\n'
-      'lets it settle (the debounce fires within the step).',
+          'lets it settle (the debounce fires within the step).',
       '(WidgetTester tester, String query) =>\n'
           '    openSearch(tester, initialQuery: query);',
     ),
     'i_open_the_search_for_without_waiting': _Step(
       'Opens the flow with an initial query and draws one frame: no fake time\n'
-      'passes (a debounce would not have fired) and no real storage I/O\n'
-      'completes (the recent searches are still being read).',
+          'passes (a debounce would not have fired) and no real storage I/O\n'
+          'completes (the recent searches are still being read).',
       '(\n  WidgetTester tester,\n  String query,\n) => openSearch(tester, initialQuery: query, wait: false);',
     ),
     'i_search_for_each_of': _Step(
       'Types each query in turn (`I type`), letting each search be answered\n'
-      'before the next.',
+          'before the next.',
       '(WidgetTester tester, String queries) async {\n'
           '  for (final query in listArgument(queries)) {\n'
           '    await iType(tester, query);\n'
@@ -130,8 +130,8 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
     ),
     'i_tap_the_recent_search': _Step(
       'Taps the recent search [query] and draws one frame with no fake time\n'
-      'passing (zero-delay timers still run): a search that waited for a\n'
-      'debounce would not have gone out.',
+          'passing (zero-delay timers still run): a search that waited for a\n'
+          'debounce would not have gone out.',
       '(WidgetTester tester, String query) async {\n'
           '  final row = find\n'
           '      .descendant(of: find.byKey(searchHistoryKey), matching: find.text(query))\n'
@@ -148,7 +148,8 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
     ),
   };
   final arg = m.tests['result_arg'] ?? 'name';
-  final tapDoc = m.tests['result_tap_doc'] ??
+  final tapDoc =
+      m.tests['result_tap_doc'] ??
       'Scrolls the results until the row named [$arg] is on screen, then taps it\nonce.';
   out['i_tap_the_result'] = _Step(
     tapDoc,
@@ -169,7 +170,7 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
   );
   out['i_tap_the_result_twice_in_quick_succession'] = _Step(
     'Two taps on the row within one frame: both reach the row, so both open\n'
-    'events reach the bloc.',
+        'events reach the bloc.',
     '(\n'
         '  WidgetTester tester,\n'
         '  String $arg,\n'
@@ -178,7 +179,7 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
   out['i_scroll_the_results_to_the_end'] = m.paged
       ? _Step(
           'Scrolls the list to its end and on while pages keep loading, until the\n'
-          'last page arrived or a later page failed (its footer offers Retry).',
+              'last page arrived or a later page failed (its footer offers Retry).',
           '(WidgetTester tester) async {\n'
               '  await shownResults(tester);\n'
               '  final position = resultsPosition(tester);\n'
@@ -189,7 +190,7 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
         )
       : _Step(
           'Rows and notes below the fold are built only once they come near the\n'
-          'screen (a lazy list), so a step that looks at the end scrolls there.',
+              'screen (a lazy list), so a step that looks at the end scrolls there.',
           '(WidgetTester tester) async {\n'
               '  final position = tester.state<ScrollableState>(resultsScrollable()).position;\n'
               '  position.jumpTo(position.maxScrollExtent);\n'
@@ -200,7 +201,7 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
   if (m.paged) {
     out['i_scroll_the_results_until_the_next_page_loads'] = _Step(
       'Jumps to the end of what is loaded once and lets the answer arrive: the\n'
-      'list asks for exactly the next page.',
+          'list asks for exactly the next page.',
       '(WidgetTester tester) async {\n'
           '  final position = resultsPosition(tester);\n'
           '  position.jumpTo(position.maxScrollExtent);\n'
@@ -241,7 +242,7 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
     final base = 'the_app_was_asked_to_${snakeCase(o.name)}';
     out[base] = _Step(
       'The navigator contract: `${o.name}` with [$arg]\'s id (from the fixture\n'
-      'cast), exactly once, and nothing else.',
+          'cast), exactly once, and nothing else.',
       '(\n'
           '  WidgetTester tester,\n'
           '  String $arg,\n'
@@ -259,7 +260,7 @@ Map<String, _Step> _stepTemplates(SrModel m, String env) {
     );
     out['${base}_times'] = _Step(
       'The navigator contract: `${o.name}` with [$arg]\'s id, [times] times,\n'
-      'and nothing else.',
+          'and nothing else.',
       '(\n'
           '  WidgetTester tester,\n'
           '  String $arg,\n'

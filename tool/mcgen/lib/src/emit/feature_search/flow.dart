@@ -151,9 +151,9 @@ void emitFlow(EmitContext ctx, SrModel m) {
             "The root services this flow's container forwards (R17): the parameter\n"
                 'types of every injectable constructor, `@factoryMethod` and module member\n'
                 'in the package, ${analytics ? 'plus the screen tracker the flow\'s observer resolves,\n'
-                        'minus what the package registers itself and what the flow provides\n'
-                        '(`FeatureFlowController`, the navigator).' : 'minus what the package registers itself and what the flow\n'
-                        'provides (`FeatureFlowController`, the navigator).'}\n'
+                          'minus what the package registers itself and what the flow provides\n'
+                          '(`FeatureFlowController`, the navigator).' : 'minus what the package registers itself and what the flow\n'
+                          'provides (`FeatureFlowController`, the navigator).'}\n'
                 '\n'
                 'HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from\n'
                 'the same analyzer input injectable reads, and `mcgen check` fail on drift\n'

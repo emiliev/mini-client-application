@@ -62,7 +62,11 @@ void emitBlocs(EmitContext ctx, SrModel m) {
         '${m.module}_event.dart',
         '${m.module}_state.dart',
       ],
-      decls: [RawDecl(Code(m.paged ? pagedBloc(m, _vars(m)) : groupedBloc(m, _vars(m))))],
+      decls: [
+        RawDecl(
+          Code(m.paged ? pagedBloc(m, _vars(m)) : groupedBloc(m, _vars(m))),
+        ),
+      ],
     ),
   );
 }
@@ -102,8 +106,12 @@ String _join(List<String> blocks) => '${blocks.join('\n\n')}\n';
 // --- events -------------------------------------------------------------------
 
 /// A sealed event's case class: [fields] are (type, name).
-String _case(String name, String superclass, List<(String, String)> fields,
-    [String? docText]) {
+String _case(
+  String name,
+  String superclass,
+  List<(String, String)> fields, [
+  String? docText,
+]) {
   final ctor = fields.map((f) => 'this.${f.$2}').join(', ');
   return '${docLines(docText)}final class $name extends $superclass {\n'
       '  const $name($ctor);\n'
@@ -115,93 +123,92 @@ String _event(SrModel m) {
   final v = _vars(m);
   final e = m.event;
   // (slot, default doc, factory signature, case class, fields)
-  final cases =
-      <(String, String, String, String, List<(String, String)>)>[
+  final cases = <(String, String, String, String, List<(String, String)>)>[
+    (
+      'event.query_changed',
+      "The field's text changed (every edit, the clear button included).",
+      'queryChanged(String text)',
+      '_QueryChanged',
+      [('String', 'text')],
+    ),
+    (
+      'event.submitted',
+      "A query to search at once: a tapped recent search, or the keyboard's\nSearch key.",
+      'submitted(String text)',
+      '_Submitted',
+      [('String', 'text')],
+    ),
+    if (m.paged) ...[
+      for (final f in m.facets)
         (
-          'event.query_changed',
-          "The field's text changed (every edit, the clear button included).",
-          'queryChanged(String text)',
-          '_QueryChanged',
-          [('String', 'text')],
+          'event.${snakeCase(f.event)}',
+          f.doc ?? 'A ${f.name} was chosen.',
+          '${f.event}(${f.type} ${f.name})',
+          f.caseClass,
+          [(f.type, f.name)],
         ),
-        (
-          'event.submitted',
-          "A query to search at once: a tapped recent search, or the keyboard's\nSearch key.",
-          'submitted(String text)',
-          '_Submitted',
-          [('String', 'text')],
-        ),
-        if (m.paged) ...[
-          for (final f in m.facets)
-            (
-              'event.${snakeCase(f.event)}',
-              f.doc ?? 'A ${f.name} was chosen.',
-              '${f.event}(${f.type} ${f.name})',
-              f.caseClass,
-              [(f.type, f.name)],
-            ),
-          (
-            'event.load_more',
-            'The results scrolled past their load-more threshold.',
-            'loadMore()',
-            '_LoadMore',
-            <(String, String)>[],
-          ),
-          (
-            'event.retry',
-            'Retry after a failed request (the first page or a later one).',
-            'retry()',
-            '_Retry',
-            <(String, String)>[],
-          ),
-          (
-            'event.refresh',
-            'Pull to refresh: reloads the first page and keeps the results meanwhile.\n'
-                '[done] completes when the reload settled, so the refresh control closes.',
-            'refresh(Completer<void> done)',
-            '_Refresh',
-            [('Completer<void>', 'done')],
-          ),
-        ] else ...[
-          (
-            'event.filter_changed',
-            'A type chip was chosen.',
-            'filterChanged(${v['Filter']} filter)',
-            '_FilterChanged',
-            [(v['Filter']!, 'filter')],
-          ),
-          (
-            'event.retry',
-            'Retry after a failed search: the same query again.',
-            'retry()',
-            '_Retry',
-            <(String, String)>[],
-          ),
-        ],
-        (
-          'event.clear_history',
-          '"Clear" above the recent searches.',
-          'clearHistory()',
-          '_ClearHistory',
-          <(String, String)>[],
-        ),
-        if (m.paged)
-          (
-            'event.open',
-            'A result was tapped.',
-            'open(${v['Id']} id)',
-            '_Open',
-            [(v['Id']!, 'id')],
-          )
-        else
-          (
-            'event.open',
-            'A result was tapped.',
-            'open(${v['Hit']} hit)',
-            '_Open',
-            [(v['Hit']!, 'hit')],
-          ),
-      ];
+      (
+        'event.load_more',
+        'The results scrolled past their load-more threshold.',
+        'loadMore()',
+        '_LoadMore',
+        <(String, String)>[],
+      ),
+      (
+        'event.retry',
+        'Retry after a failed request (the first page or a later one).',
+        'retry()',
+        '_Retry',
+        <(String, String)>[],
+      ),
+      (
+        'event.refresh',
+        'Pull to refresh: reloads the first page and keeps the results meanwhile.\n'
+            '[done] completes when the reload settled, so the refresh control closes.',
+        'refresh(Completer<void> done)',
+        '_Refresh',
+        [('Completer<void>', 'done')],
+      ),
+    ] else ...[
+      (
+        'event.filter_changed',
+        'A type chip was chosen.',
+        'filterChanged(${v['Filter']} filter)',
+        '_FilterChanged',
+        [(v['Filter']!, 'filter')],
+      ),
+      (
+        'event.retry',
+        'Retry after a failed search: the same query again.',
+        'retry()',
+        '_Retry',
+        <(String, String)>[],
+      ),
+    ],
+    (
+      'event.clear_history',
+      '"Clear" above the recent searches.',
+      'clearHistory()',
+      '_ClearHistory',
+      <(String, String)>[],
+    ),
+    if (m.paged)
+      (
+        'event.open',
+        'A result was tapped.',
+        'open(${v['Id']} id)',
+        '_Open',
+        [(v['Id']!, 'id')],
+      )
+    else
+      (
+        'event.open',
+        'A result was tapped.',
+        'open(${v['Hit']} hit)',
+        '_Open',
+        [(v['Hit']!, 'hit')],
+      ),
+  ];
   final factories = [
     for (final (slot, defaultDoc, sig, cls, _) in cases)
       '${doc(m, slot, defaultDoc, indent: '  ')}'
@@ -209,16 +216,25 @@ String _event(SrModel m) {
   ];
   return _join([
     '${doc(m, 'event.doc', 'What the search page asks for. Hand-written sealed events with private\n'
-        'cases (Tide), so a page can only create them through the factories; the\n'
-        "bloc's own events (the debounced search, the clear, the history load${m.paged ? ', a\npage of results) have no factory.' : ')\nhave no factory.'}")}'
+            'cases (Tide), so a page can only create them through the factories; the\n'
+            "bloc's own events (the debounced search, the clear, the history load${m.paged ? ', a\npage of results) have no factory.' : ')\nhave no factory.'}")}'
         'sealed class $e {\n  const $e();\n\n${factories.join('\n\n')}\n}',
     for (final (_, _, _, cls, fields) in cases) _case(cls, e, fields),
-    _case('_Search', e, [('String', 'query')],
-        'Typing paused on [query] (from `DebouncedQuery`).'),
-    _case('_Cleared', e, const [],
-        'The field became empty after a search fired (from `DebouncedQuery`).'),
-    _case('_LoadHistory', e, const [],
-        'Reads the saved recent searches, once, when the bloc starts.'),
+    _case('_Search', e, [
+      ('String', 'query'),
+    ], 'Typing paused on [query] (from `DebouncedQuery`).'),
+    _case(
+      '_Cleared',
+      e,
+      const [],
+      'The field became empty after a search fired (from `DebouncedQuery`).',
+    ),
+    _case(
+      '_LoadHistory',
+      e,
+      const [],
+      'Reads the saved recent searches, once, when the bloc starts.',
+    ),
     if (m.paged)
       _case('_PageChanged', e, [
         ('int', 'generation'),
@@ -242,11 +258,9 @@ String _state(SrModel m) {
         '${[
           factory(
             'state.idle',
-            m.paged
-                ? 'Nothing is searched: the field is empty. The recent searches show, most\n'
+            m.paged ? 'Nothing is searched: the field is empty. The recent searches show, most\n'
                       'recent first. [clearFailed] when the last Clear could not remove them\n'
-                      '(they still show).'
-                : 'Nothing is searched: the field is empty, or its text is too short. The\n'
+                      '(they still show).' : 'Nothing is searched: the field is empty, or its text is too short. The\n'
                       'recent searches show, most recent first. [clearFailed] when the last\n'
                       'Clear could not remove them (they still show).',
             '  const factory $s.idle({\n'
@@ -261,18 +275,14 @@ String _state(SrModel m) {
           ),
           factory(
             'state.results',
-            m.paged
-                ? '[query] found ${m.items}: the pages loaded so far (a later page may be\n'
-                      'loading or failing: [PagedState.isLoadingMore], [PagedState.failure]).'
-                : '[query] found something. [filter] picks the groups that show; the\n'
+            m.paged ? '[query] found ${m.items}: the pages loaded so far (a later page may be\n'
+                      'loading or failing: [PagedState.isLoadingMore], [PagedState.failure]).' : '[query] found something. [filter] picks the groups that show; the\n'
                       'results always hold both.',
-            m.paged
-                ? '  const factory $s.results({\n'
+            m.paged ? '  const factory $s.results({\n'
                       '    required String query,\n'
                       '    required PagedState<${v['Entity']}> page,\n'
                       '    required ${v['Facets']} facets,\n'
-                      '  }) = _Results;'
-                : '  const factory $s.results({\n'
+                      '  }) = _Results;' : '  const factory $s.results({\n'
                       '    required String query,\n'
                       '    required ${v['Results']} results,\n'
                       '    required ${v['Filter']} filter,\n'
@@ -280,17 +290,13 @@ String _state(SrModel m) {
           ),
           factory(
             'state.empty',
-            m.paged
-                ? '[query] with [facets] found nothing. Not a failure: nothing to retry.'
-                : '[query] found nothing in any group. Not a failure: nothing to retry.',
+            m.paged ? '[query] with [facets] found nothing. Not a failure: nothing to retry.' : '[query] found nothing in any group. Not a failure: nothing to retry.',
             '  const factory $s.empty({required String query$facets}) = _Empty;',
           ),
           factory(
             'state.failure',
-            m.paged
-                ? "[query]'s first page failed; Retry asks for it again. `McBloc` reports\n"
-                      'it to monitoring (D-16).'
-                : "[query]'s request failed; Retry searches it again. `McBloc` reports it\n"
+            m.paged ? "[query]'s first page failed; Retry asks for it again. `McBloc` reports\n"
+                      'it to monitoring (D-16).' : "[query]'s request failed; Retry searches it again. `McBloc` reports it\n"
                       'to monitoring (D-16).',
             '  @Implements<McFailureState>()\n'
                 '  const factory $s.failure({\n'
@@ -303,4 +309,3 @@ String _state(SrModel m) {
         ].join('\n\n')}\n}',
   ]);
 }
-
