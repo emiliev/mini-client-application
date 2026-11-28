@@ -9,14 +9,17 @@ import 'package:mini_client/main.dart' as app;
 
 const _home = Key('home.placeholder');
 const _settingsBody = ValueKey<String>('settings_appearance.body');
+const _indexBody = ValueKey<String>('settings_home.body');
 
 /// T-0063-AC5's deep link: `miniclient://app/settings/appearance` cold opens
-/// the settings over home (the file-drop start link, F-0020); Back goes home.
+/// the settings over the settings index over home (the file-drop start link,
+/// F-0020); Back goes to the index (T-0070), then home.
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('T-0063-AC5 the cold link miniclient://app/settings/appearance '
-      'opens the settings, and Back goes home', (tester) async {
+  testWidgets('T-0063-AC5 T-0070-AC4 the cold link '
+      'miniclient://app/settings/appearance opens the settings, and Back '
+      'goes to the index, then home', (tester) async {
     File('${Directory.systemTemp.path}/$e2eStartLinkFile').writeAsStringSync(
       'miniclient://app/settings/appearance',
     );
@@ -29,7 +32,11 @@ void main() {
     await shot(binding, tester, '68_deep_link_settings');
 
     await tester.tap(find.byType(BackButton).last);
-    await pumpUntil(tester, find.byKey(_home), 'home, after Back');
-    await shot(binding, tester, '68b_back_from_settings_is_home');
+    await pumpUntil(tester, find.byKey(_indexBody), 'the index, after Back');
+    await shot(binding, tester, '68b_back_from_appearance_is_settings');
+
+    await tester.tap(find.byType(BackButton).last);
+    await pumpUntil(tester, find.byKey(_home), 'home, after the second Back');
+    await shot(binding, tester, '68c_back_from_settings_is_home');
   });
 }

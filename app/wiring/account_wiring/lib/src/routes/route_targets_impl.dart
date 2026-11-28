@@ -3,18 +3,25 @@ import 'package:auth_signin/auth_signin.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mc_fixtures_identity/mc_fixtures_identity.dart';
 import 'package:settings_appearance/settings_appearance.dart';
+import 'package:settings_home/settings_home.dart';
 
 /// Builds each route's flow from the feature barrels (R15: unannotated, so no
 /// generator reads it), and maps each flow's result to the app-level type.
 class AccountRouteTargetsImpl implements AccountRouteTargets {
   const AccountRouteTargetsImpl({
+    required SettingsHomeNavigator settingsHome,
     required SettingsAppearanceNavigator settingsAppearance,
     required AuthSignInNavigator authSignIn,
-  }) : _settingsAppearance = settingsAppearance,
+  }) : _settingsHome = settingsHome,
+       _settingsAppearance = settingsAppearance,
        _authSignIn = authSignIn;
 
+  final SettingsHomeNavigator _settingsHome;
   final SettingsAppearanceNavigator _settingsAppearance;
   final AuthSignInNavigator _authSignIn;
+
+  @override
+  SettingsHomeFlow settingsHome() => SettingsHomeFlow(navigator: _settingsHome);
 
   @override
   SettingsAppearanceFlow settingsAppearance() =>

@@ -1,0 +1,76 @@
+{
+  "@@locale": "en",
+  "settingsHomeTitle": "Settings",
+  "@settingsHomeTitle": {
+    "description": "The settings index page title."
+  },
+  "settingsHomeAccountHeader": "Account",
+  "@settingsHomeAccountHeader": {
+    "description": "Header of the account section."
+  },
+  "settingsHomeNotSignedIn": "Not signed in",
+  "@settingsHomeNotSignedIn": {
+    "description": "Account row title while nobody is signed in."
+  },
+  "settingsHomeSignedInAs": "Signed in as {name}",
+  "@settingsHomeSignedInAs": {
+    "description": "Account row title while someone is signed in; the name is their display name (their id until it is known).",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsHomeSignIn": "Sign in",
+  "@settingsHomeSignIn": {
+    "description": "The button that opens the app's sign-in."
+  },
+  "settingsHomeSignOut": "Sign out",
+  "@settingsHomeSignOut": {
+    "description": "The button that ends the session."
+  },
+  "settingsHomeAppearance": "Appearance",
+  "@settingsHomeAppearance": {
+    "description": "The Appearance row; it opens the appearance settings."
+  },
+  "settingsHomeThemeSystem": "System",
+  "@settingsHomeThemeSystem": {
+    "description": "Theme mode shown under the Appearance row: follow the device."
+  },
+  "settingsHomeThemeLight": "Light",
+  "@settingsHomeThemeLight": {
+    "description": "Theme mode shown under the Appearance row: always light."
+  },
+  "settingsHomeThemeDark": "Dark",
+  "@settingsHomeThemeDark": {
+    "description": "Theme mode shown under the Appearance row: always dark."
+  },
+  "settingsHomeAboutHeader": "About",
+  "@settingsHomeAboutHeader": {
+    "description": "Header of the about section."
+  },
+  "settingsHomeAboutVersion": "Version",
+  "@settingsHomeAboutVersion": {
+    "description": "Label of the app's version."
+  },
+  "settingsHomeAboutVersionValue": "{version} (build {build})",
+  "@settingsHomeAboutVersionValue": {
+    "description": "The app's version with its build number.",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "build": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsHomeAboutBuild": "Build",
+  "@settingsHomeAboutBuild": {
+    "description": "Label of the build number, when the app has no version."
+  },
+  "settingsHomeAboutSeed": "Mocked backend seed",
+  "@settingsHomeAboutSeed": {
+    "description": "Label of the seed of the mocked backend (the app has no other backend)."
+  }
+}

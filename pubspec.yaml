@@ -25,6 +25,7 @@ workspace:
   - feature/discovery/discovery_search
   - feature/library/library_reading_list_editor
   - feature/settings/settings_appearance
+  - feature/settings/settings_home
   - feature/store/store_home
   - feature/trivia/trivia_quiz
   - spike/api_envelope

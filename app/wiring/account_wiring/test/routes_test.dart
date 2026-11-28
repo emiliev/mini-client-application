@@ -16,6 +16,7 @@ import 'package:mc_session/mc_session.dart';
 import 'package:mc_test_steps/mc_test_steps.dart';
 import 'package:mc_test_utils/mc_test_utils.dart';
 import 'package:settings_appearance/settings_appearance.dart';
+import 'package:settings_home/settings_home.dart';
 
 /// Stands in for the real screen, so the test is about the wiring.
 class _FakeSettings extends SettingsAppearanceFlow {
@@ -26,7 +27,20 @@ class _FakeSettings extends SettingsAppearanceFlow {
       const Text('fake appearance', key: Key('fake.appearance'));
 }
 
+/// Stands in for the settings index, so the test is about the wiring.
+class _FakeSettingsHome extends SettingsHomeFlow {
+  const _FakeSettingsHome({required super.navigator});
+
+  @override
+  Widget build(BuildContext context) =>
+      const Text('fake settings', key: Key('fake.settings'));
+}
+
 class _Targets implements AccountRouteTargets {
+  @override
+  SettingsHomeFlow settingsHome() =>
+      _FakeSettingsHome(navigator: diContainer<SettingsHomeNavigator>());
+
   @override
   SettingsAppearanceFlow settingsAppearance() =>
       _FakeSettings(navigator: diContainer<SettingsAppearanceNavigator>());
@@ -163,17 +177,140 @@ Future<void> _useDemoAccount(WidgetTester tester, String email) async {
 void main() {
   setUpAll(() => identityFixtureSets.forEach(McFixtureSets.register));
 
-  mcTestWidgets('T-0063-AC3 /settings/appearance builds the appearance flow, '
-      'with home below it', (tester) async {
+  mcTestWidgets('T-0063-AC3 T-0070-AC3 /settings/appearance builds the '
+      'appearance flow, with settings below it, and home below that', (
+    tester,
+  ) async {
     final router = await _boot(tester);
 
     expect(router.state.uri.toString(), '/settings/appearance');
     expect(router.state.name, 'settings_appearance');
     expect(find.text('fake appearance'), findsOneWidget);
-    expect(router.canPop(), isTrue, reason: 'home is below it');
+    expect(router.canPop(), isTrue, reason: 'settings is below it');
+    router.pop();
+    await tester.pumpAndSettle();
+    // T-0070: the cold link's stack is home -> settings -> appearance.
+    expect(find.byKey(const Key('fake.settings')), findsOneWidget);
+    expect(router.state.uri.toString(), '/settings');
+    expect(router.canPop(), isTrue, reason: 'home is below settings');
     router.pop();
     await tester.pumpAndSettle();
     expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+  });
+
+  mcTestWidgets('T-0070-AC3 /settings builds the settings index with home '
+      'below it', (tester) async {
+    final router = await _boot(tester, initial: AppLocations.settings);
+
+    expect(router.state.uri.toString(), '/settings');
+    expect(router.state.name, 'settings_home');
+    expect(find.text('fake settings'), findsOneWidget);
+    expect(find.text('fake appearance'), findsNothing);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+  });
+
+  mcTestWidgets('T-0070-AC3 the Appearance row pushes the appearance '
+      'settings above the index, and Back returns to the index', (
+    tester,
+  ) async {
+    final router = await _boot(tester, initial: AppLocations.settings);
+
+    diContainer<SettingsHomeNavigator>().openAppearance();
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), AppLocations.settingsAppearance);
+    expect(find.text('fake appearance'), findsOneWidget);
+
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('fake.settings')), findsOneWidget);
+    expect(router.state.uri.toString(), '/settings');
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+  });
+
+  mcTestWidgets('T-0070-AC3 a link to /settings/appearance replaces what was '
+      'open: the stack is home, settings, appearance', (tester) async {
+    final router = await _boot(tester, initial: AppLocations.settings);
+
+    router.go(AppLocations.settingsAppearance);
+    await tester.pumpAndSettle();
+    expect(find.text('fake appearance'), findsOneWidget);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('fake.settings')), findsOneWidget);
+    router.pop();
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('stand-in.home')), findsOneWidget);
+  });
+
+  test('T-0070-AC3 the link form of /settings normalises to the route', () {
+    expect(
+      PendingLinks.normalise('miniclient://app/settings'),
+      AppLocations.settings,
+    );
+  });
+
+  mcTestWidgets('T-0070-AC2 settings requestSignIn: signed out it opens the '
+      'sign-in screen with no reason, and Not now answers false; signed in it '
+      'answers true at once', (tester) async {
+    final router = await _bootReal(tester);
+    var answered = false;
+    bool? answer;
+    final pending = diContainer<SettingsHomeNavigator>().requestSignIn().then((
+      a,
+    ) {
+      answered = true;
+      answer = a;
+    });
+    await tester.pumpAndSettle();
+    expect(router.state.uri.toString(), AppLocations.signIn());
+    expect(find.text('Use your Mini Client account.'), findsOneWidget);
+    expect(answered, isFalse);
+
+    await tester.tap(find.byKey(const ValueKey<String>('auth_signin.not_now')));
+    await tester.pumpAndSettle();
+    await pending;
+    expect(answer, isFalse);
+    expect(diContainer<SessionReader>().isSignedIn, isFalse);
+
+    await tester.runAsync(
+      () => diContainer<AuthApi>().signIn(
+        email: fixtureUsers.first.email,
+        password: fixtureUsers.first.password,
+      ),
+    );
+    expect(await diContainer<SettingsHomeNavigator>().requestSignIn(), isTrue);
+    expect(
+      find.byKey(const ValueKey<String>('auth_signin.form')),
+      findsNothing,
+    );
+  });
+
+  mcTestWidgets('T-0070-AC2 settings signOut ends the session through the '
+      'auth port, and tells the server', (tester) async {
+    await _bootReal(tester);
+    await tester.runAsync(
+      () => diContainer<AuthApi>().signIn(
+        email: fixtureUsers.first.email,
+        password: fixtureUsers.first.password,
+      ),
+    );
+    expect(diContainer<SessionReader>().userId, fixtureUsers.first.id);
+
+    await tester.runAsync(
+      () => diContainer<SettingsHomeNavigator>().signOut(),
+    );
+
+    expect(diContainer<SessionReader>().isSignedIn, isFalse);
+    expect(
+      McTestSession.current.backend.requests.where(
+        (r) => '$r'.contains('/v1/auth/sign-out'),
+      ),
+      hasLength(1),
+    );
   });
 
   mcTestWidgets('T-0063-AC3 the link form normalises to the route, and the '
@@ -447,10 +584,13 @@ void main() {
 
     final flow = diContainer<AccountRouteTargets>().settingsAppearance();
     expect(flow.navigator, same(diContainer<SettingsAppearanceNavigator>()));
+    final home = diContainer<AccountRouteTargets>().settingsHome();
+    expect(home.navigator, same(diContainer<SettingsHomeNavigator>()));
   });
 
-  test('T-0063-AC3 every AppLocations entry of the group equals its typed '
-      'route', () {
+  test('T-0063-AC3 T-0070-AC3 every AppLocations entry of the group equals '
+      'its typed route', () {
+    expect(AppLocations.settings, const SettingsHomeRoute().location);
     expect(
       AppLocations.settingsAppearance,
       const SettingsAppearanceRoute().location,
@@ -485,13 +625,23 @@ void main() {
       [for (final r in SignInReason.values) r.name],
     );
     // A new route in the wiring must be added above.
+    // T-0070: the appearance route is nested under the settings index, so
+    // its own path is relative; its location is still /settings/appearance.
     expect(
       {for (final r in _goRoutes(accountRoutes)) r.path},
-      {'/settings/appearance', '/auth/sign-in'},
+      {'/settings', 'appearance', '/auth/sign-in'},
     );
     expect(
       {for (final r in _goRoutes(accountRoutes)) r.name},
-      {'settings_appearance', 'auth_sign_in'},
+      {'settings_home', 'settings_appearance', 'auth_sign_in'},
+    );
+    final settings = accountRoutes.whereType<GoRoute>().singleWhere(
+      (r) => r.name == 'settings_home',
+    );
+    expect(
+      [for (final c in settings.routes.whereType<GoRoute>()) c.name],
+      ['settings_appearance'],
+      reason: 'appearance is the only child of the settings index',
     );
   });
 }

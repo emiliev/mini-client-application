@@ -15,7 +15,8 @@ enum SignInPurpose {
 
 /// The app's answer to a feature's `requestSignIn()` (T-0066, which replaced
 /// the fixture sheet, P-044): every wiring whose navigator needs one calls
-/// it with its own [purpose].
+/// it with its own [purpose], or none when signing in has no reason of its
+/// own (the settings index, T-0070): the screen then says nothing about it.
 ///
 /// True at once when someone is signed in. Otherwise it opens the sign-in
 /// screen on the router (`AppFlows.signIn`, a result route) and answers true
@@ -29,7 +30,7 @@ enum SignInPurpose {
 Future<bool> requestAppSignIn({
   required RouterRef routerRef,
   required SessionReader session,
-  required SignInPurpose purpose,
+  SignInPurpose? purpose,
 }) async {
   if (session.isSignedIn) {
     return true;

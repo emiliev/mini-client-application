@@ -8,6 +8,8 @@ import 'package:mini_client/main.dart' as app;
 const _home = Key('home.placeholder');
 const _settingsBody = ValueKey<String>('settings_appearance.body');
 const _dark = ValueKey<String>('settings_appearance.theme.dark');
+const _indexBody = ValueKey<String>('settings_home.body');
+const _appearanceRow = ValueKey<String>('settings_home.appearance');
 const _charactersGrid = ValueKey<String>('characters_list.grid');
 
 Brightness _brightness(WidgetTester tester, Key key) =>
@@ -23,8 +25,9 @@ Future<void> _openFromHome(WidgetTester tester, String label) async {
   await tester.tap(find.text(label));
 }
 
-/// T-0063-AC5 on a simulator, through the real `main()`: home → Settings →
-/// Dark; the home page and another feature (the characters list) render
+/// T-0063-AC5 and T-0070-AC4 on a simulator, through the real `main()`: home
+/// → Settings (the index) → Appearance → Dark → Back (the index says Dark) →
+/// Back → home; the home page and another feature (the characters list) render
 /// dark; then the app is relaunched and is still dark.
 ///
 /// The relaunch is a second `main()` in the same process, over the same
@@ -36,12 +39,17 @@ Future<void> _openFromHome(WidgetTester tester, String label) async {
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('T-0063-AC5 home to Settings, Dark: home and the characters '
-      'list render dark; relaunched, still dark', (tester) async {
+  testWidgets('T-0063-AC5 T-0070-AC4 home to Settings, Appearance, Dark, '
+      'Back (the index says Dark), Back: home and the characters list render '
+      'dark; relaunched, still dark', (tester) async {
     startApp(app.main);
     await pumpUntil(tester, find.byKey(_home), 'the home page');
     final lightHome = _brightness(tester, _home);
     await _openFromHome(tester, 'Settings');
+    await pumpUntil(tester, find.byKey(_indexBody), 'the settings index');
+    await tester.pump(const Duration(milliseconds: 500));
+    await shot(binding, tester, '59_settings_index');
+    await tester.tap(find.byKey(_appearanceRow));
     await pumpUntil(tester, find.byKey(_settingsBody), 'the settings');
     await tester.pump(const Duration(milliseconds: 500));
     await shot(binding, tester, '60_settings_appearance');
@@ -50,6 +58,16 @@ void main() {
     await letArtLoad(tester, const Duration(seconds: 1));
     expect(_brightness(tester, _settingsBody), Brightness.dark);
     await shot(binding, tester, '61_settings_dark');
+
+    await tester.tap(find.byType(BackButton).last);
+    await pumpUntil(tester, find.byKey(_indexBody), 'the index, after Back');
+    expect(
+      (tester.widget<ListTile>(find.byKey(_appearanceRow)).subtitle! as Text)
+          .data,
+      'Dark',
+      reason: 'the Appearance row shows the new theme',
+    );
+    await shot(binding, tester, '61b_settings_index_dark');
 
     await tester.tap(find.byType(BackButton).last);
     await pumpUntil(tester, find.byKey(_home), 'home, after Back');

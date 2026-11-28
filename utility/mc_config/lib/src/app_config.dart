@@ -51,6 +51,7 @@ class AppConfig {
     required this.backend,
     required String apiBaseUrl,
     required this.build,
+    this.version,
     this.analytics = const AnalyticsConfig(),
   }) : apiBaseUrl = withTrailingSlash(apiBaseUrl);
 
@@ -59,6 +60,8 @@ class AppConfig {
     backend: BackendConfig.fromJson(json['backend'] as Map<String, dynamic>),
     apiBaseUrl: json['apiBaseUrl'] as String,
     build: json['build'] as String,
+    // Optional (T-0070): the settings index shows it when there is one.
+    version: json['version'] is String ? json['version'] as String : null,
     analytics: AnalyticsConfig.fromJson(json['analytics']),
   );
 
@@ -75,5 +78,9 @@ class AppConfig {
   /// `baseUrl + path` as strings. The mocked backend never contacts it.
   final String apiBaseUrl;
   final String build;
+
+  /// The app's release version, as the settings index shows it (T-0070).
+  /// Null when `version` is missing or not a string.
+  final String? version;
   final AnalyticsConfig analytics;
 }

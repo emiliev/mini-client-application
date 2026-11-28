@@ -43,7 +43,8 @@ const _expectedRouteNames = {
   // T-0064: the quiz's setup and a linked round.
   'trivia_setup',
   'trivia_play',
-  // T-0063: the appearance settings.
+  // T-0070: the settings index, and (T-0063) the appearance settings under it.
+  'settings_home',
   'settings_appearance',
   // T-0066: the sign-in form.
   'auth_sign_in',

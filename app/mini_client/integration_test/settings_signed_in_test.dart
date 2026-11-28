@@ -12,6 +12,8 @@ import 'package:mini_client/main.dart' as app;
 
 const _home = Key('home.placeholder');
 const _settingsBody = ValueKey<String>('settings_appearance.body');
+const _indexBody = ValueKey<String>('settings_home.body');
+const _appearanceRow = ValueKey<String>('settings_home.appearance');
 const _syncStatus = ValueKey<String>('settings_appearance.sync');
 const _syncCta = ValueKey<String>('settings_appearance.sync_cta');
 const _light = ValueKey<String>('settings_appearance.theme.light');
@@ -52,6 +54,8 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 300));
     await tester.tap(find.text('Settings'));
+    await pumpUntil(tester, find.byKey(_indexBody), 'the settings index');
+    await tester.tap(find.byKey(_appearanceRow));
     await pumpUntil(tester, find.byKey(_settingsBody), 'the settings');
 
     await tester.tap(find.byKey(_syncCta));
