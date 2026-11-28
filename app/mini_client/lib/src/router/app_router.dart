@@ -1,17 +1,12 @@
-import 'package:account_wiring/account_wiring.dart';
 import 'package:app_core/app_core.dart';
-import 'package:chronicle_wiring/chronicle_wiring.dart';
-import 'package:commerce_wiring/commerce_wiring.dart';
-import 'package:discovery_wiring/discovery_wiring.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
-import 'package:library_wiring/library_wiring.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:mc_session/mc_session.dart';
 import 'package:mini_client/src/pages/placeholder_pages.dart';
 import 'package:mini_client/src/router/app_routes.dart';
-import 'package:publishing_wiring/publishing_wiring.dart';
-import 'package:universe_wiring/universe_wiring.dart';
+import 'package:mini_client/src/wirings.dart';
 
 /// The app's router. `McApp` calls this once, when boot is ready, with the
 /// held deep link (R29). The shell (`StatefulShellRoute`, 5 tabs) arrives
@@ -52,15 +47,12 @@ GoRouter _buildRouter(
   observers: observers,
   // Every entity route nests under home (plan 01 §4.2, T-0049), so a link
   // opens `[home, target]` and the first screen can go back.
+  // Every wiring's routes come from `mcgen wire`'s list (T-0074); the
+  // catalogue lists the generated flows, in debug and profile builds only.
   routes: nestUnderHome($appRoutes, [
-    ...discoveryRoutes,
-    ...universeRoutes,
-    ...publishingRoutes,
-    ...chronicleRoutes,
-    ...commerceRoutes,
-    ...libraryRoutes,
-    ...accountRoutes,
+    ...wiringRoutes,
     notFoundRoute,
+    if (!kReleaseMode) catalogueRoute,
   ]),
   // The sign-in guard (P1-16 AC4) re-evaluates on every sign-out (not on a
   // sign-in), so signing out on a protected screen redirects.
@@ -80,6 +72,17 @@ GoRouter _buildRouter(
   // not-found route, nested under home like every other (T-0054).
   onException: (context, state, router) =>
       router.go(notFoundLocation(_asked(state.uri))),
+);
+
+/// `/catalogue` (T-0074, P2-08): every generated flow, one tap away. Home has
+/// no link to it; `buildAppRouter` leaves it out of release builds.
+final GoRoute catalogueRoute = GoRoute(
+  name: 'catalogue',
+  path: AppLocations.catalogue,
+  builder: (context, state) {
+    McRouteProbe.record(context, 'catalogue');
+    return const CataloguePage(entries: catalogueEntries);
+  },
 );
 
 /// The not-found screen's route: unknown paths and bad ids go here with

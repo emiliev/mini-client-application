@@ -1,4 +1,6 @@
 // The section-detail package files: pubspec.yaml and BUILD.bazel (their lists
+// (T-0074: BUILD.bazel is `mcgen buildgen`'s now; the brick still renders
+// the old one, which is dropped, until the template goes: F-0074 §6)
 // come from the generated code's use-graph, plus what the exemplars' owned
 // files use), l10n.yaml, the ARBs and the `.feature` files.
 
@@ -52,7 +54,7 @@ void emitPackage(EmitContext ctx, ScModel m) {
     'build.api_rule',
     _rule('${m.module}_api: retrofit (fork patch 0001)'),
   );
-  for (final path in ['pubspec.yaml', 'BUILD.bazel', 'l10n.yaml']) {
+  for (final path in ['pubspec.yaml', 'l10n.yaml']) {
     ctx.deferred(
       path,
       (graph) => ctx.bricks[_brick].render(
@@ -180,6 +182,14 @@ Map<String, Object?> _vars(
     ...pure,
     'flutter_localizations',
     'intl',
+    // The root-import list's (`lib/src/di/flow_scope.dart`, which `mcgen
+    // wire` writes since T-0074): Dio, EventBus, Monitoring (and the
+    // analytics port), SessionReader, over mc_di's RootImport.
+    'dio',
+    'mc_di',
+    'mc_event_bus',
+    'mc_monitoring',
+    'mc_session',
   };
   final bdd = {
     ..._packagesOf(

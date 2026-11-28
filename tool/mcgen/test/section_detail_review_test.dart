@@ -159,20 +159,28 @@ void main() {
         'test/feature/step/i_open_story_arc.dart',
       ]),
     );
-    final build = files['BUILD.bazel']!;
+    // The freezed targets: `mcgen buildgen` writes the BUILD file since
+    // T-0074 and names a new module's targets after their files.
+    final dir = p.dirname(_specOf('zz_sc_story'));
+    for (final e in files.entries) {
+      writeFile(root, '$dir/${e.key}', e.value);
+    }
+    final bg = mcgen(['buildgen', '--root', root.path, p.join(root.path, dir)]);
+    expect(bg.code, 0, reason: '$bg');
+    final build = readFile(root, '$dir/BUILD.bazel');
     expect(
       build,
       contains(
-        '"details_bloc": "lib/src/presentation/bloc/story_arc_details_bloc.dart"',
+        '"story_arc_details_bloc": "lib/src/presentation/bloc/story_arc_details_bloc.dart"',
       ),
     );
     expect(
       build,
       contains(
-        '"favourite_bloc": "lib/src/presentation/bloc/story_arc_favourite_bloc.dart"',
+        '"story_arc_favourite_bloc": "lib/src/presentation/bloc/story_arc_favourite_bloc.dart"',
       ),
     );
-    expect(build, contains('":_details_bloc_freezed"'));
+    expect(build, contains('":_story_arc_details_bloc_freezed"'));
     final bloc =
         files['lib/src/presentation/bloc/story_arc_details_bloc.dart']!;
     expect(bloc, contains("part 'story_arc_details_bloc.freezed.dart';"));

@@ -1,0 +1,4 @@
+$ tool/rules_fork.sh check
+check ai_rules_dart: 3 patch(es) apply strictly on pin e7163aab8f91
+check ai_rules_flutter: queue empty, OK
+exit=0

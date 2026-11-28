@@ -251,20 +251,20 @@ flutter_library(
 
 # --- tests (ADR-0015: BDD + contract + unit tests for pure logic; no goldens) ---
 _TEST_DEPS = [
-    "//utility/mc_di",
+    "//utility/mc_di",  # keep
     "//utility/mc_ds_feedback",
     "//utility/mc_ds_inputs",
     "//utility/mc_ds_media",
-    "//utility/mc_ds_navigation",
-    "//utility/mc_feature_flow",
+    "//utility/mc_ds_navigation",  # keep
+    "//utility/mc_feature_flow",  # keep
     "//utility/mc_fixtures_characters",
     "//utility/mc_fixtures_media",
     "//utility/mc_media",
     "//utility/mc_mocked_backend",
-    "//utility/mc_monitoring",
-    "//utility/mc_prelude",
-    "//utility/mc_storage",
-    "@pub_deps//:dio",
+    "//utility/mc_monitoring",  # keep
+    "//utility/mc_prelude",  # keep
+    "//utility/mc_storage",  # keep
+    "@pub_deps//:dio",  # keep
     "@pub_deps//:mocktail",
 ]
 
@@ -298,7 +298,7 @@ flutter_test(
         "//utility/mc_fixtures_characters",
         "//utility/mc_media",
         "//utility/mc_mocked_backend",
-        "//utility/mc_prelude",
+        "//utility/mc_prelude",  # keep
         "@pub_deps//:dio",
         "@pub_deps//:flutter_test",
     ],

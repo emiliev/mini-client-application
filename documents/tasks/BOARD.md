@@ -5,11 +5,11 @@ _Owned by Tech Lead. Last updated 2026-11-24._ Status values and lifecycle: [fle
 ## Active and recent
 | ID | Title | Status | Owner | Depends on | Branch |
 |---|---|---|---|---|---|
+| [T-0074](T-0074-mcgen-wire-buildgen.md) | `mcgen wire` + `buildgen`, `/catalogue` (P2-08); ADR-0018 | merged `f7230291` |
 | [T-0075](T-0075-mcgen-form-wizard.md) | `mcgen` FW archetype: `library_reading_list_editor` + `auth_signin` round-trip | **In Progress** | Engineer (Sonnet) / ADR-0015 | T-0072, T-0073 | `fleet/T-0075-mcgen-form-wizard` |
 | [T-0076](T-0076-mcgen-dashboard.md) | `mcgen` DB archetype: `store_home` round-trip + 2 probes | **In Progress** | Engineer (Sonnet) / ADR-0015 | T-0072, T-0073 | `fleet/T-0076-mcgen-dashboard` |
 | [T-0072](T-0072-mcgen-section-detail.md) | `mcgen` SC archetype: `comics_details` and `characters_details` round-trip | merged `48dd4443` |
 | [T-0073](T-0073-mcgen-search.md) | `mcgen` SR archetype: `discovery_search` and `characters_search` round-trip | merged `96793201` |
-| [T-0074](T-0074-mcgen-wire-buildgen.md) | `mcgen wire` + `buildgen`, catalogue route (P2-08) | **In Progress** | Engineer (Opus) / ADR-0015 | T-0069 | `fleet/T-0074-mcgen-wire-buildgen` |
 | [T-0069](T-0069-mcgen-list-detail.md) | `mcgen` list-detail archetype; `characters_list` round-trips byte for byte (P2-04); ADR-0017 | merged `6d34c618` |
 | [T-0071](T-0071-characters-search.md) | `characters_search` (F003): prefix search, sort and team facets, history | merged `8e45bf30` |
 | [T-0070](T-0070-settings-home.md) | `settings_home` (F055) with the `/settings` parent route | merged `d235ffee` |

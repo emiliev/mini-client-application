@@ -40,6 +40,10 @@ for m in zz_sc_probe zz_sc_plain zz_sc_story; do
   mkdir -p "feature/zz_probe/$m"
   cp "tool/mcgen/test/fixtures/$m/mcgen.yaml" "feature/zz_probe/$m/mcgen.yaml"
   step "mcgen gen $m" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen "$m"
+  # Its root-import list and BUILD.bazel are `mcgen wire`'s and `mcgen
+  # buildgen`'s (T-0074): the module's own only, not the app's glue.
+  step "mcgen wire feature/zz_probe/$m (its flow scope)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart wire "feature/zz_probe/$m"
+  step "mcgen buildgen feature/zz_probe/$m" "${DART[@]}" run tool/mcgen/bin/mcgen.dart buildgen "feature/zz_probe/$m"
   report "  - $(find "feature/zz_probe/$m" -type f | wc -l | tr -d ' ') files generated"
   step "mcgen gen --check $m (idempotent)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen --check "$m"
 done

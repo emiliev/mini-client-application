@@ -1,0 +1,15 @@
+$ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer build --lockfile_mode=error --config=ci --config=lint //...
+INFO: Invocation ID: 6db155ff-83da-49c9-93e2-c7fab44ffe77
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 653 targets (0 packages loaded)
+Analyzing: 653 targets (0 packages loaded, 0 targets configured)
+Analyzing: 653 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 653 targets (0 packages loaded, 0 targets configured).
+INFO: Found 653 targets...
+INFO: Elapsed time: 3.846s, Critical Path: 0.01s
+INFO: 1 process: 22 action cache hit, 1 internal.
+INFO: Build completed successfully, 1 total action
+exit=0

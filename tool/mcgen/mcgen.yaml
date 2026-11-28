@@ -32,3 +32,17 @@ third_party:
 
 # Packages that come with the Flutter SDK.
 sdk_packages: [flutter, flutter_localizations, flutter_test]
+
+# mcgen wire (T-0074): the app's wiring groups in the order it lists them
+# (plan 01 §3.4), and the feature domains (feature/<domain>/) whose group has
+# another name. A generated flow of any other domain gets a generated group
+# of the domain's name (app/wiring/<domain>_wiring).
+wire:
+  groups: [discovery, universe, publishing, chronicle, commerce, library, account]
+  domains:
+    auth: account
+    characters: universe
+    comics: publishing
+    settings: account
+    store: commerce
+    trivia: chronicle

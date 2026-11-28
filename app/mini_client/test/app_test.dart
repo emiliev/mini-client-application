@@ -369,7 +369,19 @@ void main() {
   });
 
   test('all 7 wirings are composed', () {
-    expect(wiringInitializers, hasLength(7));
+    // The 7 hand-written groups, in group order; `mcgen wire` appends a
+    // generated group after them for each new domain (T-0074).
+    final names = [for (final w in wiringInitializers) '${w.runtimeType}'];
+    expect(names.take(7), [
+      'DiscoveryWiringDIInitializer',
+      'UniverseWiringDIInitializer',
+      'PublishingWiringDIInitializer',
+      'ChronicleWiringDIInitializer',
+      'CommerceWiringDIInitializer',
+      'LibraryWiringDIInitializer',
+      'AccountWiringDIInitializer',
+    ]);
+    expect(names.toSet(), hasLength(names.length), reason: 'each once');
     expect(appConfigAsset, 'assets/app_config.json');
     final GoRouter router = buildAppRouter(
       initialLocation: '/',

@@ -35,8 +35,7 @@ void main() {
     () {
       const expected = {
         'spec synth x': 'mcgen spec synth: not yet (P2-09)',
-        'wire': 'mcgen wire: not yet (P2-08)',
-        'buildgen --check': 'mcgen buildgen: not yet (P2-08)',
+        // wire and buildgen exist since T-0074 (wire_test, buildgen_test).
         'owners --verify T-0001': 'mcgen owners: not yet (P2-08)',
         'new list_detail x': 'mcgen new: not yet (P2-08)',
         'synth --target-loc 5': 'mcgen synth: not yet (P2-15)',

@@ -1,0 +1,50 @@
+$ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer test --lockfile_mode=error --runs_per_test=20 --nocache_test_results //app/mini_client:catalogue_test //app/mini_client:analytics_screens_test //app/mini_client:app_test
+INFO: Invocation ID: 5387f41a-d692-4cf8-9f24-85a4fd545d52
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, discarding analysis cache (this can be expensive, see https://bazel.build/advanced/performance/iteration-speed).
+Analyzing: 3 targets (0 packages loaded, 0 targets configured)
+Analyzing: 3 targets (0 packages loaded, 0 targets configured)
+
+Analyzing: 3 targets (0 packages loaded, 5494 targets configured, 910 aspect applications)
+[1 / 1] no actions running
+INFO: Analyzed 3 targets (0 packages loaded, 5502 targets configured, 945 aspect applications).
+[59,836 / 68,652] checking cached actions
+[89,082 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 0s darwin-sandbox ... (14 actions, 8 running)
+[89,082 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 1s darwin-sandbox ... (14 actions, 9 running)
+[89,084 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 2s darwin-sandbox ... (14 actions, 10 running)
+[89,088 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 3s darwin-sandbox ... (14 actions, 9 running)
+[89,093 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
+[89,097 / 89,142] Testing //app/mini_client:app_test (run 5 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
+[89,100 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
+[89,103 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
+[89,105 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
+[89,109 / 89,142] Testing //app/mini_client:analytics_screens_test (run 5 of 20); 6s darwin-sandbox ... (14 actions, 8 running)
+[89,110 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
+[89,113 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
+[89,116 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
+[89,121 / 89,142] Testing //app/mini_client:app_test (run 14 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
+[89,122 / 89,142] Testing //app/mini_client:analytics_screens_test (run 9 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
+[89,127 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 9 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
+[89,128 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 9 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
+[89,131 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 10 of 20); 5s darwin-sandbox ... (11 actions, 9 running)
+[89,132 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 11 of 20); 4s darwin-sandbox ... (10 actions, 8 running)
+[89,134 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 13 of 20); 5s darwin-sandbox ... (8 actions running)
+[89,136 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 15 of 20); 4s darwin-sandbox ... (6 actions running)
+[89,137 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 16 of 20); 5s darwin-sandbox ... (5 actions running)
+[89,140 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 19 of 20); 3s darwin-sandbox ... (2 actions running)
+[89,141 / 89,142] 3 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 20 of 20); 4s darwin-sandbox
+INFO: Found 3 test targets...
+INFO: Elapsed time: 29.639s, Critical Path: 9.20s
+INFO: 61 processes: 89081 action cache hit, 1 internal, 60 darwin-sandbox.
+INFO: Build completed successfully, 61 total actions
+//app/mini_client:analytics_screens_test                                 PASSED in 6.3s
+  Stats over 20 runs: max = 6.3s, min = 4.5s, avg = 5.6s, dev = 0.4s
+//app/mini_client:app_test                                               PASSED in 2.8s
+  Stats over 20 runs: max = 2.8s, min = 2.1s, avg = 2.4s, dev = 0.2s
+//app/mini_client:catalogue_test                                         PASSED in 1.6s
+  Stats over 20 runs: max = 1.6s, min = 1.3s, avg = 1.4s, dev = 0.1s
+
+Executed 3 out of 3 tests: 3 tests pass.
+exit=0
