@@ -1,0 +1,23 @@
+{
+  "@@locale": "en_XA",
+  "charactersSearchTitle": "[Šéàŕçĥ ~~]",
+  "charactersSearchFieldLabel": "[Šéàŕçĥ çĥàŕàçţéŕš ƀý ñàɱé ~~~~~~~~~~]",
+  "charactersSearchClearQuery": "[Çļéàŕ šéàŕçĥ ~~~~~]",
+  "charactersSearchSortLabel": "[Šóŕţ ƀý ~~~]",
+  "charactersSearchTeamLabel": "[Ţéàɱ ~~]",
+  "charactersSearchSortNameAscending": "[Ñàɱé À–Ž ~~~]",
+  "charactersSearchSortNameDescending": "[Ñàɱé Ž–À ~~~]",
+  "charactersSearchSortNewest": "[Ŕéçéñţļý úþðàţéð ~~~~~~]",
+  "charactersSearchSortOldest": "[Ļéàšţ ŕéçéñţļý úþðàţéð ~~~~~~~~~]",
+  "charactersSearchSearching": "[Šéàŕçĥíñĝ ~~~~]",
+  "charactersSearchEmptyTitle": "[Ñó çĥàŕàçţéŕš ƒóúñð ~~~~~~~~]",
+  "charactersSearchEmptyMessage": "[Ñó çĥàŕàçţéŕ’š ñàɱé šţàŕţš ŵíţĥ “{query}”. Çĥéçķ ţĥé šþéļļíñĝ óŕ ţŕý àñóţĥéŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]",
+  "charactersSearchEmptyTeamMessage": "[Ñó çĥàŕàçţéŕ óƒ {team} ĥàš à ñàɱé ţĥàţ šţàŕţš ŵíţĥ “{query}”. Ţŕý àñóţĥéŕ ţéàɱ óŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]",
+  "charactersSearchErrorTitle": "[Ţĥé šéàŕçĥ ƒàíļéð ~~~~~~~]",
+  "charactersSearchLoadMoreFailed": "[Çóúļð ñóţ ļóàð ɱóŕé çĥàŕàçţéŕš. ~~~~~~~~~~~~]",
+  "charactersSearchLoading": "[Ļóàðíñĝ çĥàŕàçţéŕš ~~~~~~~]",
+  "charactersSearchRecent": "[Ŕéçéñţ šéàŕçĥéš ~~~~~~]",
+  "charactersSearchClearRecent": "[Çļéàŕ ~~]",
+  "charactersSearchClearFailed": "[Ýóúŕ ŕéçéñţ šéàŕçĥéš çóúļð ñóţ ƀé çļéàŕéð. Þļéàšé ţŕý àĝàíñ. ~~~~~~~~~~~~~~~~~~~~~~~~]",
+  "charactersSearchNoRecent": "[Šéàŕçĥ ƒóŕ çĥàŕàçţéŕš ƀý ţĥé šţàŕţ óƒ ţĥéíŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~]"
+}
