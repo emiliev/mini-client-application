@@ -1,0 +1,104 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mc_ds_cards/mc_ds_cards.dart';
+import 'package:mc_ds_feedback/mc_ds_feedback.dart';
+import 'package:mc_ds_lists/mc_ds_lists.dart';
+import 'package:mc_ds_navigation/mc_ds_navigation.dart';
+import 'package:mc_feature_flow/mc_feature_flow.dart';
+import 'package:mc_formatters/mc_formatters.dart';
+import 'package:mc_l10n_core/mc_l10n_core.dart';
+import 'package:zz_db_b/src/domain/model/store.dart';
+import 'package:zz_db_b/src/flow/zz_db_b_flow_state.dart';
+import 'package:zz_db_b/src/presentation/bloc/category_products_bloc.dart';
+import 'package:zz_db_b/src/presentation/widget/failure_message.dart';
+import 'package:zz_db_b/src/presentation/widget/store_section.dart';
+
+/// Key of the category page's products grid, for tests.
+const categoryGridKey = ValueKey<String>('store_category.grid');
+
+/// Key of the category page's title, for tests.
+const categoryTitleKey = ValueKey<String>('store_category.title');
+
+/// One category's products, paged (offset and limit), as a grid of
+/// `McMediaCard`s. A page of the flow: above the store home, or the flow's
+/// only page when it opened at the category.
+class CategoryPage extends StatelessWidget {
+  const CategoryPage({required this.category, super.key});
+
+  /// The category the page shows; its name titles the page once known.
+  final OpenCategory category;
+
+  @override
+  Widget build(BuildContext context) => BlocProvider(
+    // The only DI lookup in UI code (R17).
+    create: (context) => context.di<CategoryProductsBloc>(),
+    child: _CategoryPageContent(category: category),
+  );
+}
+
+class _CategoryPageContent extends StatelessWidget {
+  const _CategoryPageContent({required this.category});
+
+  final OpenCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.storeL10n;
+    final core = McL10nCoreL10n.of(context);
+    final bloc = context.read<CategoryProductsBloc>();
+    void retry() => bloc.add(const CategoryProductsEvent.retry());
+    return Scaffold(
+      appBar: McAppBar(
+        leading: const McFlowBackButton(),
+        title: category.name ?? l10n.storeCategoryTitle,
+        titleKey: categoryTitleKey,
+      ),
+      body: BlocBuilder<CategoryProductsBloc, CategoryProductsState>(
+        builder: (context, state) => state.when(
+          loading: () => McLoading(semanticLabel: l10n.storeCategoryLoading),
+          notFound: () => McEmptyView(
+            title: l10n.storeCategoryNotFoundTitle,
+            message: l10n.storeCategoryNotFoundMessage,
+          ),
+          failure: (error, _) => McErrorView(
+            title: l10n.storeCategoryErrorTitle,
+            message: failureMessage(error, core),
+            retryLabel: core.commonRetry,
+            onRetry: retry,
+          ),
+          success: (page) => McPagedGrid<Product>(
+            key: categoryGridKey,
+            state: page,
+            cellHeight: (width, textScaler) =>
+                McMediaCard.heightFor(width: width, textScaler: textScaler),
+            itemBuilder: (context, product, _) => McMediaCard(
+              key: ValueKey('store_category.product.${product.id.value}'),
+              title: product.title,
+              image: product.cover,
+              subtitle: formatMoney(
+                product.dealPrice ?? product.price,
+                Localizations.localeOf(context).toString(),
+              ),
+              onTap: () => bloc.add(CategoryProductsEvent.open(product)),
+            ),
+            onLoadMore: () => bloc.add(const CategoryProductsEvent.loadMore()),
+            onRetry: retry,
+            onRefresh: () {
+              final done = Completer<void>();
+              bloc.add(CategoryProductsEvent.refresh(done));
+              return done.future;
+            },
+            emptyTitle: l10n.storeCategoryEmptyTitle,
+            emptyMessage: l10n.storeCategoryEmptyMessage,
+            errorTitle: l10n.storeCategoryErrorTitle,
+            footerErrorMessage: l10n.storeCategoryLoadMoreFailed,
+            retryLabel: core.commonRetry,
+            loadingLabel: l10n.storeCategoryLoading,
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -1,0 +1,31 @@
+name: feature_dashboard_package
+description: A dashboard feature's package files - pubspec.yaml and l10n.yaml (T-0076). mcgen computes the dependency lists from the generated code's use-graph. BUILD.bazel is the module's own (owned).
+version: 0.1.0
+
+# mcgen precomputes every value (plan 02 section 2.4); by hand:
+#   mason make feature_dashboard_package -c vars.json
+vars:
+  pubspec_preamble:
+    type: string
+    description: Comment lines above `name:` (each ending in a newline), or empty.
+  name:
+    type: string
+    description: The package name.
+  pascal:
+    type: string
+    description: The package name in PascalCase.
+  description:
+    type: string
+    description: The pubspec description.
+  sdk:
+    type: string
+    description: The environment sdk constraint.
+  flutter:
+    type: string
+    description: The environment flutter constraint.
+  dependencies:
+    type: array
+    description: 'Items {"entry": "<name>: <constraint>"}, sorted.'
+  dev_dependencies:
+    type: array
+    description: 'Items {"entry": "<name>: <constraint>"}, sorted.'

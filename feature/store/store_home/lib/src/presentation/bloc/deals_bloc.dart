@@ -58,11 +58,13 @@ final class DealsBloc
       case _Refresh(:final done):
         await refresh(emit, done);
       case _Open(:final deal):
+        // mcgen:keep deals.open
         final id = deal.product.id;
         if (startOpenGuard(id.value)) {
           tracker.itemTapped(section, StoreItemKind.comic, '${id.value}');
           _navigator.openComic(id);
         }
+      // mcgen:end deals.open
     }
   }
 

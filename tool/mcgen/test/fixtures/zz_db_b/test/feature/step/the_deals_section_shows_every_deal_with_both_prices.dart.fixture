@@ -1,0 +1,39 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/zz_db_b_env.dart';
+
+/// Usage: the deals section shows every deal with both prices
+///
+/// Each of the fixtures' deals, in their order: its title, the deal price,
+/// the original price struck through (both formatted from the integer cents
+/// by the test's own oracle), the discount and "Ends in N days" against the
+/// fixtures' fixed clock.
+Future<void> theDealsSectionShowsEveryDealWithBothPrices(
+  WidgetTester tester,
+) async {
+  await letSectionsLand(tester);
+  final deals = storeCatalogue.deals;
+  expect(deals, hasLength(8), reason: 'the contract has 8 deals');
+  for (final product in deals) {
+    final deal = product.deal!;
+    final card = find.byKey(dealKey(product.id));
+    await scrollCarouselTo(tester, 'deals', card);
+    Finder inCard(String text) =>
+        find.descendant(of: card, matching: find.text(text));
+    expect(inCard(product.title), findsOneWidget, reason: product.title);
+    expect(inCard(euros(deal.dealPriceCents)), findsOneWidget);
+    expect(inCard('−${deal.discountPercent}%'), findsOneWidget);
+    final days = deal.endsInDays;
+    expect(
+      inCard(days == 1 ? 'Ends in 1 day' : 'Ends in $days days'),
+      findsOneWidget,
+    );
+    final original = tester.widget<Text>(inCard(euros(product.priceCents)));
+    expect(
+      original.style?.decoration,
+      TextDecoration.lineThrough,
+      reason: 'the original price of ${product.title} is struck through',
+    );
+  }
+}

@@ -1,0 +1,26 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/zz_db_a_env.dart';
+
+/// Usage: the featured section shows every featured comic with its price
+///
+/// Each of the fixtures' featured products, in their order, with the price
+/// the cart charges (formatted from cents by the test's own oracle).
+Future<void> theFeaturedSectionShowsEveryFeaturedComicWithItsPrice(
+  WidgetTester tester,
+) async {
+  await letSectionsLand(tester);
+  final featured = storeCatalogue.featured;
+  expect(featured, hasLength(6), reason: 'the contract has 6 featured');
+  for (final product in featured) {
+    final card = find.byKey(featuredKey(product.id));
+    await scrollCarouselTo(tester, 'featured', card);
+    for (final text in [product.title, euros(product.unitPriceCents)]) {
+      expect(
+        find.descendant(of: card, matching: find.text(text)),
+        findsOneWidget,
+        reason: '${product.title} shows "$text"',
+      );
+    }
+  }
+}

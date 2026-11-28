@@ -1,0 +1,38 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '../util/zz_db_b_env.dart';
+
+/// Usage: the deal of product {501501} reads {'€10.83'}, {'€12.03'} struck through and {'Ends in 1 day'}
+///
+/// The deal's card shows the deal price, the original price struck through
+/// and how long it runs, exactly (non-breaking spaces read as plain ones).
+Future<void> theDealOfProductReadsStruckThroughAnd(
+  WidgetTester tester,
+  int id,
+  String price,
+  String original,
+  String endsIn,
+) async {
+  await letSectionsLand(tester);
+  final card = find.byKey(dealKey(id));
+  await scrollCarouselTo(tester, 'deals', card);
+  Finder inCard(String text) => find.descendant(
+    of: card,
+    matching: find.byWidgetPredicate(
+      (w) => w is Text && plainSpaces(w.data ?? '') == plainSpaces(text),
+    ),
+  );
+  expect(inCard(price), findsOneWidget, reason: 'the deal price');
+  expect(inCard(endsIn), findsOneWidget, reason: 'how long it runs');
+  final struck = inCard(original);
+  expect(struck, findsOneWidget, reason: 'the original price');
+  expect(
+    tester.widget<Text>(struck).style?.decoration,
+    TextDecoration.lineThrough,
+  );
+  expect(
+    tester.widget<Text>(inCard(price)).style?.decoration,
+    isNot(TextDecoration.lineThrough),
+  );
+}

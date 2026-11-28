@@ -60,6 +60,7 @@ final class CategoriesBloc
       case _Refresh(:final done):
         await refresh(emit, done);
       case _Open(:final category):
+        // mcgen:keep categories.open
         if (startOpenGuard(category.id.value)) {
           tracker.itemTapped(
             section,
@@ -70,6 +71,7 @@ final class CategoriesBloc
             OpenCategory(id: category.id, name: category.name),
           );
         }
+      // mcgen:end categories.open
     }
   }
 

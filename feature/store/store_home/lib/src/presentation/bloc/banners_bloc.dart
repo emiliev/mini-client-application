@@ -57,12 +57,15 @@ final class BannersBloc
       case _Refresh(:final done):
         await refresh(emit, done);
       case _Open(:final banner):
+        // mcgen:keep banners.open
         if (startOpenGuard(banner.id)) {
           _open(banner);
         }
+      // mcgen:end banners.open
     }
   }
 
+  // mcgen:keep banners.members
   void _open(StoreBanner banner) {
     switch (banner.target) {
       case ComicTarget(:final id):
@@ -76,6 +79,7 @@ final class BannersBloc
         _navigator.openSearch(query);
     }
   }
+  // mcgen:end banners.members
 
   @override
   Future<Result<List<StoreBanner>, ApiFailure>> fetch() =>

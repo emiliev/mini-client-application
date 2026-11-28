@@ -138,4 +138,3 @@ Feature: The cart summary follows the session
     Then the cart section shows the cart of {'reader@mini-client.test'}
     And the backend received {2} requests for {'GET /v1/me/cart'}
     And the section {'cart'} was viewed {1} times
-

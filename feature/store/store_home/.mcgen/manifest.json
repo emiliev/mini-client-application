@@ -1,0 +1,364 @@
+{
+  "archetype": "dashboard",
+  "files": {
+    "l10n.yaml": {
+      "hash": "3b0fda1ff80e01f9750044ada56b5cdeada774afda46ace1923c34c66fad144c",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "02d1958bc873729bb4da50fecad7e7b5611185f7e069fd50791cd152708feb5a",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/category_id.dart": {
+      "hash": "be010a2948f9b5e33412aedd2c5e90f6f89b7851bb139cb5048652ae9649515d",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/comic_id.dart": {
+      "hash": "5032017d6e2eed573263667dbc9ef8f07c901c1d8edc124ffa497784dac477a2",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/store_analytics.dart": {
+      "hash": "d8d6c291261c3d01658878fd65f0281df395222e48f08e5530a1bdd3e480a4db",
+      "ownership": "managed"
+    },
+    "lib/src/domain/model/store_clock.dart": {
+      "hash": "3c52eb0d9b6198d52b946f4259596e7e7fce08ce2c20e7483be7a3ab501e0688",
+      "ownership": "managed"
+    },
+    "lib/src/flags/store_home_flags.dart": {
+      "hash": "c4148f290462c98b48bca6353f2528c650b772278de299b38ffa7dc91698b431",
+      "ownership": "managed"
+    },
+    "lib/src/flow/store_home_flow.dart": {
+      "hash": "ad20fb19f919ded8702d4abd2342638e5351bbce1d27976b75fe81e83716a313",
+      "ownership": "managed"
+    },
+    "lib/src/flow/store_home_flow_state.dart": {
+      "hash": "cdc2410ca30bc8feabe1d4a5196f800b1f535080848d01c1a482b00420a927eb",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/store_home_de.arb": {
+      "hash": "cc0e2ba1f77b4eaec732c341d1c24d34271482275e2a88d88bc9b8ff6a90dd01",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/store_home_en.arb": {
+      "hash": "440dce1d5ba0017720f61d9a7aee0fd06c7f9a741113bdd3591350cfe3e38e96",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/store_home_en_XA.arb": {
+      "hash": "b9710caa3782c1019c3c6c5ca0a4f799b1ef8b7e730811bd0fb872fa2e5a7f26",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/store_home_navigator.dart": {
+      "hash": "9604a5db94c4f53487ab2f9b0db78145eece332bbb668e047c04390843d23f4e",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/banners_bloc.dart": {
+      "hash": "bd39ab48e633e7809e21b149a2c9ed0cead117559a048ec5d23f6535f2a1d4df",
+      "keep": {
+        "banners.members": "81096fed13149f405323397988cecadea77e74f58e8dec6da546e019b9c51ae4",
+        "banners.open": "18610010db40b2e696407ac36fd62b8455079f70e107e96a8248b902d4faa8ec"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/banners_event.dart": {
+      "hash": "3bea1c1506a7c309648737bb4a9866145fa6cc906fa8c004aae24503c0a9d23d",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/banners_state.dart": {
+      "hash": "f662ad3bf2098f89a46695f6ae6d0c5526c38f40925ebe1b7ad30a8379ee4881",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/cart_summary_bloc.dart": {
+      "hash": "c4f7ae9e43c1b7de75aa814b1ff20d4f5e0e2cc57311e8fb22e8000fc12930ac",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/cart_summary_event.dart": {
+      "hash": "cdfa8c2987aab009b662b403b87d1154119000b7da44856d56fe31ec37b46230",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/cart_summary_state.dart": {
+      "hash": "9422427d3ef28f64c648bedad5c59bbf2c20c10cdaccd0f64fb3715f39ef48dd",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/categories_bloc.dart": {
+      "hash": "19f0e0f9589478e46b3112958b2e44ddd7b672558e13dd6a2079d65b5b146cc6",
+      "keep": {
+        "categories.open": "e4f4946461585bbb7921af628364107fe233ed120ecaca4f2561a167532aa985"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/categories_event.dart": {
+      "hash": "139c87f148cbbedac445ed062ff37ec9572d585263efbadeda84fbd12faffc39",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/categories_state.dart": {
+      "hash": "efdaca88541d555486d156c62ef789b0448d6754b51d90c40addc785e4f58847",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/category_products_bloc.dart": {
+      "hash": "ba82f0deb30a5162195df12373272c84a35eb5ee8e26e631ef8c6d444390f404",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/category_products_event.dart": {
+      "hash": "4891a202d772ad00f98b61efa0c516007f1070aec12144b5fa98ba04f07225d7",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/category_products_state.dart": {
+      "hash": "67d6f25f66a229bcd673abb398d6da18f541d6cf53748f1beab8fcc69c6fc095",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/deals_bloc.dart": {
+      "hash": "4f271c750ebe4e289f59380fe5c1f18402bdcc13cad6de8a73a7440ea5a70eef",
+      "keep": {
+        "deals.open": "62a4070c59893d562041388e947974ea78b0260d24fb41777cc975a29c3570df"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/deals_event.dart": {
+      "hash": "46accff1c846f7630ebdc1efdca4af4c58b282cc0bcbc2d9ddc7dec6151cab9a",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/deals_state.dart": {
+      "hash": "c1c431ce979304c68cb98a5580f879193114bdba7251b875c4bcd41e1be8111e",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/featured_bloc.dart": {
+      "hash": "234219b27fdecbe7f41b69fed5fb1f3520a90dd310e1350a5ff5e6bcde2136b5",
+      "keep": {
+        "featured.open": "f1b961eedf0f6b444205410128c396d699ea49d9860e1e9779c9683fa284ba66"
+      },
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/featured_event.dart": {
+      "hash": "d2156f76836ae5c9bac12c315aed78de7b432dea529cf1e012f9e33ed6a11712",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/featured_state.dart": {
+      "hash": "0aa0b79d81c3ebfb7ddea6c60e0fb6b03198580649c866babad2e1ae3743d2f9",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/open_category.dart": {
+      "hash": "67c2f6b2924b034a471479857d327d914a7c6adb6f44f38a9e0a4b2df5fad180",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/bloc/store_section_bloc.dart": {
+      "hash": "c34e9fe103d2db5732c84fa5c49a161a0ccf1db982d2170169b46938ade1624f",
+      "ownership": "managed"
+    },
+    "lib/src/presentation/page/store_home_page.dart": {
+      "hash": "5232665d4fb862974abfc70ad3e7ed1975b525a35a9aa8753dad1be018ce13d9",
+      "ownership": "managed"
+    },
+    "lib/store_home.dart": {
+      "hash": "d152b6f4cb34fae642910b122d48ccb5aa7df6a0c5a3f5485410437559930c31",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "d4d8b9b9e12278fa203b2822281dcad5fe194f9c4c7c6fca048a14b35c28cc16",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "c53bc57ff8ec822e2b79afaa56c9f3cb5f3e625aa0f83dccfe8565422a74b7d2",
+      "ownership": "managed"
+    },
+    "test/feature/step/every_section_but_is_ready.dart": {
+      "hash": "0ee64b18f349cc5ae7d3c0110c6b07293f7ad1fe25ed865d113d7f2e40b3fca5",
+      "ownership": "managed"
+    },
+    "test/feature/step/every_section_but_shows_its_error.dart": {
+      "hash": "07ab1167b878fc6b294eab23032c2a57daaa9ee8d6d2230ed7b6845f2edeaa5d",
+      "ownership": "managed"
+    },
+    "test/feature/step/has_of_product_in_the_cart.dart": {
+      "hash": "94270e8cca5bde1a56ade93cd1a49dd128c305705aa4c97f32106f8de02decd0",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_leave_the_store.dart": {
+      "hash": "ecf5ce92c147e1a522dbdaa3c651b5aadcfa17b99b7d88664b65a8c6d6535c96",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_a_dialog_over_the_store_and_close_it.dart": {
+      "hash": "d16a2d530eb97d878f14d1cc0e3705e1f1b7350d31860a15803813fab0788016",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_store.dart": {
+      "hash": "cf917674519f1dddeb125050ece197258ec2c238e7b2258b6e8088af9f48083e",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_open_the_store_at_category.dart": {
+      "hash": "d712126d81a0cfbdaf6ab5b3b3a588d474e0bb3ee9c598f59003665f2579d576",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_pull_the_store_to_refresh.dart": {
+      "hash": "1c8f884350010e2fdca6b138dc7893a37b41f24c234f0aece8926e4716734786",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_scroll_the_category_to_the_end.dart": {
+      "hash": "a07b096e9dd9daff7c504392b795edc1c3f001a5580499b53b494ad82c85c17a",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_scroll_through_the_whole_store.dart": {
+      "hash": "ab078e79b1839d9abd27936ecb4b56e13cab80474d46e8c47044ab63758b22db",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_and_in_the_section_in_quick_succession.dart": {
+      "hash": "4d12556ca94cd276b34e749207ec99de91b5cdb3951076794b8e84516ff8ab79",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_in_the_section.dart": {
+      "hash": "394b79aa4e9cf344cbe94c591ecd9bbe6e461c54ecc8d4b1d32f7d6fba008514",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_in_the_section_and_again_after_milliseconds.dart": {
+      "hash": "a68390ebde1dadb0771c09c6e312d5f5d13060a17de6aac1a54ca70e7586429e",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_in_the_section_twice_in_quick_succession.dart": {
+      "hash": "600e30f2196b22f311875ea0f73a0e0a0e21364be6eac150a59165605ce1c11f",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_on_the_category_page.dart": {
+      "hash": "3526f20dbf2305f9069929e4a7c4037a1cd7cdc06391059d935085cc769765bb",
+      "ownership": "owned"
+    },
+    "test/feature/step/i_tap_retry_in_the_section.dart": {
+      "hash": "3818b2e526dde2afbb29a090262029f07fcd3d3e87077401b234bc55df3bfd79",
+      "ownership": "managed"
+    },
+    "test/feature/step/i_tap_retry_in_the_section_twice_in_quick_succession.dart": {
+      "hash": "56a304e1ba4ad417899a54f83a2345a7a378e2064b5af37b2a8487a2d2ee104c",
+      "ownership": "managed"
+    },
+    "test/feature/step/only_the_section_shows_an_error.dart": {
+      "hash": "710907301e6d53e35bd4559fe3e3b147a4edf1fa87b3be8bdeaaaee775a8a694",
+      "ownership": "managed"
+    },
+    "test/feature/step/signing_in_is_cancelled.dart": {
+      "hash": "daeb1ee4480d57058da1df3c0344489038a0f300b4e1ab542fbde53b75654d1a",
+      "ownership": "owned"
+    },
+    "test/feature/step/signing_in_succeeds_as.dart": {
+      "hash": "f820fd37d93d63b7a2bf07e7caad875a70af4bd8162f41340bb6689ebc0ee841",
+      "ownership": "owned"
+    },
+    "test/feature/step/signs_in_elsewhere.dart": {
+      "hash": "430e12b75c258637b2317d5f3e7bb29e4b8619d629cb2a775b948aea091c65bf",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_open_comic_times.dart": {
+      "hash": "d94b656a269bf36c052e337bf04f46d700face4d4114db8ca63d2b328a304d0f",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_open_comic_times_then_comic.dart": {
+      "hash": "f094e6d4ab842a9b16fff457cce0238dd1c00ba1d090a1b5d72c732a6478f755",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_open_no_comic.dart": {
+      "hash": "9b70d10d9ba7722beb248acfbe31238e81fda6e07305dbb5f002c2d91885ac51",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_open_the_cart_times.dart": {
+      "hash": "1dbd28eed7f539caebf9f644cf406d352cf95f3ba8a33354e28806771feb3308",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_search_for.dart": {
+      "hash": "9e98334d6fe1365d98f4077986b1983258b3a2d1e9245724149fa0a28f8460cf",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_app_was_asked_to_sign_in_time.dart": {
+      "hash": "cbb485e3a18337a0e18410c9c9f43add8fdc6a4e140d46564bd5fb7bbce53ed5",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_banners_section_shows_every_banner_of_the_store.dart": {
+      "hash": "86e6daee11c62f6d536e6918c8e2375de0e88a61ae62cc3e6fb00cdf2194dd75",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_cart_section_shows_the_cart_of.dart": {
+      "hash": "8a3c8627691f705e5d6552f4aa74604caa1f65db84eedb18b0ba05a40963987d",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_categories_section_shows_every_category_of_the_store.dart": {
+      "hash": "39963f2e1e397c61320adaa01915974f6db0c86912d25d0ddbbe2b49b8297d03",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_category_page_of_is_open_titled.dart": {
+      "hash": "f7ef9153e4fe958cf2c8a15308d154846b6df12b8c2ad1f2d708ae45f6e0e103",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_category_page_shows_the_first_products_of.dart": {
+      "hash": "e0dfe0eb401fa4c6d991e391d5bbda57b84c20693a529fab75da0e1f8a89a4bf",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_deal_of_product_reads_struck_through_and.dart": {
+      "hash": "3504f922fb5e955ad337a87538f464a4a1488f69f16a643eb05b0daddf69a5bd",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_deals_section_shows_every_deal_with_both_prices.dart": {
+      "hash": "8526adce9a86d6e1b4a952b66655254c012e2b851080915c86ecebc299b78832",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_featured_section_shows_every_featured_comic_with_its_price.dart": {
+      "hash": "7af7951b550020ca2b7a2fa36afe13a929850d90bdd8b9b8f7c005e1540fc77f",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_section_is_announced_as.dart": {
+      "hash": "19d603dc28a1f4b9f4ac6527a6dd298babf4f845895224808cd00a6b946dc418",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_section_is_loading.dart": {
+      "hash": "62d8e82a351cce2fed4bdaa1d6be20cc841e68fb15589ab343f21af19d10ce9b",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_section_is_ready.dart": {
+      "hash": "fa82a527a0ff5c499cb32770a02ba4ae58ca8d8f5e9890f58e571df3f200d69d",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_section_shows.dart": {
+      "hash": "d4cbb7bfef10427843810cd87da121e162f6ebae03d3a781d1c9374f891edffc",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_section_shows_its_error_with_retry.dart": {
+      "hash": "7c968f3a3b2246229c90bf1f9362c411690d5db488daaef56cba553ba765bcce",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_section_was_viewed_times.dart": {
+      "hash": "326f7daf5326709c9ee41b45018f34078efe27fb5fc9c3747fdda744416dbfca",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_sections_are.dart": {
+      "hash": "6ac949eab1c707adef1096664107d863b37f3013808047f49b2ba4b33dff6f41",
+      "ownership": "managed"
+    },
+    "test/feature/step/the_session_ends_elsewhere.dart": {
+      "hash": "48d61a5a677125fa47069948aedad9fd5edef4e52789da38eb42595c9d4dfa38",
+      "ownership": "owned"
+    },
+    "test/feature/step/the_store_tap_was_tracked_with_section_kind_and_id.dart": {
+      "hash": "88f623e7b15a064df8682d474c75e14d2fcf038b47e0932e284715deb0fd08ea",
+      "ownership": "managed"
+    },
+    "test/feature/store_home.feature": {
+      "hash": "901d9fef9b7b2b8ab6ea440583b4b410d808ab4d095e33337f5ab75a625f1b5d",
+      "ownership": "managed"
+    },
+    "test/feature/store_home_cart.feature": {
+      "hash": "6698d322f3a19b16c5c2dc30c0d1bfb37f14482a62dc13fa3bfaca31761dce78",
+      "ownership": "managed"
+    },
+    "test/feature/store_home_l10n.feature": {
+      "hash": "04f9f248736bd5d31c19650130f4da71e63e6620175224b44d0f76b3a6736361",
+      "ownership": "managed"
+    },
+    "test/feature/store_home_sections.feature": {
+      "hash": "58c828b1bf34e76ff74a8e5a63f76ed099a861ee7a6d54502f1f7a6c647f6446",
+      "ownership": "managed"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "store_home",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x5915da8aeff491f5",
+  "spec_hash": "ad61460f60eff4cac5e92be8402789eafec3a4e6f6231e32cf2dc15dfcdb3d1e"
+}

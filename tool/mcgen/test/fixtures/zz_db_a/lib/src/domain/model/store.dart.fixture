@@ -1,0 +1,92 @@
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:mc_formatters/mc_formatters.dart';
+import 'package:mc_media/mc_media.dart';
+import 'package:zz_db_a/src/domain/model/category_id.dart';
+import 'package:zz_db_a/src/domain/model/comic_id.dart';
+
+part 'store.freezed.dart';
+
+// The store as this feature shows it. Domain models: no JSON, so a bare
+// `@freezed` (R30 is about models with JSON); the wire shapes are in
+// `store_dto.dart`. Money is `Money` (integer minor units), never a double.
+
+/// A comic the store sells.
+@freezed
+abstract class Product with _$Product {
+  const factory Product({
+    required ComicId id,
+    required String title,
+    required ApiImage cover,
+
+    /// The store's list price.
+    required Money price,
+
+    /// What the cart charges when the product is one of the deals.
+    Money? dealPrice,
+  }) = _Product;
+}
+
+/// A discounted product: the price it had, the price it has, and when the
+/// offer ends.
+@freezed
+abstract class Deal with _$Deal {
+  const factory Deal({
+    required Product product,
+    required Money originalPrice,
+    required Money dealPrice,
+    required int discountPercent,
+
+    /// The instant the deal ends, in UTC.
+    required DateTime endsAt,
+  }) = _Deal;
+
+  const Deal._();
+
+  /// Whether the deal still runs at [now]: it ends at [endsAt] exactly.
+  bool runsAt(DateTime now) => endsAt.isAfter(now);
+
+  /// Whole days left at [now], rounded down: 25 hours left is 1 day, 1 hour
+  /// left is 0 ("ends today"). Only for a deal that [runsAt] [now].
+  int daysLeftAt(DateTime now) => endsAt.difference(now).inDays;
+}
+
+/// A store banner and where it leads.
+@freezed
+abstract class StoreBanner with _$StoreBanner {
+  const factory StoreBanner({
+    required String id,
+    required String title,
+    required String subtitle,
+    required ApiImage image,
+    required BannerTarget target,
+  }) = _StoreBanner;
+}
+
+/// Where a banner leads: a comic, a category of the store, or a search.
+/// Public cases, matched with `switch` (F-0046 fact 1).
+@freezed
+sealed class BannerTarget with _$BannerTarget {
+  const factory BannerTarget.comic(ComicId id) = ComicTarget;
+  const factory BannerTarget.category(CategoryId id) = CategoryTarget;
+  const factory BannerTarget.search(String query) = SearchTarget;
+}
+
+/// One category of the store.
+@freezed
+abstract class StoreCategory with _$StoreCategory {
+  const factory StoreCategory({
+    required CategoryId id,
+    required String name,
+
+    /// How many products it has.
+    required int count,
+    required ApiImage image,
+  }) = _StoreCategory;
+}
+
+/// What the store home shows of the signed-in user's cart.
+@freezed
+abstract class CartSummary with _$CartSummary {
+  const factory CartSummary({required int itemCount, required Money total}) =
+      _CartSummary;
+}
