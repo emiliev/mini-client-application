@@ -1,0 +1,81 @@
+# e2e_ios.sh: T-0070 engineer on mc-T-0070-engineer-75680 (2F065A15-0742-4BAC-BF60-99B33F286F06)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1d52d970a9af6139/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7MW4Ku/screenshots/2-settings_signed_in_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/settings_signed_in_test.dart -d 2F065A15-0742-4BAC-BF60-99B33F286F06
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1d52d970a9af6139`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1d52d970a9af6139`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           11.2s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:55968/TRJgG6kbcLE=/
+VMServiceFlutterDriver: Isolate found with number: 652367494499663
+VMServiceFlutterDriver: Isolate 652367494499663 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0063-AC5 signed in: Light, relaunched, still Light, and the account holds Light
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: home, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: settings_home, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 3}
+flutter: [debug] SettingsHomeBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: settings_appearance, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 4}
+flutter: [debug] AppearanceBloc: _Load _Loading -> _Ready
+flutter: [debug] AppearanceBloc: _SyncAcrossDevices _Ready -> _Ready
+flutter: [event] mc_screen_view {screen_name: auth_sign_in, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 5}
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] POST /v1/auth/sign-in -> 200
+flutter: [debug] SettingsHomeBloc: _SessionChanged _Ready -> _Ready
+flutter: [debug] AppearanceBloc: _Changed _Ready -> _Ready
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] GET /v1/me/preferences -> 200
+flutter: [debug] GET /v1/me -> 200
+flutter: [debug] AuthSignInBloc: _FormChanged AuthSignInState -> AuthSignInState
+flutter: [debug] AppearanceBloc: _SyncAcrossDevices _Ready -> _Ready
+flutter: [event] mc_screen_view {screen_name: settings_appearance, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 6}
+flutter: [debug] AppearanceBloc: _Changed _Ready -> _Ready
+flutter: [debug] SettingsHomeBloc: _SessionChanged _Ready -> _Ready
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [debug] AppearanceBloc: _SetThemeMode _Ready -> _Ready
+flutter: [event] settings_changed {setting: theme_mode, value: light, session_id: c1cdd86447bc6e5252da48767f34aa7e, seq: 7}
+flutter: [debug] SettingsHomeBloc: _AppearanceChanged _Ready -> _Ready
+flutter: [debug] PATCH /v1/me/preferences -> 200
+flutter: [debug] AppearanceBloc: _Changed _Ready -> _Ready
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: ef64f0ca75b920f9073012ec4eaab197, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] GET /v1/me/preferences -> 200
+flutter: [debug] PATCH /v1/me/preferences -> 200
+flutter: [event] mc_screen_view {screen_name: home, session_id: ef64f0ca75b920f9073012ec4eaab197, seq: 2}
+flutter: 00:09 +1: (tearDownAll)
+flutter: 00:09 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7MW4Ku/screenshots/2-settings_signed_in_test/65_sync_sign_in_form.png (273495)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7MW4Ku/screenshots/2-settings_signed_in_test/66_signed_in_light_synced.png (277382)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.7MW4Ku/screenshots/2-settings_signed_in_test/67_relaunched_still_light.png (346383)
+All tests passed.
+
+# exit code: 0
