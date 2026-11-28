@@ -1,0 +1,1036 @@
+# The second section-detail (SC) exemplar's spec (T-0072, P2-05): the
+# hand-built `characters_details` (T-0067), a copy of `comics_details` with a
+# second request (the character's comics), analytics, and no inner page. Two
+# real modules round-trip through the same archetype, which is what shows
+# that it generalises. `mcgen gen characters_details --check` renders this
+# spec and compares the render with the package, byte for byte outside keep
+# regions and owned files (plan 02 KD1, ADR-0017); the package stays
+# hand-built (ejected) and gen writes only .mcgen/manifest.json.
+#
+# What the archetype does not template is owned: the model files (entity,
+# DTOs, mapper), the pages and widgets, the test env, the flow-scope test,
+# the contract tests and the steps about this page's own sections. The
+# `entities` below are the starting point mcgen would write for them (only
+# what the managed files reference); the hand-written files are richer, and
+# only their existence is checked.
+schema: mcgen/1
+module: characters_details
+tier: feature
+archetype: section_detail
+ownership: ejected
+exemplar: true
+description: One character's profile in sections, with a favourite that asks the app to sign in.
+deps: [mc_analytics, mc_ds_buttons, mc_ds_cards, mc_ds_charts, mc_ds_feedback, mc_ds_layout, mc_ds_media, mc_ds_navigation, mc_ds_theme, mc_ds_tokens, mc_l10n_core, mc_media]
+dev_deps: [mc_fixtures_characters, mc_fixtures_comics, mc_mocked_backend, mc_storage]
+owned:
+  - lib/src/domain/model/character.dart
+  - lib/src/domain/model/character_dto.dart
+  - lib/src/domain/model/character_mapper.dart
+  - lib/src/presentation/page/**
+  - lib/src/presentation/widget/character_*.dart
+  - test/contract/**
+  - test/feature/util/characters_details_env.dart
+  - test/flow_scope_test.dart
+keep: [details.openComic]
+
+entities:
+  - name: Character
+    doc: |-
+      A character as this page shows it.
+    fields:
+      - {name: id, type: CharacterId}
+      - {name: name, type: String}
+  - name: ComicSummary
+    doc: |-
+      A comic the character appears in, as the "Comics" row lists it.
+    fields:
+      - {name: id, type: ComicId}
+      - {name: title, type: String}
+  - name: CharacterDto
+    json: true
+    doc: |-
+      `GET /v1/characters/:id`: one character in detail.
+    fields:
+      - {name: id, type: int}
+      - {name: name, type: String}
+  - name: ComicSummaryDto
+    json: true
+    doc: |-
+      One comic of `GET /v1/comics?characterId=`.
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+  - name: ComicsPageDto
+    json: true
+    doc: |-
+      `GET /v1/comics?characterId=`: a page of comics.
+    fields:
+      - {name: results, type: "List<ComicSummaryDto>"}
+
+navigator:
+  name: CharacterDetailsNavigator
+  doc: |-
+    What characters_details needs from outside: intents in the feature's own
+    language, never routes (plan 01 §4.1). Implemented in
+    `app/wiring/universe_wiring` (T-0067). Only blocs call it.
+  outbound: [openComic(ComicId), "requestSignIn() -> bool"]
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: characterDetailsTitle
+      description: "Title of the profile page before the character has loaded."
+      text: {en: "Character", de: "Figur", en_XA: "[Çĥàŕàçţéŕ ~~~~]"}
+    - key: characterDetailsLoading
+      description: "Screen-reader label while the character loads."
+      text: {en: "Loading the character", de: "Figur wird geladen", en_XA: "[Ļóàðíñĝ ţĥé çĥàŕàçţéŕ ~~~~~~~~]"}
+    - key: characterDetailsErrorTitle
+      description: "Title when the character fails to load; the reason and Retry follow."
+      text: {en: "The character could not be loaded", de: "Die Figur konnte nicht geladen werden", en_XA: "[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]"}
+    - key: characterDetailsNotFoundTitle
+      description: "Title when no character has the requested id."
+      text: {en: "Character not found", de: "Figur nicht gefunden", en_XA: "[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]"}
+    - key: characterDetailsNotFoundMessage
+      description: "Message below the not-found title."
+      text: {en: "This character does not exist or is no longer available.", de: "Diese Figur gibt es nicht oder nicht mehr.", en_XA: "[Ţĥíš çĥàŕàçţéŕ ðóéš ñóţ éxíšţ óŕ íš ñó ļóñĝéŕ àvàíļàƀļé. ~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: characterDetailsPortraitLabel
+      description: "Screen-reader label of the portrait image."
+      placeholders: {name: {type: String}}
+      text: {en: "Portrait of {name}", de: "Porträt von {name}", en_XA: "[Þóŕţŕàíţ óƒ {name} ~~~~~]"}
+    - key: characterDetailsAliases
+      description: "The character's other names, below its name; the placeholder is a comma-separated list."
+      placeholders: {aliases: {type: String}}
+      text: {en: "Also known as {aliases}", de: "Auch bekannt als {aliases}", en_XA: "[Àļšó ķñóŵñ àš {aliases} ~~~~~~]"}
+    - key: characterDetailsBio
+      description: "Section title above the character's biography."
+      text: {en: "Biography", de: "Biografie", en_XA: "[Ɓíóĝŕàþĥý ~~~~]"}
+    - key: characterDetailsFacts
+      description: "Section title above origin, team, first appearance and powers."
+      text: {en: "Details", de: "Angaben", en_XA: "[Ðéţàíļš ~~~]"}
+    - key: characterDetailsFactOrigin
+      description: "Label of the origin fact."
+      text: {en: "Origin", de: "Herkunft", en_XA: "[Óŕíĝíñ ~~]"}
+    - key: characterDetailsFactTeam
+      description: "Label of the team fact."
+      text: {en: "Team", de: "Team", en_XA: "[Ţéàɱ ~~]"}
+    - key: characterDetailsFactFirstAppearance
+      description: "Label of the first appearance year fact."
+      text: {en: "First appeared", de: "Erster Auftritt", en_XA: "[Ƒíŕšţ àþþéàŕéð ~~~~~~]"}
+    - key: characterDetailsFactPowers
+      description: "Label of the powers fact; the value lists them."
+      text: {en: "Powers", de: "Kräfte", en_XA: "[Þóŵéŕš ~~]"}
+    - key: characterDetailsStats
+      description: "Section title above the stats chart."
+      text: {en: "Power stats", de: "Kraftwerte", en_XA: "[Þóŵéŕ šţàţš ~~~~]"}
+    - key: characterDetailsStatsLabel
+      description: "Screen-reader summary of the stats chart."
+      placeholders: {name: {type: String}}
+      text: {en: "Power stats of {name}", de: "Kraftwerte von {name}", en_XA: "[Þóŵéŕ šţàţš óƒ {name} ~~~~~~]"}
+    - key: characterDetailsStatsEmpty
+      description: "Shown instead of the chart when the character has no stats."
+      text: {en: "No stats available.", de: "Keine Werte verfügbar.", en_XA: "[Ñó šţàţš àvàíļàƀļé. ~~~~~~~~]"}
+    - key: characterDetailsStatIntelligence
+      description: "Power stat."
+      text: {en: "Intelligence", de: "Intelligenz", en_XA: "[Íñţéļļíĝéñçé ~~~~~]"}
+    - key: characterDetailsStatStrength
+      description: "Power stat."
+      text: {en: "Strength", de: "Stärke", en_XA: "[Šţŕéñĝţĥ ~~~]"}
+    - key: characterDetailsStatSpeed
+      description: "Power stat."
+      text: {en: "Speed", de: "Tempo", en_XA: "[Šþééð ~~]"}
+    - key: characterDetailsStatDurability
+      description: "Power stat: how much punishment the character takes."
+      text: {en: "Durability", de: "Robustheit", en_XA: "[Ðúŕàƀíļíţý ~~~~]"}
+    - key: characterDetailsStatEnergy
+      description: "Power stat: energy projection."
+      text: {en: "Energy", de: "Energie", en_XA: "[Éñéŕĝý ~~]"}
+    - key: characterDetailsStatCombat
+      description: "Power stat: fighting skill."
+      text: {en: "Combat", de: "Kampfkraft", en_XA: "[Çóɱƀàţ ~~]"}
+    - key: characterDetailsComics
+      description: "Section title above the row of comics the character appears in."
+      text: {en: "Comics", de: "Comics", en_XA: "[Çóɱíçš ~~]"}
+    - key: characterDetailsComicsEmpty
+      description: "Shown instead of the row when no comic features the character."
+      text: {en: "No comics yet.", de: "Noch keine Comics.", en_XA: "[Ñó çóɱíçš ýéţ. ~~~~~~]"}
+    - key: characterDetailsFavouriteAdd
+      description: "Favourite toggle while the character is not a favourite."
+      text: {en: "Add to favourites", de: "Zu Favoriten hinzufügen", en_XA: "[Àðð ţó ƒàvóúŕíţéš ~~~~~~~]"}
+    - key: characterDetailsFavouriteRemove
+      description: "Favourite toggle while the character is a favourite."
+      text: {en: "Remove from favourites", de: "Aus Favoriten entfernen", en_XA: "[Ŕéɱóvé ƒŕóɱ ƒàvóúŕíţéš ~~~~~~~~~]"}
+    - key: characterDetailsFavouriteSaveFailed
+      description: "Inline error below the toggle after a failed write; the toggle is back where it was."
+      text: {en: "Your favourites could not be updated. Please try again.", de: "Deine Favoriten konnten nicht aktualisiert werden. Bitte versuche es erneut.", en_XA: "[Ýóúŕ ƒàvóúŕíţéš çóúļð ñóţ ƀé úþðàţéð. Þļéàšé ţŕý àĝàíñ. ~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: characterDetailsFavouriteLoadFailed
+      description: "Inline error below the toggle when reading the favourite failed."
+      text: {en: "Your favourites could not be checked.", de: "Deine Favoriten konnten nicht geprüft werden.", en_XA: "[Ýóúŕ ƒàvóúŕíţéš çóúļð ñóţ ƀé çĥéçķéð. ~~~~~~~~~~~~~~~]"}
+
+bdd:
+  - feature: characters_details
+    title: "A character's profile"
+    description: |-
+      Fans open one character and read its profile section by section: the
+      portrait and names, the biography, the power stats, the comics it appears
+      in and the details, each leading on.
+    background:
+      - "# The comics domain answers the \"Comics\" row (GET /v1/comics?characterId=);"
+      - "# the strict harness fails any request to a route nothing serves."
+      - "Given the backend serves {'characters.default'}"
+      - "And the backend serves {'comics.default'}"
+    scenarios:
+      - title: "The profile shows the header, the bio, the stats, the comics and the favourite"
+        tags: [T-0067-AC1, smoke]
+        steps:
+          - "When I open character {100002}"
+          - "Then the backend received {'GET /v1/characters/100002'}"
+          - "And I see the header of character {100002} with its bundled portrait"
+          - "And I see {'Also known as The Sentinel'}"
+          - "And I see {'Add to favourites'}"
+          - "And I see {'Biography'}"
+          - "And I see the bio of character {100002}"
+          - "And I see {'Power stats'}"
+          - "And the stats chart shows the stats of character {100002}"
+          - "And I scroll the profile until I see {'Comics'}"
+          - "And the comics row lists the comics of character {100002}"
+          - "And the backend received {1} requests for {'GET /v1/characters/100002'}"
+          - "And the backend received {1} requests for {'GET /v1/comics'}"
+      - title: "The details name the origin, the team, the first appearance and the powers"
+        tags: [T-0067-AC1]
+        steps:
+          - "When I open character {100002}"
+          - "And I scroll the profile until I see {'Details'}"
+          - "Then the fact {'Origin'} reads {'a clockmaker\\'s daughter'}"
+          - "And the fact {'Team'} reads {'The Undertow'}"
+          - "And the fact {'First appeared'} reads {'1984'}"
+          - "And the fact {'Powers'} reads {'Frost breath, Memory reading, Tidal command'}"
+      - title: "A character with no aliases shows no aliases line"
+        tags: [T-0067-AC1]
+        steps:
+          - "When I open character {100000}"
+          - "Then I see the header of character {100000} with its bundled portrait"
+          - "And I don't see {'Also known as'}"
+          - "And the stats chart shows the stats of character {100000}"
+      - title: "A character no comic features says so instead of showing a row"
+        tags: [T-0067-AC1]
+        steps:
+          - "When I open character {101187}"
+          - "Then I see the header of character {101187} with its bundled portrait"
+          - "When I scroll the profile until I see {'No comics yet.'}"
+          - "Then there is no comics row"
+          - "And the backend received {1} requests for {'GET /v1/comics'}"
+      - title: "A failed character explains the problem and retries"
+        tags: [T-0067-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/characters/100002'} with {<failure>}"
+          - "When I open character {100002}"
+          - "Then I see {'The character could not be loaded'}"
+          - "And I see {<message>}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then I see the header of character {100002} with its bundled portrait"
+          - "And I don't see {'The character could not be loaded'}"
+        examples:
+          - ["failure", "message"]
+          - ["'server_error'", "'The server had a problem. Please try again later.'"]
+          - ["'timeout'", "'The request took too long. Please try again.'"]
+          - ["'offline'", "'No connection. Check your network and try again.'"]
+          - ["'malformed'", "'Something went wrong.'"]
+      - title: "Failed comics fail the page, and Retry loads both again"
+        tags: [T-0067-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/comics'} with {'server_error'}"
+          - "When I open character {100002}"
+          - "Then I see {'The character could not be loaded'}"
+          - "And I see {'The server had a problem. Please try again later.'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then I see the header of character {100002} with its bundled portrait"
+          - "And the backend received {2} requests for {'GET /v1/characters/100002'}"
+          - "# Three failed attempts (the client retries a failing GET twice) and the"
+          - "# answer after Retry."
+          - "And the backend received {4} requests for {'GET /v1/comics'}"
+      - title: "A double Retry sends one request"
+        tags: [T-0067-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/characters/100002'} with {'malformed'}"
+          - "When I open character {100002}"
+          - "Then I see {'The character could not be loaded'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'} twice in quick succession"
+          - "Then I see the header of character {100002} with its bundled portrait"
+          - "And the backend received {2} requests for {'GET /v1/characters/100002'}"
+          - "And the backend received {2} requests for {'GET /v1/comics'}"
+      - title: "An unknown character shows that it was not found"
+        tags: [T-0067-AC2]
+        steps:
+          - "When I open character {999999}"
+          - "Then I see {'Character not found'}"
+          - "And I see {'This character does not exist or is no longer available.'}"
+          - "And I don't see {'Retry'}"
+          - "And nothing overflows"
+          - "And the backend received {1} requests for {'GET /v1/characters/999999'}"
+      - title: "An unknown character is not found even when the comics fail"
+        tags: [T-0067-AC2]
+        steps:
+          - "Given the backend fails {'GET /v1/comics'} with {'server_error'}"
+          - "When I open character {999999}"
+          - "Then I see {'Character not found'}"
+          - "And I don't see {'The character could not be loaded'}"
+      - title: "Tapping a comic hands it over to the app exactly once"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap the comic {'Brass Crossing #8'}"
+          - "Then the app was asked to open comic {'Brass Crossing #8'}"
+      - title: "A double tap on a comic hands it over once (P-089)"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap the comic {'Brass Crossing #8'} twice in quick succession"
+          - "Then the app was asked to open comic {'Brass Crossing #8'}"
+      - title: "A second tap 499 ms after the first is still the same tap (P-089)"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap the comic {'Brass Crossing #8'} and again after {499} milliseconds"
+          - "Then the app was asked to open comic {'Brass Crossing #8'}"
+      - title: "A tap 501 ms after the first opens the comic again (P-089)"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap the comic {'Brass Crossing #8'} and again after {501} milliseconds"
+          - "Then the app was asked to open comic {'Brass Crossing #8'} {2} times"
+      - title: "Tapping a different comic 450 ms later is not a double tap (P-089)"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap the comic {'Brass Crossing #8'} and then {'Cinder Reckoning #2'} after {450} milliseconds"
+          - "Then the app was asked to open comics {'Brass Crossing #8'} and {'Cinder Reckoning #2'}"
+      - title: "In German the sections and labels are German"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open character {100002}"
+          - "Then I see {'Auch bekannt als The Sentinel'}"
+          - "And I see {'Zu Favoriten hinzufügen'}"
+          - "And I see {'Biografie'}"
+          - "And I see {'Kraftwerte'}"
+          - "And the stats chart reads {'Kraftwerte von Spiral Warden'} then {'Intelligenz: 72, Stärke: 93, Tempo: 10, Robustheit: 26, Energie: 93, Kampfkraft: 68'}"
+          - "When I scroll the profile until I see {'Angaben'}"
+          - "Then the fact {'Herkunft'} reads {'a clockmaker\\'s daughter'}"
+          - "And the fact {'Erster Auftritt'} reads {'1984'}"
+          - "And the fact {'Kräfte'} reads {'Frost breath, Memory reading, Tidal command'}"
+      - title: "The stats chart reads each stat in English for a screen reader"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "When I open character {100002}"
+          - "Then the stats chart reads {'Power stats of Spiral Warden'} then {'Intelligence: 72, Strength: 93, Speed: 10, Durability: 26, Energy: 93, Combat: 68'}"
+      - title: "In German a failed character explains itself in German"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And the backend fails {'GET /v1/characters/100002'} with {'server_error'}"
+          - "When I open character {100002}"
+          - "Then I see {'Die Figur konnte nicht geladen werden'}"
+          - "And I see {'Erneut versuchen'}"
+      - title: "In German an unknown character says so in German"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open character {999999}"
+          - "Then I see {'Figur nicht gefunden'}"
+          - "And I see {'Diese Figur gibt es nicht oder nicht mehr.'}"
+      - title: "In German a character nobody features says so in German"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open character {101187}"
+          - "And I scroll the profile until I see {'Noch keine Comics.'}"
+          - "Then there is no comics row"
+      - title: "In German at <scale>x nothing overflows on any state"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And the text scale is <scale>"
+          - "When I open character {100002}"
+          - "Then I see {'Biografie'}"
+          - "And nothing overflows"
+          - "When I scroll the profile to the end"
+          - "Then I see {'Angaben'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In the pseudo-locale at <scale>x nothing overflows on any section"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "When I open character {100002}"
+          - "Then I see {'[Ɓíóĝŕàþĥý ~~~~]'}"
+          - "And I see {'[Àļšó ķñóŵñ àš The Sentinel ~~~~~~]'}"
+          - "And I see {'[Àðð ţó ƒàvóúŕíţéš ~~~~~~~]'}"
+          - "And nothing overflows"
+          - "When I scroll the profile until I see {'[Þóŵéŕ šţàţš ~~~~]'}"
+          - "Then nothing overflows"
+          - "When I scroll the profile until I see {'[Çóɱíçš ~~]'}"
+          - "Then nothing overflows"
+          - "When I scroll the profile to the end"
+          - "Then I see {'[Ðéţàíļš ~~~]'}"
+          - "And the fact {'[Óŕíĝíñ ~~]'} reads {'a clockmaker\\'s daughter'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In the pseudo-locale at <scale>x a character nobody features does not overflow"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "When I open character {101187}"
+          - "And I scroll the profile until I see {'[Ñó çóɱíçš ýéţ. ~~~~~~]'}"
+          - "Then nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In German at <scale>x the not-found and the failed states do not overflow"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And the text scale is <scale>"
+          - "And the backend fails {'GET /v1/characters/100002'} with {'server_error'}"
+          - "When I open character {<id>}"
+          - "Then I see {<text>}"
+          - "And nothing overflows"
+        examples:
+          - ["scale", "id", "text                                    "]
+          - ["1", "999999", "'Figur nicht gefunden'                  "]
+          - ["2", "999999", "'Figur nicht gefunden'                  "]
+          - ["1", "100002", "'Die Figur konnte nicht geladen werden' "]
+          - ["2", "100002", "'Die Figur konnte nicht geladen werden' "]
+      - title: "In the pseudo-locale at <scale>x the not-found and the failed states do not overflow"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "And the backend fails {'GET /v1/characters/100002'} with {'server_error'}"
+          - "When I open character {<id>}"
+          - "Then I see {<text>}"
+          - "And nothing overflows"
+        examples:
+          - ["scale", "id", "text                                                  "]
+          - ["1", "999999", "'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                      "]
+          - ["2", "999999", "'[Çĥàŕàçţéŕ ñóţ ƒóúñð ~~~~~~~~]'                      "]
+          - ["1", "100002", "'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'  "]
+          - ["2", "100002", "'[Ţĥé çĥàŕàçţéŕ çóúļð ñóţ ƀé ļóàðéð ~~~~~~~~~~~~~]'  "]
+  - feature: characters_details_favourite
+    title: "Favourite a character"
+    description: |-
+      Fans keep characters among their favourites. Signed out, the app asks them to
+      sign in first; signed in, the toggle answers at once and owns up when the
+      write fails.
+    background:
+      - "Given the backend serves {'characters.default'}"
+      - "And the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+    scenarios:
+      - title: "Signed out, the favourite waits for sign-in and then saves it"
+        tags: [T-0067-AC3, smoke]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "Then the app was asked to sign in {1} time"
+          - "And I see {'Add to favourites'}"
+          - "And the button {'Add to favourites'} is disabled"
+          - "And the backend received {0} requests for {'* /v1/me/favourites/:kind/:id'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {'PUT /v1/me/favourites/character/100002'} with the bearer of {'reader@mini-client.test'}"
+          - "And the backend received {'GET /v1/me/favourites/character/100002'} with the bearer of {'reader@mini-client.test'}"
+          - "And the backend answered {'PUT /v1/me/favourites/character/100002'} with {200}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+          - "And the app announced {1} change to {'favourites'}"
+          - "And the analytics event {'character_favourited'} was tracked with"
+          - "  | 'key' | 'json'   |"
+          - "  | 'id'  | '100002' |"
+          - "And the favourite of character {100002} was tracked {1} times"
+      - title: "Signed out, backing out of sign-in changes nothing and sends nothing"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "And signing in is cancelled"
+          - "Then I see {'Add to favourites'}"
+          - "And the app was asked to sign in {1} time"
+          - "And the backend received {0} requests for {'* /v1/me/favourites/:kind/:id'}"
+          - "And the backend received {0} requests for {'* /v1/me'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And no analytics event was tracked"
+          - "And character {100002} is not a favourite of {'reader@mini-client.test'}"
+      - title: "Signed out, a double tap asks to sign in once and sends one request"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'} twice in quick succession"
+          - "Then the app was asked to sign in {1} time"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the app announced {1} change to {'favourites'}"
+      - title: "Signed in, the toggle flips at once and a failed write rolls it back"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "Given the backend holds {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend fails {'PUT /v1/me/favourites/character/100002'} with {'server_error'}"
+          - "When I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the button {'Remove from favourites'} is disabled"
+          - "When the backend releases {'PUT /v1/me/favourites/character/100002'}"
+          - "Then I see {'Add to favourites'}"
+          - "And I see {'Your favourites could not be updated. Please try again.'}"
+          - "And the app was asked to sign in {0} time"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And no analytics event was tracked"
+          - "And character {100002} is not a favourite of {'reader@mini-client.test'}"
+      - title: "Signed in, a removal that fails keeps the favourite"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the app announced {1} change to {'favourites'}"
+          - "Given the backend fails {'DELETE /v1/me/favourites/character/100002'} with {'offline'}"
+          - "When I tap {'Remove from favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And I see {'Your favourites could not be updated. Please try again.'}"
+          - "And the app announced {1} change to {'favourites'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+          - "When the backend recovers"
+          - "And I tap {'Remove from favourites'}"
+          - "Then I see {'Add to favourites'}"
+          - "And I don't see {'Your favourites could not be updated. Please try again.'}"
+          - "And the app announced {2} change to {'favourites'}"
+          - "And the favourite of character {100002} was tracked {1} times"
+          - "And character {100002} is not a favourite of {'reader@mini-client.test'}"
+      - title: "Signed in, a double tap sends one request"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'} twice in quick succession"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And the app announced {1} change to {'favourites'}"
+      - title: "Signed in, the toggle shows a saved favourite"
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has character {100002} among their favourites"
+          - "When I open character {100002}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "And the app was asked to sign in {0} time"
+      - title: "The seeded favourites of the reader show Remove from the start"
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100000}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'GET /v1/me/favourites/character/100000'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/favourites/character/100000'}"
+          - "And no analytics event was tracked"
+      - title: "A favourite that cannot be checked says so"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And the backend fails {'GET /v1/me/favourites/character/100002'} with {'server_error'}"
+          - "When I open character {100002}"
+          - "Then I see {'Add to favourites'}"
+          - "And I see {'Your favourites could not be checked.'}"
+          - "When the backend recovers"
+          - "And I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+      - title: "In German the favourite labels and its error are German"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "Then I see {'Zu Favoriten hinzufügen'}"
+          - "When I tap {'Zu Favoriten hinzufügen'}"
+          - "Then I see {'Aus Favoriten entfernen'}"
+          - "Given the backend fails {'DELETE /v1/me/favourites/character/100002'} with {'server_error'}"
+          - "When I tap {'Aus Favoriten entfernen'}"
+          - "Then I see {'Aus Favoriten entfernen'}"
+          - "And I see {'Deine Favoriten konnten nicht aktualisiert werden. Bitte versuche es erneut.'}"
+      - title: "The pseudo-locale renders the favourite error without overflow"
+        tags: [T-0067-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And I am signed in as {'reader@mini-client.test'}"
+          - "And the backend fails {'PUT /v1/me/favourites/character/100002'} with {'server_error'}"
+          - "When I open character {100002}"
+          - "And I tap {'[Àðð ţó ƒàvóúŕíţéš ~~~~~~~]'}"
+          - "Then I see {'[Ýóúŕ ƒàvóúŕíţéš çóúļð ñóţ ƀé úþðàţéð. Þļéàšé ţŕý àĝàíñ. ~~~~~~~~~~~~~~~~~~~~~~]'}"
+          - "And nothing overflows"
+      - title: "Signed out, signing in as a user who already has the favourite writes nothing"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given {'reader@mini-client.test'} has character {100002} among their favourites"
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "And signing in succeeds as {'reader@mini-client.test'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+      - title: "A sign-in elsewhere shows that user's favourite"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given {'reader@mini-client.test'} has character {100002} among their favourites"
+          - "When I open character {100002}"
+          - "Then I see {'Add to favourites'}"
+          - "When {'reader@mini-client.test'} signs in elsewhere"
+          - "Then I see {'Remove from favourites'}"
+          - "And the app was asked to sign in {0} time"
+      - title: "A sign-out elsewhere shows the character as not a favourite"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "When the session ends elsewhere"
+          - "Then I see {'Add to favourites'}"
+          - "And the user is signed out"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+      - title: "A rejected refresh during a write signs out and shows Add again"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "Given the backend fails {'PUT /v1/me/favourites/character/100002'} with {'unauthorized'}"
+          - "And the backend fails {'POST /v1/auth/refresh'} with {'unauthorized'}"
+          - "When I tap {'Add to favourites'}"
+          - "And the app finishes writing to storage"
+          - "Then I see {'Add to favourites'}"
+          - "And I don't see {'Your favourites could not be updated. Please try again.'}"
+          - "And the user is signed out"
+          - "And the backend received {1} requests for {'POST /v1/auth/refresh'}"
+          - "And the app announced {0} change to {'favourites'}"
+      - title: "Signed out, a failed read after sign-in writes nothing and says so"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "Given the backend fails {'GET /v1/me/favourites/character/100002'} with {'server_error'}"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "Then I see {'Your favourites could not be checked.'}"
+          - "And I see {'Add to favourites'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the app announced {0} change to {'favourites'}"
+      - title: "A sign-out while the flag is being read shows the signed-out view"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has character {100002} among their favourites"
+          - "And the backend holds {'GET /v1/me/favourites/character/100002'}"
+          - "When I open character {100002}"
+          - "And the app sends {'GET /v1/me/favourites/character/100002'}"
+          - "Then the backend received {1} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "When the session ends elsewhere"
+          - "And the backend releases {'GET /v1/me/favourites/character/100002'}"
+          - "Then I see {'Add to favourites'}"
+          - "And I don't see {'Remove from favourites'}"
+          - "And the user is signed out"
+      - title: "A sign-out during the read after sign-in writes nothing"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "Given the backend holds {'GET /v1/me/favourites/character/100002'}"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "And the app sends {'GET /v1/me/favourites/character/100002'}"
+          - "And the session ends elsewhere"
+          - "And the backend releases {'GET /v1/me/favourites/character/100002'}"
+          - "And the app finishes writing to storage"
+          - "Then I see {'Add to favourites'}"
+          - "And I don't see {'Your favourites could not be updated. Please try again.'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And the user is signed out"
+          - "And character {100002} is not a favourite of {'reader@mini-client.test'}"
+      - title: "Another user signing in during the read after sign-in gets no write"
+        tags: [T-0067-AC3]
+        steps:
+          - "When I open character {100002}"
+          - "And I tap {'Add to favourites'}"
+          - "Given the backend holds {'GET /v1/me/favourites/character/100002'}"
+          - "When signing in succeeds as {'reader@mini-client.test'}"
+          - "And the app sends {'GET /v1/me/favourites/character/100002'}"
+          - "And {'collector@mini-client.test'} signs in elsewhere"
+          - "And the backend releases {'GET /v1/me/favourites/character/100002'}"
+          - "And the app finishes writing to storage"
+          - "Then I see {'Add to favourites'}"
+          - "And the backend received {0} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And the backend received {2} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And character {100002} is not a favourite of {'collector@mini-client.test'}"
+          - "And character {100002} is not a favourite of {'reader@mini-client.test'}"
+      - title: "A sign-out during an in-flight write keeps the saved favourite and shows Add"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "Given the backend holds {'PUT /v1/me/favourites/character/100002'}"
+          - "When I tap {'Add to favourites'}"
+          - "And the app sends {'PUT /v1/me/favourites/character/100002'}"
+          - "Then I see {'Remove from favourites'}"
+          - "When the session ends elsewhere"
+          - "And the backend releases {'PUT /v1/me/favourites/character/100002'}"
+          - "And the app finishes writing to storage"
+          - "Then I see {'Add to favourites'}"
+          - "And I don't see {'Your favourites could not be updated. Please try again.'}"
+          - "And the user is signed out"
+          - "And the backend received {1} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+          - "And the app announced {1} change to {'favourites'}"
+      - title: "Taps during a token refresh send no second write"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "Given the backend fails {'PUT /v1/me/favourites/character/100002'} with {'unauthorized'} once"
+          - "And the backend holds {'POST /v1/auth/refresh'}"
+          - "When I tap {'Add to favourites'}"
+          - "And the app sends {'POST /v1/auth/refresh'}"
+          - "And I tap {'Remove from favourites'}"
+          - "And I tap {'Remove from favourites'}"
+          - "And the backend releases {'POST /v1/auth/refresh'}"
+          - "And the app finishes writing to storage"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {2} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And the backend received {1} requests for {'POST /v1/auth/refresh'}"
+          - "And the app announced {1} change to {'favourites'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+      - title: "A switch to another user elsewhere shows that user's flag"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has character {100002} among their favourites"
+          - "When I open character {100002}"
+          - "Then I see {'Remove from favourites'}"
+          - "When {'collector@mini-client.test'} signs in elsewhere"
+          - "Then I see {'Add to favourites'}"
+          - "When I tap {'Add to favourites'}"
+          - "Then I see {'Remove from favourites'}"
+          - "And character {100002} is a favourite of {'collector@mini-client.test'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+      - title: "A user switch right before the favourite is sent sends nothing for the wrong user"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "And {'collector@mini-client.test'} signs in just before the app sends {'PUT /v1/me/favourites/character/100002'}"
+          - "And I tap {'Add to favourites'}"
+          - "And the app finishes writing to storage"
+          - "Then the backend received {0} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the session belongs to {'collector@mini-client.test'}"
+          - "And the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And I see {'Add to favourites'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And character {100002} is not a favourite of {'collector@mini-client.test'}"
+          - "And character {100002} is not a favourite of {'reader@mini-client.test'}"
+      - title: "A user switch right before the favourite is removed sends nothing for the wrong user"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "And {'reader@mini-client.test'} has character {100002} among their favourites"
+          - "And {'collector@mini-client.test'} has character {100002} among their favourites"
+          - "When I open character {100002}"
+          - "Then I see {'Remove from favourites'}"
+          - "When {'collector@mini-client.test'} signs in just before the app sends {'DELETE /v1/me/favourites/character/100002'}"
+          - "And I tap {'Remove from favourites'}"
+          - "And the app finishes writing to storage"
+          - "Then the backend received {0} requests for {'DELETE /v1/me/favourites/character/100002'}"
+          - "And character {100002} is a favourite of {'collector@mini-client.test'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+          - "And the app announced {0} change to {'favourites'}"
+          - "And the session belongs to {'collector@mini-client.test'}"
+      - title: "Two pages of the same character agree after one of them writes"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002} on two pages"
+          - "Then page {1} shows {'Add to favourites'}"
+          - "And page {2} shows {'Add to favourites'}"
+          - "When I tap {'Add to favourites'} on page {1}"
+          - "Then page {1} shows {'Remove from favourites'}"
+          - "And page {2} shows {'Remove from favourites'}"
+          - "And the backend received {1} requests for {'PUT /v1/me/favourites/character/100002'}"
+          - "And the backend received {3} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "And the app announced {1} change to {'favourites'}"
+      - title: "An announcement that arrives during a write is applied when the write settles"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100002}"
+          - "Given the backend holds {'PUT /v1/me/favourites/character/100002'}"
+          - "When I tap {'Add to favourites'}"
+          - "And the app sends {'PUT /v1/me/favourites/character/100002'}"
+          - "And another page announces a change to {'favourites'}"
+          - "Then the backend received {1} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "When the backend releases {'PUT /v1/me/favourites/character/100002'}"
+          - "And the app finishes writing to storage"
+          - "Then I see {'Remove from favourites'}"
+          - "And the backend received {2} requests for {'GET /v1/me/favourites/character/100002'}"
+          - "And the app announced {2} change to {'favourites'}"
+          - "And character {100002} is a favourite of {'reader@mini-client.test'}"
+      - title: "A refresh caused by an announcement keeps the toggle as it was, enabled"
+        tags: [T-0067-AC3]
+        steps:
+          - "Given I am signed in as {'reader@mini-client.test'}"
+          - "When I open character {100000}"
+          - "Then the favourite toggle shows {'Remove from favourites'} enabled and on"
+          - "Given the backend holds {'GET /v1/me/favourites/character/100000'}"
+          - "When another page announces a change to {'favourites'}"
+          - "Then the backend received {2} requests for {'GET /v1/me/favourites/character/100000'}"
+          - "And the favourite toggle shows {'Remove from favourites'} enabled and on"
+          - "And I don't see {'Add to favourites'}"
+          - "When the backend releases {'GET /v1/me/favourites/character/100000'}"
+          - "Then the favourite toggle shows {'Remove from favourites'} enabled and on"
+  - feature: characters_details_synthetic
+    title: "A character without a bio, an origin or a team"
+    description: |-
+      The synthetic fixture sets have characters with empty text fields; the
+      profile leaves those rows out instead of showing empty ones.
+    background:
+      - "Given the backend serves {'characters.paged_45'}"
+      - "And the backend serves {'comics.default'}"
+    scenarios:
+      - title: "A synthetic character with no bio, origin or team shows no empty rows"
+        tags: [T-0067-AC1]
+        steps:
+          - "When I open character {100000}"
+          - "Then I see {'Hero 01'}"
+          - "And I don't see {'Biography'}"
+          - "When I scroll the profile until I see {'Details'}"
+          - "Then I don't see {'Origin'}"
+          - "And I don't see {'Team'}"
+          - "And the fact {'First appeared'} reads {'2000'}"
+
+options:
+  item: character
+  items: characters
+  prefix: CharacterDetails
+  scroll: profile
+  title: name
+  ids:
+    - name: CharacterId
+      type: int
+      doc: |-
+        A character's id in this feature's own vocabulary (features never share
+        types, plan 01 §4.3). The flow starts from it, so the barrel exports it.
+
+        An extension type: an `int` at run time, but not interchangeable with
+        other ids at compile time.
+    - name: ComicId
+      type: int
+      doc: |-
+        A comic's id as this feature names it: an appearance of the character.
+        The navigator takes it (`openComic`), so the barrel exports it. The wiring
+        maps it to the app's comic location; it is not the type `comics_details`
+        declares (features never share types, plan 01 §4.3).
+  entity: Character
+  dto: CharacterDto
+  item_path: v1/characters/{id}
+  related:
+    name: comics
+    item: comic
+    summary: ComicSummary
+    page_dto: ComicsPageDto
+    path: v1/comics
+    param: characterId
+    limit: 20
+  opens:
+    - calls: openComic
+      id: ComicId
+      label: comic
+      event_doc: A comic in the "Comics" row was tapped.
+      lookup: comicTitled
+      lookup_param: title
+  analytics:
+    event: character_favourited
+    screen: character_details
+    method: characterFavourited
+  tests:
+    fixture_sets: [characters.default, comics.default]
+    user_email: reader@mini-client.test
+    min_pure: 10
+    tags:
+      architecture: T-0067-AC6
+    env:
+      fixture_packages: mc_fixtures_characters mc_fixtures_comics
+      fixture_set_lists: charactersFixtureSets comicsFixtureSets
+      sample_id: "100002"
+    contracts:
+      - name: contract_test
+        main: test/contract/characters_details_api_contract_test.dart
+        comment: The DTOs against the fixture JSON (the one src/ importer, R7).
+        deps:
+          - ":characters_details"
+          - "//utility/mc_fixtures_characters"
+          - "//utility/mc_fixtures_comics"
+          - "//utility/mc_fixtures_identity"
+          - "//utility/mc_media"
+          - "//utility/mc_mocked_backend"
+          - "@pub_deps//:dio"
+          - "@pub_deps//:flutter_test"
+      - name: bloc_guards_test
+        main: test/contract/character_favourite_bloc_guards_test.dart
+        comment: |-
+          The favourite bloc's stale-state guard on its own: the real bloc and
+          repository over the mocked backend, with no auth interceptor (T-0050).
+        deps:
+          - ":characters_details"
+          - "//utility/mc_bloc_kit"
+          - "//utility/mc_event_bus"
+          - "//utility/mc_fixtures_characters"
+          - "//utility/mc_fixtures_comics"
+          - "//utility/mc_fixtures_identity"
+          - "//utility/mc_mocked_backend"
+          - "//utility/mc_monitoring"
+          - "//utility/mc_session"
+          - "//utility/mc_storage"
+          - "@pub_deps//:dio"
+          - "@pub_deps//:flutter_test"
+  build:
+    pure: [mc_media]
+    tests: [mc_api_auth, mc_di, mc_ds_cards, mc_ds_charts, mc_ds_feedback, mc_ds_media, mc_ds_navigation, mc_event_bus, mc_feature_flow, mc_fixtures_characters, mc_fixtures_comics, mc_fixtures_identity, mc_fixtures_media, mc_media, mc_mocked_backend, mc_session, dio, mocktail]
+    flow_scope: [mc_monitoring, mc_storage, mc_test_utils, flutter, flutter_test]
+  prose:
+    build.preamble: |-
+      T-0067: `characters_details`, an SC feature (plan 01 §3.3, F002) copied from
+      the SC exemplar `comics_details` (T-0041). Phase D's buildgen emits this
+      file; until then it is written by hand.
+      No per-package analysis_options.yaml: the root file applies (F-0021).
+
+      Every generator runs as a Bazel action; nothing generated is committed:
+        freezed      character, character_dto, flow state, both bloc states
+        json         character_dto                      (over its freezed output)
+        retrofit     characters_details_api             (fork patch 0001)
+        injectable   4 shards + di_initializer.config.dart (fork patch 0002)
+        gen-l10n     lib/src/l10n/characters_details_l10n*.dart
+        BDD          test/feature/*.feature -> :bdd_test (fork patch 0003)
+
+      Staging (plan 03 §3.4, §4.7). Generators read only Flutter-free libraries
+      (R15): `_stage` holds the hand-written pure files. Two lanes are narrower so
+      that a body edit in a bloc re-runs neither the retrofit part nor the
+      injectable aggregate (T-0041-AC7):
+        - the retrofit and json actions see only the DTO file and its freezed
+          output (`_stage_dto`), never `_stage`;
+        - the injectable aggregate sees only the init file and the shards; a bloc
+          edit re-runs the shards (all of them, F-0028 §5) but they come out
+          byte-identical, so the aggregate is an action-cache hit.
+    pubspec.preamble: |-
+      T-0067: the character profile (archetype SC, plan 01 F002), in the shape of
+      the SC exemplar comics_details.
+    navigator.openComic: "A comic in the \"Comics\" row: hands over to the comic's page."
+    build.api_rule: "# --- characters_details_api: retrofit (fork patch 0001) -------------------------"
+    step.character_is_a_favourite_of.usage: "character {501500} is a favourite of {'reader@mini-client.test'}"
+    step.character_is_not_a_favourite_of.usage: "character {501500} is not a favourite of {'reader@mini-client.test'}"
+    step.has_character_among_their_favourites.usage: "{'reader@mini-client.test'} has character {501500} among their favourites"
+    step.i_open_character.usage: "I open character {501500}"
+    step.i_open_character_on_two_pages.usage: "I open character {501500} on two pages"
+    step.page_shows.usage: "page {1} shows {'Remove from favourites'}"
+    step.the_app_announced_change_to.usage: "the app announced {1} change to {'favourites'}"
+    step.the_fact_reads.usage: "the fact {'Origin'} reads {'an archivist of lost maps'}"
+    step.the_stats_chart_reads_then.usage: "the stats chart reads {'Power stats of Spiral Warden', 'Intelligence: 72, Strength: 93'}"
+    step.comic.open_doc: |-
+      The navigator contract: `openComic` with the id of the comic titled
+      [title] (from the comics fixture), exactly once, and nothing else.
+    api.get_related: |-
+      A page of the comics that feature the character (the comics domain's
+      reverse lookup), in title order.
+    analytics.screen: |-
+      The screen name of the flow's one page: its `McFlowPage` name, which
+      `AnalyticsFlowObserver` tracks. It equals the app route's name
+      (`/characters/:id` is `character_details`), so it is not tracked twice
+      (ADR-0012).
+    analytics.extension: |-
+      The profile's analytics vocabulary over the blocs' pure-Dart port
+      (`AnalyticsTracker`, R15, ADR-0012): the event and its parameters are
+      spelled once, here.
+    analytics.method: |-
+      `character_favourited` with `id`, the character's id. Only a saved
+      favourite counts: not a removal, a failed write or a sign-in that was
+      backed out of.
+    repository.related_limit: |-
+      How many comics the "Comics" row asks for: one page of the comics
+      domain's reverse lookup.
+    repository.fetch_related: |-
+      The comics the character appears in, in title order (at most
+      [comicsLimit]). A character nobody features has none.
+    flow.doc: |-
+      The feature's only entry point (R4): one character's profile in sections
+      (header, bio, stats, comics, favourite). Its comics and its favourite
+      leave the feature through [navigator].
+
+      The app builds it from a route (`/characters/:id`, universe_wiring) with
+      the navigator implementation from its wiring; tests pass a mock. It starts
+      from the id alone (plan 01 §4.4).
+
+      Its one page is the screen `character_details`, tracked from inside the
+      flow by `AnalyticsFlowObserver` (ADR-0012).
+
+      Immutable after creation: the flow reads [navigator] and [characterId]
+      once, when its scope opens (`provide:` runs once per flow instance). A
+      rebuild with a different navigator keeps the first one; a different
+      [characterId] builds a new flow (its `FeatureFlow` is keyed by it), with a
+      fresh scope, state and first page.
+    flow_state.id: |-
+      The character the flow opened on (`/characters/:id`); the flow starts
+      from the id alone (plan 01 §4.4).
+    details_bloc.open_guard: |-
+      How long after handing a comic over a second hand-over of the same one is
+      ignored: the second tap of a double tap (P-089). By then the opened page
+      covers this one. The same value as `comics_details` and
+      `discovery_search`.
+    details_bloc.doc: |-
+      The profile page's bloc: loads the character the flow opened on and the
+      comics it appears in, and hands a tapped comic over to the app through the
+      navigator, which only blocs call (plan 01 §4.1). A second hand-over of
+      the same comic within [openGuard] is ignored, so a double tap opens one
+      page.
+
+      Pure Dart (R15): it imports `package:bloc` through `mc_bloc_kit`, never
+      Flutter, so every generator that reads it runs on analyzer summaries.
+    details_bloc.load_comment: |-
+      Both requests start at once: the profile does not wait for the
+      comics to ask for them.
+    details_bloc.start_guard: |-
+      False while a hand-over of the same [target] still guards (the second
+      tap of a double tap); else starts the guard for it. A different comic
+      goes through at once: popping back and tapping another within
+      [openGuard] is not a double tap.
+    details_event.doc: |-
+      What the profile page asks for. Hand-written sealed events with private
+      cases (Tide), so a page can only create them through the factories.
+    details_state.success: The character and the comics it appears in (possibly none).
+    details_state.failure: |-
+      The character or its comics could not be loaded. `McBloc` reports it to
+      monitoring (D-16).

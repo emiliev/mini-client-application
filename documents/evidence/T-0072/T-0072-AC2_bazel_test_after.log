@@ -1,0 +1,370 @@
+INFO: Invocation ID: 65643272-903b-4203-9bd5-53f2ca55a19b
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 154 targets (12 packages loaded, 0 targets configured)
+Analyzing: 154 targets (12 packages loaded, 0 targets configured)
+
+INFO: From DartCodegen @@//feature/characters/characters_details:_character_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartCodegen @@//feature/comics/comics_details:_comic_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+Analyzing: 154 targets (39 packages loaded, 899 targets configured, 251 aspect applications)
+[8,183 / 10,983] DartCodegen @@//feature/comics/comics_details:_di_config_src_presentation_bloc_comic_favourite_bloc_inj; 0s disk-cache, worker ... (14 actions, 10 running)
+INFO: From DartCodegen @@//feature/discovery/discovery_search:_search_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+Analyzing: 154 targets (39 packages loaded, 955 targets configured, 450 aspect applications)
+[16,688 / 27,670] DartCodegen @@//feature/characters/characters_details:_details_bloc_freezed; 1s disk-cache, worker ... (13 actions, 2 running)
+INFO: From DartCodegen @@//feature/trivia/trivia_quiz:_trivia_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: Analyzed 154 targets (39 packages loaded, 978 targets configured, 520 aspect applications).
+[29,465 / 45,653] [Prepa] Creating symlink app/wiring/publishing_wiring/_creators_routes_go_router_part.pkg_roots.cdf87bab8a5b1f85/flutter/lib/src/foundation/diagnostics.dart
+[40,430 / 63,007] [Prepa] Creating symlink app/wiring/commerce_wiring/_store_routes_go_router_part.pkg_roots.02db5d0613cfec1d/flutter__localizations/lib/src/l10n/cupertino_ky.arb ... (14 actions, 0 running)
+[49,812 / 73,010] [Prepa] Creating symlink app/wiring/commerce_wiring/_di_config_src_navigators_store_home_navigator_impl_inj.pkg_roots.02db5d0613cfec1d/flutter__localizations/lib/src/l10n/material_ta.arb ... (10 actions, 0 running)
+[60,009 / 77,653] [Prepa] Creating symlink app/wiring/discovery_wiring/_search_routes_go_router_part.pkg_roots.3d864d7cbdac17bd/async/lib/src/stream_splitter.dart
+INFO: From DartCodegen @@//feature/library/library_reading_list_editor:_reading_list_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartAggregateCodegen @@//feature/settings/settings_appearance:di_config:
+Missing dependencies in settings_appearance/src/di/di_initializer.dart
+
+[AppearanceBloc] depends on unregistered type [AppearanceSettings] , from package:mc_appearance/mc_appearance.dart
+[AppearanceBloc] depends on unregistered type [SettingsAppearanceNavigator] , from package:settings_appearance/src/navigator/settings_appearance_navigator.dart
+[AppearanceBloc] depends on unregistered type [FeatureFlowController<(SettingsAppearanceFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[AppearanceBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[AppearanceBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartCodegen @@//feature/characters/characters_search:_character_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+[68,441 / 82,822] Checking Dart formatting of //app/wiring/universe_wiring:routes_test; Downloading app/wiring/universe_wiring/routes_test.dart_analyze.formatted; 0s disk-cache ... (14 actions, 0 running)
+INFO: From DartAggregateCodegen @@//feature/comics/comics_details:di_config:
+Missing dependencies in comics_details/src/di/di_initializer.dart
+
+[ComicDetailsBloc] depends on unregistered type [FeatureFlowController<(ComicsDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ComicDetailsBloc] depends on unregistered type [ComicsDetailsNavigator] , from package:comics_details/src/navigator/comics_details_navigator.dart
+[ComicDetailsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[ComicsDetailsApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[ComicFavouriteBloc] depends on unregistered type [FeatureFlowController<(ComicsDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ComicFavouriteBloc] depends on unregistered type [ComicsDetailsNavigator] , from package:comics_details/src/navigator/comics_details_navigator.dart
+[ComicFavouriteBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[ComicFavouriteBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[ComicFavouriteBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[80,835 / 88,429] Checking Dart formatting of //feature/characters/characters_details:characters_details; 0s disk-cache, worker ... (14 actions, 3 running)
+INFO: From DartCodegen @@//feature/store/store_home:_store_dto_json_part:
+[WARNING] rules_dart_ext: You are missing a required dependency on json_annotation in the "dependencies" section of your pubspec with a lower bound of at least "4.12.0".
+INFO: From DartAggregateCodegen @@//feature/characters/characters_details:di_config:
+Missing dependencies in characters_details/src/di/di_initializer.dart
+
+[CharacterDetailsBloc] depends on unregistered type [FeatureFlowController<(CharacterDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharacterDetailsBloc] depends on unregistered type [CharacterDetailsNavigator] , from package:characters_details/src/navigator/characters_details_navigator.dart
+[CharacterDetailsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharacterDetailsApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[CharacterFavouriteBloc] depends on unregistered type [FeatureFlowController<(CharacterDetailsFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharacterFavouriteBloc] depends on unregistered type [CharacterDetailsNavigator] , from package:characters_details/src/navigator/characters_details_navigator.dart
+[CharacterFavouriteBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[CharacterFavouriteBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[CharacterFavouriteBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CharacterFavouriteBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/settings/settings_home:di_config:
+Missing dependencies in settings_home/src/di/di_initializer.dart
+
+[AccountProfileReader] depends on unregistered type [Dio] , from package:dio/dio.dart
+[SettingsHomeBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[SettingsHomeBloc] depends on unregistered type [AppearanceReader] , from package:mc_appearance/mc_appearance.dart
+[SettingsHomeBloc] depends on unregistered type [SettingsHomeNavigator] , from package:settings_home/src/navigator/settings_home_navigator.dart
+[SettingsHomeBloc] depends on unregistered type [AppConfig] , from package:mc_config/mc_config.dart
+[SettingsHomeBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[92,302 / 92,986] Analyzing Dart sources of //feature/characters/characters_details:characters_details against summaries; 0s disk-cache, worker ... (13 actions, 6 running)
+INFO: From DartAggregateCodegen @@//feature/trivia/trivia_quiz:di_config:
+Missing dependencies in trivia_quiz/src/di/di_initializer.dart
+
+[TriviaQuizApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[TriviaResultsBloc] depends on unregistered type [FeatureFlowController<(TriviaQuizFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[TriviaResultsBloc] depends on unregistered type [TriviaQuizNavigator] , from package:trivia_quiz/src/navigator/trivia_quiz_navigator.dart
+[TriviaResultsBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[TriviaResultsBloc] depends on unregistered type [RoundSeeds] , from package:trivia_quiz/src/domain/model/round_seeds.dart
+[TriviaResultsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[TriviaSetupBloc] depends on unregistered type [FeatureFlowController<(TriviaQuizFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[TriviaSetupBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[TriviaSetupBloc] depends on unregistered type [RoundSeeds] , from package:trivia_quiz/src/domain/model/round_seeds.dart
+[TriviaSetupBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[TriviaPlayBloc] depends on unregistered type [FeatureFlowController<(TriviaQuizFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[TriviaPlayBloc] depends on unregistered type [FeatureFlagsReader] , from package:mc_feature_flags/mc_feature_flags.dart
+[TriviaPlayBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[TriviaPlayBloc] depends on unregistered type [RoundSeeds] , from package:trivia_quiz/src/domain/model/round_seeds.dart
+[TriviaPlayBloc] depends on unregistered type [TriviaTicker] , from package:trivia_quiz/src/domain/time/trivia_ticker.dart
+[TriviaPlayBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/characters/characters_list:di_config:
+Missing dependencies in characters_list/src/di/di_initializer.dart
+
+[CharacterPreviewBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharacterPreviewBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListBloc] depends on unregistered type [FeatureFlowController<(CharactersListFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersListBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[CharactersListBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[RelatedComicsBloc] depends on unregistered type [CharactersListNavigator] , from package:characters_list/src/navigator/characters_list_navigator.dart
+[RelatedComicsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CharactersListApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/discovery/discovery_search:di_config:
+Missing dependencies in discovery_search/src/di/di_initializer.dart
+
+[SearchHistory] depends on unregistered type [FileStore] , from package:mc_storage/mc_storage.dart
+[DiscoverySearchApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[DiscoverySearchBloc] depends on unregistered type [FeatureFlowController<(DiscoverySearchFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[DiscoverySearchBloc] depends on unregistered type [DiscoverySearchNavigator] , from package:discovery_search/src/navigator/discovery_search_navigator.dart
+[DiscoverySearchBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/characters/characters_search:di_config:
+Missing dependencies in characters_search/src/di/di_initializer.dart
+
+[CharactersSearchApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[CharactersSearchBloc] depends on unregistered type [FeatureFlowController<(CharactersSearchFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CharactersSearchBloc] depends on unregistered type [CharactersSearchNavigator] , from package:characters_search/src/navigator/characters_search_navigator.dart
+[CharactersSearchBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[SearchHistory] depends on unregistered type [FileStore] , from package:mc_storage/mc_storage.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/chronicle_wiring:di_config:
+Missing dependencies in chronicle_wiring/src/di/di_initializer.dart
+
+[TriviaQuizNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[TriviaQuizNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/library/library_reading_list_editor:di_config:
+Missing dependencies in library_reading_list_editor/src/di/di_initializer.dart
+
+[ComicPickerBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[ReadingListEditorApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[ReadingListEditorBloc] depends on unregistered type [FeatureFlowController<(ReadingListEditorFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[ReadingListEditorBloc] depends on unregistered type [ReadingListEditorNavigator] , from package:library_reading_list_editor/src/navigator/reading_list_editor_navigator.dart
+[ReadingListEditorBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[ReadingListEditorBloc] depends on unregistered type [EventBus] , from package:mc_event_bus/mc_event_bus.dart
+[ReadingListEditorBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/discovery_wiring:di_config:
+Missing dependencies in discovery_wiring/src/di/di_initializer.dart
+
+[DiscoverySearchNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/store/store_home:di_config:
+Missing dependencies in store_home/src/di/di_initializer.dart
+
+[CartSummaryBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[CartSummaryBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[CartSummaryBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CartSummaryBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[BannersBloc] depends on unregistered type [FeatureFlowController<(StoreHomeFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[BannersBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[BannersBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[BannersBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[FeaturedBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[FeaturedBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[FeaturedBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[StoreHomeApi] depends on unregistered type [Dio] , from package:dio/dio.dart
+[DealsBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[DealsBloc] depends on unregistered type [StoreClock] , from package:store_home/src/domain/model/store_clock.dart
+[DealsBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[DealsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CategoriesBloc] depends on unregistered type [FeatureFlowController<(StoreHomeFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CategoriesBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CategoriesBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[CategoryProductsBloc] depends on unregistered type [FeatureFlowController<(StoreHomeFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[CategoryProductsBloc] depends on unregistered type [StoreHomeNavigator] , from package:store_home/src/navigator/store_home_navigator.dart
+[CategoryProductsBloc] depends on unregistered type [AnalyticsTracker] , from package:mc_monitoring/mc_monitoring.dart
+[CategoryProductsBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/library_wiring:di_config:
+Missing dependencies in library_wiring/src/di/di_initializer.dart
+
+[ReadingListEditorNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[ReadingListEditorNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/commerce_wiring:di_config:
+Missing dependencies in commerce_wiring/src/di/di_initializer.dart
+
+[StoreHomeNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[StoreHomeNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//feature/auth/auth_signin:di_config:
+Missing dependencies in auth_signin/src/di/di_initializer.dart
+
+[AuthSignInBloc] depends on unregistered type [FeatureFlowController<(AuthSignInFlowState)>] , from package:mc_bloc_kit/mc_bloc_kit.dart
+[AuthSignInBloc] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[AuthSignInBloc] depends on unregistered type [Monitoring] , from package:mc_monitoring/mc_monitoring.dart
+[AuthSignInRepository] depends on unregistered type [AuthApi] , from package:mc_api_auth/mc_api_auth.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/account_wiring:di_config:
+Missing dependencies in account_wiring/src/di/di_initializer.dart
+
+[SettingsAppearanceNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[SettingsAppearanceNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[SettingsHomeNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[SettingsHomeNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[SettingsHomeNavigatorImpl] depends on unregistered type [AuthApi] , from package:mc_api_auth/mc_api_auth.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[92,842 / 93,004] 3 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 1s disk-cache, worker ... (14 actions running)
+[92,873 / 93,013] 4 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 2s disk-cache, worker ... (14 actions running)
+[92,878 / 93,013] 9 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 3s disk-cache, worker ... (14 actions running)
+[92,881 / 93,013] 12 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 4s disk-cache, worker ... (14 actions running)
+[92,884 / 93,013] 15 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 5s disk-cache, worker ... (14 actions running)
+[92,885 / 93,013] 16 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 6s disk-cache, worker ... (14 actions running)
+[92,888 / 93,013] 19 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 7s disk-cache, worker ... (14 actions, 13 running)
+[92,888 / 93,013] 19 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 8s disk-cache, worker ... (14 actions running)
+[92,892 / 93,013] 24 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 10s disk-cache, worker ... (13 actions running)
+[92,894 / 93,013] 25 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 11s disk-cache, worker ... (11 actions running)
+[92,896 / 93,013] 27 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 12s disk-cache, worker ... (9 actions running)
+[92,898 / 93,013] 27 / 47 tests; DartCodegen @@//app/wiring/publishing_wiring:_creators_routes_go_router_part; 14s disk-cache, worker ... (8 actions, 7 running)
+INFO: From DartAggregateCodegen @@//app/wiring/publishing_wiring:di_config:
+Missing dependencies in publishing_wiring/src/di/di_initializer.dart
+
+[ComicsDetailsNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[ComicsDetailsNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+INFO: From DartAggregateCodegen @@//app/wiring/universe_wiring:di_config:
+Missing dependencies in universe_wiring/src/di/di_initializer.dart
+
+[CharactersListNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[CharacterDetailsNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+[CharacterDetailsNavigatorImpl] depends on unregistered type [SessionReader] , from package:mc_session/mc_session.dart
+[CharactersSearchNavigatorImpl] depends on unregistered type [RouterRef] , from package:app_core/app_core.dart
+
+Did you forget to annotate the above class(s) or their implementation with @injectable? 
+or add the right environment keys?
+------------------------------------------------------------------------ 
+
+[93,005 / 93,028] 27 / 47 tests; Testing //feature/comics/comics_details:bdd_test; 9s darwin-sandbox ... (14 actions, 8 running)
+[93,011 / 93,031] 27 / 47 tests; Testing //feature/comics/comics_details:bdd_test; 10s darwin-sandbox ... (14 actions, 8 running)
+[93,016 / 93,031] 32 / 47 tests; Testing //feature/characters/characters_details:bdd_test; 10s darwin-sandbox ... (14 actions, 8 running)
+[93,017 / 93,031] 33 / 47 tests; Testing //feature/characters/characters_details:bdd_test; 11s darwin-sandbox ... (14 actions, 8 running)
+[93,019 / 93,031] 35 / 47 tests; Testing //app/mini_client:characters_search_route_test; 4s darwin-sandbox ... (12 actions, 8 running)
+[93,021 / 93,031] 37 / 47 tests; Testing //app/mini_client:analytics_screens_test; 3s darwin-sandbox ... (10 actions, 8 running)
+[93,022 / 93,031] 38 / 47 tests; Testing //app/mini_client:analytics_screens_test; 4s darwin-sandbox ... (9 actions, 8 running)
+[93,024 / 93,031] 40 / 47 tests; Testing //app/mini_client:reading_list_route_test; 5s darwin-sandbox ... (7 actions running)
+[93,027 / 93,031] 43 / 47 tests; Testing //app/mini_client:sign_in_guard_app_test; 5s darwin-sandbox ... (4 actions running)
+[93,030 / 93,031] 47 / 47 tests; Testing //app/mini_client:sign_in_guard_app_test; 6s darwin-sandbox
+INFO: Found 107 targets and 47 test targets...
+INFO: Elapsed time: 34.256s, Critical Path: 25.59s
+INFO: 87791 processes: 6 action cache hit, 639 disk cache hit, 87041 internal, 51 darwin-sandbox, 60 worker.
+INFO: Build completed successfully, 87791 total actions
+//app/mini_client:analytics_screens_test                                 PASSED in 5.2s
+//app/mini_client:app_test                                               PASSED in 1.7s
+//app/mini_client:bdd_test                                               PASSED in 1.6s
+//app/mini_client:characters_search_route_test                           PASSED in 4.1s
+//app/mini_client:comic_route_test                                       PASSED in 2.6s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 5.2s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.4s
+//app/mini_client:not_found_test                                         PASSED in 4.0s
+//app/mini_client:reading_list_route_test                                PASSED in 5.5s
+//app/mini_client:search_route_test                                      PASSED in 3.6s
+//app/mini_client:settings_route_test                                    PASSED in 4.0s
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 6.7s
+//app/mini_client:store_route_test                                       PASSED in 3.1s
+//app/mini_client:trivia_route_test                                      PASSED in 3.8s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 0.9s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.8s
+//app/wiring/account_wiring:routes_test                                  PASSED in 9.6s
+//app/wiring/app_core:app_layer_test                                     PASSED in 1.3s
+//app/wiring/app_core:appearance_shell_test                              PASSED in 2.5s
+//app/wiring/app_core:boot_test                                          PASSED in 2.4s
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.7s
+//app/wiring/app_core:flow_results_hardening_test                        PASSED in 5.7s
+//app/wiring/app_core:flow_results_test                                  PASSED in 2.8s
+//app/wiring/app_core:formatters_root_test                               PASSED in 0.6s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.8s
+//app/wiring/app_core:route_nesting_test                                 PASSED in 1.2s
+//app/wiring/app_core:router_observers_test                              PASSED in 1.3s
+//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 1.4s
+//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 4.4s
+//app/wiring/app_core:sign_in_guard_test                                 PASSED in 1.0s
+//app/wiring/chronicle_wiring:routes_test                                PASSED in 2.7s
+//app/wiring/commerce_wiring:routes_test                                 PASSED in 2.9s
+//app/wiring/discovery_wiring:routes_test                                PASSED in 2.0s
+//app/wiring/library_wiring:routes_test                                  PASSED in 2.5s
+//app/wiring/publishing_wiring:routes_test                               PASSED in 1.5s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 1.7s
+//feature/characters/characters_details:architecture_test                PASSED in 0.3s
+//feature/characters/characters_details:bdd_test                         PASSED in 11.6s
+//feature/characters/characters_details:bloc_guards_test                 PASSED in 2.2s
+//feature/characters/characters_details:contract_test                    PASSED in 0.6s
+//feature/characters/characters_details:flow_scope_test                  PASSED in 2.6s
+//feature/comics/comics_details:architecture_test                        PASSED in 0.4s
+//feature/comics/comics_details:bdd_test                                 PASSED in 11.1s
+//feature/comics/comics_details:bloc_guards_test                         PASSED in 2.0s
+//feature/comics/comics_details:contract_test                            PASSED in 0.7s
+//feature/comics/comics_details:flow_scope_test                          PASSED in 2.6s
+//feature/comics/comics_details:golden_test                              PASSED in 2.8s
+
+Executed 47 out of 47 tests: 47 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+done 0

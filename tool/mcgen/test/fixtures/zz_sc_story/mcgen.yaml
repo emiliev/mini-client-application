@@ -1,0 +1,108 @@
+# T-0072 review round: a second throwaway section-detail module, for what a
+# batch of specs will hit: a two-word item (`story_arc`: file stems, freezed
+# targets), ids that are not `int` (String ids in the API, the guard record
+# and the steps), two hand-overs, a DTO with a nested DTO, a list of DTOs and
+# a nullable id, and the default favourites path (taken from the kind).
+# Never committed as a module: tool/mcgen/tool/T-0072-AC3_sc_probe.sh copies
+# it to feature/zz_probe/zz_sc_story and builds it with `--config=lint`.
+schema: mcgen/1
+module: zz_sc_story
+tier: feature
+archetype: section_detail
+ownership: mixed
+description: A throwaway story arc page with String ids and two hand-overs (T-0072 review).
+dev_deps: [mc_mocked_backend]
+keep: [details.openPerson, details.openPlace]
+
+entities:
+  - name: StoryArc
+    fields:
+      - {name: id, type: StoryArcId}
+      - {name: title, type: String}
+      - {name: parent, type: "StoryArcId?"}
+      - {name: chapters, type: "List<Chapter>"}
+      - {name: owner, type: Owner}
+      - {name: notes, type: "List<Chapter>?"}
+      - {name: author, type: PersonId}
+      - {name: place, type: PlaceId}
+  - name: Chapter
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+  - name: Owner
+    fields:
+      - {name: name, type: String}
+  - name: StoryArcDto
+    json: true
+    fields:
+      - {name: id, type: String}
+      - {name: title, type: String}
+      - {name: parent, type: "String?"}
+      - {name: chapters, type: "List<ChapterDto>"}
+      - {name: owner, type: OwnerDto}
+      - {name: notes, type: "List<ChapterDto>?"}
+      - {name: author, type: String}
+      - {name: place, type: String}
+  - name: ChapterDto
+    json: true
+    fields:
+      - {name: id, type: int}
+      - {name: title, type: String}
+  - name: OwnerDto
+    json: true
+    fields:
+      - {name: name, type: String}
+
+navigator:
+  name: ZzScStoryNavigator
+  doc: What zz_sc_story needs from outside.
+  outbound: [openPerson(PersonId), openPlace(PlaceId), "requestSignIn() -> bool"]
+
+l10n:
+  locales: [en, de]
+  strings:
+    - {key: zzScStoryTitle, description: Title before it loads., text: {en: Story arc, de: Handlungsbogen}}
+    - {key: zzScStoryLoading, description: Loading label., text: {en: Loading, de: Wird geladen}}
+    - {key: zzScStoryErrorTitle, description: Error title., text: {en: Could not be loaded, de: Konnte nicht geladen werden}}
+    - {key: zzScStoryNotFoundTitle, description: Not found title., text: {en: Story arc not found, de: Nicht gefunden}}
+    - {key: zzScStoryNotFoundMessage, description: Not found message., text: {en: It does not exist., de: Es gibt ihn nicht.}}
+    - {key: zzScStoryOpenPerson, description: Opens the author., text: {en: Open author, de: Autor öffnen}}
+    - {key: zzScStoryOpenPlace, description: Opens the place., text: {en: Open place, de: Ort öffnen}}
+    - {key: zzScStoryFavouriteAdd, description: Add., text: {en: Add to favourites, de: Hinzufügen}}
+    - {key: zzScStoryFavouriteRemove, description: Remove., text: {en: Remove from favourites, de: Entfernen}}
+    - {key: zzScStoryFavouriteSaveFailed, description: Save failed., text: {en: Could not save., de: Nicht gespeichert.}}
+    - {key: zzScStoryFavouriteLoadFailed, description: Load failed., text: {en: Could not check., de: Nicht geprüft.}}
+
+bdd:
+  - feature: zz_sc_story
+    title: A story arc's page
+    background:
+      - "Given the backend serves {'comics.default'}"
+      - "And the backend serves {'identity.default'}"
+    scenarios:
+      - id: MC-zz_sc_story-01
+        title: The page opens
+        steps:
+          - When I open story arc {'arc-1'}
+          - "Then I see {'Story arc not found'}"
+
+options:
+  item: story_arc
+  items: story_arcs
+  prefix: ZzScStory
+  ids:
+    - {name: StoryArcId, type: String}
+    - {name: PersonId, type: String}
+    - {name: PlaceId, type: String}
+  entity: StoryArc
+  item_path: v1/comics/{id}
+  favourite_kind: comic
+  opens:
+    - {calls: openPerson, id: PersonId, label: person, event_doc: The author was tapped., field: author}
+    - {calls: openPlace, id: PlaceId, label: place, event_doc: The place was tapped., field: place}
+  tests:
+    fixture_sets: [comics.default]
+    env:
+      fixture_packages: mc_fixtures_comics
+      fixture_set_lists: comicsFixtureSets
+      sample_id: "'arc-1'"
