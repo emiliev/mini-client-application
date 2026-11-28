@@ -26,6 +26,46 @@ const wireHeader =
 const generatedLocationsPath =
     'app/wiring/app_core/lib/src/locations/generated_locations.dart';
 
+/// `directives_ordering`: one section's directives, sorted by their URI.
+List<String> sortedDirectives(List<String> lines) =>
+    [...lines]..sort((a, b) => a.split("'")[1].compareTo(b.split("'")[1]));
+
+/// [dart] with every run of consecutive `package:` imports (and of
+/// exports) sorted by URI, as `directives_ordering` wants.
+String sortDirectiveRuns(String dart) {
+  final lines = dart.split('\n');
+  final out = <String>[];
+  var run = <String>[];
+  String? kind;
+  void flush() {
+    out.addAll(run..sort((a, b) => a.split("'")[1].compareTo(b.split("'")[1])));
+    run = [];
+    kind = null;
+  }
+
+  for (final l in lines) {
+    final k = l.startsWith("import 'package:")
+        ? 'import'
+        : l.startsWith("export 'package:")
+        ? 'export'
+        : null;
+    if (k != null && (kind == null || kind == k)) {
+      kind = k;
+      run.add(l);
+      continue;
+    }
+    flush();
+    if (k != null) {
+      kind = k;
+      run.add(l);
+    } else {
+      out.add(l);
+    }
+  }
+  flush();
+  return out.join('\n');
+}
+
 String pascal(String snake) => [
   for (final x in snake.split('_'))
     if (x.isNotEmpty) '${x[0].toUpperCase()}${x.substring(1)}',
@@ -144,6 +184,9 @@ GroupPlan planGroups(
   ];
   for (final g in groups.where((g) => g.generated)) {
     _emitGroup(root, g, locations);
+    for (final e in g.files.entries.toList()) {
+      if (e.key.endsWith('.dart')) g.files[e.key] = sortDirectiveRuns(e.value);
+    }
   }
   return GroupPlan(groups);
 }
@@ -224,9 +267,11 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     "import 'package:go_router/go_router.dart';",
     "import 'package:$pkg/src/routes/${g.name}_routes.dart';",
     '',
-    "export 'package:$pkg/src/di/${pkg}_di_initializer.dart' show ${g.initializer};",
-    "export 'package:$pkg/src/routes/${g.name}_routes.dart' show ${[for (final f in flows) f.route].join(', ')};",
-    "export 'package:$pkg/src/routes/route_targets.dart' show ${g.pascalName}RouteTargets;",
+    ...sortedDirectives([
+      "export 'package:$pkg/src/di/${pkg}_di_initializer.dart' show ${g.initializer};",
+      "export 'package:$pkg/src/routes/${g.name}_routes.dart' show ${[for (final f in flows) f.route].join(', ')};",
+      "export 'package:$pkg/src/routes/route_targets.dart' show ${g.pascalName}RouteTargets;",
+    ]),
     '',
     '/// The ${g.name} group\'s routes.',
     'List<RouteBase> get ${g.routesGetter} => <RouteBase>[...${camel(g.name)}TypedRoutes];',
@@ -282,8 +327,10 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
   g.files['$dir/lib/src/routes/route_targets_impl.dart'] = [
     wireHeader.trimRight(),
     '',
-    "import 'package:$pkg/src/routes/route_targets.dart';",
-    for (final f in flows) imp(f),
+    ...sortedDirectives([
+      "import 'package:$pkg/src/routes/route_targets.dart';",
+      for (final f in flows) imp(f),
+    ]),
     '',
     '/// Builds each route\'s flow from the feature barrels (R15: unannotated, so',
     '/// no generator reads it).',
@@ -330,12 +377,14 @@ void _emitGroup(String root, WiringGroup g, Set<String> locations) {
     '',
     "import 'dart:async';",
     '',
-    "import 'package:get_it/get_it.dart';",
-    "import 'package:mc_di/mc_di.dart';",
-    "import 'package:$pkg/src/di/di_initializer.dart';",
-    "import 'package:$pkg/src/routes/route_targets.dart';",
-    "import 'package:$pkg/src/routes/route_targets_impl.dart';",
-    for (final f in flows) imp(f),
+    ...sortedDirectives([
+      "import 'package:get_it/get_it.dart';",
+      "import 'package:mc_di/mc_di.dart';",
+      "import 'package:$pkg/src/di/di_initializer.dart';",
+      "import 'package:$pkg/src/routes/route_targets.dart';",
+      "import 'package:$pkg/src/routes/route_targets_impl.dart';",
+      for (final f in flows) imp(f),
+    ]),
     '',
     '/// The ${g.name} group\'s root registrations: the navigator implementations',
     '/// (injectable) and the route targets the typed routes resolve (R15).',

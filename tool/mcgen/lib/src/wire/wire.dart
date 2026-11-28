@@ -80,14 +80,35 @@ class WireConfig {
   final Map<String, String> domains;
 }
 
-/// Everything wire owns under [root], given the specs there.
+/// Everything wire owns under [root], given the specs there. With [only]
+/// (root-relative package directories), just those packages' own files
+/// (their flow scopes): a module generated alone, outside the app.
 List<WireOutput> wireAll(
   String root,
   List<ModuleSpec> specs,
   DartFormatter formatter, {
   WireConfig config = const WireConfig(),
+  List<String>? only,
 }) {
   final index = RepoIndex.scan(root);
+  if (only != null) {
+    final dart = <String, String>{};
+    for (final pkg in index.packages) {
+      if (!only.contains(pkg.dir) || pkg.tier != Tier.feature) continue;
+      final abs = p.join(root, pkg.dir);
+      if (!hasFlowScope(abs)) continue;
+      final rel = '${pkg.dir}/$flowScopePath';
+      dart[rel] = flowScopeFile(
+        pkg.name,
+        rootImports(pkg.name, abs, root),
+        existing: _read(root, rel),
+      );
+    }
+    return [
+      for (final e in formatter.formatAll(dart).entries)
+        WireOutput(e.key, e.value, _read(root, e.key)),
+    ];
+  }
   final groups = planGroups(
     root,
     index,
@@ -180,13 +201,14 @@ int runWire(
   List<ModuleSpec> specs,
   DartFormatter formatter, {
   WireConfig config = const WireConfig(),
+  List<String>? only,
   required bool check,
   required StringSink out,
   required StringSink err,
 }) {
   final List<WireOutput> outputs;
   try {
-    outputs = wireAll(root, specs, formatter, config: config);
+    outputs = wireAll(root, specs, formatter, config: config, only: only);
   } on StateError catch (x) {
     err.writeln('mcgen wire: ${x.message}');
     return 1;

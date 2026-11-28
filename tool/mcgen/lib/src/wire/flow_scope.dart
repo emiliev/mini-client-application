@@ -52,7 +52,12 @@ List<String> _splitTop(String s) {
   out.add(s.substring(from));
   return [
     for (final x in out)
-      if (x.trim().isNotEmpty) x.trim(),
+      if (x.trim().isNotEmpty)
+        // `{named, params}` and `[optional, ones]` are parameters too.
+        if (x.trim().startsWith('{') || x.trim().startsWith('['))
+          ..._splitTop(x.trim().substring(1, x.trim().length - 1))
+        else
+          x.trim(),
   ];
 }
 

@@ -1,6 +1,7 @@
-// The list-detail package files: pubspec.yaml and BUILD.bazel (their lists
-// come from the generated code's use-graph), l10n.yaml, the ARBs and the
-// `.feature` files.
+// The list-detail package files: pubspec.yaml (its lists come from the
+// generated code's use-graph), l10n.yaml, the ARBs and the `.feature` files.
+// BUILD.bazel is `mcgen buildgen`'s (T-0074, ADR-0018) and the root-import
+// list `mcgen wire`'s.
 
 import 'dart:convert';
 
@@ -13,14 +14,6 @@ import 'package:mcgen/src/emit/feature_list_detail/model.dart';
 
 const _brick = 'feature_list_detail_package';
 
-/// The Flutter-free files generators read (R15): `:_stage`'s glob.
-bool _isPure(LdModel m, String path) =>
-    path == 'lib/src/di/flow_scope.dart' ||
-    path.startsWith('lib/src/domain/') ||
-    path == 'lib/src/flow/${m.module}_flow_state.dart' ||
-    path.startsWith('lib/src/navigator/') ||
-    path.startsWith('lib/src/presentation/bloc/');
-
 void emitPackage(EmitContext ctx, LdModel m) {
   for (final f in m.spec.bdd) {
     ctx.file(
@@ -30,23 +23,13 @@ void emitPackage(EmitContext ctx, LdModel m) {
   }
   _arbs(ctx, m);
   // Read now, not when the deferred files are built, so the archetype's
-  // unused-prose check sees these slots.
+  // unused-prose check sees the slot.
   final pubspec = m.optionalText('pubspec.preamble');
-  final build = m.text(
-    'build.preamble',
-    '${m.module}: a list-detail feature (archetype list_detail).\n'
-        'No per-package analysis_options.yaml: the root file applies (F-0021).\n'
-        '\n'
-        'Every generator runs as a Bazel action; nothing generated is committed.\n'
-        'Generators read only Flutter-free libraries (R15): `_stage` holds the\n'
-        'pure files, and the retrofit and json actions see only the DTOs\n'
-        '(`_stage_dto`), so a bloc body edit re-runs neither (F-0031 fact 4).',
-  );
-  for (final path in ['pubspec.yaml', 'BUILD.bazel', 'l10n.yaml']) {
+  for (final path in ['pubspec.yaml', 'l10n.yaml']) {
     ctx.deferred(
       path,
       (graph) => ctx.bricks[_brick].render(
-        _vars(ctx, m, graph, pubspec: pubspec, build: build),
+        _vars(ctx, m, graph, pubspec: pubspec),
       )[path]!,
     );
   }
@@ -163,19 +146,6 @@ String _accentMessage(String s) {
   return b.toString();
 }
 
-String _label(EmitContext ctx, String pkg) =>
-    switch (ctx.packages.lookup(pkg)) {
-      FirstPartyPackage(:final dir) => '//$dir',
-      _ => '@pub_deps//:$pkg',
-    };
-
-List<Map<String, String>> _labels(EmitContext ctx, Iterable<String> pkgs) {
-  final labels = [for (final p in pkgs.toSet()) _label(ctx, p)]..sort();
-  return [
-    for (final l in labels) {'label': l},
-  ];
-}
-
 Set<String> _packagesOf(UseGraph g, bool Function(String path) where) => {
   for (final l in g.libraries.values)
     if (where(l.library.path))
@@ -183,53 +153,24 @@ Set<String> _packagesOf(UseGraph g, bool Function(String path) where) => {
         if (p != g.package) p,
 };
 
-/// `# --- <title> ` padded with dashes to 78 columns.
-String _rule(String title) {
-  final head = '# --- $title ';
-  return head.padRight(78, '-');
-}
-
 Map<String, Object?> _vars(
   EmitContext ctx,
   LdModel m,
   UseGraph g, {
   required String? pubspec,
-  required String build,
 }) {
   final spec = m.spec;
-  final hasJson = m.dtos.isNotEmpty;
   // Codegen runtimes the source never names: injectable's output uses get_it
   // and json_serializable's json_annotation; gen-l10n's output uses
   // flutter_localizations and intl.
-  final pure = {
-    ..._packagesOf(g, (p) => _isPure(m, p)),
-    'get_it',
-    if (hasJson) 'json_annotation',
-  };
   final lib = {
     ..._packagesOf(g, (p) => p.startsWith('lib/')),
     ...spec.deps,
-    ...pure,
+    'get_it',
+    if (m.dtos.isNotEmpty) 'json_annotation',
     'flutter_localizations',
     'intl',
   };
-  final bdd = _packagesOf(
-    g,
-    (p) =>
-        p.startsWith('test/feature/step/') ||
-        p.startsWith('test/feature/util/') ||
-        p == 'test/flow_scope_test.dart',
-  );
-  // flow_scope_test adds these itself (with the library and Flutter): the DI
-  // and the Dio of its root-without-a-type case.
-  const flowScopeOwn = {
-    'mc_di',
-    'dio',
-    'flutter',
-    'flutter_test',
-    'mc_test_utils',
-  };
-  final tests = bdd.difference(flowScopeOwn);
   final testFiles = _packagesOf(g, (p) => !p.startsWith('lib/'));
   final dev = {
     ...testFiles.difference(lib),
@@ -237,37 +178,6 @@ Map<String, Object?> _vars(
     'mc_analysis',
     'mc_test_steps',
   };
-  final contractPath = [
-    for (final p in g.libraries.keys)
-      if (p.startsWith('test/contract/')) p,
-  ].single;
-  final contract = _packagesOf(g, (p) => p == contractPath);
-
-  final freezed = <(String, String)>[
-    for (final l in g.libraries.values)
-      if (l.library.parts.any((p) => p.endsWith('.freezed.dart')))
-        (_freezedName(m, l.library.path), l.library.path),
-  ]..sort((a, b) => a.$1.compareTo(b.$1));
-  final dtoSrc = 'lib/src/domain/model/${m.dtoFile}';
-  final dtoName = m.dtoFile.replaceFirst('.dart', '');
-  final apiName = '${m.module}_api';
-  final codegen =
-      <(String, String)>[
-        for (final (name, _) in freezed) (name, '_${name}_freezed'),
-        (dtoName, '_${dtoName}_g'),
-        (apiName, '_${apiName}_g'),
-      ]..sort((a, b) {
-        final c = a.$1.compareTo(b.$1);
-        return c != 0 ? c : a.$2.compareTo(b.$2);
-      });
-  final injectable = [
-    for (final l in g.libraries.values)
-      if (l.library.path.startsWith('lib/') &&
-          l.imports.contains('package:injectable/injectable.dart') &&
-          !l.library.path.endsWith('/di_initializer.dart') &&
-          !l.library.path.contains('/model/'))
-        l.library.path,
-  ]..sort();
   String entry(String p) => ctx.packages.pubspecEntry(p);
   final description = spec.description;
   if (description == null) {
@@ -277,10 +187,6 @@ Map<String, Object?> _vars(
     'pubspec_preamble': pubspec == null
         ? ''
         : commentLines(pubspec).replaceAll(RegExp('^//', multiLine: true), '#'),
-    'build_preamble': commentLines(
-      build,
-    ).replaceAll(RegExp('^//', multiLine: true), '#'),
-    'build_file': 'BUILD.bazel',
     'name': m.module,
     'pascal': m.pascal,
     'description': description,
@@ -290,51 +196,11 @@ Map<String, Object?> _vars(
         (throw StateError(
           'tool/mcgen/mcgen.yaml needs dart.flutter_constraint for a Flutter feature',
         )),
-    'lang': ctx.config.languageVersion,
     'dependencies': [
       for (final p in (lib.toList()..sort())) {'entry': entry(p)},
     ],
     'dev_dependencies': [
       for (final p in (dev.toList()..sort())) {'entry': entry(p)},
     ],
-    'pure_deps': _labels(ctx, pure),
-    'flow_state_src': 'lib/src/flow/${m.module}_flow_state.dart',
-    'freezed': [
-      for (final (name, src) in freezed) {'name': name, 'src': src},
-    ],
-    'dto_name': dtoName,
-    'dto_src': dtoSrc,
-    'dto_rule': _rule('$dtoName: json over the freezed output'),
-    'api_rule': _rule('$apiName: retrofit (fork patch 0001)'),
-    'api_name': apiName,
-    'api_src': 'lib/src/domain/api/$apiName.dart',
-    'injectable': [
-      for (final s in injectable) {'src': s},
-    ],
-    'codegen': [
-      for (final (_, t) in codegen) {'target': ':$t'},
-      {'target': ':di_config'},
-      {'target': ':_l10n'},
-    ],
-    'flutter_deps': _labels(ctx, lib.difference(pure)),
-    'test_deps': _labels(ctx, tests),
-    'env': 'test/feature/util/${m.module}_env.dart',
-    'contract_main': contractPath,
-    'contract_deps': [
-      {'label': ':${m.module}'},
-      ..._labels(ctx, contract),
-    ],
-    'legacy_goldens': m.tests.legacyGoldens,
-    'golden_main': 'test/golden/${m.module}_golden_test.dart',
   };
-}
-
-/// The flow state is `flow_state`, the list page's bloc `list_bloc`, any
-/// other file its stem: the names the exemplar's BUILD gives its freezed
-/// targets.
-String _freezedName(LdModel m, String path) {
-  final stem = path.split('/').last.replaceFirst('.dart', '');
-  if (stem == '${m.module}_flow_state') return 'flow_state';
-  if (stem == '${m.module}_bloc') return 'list_bloc';
-  return stem;
 }

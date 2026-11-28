@@ -1,25 +1,16 @@
 name: feature_list_detail_package
-description: A list-detail feature's package files - pubspec.yaml, l10n.yaml and BUILD.bazel (T-0069). mcgen computes every list from the generated code's use-graph.
+description: A list-detail feature's package files - pubspec.yaml and l10n.yaml (T-0069). mcgen computes every list from the generated code's use-graph; BUILD.bazel is mcgen buildgen's (T-0074).
 version: 0.1.0
 
 # mcgen precomputes every value (plan 02 section 2.4); by hand:
 #   mason make feature_list_detail_package -c vars.json
 vars:
-  build_file:
-    type: string
-    description: 'Always "BUILD.bazel". The template is named after this variable because a file named BUILD.bazel would make the brick directory a Bazel package (T-0069, F-0069).'
   pubspec_preamble:
     type: string
     description: Comment lines above `name:` (each ending in a newline), or empty.
-  build_preamble:
-    type: string
-    description: The comment block at the top of BUILD.bazel (each line ending in a newline).
   name:
     type: string
     description: The package name.
-  lang:
-    type: string
-    description: The Dart language version (tool/mcgen/mcgen.yaml dart.language_version).
   pascal:
     type: string
     description: The package name in PascalCase.
@@ -38,57 +29,3 @@ vars:
   dev_dependencies:
     type: array
     description: 'Items {"entry": "<name>: <constraint>"}, sorted.'
-  pure_deps:
-    type: array
-    description: 'Labels of the generator-read files deps, items {"label": "..."}, sorted.'
-  flow_state_src:
-    type: string
-    description: The flow state file.
-  freezed:
-    type: array
-    description: 'Items {"name": "<target stem>", "src": "<file>"}, by name.'
-  dto_name:
-    type: string
-    description: The DTO file's freezed name (its lane is narrow).
-  dto_src:
-    type: string
-    description: The DTO file.
-  dto_rule:
-    type: string
-    description: The DTO section's rule line, padded with dashes to 78 columns.
-  api_rule:
-    type: string
-    description: The API section's rule line, padded with dashes to 78 columns.
-  api_name:
-    type: string
-    description: The API file's stem.
-  api_src:
-    type: string
-    description: The API file.
-  injectable:
-    type: array
-    description: 'Items {"src": "<file>"}: the files with injectable classes, sorted.'
-  codegen:
-    type: array
-    description: 'Items {"target": ":<name>"}: every codegen target of the library.'
-  flutter_deps:
-    type: array
-    description: 'Labels of the library deps beyond pure_deps, items {"label": "..."}, sorted.'
-  test_deps:
-    type: array
-    description: 'Labels the BDD, flow-scope and golden tests share, items {"label": "..."}, sorted.'
-  env:
-    type: string
-    description: The BDD setup file (the test env).
-  contract_main:
-    type: string
-    description: The contract test file.
-  contract_deps:
-    type: array
-    description: 'Labels of the contract test, items {"label": "..."}.'
-  legacy_goldens:
-    type: boolean
-    description: Whether the package keeps a pre-ADR-0015 golden test target.
-  golden_main:
-    type: string
-    description: The golden test file (legacy only).

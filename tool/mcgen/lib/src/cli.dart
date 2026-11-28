@@ -39,7 +39,8 @@ usage: mcgen <command> [options]
   gen [--check] [--force] <module|path>... render modules (--check: dry run, exit 1 on any diff)
   gen --out <dir> <module|path>            render one module into an empty directory
   check [--all] [<module|path>...]         drift: hand edits, stale manifests, keep damage
-  wire [--check]                           the shared app glue, from every spec (plan 02 section 2.8)
+  wire [--check] [<dir>...]                the shared app glue, from every spec (plan 02 section 2.8);
+                                           with package dirs, only their flow scopes
   buildgen [--check] [--adopt] [<dir>...]  BUILD.bazel of every covered package (ADR-0018)
 
   not yet: spec synth (P2-09), owners, new (P2-08), stats (P2-09), synth (P2-15)
@@ -169,6 +170,14 @@ int runMcgen(
         session.context,
         session.formatter,
         config: WireConfig.load(session.tool.configPath),
+        only: opts.rest.isEmpty
+            ? null
+            : [
+                for (final d in opts.rest)
+                  p.posix.joinAll(
+                    p.split(p.relative(p.absolute(workDir, d), from: root)),
+                  ),
+              ],
         check: opts.flag('check'),
         out: o,
         err: e,
