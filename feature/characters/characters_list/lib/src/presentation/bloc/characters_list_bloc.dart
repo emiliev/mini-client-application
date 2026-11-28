@@ -5,6 +5,7 @@ import 'package:characters_list/src/domain/model/character.dart';
 import 'package:characters_list/src/domain/model/characters_query.dart';
 import 'package:characters_list/src/domain/repository/characters_list_repository.dart';
 import 'package:characters_list/src/flow/characters_list_flow_state.dart';
+import 'package:characters_list/src/navigator/characters_list_navigator.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mc_api_errors/mc_api_errors.dart';
@@ -19,6 +20,10 @@ part 'characters_list_state.dart';
 /// Characters per request: the first page shows 30 (T-0032-AC1).
 const int charactersPageSize = 30;
 
+/// How long after opening the search a second open is ignored: the second tap
+/// of a double tap. By then the search page covers the list.
+const Duration openSearchGuard = Duration(milliseconds: 500);
+
 /// The list page's bloc: pages of characters through a [PagingController]
 /// (load, load more, refresh, retry), and the tap that opens a preview, which
 /// is flow state, not a route (plan 01 §4.1).
@@ -28,8 +33,12 @@ const int charactersPageSize = 30;
 @injectable
 final class CharactersListBloc
     extends McBloc<CharactersListEvent, CharactersListState> {
-  CharactersListBloc(this._repository, this._flow, Monitoring monitoring)
-    : super(const CharactersListState.loading(), monitoring: monitoring) {
+  CharactersListBloc(
+    this._repository,
+    this._flow,
+    this._navigator,
+    Monitoring monitoring,
+  ) : super(const CharactersListState.loading(), monitoring: monitoring) {
     _paging = PagingController<Character>(
       fetcher: (request) => _repository.fetchPage(
         CharactersQuery(
@@ -49,6 +58,8 @@ final class CharactersListBloc
 
   final CharactersListRepository _repository;
   final FeatureFlowController<CharactersListFlowState> _flow;
+  final CharactersListNavigator _navigator;
+  Timer? _openSearchGuard;
   late final PagingController<Character> _paging;
 
   Future<void> _onEvent(
@@ -74,6 +85,12 @@ final class CharactersListBloc
         if (_flow.state.preview == null) {
           _flow.update((s) => s.copyWith(preview: character));
         }
+      case _OpenSearch():
+        // One search per tap: a double tap must not push it twice.
+        if (!(_openSearchGuard?.isActive ?? false)) {
+          _openSearchGuard = Timer(openSearchGuard, () {});
+          _navigator.openSearch();
+        }
       case _PageChanged(:final page):
         emit(_toState(page));
     }
@@ -93,6 +110,7 @@ final class CharactersListBloc
 
   @override
   Future<void> close() {
+    _openSearchGuard?.cancel();
     _paging.dispose();
     return super.close();
   }

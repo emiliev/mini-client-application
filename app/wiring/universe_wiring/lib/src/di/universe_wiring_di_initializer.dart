@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:characters_details/characters_details.dart';
 import 'package:characters_list/characters_list.dart';
+import 'package:characters_search/characters_search.dart' as search;
 import 'package:get_it/get_it.dart';
 import 'package:mc_di/mc_di.dart';
 import 'package:universe_wiring/src/di/di_initializer.dart';
@@ -20,6 +21,7 @@ class UniverseWiringDIInitializer extends McDIInitializer {
     getIt.registerLazySingleton<UniverseRouteTargets>(
       () => UniverseRouteTargetsImpl(
         charactersList: getIt<CharactersListNavigator>(),
+        charactersSearch: getIt<search.CharactersSearchNavigator>(),
         characterDetails: getIt<CharacterDetailsNavigator>(),
       ),
     );

@@ -19,6 +19,14 @@ abstract final class AppLocations {
   /// `CharacterDetailsRoute(id: id).location` in universe_wiring.
   static String character(int id) => '/characters/$id';
 
+  /// The character search (T-0071), starting with [query] when given
+  /// (encoded as a query parameter). Equals
+  /// `CharactersSearchRoute(q: query).location` in universe_wiring.
+  static String charactersSearch([String? query]) => Uri(
+    path: '/characters/search',
+    queryParameters: query == null ? null : {'q': query},
+  ).toString();
+
   /// One comic (T-0041), by the `ComicId` value. Equals
   /// `ComicDetailsRoute(id: id).location` in publishing_wiring.
   static String comic(int id) => '/comics/$id';

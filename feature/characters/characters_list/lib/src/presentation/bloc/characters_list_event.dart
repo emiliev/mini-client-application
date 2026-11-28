@@ -21,6 +21,9 @@ sealed class CharactersListEvent {
   /// A tile was tapped: its preview opens inside the flow (ignored while a
   /// preview is open).
   const factory CharactersListEvent.preview(Character character) = _Preview;
+
+  /// The app bar's search action: the search opens (T-0071).
+  const factory CharactersListEvent.openSearch() = _OpenSearch;
 }
 
 final class _Load extends CharactersListEvent {
@@ -45,6 +48,10 @@ final class _Preview extends CharactersListEvent {
   const _Preview(this.character);
 
   final Character character;
+}
+
+final class _OpenSearch extends CharactersListEvent {
+  const _OpenSearch();
 }
 
 /// Internal: the paging controller produced a new state.

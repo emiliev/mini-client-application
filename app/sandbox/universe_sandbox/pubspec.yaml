@@ -20,6 +20,7 @@ dependencies:
 dev_dependencies:
   characters_details: any
   characters_list: any
+  characters_search: any
   flutter_test:
     sdk: flutter
   integration_test:

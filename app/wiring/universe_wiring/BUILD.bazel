@@ -25,12 +25,14 @@ _INIT = "lib/src/di/di_initializer.dart"
 _NAVIGATORS = [
     "lib/src/navigators/character_details_navigator_impl.dart",
     "lib/src/navigators/characters_list_navigator_impl.dart",
+    "lib/src/navigators/characters_search_navigator_impl.dart",
 ]
 
 _DEPS = [
     "//app/wiring/app_core",
     "//feature/characters/characters_details",
     "//feature/characters/characters_list",
+    "//feature/characters/characters_search",
     "//utility/mc_api_auth",
     "//utility/mc_di",
     "//utility/mc_session",

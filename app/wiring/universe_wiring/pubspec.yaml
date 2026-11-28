@@ -13,6 +13,7 @@ dependencies:
   app_core: any
   characters_details: any
   characters_list: any
+  characters_search: any
   flutter:
     sdk: flutter
   get_it: ^8.0.0

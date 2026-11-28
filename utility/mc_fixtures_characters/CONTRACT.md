@@ -20,6 +20,7 @@ The machine-readable list is `fixtures/routes.json`; a test keeps it, the domain
 | `offset` | int | 0 | `>= 0` |
 | `limit` | int | 20 | 1 to 100 |
 | `nameStartsWith` | string | none | case-insensitive prefix of `name`; empty means no filter |
+| `team` | string | none | a team **id**: the team's name in lower case with each run of other characters as one `-` (`Harbor Watch` is `harbor-watch`; `teamIdOf` in the package). Case-insensitive; empty means no filter; an id nobody has (`red`) matches nothing (`total: 0`), it is not an error. `characters_list`'s `initialTeamId` and `characters_search`'s team chips send the same ids (T-0071) |
 | `orderBy` | enum | `name` | `name`, `-name`, `modified`, `-modified`; ties break on `id`, so the order is total |
 
 Response `200`:
@@ -74,6 +75,7 @@ An unknown or non-numeric id gives `404` with `{"error": {"code": "character_not
 | First name in order | `Amber Alchemist` |
 | `nameStartsWith=spi` | matches the aliases Spindle, Spirit, Spiral and Spire (152 characters); `Sparrow *` does not match |
 | Page 2 at 30 per page | `offset=30&limit=30` |
+| Teams | `The Lantern Circle` (`the-lantern-circle`), `Harbor Watch` (`harbor-watch`), `Northern Compass` (`northern-compass`), `The Quiet Ones` (`the-quiet-ones`), `Copper Street Collective` (`copper-street-collective`), `Skyline Guild` (`skyline-guild`), `The Undertow` (`the-undertow`), `Open Road` (`open-road`). Every character has one, drawn from the seed; the synthetic sets give everyone the empty team, so any `team` filter matches nothing there |
 | Names | do not depend on the seed; every other field does |
 
 ## Scenarios

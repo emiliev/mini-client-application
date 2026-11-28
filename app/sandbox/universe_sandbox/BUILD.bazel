@@ -48,6 +48,7 @@ flutter_library(
         ":universe_sandbox_lib",
         "//feature/characters/characters_details",
         "//feature/characters/characters_list",
+        "//feature/characters/characters_search",
         "@pub_deps//:flutter_test",
     ],
 ) for t in [

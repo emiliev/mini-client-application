@@ -28,4 +28,11 @@ class CharactersListNavigatorImpl implements CharactersListNavigator {
   void openComic(ComicId id) {
     unawaited(_routerRef.router.push(AppLocations.comic(id.value)));
   }
+
+  /// The search is this group's (a typed route), and a push: Back returns to
+  /// the list (T-0071).
+  @override
+  void openSearch() {
+    unawaited(_routerRef.router.push(const CharactersSearchRoute().location));
+  }
 }
