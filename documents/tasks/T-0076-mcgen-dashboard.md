@@ -70,3 +70,14 @@ Add the DB archetype. The exemplar `store_home` must round-trip. It is the only 
   - drop `_flowScope` and switch the probe script to `gen`, `wire`, `buildgen` after T-0074;
   - template the navigator-based steps;
   - a 20-run flake check of the probe targets is not meaningful: they are never committed.
+
+## Review round (ADR-0015's single fix round)
+- 2026-11-28 (Engineer): five important findings fixed, each with a test in `tool/mcgen/test/dashboard_test.dart`.
+  1. **String ids.** The detail open guard's type comes from `options.detail.item_id_type` (default `Object`; `store_home` declares `int`, so the exemplar is unchanged). Test: `T-0076-AC3 the detail open guard takes the id type the spec declares, Object by default, so a String id analyses` (a render check; no generated-code analysis in a unit test).
+  2. **Multi-argument navigator methods** are rejected by lint (`navigator.outbound[i]`): `T-0076-AC3 navigator: a method takes at most one argument, so no parameter name repeats`.
+  3. **Session-section calls.** `open_call` must take no argument and `requestSignIn` must return a `Future`: `T-0076-AC3 session section: open_call takes no argument and requestSignIn returns a Future`.
+  4. **Uniqueness and identifiers.** Flag names and keys, section `bloc` and `widget` names must be unique and section names lower camel case: `T-0076-AC3 unique flag names and keys, unique bloc and widget names, lower camel section names`.
+  5. **Escaping.** A flag's `key` and `description` go through `dartString` (`core/naming.dart`; no new helper): `T-0076-AC3 a flag key and description are escaped as Dart strings`.
+  - **Nits fixed:** a session section that sets `open`, `members`, `top` or `fetch_method` is rejected (`T-0076-AC3 a session section says so when it ignores a key`); the dead lint branches are gone; the AC2 manifest test compares SHA-256 hashes, not byte lengths.
+  - **Follow-ups (for `pending-work.md`):** step-template matching is by the page noun and the analytics prefix in the step's file name, so two nouns that overlap would mis-match; the T-0074 contract switch (drop `_flowScope`, probe script `gen`, `wire`, `buildgen`); template the navigator-based steps.
+  - Gates re-run: `T-0065-AC5_gates.sh` (219 mcgen tests), both probes (4 of 4 and 78 of 78), and every `--check` up to date.

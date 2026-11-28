@@ -1,6 +1,6 @@
 # T-0076-AC3: two throwaway dashboard modules
 
-HEAD `e4660a8d`
+HEAD `04403e77`
 
 ## zz_db_a
 - PASS: mcgen gen zz_db_a
