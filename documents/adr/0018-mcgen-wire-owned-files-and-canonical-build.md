@@ -13,7 +13,7 @@ Phase E batches (plan 02 §7.1) must never hand-edit shared glue. After every me
 
 ## Options considered
 ### BUILD files: pure template, sidecar config, or merge
-- **A. A pure function of the package (a template).** Every hand-written difference would have to become a rule or a graph change. The import graph does not explain everything that is in the lists (F-0074 §2), so this would add or remove edges in 8 of the 11 packages.
+- **A. A pure function of the package (a template).** Every hand-written difference would have to become a rule or a graph change. The import graph does not explain everything that is in the lists (F-0074 §2), so this would remove edges in all 11 packages.
 - **B. A sidecar file per package** (`build.yaml` with extras and overrides). It is one more file per module, and it splits a target's truth between two files. A reviewer reading the BUILD file cannot see why an item is there.
 - **C. Merge with the file on disk, keeping only what a human owns (chosen).** This is Gazelle's model: `# keep` on an item, plus comments as prose. Everything else is derived and checked.
 
@@ -74,4 +74,4 @@ Phase E batches (plan 02 §7.1) must never hand-edit shared glue. After every me
   - a `route:` spec section and exemplar specs, so that wire can own the hand-written groups (F-0074 §4);
   - buildgen for utility packages once an archetype covers one;
   - shrinking the kept items as packages are next touched (F-0074 §2);
-  - SC/SR archetypes (T-0072, T-0073) should emit no BUILD or flow scope (Decision 1).
+  - The SC and SR archetypes (T-0072, T-0073, merged during T-0074) now leave the flow scope to wire, and SC its BUILD file to buildgen. What remains of Decision 1: SC's brick still renders a BUILD file that is dropped, and the SR skeleton writes an owned first BUILD file (F-0074 §6).

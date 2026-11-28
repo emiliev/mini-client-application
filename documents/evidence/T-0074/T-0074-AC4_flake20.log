@@ -1,5 +1,5 @@
 $ tool/bazelw --output_base=/tmp/mc-ob-T-0074-engineer test --lockfile_mode=error --runs_per_test=20 --nocache_test_results //app/mini_client:catalogue_test //app/mini_client:analytics_screens_test //app/mini_client:app_test
-INFO: Invocation ID: 39c5d44a-1265-4ce4-aa9a-dcde860c0edf
+INFO: Invocation ID: 36c53b0a-826e-4220-8c65-c7b353cdb6a4
 Computing main repo mapping: 
 Loading: 
 Loading: 0 packages loaded
@@ -7,40 +7,41 @@ WARNING: Build options --compilation_mode and --ios_multi_cpus have changed, dis
 Analyzing: 3 targets (0 packages loaded, 0 targets configured)
 Analyzing: 3 targets (0 packages loaded, 0 targets configured)
 
-Analyzing: 3 targets (0 packages loaded, 5501 targets configured, 930 aspect applications)
+Analyzing: 3 targets (0 packages loaded, 5502 targets configured, 942 aspect applications)
 [1 / 1] no actions running
 INFO: Analyzed 3 targets (0 packages loaded, 5502 targets configured, 945 aspect applications).
-[55,612 / 68,307] checking cached actions
-[89,082 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 0s darwin-sandbox ... (14 actions, 8 running)
-[89,082 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 1s darwin-sandbox ... (14 actions, 9 running)
-[89,086 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
-[89,087 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,087 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 5s darwin-sandbox ... (14 actions, 9 running)
-[89,092 / 89,142] Testing //app/mini_client:analytics_screens_test (run 9 of 20); 5s darwin-sandbox ... (14 actions, 9 running)
-[89,098 / 89,142] Testing //app/mini_client:analytics_screens_test (run 5 of 20); 2s darwin-sandbox ... (14 actions, 9 running)
-[89,100 / 89,142] Testing //app/mini_client:analytics_screens_test (run 5 of 20); 3s darwin-sandbox ... (14 actions, 9 running)
-[89,102 / 89,142] Testing //app/mini_client:analytics_screens_test (run 5 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,105 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
-[89,107 / 89,142] Testing //app/mini_client:analytics_screens_test (run 7 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
-[89,111 / 89,142] Testing //app/mini_client:analytics_screens_test (run 12 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
-[89,115 / 89,142] Testing //app/mini_client:app_test (run 9 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
-[89,120 / 89,142] Testing //app/mini_client:app_test (run 12 of 20); 1s darwin-sandbox ... (14 actions, 8 running)
-[89,124 / 89,142] Testing //app/mini_client:analytics_screens_test (run 14 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
-[89,126 / 89,142] Testing //app/mini_client:analytics_screens_test (run 14 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
-[89,130 / 89,142] Testing //app/mini_client:analytics_screens_test (run 14 of 20); 4s darwin-sandbox ... (12 actions, 8 running)
-[89,133 / 89,142] Testing //app/mini_client:analytics_screens_test (run 15 of 20); 4s darwin-sandbox ... (9 actions, 8 running)
-[89,138 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 17 of 20); 1s darwin-sandbox ... (4 actions running)
-[89,140 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 19 of 20); 4s darwin-sandbox ... (2 actions running)
+[59,397 / 68,795] checking cached actions
+[89,082 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 0s darwin-sandbox ... (14 actions, 8 running)
+[89,082 / 89,142] Testing //app/mini_client:catalogue_test (run 2 of 20); 1s darwin-sandbox ... (14 actions, 9 running)
+[89,087 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
+[89,089 / 89,142] Testing //app/mini_client:analytics_screens_test (run 4 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
+[89,094 / 89,142] Testing //app/mini_client:analytics_screens_test (run 2 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
+[89,098 / 89,142] Testing //app/mini_client:analytics_screens_test (run 3 of 20); 4s darwin-sandbox ... (14 actions, 9 running)
+[89,104 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
+[89,106 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
+[89,107 / 89,142] Testing //app/mini_client:analytics_screens_test (run 6 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
+[89,109 / 89,142] Testing //app/mini_client:analytics_screens_test (run 7 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
+[89,109 / 89,142] Testing //app/mini_client:analytics_screens_test (run 7 of 20); 5s darwin-sandbox ... (14 actions, 9 running)
+[89,116 / 89,142] Testing //app/mini_client:analytics_screens_test (run 12 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
+[89,119 / 89,142] Testing //app/mini_client:analytics_screens_test (run 12 of 20); 5s darwin-sandbox ... (14 actions, 8 running)
+[89,124 / 89,142] Testing //app/mini_client:analytics_screens_test (run 13 of 20); 2s darwin-sandbox ... (14 actions, 8 running)
+[89,125 / 89,142] Testing //app/mini_client:analytics_screens_test (run 13 of 20); 3s darwin-sandbox ... (14 actions, 8 running)
+[89,126 / 89,142] Testing //app/mini_client:analytics_screens_test (run 13 of 20); 4s darwin-sandbox ... (14 actions, 8 running)
+[89,129 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 14 of 20); 4s darwin-sandbox ... (13 actions, 8 running)
+[89,129 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 14 of 20); 5s darwin-sandbox ... (13 actions, 9 running)
+[89,136 / 89,142] 1 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 19 of 20); 3s darwin-sandbox ... (6 actions running)
+[89,141 / 89,142] 2 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 20 of 20); 2s darwin-sandbox
+[89,141 / 89,142] 3 / 3 tests; Testing //app/mini_client:analytics_screens_test (run 20 of 20); 3s darwin-sandbox
 INFO: Found 3 test targets...
-INFO: Elapsed time: 27.681s, Critical Path: 8.42s
+INFO: Elapsed time: 27.559s, Critical Path: 8.28s
 INFO: 61 processes: 89081 action cache hit, 1 internal, 60 darwin-sandbox.
 INFO: Build completed successfully, 61 total actions
-//app/mini_client:analytics_screens_test                                 PASSED in 5.5s
-  Stats over 20 runs: max = 5.5s, min = 4.1s, avg = 5.1s, dev = 0.4s
-//app/mini_client:app_test                                               PASSED in 2.4s
-  Stats over 20 runs: max = 2.4s, min = 2.1s, avg = 2.2s, dev = 0.1s
-//app/mini_client:catalogue_test                                         PASSED in 1.5s
-  Stats over 20 runs: max = 1.5s, min = 1.2s, avg = 1.3s, dev = 0.1s
+//app/mini_client:analytics_screens_test                                 PASSED in 5.4s
+  Stats over 20 runs: max = 5.4s, min = 3.8s, avg = 5.1s, dev = 0.3s
+//app/mini_client:app_test                                               PASSED in 2.3s
+  Stats over 20 runs: max = 2.3s, min = 1.9s, avg = 2.1s, dev = 0.1s
+//app/mini_client:catalogue_test                                         PASSED in 1.4s
+  Stats over 20 runs: max = 1.4s, min = 1.2s, avg = 1.3s, dev = 0.0s
 
 Executed 3 out of 3 tests: 3 tests pass.
 exit=0

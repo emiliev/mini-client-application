@@ -1,8 +1,8 @@
 # T-0074-AC3: a new list-detail spec, wired by mcgen alone
 
-HEAD `6ccb217b`, copy `/tmp/mc-T-0074-probe-engineer-MWOVqd` (deleted afterwards)
+HEAD `ee8474a8`, copy `/tmp/mc-T-0074-probe-engineer-3tRT7k` (deleted afterwards)
 
-- the copy: 6067 files; the one hand-written addition: `feature/zz_probe/zz_ld_probe/mcgen.yaml`
+- the copy: 6116 files; the one hand-written addition: `feature/zz_probe/zz_ld_probe/mcgen.yaml`
 - PASS: mcgen gen zz_ld_probe
 - PASS: mcgen wire
 - PASS: mcgen buildgen

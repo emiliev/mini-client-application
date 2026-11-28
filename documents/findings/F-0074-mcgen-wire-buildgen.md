@@ -39,7 +39,7 @@ A BUILD file is a function of the package's files, plus what a human owns:
 | List | Rule | Agreed before `# keep` |
 |---|---|---|
 | `_PURE_DEPS` | imports of the pure globs' files, plus `get_it` (injectable output) and `json_annotation` (with a DTO) | 11 of 11 |
-| `_FLUTTER_DEPS` | imports of every `lib/` file, minus `_PURE_DEPS`, plus `flutter_localizations` and `intl` (gen-l10n output) | 9 of 11 (`mc_ds_theme` is in characters_list and auth_signin, imported by nothing) |
+| `_FLUTTER_DEPS` | imports of every `lib/` file, minus `_PURE_DEPS`, plus `flutter_localizations` and `intl` (gen-l10n output) | 8 of 11 (characters_list and auth_signin list `mc_ds_theme`, settings_home `mc_l10n_core`, and no `lib/` file imports them) |
 | `_TEST_DEPS` | imports of `test/feature/step/**` and `test/feature/util/*`, minus what `mc_bdd_tests` adds itself | the derived set ⊆ the hand set in 11 of 11; 10 have extras |
 | a test's own `deps` | `:pkg` plus the imports of its `main` (and of the util files when it imports them), minus `_TEST_DEPS` | most; extras such as `mc_storage` in 4 flow-scope tests |
 | `_FREEZED` names | the name the BUILD file gave the source (`list_bloc`, `details_bloc`), else the file stem | 11 of 11 once carried over |
@@ -50,7 +50,7 @@ A BUILD file is a function of the package's files, plus what a human owns:
   - trivia_quiz's engine lane (`_ENGINE_SRCS`, `_engine`, `engine_test`), its `architecture_test` with the engine list, and `outline_matches_contract_test`;
   - the `size = "medium"` legacy `golden_test` of library_reading_list_editor and store_home.
 
-**Why not a pure template.** It would change 8 of the 11 graphs. **Why not a sidecar file.** It splits a target's truth across two files, and a reviewer can't see why an item is there.
+**Why not a pure template.** It would change all 11 graphs: every file has at least 2 items no import explains. **Why not a sidecar file.** It splits a target's truth across two files, and a reviewer can't see why an item is there.
 
 ## 2. What `--adopt` changed, exactly (commit `6802dab2`)
 - `# keep` on 75 list items.
@@ -121,8 +121,12 @@ The app's own list of wirings moved to `app/mini_client/wirings.bzl` (`_WIRINGS 
 - **`directives_ordering` sorts by URI across a package's own and other packages.** `package:zz_ld_probe/…` sorts before `package:zz_probe_wiring/…`. The generated group's files sort each run of imports and exports at the end.
 - **A navigator skeleton with no location to map** would leave a private `_routerRef` unused, and the analyze aspect fails on any diagnostic. The skeleton's field is public (`routerRef`).
 - **Archetypes and the round-trip.** The round-trip now ignores `BUILD.bazel` and `lib/src/di/flow_scope.dart` (`defaultExemplarIgnores`).
-  - An archetype that still renders one of them reports "rendered, but not in the exemplar". The search archetype (T-0073, merged mid-task) did. It now registers the root-import list as an external symbol, as list-detail does, and adds the list's packages (`dio`, `mc_di`, `mc_monitoring`, `mc_storage`) to its pubspec.
-  - Its skeleton mode still writes an owned first `BUILD.bazel`. buildgen rewrites that file on its next run, so the two never conflict, but there are two writers (follow-up).
+  - An archetype that still renders one of them reports "rendered, but not in the exemplar". Both archetypes merged mid-task did: search (T-0073) rendered the flow scope, and section-detail (T-0072) rendered both files.
+  - Both now register the root-import list as an external symbol, as list-detail does, and add the list's packages to their pubspec deps: search adds `dio`, `mc_di`, `mc_monitoring` and `mc_storage`; section-detail adds `dio`, `mc_di`, `mc_event_bus`, `mc_monitoring` and `mc_session`. Their four exemplars still round-trip (manifests regenerated).
+  - **Section-detail** no longer outputs a `BUILD.bazel`. Its brick still renders the old one from its prose slots, which is then dropped, until the template is removed. Removing it means deleting the `build.*` slots from the two exemplar specs.
+  - **The search skeleton** still writes an owned first `BUILD.bazel`. buildgen rewrites that file on its next run, so the two never conflict, but there are two writers.
+  - The three archetype probe scripts now run `mcgen wire <module dir>`, and the list-detail and section-detail probes also `mcgen buildgen <module dir>`. All three pass under Bazel ([T-0074-AC4_archetype_probes.md](../evidence/T-0074/T-0074-AC4_archetype_probes.md)).
+  - `tool/mcgen/tool/T-0072-AC3_sc_probe.sh` is committed without the exec bit (mode 100644 on `main`): run it with `bash`.
 
 ## Evidence
 - AC1:
@@ -133,13 +137,13 @@ The app's own list of wirings moved to `app/mini_client/wirings.bzl` (`_WIRINGS 
   - `T-0074-AC3 *` (2 tests) in `wire_test.dart`;
   - `T-0074-AC3 *` (3 tests) in `app/mini_client/test/catalogue_test.dart`;
   - [T-0074-AC3_wire_probe.md](../evidence/T-0074/T-0074-AC3_wire_probe.md).
-- AC4: [T-0065-AC5_gates.md](../evidence/T-0074/T-0065-AC5_gates.md) and the `T-0074-AC4_*.log` files.
+- AC4: [T-0065-AC5_gates.md](../evidence/T-0074/T-0065-AC5_gates.md), [T-0074-AC4_archetype_probes.md](../evidence/T-0074/T-0074-AC4_archetype_probes.md) and the `T-0074-AC4_*.log` files.
 
 ## Implications / actions
 - **ADR-0018** (proposed) records the canonical BUILD form and the wire-owned layout.
 - **Follow-ups for the TL** (none filed in `pending-work.md`, which the TL owns):
   - (a) A `route:` spec section, plus specs for the exemplars' routes, so wire can own the 7 hand-written groups and generated flows can join them. That is the batches' common case (plan 02 §7.1: `comics_*` joins publishing).
   - (b) Shrink the 75 `# keep` items as packages are next touched: most are over-approximations.
-  - (c) The search archetype's skeleton BUILD should go (ADR-0018 Decision 1); the SC archetype (T-0072) should emit neither file.
+  - (c) Remove the dead BUILD template from section-detail (and its `build.*` prose slots in the comics_details and characters_details specs), and the search skeleton's owned BUILD (ADR-0018 Decision 1).
   - (d) buildgen for utility packages, once an archetype covers one.
   - (e) The CI mcgen gate now also runs `wire --check` and `buildgen --check` (`tool/ci/ci.sh` gate 6).
