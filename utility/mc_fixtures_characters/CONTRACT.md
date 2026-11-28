@@ -20,6 +20,7 @@ The machine-readable list is `fixtures/routes.json`; a test keeps it, the domain
 | `offset` | int | 0 | `>= 0` |
 | `limit` | int | 20 | 1 to 100 |
 | `nameStartsWith` | string | none | case-insensitive prefix of `name`; empty means no filter |
+| `team` | string | none | the exact team name (one of the eight in the table below), case-insensitive; empty means no filter; a name nobody has matches nothing (`total: 0`), it is not an error (T-0071) |
 | `orderBy` | enum | `name` | `name`, `-name`, `modified`, `-modified`; ties break on `id`, so the order is total |
 
 Response `200`:
@@ -74,6 +75,7 @@ An unknown or non-numeric id gives `404` with `{"error": {"code": "character_not
 | First name in order | `Amber Alchemist` |
 | `nameStartsWith=spi` | matches the aliases Spindle, Spirit, Spiral and Spire (152 characters); `Sparrow *` does not match |
 | Page 2 at 30 per page | `offset=30&limit=30` |
+| Teams | `The Lantern Circle`, `Harbor Watch`, `Northern Compass`, `The Quiet Ones`, `Copper Street Collective`, `Skyline Guild`, `The Undertow`, `Open Road`. Every character has one, drawn from the seed; the synthetic sets give everyone the empty team, so any `team` filter matches nothing there |
 | Names | do not depend on the seed; every other field does |
 
 ## Scenarios

@@ -7,9 +7,10 @@ const int maxLimit = 100;
 /// `GET /v1/characters`: pagination, `nameStartsWith` search and ordering.
 ///
 /// Query: `offset` (default 0), `limit` (1 to 100, default 20),
-/// `nameStartsWith` (case-insensitive), `orderBy` (`name`, `-name`,
-/// `modified`, `-modified`; default `name`). Ties break on `id`, so the order
-/// is total and stable.
+/// `nameStartsWith` (case-insensitive), `team` (the exact team name,
+/// case-insensitive; empty means no filter; T-0071), `orderBy` (`name`,
+/// `-name`, `modified`, `-modified`; default `name`). Ties break on `id`, so
+/// the order is total and stable.
 MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
   final (:query, :error) = _parse(request);
   if (query == null) {
@@ -21,6 +22,12 @@ MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
     matches = [
       for (final c in matches)
         if (c.name.toLowerCase().startsWith(query.prefix)) c,
+    ];
+  }
+  if (query.team.isNotEmpty) {
+    matches = [
+      for (final c in matches)
+        if (c.team.toLowerCase() == query.team) c,
     ];
   }
   if (query.orderBy != 'name') {
@@ -38,7 +45,13 @@ MockHandler listCharacters(CharacterUniverse universe) => (request, context) {
   );
 };
 
-typedef _Query = ({int offset, int limit, String orderBy, String prefix});
+typedef _Query = ({
+  int offset,
+  int limit,
+  String orderBy,
+  String prefix,
+  String team,
+});
 
 /// Validates the list query once, for the normal and the `empty` handler.
 ({_Query? query, MockResponse? error}) _parse(MockRequest request) {
@@ -72,6 +85,7 @@ typedef _Query = ({int offset, int limit, String orderBy, String prefix});
       limit: limit,
       orderBy: orderBy,
       prefix: (request.query['nameStartsWith'] ?? '').trim().toLowerCase(),
+      team: (request.query['team'] ?? '').trim().toLowerCase(),
     ),
     error: null,
   );

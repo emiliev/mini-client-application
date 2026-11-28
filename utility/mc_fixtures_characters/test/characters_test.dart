@@ -349,4 +349,64 @@ void main() {
       expect((await _get(dio, '/v1/characters'))['total'], 1500);
     });
   });
+
+  group('T-0071-AC3 the team filter', () {
+    test('T-0071-AC3: team keeps exactly that team, case-insensitively, and '
+        'counts the matches', () async {
+      final universe = CharacterUniverse(42, defaultMockClock);
+      final expected = [
+        for (final c in universe.byName)
+          if (c.team == 'Harbor Watch') c,
+      ];
+      expect(expected, isNotEmpty);
+      final page = await _get(
+        dio,
+        '/v1/characters?team=${Uri.encodeQueryComponent('harbor WATCH')}'
+        '&limit=100',
+      );
+      expect(page['total'], expected.length);
+      expect(
+        [for (final c in _results(page)) c['id']],
+        [
+          for (final c in expected.take(100)) c.id,
+        ],
+      );
+    });
+
+    test('T-0071-AC3: team combines with a name prefix and an order', () async {
+      final universe = CharacterUniverse(42, defaultMockClock);
+      final expected = [
+        for (final c in universe.byName.reversed)
+          if (c.team == 'The Quiet Ones' && c.name.startsWith('Spi')) c,
+      ];
+      expect(expected, isNotEmpty);
+      final page = await _get(
+        dio,
+        '/v1/characters?team=${Uri.encodeQueryComponent('The Quiet Ones')}'
+        '&nameStartsWith=spi&orderBy=-name&limit=100',
+      );
+      expect(page['total'], expected.length);
+      expect(
+        [for (final c in _results(page)) c['name']],
+        [
+          for (final c in expected) c.name,
+        ],
+      );
+    });
+
+    test('T-0071-AC3: an unknown team matches nothing; an empty one filters '
+        'nothing; the synthetic cast has no team', () async {
+      final none = await _get(dio, '/v1/characters?team=Nobody');
+      expect([none['total'], none['count']], [0, 0]);
+      final all = await _get(dio, '/v1/characters?team=');
+      expect(all['total'], 1500);
+      final synthetic = MockBackend(
+        domains: [const SyntheticCharactersDomain(5)],
+      ).createDio();
+      expect(
+        (await _get(synthetic, '/v1/characters?team=Harbor%20Watch'))['total'],
+        0,
+      );
+    });
+  });
 }
