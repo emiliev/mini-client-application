@@ -333,9 +333,6 @@ class FwModel {
       declared(a.type, 'options.flow_state.fields[$i].type');
     }
     declared(m.resultType, 'options.flow.result.type');
-    for (final (i, p) in m.pages.indexed) {
-      declared(p.widget.split('(').first, 'options.flow.pages[$i].widget');
-    }
     // Expressions the flow writes: every type they name is declared.
     void expr(String text, String path, {Set<String> also = const {}}) {
       for (final id in _identifiers(text)) {
@@ -347,6 +344,11 @@ class FwModel {
       }
     }
 
+    for (final (i, p) in m.pages.indexed) {
+      expr(p.widget, 'options.flow.pages[$i].widget');
+      if (p.when != null) expr(p.when!, 'options.flow.pages[$i].when');
+    }
+    if (m.flowKey != null) expr(m.flowKey!, 'options.flow.key');
     expr(m.flowStateExpr, 'options.flow.state', also: {m.flowState});
     expr(m.resultCast, 'options.flow.result.cast');
     for (final (i, a) in m.flowArgs.indexed) {
@@ -366,9 +368,22 @@ class FwModel {
       if (o.returns != null) expr('${o.returns}', 'navigator.outbound[$i]');
     }
     final ident = RegExp(r'^[a-z][A-Za-z0-9]*$');
-    for (final (i, a) in [...m.flowArgs, ...m.stateFields].indexed) {
+    for (final (i, a) in m.flowArgs.indexed) {
       if (!ident.hasMatch(a.name)) {
-        err(node, 'options.flow[$i].name', '"${a.name}" is not a Dart name');
+        err(
+          node,
+          'options.flow.args[$i].name',
+          '"${a.name}" is not a Dart name',
+        );
+      }
+    }
+    for (final (i, a) in m.stateFields.indexed) {
+      if (!ident.hasMatch(a.name)) {
+        err(
+          node,
+          'options.flow_state.fields[$i].name',
+          '"${a.name}" is not a Dart name',
+        );
       }
     }
     final stateNames = {for (final f in m.stateFields) f.name};
@@ -412,20 +427,28 @@ class FwModel {
         err(node, 'options.types.${e.key}', 'must be a .dart file');
       }
     }
-    // Every flow argument is read by the flow's key or its state expression.
-    final argNames = {for (final a in m.flowArgs) a.name};
-    for (final f in m.stateFields) {
-      if (!RegExp('\\b${f.name}\\s*:').hasMatch(m.flowStateExpr)) {
-        if (f.isRequired || f.defaultValue == null) continue;
-      }
-    }
-    for (final a in argNames) {
-      if (!RegExp('\\b$a\\b').hasMatch(m.flowStateExpr) &&
-          (m.flowKey == null || !m.flowKey!.contains(a))) {
+    // Every flow argument is read by the flow's key or its state expression,
+    // and the state expression sets every required flow-state field.
+    bool mentions(String text, String name) =>
+        RegExp('(?<![A-Za-z0-9_\$.])$name(?![A-Za-z0-9_])').hasMatch(text);
+    for (final a in m.flowArgs) {
+      if (!mentions(m.flowStateExpr, a.name) &&
+          (m.flowKey == null || !mentions(m.flowKey!, a.name))) {
         err(
           node,
           'options.flow.args',
-          'flow argument "$a" is used by neither options.flow.state nor options.flow.key',
+          'flow argument "${a.name}" is used by neither options.flow.state nor options.flow.key',
+        );
+      }
+    }
+    for (final f in m.stateFields) {
+      if (f.isRequired &&
+          !RegExp('\\b${f.name}\\s*:').hasMatch(m.flowStateExpr)) {
+        err(
+          node,
+          'options.flow.state',
+          'the flow state requires "${f.name}" (not nullable, no default), '
+              'but the state expression does not set it',
         );
       }
     }
@@ -464,7 +487,7 @@ class FwModel {
       }
     }
     final sk = m.skeleton;
-    if (sk != null) out.addAll(sk.lint(m, err, strings.keys.toSet()));
+    if (sk != null) out.addAll(sk.lint(m, err, strings));
     return out;
   }
 
@@ -577,10 +600,18 @@ class FwSkeleton {
     ],
   ];
 
+  /// The placeholders the template's use of key [k] needs: `Step` takes the
+  /// step and the total, a `TooLong` the maximum, every other key none.
+  List<String> _placeholders(FwModel m, String k) {
+    if (k == '${m.camel}Step') return const ['step', 'total'];
+    if (k.endsWith('TooLong')) return const ['max'];
+    return const [];
+  }
+
   List<Diagnostic> lint(
     FwModel m,
     void Function(YamlNode?, String, String) err,
-    Set<String> strings,
+    Map<String, L10nStringSpec> strings,
   ) {
     final out = <Diagnostic>[];
     final node = m.spec.optionsNode;
@@ -679,8 +710,33 @@ class FwSkeleton {
       err(node, 'options.skeleton.noun', 'the noun is lower-case words');
     }
     for (final k in requiredKeys(m)) {
-      if (!strings.contains(k)) {
+      if (!strings.containsKey(k)) {
         err(m.spec.node, 'l10n.strings', 'form_wizard needs the string "$k"');
+        continue;
+      }
+      final want = _placeholders(m, k);
+      final have = {
+        for (final e in strings[k]!.placeholders.entries)
+          e.key: (e.value is Map ? (e.value as Map)['type'] : null),
+      };
+      if (want.length != have.length ||
+          want.any((n) => have[n] != 'int') ||
+          have.keys.any((n) => !want.contains(n))) {
+        err(
+          m.spec.node,
+          '${strings[k]!.path}.placeholders',
+          '"$k" needs ${want.isEmpty ? 'no placeholders' : 'the int placeholders ${want.join(', ')}'}',
+        );
+      }
+    }
+    final bodyKeys = <String>{};
+    for (final k in [...fields.map((f) => f.bodyKey), ...extra.keys]) {
+      if (!bodyKeys.add(k)) {
+        err(
+          node,
+          'options.skeleton.submit',
+          'request body key "$k" is written twice (fields and submit.extra)',
+        );
       }
     }
     for (final r in const ['Dio', 'SessionReader', 'Monitoring']) {

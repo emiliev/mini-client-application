@@ -132,6 +132,19 @@ bdd:
           - "Then the backend answered {'POST /v1/me/lists'} with {400}"
           - "And the error {'This title was not accepted.'} shows under the field {'Title'}"
           - "And the flow has not completed"
+      - id: MC-zz_fw_plain-07
+        title: A failing backend shows the failure on the form, and a retry sends the note
+        tags: [T-0075-AC3]
+        steps:
+          - "Given the backend fails {'POST /v1/me/lists'} with {'server_error'}"
+          - "When I open the note flow"
+          - "And I enter {'Amber reads'} in the field {'Title'}"
+          - "And I tap {'Save note'}"
+          - "Then I see {'The server had a problem. Please try again later.'}"
+          - "And the flow has not completed"
+          - "When the backend recovers"
+          - "And I tap {'Save note'}"
+          - "Then the flow completed with {'l-5'}"
     outlines: []
 
 options:

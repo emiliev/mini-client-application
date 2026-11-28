@@ -51,7 +51,7 @@ Add the FW archetype. The exemplar `library_reading_list_editor` (multi-step wiz
   - **Exemplars:** `library_reading_list_editor` (three steps, nullable result, keyed flow) and `auth_signin` (one form, two arguments, non-null result) each have a spec (`exemplar: true`) and a manifest. Each exemplar's diff against `main` is the spec, the manifest and whitespace-only realignments of Examples tables (F-0075 section 3.1); no keep region exists.
   - **Managed:** barrel, DI initializer, root imports, navigator, flow state, flow, ARBs, `l10n.yaml`, `pubspec.yaml`, `.feature` files, architecture test. **Owned:** the domain, the form's rules, the bloc, the pages, the env, the steps, the contract and guard tests, the golden, BUILD (hand share 89 % and 95 %, F-0075 section 1).
   - **Skeleton** (`options.skeleton`): a new module gets an owned bloc (the guards: closed means stopped, one submit at a time, the epoch rule, `authPinned` write, `reject()` for a `400`), repository, form rules, step page, env, eight steps, flow-scope test and BUILD.
-  - **Probes** `zz_fw_probe` (3 steps) and `zz_fw_plain` (1 step): `tool/mcgen/tool/T-0075-AC3_fw_probe.sh`; gen, idempotent `--check`, `build --config=lint` and uncached `test`, 7 and 6 BDD scenarios.
+  - **Probes** `zz_fw_probe` (3 steps) and `zz_fw_plain` (1 step): `tool/mcgen/tool/T-0075-AC3_fw_probe.sh`; gen, idempotent `--check`, `build --config=lint` and uncached `test`, 7 and 7 BDD scenarios.
   - **No change to `emit/common`.** `archetypes.dart`: one import and one line.
   - **Tests:** nothing deleted or weakened. `tool/mcgen/test/form_wizard_test.dart` is new.
   - **Pitfalls and hand share:** [F-0075](../findings/F-0075-mcgen-form-wizard.md).
@@ -72,3 +72,15 @@ Add the FW archetype. The exemplar `library_reading_list_editor` (multi-step wiz
   - once T-0074 lands, `BUILD.bazel` and `flow_scope.dart` leave this archetype;
   - the skeleton knows text fields only (no choice, picked list, sign-in gate or edit mode);
   - a bloc template covering both exemplars would be a code DSL: not planned.
+
+## Review round (ADR-0015 single fix round)
+- 2026-11-28 (Engineer): six important findings, each with a test in `form_wizard_test.dart`.
+  1. **One-step form:** the last step page now shows the saving indicator and `wizard.failure`, as a review does. `zz_fw_plain` has a failure scenario (`server_error`, then a retry) and passes under Bazel (7 of 7 scenarios).
+  2. **Placeholders:** lint requires `Step` to have the int placeholders `step` and `total`, `TooLong` the int `max`, and every other required key none.
+  3. **Flow state:** lint reports a required flow-state field (non-nullable, no default) that the state expression does not set. The dead loop is gone.
+  4. **Names in expressions:** the type check covers the whole page widget, its `when` and `flow.key`, and `flow.dart` passes all three through `refs`, so a type there is imported.
+  5. **Escaping:** every spec string written into a Dart literal (labels, request path, id key, body keys) goes through the shared `dartString` helper in `core/naming.dart`, which LD, SC and SR already use, so `emit/common` needed no new one. Tested with a quote, a backslash and a dollar sign.
+  6. **Duplicate keys:** lint rejects a request body key written twice across fields and `submit.extra`.
+- **Nits fixed:** the flow-argument check matches by word, and a bad name is reported at `options.flow.args[i].name` or `options.flow_state.fields[i].name`.
+- **Accepted by the TL:** the hand share (89 % and 95 %) and the whitespace-only realignment of one Examples table in each of `auth_signin_l10n.feature` and `reading_list_editor_create.feature`.
+- **After T-0074 merges:** drop `BUILD.bazel` and `flow_scope.dart` from the archetype, add the root-import packages to the pubspec, and switch the probe script to gen, wire, buildgen.

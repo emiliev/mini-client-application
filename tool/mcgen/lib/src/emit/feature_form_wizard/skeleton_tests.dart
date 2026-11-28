@@ -5,6 +5,7 @@
 import 'package:mcgen/src/core/emit.dart';
 import 'package:mcgen/src/core/ir/code.dart';
 import 'package:mcgen/src/core/ir/dart_ir.dart';
+import 'package:mcgen/src/core/naming.dart';
 import 'package:mcgen/src/emit/common/bdd.dart';
 import 'package:mcgen/src/emit/feature_form_wizard/model.dart';
 import 'package:mcgen/src/emit/feature_form_wizard/skeleton_test_templates.dart';
@@ -129,7 +130,7 @@ void emitSkeletonTests(EmitContext ctx, FwModel m, Map<String, String> v) {
 
   final fills = [
     for (final step in sk.steps.take(sk.steps.length - 1))
-      '[${[for (final f in step.fields) "('${f.label}', 'x')"].join(', ')}]',
+      '[${[for (final f in step.fields) '(${dartString(f.label)}, \'x\')'].join(', ')}]',
   ];
   final next = m.en('${m.camel}Next');
   ctx.library(

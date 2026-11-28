@@ -31,11 +31,11 @@ class <<Repository>> {
     required int epoch,
   }) => apiCall(() async {
     final response = await _dio.post<Map<String, dynamic>>(
-      '<<path>>',
+      <<path>>,
       data: body,
       options: Options(extra: authPinned(epoch)),
     );
-    return <<Result>>(response.data!['<<idKey>>'] as String);
+    return <<Result>>(response.data![<<idKey>>] as String);
   });
 }''';
 

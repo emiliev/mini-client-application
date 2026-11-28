@@ -317,7 +317,7 @@ void main() {
         plain
             .files['lib/src/presentation/page/zz_fw_plain_step_page.dart']!
             .content,
-        isNot(contains('failureMessage(failure, core)')),
+        contains('failureMessage(failure, core)'),
       );
     });
 
@@ -666,6 +666,230 @@ void main() {
           );
         },
       );
+
+      test('T-0075-AC3 a one-step form page shows the saving and the failure '
+          'state, as a review does', () {
+        final root = _probeRoot('zz_fw_plain', 'probe-onestep');
+        addTearDown(() => root.deleteSync(recursive: true));
+        final gen = _render(
+          root.path,
+          '${_probeRel('zz_fw_plain')}/mcgen.yaml',
+        );
+        final page = gen
+            .files['lib/src/presentation/page/zz_fw_plain_step_page.dart']!
+            .content;
+        expect(page, contains('if (wizard.isCompleting)'));
+        expect(page, contains('Text(failureMessage(failure, core)'));
+        expect(page, contains('key: saveErrorKey'));
+        expect(
+          readFixture('zz_fw_plain/mcgen.yaml'),
+          contains('A failing backend shows the failure on the form'),
+        );
+      });
+
+      test('T-0075-AC3 placeholders are checked: Step takes two ints, TooLong '
+          'one, every other key none', () {
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) => s.replaceFirst(
+              'placeholders: {step: {type: int}, total: {type: int}}\n',
+              'placeholders: {step: {type: int}}\n',
+            ),
+          ),
+          contains(
+            'error [form_wizard] l10n.strings[1].placeholders: '
+            '"zzFwProbeStep" needs the int placeholders step, total',
+          ),
+        );
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) => s.replaceFirst(
+              'placeholders: {max: {type: int}}\n'
+                  '      text: {en: "Use at most {max} characters.", '
+                  'de: "Verwende höchstens {max} Zeichen."}\n'
+                  '    - key: zzFwProbeNameRefused',
+              'placeholders: {max: {type: String}}\n'
+                  '      text: {en: "Use at most {max} characters.", '
+                  'de: "Verwende höchstens {max} Zeichen."}\n'
+                  '    - key: zzFwProbeNameRefused',
+            ),
+          ),
+          contains(
+            'error [form_wizard] l10n.strings[11].placeholders: '
+            '"zzFwProbeNameTooLong" needs the int placeholders max',
+          ),
+        );
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) => s.replaceFirst(
+              '      description: The Back button.\n',
+              '      description: The Back button.\n'
+                  '      placeholders: {x: {type: int}}\n',
+            ),
+          ),
+          contains(
+            'error [form_wizard] l10n.strings[2].placeholders: '
+            '"zzFwProbeBack" needs no placeholders',
+          ),
+        );
+      });
+
+      test('T-0075-AC3 a required flow-state field the state expression does '
+          'not set is a lint error', () {
+        expect(
+          _lintWith(
+            'zz_fw_plain',
+            (s) => s.replaceFirst('        default: "0"\n', ''),
+          ),
+          contains(
+            'error [form_wizard] options.flow.state: the flow state requires '
+            '"step" (not nullable, no default), but the state expression '
+            'does not set it',
+          ),
+        );
+      });
+
+      test('T-0075-AC3 names in the widget, the condition and the key are '
+          'checked and imported', () {
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) => s
+                .replaceFirst(
+                  'widget: "ZzFwProbeStepPage(step: 0)"',
+                  'widget: "ZzFwProbeStepPage(step: 0, g: Ghost())"',
+                )
+                .replaceFirst(
+                  '"state.step >= 1"',
+                  '"state.step >= Phantom.one"',
+                ),
+          ),
+          containsAll([
+            'error [form_wizard] options.flow.pages[0].widget: '
+                'type "Ghost" is not in options.types',
+            'error [form_wizard] options.flow.pages[1].when: '
+                'type "Phantom" is not in options.types',
+          ]),
+        );
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) => s.replaceFirst('  flow:\n', '  flow:\n    key: Wraith.id\n'),
+          ),
+          contains(
+            'error [form_wizard] options.flow.key: '
+            'type "Wraith" is not in options.types',
+          ),
+        );
+        final root = _copyRoot(
+          _wizard,
+          'refs',
+          edit: (s) => s
+              .replaceFirst(
+                '    ReadingListId: domain/model/reading_list_id.dart\n',
+                '    ReadingListId: domain/model/reading_list_id.dart\n'
+                    '    Limits: domain/model/limits.dart\n',
+              )
+              .replaceFirst('"state.step >= 1"', '"state.step >= Limits.one"'),
+        );
+        addTearDown(() => root.deleteSync(recursive: true));
+        final gen = _render(root.path, '$_wizard/mcgen.yaml');
+        expect(
+          gen.files['lib/src/flow/reading_list_editor_flow.dart']!.content,
+          contains(
+            "import 'package:library_reading_list_editor/src/domain/model/"
+            "limits.dart';",
+          ),
+        );
+      });
+
+      test('T-0075-AC3 spec text written into a Dart literal is escaped: a '
+          r'quote, a backslash and a $', () {
+        final root = _probeRoot(
+          'zz_fw_probe',
+          'probe-escape',
+          edit: (s) => s
+              .replaceFirst(
+                '{name: name, label: Name,',
+                r'''{name: name, label: "Author's $name\\",''',
+              )
+              .replaceFirst('path: v1/me/lists', r'''path: "v1/it's/$x"'''),
+        );
+        addTearDown(() => root.deleteSync(recursive: true));
+        final gen = _render(
+          root.path,
+          '${_probeRel('zz_fw_probe')}/mcgen.yaml',
+        );
+        expect(
+          gen.files['test/flow_scope_test.dart']!.content,
+          contains(r"('Author\'s \$name\\', 'x')"),
+        );
+        expect(
+          gen
+              .files['lib/src/domain/repository/zz_fw_probe_repository.dart']!
+              .content,
+          contains(r"'v1/it\'s/\$x'"),
+        );
+      });
+
+      test('T-0075-AC3 a request body key written twice is a lint error', () {
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) => s.replaceFirst(
+              '        comicIds: "const <int>[]"\n',
+              '        comicIds: "const <int>[]"\n        name: "1"\n',
+            ),
+          ),
+          contains(
+            'error [form_wizard] options.skeleton.submit: request body key '
+            '"name" is written twice (fields and submit.extra)',
+          ),
+        );
+      });
+
+      test('T-0075-AC3 a flow argument is matched by word, and a bad name is '
+          'reported at its own path', () {
+        final args = _copyRoot(
+          _wizard,
+          'arg-word',
+          edit: (s) => s.replaceFirst(
+            '    result:\n      type: ReadingListId?',
+            '      - {name: edit, type: String?}\n'
+                '    result:\n      type: ReadingListId?',
+          ),
+        );
+        addTearDown(() => args.deleteSync(recursive: true));
+        final r = mcgen([
+          'spec',
+          'lint',
+          '--root',
+          args.path,
+          'library_reading_list_editor',
+        ]);
+        expect(r.code, 1, reason: '$r');
+        expect(
+          r.err,
+          contains(
+            'flow argument "edit" is used by neither options.flow.state '
+            'nor options.flow.key',
+          ),
+        );
+        expect(
+          _lintWith(
+            'zz_fw_probe',
+            (s) =>
+                s.replaceFirst('      - name: step\n', '      - name: Step\n'),
+          ),
+          contains(
+            'error [form_wizard] options.flow_state.fields[0].name: '
+            '"Step" is not a Dart name',
+          ),
+        );
+      });
 
       test(
         'T-0075-AC3 an archetype error prints the spec path and the message, '

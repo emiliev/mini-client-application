@@ -243,11 +243,11 @@ Map<String, String> skeletonVars(FwModel m) {
   final body = StringBuffer();
   for (final f in fields) {
     body.writeln(
-      "  '${f.bodyKey}': (values.get<String>(${m.pascal}Fields.${f.name}) ?? '')${f.trim ? '.trim()' : ''},",
+      "  ${dartString(f.bodyKey)}: (values.get<String>(${m.pascal}Fields.${f.name}) ?? '')${f.trim ? '.trim()' : ''},",
     );
   }
   for (final e in sk.extra.entries) {
-    body.writeln("  '${e.key}': ${e.value},");
+    body.writeln('  ${dartString(e.key)}: ${e.value},');
   }
   return {
     'module': m.module,
@@ -259,8 +259,8 @@ Map<String, String> skeletonVars(FwModel m) {
     'Navigator': m.navigator,
     'Flow': m.flow,
     'L10n': m.l10nClass,
-    'path': sk.path,
-    'idKey': sk.idKey,
+    'path': dartString(sk.path),
+    'idKey': dartString(sk.idKey),
     'step_count': '${sk.steps.length}',
     'field_consts': indent(
       [
@@ -269,7 +269,7 @@ Map<String, String> skeletonVars(FwModel m) {
       2,
     ),
     'of_parameter': [
-      for (final f in fields) "    '${f.bodyKey}' => ${f.name},\n",
+      for (final f in fields) "    ${dartString(f.bodyKey)} => ${f.name},\n",
     ].join(),
     'step_consts': indent(
       [
@@ -286,10 +286,9 @@ Map<String, String> skeletonVars(FwModel m) {
               'Validator<String> _trimmed(Validator<String> rule) =>\n'
               '    (value) => rule(value?.trim());\n\n'
         : '',
-    'review_locals': sk.steps.any((s) => s.isReview)
-        ? '    final core = McL10nCoreL10n.of(context);\n'
-              '    final failure = wizard.failure;\n'
-        : '',
+    'review_locals':
+        '    final core = McL10nCoreL10n.of(context);\n'
+        '    final failure = wizard.failure;\n',
     'tag': m.archTag,
     'noun': sk.noun,
   };
@@ -361,6 +360,17 @@ String _stepCases(FwModel m) {
         );
         b.writeln('            textInputAction: TextInputAction.next,');
         b.writeln('          ),');
+      }
+      if (i == sk.steps.length - 1) {
+        // A form of one step has no review: its page shows the save.
+        b.writeln('          if (wizard.isCompleting)');
+        b.writeln(
+          '            McLoading(key: savingKey, semanticLabel: l10n.${m.camel}Saving),',
+        );
+        b.writeln('          if (failure != null)');
+        b.writeln(
+          '            Text(failureMessage(failure, core), key: saveErrorKey),',
+        );
       }
     }
     b.writeln('        ],');

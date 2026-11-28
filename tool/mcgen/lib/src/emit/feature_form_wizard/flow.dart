@@ -175,7 +175,7 @@ void emitFlow(EmitContext ctx, FwModel m) {
               ]),
               'key': m.flowKey == null
                   ? ''
-                  : '    key: ValueKey(${m.flowKey}),\n',
+                  : '    key: ValueKey(${refs(m, m.flowKey!)}),\n',
               'state': refs(m, m.flowStateExpr),
               'cast': refs(m, m.resultCast),
               'pages_comment': switch (m.optionalText('flow.pages_comment')) {
@@ -184,7 +184,7 @@ void emitFlow(EmitContext ctx, FwModel m) {
               },
               'pages': [
                 for (final p in m.pages)
-                  '      ${p.when == null ? '' : 'if (${p.when}) '}'
+                  '      ${p.when == null ? '' : 'if (${refs(m, p.when!)}) '}'
                       "${p.isConst ? 'const ' : ''}McFlowPage(name: '${p.name}', child: ${refs(m, p.widget)}),\n",
               ].join(),
             }),

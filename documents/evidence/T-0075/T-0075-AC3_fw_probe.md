@@ -1,6 +1,6 @@
 # T-0075-AC3: throwaway form/wizard modules
 
-HEAD `86d203c3`
+HEAD `83408897`
 
 ## zz_fw_probe
 - PASS: mcgen gen zz_fw_probe
@@ -18,7 +18,7 @@ HEAD `86d203c3`
 - PASS: mcgen gen --check zz_fw_plain (idempotent)
 - PASS: bazel build --config=lint //feature/zz_probe/zz_fw_plain/... (mc_analysis, no issue)
 - PASS: bazel test //feature/zz_probe/zz_fw_plain/... (uncached)
-  - BDD scenarios: 6 passed, 0 failed
+  - BDD scenarios: 7 passed, 0 failed
   - //feature/zz_probe/zz_fw_plain:architecture_test PASSED
   - //feature/zz_probe/zz_fw_plain:bdd_test PASSED
   - //feature/zz_probe/zz_fw_plain:flow_scope_test PASSED
