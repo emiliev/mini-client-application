@@ -25,10 +25,25 @@ void emitPackage(EmitContext ctx, LdModel m) {
     ctx.file('test/feature/${f.feature}.feature', renderFeature(f));
   }
   _arbs(ctx, m);
+  // Read now, not when the deferred files are built, so the archetype's
+  // unused-prose check sees these slots.
+  final pubspec = m.optionalText('pubspec.preamble');
+  final build = m.text(
+    'build.preamble',
+    '${m.module}: a list-detail feature (archetype list_detail).\n'
+        'No per-package analysis_options.yaml: the root file applies (F-0021).\n'
+        '\n'
+        'Every generator runs as a Bazel action; nothing generated is committed.\n'
+        'Generators read only Flutter-free libraries (R15): `_stage` holds the\n'
+        'pure files, and the retrofit and json actions see only the DTOs\n'
+        '(`_stage_dto`), so a bloc body edit re-runs neither (F-0031 fact 4).',
+  );
   for (final path in ['pubspec.yaml', 'BUILD.bazel', 'l10n.yaml']) {
     ctx.deferred(
       path,
-      (graph) => ctx.bricks[_brick].render(_vars(ctx, m, graph))[path]!,
+      (graph) => ctx.bricks[_brick].render(
+        _vars(ctx, m, graph, pubspec: pubspec, build: build),
+      )[path]!,
     );
   }
 }
@@ -93,7 +108,13 @@ String _rule(String title) {
   return head.padRight(78, '-');
 }
 
-Map<String, Object?> _vars(EmitContext ctx, LdModel m, UseGraph g) {
+Map<String, Object?> _vars(
+  EmitContext ctx,
+  LdModel m,
+  UseGraph g, {
+  required String? pubspec,
+  required String build,
+}) {
   final spec = m.spec;
   final hasJson = m.dtos.isNotEmpty;
   // Codegen runtimes the source never names: injectable's output uses get_it
@@ -172,20 +193,11 @@ Map<String, Object?> _vars(EmitContext ctx, LdModel m, UseGraph g) {
     throw StateError('${spec.file}: list_detail needs a description');
   }
   return {
-    'pubspec_preamble': m.prose['pubspec.preamble'] == null
+    'pubspec_preamble': pubspec == null
         ? ''
-        : commentLines(m.prose['pubspec.preamble']!).replaceAll('//', '#'),
+        : commentLines(pubspec).replaceAll(RegExp('^//', multiLine: true), '#'),
     'build_preamble': commentLines(
-      m.text(
-        'build.preamble',
-        '${m.module}: a list-detail feature (archetype list_detail).\n'
-            'No per-package analysis_options.yaml: the root file applies (F-0021).\n'
-            '\n'
-            'Every generator runs as a Bazel action; nothing generated is committed.\n'
-            'Generators read only Flutter-free libraries (R15): `_stage` holds the\n'
-            'pure files, and the retrofit and json actions see only the DTOs\n'
-            '(`_stage_dto`), so a bloc body edit re-runs neither (F-0031 fact 4).',
-      ),
+      build,
     ).replaceAll(RegExp('^//', multiLine: true), '#'),
     'build_file': 'BUILD.bazel',
     'name': m.module,

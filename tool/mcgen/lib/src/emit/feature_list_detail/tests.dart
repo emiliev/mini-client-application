@@ -910,7 +910,10 @@ DartLibrary _architectureTest(LdModel m) {
   ];
   final expected = [
     for (final s in shown)
-      '${m.prose.containsKey('architecture.export.$s') ? commentLines(m.prose['architecture.export.$s']!, indent: '      ') : ''}'
+      '${switch (m.optionalText('architecture.export.$s')) {
+            null => '',
+            final t => commentLines(t, indent: '      '),
+          }}'
           "      '$s',",
   ].join('\n');
   final tag = m.tag('architecture');

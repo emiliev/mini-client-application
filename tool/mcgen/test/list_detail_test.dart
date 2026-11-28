@@ -118,7 +118,7 @@ void main() {
         'test/feature/util/characters_list_env.dart',
       });
       final compared = gen.files.length - owned.length;
-      expect(compared, greaterThanOrEqualTo(50));
+      expect(compared, 50);
       expect(gen.files.keys, contains('BUILD.bazel'));
       expect(gen.files.keys, contains('lib/src/l10n/characters_list_de.arb'));
       expect(
@@ -424,6 +424,23 @@ void main() {
         [
           'error [list_detail] options.preview.actions[0].calls: the navigator has no method "openSeries"',
         ],
+      );
+    });
+
+    test('T-0069-AC3 a prose slot no template uses fails gen, naming it', () {
+      final root = _probeRoot('probe-prose');
+      addTearDown(() => root.deleteSync(recursive: true));
+      final spec = File(
+        p.join(root.path, 'feature/zz_probe/zz_ld_probe/mcgen.yaml'),
+      );
+      spec.writeAsStringSync(
+        '${spec.readAsStringSync()}  prose:\n    flow.dco: A typo.\n',
+      );
+      final r = mcgen(['gen', '--check', '--root', root.path, 'zz_ld_probe']);
+      expect(r.code, 1, reason: '$r');
+      expect(
+        r.err,
+        contains('options.prose has slot(s) no template uses: flow.dco'),
       );
     });
 

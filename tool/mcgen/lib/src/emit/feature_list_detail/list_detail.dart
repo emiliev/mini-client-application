@@ -42,5 +42,11 @@ class ListDetailArchetype extends Archetype {
     emitPages(ctx, m);
     emitPackage(ctx, m);
     emitTests(ctx, m);
+    final unused = m.unusedProse;
+    if (unused.isNotEmpty) {
+      throw StateError(
+        'options.prose has slot(s) no template uses: ${unused.join(', ')}',
+      );
+    }
   }
 }

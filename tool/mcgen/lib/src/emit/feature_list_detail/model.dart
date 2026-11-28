@@ -269,7 +269,25 @@ class LdModel {
   }
 
   /// The prose of [slot]: the spec's `options.prose`, else [fallback].
-  String text(String slot, String fallback) => prose[slot] ?? fallback;
+  String text(String slot, String fallback) {
+    _consulted.add(slot);
+    return prose[slot] ?? fallback;
+  }
+
+  /// The prose of [slot], or null when the spec gives none (no default).
+  String? optionalText(String slot) {
+    _consulted.add(slot);
+    return prose[slot];
+  }
+
+  final _consulted = <String>{};
+
+  /// `options.prose` slots no template asked for: a typo, or a slot that a
+  /// template change dropped. The archetype refuses to emit with any.
+  List<String> get unusedProse => [
+    for (final k in prose.keys)
+      if (!_consulted.contains(k)) k,
+  ]..sort();
 
   /// The AC tag a test name starts with, plus a space; empty when untagged.
   String tag(String slot) {

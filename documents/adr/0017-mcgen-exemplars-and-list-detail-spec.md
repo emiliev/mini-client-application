@@ -80,7 +80,7 @@ P2-04 is the first real archetype. Its exemplar, `characters_list`, must regener
 
 ## Consequences
 - **Positive:**
-  - `characters_list` round-trips: 51 files compared byte for byte, and 2 owned files checked to exist. A one-field spec change fails `--check` and names the file (T-0069-AC1).
+  - `characters_list` round-trips: 50 files compared byte for byte, and 2 owned files checked to exist. The only exemplar files mcgen does not render are the spec, the manifest and the five legacy golden files. A one-field spec change fails `--check` and names the file (T-0069-AC1).
   - A second LD module with other names, no filter and no section generates, analyses clean and passes 7 BDD scenarios under Bazel (T-0069-AC3).
   - P2-05 to P2-07 reuse several parts:
     - exemplar mode;
@@ -90,7 +90,7 @@ P2-04 is the first real archetype. Its exemplar, `characters_list`, must regener
     - the prose slots;
     - the BUILD and pubspec dependency rules.
 - **Negative / trade-offs:**
-  - An exemplar spec is long, about 420 lines for `characters_list`, mostly prose. Prose slot ids become an interface between templates and specs: renaming a slot silently falls back to the default, and the round-trip then fails, which is how it is caught.
+  - An exemplar spec is long: 509 lines for `characters_list`, of which 196 are BDD, 37 are strings and 92 are the 19 prose slots. Prose slot ids become an interface between templates and specs. gen refuses a spec slot that no template asks for. A template slot that a spec leaves out falls back to its default, which an exemplar's round-trip shows.
   - The LD model covers what `characters_list` and the probe exercise. A second filter type, path parameters or non-GET endpoints are lint errors until a module needs them.
   - Owned test files are hand-written. tool/loc counts them as hand (275 of 717 test lines in `characters_list`).
   - `dart format` puts a keep region's end marker at the `case` indent when the region ends a switch case (F-0069).

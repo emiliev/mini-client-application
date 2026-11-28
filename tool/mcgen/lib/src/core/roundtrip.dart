@@ -23,6 +23,9 @@ const defaultExemplarIgnores = [
   '**/*.injectable.json',
   'lib/src/l10n/*_l10n.dart',
   'lib/src/l10n/*_l10n_*.dart',
+  // What `flutter pub get` and `flutter create` may leave (git-ignored).
+  '.flutter-plugins-dependencies',
+  '.metadata',
 ];
 
 class TreeDiff {
