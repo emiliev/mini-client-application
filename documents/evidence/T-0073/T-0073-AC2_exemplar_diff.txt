@@ -1,0 +1,59 @@
+ .../characters_search/.mcgen/manifest.json         | 210 ++++++
+ .../presentation/bloc/characters_search_bloc.dart  |   2 +
+ feature/characters/characters_search/mcgen.yaml    | 770 +++++++++++++++++++++
+ .../discovery_search/.mcgen/manifest.json          | 218 ++++++
+ .../presentation/bloc/discovery_search_bloc.dart   |   2 +
+ feature/discovery/discovery_search/mcgen.yaml      | 734 ++++++++++++++++++++
+ .../test/feature/discovery_search.feature          |   6 +-
+ 7 files changed, 1939 insertions(+), 3 deletions(-)
+
+diff --git a/feature/characters/characters_search/lib/src/presentation/bloc/characters_search_bloc.dart b/feature/characters/characters_search/lib/src/presentation/bloc/characters_search_bloc.dart
+index aac0acf3..2eec7544 100644
+--- a/feature/characters/characters_search/lib/src/presentation/bloc/characters_search_bloc.dart
++++ b/feature/characters/characters_search/lib/src/presentation/bloc/characters_search_bloc.dart
+@@ -166,7 +166,9 @@ final class CharactersSearchBloc
+           return;
+         }
+         _openGuard = Timer(openGuard, () {});
++        // mcgen:keep search.open
+         _navigator.openCharacter(id);
++      // mcgen:end search.open
+       case _LoadHistory():
+         final version = _historyVersion;
+         final loaded = await _history.load();
+diff --git a/feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_bloc.dart b/feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_bloc.dart
+index 1b975a27..96fff7e8 100644
+--- a/feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_bloc.dart
++++ b/feature/discovery/discovery_search/lib/src/presentation/bloc/discovery_search_bloc.dart
+@@ -134,12 +134,14 @@ final class DiscoverySearchBloc
+           return;
+         }
+         _openGuard = Timer(openGuard, () {});
++        // mcgen:keep search.open
+         switch (hit) {
+           case CharacterHit(:final id):
+             _navigator.openCharacter(id);
+           case ComicHit(:final id):
+             _navigator.openComic(id);
+         }
++      // mcgen:end search.open
+       case _LoadHistory():
+         final version = _historyVersion;
+         final loaded = await _history.load();
+diff --git a/feature/discovery/discovery_search/test/feature/discovery_search.feature b/feature/discovery/discovery_search/test/feature/discovery_search.feature
+index a1607012..62e14f1c 100644
+--- a/feature/discovery/discovery_search/test/feature/discovery_search.feature
++++ b/feature/discovery/discovery_search/test/feature/discovery_search.feature
+@@ -173,9 +173,9 @@ Feature: Search characters and comics
+     And the backend received {<requests>} requests for {'GET /v1/search'}
+ 
+     Examples:
+-      | query           | requests |
+-      | 'é'             | 0        |
+-      | 'e\u0301'       | 1        |
++      | query          | requests |
++      | 'é'            | 0        |
++      | 'e\u0301'      | 1        |
+       | '\u0301\u0301' | 1        |
+ 
+   @T-0046-AC3

@@ -134,12 +134,14 @@ final class DiscoverySearchBloc
           return;
         }
         _openGuard = Timer(openGuard, () {});
+        // mcgen:keep search.open
         switch (hit) {
           case CharacterHit(:final id):
             _navigator.openCharacter(id);
           case ComicHit(:final id):
             _navigator.openComic(id);
         }
+      // mcgen:end search.open
       case _LoadHistory():
         final version = _historyVersion;
         final loaded = await _history.load();

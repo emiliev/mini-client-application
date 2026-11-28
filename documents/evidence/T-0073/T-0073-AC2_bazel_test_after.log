@@ -1,0 +1,79 @@
+INFO: Invocation ID: 61a2b65b-0935-4dc4-a848-130013f5f134
+Computing main repo mapping: 
+Loading: 
+Loading: 0 packages loaded
+Analyzing: 152 targets (0 packages loaded)
+Analyzing: 152 targets (0 packages loaded, 0 targets configured)
+Analyzing: 152 targets (0 packages loaded, 0 targets configured)
+
+INFO: Analyzed 152 targets (0 packages loaded, 83 targets configured, 171 aspect applications).
+[90,526 / 90,562] 2 / 45 tests; Testing //feature/discovery/discovery_search:contract_test; 0s darwin-sandbox ... (14 actions, 9 running)
+[92,793 / 92,841] 11 / 45 tests; Testing //app/wiring/app_core:boot_test; 1s darwin-sandbox ... (14 actions, 8 running)
+[92,845 / 92,880] 14 / 45 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 1s darwin-sandbox ... (14 actions, 8 running)
+[92,847 / 92,880] 16 / 45 tests; Testing //app/wiring/app_core:flow_results_hardening_test; 2s darwin-sandbox ... (14 actions, 8 running)
+[92,860 / 92,886] 19 / 45 tests; Testing //app/mini_client:analytics_screens_test; 3s darwin-sandbox ... (14 actions, 8 running)
+[92,860 / 92,886] 19 / 45 tests; Testing //app/mini_client:analytics_screens_test; 4s darwin-sandbox ... (14 actions, 9 running)
+[92,863 / 92,886] 22 / 45 tests; Testing //app/wiring/account_wiring:routes_test; 5s darwin-sandbox ... (14 actions, 9 running)
+[92,867 / 92,886] 26 / 45 tests; Testing //app/mini_client:sign_in_guard_app_test; 4s darwin-sandbox ... (14 actions, 8 running)
+[92,869 / 92,886] 28 / 45 tests; Testing //app/mini_client:sign_in_guard_app_test; 5s darwin-sandbox ... (14 actions, 8 running)
+[92,872 / 92,886] 31 / 45 tests; Testing //app/mini_client:sign_in_guard_app_test; 6s darwin-sandbox ... (14 actions, 8 running)
+[92,875 / 92,886] 34 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 4s darwin-sandbox ... (11 actions, 8 running)
+[92,881 / 92,886] 40 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 5s darwin-sandbox ... (5 actions running)
+[92,882 / 92,886] 41 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 6s darwin-sandbox ... (4 actions running)
+[92,882 / 92,886] 42 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 7s darwin-sandbox ... (4 actions running)
+[92,884 / 92,886] 43 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 9s darwin-sandbox ... (2 actions running)
+[92,884 / 92,886] 43 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 19s darwin-sandbox ... (2 actions running)
+[92,884 / 92,886] 44 / 45 tests; Testing //feature/characters/characters_search:bdd_test; 36s darwin-sandbox ... (2 actions running)
+INFO: Found 107 targets and 45 test targets...
+INFO: Elapsed time: 49.395s, Critical Path: 41.09s
+INFO: 46 processes: 1662 action cache hit, 1 internal, 45 darwin-sandbox.
+INFO: Build completed successfully, 46 total actions
+//app/mini_client:analytics_screens_test                                 PASSED in 4.8s
+//app/mini_client:app_test                                               PASSED in 1.9s
+//app/mini_client:bdd_test                                               PASSED in 1.4s
+//app/mini_client:characters_search_route_test                           PASSED in 3.8s
+//app/mini_client:comic_route_test                                       PASSED in 2.4s
+//app/mini_client:deep_link_back_stack_test                              PASSED in 5.0s
+//app/mini_client:links_after_flow_test                                  PASSED in 1.3s
+//app/mini_client:not_found_test                                         PASSED in 3.7s
+//app/mini_client:reading_list_route_test                                PASSED in 5.1s
+//app/mini_client:search_route_test                                      PASSED in 3.7s
+//app/mini_client:settings_route_test                                    PASSED in 4.2s
+//app/mini_client:sign_in_guard_app_test                                 PASSED in 6.7s
+//app/mini_client:store_route_test                                       PASSED in 2.8s
+//app/mini_client:trivia_route_test                                      PASSED in 3.1s
+//app/sandbox/universe_sandbox:universe_sandbox_links_test               PASSED in 1.0s
+//app/sandbox/universe_sandbox:universe_sandbox_router_test              PASSED in 0.7s
+//app/wiring/account_wiring:routes_test                                  PASSED in 6.5s
+//app/wiring/app_core:app_layer_test                                     PASSED in 0.8s
+//app/wiring/app_core:appearance_shell_test                              PASSED in 1.5s
+//app/wiring/app_core:boot_test                                          PASSED in 1.3s
+//app/wiring/app_core:feature_flags_boot_test                            PASSED in 1.2s
+//app/wiring/app_core:flow_results_hardening_test                        PASSED in 2.9s
+//app/wiring/app_core:flow_results_test                                  PASSED in 1.7s
+//app/wiring/app_core:formatters_root_test                               PASSED in 0.6s
+//app/wiring/app_core:links_and_hooks_test                               PASSED in 0.6s
+//app/wiring/app_core:route_nesting_test                                 PASSED in 0.8s
+//app/wiring/app_core:router_observers_test                              PASSED in 1.2s
+//app/wiring/app_core:router_ref_and_scheme_test                         PASSED in 1.1s
+//app/wiring/app_core:sign_in_guard_router_test                          PASSED in 2.2s
+//app/wiring/app_core:sign_in_guard_test                                 PASSED in 0.8s
+//app/wiring/chronicle_wiring:routes_test                                PASSED in 1.3s
+//app/wiring/commerce_wiring:routes_test                                 PASSED in 1.5s
+//app/wiring/discovery_wiring:routes_test                                PASSED in 1.0s
+//app/wiring/library_wiring:routes_test                                  PASSED in 1.5s
+//app/wiring/publishing_wiring:routes_test                               PASSED in 1.5s
+//app/wiring/universe_wiring:routes_test                                 PASSED in 1.5s
+//feature/characters/characters_search:architecture_test                 PASSED in 0.3s
+//feature/characters/characters_search:bdd_test                          PASSED in 37.3s
+//feature/characters/characters_search:contract_test                     PASSED in 0.7s
+//feature/characters/characters_search:flow_scope_test                   PASSED in 5.0s
+//feature/discovery/discovery_search:architecture_test                   PASSED in 0.2s
+//feature/discovery/discovery_search:bdd_test                            PASSED in 36.5s
+//feature/discovery/discovery_search:contract_test                       PASSED in 0.9s
+//feature/discovery/discovery_search:flow_scope_test                     PASSED in 3.2s
+//feature/discovery/discovery_search:golden_test                         PASSED in 4.2s
+
+Executed 45 out of 45 tests: 45 tests pass.
+There were tests whose specified size is too big. Use the --test_verbose_timeout_warnings command line option to see which ones these are.
+exit 0
