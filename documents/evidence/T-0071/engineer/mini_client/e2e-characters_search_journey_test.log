@@ -1,0 +1,71 @@
+# e2e_ios.sh: T-0071 engineer on mc-T-0071-engineer-30498 (E63B9C7E-8D70-487D-8474-BAF5B601F624)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1c129b0354abf0c8/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_search_journey_test.dart -d E63B9C7E-8D70-487D-8474-BAF5B601F624
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1c129b0354abf0c8`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1c129b0354abf0c8`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           31.6s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58759/bEhCTgIzzj4=/
+VMServiceFlutterDriver: Isolate found with number: 1871052631180155
+VMServiceFlutterDriver: Isolate 1871052631180155 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0071-AC5 home to Characters, Search, "amber", a sort, a character and its profile; Back, Back
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [debug] GET /v1/flags -> 200
+flutter: [event] mc_screen_view {screen_name: home, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 2}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 3}
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [event] mc_screen_view {screen_name: characters_search, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 4}
+flutter: [debug] CharactersSearchBloc: _LoadHistory _Idle -> _Idle
+flutter: [debug] CharactersSearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersSearchBloc: _PageChanged _Searching -> _Results
+flutter: [debug] CharactersSearchBloc: _SortChanged _Results -> _Searching
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersSearchBloc: _PageChanged _Searching -> _Results
+flutter: [event] mc_screen_view {screen_name: character_details, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 5}
+flutter: [debug] CharacterDetailsBloc: _Load _Loading -> _Loading
+flutter: [debug] GET /v1/characters/100206 -> 200
+flutter: [debug] GET /v1/comics -> 200
+flutter: [debug] CharacterDetailsBloc: _Load _Loading -> _Success
+flutter: [debug] CharacterFavouriteBloc: _Load _Loading -> _Ready
+flutter: [event] mc_screen_view {screen_name: characters_search, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 6}
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 66aaf1fea9a0bf792f49fb7c10877d7a, seq: 7}
+flutter: 00:18 +1: (tearDownAll)
+flutter: 00:18 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/90_characters_list_with_search_action.png (406877)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/91_search_opened.png (209099)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/92_search_results_name_order.png (409478)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/93_search_results_sorted_z_to_a.png (408412)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/94_profile_from_search.png (415451)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/95_back_to_search.png (408412)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/1-characters_search_journey_test/96_back_to_list.png (406877)
+All tests passed.
+
+# exit code: 0

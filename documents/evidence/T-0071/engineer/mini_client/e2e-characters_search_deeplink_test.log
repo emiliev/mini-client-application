@@ -1,0 +1,62 @@
+# e2e_ios.sh: T-0071 engineer on mc-T-0071-engineer-30498 (E63B9C7E-8D70-487D-8474-BAF5B601F624)
+# cwd: /Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1c129b0354abf0c8/app/mini_client
+# SCREENSHOT_DIR=/var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/2-characters_search_deeplink_test
+$ fvm flutter drive --driver=test_driver/integration_test.dart --target=integration_test/characters_search_deeplink_test.dart -d E63B9C7E-8D70-487D-8474-BAF5B601F624
+
+# e2e_ios.sh: uninstalled com.emiliev.miniclient; removed build/ios/iphonesimulator
+# --- runner output ---
+Resolving dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1c129b0354abf0c8`...
+Downloading packages...
+  _fe_analyzer_shared 103.0.0 (111.0.0 available)
+  analyzer 13.3.0 (14.7.0 available)
+  bloc 9.2.1 (9.2.2 available)
+  coverage 1.16.1 (1.16.2 available)
+  flutter_bloc 9.1.1 (9.1.2 available)
+  get_it 8.3.0 (9.3.0 available)
+  go_router 17.5.0 (18.1.4 available)
+  material_color_utilities 0.13.0 (0.13.1 available)
+  package_config 2.2.0 (3.0.0 available)
+  test 1.31.1 (1.33.0 available)
+  test_api 0.7.12 (0.7.15 available)
+  test_core 0.6.18 (0.6.21 available)
+Got dependencies in `/Users/emililiev/projects/flutter/mini-client/.claude/worktrees/agent-a1c129b0354abf0c8`!
+12 packages have newer versions incompatible with dependency constraints.
+Try `flutter pub outdated` for more information.
+Running Xcode build...                                          
+Xcode build done.                                           13.2s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:58965/_O5MD4f5naY=/
+VMServiceFlutterDriver: Isolate found with number: 1358931375613571
+VMServiceFlutterDriver: Isolate 1358931375613571 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: T-0071-AC5 the deep link miniclient://app/characters/search?q=a opens the search with its results, over the list and home
+VMServiceFlutterDriver: Connected to Flutter application.
+flutter: [debug] BootBloc: BootStarted BootBooting -> BootBooting
+flutter: [event] mc_session_start {reason: cold_start, session_id: 130d5bc55a5bff5e4b950895f74642ba, seq: 1}
+flutter: [debug] BootBloc: _BootSucceeded BootBooting -> BootReady
+flutter: [event] mc_screen_view {screen_name: characters_search, session_id: 130d5bc55a5bff5e4b950895f74642ba, seq: 2}
+flutter: [debug] GET /v1/flags -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] CharactersSearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: [debug] CharactersSearchBloc: _PageChanged _Searching -> _Results
+flutter: [event] mc_screen_view {screen_name: characters_list, session_id: 130d5bc55a5bff5e4b950895f74642ba, seq: 3}
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: [event] mc_screen_view {screen_name: home, session_id: 130d5bc55a5bff5e4b950895f74642ba, seq: 4}
+flutter: [event] mc_screen_view {screen_name: characters_search, session_id: 130d5bc55a5bff5e4b950895f74642ba, seq: 5}
+flutter: [debug] CharactersSearchBloc: _Search _Idle -> _Searching
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersSearchBloc: _PageChanged _Searching -> _Results
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Loading
+flutter: [debug] GET /v1/characters -> 200
+flutter: [debug] CharactersListBloc: _PageChanged _Loading -> _Success
+flutter: 00:10 +1: (tearDownAll)
+flutter: 00:10 +2: All tests passed!
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/2-characters_search_deeplink_test/97_deep_link_characters_search.png (406533)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/2-characters_search_deeplink_test/98_back_from_search_is_list.png (406877)
+SCREENSHOT_WRITTEN /var/folders/fj/1dh73k217x5gx70k2qwdlzr80000gn/T//e2e_ios.0VRCMk/screenshots/2-characters_search_deeplink_test/99_link_to_running_app_characters_search.png (412733)
+All tests passed.
+
+# exit code: 0
