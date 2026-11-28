@@ -1,0 +1,33 @@
+ .../characters_list/.mcgen/manifest.json           | 225 +++++++++
+ .../presentation/bloc/character_preview_bloc.dart  |   2 +
+ .../src/presentation/bloc/related_comics_bloc.dart |   2 +
+ feature/characters/characters_list/mcgen.yaml      | 509 +++++++++++++++++++++
+ 4 files changed, 738 insertions(+)
+diff --git a/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart b/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart
+index 4a1d2b14..11cd7547 100644
+--- a/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart
++++ b/feature/characters/characters_list/lib/src/presentation/bloc/character_preview_bloc.dart
+@@ -31,7 +31,9 @@ final class CharacterPreviewBloc
+     on<CharacterPreviewEvent>((event, emit) {
+       switch (event) {
+         case _SeeFullProfile():
++          // mcgen:keep preview.seeFullProfile
+           _navigator.openCharacter(state.id);
++        // mcgen:end preview.seeFullProfile
+       }
+     });
+   }
+diff --git a/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart b/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart
+index 4ba67937..b049cd00 100644
+--- a/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart
++++ b/feature/characters/characters_list/lib/src/presentation/bloc/related_comics_bloc.dart
+@@ -101,7 +101,9 @@ final class RelatedComicsBloc
+           _loading = false;
+         }
+       case _Open(:final id):
++        // mcgen:keep section.RelatedComics.open
+         _navigator.openComic(id);
++      // mcgen:end section.RelatedComics.open
+     }
+   }
+ }
