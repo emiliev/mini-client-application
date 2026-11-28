@@ -30,6 +30,8 @@ const _expectedRouteNames = {
   'placeholder_detail',
   'characters_list',
   'character_details',
+  // T-0071: the character search.
+  'characters_search',
   'comics_details',
   'creator_details',
   'discovery_search',
