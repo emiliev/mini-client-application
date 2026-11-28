@@ -1,0 +1,8 @@
+name: feature_search_di
+description: A search feature's DI initializer (Tide's boilerplate shape). A Dart brick - declarations only; references are written «Name» and mcgen writes the imports (T-0073).
+version: 0.1.0
+
+vars:
+  pascal:
+    type: string
+    description: The package name in PascalCase.

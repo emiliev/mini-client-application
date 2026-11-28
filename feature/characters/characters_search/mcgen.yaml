@@ -1,0 +1,770 @@
+# The search exemplar's spec, paged shape (T-0073, P2-05). `mcgen gen
+# characters_search --check` renders it and compares the render with this
+# package, byte for byte outside keep regions and owned files (plan 02 KD1,
+# ADR-0017). The package stays hand-built (ejected); gen writes only
+# .mcgen/manifest.json.
+#
+# The archetype owns the search behaviour (field, debounce, recent searches,
+# generation guard, paging, facets' events, every state); the domain (API,
+# DTOs, mapper, facets, repository), the results widgets, the test env, the
+# contract and flow-scope tests and BUILD.bazel are the module's own (owned).
+# Most of the rest of this file is prose and data: the BDD, the strings and
+# the prose slots the templates cannot derive.
+schema: mcgen/1
+module: characters_search
+tier: feature
+archetype: search
+ownership: ejected
+exemplar: true
+description: Name-prefix search over characters with sort and team facets, paging and recent searches.
+deps: [json_annotation, mc_api_client, mc_ds_media, mc_media, mc_prelude, retrofit]
+dev_deps: [mc_fixtures_characters, mc_fixtures_media, mc_mocked_backend]
+owned:
+  - BUILD.bazel
+  - lib/src/domain/api/**
+  - lib/src/domain/model/character.dart
+  - lib/src/domain/model/character_dto.dart
+  - lib/src/domain/model/character_facets.dart
+  - lib/src/domain/model/character_mapper.dart
+  - lib/src/domain/repository/**
+  - lib/src/presentation/widget/character_result_tile.dart
+  - lib/src/presentation/widget/empty_search_message.dart
+  - lib/src/presentation/widget/search_facets.dart
+  - test/contract/**
+  - test/feature/util/**
+  - test/flow_scope_test.dart
+# What opening a result does is where search features differ most.
+keep: [search.open]
+
+navigator:
+  name: CharactersSearchNavigator
+  doc: |-
+    What characters_search needs from outside: intents in the feature's own
+    language, never routes (plan 01 §4.1). Implemented in
+    `app/wiring/universe_wiring` (T-0071). Only blocs call it.
+  outbound: [openCharacter(CharacterId)]
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: charactersSearchTitle
+      description: Title of the search page.
+      text: {en: Search, de: Suche, en_XA: "[Šéàŕçĥ ~~]"}
+    - key: charactersSearchFieldLabel
+      description: Placeholder and accessible name of the search field.
+      text: {en: Search characters by name, de: Figuren nach Namen suchen, en_XA: "[Šéàŕçĥ çĥàŕàçţéŕš ƀý ñàɱé ~~~~~~~~~~]"}
+    - key: charactersSearchClearQuery
+      description: Accessible name of the button that empties the search field.
+      text: {en: Clear search, de: "Suche löschen", en_XA: "[Çļéàŕ šéàŕçĥ ~~~~~]"}
+    - key: charactersSearchSortLabel
+      description: Accessible name of the group of sort chips.
+      text: {en: Sort by, de: Sortieren nach, en_XA: "[Šóŕţ ƀý ~~~]"}
+    - key: charactersSearchTeamLabel
+      description: Accessible name of the group of team chips.
+      text: {en: Team, de: Team, en_XA: "[Ţéàɱ ~~]"}
+    - key: charactersSearchSortNameAscending
+      description: "Sort chip: by name, A to Z."
+      text: {en: Name A–Z, de: Name A–Z, en_XA: "[Ñàɱé À–Ž ~~~]"}
+    - key: charactersSearchSortNameDescending
+      description: "Sort chip: by name, Z to A."
+      text: {en: Name Z–A, de: Name Z–A, en_XA: "[Ñàɱé Ž–À ~~~]"}
+    - key: charactersSearchSortNewest
+      description: "Sort chip: the most recently updated first."
+      text: {en: Recently updated, de: Zuletzt aktualisiert, en_XA: "[Ŕéçéñţļý úþðàţéð ~~~~~~]"}
+    - key: charactersSearchSortOldest
+      description: "Sort chip: the least recently updated first."
+      text: {en: Least recently updated, de: "Am längsten nicht aktualisiert", en_XA: "[Ļéàšţ ŕéçéñţļý úþðàţéð ~~~~~~~~~]"}
+    - key: charactersSearchSearching
+      description: Screen-reader label while a search is in flight.
+      text: {en: Searching, de: "Suche läuft", en_XA: "[Šéàŕçĥíñĝ ~~~~]"}
+    - key: charactersSearchEmptyTitle
+      description: Title when a search found nothing.
+      text: {en: No characters found, de: Keine Figuren gefunden, en_XA: "[Ñó çĥàŕàçţéŕš ƒóúñð ~~~~~~~~]"}
+    - key: charactersSearchEmptyMessage
+      description: Message below the no-results title.
+      placeholders: {"query": {"type": "String"}}
+      text: {en: "No character’s name starts with “{query}”. Check the spelling or try another name.", de: "Kein Name einer Figur beginnt mit „{query}“. Prüfe die Schreibweise oder versuche einen anderen Namen.", en_XA: "[Ñó çĥàŕàçţéŕ’š ñàɱé šţàŕţš ŵíţĥ “{query}”. Çĥéçķ ţĥé šþéļļíñĝ óŕ ţŕý àñóţĥéŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: charactersSearchEmptyTeamMessage
+      description: Message below the no-results title when a team is chosen.
+      placeholders: {"query": {"type": "String"}, "team": {"type": "String"}}
+      text: {en: "No character of {team} has a name that starts with “{query}”. Try another team or name.", de: "Keine Figur von {team} hat einen Namen, der mit „{query}“ beginnt. Versuche ein anderes Team oder einen anderen Namen.", en_XA: "[Ñó çĥàŕàçţéŕ óƒ {team} ĥàš à ñàɱé ţĥàţ šţàŕţš ŵíţĥ “{query}”. Ţŕý àñóţĥéŕ ţéàɱ óŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: charactersSearchErrorTitle
+      description: Title when the first page of a search fails; the reason and Retry follow.
+      text: {en: The search failed, de: Die Suche ist fehlgeschlagen, en_XA: "[Ţĥé šéàŕçĥ ƒàíļéð ~~~~~~~]"}
+    - key: charactersSearchLoadMoreFailed
+      description: Footer text when a later page fails; Retry follows.
+      text: {en: Could not load more characters., de: Weitere Figuren konnten nicht geladen werden., en_XA: "[Çóúļð ñóţ ļóàð ɱóŕé çĥàŕàçţéŕš. ~~~~~~~~~~~~]"}
+    - key: charactersSearchLoading
+      description: Screen-reader label while the first page loads.
+      text: {en: Loading characters, de: Figuren werden geladen, en_XA: "[Ļóàðíñĝ çĥàŕàçţéŕš ~~~~~~~]"}
+    - key: charactersSearchRecent
+      description: Section title above the recent searches.
+      text: {en: Recent searches, de: Letzte Suchen, en_XA: "[Ŕéçéñţ šéàŕçĥéš ~~~~~~]"}
+    - key: charactersSearchClearRecent
+      description: "Action beside the recent searches: forgets them all."
+      text: {en: Clear, de: "Löschen", en_XA: "[Çļéàŕ ~~]"}
+    - key: charactersSearchClearFailed
+      description: Inline error below the recent searches after Clear failed; they are still there.
+      text: {en: Your recent searches could not be cleared. Please try again., de: "Deine letzten Suchen konnten nicht gelöscht werden. Bitte versuche es erneut.", en_XA: "[Ýóúŕ ŕéçéñţ šéàŕçĥéš çóúļð ñóţ ƀé çļéàŕéð. Þļéàšé ţŕý àĝàíñ. ~~~~~~~~~~~~~~~~~~~~~~~~]"}
+    - key: charactersSearchNoRecent
+      description: Shown instead of the recent searches when there are none.
+      text: {en: Search for characters by the start of their name., de: Suche Figuren nach dem Anfang ihres Namens., en_XA: "[Šéàŕçĥ ƒóŕ çĥàŕàçţéŕš ƀý ţĥé šţàŕţ óƒ ţĥéíŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~]"}
+
+bdd:
+  - feature: characters_search
+    title: Search characters by name
+    description: |-
+      Fans type the start of a name and see the characters that match, sorted by
+      name, with their art, and open one.
+    background:
+      - "# Only the characters domain: the strict harness fails any request to a"
+      - "# route nothing serves (opening a result is the app's business)."
+      - "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: Typing a prefix shows the matching characters, sorted by name, with their art
+        tags: [T-0071-AC1, smoke]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "Then the backend received {1} requests for {'GET /v1/characters'}"
+          - "And the backend received {'GET /v1/characters?nameStartsWith=spi&orderBy=name&offset=0&limit=30'}"
+          - "And the results show the first {30} characters for {'spi'}"
+          - "And the sort {'Name A–Z'} is chosen"
+          - "And no team is chosen"
+      - title: The prefix matches in any case and is trimmed
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search"
+          - "And I type {'  SPIRE w '}"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=SPIRE%20w'}"
+          - "And the results show the first {4} characters for {'spire w'}"
+      - title: A prefix nothing matches shows the empty state
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search"
+          - "And I type {'zzzz'}"
+          - "Then I see {'No characters found'}"
+          - "And I see {'No character’s name starts with “zzzz”. Check the spelling or try another name.'}"
+          - "And I don't see {'Retry'}"
+          - "And the backend received {1} requests for {'GET /v1/characters?nameStartsWith=zzzz'}"
+          - "And I see {'Name A–Z'}"
+      - title: Clearing the field shows the recent searches again
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "Then I see {'Spindle Alchemist'}"
+          - "When I type {''}"
+          - "Then I don't see {'Spindle Alchemist'}"
+          - "And I see {'Search for characters by the start of their name.'}"
+          - "And the facets are not shown"
+      - title: The screen is named characters_search
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search"
+          - "Then the screen {'characters_search'} was tracked"
+      - title: A search opened with a query searches it at once
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search for {'spi'} without waiting"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=spi'}"
+          - "And the field reads {'spi'}"
+          - "When {0} milliseconds pass"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=spi'}"
+          - "And the results show the first {30} characters for {'spi'}"
+      - title: A search opened with a blank query opens on the recent searches
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search for {'  '}"
+          - "Then I see {'Search for characters by the start of their name.'}"
+          - "And the backend received {0} requests for {'GET /v1/characters'}"
+          - "And the facets are not shown"
+      - title: "A linked query is trimmed: the field and the search use the same text"
+        tags: [T-0071-AC1]
+        steps:
+          - "When I open the search for {' spi '} without waiting"
+          - "Then the field reads {'spi'}"
+          - "And the backend received {1} requests for {'GET /v1/characters?nameStartsWith=spi'}"
+          - "When {0} milliseconds pass"
+          - "Then the results show the first {30} characters for {'spi'}"
+  - feature: characters_search_typing
+    title: Search as you type
+    description: |-
+      The search waits until typing pauses, sends one request for what was
+      typed, shows only the latest query's answer, and remembers what was found.
+    background:
+      - "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: Typing one character at a time sends one request, for the whole word
+        tags: [T-0071-AC2, smoke]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'} one character at a time"
+          - "Then the backend received {0} requests for {'GET /v1/characters'}"
+          - "When {299} milliseconds pass"
+          - "Then the backend received {0} requests for {'GET /v1/characters'}"
+          - "When {1} milliseconds pass"
+          - "Then the backend received {1} requests for {'GET /v1/characters'}"
+          - "And the backend received {'GET /v1/characters?nameStartsWith=spi'}"
+          - "When {500} milliseconds pass"
+          - "Then the backend received {1} requests for {'GET /v1/characters'}"
+          - "And the results show the first {30} characters for {'spi'}"
+      - title: The keyboard's Search key searches at once
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'} one character at a time"
+          - "And I press Search on the keyboard"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=spi'}"
+          - "When {300} milliseconds pass"
+          - "Then the backend received {1} requests for {'GET /v1/characters'}"
+          - "And the results show the first {30} characters for {'spi'}"
+      - title: A pause inside the word sends a request for each pause
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I type {'sp'} one character at a time"
+          - "And {300} milliseconds pass"
+          - "And I type {'spi'} one character at a time"
+          - "And {300} milliseconds pass"
+          - "Then the backend received {2} requests for {'GET /v1/characters'}"
+          - "And the backend received {'GET /v1/characters?nameStartsWith=sp'}"
+          - "And the backend received {'GET /v1/characters?nameStartsWith=spi'}"
+      - title: A slow answer for an older query does not replace the newer one's
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "Given the backend holds {'GET /v1/characters?nameStartsWith=spire'}"
+          - "When I type {'spire'}"
+          - "And the app sends {'GET /v1/characters?nameStartsWith=spire'}"
+          - "And I type {'spin'}"
+          - "Then the results show the first {30} characters for {'spin'}"
+          - "When the backend releases {'GET /v1/characters?nameStartsWith=spire'}"
+          - "Then the results show the first {30} characters for {'spin'}"
+          - "And I don't see {'Spire Alchemist'}"
+          - "And the field reads {'spin'}"
+          - "And the backend received {2} requests for {'GET /v1/characters?offset=0'}"
+      - title: Answers that arrive in reverse order end on the newer query's
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "Given the backend holds {'GET /v1/characters?nameStartsWith=spire'}"
+          - "And the backend holds {'GET /v1/characters?nameStartsWith=spin'}"
+          - "When I type {'spire'}"
+          - "And the app sends {'GET /v1/characters?nameStartsWith=spire'}"
+          - "And I type {'spin'}"
+          - "And the app sends {'GET /v1/characters?nameStartsWith=spin'}"
+          - "And the backend releases {'GET /v1/characters?nameStartsWith=spin'}"
+          - "Then the results show the first {30} characters for {'spin'}"
+          - "When the backend releases {'GET /v1/characters?nameStartsWith=spire'}"
+          - "Then the results show the first {30} characters for {'spin'}"
+          - "And I don't see {'Spire Alchemist'}"
+      - title: Clearing the field while a request is in flight shows the recent searches
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And the app finishes writing to storage"
+          - "Given the backend holds {'GET /v1/characters?nameStartsWith=spi'}"
+          - "When I type {'spi'}"
+          - "And the app sends {'GET /v1/characters?nameStartsWith=spi'}"
+          - "And I tap the icon button {'Clear search'}"
+          - "Then the recent searches are {'amber'}"
+          - "When the backend releases {'GET /v1/characters?nameStartsWith=spi'}"
+          - "And the app finishes writing to storage"
+          - "Then the recent searches are {'amber'}"
+          - "And I don't see {'Spindle Alchemist'}"
+          - "And the field reads {''}"
+      - title: Changing the query while a request is in flight drops the old answer, and the old query is not saved
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "Given the backend holds {'GET /v1/characters?nameStartsWith=spi'}"
+          - "When I type {'spi'}"
+          - "And the app sends {'GET /v1/characters?nameStartsWith=spi'}"
+          - "And I tap the icon button {'Clear search'}"
+          - "And the backend releases {'GET /v1/characters?nameStartsWith=spi'}"
+          - "And the app finishes writing to storage"
+          - "Then I don't see {'Spindle Alchemist'}"
+          - "And I see {'Search for characters by the start of their name.'}"
+          - "And the backend received {1} requests for {'GET /v1/characters'}"
+      - title: The searches that found something are remembered, most recent first, without repeats, at most 10
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I search for each of {'spi, amber, brass, zzzz, cinder, dusk, ember, frost, gale, hollow, iron, jade, kestrel, spi'}"
+          - "And the app finishes writing to storage"
+          - "And I tap the icon button {'Clear search'}"
+          - "Then the recent searches are {'spi, kestrel, jade, iron, hollow, gale, frost, ember, dusk, cinder'}"
+      - title: The recent searches survive a new search flow
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I search for each of {'amber, spi'}"
+          - "And the app finishes writing to storage"
+          - "And I open the search again"
+          - "Then the recent searches are {'spi, amber'}"
+          - "And the backend received {2} requests for {'GET /v1/characters'}"
+      - title: Tapping a recent search searches it at once
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I search for each of {'amber, spi'}"
+          - "And the app finishes writing to storage"
+          - "And I open the search again"
+          - "And I tap the recent search {'amber'}"
+          - "Then the backend received {2} requests for {'GET /v1/characters?nameStartsWith=amber'}"
+          - "And the field reads {'amber'}"
+          - "When {0} milliseconds pass"
+          - "Then the results show the first {30} characters for {'amber'}"
+          - "When {300} milliseconds pass"
+          - "Then the backend received {2} requests for {'GET /v1/characters?nameStartsWith=amber&offset=0'}"
+      - title: A facet change does not save the query again
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And the app finishes writing to storage"
+          - "And I tap the sort chip {'Name Z–A'}"
+          - "And the app finishes writing to storage"
+          - "And I tap the icon button {'Clear search'}"
+          - "Then the recent searches are {'amber'}"
+      - title: Clear forgets the recent searches, also for the next search flow
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I search for each of {'amber, spi'}"
+          - "And the app finishes writing to storage"
+          - "And I open the search again"
+          - "And I tap {'Clear'}"
+          - "Then I see {'Search for characters by the start of their name.'}"
+          - "When the app finishes writing to storage"
+          - "And I open the search again"
+          - "Then I see {'Search for characters by the start of their name.'}"
+          - "And I don't see {'Recent searches'}"
+      - title: A search that cannot be saved still shows its results and keeps the recent searches
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And the app finishes writing to storage"
+          - "Given the app can no longer write to storage"
+          - "When I type {'spi'}"
+          - "And the app finishes writing to storage"
+          - "Then the results show the first {30} characters for {'spi'}"
+          - "When I tap the icon button {'Clear search'}"
+          - "Then the recent searches are {'amber'}"
+      - title: A Clear that fails keeps the recent searches and says so
+        tags: [T-0071-AC2]
+        steps:
+          - "When I open the search"
+          - "And I search for each of {'amber, spi'}"
+          - "And the app finishes writing to storage"
+          - "And I open the search again"
+          - "Given the app can no longer write to storage"
+          - "When I tap {'Clear'}"
+          - "And the app finishes writing to storage"
+          - "Then the recent searches are {'spi, amber'}"
+          - "And I see {'Your recent searches could not be cleared. Please try again.'}"
+          - "When I open the search again"
+          - "Then the recent searches are {'spi, amber'}"
+          - "And I don't see {'Your recent searches could not be cleared. Please try again.'}"
+  - feature: characters_search_facets
+    title: Sort, narrow and page the matches
+    description: |-
+      Fans choose how the matches are sorted and which team they belong to, and
+      the list loads more matches as they scroll.
+    background:
+      - "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: A sort change sends one request and shows that order from the top
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "Then the sort {'Name A–Z'} is chosen"
+          - "When I tap the sort chip {<label>}"
+          - "Then the backend received {2} requests for {'GET /v1/characters'}"
+          - "And the backend received {1} requests for {'GET /v1/characters?nameStartsWith=amber&orderBy=<order>&offset=0&limit=30'}"
+          - "And the sort {<label>} is chosen"
+          - "And the results show the first {30} characters for {'amber'} sorted by {'<order>'}"
+        examples:
+          - ["label", "order"]
+          - ["'Name Z–A'", "-name"]
+          - ["'Recently updated'", "-modified"]
+          - ["'Least recently updated'", "modified"]
+      - title: Sorting again by the first order sends one request for it
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I tap the sort chip {'Name Z–A'}"
+          - "And I tap the sort chip {'Name A–Z'}"
+          - "Then the backend received {2} requests for {'GET /v1/characters?orderBy=name'}"
+          - "And the backend received {1} requests for {'GET /v1/characters?orderBy=-name'}"
+          - "And the results show the first {30} characters for {'amber'}"
+      - title: A sort change starts the paging over
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I scroll the results until the next page loads"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=amber&orderBy=name&offset=30&limit=30'}"
+          - "When I tap the sort chip {'Name Z–A'}"
+          - "Then the backend received {1} requests for {'GET /v1/characters?orderBy=-name&offset=0'}"
+          - "And the backend received {0} requests for {'GET /v1/characters?orderBy=-name&offset=30'}"
+          - "And the backend received {3} requests for {'GET /v1/characters'}"
+          - "And the results show the first {30} characters for {'amber'} sorted by {'-name'}"
+      - title: A team keeps only its characters, and choosing it again lets every team show
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I tap the team chip {'Harbor Watch'}"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=amber&orderBy=name&team=harbor-watch&offset=0&limit=30'}"
+          - "And the team {'Harbor Watch'} is chosen"
+          - "And the results show the first {8} characters for {'amber'} of team {'Harbor Watch'}"
+          - "When I tap the team chip {'Harbor Watch'}"
+          - "Then no team is chosen"
+          - "And the backend received {3} requests for {'GET /v1/characters'}"
+          - "And the backend received {1} requests for {'GET /v1/characters?team=harbor-watch'}"
+          - "And the results show the first {30} characters for {'amber'}"
+      - title: A team and a sort combine
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "And I tap the team chip {'The Undertow'}"
+          - "And I tap the sort chip {'Name Z–A'}"
+          - "Then the backend received {'GET /v1/characters?nameStartsWith=spi&orderBy=-name&team=the-undertow&offset=0'}"
+          - "And the results show the first {13} characters for {'spi'} of team {'The Undertow'} sorted by {'-name'}"
+      - title: A team nobody in the matches belongs to says so, and its chip brings the matches back
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'ember'}"
+          - "And I tap the team chip {'Harbor Watch'}"
+          - "Then I see {'No characters found'}"
+          - "And I see {'No character of Harbor Watch has a name that starts with “ember”. Try another team or name.'}"
+          - "And the team {'Harbor Watch'} is chosen"
+          - "When I tap the team chip {'Harbor Watch'}"
+          - "Then the results show the first {30} characters for {'ember'}"
+      - title: The chosen facets stay for the next query
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I tap the sort chip {'Name Z–A'}"
+          - "And I tap the team chip {'Harbor Watch'}"
+          - "And I type {'brass'}"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=brass&orderBy=-name&team=harbor-watch&offset=0'}"
+          - "And the results show the first {5} characters for {'brass'} of team {'Harbor Watch'} sorted by {'-name'}"
+          - "And the sort {'Name Z–A'} is chosen"
+          - "And the team {'Harbor Watch'} is chosen"
+      - title: Scrolling to the end of a page loads the next one, once, and the last page ends the list
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I scroll the results to the end"
+          - "Then the backend received {1} requests for {'GET /v1/characters?nameStartsWith=amber&orderBy=name&offset=30&limit=30'}"
+          - "And the backend received {2} requests for {'GET /v1/characters'}"
+          - "And the results show the first {38} characters for {'amber'}"
+          - "When I scroll the results to the end"
+          - "Then the backend received {2} requests for {'GET /v1/characters'}"
+      - title: A short list asks for no further page
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'spire w'}"
+          - "And I scroll the results to the end"
+          - "Then the backend received {1} requests for {'GET /v1/characters'}"
+          - "And the results show the first {4} characters for {'spire w'}"
+      - title: A failed search explains the problem, and Retry searches the same query again
+        tags: [T-0071-AC3]
+        steps:
+          - "Given the backend fails {'GET /v1/characters'} with {<failure>}"
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "Then I see {'The search failed'}"
+          - "And I see {<message>}"
+          - "And {1} errors were reported"
+          - "And I see {'Name A–Z'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the results show the first {30} characters for {'spi'}"
+          - "And I don't see {'The search failed'}"
+          - "And the backend received {'GET /v1/characters?nameStartsWith=spi&orderBy=name&offset=0&limit=30'}"
+        examples:
+          - ["failure", "message"]
+          - ["'server_error'", "'The server had a problem. Please try again later.'"]
+          - ["'timeout'", "'The request took too long. Please try again.'"]
+          - ["'offline'", "'No connection. Check your network and try again.'"]
+          - ["'malformed'", "'Something went wrong.'"]
+      - title: A double Retry sends one request
+        tags: [T-0071-AC3]
+        steps:
+          - "Given the backend fails {'GET /v1/characters'} with {'malformed'}"
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "Then I see {'The search failed'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'} twice in quick succession"
+          - "Then the backend received {2} requests for {'GET /v1/characters?nameStartsWith=spi&offset=0'}"
+          - "And the results show the first {30} characters for {'spi'}"
+      - title: A failed second page keeps the loaded characters and offers Retry
+        tags: [T-0071-AC3]
+        steps:
+          - "Given the backend fails {'GET /v1/characters?offset=30'} with {'server_error'}"
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I scroll the results to the end"
+          - "Then I see {'Could not load more characters.'}"
+          - "And I see {'Retry'}"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the results show the first {38} characters for {'amber'}"
+          - "And I don't see {'Could not load more characters.'}"
+      - title: A failed facet change shows the failure, and Retry brings that order back
+        tags: [T-0071-AC3]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "Given the backend fails {'GET /v1/characters?orderBy=-name'} with {'server_error'}"
+          - "When I tap the sort chip {'Name Z–A'}"
+          - "Then I see {'The search failed'}"
+          - "And the sort {'Name Z–A'} is chosen"
+          - "When the backend recovers"
+          - "And I tap {'Retry'}"
+          - "Then the results show the first {30} characters for {'amber'} sorted by {'-name'}"
+  - feature: characters_search_open
+    title: Open a result and read the search in other languages
+    description: |-
+      Tapping a result hands the character over to the app, once. The search
+      reads well in German, in the pseudo-locale and at large text sizes.
+    background:
+      - "Given the backend serves {'characters.default'}"
+    scenarios:
+      - title: Tapping a result hands the character over to the app exactly once
+        tags: [T-0071-AC4]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "And I tap the result {'Spindle Alchemist'}"
+          - "Then the app was asked to open character {'Spindle Alchemist'}"
+      - title: A double tap on a result hands it over once
+        tags: [T-0071-AC4]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "And I tap the result {'Spindle Alchemist'} twice in quick succession"
+          - "Then the app was asked to open character {'Spindle Alchemist'}"
+      - title: A second tap 499 ms after the first is still the same tap
+        tags: [T-0071-AC4]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "And I tap the result {'Spindle Alchemist'} and again after {499} milliseconds"
+          - "Then the app was asked to open character {'Spindle Alchemist'}"
+      - title: A tap 501 ms after the first opens the result again
+        tags: [T-0071-AC4]
+        steps:
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "And I tap the result {'Spindle Alchemist'} and again after {501} milliseconds"
+          - "Then the app was asked to open character {'Spindle Alchemist'} {2} times"
+      - title: A result deep in the list, after a page was loaded, opens that character
+        tags: [T-0071-AC4]
+        steps:
+          - "When I open the search"
+          - "And I type {'amber'}"
+          - "And I scroll the results to the end"
+          - "And I tap the result {'Amber Wanderer'}"
+          - "Then the app was asked to open character {'Amber Wanderer'}"
+      - title: In German the field, the facets and the states are German at 1 and 2 times the text size
+        tags: [T-0071-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And the text scale is {<scale>}"
+          - "When I open the search"
+          - "Then I see {'Suche'}"
+          - "And I see {'Figuren nach Namen suchen'}"
+          - "And I see {'Suche Figuren nach dem Anfang ihres Namens.'}"
+          - "And nothing overflows"
+          - "When I type {'spi'}"
+          - "Then I see {'Name A–Z'}"
+          - "And I see {'Zuletzt aktualisiert'}"
+          - "And the results show the first {5} characters for {'spi'}"
+          - "And nothing overflows"
+          - "When I tap the team chip {'The Undertow'}"
+          - "And I type {'zzzz'}"
+          - "Then I see {'Keine Figuren gefunden'}"
+          - "And I see {'Keine Figur von The Undertow hat einen Namen, der mit „zzzz“ beginnt. Versuche ein anderes Team oder einen anderen Namen.'}"
+          - "And nothing overflows"
+          - "Given the backend fails {'GET /v1/characters'} with {'server_error'}"
+          - "When I type {'spi'}"
+          - "Then I see {'Die Suche ist fehlgeschlagen'}"
+          - "And I see {'Erneut versuchen'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: In German the recent searches are German
+        tags: [T-0071-AC4, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open the search"
+          - "And I type {'spi'}"
+          - "And the app finishes writing to storage"
+          - "And I tap the icon button {'Suche löschen'}"
+          - "Then I see {'Letzte Suchen'}"
+          - "And I see {'Löschen'}"
+          - "And nothing overflows"
+      - title: The pseudo-locale renders every state without overflow at 1 and 2 times the text size
+        tags: [T-0071-AC4, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is {<scale>}"
+          - "When I open the search"
+          - "Then I see {'[Šéàŕçĥ çĥàŕàçţéŕš ƀý ñàɱé ~~~~~~~~~~]'}"
+          - "And I see {'[Šéàŕçĥ ƒóŕ çĥàŕàçţéŕš ƀý ţĥé šţàŕţ óƒ ţĥéíŕ ñàɱé. ~~~~~~~~~~~~~~~~~~~~]'}"
+          - "And nothing overflows"
+          - "When I type {'spi'}"
+          - "Then I see {'[Ñàɱé À–Ž ~~~]'}"
+          - "And the results show the first {5} characters for {'spi'}"
+          - "And nothing overflows"
+          - "When I tap the team chip {'Open Road'}"
+          - "And I type {'zzzz'}"
+          - "Then I see {'[Ñó çĥàŕàçţéŕš ƒóúñð ~~~~~~~~]'}"
+          - "And nothing overflows"
+          - "Given the backend fails {'GET /v1/characters'} with {'server_error'}"
+          - "When I type {'spi'}"
+          - "Then I see {'[Ţĥé šéàŕçĥ ƒàíļéð ~~~~~~~]'}"
+          - "And nothing overflows"
+          - "And the app finishes writing to storage"
+          - "When I tap the icon button {'[Çļéàŕ šéàŕçĥ ~~~~~]'}"
+          - "Then I see {'[Ŕéçéñţ šéàŕçĥéš ~~~~~~]'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+
+options:
+  mode: paged
+  item: character
+  items: characters
+  ids:
+    - name: CharacterId
+      type: int
+      doc: |-
+        A character's id in this feature's own vocabulary (features never share
+        types, plan 01 §4.3). The navigator takes it, so the barrel exports it.
+
+        An extension type: an `int` at run time, but not interchangeable with
+        other ids at compile time.
+  history:
+    key: characters_search.history
+  flow:
+    trim_query: true
+  analytics:
+    file: character_analytics.dart
+    const: charactersSearchScreen
+  files:
+    entity: character.dart
+    facets: character_facets.dart
+    tile: character_result_tile.dart
+    empty_message: empty_search_message.dart
+    facets_view: search_facets.dart
+  names:
+    facets: CharacterFacets
+    query: CharactersSearchQuery
+    tile: CharacterResultTile
+    tile_arg: character
+    facets_view: SearchFacets
+  results:
+    entity: Character
+    page_size: 30
+    page_size_const: charactersSearchPageSize
+    open: openCharacter
+    empty_message: emptySearchMessage(l10n, query, facets.team)
+  facets:
+    - name: sort
+      type: CharacterSort
+      event: sortChanged
+      doc: A sort chip was chosen.
+    - name: team
+      type: String?
+      event: teamChanged
+      doc: "A team chip was chosen, or cleared (null: every team)."
+  tests:
+    lookup.openCharacter: characterNamed
+  tags:
+    architecture: T-0071-AC6
+  prose:
+    barrel.preamble: |-
+      The public surface (R4, checked by mc_arch_check and the architecture
+      test): the flow, its navigator and the navigator's argument type. No
+      `library;` directive (Tide's `unnecessary_library_directive`).
+    pubspec.preamble: |-
+      T-0071: characters_search, name-prefix search over characters with sort and
+      team facets, paging and recent searches (archetype SR; copies discovery_search).
+    di.key: |-
+      The `FileStore` key of the recent character searches. Every flow instance
+      reads and writes the same key, so the list survives the flow (and the
+      app). It is this feature's own key: the global search keeps its own list.
+    analytics.doc: |-
+      The screen name of the flow's one page: its `McFlowPage` name, which
+      `AnalyticsFlowObserver` tracks. It equals the app route's name
+      (`/characters/search` is `characters_search`), so it is not tracked twice
+      (ADR-0012).
+    navigator.openCharacter: |-
+      A character in the results: hands over to the character's profile
+      (`characters_details`).
+    flow.intro: |-
+      The feature's only entry point (R4): search the characters by the start of
+      their name, sorted and narrowed by facets, whose results leave the feature
+      through [navigator].
+
+      The app builds it from a route (`/characters/search?q=`, universe_wiring)
+      with the navigator implementation from its wiring; tests pass a mock. It
+      can start from a query alone (plan 01 §4.4).
+    flow.screen: |-
+      Its one page is the screen `characters_search`, tracked from inside the
+      flow by `AnalyticsFlowObserver` (ADR-0012).
+    flow.query_doc: |-
+      [initialQuery] trimmed, with a blank one as none
+      (`/characters/search?q=`): the flow's key, the field's text and the
+      search all use this one text, so `?q=%20spi` is `?q=spi`.
+    flow_state.initial_query: |-
+      The query the flow opened with (`/characters/search?q=spi`): the field
+      starts with it and it is searched at once. Null (the flow treats a
+      blank query as none) opens on the recent searches.
+    bloc.search_debounce: How long typing must pause before a search goes out (T-0071).
+    bloc.facets: |-
+      - **Facets:** the sort order and the team are sent to the backend. A
+        change searches the same query again from the first page (one
+        request), and the choice stays for the next query.
+    step.i_open_the_search_for.usage: "I open the search for {'spi'}"
+    step.i_open_the_search_for.doc: |-
+      Opens the flow with an initial query, as the route
+      `/characters/search?q=spi` does, and lets it settle (the debounce fires
+      within the step).
+    step.i_search_for_each_of.usage: "I search for each of {'spi, amber, chron'}"
+    step.i_tap_the_result.usage: "I tap the result {'Amber Alchemist'}"
+    step.i_tap_the_result_and_again_after_milliseconds.usage: "I tap the result {'Amber Alchemist'} and again after {499} milliseconds"
+    step.i_tap_the_result_twice_in_quick_succession.usage: "I tap the result {'Amber Alchemist'} twice in quick succession"
+    step.the_app_was_asked_to_open_character.usage: "the app was asked to open character {'Amber Alchemist'}"
+    step.the_app_was_asked_to_open_character_times.usage: "the app was asked to open character {'Amber Alchemist'} {2} times"
+    step.the_recent_searches_are.usage: "the recent searches are {'spi, amber'}"
+    step.i_tap_the_team_chip.doc: |-
+      Taps the team chip [label], scrolling the chips until it is on screen.
+      Tapping the chosen team again lets every team show.
+    step.no_team_is_chosen.doc: "No team chip is selected: every team shows."
+    step.the_facets_are_not_shown.doc: |-
+      Neither the sort chips nor the team chips are on screen (the recent
+      searches show instead).
+    step.the_app_was_asked_to_open_character.doc: |-
+      The navigator contract: `openCharacter` with [name]'s id (from the
+      fixture cast), exactly once, and nothing else.

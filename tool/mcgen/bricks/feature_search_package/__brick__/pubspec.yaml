@@ -1,0 +1,22 @@
+{{{pubspec_preamble}}}name: {{{name}}}
+description: {{{description}}}
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: {{{sdk}}}
+  flutter: {{{flutter}}}
+
+dependencies:
+{{#dependencies}}
+  {{{entry}}}
+{{/dependencies}}
+
+dev_dependencies:
+{{#dev_dependencies}}
+  {{{entry}}}
+{{/dev_dependencies}}
+
+flutter:
+  generate: true
