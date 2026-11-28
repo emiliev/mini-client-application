@@ -48,11 +48,11 @@ Feature: The sign-in form speaks the reader's language
     Then I see {<line>}
 
     Examples:
-      | code             | line                                                                       |
-      | 'favourites'     | 'Melde dich an, um deine Favoriten zu behalten.'                           |
-      | 'readingLists'   | 'Melde dich an, um deine Leselisten zu speichern.'                         |
-      | 'cart'           | 'Melde dich an, um deinen Warenkorb zu nutzen.'                            |
-      | 'triviaResults'  | 'Melde dich an, um deine Quizergebnisse zu behalten.'                      |
+      | code             | line                                                                            |
+      | 'favourites'     | 'Melde dich an, um deine Favoriten zu behalten.'                                |
+      | 'readingLists'   | 'Melde dich an, um deine Leselisten zu speichern.'                              |
+      | 'cart'           | 'Melde dich an, um deinen Warenkorb zu nutzen.'                                 |
+      | 'triviaResults'  | 'Melde dich an, um deine Quizergebnisse zu behalten.'                           |
       | 'appearanceSync' | 'Melde dich an, um dein Erscheinungsbild auf allen Geräten zu synchronisieren.' |
 
   @T-0066-AC1 @l10n

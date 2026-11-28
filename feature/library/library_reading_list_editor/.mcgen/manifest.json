@@ -1,0 +1,75 @@
+{
+  "archetype": "form_wizard",
+  "files": {
+    "l10n.yaml": {
+      "hash": "0fec0147a7e6d611b8bff791bd2908c6af603e189b0e50b7c0df7811a7f4280d",
+      "ownership": "managed"
+    },
+    "lib/library_reading_list_editor.dart": {
+      "hash": "c35fe56db8dbcf25cfc031d5f1527d452db7bb02ac86bb7f9e7b475ecaf34bec",
+      "ownership": "managed"
+    },
+    "lib/src/di/di_initializer.dart": {
+      "hash": "32f419ab625de2d56243d3503e78621d893bb2791d5b98935e40132b52874053",
+      "ownership": "managed"
+    },
+    "lib/src/di/flow_scope.dart": {
+      "hash": "5bb35e66f69e06309d8a8cbdda077a06c2a0cac88d66c45abede818e3e2001c1",
+      "ownership": "managed"
+    },
+    "lib/src/flow/reading_list_editor_flow.dart": {
+      "hash": "12db702c7a77af8fd5dfe82a4f9f039d692e5be09af49f085a892a16200df9d8",
+      "ownership": "managed"
+    },
+    "lib/src/flow/reading_list_editor_flow_state.dart": {
+      "hash": "c1a1c997168623b266d3af9851c5dbb4c28a3d3a0ceccb7d7ce92d042bed944c",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/library_reading_list_editor_de.arb": {
+      "hash": "860d27f565de5ca29beae003cff8c71e80229f62c82e709a181e58e0c75a31fc",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/library_reading_list_editor_en.arb": {
+      "hash": "8477b2a8a3ed3231d1bd9196cfa2413ac87d06fdd1a095ecd5080b7b5081e908",
+      "ownership": "managed"
+    },
+    "lib/src/l10n/library_reading_list_editor_en_XA.arb": {
+      "hash": "2f418fedb497270aa71176295584488d667878cada3c77f573e2c47d8af98e45",
+      "ownership": "managed"
+    },
+    "lib/src/navigator/reading_list_editor_navigator.dart": {
+      "hash": "59499b4ba64ab1b0c661c93558d8279088d1321babda70db6751ec68e288c250",
+      "ownership": "managed"
+    },
+    "pubspec.yaml": {
+      "hash": "80e17d6434a891016b5426bc7b1c711000ea713dca5c8969ffcc017a7d8de898",
+      "ownership": "managed"
+    },
+    "test/architecture/architecture_test.dart": {
+      "hash": "f501b8f8dc1b90d0a86e21ef2119dd5497f7e6b56e1f492e062c95a12fa7e0d6",
+      "ownership": "managed"
+    },
+    "test/feature/reading_list_editor_create.feature": {
+      "hash": "deefd076533a2c417329aa3bb412c270859e7558c0e162207946bcf58f29bf49",
+      "ownership": "managed"
+    },
+    "test/feature/reading_list_editor_edit.feature": {
+      "hash": "1d5f5a1ed5dd1132da34b872330ae1c92fb17efed3dc613ae25d5eef7c170e9e",
+      "ownership": "managed"
+    },
+    "test/feature/reading_list_editor_l10n.feature": {
+      "hash": "fa0e1b478b2b7d0cc5a96f4a5f5d9644868a5774b6bdec99858660b3a5aac803",
+      "ownership": "managed"
+    },
+    "test/feature/reading_list_editor_races.feature": {
+      "hash": "b0dbcb1967378688a0f935d2787b639fbf82b443c659770d8147b0eacaa0b891",
+      "ownership": "managed"
+    }
+  },
+  "generator": "mcgen 0.1.0",
+  "module": "library_reading_list_editor",
+  "ownership": "ejected",
+  "schema": "mcgen-manifest/1",
+  "seed": "0x84cae657608aa119",
+  "spec_hash": "a8d8254e13bf56c6a52a8182dbd9e249ac844b6840d636f2273647282221c7a7"
+}

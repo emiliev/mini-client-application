@@ -1,0 +1,502 @@
+# The form/wizard exemplar, one-form shape (T-0075, P2-06). `mcgen gen
+# auth_signin --check` renders this spec and compares the render with this
+# package, byte for byte outside keep regions and owned files (plan 02 KD1,
+# ADR-0017). The package stays hand-built (ejected); gen writes only
+# .mcgen/manifest.json.
+#
+# The archetype owns what every form or wizard feature shares: the barrel, the
+# DI initializer, the navigator contract, the flow state, the flow (its
+# arguments, result and pages), the root-import list, the architecture test,
+# the package files, the strings and the .feature files. The form's rules,
+# the bloc, the domain, the pages, the test env, the steps, the contract tests
+# and BUILD.bazel are the module's own (owned).
+schema: mcgen/1
+module: auth_signin
+tier: feature
+archetype: form_wizard
+ownership: ejected
+exemplar: true
+description: The sign-in form (email, password, demo accounts) that ends with a result saying whether the user signed in.
+deps:
+  - bloc
+  - flutter
+  - flutter_bloc
+  - freezed_annotation
+  - mc_api_auth
+  - mc_api_errors
+  - mc_bloc_kit
+  - mc_di
+  - mc_ds_buttons
+  - mc_ds_feedback
+  - mc_ds_forms
+  - mc_ds_inputs
+  - mc_ds_layout
+  - mc_ds_navigation
+  - mc_ds_theme
+  - mc_ds_tokens
+  - mc_feature_flow
+  - mc_forms
+  - mc_l10n_core
+  - mc_monitoring
+  - mc_prelude
+  - mc_session
+dev_deps:
+  - flutter_test
+  - mc_fixtures_identity
+  - mc_mocked_backend
+  - mc_storage
+  - mc_test_utils
+  - mocktail
+  - test
+owned:
+  - BUILD.bazel
+  - lib/src/domain/**
+  - lib/src/presentation/**
+  - test/contract/**
+  - test/feature/step/**
+  - test/feature/util/**
+  - test/flow_scope_test.dart
+  - test/unit/**
+
+navigator:
+  name: AuthSignInNavigator
+  doc: |-
+    What auth_signin needs from outside: intents in the feature's own
+    language, never routes (plan 01 §4.1). Implemented in
+    `app/wiring/account_wiring` (T-0066).
+
+    It has no outbound methods yet: the form ends with a result
+    (`AuthSignInFlow.onComplete`) and the app decides where that leads (back
+    to the caller, or to the link that asked for the sign-in). Sign-up and
+    password reset would add intents here.
+  outbound: []
+
+options:
+  pascal: AuthSignIn
+  stem: auth_signin
+  l10n_file: auth_signin_l10n
+  arb: block_placeholders
+  types:
+    DemoAccount: domain/model/demo_account.dart
+    SignInReason: domain/model/sign_in_reason.dart
+    SignInResult: domain/model/sign_in_result.dart
+    SignInPage: presentation/page/sign_in_page.dart
+    AuthApi: package:mc_api_auth/mc_api_auth.dart
+    Monitoring: package:mc_monitoring/mc_monitoring.dart
+    SessionReader: package:mc_session/mc_session.dart
+  barrel: [DemoAccount, SignInReason, SignInResult]
+  root_imports: [AuthApi, Monitoring, SessionReader]
+  flow:
+    args:
+      - name: reason
+        type: SignInReason?
+        doc: What the user is signing in for; null says nothing.
+      - name: demoAccounts
+        type: List<DemoAccount>
+        default: "const []"
+        doc: The accounts "Use a demo account" offers; none hides the helper.
+    result:
+      type: SignInResult
+      cast: result! as SignInResult
+    state: "AuthSignInFlowState(reason: reason, demoAccounts: demoAccounts)"
+    pages:
+      - name: auth_sign_in
+        widget: "SignInPage(reason: state.reason, demoAccounts: state.demoAccounts)"
+  flow_state:
+    fields:
+      - name: reason
+        type: SignInReason?
+        doc: What the user is signing in for; null says nothing.
+      - name: demoAccounts
+        type: List<DemoAccount>
+        default: "<DemoAccount>[]"
+        doc: The accounts "Use a demo account" offers; none hides the helper.
+  architecture:
+    tag: T-0066-AC1
+    pure_files_over: 8
+  prose:
+    pubspec.preamble: "T-0066 (F045): the auth_signin feature (archetype FW, one form page)."
+    barrel.preamble: |-
+      The public surface (R4, checked by mc_arch_check and the architecture
+      test): the flow, its navigator, and the flow's argument and result types.
+      No `library;` directive (Tide's `unnecessary_library_directive`).
+    flow_scope.doc: |-
+      The root services this flow's container forwards (R17): the parameter
+      types of every injectable constructor and `@factoryMethod` in the package,
+      minus what the package registers itself and what the flow provides
+      (`FeatureFlowController`, the navigator).
+
+      HAND-WRITTEN FOR NOW (as in library_reading_list_editor):
+      `test/flow_scope_test.dart` opens the flow over the production-shaped test
+      root and resolves every registration, so a missing import fails a test,
+      not the app.
+    flow_state.doc: |-
+      The flow's arguments, which the flow starts from (plan 01 §4.4). The form
+      has one page, so nothing changes while it is open; the form's values live
+      in the bloc's form controller.
+    flow.doc: |-
+      The feature's only entry point (R4): the sign-in form, which **ends with a
+      result**.
+
+      - When the user signs in, [onComplete] is called once with
+        [SignInResult.signedIn] (the session has started).
+      - When the user taps "Not now", it is called once with
+        [SignInResult.cancelled].
+      - When the user leaves by Back, the app's route is popped and [onComplete]
+        is not called; the route's own pop gives its caller null.
+
+      The app builds it from a route (`/auth/sign-in`, account_wiring) whose
+      [onComplete] hands the result to whoever pushed the route, or goes on to
+      the link the guard sent the user from. Tests pass a recorder. It starts
+      from its arguments alone (plan 01 §4.4).
+
+      Immutable after creation: the flow reads [reason] and [demoAccounts] once,
+      when its scope opens.
+    flow.result_doc: The flow's result. Called at most once.
+
+l10n:
+  locales: [en, de, en_XA]
+  strings:
+    - key: authSignInTitle
+      description: "App bar title of the sign-in form."
+      text: {en: "Sign in", de: "Anmelden", en_XA: "[Šíĝñ íñ ~~~]"}
+    - key: authSignInIntro
+      description: "Line above the form when nothing says what the sign-in is for."
+      text: {en: "Use your Mini Client account.", de: "Nutze dein Mini-Client-Konto.", en_XA: "[Úšé ýóúŕ ɱíñí Çļíéñţ àççóúñţ. ~~~~~~~~~~~~]"}
+    - key: authSignInReasonFavourites
+      description: "Line above the form when the user wants to favourite something."
+      text: {en: "Sign in to keep your favourites.", de: "Melde dich an, um deine Favoriten zu behalten.", en_XA: "[Šíĝñ íñ ţó ķééþ ýóúŕ ƒàvóúŕíţéš. ~~~~~~~~~~~~~]"}
+    - key: authSignInReasonReadingLists
+      description: "Line above the form when the user opens the reading lists."
+      text: {en: "Sign in to save your reading lists.", de: "Melde dich an, um deine Leselisten zu speichern.", en_XA: "[Šíĝñ íñ ţó šàvé ýóúŕ ŕéàðíñĝ ļíšţš. ~~~~~~~~~~~~~~]"}
+    - key: authSignInReasonCart
+      description: "Line above the form when the user wants to use the cart."
+      text: {en: "Sign in to use your cart.", de: "Melde dich an, um deinen Warenkorb zu nutzen.", en_XA: "[Šíĝñ íñ ţó úšé ýóúŕ çàŕţ. ~~~~~~~~~~]"}
+    - key: authSignInReasonTriviaResults
+      description: "Line above the form when the user wants to save a trivia score."
+      text: {en: "Sign in to keep your trivia results.", de: "Melde dich an, um deine Quizergebnisse zu behalten.", en_XA: "[Šíĝñ íñ ţó ķééþ ýóúŕ ţŕívíà ŕéšúļţš. ~~~~~~~~~~~~~~]"}
+    - key: authSignInReasonAppearanceSync
+      description: "Line above the form when the user wants to sync the appearance settings."
+      text: {en: "Sign in to sync your appearance across devices.", de: "Melde dich an, um dein Erscheinungsbild auf allen Geräten zu synchronisieren.", en_XA: "[Šíĝñ íñ ţó šýñç ýóúŕ àþþéàŕàñçé àçŕóšš ðévíçéš. ~~~~~~~~~~~~~~~~~~~]"}
+    - key: authSignInEmailLabel
+      description: "Label of the email field."
+      text: {en: "Email", de: "E-Mail", en_XA: "[Éɱàíļ ~~]"}
+    - key: authSignInPasswordLabel
+      description: "Label of the password field."
+      text: {en: "Password", de: "Passwort", en_XA: "[Þàššŵóŕð ~~~]"}
+    - key: authSignInEmailRequired
+      description: "Error under the email field when it is empty."
+      text: {en: "Enter your email address.", de: "Gib deine E-Mail-Adresse ein.", en_XA: "[Éñţéŕ ýóúŕ éɱàíļ àððŕéšš. ~~~~~~~~~~]"}
+    - key: authSignInEmailInvalid
+      description: "Error under the email field when it is not shaped like an address."
+      text: {en: "Enter a valid email address.", de: "Gib eine gültige E-Mail-Adresse ein.", en_XA: "[Éñţéŕ à vàļíð éɱàíļ àððŕéšš. ~~~~~~~~~~~]"}
+    - key: authSignInPasswordRequired
+      description: "Error under the password field when it is empty."
+      text: {en: "Enter your password.", de: "Gib dein Passwort ein.", en_XA: "[Éñţéŕ ýóúŕ þàššŵóŕð. ~~~~~~~~]"}
+    - key: authSignInSubmit
+      description: "The submit button."
+      text: {en: "Sign in", de: "Anmelden", en_XA: "[Šíĝñ íñ ~~~]"}
+    - key: authSignInBusy
+      description: "The submit button's label while the request runs."
+      text: {en: "Signing in", de: "Anmeldung läuft", en_XA: "[Šíĝñíñĝ íñ ~~~~]"}
+    - key: authSignInTryAgain
+      description: "The submit button's label after a failure that may pass."
+      text: {en: "Try again", de: "Erneut versuchen", en_XA: "[Ţŕý àĝàíñ ~~~~]"}
+    - key: authSignInNotNow
+      description: "Leaves the form without signing in."
+      text: {en: "Not now", de: "Jetzt nicht", en_XA: "[Ñóţ ñóŵ ~~~]"}
+    - key: authSignInInvalidCredentials
+      description: "Form error when the backend refused the credentials."
+      text: {en: "The email or password is wrong.", de: "E-Mail oder Passwort ist falsch.", en_XA: "[Ţĥé éɱàíļ óŕ þàššŵóŕð íš ŵŕóñĝ. ~~~~~~~~~~~~]"}
+    - key: authSignInFailed
+      description: "Form error when the request failed; the reason is the app's shared error text."
+      placeholders: {"reason": {"type": "String"}}
+      text: {en: "Could not sign in. {reason}", de: "Anmeldung nicht möglich. {reason}", en_XA: "[Çóúļð ñóţ šíĝñ íñ. {reason} ~~~~~~~~]"}
+    - key: authSignInDemoTitle
+      description: "Heading of the list of accounts that fill in the form."
+      text: {en: "Use a demo account", de: "Demokonto verwenden", en_XA: "[Úšé à ðéɱó àççóúñţ ~~~~~~~]"}
+    - key: authSignInDemoHint
+      description: "Line under the demo accounts' heading."
+      text: {en: "Fills in the form with a test account.", de: "Füllt das Formular mit einem Testkonto aus.", en_XA: "[Ƒíļļš íñ ţĥé ƒóŕɱ ŵíţĥ à ţéšţ àççóúñţ. ~~~~~~~~~~~~~~~]"}
+    - key: authSignInDemoAccount
+      description: "The button that fills in the form with one demo account."
+      placeholders: {"name": {"type": "String"}, "email": {"type": "String"}}
+      text: {en: "{name} ({email})", de: "{name} ({email})", en_XA: "[{name} ({email}) ~~~]"}
+bdd:
+  - feature: auth_signin_sign_in
+    title: "Sign in"
+    description: |-
+      A reader signs in with an email and a password. The form ends with a
+      result that says whether anyone is signed in, and tells wrong credentials
+      from a backend that is down.
+    background:
+      - "Given the backend serves {'identity.default'}"
+    scenarios:
+      - title: "A fixture user's credentials sign them in"
+        tags: [T-0066-AC1, smoke]
+        steps:
+          - "When I open the sign-in form"
+          - "Then I see {'Use your Mini Client account.'}"
+          - "And nobody is signed in"
+          - "When I enter {'reader@mini-client.test'} in the field {'Email'}"
+          - "And I enter {'marvelous'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then the backend received {1} requests for {'POST /v1/auth/sign-in'}"
+          - "And the backend received {'POST /v1/auth/sign-in'} with the body"
+          - "  | 'key'      | 'json'                      |"
+          - "  | 'email'    | '\"reader@mini-client.test\"' |"
+          - "  | 'password' | '\"marvelous\"'               |"
+          - "And the backend answered {'POST /v1/auth/sign-in'} with {200}"
+          - "And the session belongs to {'reader@mini-client.test'}"
+          - "And the sign-in completed with {'signedIn'}"
+      - title: "The email is sent trimmed and matches in any case"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "And I enter {'  COLLECTOR@mini-client.test '} in the field {'Email'}"
+          - "And I enter {'vault-7'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then the backend received {'POST /v1/auth/sign-in'} with the body"
+          - "  | 'key'      | 'json'                         |"
+          - "  | 'email'    | '\"COLLECTOR@mini-client.test\"' |"
+          - "  | 'password' | '\"vault-7\"'                    |"
+          - "And the session belongs to {'collector@mini-client.test'}"
+          - "And the sign-in completed with {'signedIn'}"
+      - title: "Wrong credentials show a typed error on the form and sign nobody in"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "And I enter {<email>} in the field {'Email'}"
+          - "And I enter {<password>} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then the backend answered {'POST /v1/auth/sign-in'} with {401}"
+          - "And I see {'The email or password is wrong.'}"
+          - "And the submit button reads {'Sign in'}"
+          - "And nobody is signed in"
+          - "And the sign-in has not completed"
+          - "And the field {'Email'} holds {<email>}"
+        examples:
+          - ["email", "password    "]
+          - ["'reader@mini-client.test'", "'not-it'    "]
+          - ["'stranger@mini-client.test'", "'marvelous' "]
+      - title: "After wrong credentials, correcting the password signs in"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "And I enter {'reader@mini-client.test'} in the field {'Email'}"
+          - "And I enter {'not-it'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then I see {'The email or password is wrong.'}"
+          - "When I enter {'marvelous'} in the field {'Password'}"
+          - "Then I don't see {'The email or password is wrong.'}"
+          - "When I submit the form"
+          - "Then the session belongs to {'reader@mini-client.test'}"
+          - "And the sign-in completed with {'signedIn'}"
+      - title: "A server error shows an error with a retry, and the retry signs in"
+        tags: [T-0066-AC1]
+        steps:
+          - "Given the backend fails {'POST /v1/auth/sign-in'} with {'server_error'}"
+          - "When I open the sign-in form"
+          - "And I enter {'reader@mini-client.test'} in the field {'Email'}"
+          - "And I enter {'marvelous'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then I see {'Could not sign in. The server had a problem. Please try again later.'}"
+          - "And the submit button reads {'Try again'}"
+          - "And nobody is signed in"
+          - "And the sign-in has not completed"
+          - "When the backend recovers"
+          - "And I submit the form"
+          - "Then the session belongs to {'reader@mini-client.test'}"
+          - "And the sign-in completed with {'signedIn'}"
+      - title: "With the identity service down (the scenario), the form says so and signs nobody in"
+        tags: [T-0066-AC1]
+        steps:
+          - "Given the backend runs the scenario {'identity.server_error'}"
+          - "When I open the sign-in form"
+          - "And I enter {'reader@mini-client.test'} in the field {'Email'}"
+          - "And I enter {'marvelous'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then the backend answered {'POST /v1/auth/sign-in'} with {500}"
+          - "And I see {'Could not sign in. The server had a problem. Please try again later.'}"
+          - "And the submit button reads {'Try again'}"
+          - "And nobody is signed in"
+      - title: "A sign-in that hands out an expired access token is a normal sign-in, refreshed on first use"
+        tags: [T-0066-AC1]
+        steps:
+          - "Given the backend runs the scenario {'identity.expired_token'}"
+          - "When I open the sign-in form"
+          - "And I enter {'reader@mini-client.test'} in the field {'Email'}"
+          - "And I enter {'marvelous'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then the session belongs to {'reader@mini-client.test'}"
+          - "And the sign-in completed with {'signedIn'}"
+          - "When the app asks who is signed in and is answered {200}"
+          - "Then the backend received {1} requests for {'POST /v1/auth/refresh'}"
+          - "And the session belongs to {'reader@mini-client.test'}"
+      - title: "A double tap on Submit sends exactly one request"
+        tags: [T-0066-AC1]
+        steps:
+          - "Given the backend holds {'POST /v1/auth/sign-in'}"
+          - "When I open the sign-in form"
+          - "And I enter {'reader@mini-client.test'} in the field {'Email'}"
+          - "And I enter {'marvelous'} in the field {'Password'}"
+          - "And I submit the form twice in quick succession"
+          - "Then the button {'Signing in'} is disabled"
+          - "And the button {'Not now'} is disabled"
+          - "When I let the sign-in request through"
+          - "Then the backend received {1} requests for {'POST /v1/auth/sign-in'}"
+          - "And the sign-in completed with {'signedIn'}"
+          - "And the session belongs to {'reader@mini-client.test'}"
+      - title: "Submitting an empty form asks for both fields and sends nothing"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "And I submit the form"
+          - "Then the error {'Enter your email address.'} shows under the field {'Email'}"
+          - "And the error {'Enter your password.'} shows under the field {'Password'}"
+          - "And the backend received {0} requests for {'POST /v1/auth/sign-in'}"
+          - "And the sign-in has not completed"
+      - title: "Something that is not an email address is refused before any request"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "And I enter {'reader'} in the field {'Email'}"
+          - "And I enter {'marvelous'} in the field {'Password'}"
+          - "And I submit the form"
+          - "Then the error {'Enter a valid email address.'} shows under the field {'Email'}"
+          - "And the backend received {0} requests for {'POST /v1/auth/sign-in'}"
+      - title: "A demo account fills the form and signs in"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form with the demo accounts"
+          - "Then I see the texts"
+          - "  | 'text'                                           |"
+          - "  | 'Use a demo account'                             |"
+          - "  | 'Fills in the form with a test account.'         |"
+          - "  | 'Rhea Reader (reader@mini-client.test)'          |"
+          - "  | 'Cole Collector (collector@mini-client.test)'    |"
+          - "When I tap {'Cole Collector (collector@mini-client.test)'}"
+          - "Then the field {'Email'} holds {'collector@mini-client.test'}"
+          - "And the field {'Password'} holds {'vault-7'}"
+          - "And nobody is signed in"
+          - "When I submit the form"
+          - "Then the session belongs to {'collector@mini-client.test'}"
+          - "And the sign-in completed with {'signedIn'}"
+      - title: "Without demo accounts the helper is not offered"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "Then I don't see {'Use a demo account'}"
+      - title: "Not now completes as cancelled and signs nobody in"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form"
+          - "And I tap {'Not now'}"
+          - "Then the sign-in completed with {'cancelled'}"
+          - "And nobody is signed in"
+          - "And the backend received {0} requests for {'POST /v1/auth/sign-in'}"
+      - title: "The screen says what the sign-in is for"
+        tags: [T-0066-AC1]
+        steps:
+          - "When I open the sign-in form for {<code>}"
+          - "Then I see {<line>}"
+        examples:
+          - ["code", "line                                                 "]
+          - ["'favourites'", "'Sign in to keep your favourites.'                   "]
+          - ["'readingLists'", "'Sign in to save your reading lists.'                "]
+          - ["'cart'", "'Sign in to use your cart.'                          "]
+          - ["'triviaResults'", "'Sign in to keep your trivia results.'               "]
+          - ["'appearanceSync'", "'Sign in to sync your appearance across devices.'    "]
+          - ["'a hostile phrase'", "'Use your Mini Client account.'                      "]
+  - feature: auth_signin_l10n
+    title: "The sign-in form speaks the reader's language"
+    description: |-
+      Every title, label, message and button comes from the feature's own
+      strings, in German as in English, and long translations fit at large text
+      sizes.
+    background:
+      - "Given the backend serves {'identity.default'}"
+    scenarios:
+      - title: "In German the form, its errors and its helpers are German"
+        tags: [T-0066-AC1, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open the sign-in form with the demo accounts"
+          - "Then I see the texts"
+          - "  | 'text'                                  |"
+          - "  | 'Anmelden'                              |"
+          - "  | 'Nutze dein Mini-Client-Konto.'         |"
+          - "  | 'E-Mail'                                |"
+          - "  | 'Passwort'                              |"
+          - "  | 'Demokonto verwenden'                   |"
+          - "  | 'Füllt das Formular mit einem Testkonto aus.' |"
+          - "  | 'Rhea Reader (reader@mini-client.test)' |"
+          - "  | 'Jetzt nicht'                           |"
+          - "When I submit the form"
+          - "Then the error {'Gib deine E-Mail-Adresse ein.'} shows under the field {'E-Mail'}"
+          - "And the error {'Gib dein Passwort ein.'} shows under the field {'Passwort'}"
+          - "When I enter {'reader'} in the field {'E-Mail'}"
+          - "Then the error {'Gib eine gültige E-Mail-Adresse ein.'} shows under the field {'E-Mail'}"
+          - "When I enter {'reader@mini-client.test'} in the field {'E-Mail'}"
+          - "And I enter {'not-it'} in the field {'Passwort'}"
+          - "And I submit the form"
+          - "Then I see {'E-Mail oder Passwort ist falsch.'}"
+      - title: "In German a failing backend is German, with a German retry"
+        tags: [T-0066-AC1, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "And the backend fails {'POST /v1/auth/sign-in'} with {'server_error'}"
+          - "When I open the sign-in form"
+          - "And I enter {'reader@mini-client.test'} in the field {'E-Mail'}"
+          - "And I enter {'marvelous'} in the field {'Passwort'}"
+          - "And I submit the form"
+          - "Then I see {'Anmeldung nicht möglich. Auf dem Server ist ein Fehler aufgetreten. Bitte versuche es später erneut.'}"
+          - "And the submit button reads {'Erneut versuchen'}"
+      - title: "In German the reason line is German"
+        tags: [T-0066-AC1, l10n]
+        steps:
+          - "Given the device locale is {'de'}"
+          - "When I open the sign-in form for {<code>}"
+          - "Then I see {<line>}"
+        examples:
+          - ["code", "line"]
+          - ["'favourites'", "'Melde dich an, um deine Favoriten zu behalten.'"]
+          - ["'readingLists'", "'Melde dich an, um deine Leselisten zu speichern.'"]
+          - ["'cart'", "'Melde dich an, um deinen Warenkorb zu nutzen.'"]
+          - ["'triviaResults'", "'Melde dich an, um deine Quizergebnisse zu behalten.'"]
+          - ["'appearanceSync'", "'Melde dich an, um dein Erscheinungsbild auf allen Geräten zu synchronisieren.'"]
+      - title: "In the pseudo-locale nothing overflows at <scale>x"
+        tags: [T-0066-AC1, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "When I open the sign-in form with the demo accounts"
+          - "Then nothing overflows"
+          - "When I submit the form"
+          - "Then the error {'[Éñţéŕ ýóúŕ éɱàíļ àððŕéšš. ~~~~~~~~~~]'} shows under the field {'[Éɱàíļ ~~]'}"
+          - "And nothing overflows"
+          - "When I enter {'reader@mini-client.test'} in the field {'[Éɱàíļ ~~]'}"
+          - "And I enter {'not-it'} in the field {'[Þàššŵóŕð ~~~]'}"
+          - "And I submit the form"
+          - "Then I see {'[Ţĥé éɱàíļ óŕ þàššŵóŕð íš ŵŕóñĝ. ~~~~~~~~~~~~]'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
+      - title: "In the pseudo-locale a failing backend fits at <scale>x"
+        tags: [T-0066-AC1, l10n]
+        steps:
+          - "Given the pseudo-locale is active"
+          - "And the text scale is <scale>"
+          - "And the backend fails {'POST /v1/auth/sign-in'} with {'server_error'}"
+          - "When I open the sign-in form for {'appearanceSync'}"
+          - "And I enter {'reader@mini-client.test'} in the field {'[Éɱàíļ ~~]'}"
+          - "And I enter {'marvelous'} in the field {'[Þàššŵóŕð ~~~]'}"
+          - "And I submit the form"
+          - "Then I see {'[Çóúļð ñóţ šíĝñ íñ. [Ţĥé šéŕvéŕ ĥàð à þŕóþļéɱ. Þļéàšé ţŕý àĝàíñ ļàţéŕ. ~~~~~~~~~~~~~~~~~~] ~~~~~~~~]'}"
+          - "And nothing overflows"
+        examples:
+          - ["scale"]
+          - ["1"]
+          - ["2"]
