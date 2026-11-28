@@ -3,7 +3,8 @@
 # throwaway DB modules (tool/mcgen/test/fixtures/zz_db_a and zz_db_b: the spec
 # and the hand-written owned files of each) are, one after the other,
 #   1. copied into feature/zz_probe/<module>;
-#   2. generated there by `mcgen gen` (the managed files);
+#   2. generated there by `mcgen gen` (the managed files), then `mcgen wire`
+#      (flow_scope.dart) and `mcgen buildgen` (BUILD.bazel);
 #   3. analysed with mc_analysis (`bazel build --config=lint`), with no issue;
 #   4. tested under Bazel: BDD, contract, architecture and flow-scope tests;
 # and deleted again, whatever happens. Never committed (task scope).
@@ -43,6 +44,10 @@ for mod in zz_db_a zz_db_b; do
   # Bazel package sees them in the fixtures directory.
   while IFS= read -r f; do mv "$f" "${f%.fixture}"; done < <(find "$PROBE" -name '*.fixture')
   step "mcgen gen $mod" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen "$mod"
+  # Its root-import list and BUILD.bazel are `mcgen wire`'s and `mcgen
+  # buildgen`'s (T-0074): the module's own only, not the app's glue.
+  step "mcgen wire $PROBE (its flow scope)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart wire "$PROBE"
+  step "mcgen buildgen $PROBE" "${DART[@]}" run tool/mcgen/bin/mcgen.dart buildgen "$PROBE"
   report "  - $(find "$PROBE" -type f | wc -l | tr -d ' ') files after generation"
   step "mcgen gen --check $mod (idempotent)" "${DART[@]}" run tool/mcgen/bin/mcgen.dart gen --check "$mod"
 done

@@ -9,6 +9,9 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:mcgen/mcgen.dart';
+import 'package:mcgen/src/wire/app.dart';
+import 'package:mcgen/src/wire/flow_scope.dart';
+import 'package:mcgen/src/wire/groups.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -772,6 +775,118 @@ void main() {
       expect(byDefault, contains('Object? _openTarget;'));
       expect(byDefault, contains('bool _startOpenGuard(Object target)'));
       expect(byDefault, isNot(contains('int?')));
+    });
+  });
+
+  group('T-0076-AC3 wire and the dashboard (the T-0074 contract)', () {
+    void copyFile(Directory root, String rel) {
+      File(p.join(root.path, rel))
+        ..parent.createSync(recursive: true)
+        ..writeAsBytesSync(File(p.join(repoRoot, rel)).readAsBytesSync());
+    }
+
+    /// What wire reads, plus a managed dashboard probe at feature/zz_probe.
+    Directory wireRoot(String tag, String mod, {bool managed = false}) {
+      final root = tempRoot('T-0076-wire-$tag');
+      addTearDown(() => root.deleteSync(recursive: true));
+      for (final rel in [
+        'pubspec.yaml',
+        appPubspecPath,
+        appWiringsBzlPath,
+        appWiringsPath,
+        generatedLocationsPath,
+        'app/wiring/app_core/lib/src/locations/app_locations.dart',
+      ]) {
+        copyFile(root, rel);
+      }
+      for (final d in Directory(p.join(repoRoot, 'app/wiring')).listSync()) {
+        final rel = p.relative(d.path, from: repoRoot);
+        if (File(p.join(d.path, 'pubspec.yaml')).existsSync()) {
+          copyFile(root, '$rel/pubspec.yaml');
+        }
+      }
+      for (final d in Directory(p.join(repoRoot, 'utility')).listSync()) {
+        if (d is! Directory) continue;
+        final rel = p.relative(d.path, from: repoRoot);
+        for (final f in listTree(d.path)) {
+          if (f == 'pubspec.yaml' || f.startsWith('lib/')) {
+            copyFile(root, '$rel/$f');
+          }
+        }
+      }
+      var spec = readFixture('$mod/mcgen.yaml');
+      if (managed)
+        spec = spec.replaceFirst('ownership: mixed', 'ownership: managed');
+      writeFile(root, 'feature/zz_probe/$mod/mcgen.yaml', spec);
+      // The hand-written files (the API, the repository, ...) that the
+      // blocs' constructors take their types from.
+      for (final f in listTree(fixture(mod))) {
+        if (!f.endsWith('.fixture') || f == 'BUILD.bazel.fixture') continue;
+        writeFile(
+          root,
+          'feature/zz_probe/$mod/${f.substring(0, f.length - '.fixture'.length)}',
+          File(p.join(fixture(mod), f)).readAsStringSync(),
+        );
+      }
+      return root;
+    }
+
+    test('T-0076-AC3 wire cannot route a dashboard yet: repo-wide it warns, '
+        'shows a disabled catalogue entry and does not fail', () {
+      final root = wireRoot('route', 'zz_db_a', managed: true);
+      final r = mcgen(['wire', '--root', root.path]);
+      expect(r.code, 0, reason: '$r');
+      expect(
+        r.err,
+        contains('warning: feature/zz_probe/zz_db_a/mcgen.yaml: not wired'),
+      );
+      expect(
+        readFile(root, appWiringsPath),
+        allOf(
+          contains("module: 'zz_db_a'"),
+          contains('wire cannot route a "dashboard" flow yet'),
+        ),
+      );
+      final c = mcgen(['wire', '--check', '--root', root.path]);
+      expect(c.code, 0, reason: 'a warning is not drift: $c');
+    });
+
+    test('T-0076-AC3 the dashboard pubspec has the packages wire\'s flow '
+        'scope imports', () {
+      for (final mod in ['zz_db_a', 'zz_db_b']) {
+        final root = wireRoot('pubspec-$mod', mod);
+        expect(mcgen(['gen', mod, '--root', root.path]).code, 0);
+        final dir = p.join(root.path, 'feature/zz_probe/$mod');
+        expect(mcgen(['wire', dir, '--root', root.path]).code, 0);
+        final scope = File(p.join(dir, flowScopePath)).readAsStringSync();
+        final pubspec = File(p.join(dir, 'pubspec.yaml')).readAsStringSync();
+        final deps = pubspec.substring(
+          pubspec.indexOf('dependencies:'),
+          pubspec.indexOf('dev_dependencies:'),
+        );
+        final imports = RegExp(r"import 'package:(\w+)/").allMatches(scope);
+        expect(imports, isNotEmpty);
+        for (final m in imports) {
+          expect(
+            deps,
+            contains('  ${m.group(1)}:'),
+            reason: '$mod: ${m.group(1)}',
+          );
+        }
+        // B reads a flag and the session; A neither.
+        expect(
+          scope.contains('FeatureFlagsReader'),
+          mod == 'zz_db_b',
+          reason: mod,
+        );
+        expect(scope.contains('SessionReader'), isTrue, reason: mod);
+      }
+    });
+
+    test('T-0076-AC3 the exemplar renders no flow scope: wire owns it', () {
+      final gen = _render(repoRoot);
+      expect(gen.files.keys, isNot(contains('lib/src/di/flow_scope.dart')));
+      expect(gen.files.keys, isNot(contains('BUILD.bazel')));
     });
   });
 }

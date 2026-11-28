@@ -56,6 +56,15 @@ void emitPackage(
         'json_annotation',
         'flutter_localizations',
         'intl',
+        // The root-import list's (`lib/src/di/flow_scope.dart`, which `mcgen
+        // wire` writes since T-0074): Dio, Monitoring and the analytics
+        // port, over mc_di's RootImport; the flags reader and the session
+        // reader when a section needs them.
+        'dio',
+        'mc_di',
+        'mc_monitoring',
+        if (m.flags.isNotEmpty) 'mc_feature_flags',
+        if (m.hasSession) 'mc_session',
       }..remove(m.module);
       final dev = {
         ...testPackages.where((p) => !lib.contains(p)),

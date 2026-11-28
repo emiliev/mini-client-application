@@ -15,7 +15,6 @@ void emitFlow(Out ctx, DbModel m) {
     );
   }
   ctx.file('lib/src/di/di_initializer.dart', _di(m));
-  ctx.file('lib/src/di/flow_scope.dart', _flowScope(m));
   ctx.file('lib/src/navigator/${m.module}_navigator.dart', _navigator(m));
   ctx.file('lib/src/flow/${m.module}_flow_state.dart', _flowState(m));
   ctx.file('lib/src/flow/${m.module}_flow.dart', _flow(m));
@@ -75,55 +74,6 @@ FutureOr<GetIt> _init(GetIt getIt, String? environment) =>
     'DIInitializer': m.diInitializer,
   },
 );
-
-String _flowScope(DbModel m) {
-  final roots = <(String, String)>[
-    ('AnalyticsTracker', 'package:mc_monitoring/mc_monitoring.dart'),
-    ('Dio', 'package:dio/dio.dart'),
-    if (m.flags.isNotEmpty)
-      ('FeatureFlagsReader', 'package:mc_feature_flags/mc_feature_flags.dart'),
-    ('Monitoring', 'package:mc_monitoring/mc_monitoring.dart'),
-    if (m.hasSession) ('SessionReader', 'package:mc_session/mc_session.dart'),
-  ];
-  final provided = [
-    '`FeatureFlowController`',
-    'the navigator',
-    if (m.hasClock) 'the `${m.clock}`',
-  ];
-  final providedText = provided.length == 1
-      ? provided.single
-      : '${provided.take(provided.length - 1).join(', ')}, ${provided.last}';
-  return tpl(
-    '''
-<<imports>>
-
-<<d_doc>>const List<RootImport<Object>> <<rootImports>> = [
-<<roots>>
-];
-''',
-    {
-      'imports': imports([
-        'package:mc_di/mc_di.dart',
-        for (final r in roots) r.$2,
-      ]),
-      'd_doc': m.doc(
-        'flow_scope.doc',
-        'The root services this flow\'s container forwards (R17): the parameter\n'
-            'types of every injectable constructor and `@factoryMethod` in the\n'
-            'package, minus what the package registers itself and what the flow\n'
-            'provides ($providedText).\n'
-            '\n'
-            'HAND-WRITTEN FOR NOW. Plan 01 §4.5 has `mcgen wire` derive this file from\n'
-            'the same analyzer input injectable reads, and `mcgen check` fail on drift\n'
-            '(Phase D). Until then `test/flow_scope_test.dart` opens the flow over the\n'
-            'production-shaped test root and resolves every registration, so a missing\n'
-            'import fails a test, not the app.',
-      ),
-      'rootImports': m.rootImports,
-      'roots': [for (final r in roots) '  RootImport<${r.$1}>(),'].join('\n'),
-    },
-  );
-}
 
 String _navigator(DbModel m) {
   final nav = m.spec.navigator!;

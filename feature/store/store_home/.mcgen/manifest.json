@@ -9,10 +9,6 @@
       "hash": "02d1958bc873729bb4da50fecad7e7b5611185f7e069fd50791cd152708feb5a",
       "ownership": "managed"
     },
-    "lib/src/di/flow_scope.dart": {
-      "hash": "08c99447716ca410274600e655c71f518fb8425242d1ff1c7f8db6cdf88d8915",
-      "ownership": "managed"
-    },
     "lib/src/domain/model/category_id.dart": {
       "hash": "be010a2948f9b5e33412aedd2c5e90f6f89b7851bb139cb5048652ae9649515d",
       "ownership": "managed"
@@ -364,5 +360,5 @@
   "ownership": "ejected",
   "schema": "mcgen-manifest/1",
   "seed": "0x5915da8aeff491f5",
-  "spec_hash": "06950090de183d4f1028a5b9c0d24c2c3cbe2524a725f5cd339cd26570418efd"
+  "spec_hash": "ad61460f60eff4cac5e92be8402789eafec3a4e6f6231e32cf2dc15dfcdb3d1e"
 }
