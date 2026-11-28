@@ -1,13 +1,17 @@
 # T-0076-AC3: two throwaway dashboard modules
 
-HEAD `04403e77`
+HEAD `381dbfc4`
 
 ## zz_db_a
 - PASS: mcgen gen zz_db_a
+- PASS: mcgen wire feature/zz_probe/zz_db_a (its flow scope)
+- PASS: mcgen buildgen feature/zz_probe/zz_db_a
   - 59 files after generation
 - PASS: mcgen gen --check zz_db_a (idempotent)
 ## zz_db_b
 - PASS: mcgen gen zz_db_b
+- PASS: mcgen wire feature/zz_probe/zz_db_b (its flow scope)
+- PASS: mcgen buildgen feature/zz_probe/zz_db_b
   - 105 files after generation
 - PASS: mcgen gen --check zz_db_b (idempotent)
 - PASS: bazel build --config=lint //feature/zz_probe/zz_db_a/... (mc_analysis, no issue)
